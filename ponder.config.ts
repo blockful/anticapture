@@ -2,6 +2,7 @@ import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
 
 import { ENSTokenAbi } from "./abis/ENSTokenAbi";
+import { ENSGovernorAbi } from "./abis/ENSGovernorAbi";
 
 export default createConfig({
   networks: {
@@ -18,7 +19,14 @@ export default createConfig({
       abi: ENSTokenAbi,
       address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
       network: "mainnet",
-      startBlock: 20440000,
+      startBlock: 20370000,
+    },
+    ENSGovernor: {
+      abi: ENSGovernorAbi,
+      address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      network: "mainnet",
+      startBlock: 20370000,
+
     },
   },
 });
