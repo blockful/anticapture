@@ -42,8 +42,6 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
       reason: event.args.reason,
     },
   });
-
-  await getVoterWithHighestWeight(context);
 });
 
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
@@ -64,39 +62,3 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
     },
   });
 });
-
-// Função para encontrar o votante com o maior weight
-async function getVoterWithHighestWeight(context: any) {
-  const { VoteCast } = context.db;
-
-  const highestWeightVote = await VoteCast.findMany({
-    orderBy: {
-      weight: 'desc',
-    },
-    take: 1,
-  });
-
-  if (highestWeightVote.length > 0) {
-    const vote = highestWeightVote[0];
-    console.log(`Voter with highest weight: ${vote.voter}, Weight: ${vote.weight}`);
-    await saveVoteToCsv(vote.voter, vote.weight);
-  } else {
-    console.log('No votes found.');
-  }
-}
-
-// Função para salvar o votante e o peso em um arquivo CSV
-async function saveVoteToCsv(voter: string, weight: string) {
-  const csvFilePath = 'voters_weights.csv';
-  const csvWriter = createObjectCsvWriter({
-    path: csvFilePath,
-    header: [
-      { id: 'voter', title: 'Voter' },
-      { id: 'weight', title: 'Weight' },
-    ],
-    append: fs.existsSync(csvFilePath), // Append to the file if it exists
-  });
-
-  const record = [{ voter, weight }];
-  await csvWriter.writeRecords(record);
-}
