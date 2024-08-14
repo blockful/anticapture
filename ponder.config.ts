@@ -4,8 +4,9 @@ import { http } from "viem";
 import { ENSTokenAbi } from "./abis/ENSTokenAbi";
 import { ENSGovernorAbi } from "./abis/ENSGovernorAbi";
 
-if (!process.env.START_BLOCK) {
-  throw new Error("START_BLOCK is not defined in the .env.local file");
+let startBlock = 0;
+if (process.env.START_BLOCK) {
+  startBlock = parseInt(process.env.START_BLOCK);
 }
 
 export default createConfig({
@@ -23,14 +24,13 @@ export default createConfig({
       abi: ENSTokenAbi,
       address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
       network: "mainnet",
-      startBlock: parseInt(process.env.START_BLOCK),
+      startBlock: startBlock,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
       network: "mainnet",
-      startBlock: parseInt(process.env.START_BLOCK),
-
+      startBlock: startBlock,
     },
   },
 });
