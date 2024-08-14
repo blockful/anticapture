@@ -1,6 +1,4 @@
 import { ponder } from "@/generated";
-import { createObjectCsvWriter } from 'csv-writer';
-import fs from 'fs';
 
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
   const { Delegation } = context.db;
