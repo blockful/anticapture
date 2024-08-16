@@ -26,6 +26,7 @@ export default createSchema((p) => ({
     support: p.string().optional(),
     weight: p.string().optional(),
     reason: p.string().optional(),
+    timestamp: p.bigint(),
   }),
   ProposalCreated: p.createTable({
     id: p.string(),
@@ -38,5 +39,6 @@ export default createSchema((p) => ({
     startBlock: p.string().optional(),
     endBlock: p.string().optional(),
     description: p.string().optional(),
+    timestamp: p.bigint(),
   }),
 }));
