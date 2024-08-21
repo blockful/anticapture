@@ -1,6 +1,4 @@
 import { ponder } from "@/generated";
-import { createObjectCsvWriter } from 'csv-writer';
-import fs from 'fs';
 
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
   const { Delegation } = context.db;
@@ -40,6 +38,7 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
       support: event.args.support.toString(),
       weight: event.args.weight.toString(),
       reason: event.args.reason,
+      timestamp: event.block.timestamp,
     },
   });
 });
@@ -59,6 +58,7 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
       startBlock: event.args.startBlock.toString(),
       endBlock: event.args.endBlock.toString(),
       description: event.args.description,
+      timestamp: event.block.timestamp,
     },
   });
 });

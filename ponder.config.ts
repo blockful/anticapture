@@ -30,7 +30,7 @@ export default createConfig({
       abi: ENSGovernorAbi,
       address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
       network: "mainnet",
-      startBlock: startBlock,
+      startBlock: 20370000,
     },
   },
 });
