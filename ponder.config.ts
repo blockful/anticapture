@@ -16,6 +16,11 @@ if (!process.env.STATUS) {
   ({ networks, contracts } = configData["staging"]);
 }
 
+let startBlock = 0;
+if (process.env.START_BLOCK) {
+  startBlock = parseInt(process.env.START_BLOCK);
+}
+
 export default createConfig({
   networks: {
     mainnet: {
@@ -32,11 +37,12 @@ export default createConfig({
       address: contracts.ENSToken.address as `0x${string}`,
       network: networks.name as any,
       startBlock: contracts.ENSToken.startBlock,
+
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       address: contracts.ENSGovernor.address as `0x${string}`,
-      network: "mainnet",
+      network: networks.name as any,
       startBlock: contracts.ENSGovernor.startBlock,
     },
   },
