@@ -47,7 +47,7 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
   const { ProposalCreated } = context.db;
 
   await ProposalCreated.create({
-    id: event.log.id,
+    id: event.args.proposalId.toString(),
     data: {
       proposalId: event.args.proposalId.toString(),
       proposer: event.args.proposer,
@@ -59,6 +59,25 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
       endBlock: event.args.endBlock.toString(),
       description: event.args.description,
       timestamp: event.block.timestamp,
+      status: "Pending",
     },
+  });
+});
+/**/
+ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
+  const { ProposalCreated } = context.db;
+
+  await ProposalCreated.update({
+    id: event.args.proposalId.toString(),
+    data: { status: "CANCELED" },
+  });
+});
+
+ponder.on("ENSGovernor:ProposalExecuted", async ({ event, context }) => {
+  const { ProposalCreated } = context.db;
+
+  await ProposalCreated.update({
+    id: event.args.proposalId.toString(),
+    data: { status: "EXECUTED" },
   });
 });

@@ -40,5 +40,6 @@ export default createSchema((p) => ({
     endBlock: p.string().optional(),
     description: p.string().optional(),
     timestamp: p.bigint(),
+    status: p.string(),
   }),
 }));
