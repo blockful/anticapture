@@ -1,0 +1,36 @@
+{
+  "production": {
+    "networks": {
+        "name": "mainnet",
+        "chainId": 1,
+        "rpcUrl": "https://eth-mainnet.g.alchemy.com/v2/unG4VR6N7U7k03s3nCeBoWwqUowmvGH2"
+    },
+    "contracts": {
+      "ENSToken": {
+        "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        "startBlock": 13533418
+      },
+      "ENSGovernor": {
+        "address": "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+        "startBlock": 13533772
+      }
+    }
+  },
+  "staging": {
+    "networks": {
+        "name": "mainnet",
+        "chainId": 1,
+        "rpcUrl": "https://eth-mainnet.g.alchemy.com/v2/unG4VR6N7U7k03s3nCeBoWwqUowmvGH2"
+    },
+    "contracts": {
+      "ENSToken": {
+        "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        "startBlock": 13533418
+      },
+      "ENSGovernor": {
+        "address": "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+        "startBlock": 13533772
+      }
+    }
+  }
+}
