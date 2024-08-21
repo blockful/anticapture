@@ -1,8 +1,20 @@
 import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
-
 import { ENSTokenAbi } from "./abis/ENSTokenAbi";
 import { ENSGovernorAbi } from "./abis/ENSGovernorAbi";
+import configData from "./config.json";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+let networks, contracts;
+if (!process.env.STATUS) {
+  throw new Error("Env variable STATUS is not defined");
+} else if (process.env.STATUS === "production") {
+  ({ networks, contracts } = configData["production"]);
+} else {
+  ({ networks, contracts } = configData["staging"]);
+}
 
 let startBlock = 0;
 if (process.env.START_BLOCK) {
@@ -12,7 +24,7 @@ if (process.env.START_BLOCK) {
 export default createConfig({
   networks: {
     mainnet: {
-      chainId: 1,
+      chainId: networks.chainId,
       transport: loadBalance([
         http(process.env.PONDER_RPC_URL_1),
         http(process.env.PONDER_RPC_URL_1_2),
@@ -22,15 +34,16 @@ export default createConfig({
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,
-      address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-      network: "mainnet",
-      startBlock: startBlock,
+      address: contracts.ENSToken.address as `0x${string}`,
+      network: networks.name as any,
+      startBlock: contracts.ENSToken.startBlock,
+
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
-      address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-      network: "mainnet",
-      startBlock: 20370000,
+      address: contracts.ENSGovernor.address as `0x${string}`,
+      network: networks.name as any,
+      startBlock: contracts.ENSGovernor.startBlock,
     },
   },
 });
