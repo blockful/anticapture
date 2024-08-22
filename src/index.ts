@@ -14,7 +14,6 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
 
   const fromDelegateAccount = await Account.findUnique({ id: event.args.fromDelegate });
 
-  // Verifica se a conta existe antes de atualizar
   const toDelegateAccount = await Account.findUnique({ id: event.args.toDelegate });
   if (!toDelegateAccount) {
     await Account.create({
@@ -34,7 +33,6 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
     }),
   });
 
-  // Verifica se a conta existe antes de atualizar
   const fromDelegateExists = await Account.findUnique({ id: event.args.fromDelegate });
   if (!fromDelegateExists) {
     await Account.create({
@@ -66,7 +64,6 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     },
   });
 
-  // Verifica se a conta existe antes de atualizar
   const fromAccount = await Account.findUnique({ id: event.args.from });
   if (!fromAccount) {
     await Account.create({
@@ -86,7 +83,6 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     }),
   });
 
-  // Verifica se a conta existe antes de atualizar
   const toAccount = await Account.findUnique({ id: event.args.to });
   if (!toAccount) {
     await Account.create({
@@ -122,7 +118,6 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
     },
   });
 
-  // Verifica se a conta existe antes de atualizar
   const voterAccount = await Account.findUnique({ id: event.args.voter });
   if (!voterAccount) {
     await Account.create({
@@ -161,7 +156,6 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
     },
   });
 
-  // Verifica se a conta existe antes de atualizar
   const proposerAccount = await Account.findUnique({ id: event.args.proposer });
   if (!proposerAccount) {
     await Account.create({
