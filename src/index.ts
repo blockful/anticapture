@@ -1,7 +1,7 @@
 import { ponder } from "@/generated";
 
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
-  const { Delegations } = context.db;
+  const { Delegations, Account } = context.db;
 
   await Delegations.create({
     id: event.log.id,
@@ -11,10 +11,50 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
       timestamp: event.block.timestamp,
     },
   });
+
+  const fromDelegateAccount = await Account.findUnique({ id: event.args.fromDelegate });
+
+  // Verifica se a conta existe antes de atualizar
+  const toDelegateAccount = await Account.findUnique({ id: event.args.toDelegate });
+  if (!toDelegateAccount) {
+    await Account.create({
+      id: event.args.toDelegate,
+      data: {
+        votingPower: BigInt(0),
+        delegationsCount: 0,
+      },
+    });
+  }
+
+  await Account.update({
+    id: event.args.toDelegate,
+    data: ({ current }) => ({
+      votingPower: (current.votingPower ?? BigInt(0)) + BigInt(fromDelegateAccount?.balance ?? BigInt(0)),
+      delegationsCount: (current.delegationsCount ?? 0) + 1,
+    }),
+  });
+
+  // Verifica se a conta existe antes de atualizar
+  const fromDelegateExists = await Account.findUnique({ id: event.args.fromDelegate });
+  if (!fromDelegateExists) {
+    await Account.create({
+      id: event.args.fromDelegate,
+      data: {
+        votingPower: BigInt(0),
+      },
+    });
+  }
+
+  await Account.update({
+    id: event.args.fromDelegate,
+    data: {
+      votingPower: BigInt(0),
+    },
+  });
 });
 
 ponder.on("ENSToken:Transfer", async ({ event, context }) => {
-  const { Transfers } = context.db;
+  const { Transfers, Account } = context.db;
 
   await Transfers.create({
     id: event.log.id,
@@ -25,10 +65,50 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
       timestamp: event.block.timestamp,
     },
   });
+
+  // Verifica se a conta existe antes de atualizar
+  const fromAccount = await Account.findUnique({ id: event.args.from });
+  if (!fromAccount) {
+    await Account.create({
+      id: event.args.from,
+      data: {
+        balance: BigInt(0),
+        votingPower: BigInt(0),
+      },
+    });
+  }
+
+  await Account.update({
+    id: event.args.from,
+    data: ({ current }) => ({
+      balance: (current.balance ?? BigInt(0)) - BigInt(event.args.value),
+      votingPower: (current.votingPower ?? BigInt(0)) - BigInt(event.args.value),
+    }),
+  });
+
+  // Verifica se a conta existe antes de atualizar
+  const toAccount = await Account.findUnique({ id: event.args.to });
+  if (!toAccount) {
+    await Account.create({
+      id: event.args.to,
+      data: {
+        balance: BigInt(0),
+        votingPower: BigInt(0),
+      },
+    });
+  }
+
+  await Account.update({
+    id: event.args.to,
+    data: ({ current }) => ({
+      balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
+      votingPower: (current.votingPower ?? BigInt(0)) + BigInt(event.args.value),
+    }),
+  });
 });
 
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
-  const { VotesOnchain } = context.db;
+  const { VotesOnchain, Account } = context.db;
 
   await VotesOnchain.create({
     id: event.log.id,
@@ -41,10 +121,29 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
       timestamp: event.block.timestamp,
     },
   });
+
+  // Verifica se a conta existe antes de atualizar
+  const voterAccount = await Account.findUnique({ id: event.args.voter });
+  if (!voterAccount) {
+    await Account.create({
+      id: event.args.voter,
+      data: {
+        votesCount: 0,
+      },
+    });
+  }
+
+  await Account.update({
+    id: event.args.voter,
+    data: ({ current }) => ({
+      votesCount: (current.votesCount ?? 0) + 1,
+    }),
+  });
+
 });
 
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
-  const { ProposalsOnchain } = context.db;
+  const { ProposalsOnchain, Account } = context.db;
 
   await ProposalsOnchain.create({
     id: event.args.proposalId.toString(),
@@ -61,8 +160,26 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
       status: "Pending",
     },
   });
+
+  // Verifica se a conta existe antes de atualizar
+  const proposerAccount = await Account.findUnique({ id: event.args.proposer });
+  if (!proposerAccount) {
+    await Account.create({
+      id: event.args.proposer,
+      data: {
+        proposalCount: 0,
+      },
+    });
+  }
+
+  await Account.update({
+    id: event.args.proposer,
+    data: ({ current }) => ({
+      proposalCount: (current.proposalCount ?? 0) + 1,
+    }),
+  });
 });
-/**/
+
 ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
   const { ProposalsOnchain } = context.db;
 
