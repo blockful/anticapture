@@ -1,7 +1,7 @@
 import { createSchema } from "@ponder/core";
 
 export default createSchema((p) => ({
-  Delegation: p.createTable({
+  Delegations: p.createTable({
     id: p.string(),
     delegatee: p.string().references("Account.id"),
     delegator: p.string().references("Account.id"),
@@ -12,23 +12,23 @@ export default createSchema((p) => ({
     votingPower: p.bigint(),
     delegationsReceived: p.int(),
   }),
-  Transfer: p.createTable({
+  Transfers: p.createTable({
     id: p.string(),
     amount: p.bigint(),
     from: p.string().references("Account.id"),
     to: p.string().references("Account.id"),
     timestamp: p.bigint(),
   }),
-  VoteCast: p.createTable({
+  VotesOnchain: p.createTable({
     id: p.string(),
     voter: p.string().references("Account.id"),
-    proposalId: p.string().references("ProposalCreated.id"),
+    proposalId: p.string().references("ProposalsOnchain.id"),
     support: p.string(),
     weight: p.string(),
     reason: p.string(),
     timestamp: p.bigint(),
   }),
-  ProposalCreated: p.createTable({
+  ProposalsOnchain: p.createTable({
     id: p.string(),
     proposer: p.string(),
     targets: p.json(),

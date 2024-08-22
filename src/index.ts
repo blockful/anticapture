@@ -1,9 +1,9 @@
 import { ponder } from "@/generated";
 
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
-  const { Delegation } = context.db;
+  const { Delegations } = context.db;
 
-  await Delegation.create({
+  await Delegations.create({
     id: event.log.id,
     data: {
       delegatee: event.args.toDelegate,
@@ -14,9 +14,9 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
 });
 
 ponder.on("ENSToken:Transfer", async ({ event, context }) => {
-  const { Transfer } = context.db;
+  const { Transfers } = context.db;
 
-  await Transfer.create({
+  await Transfers.create({
     id: event.log.id,
     data: {
       amount: event.args.value,
@@ -28,9 +28,9 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
 });
 
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
-  const { VoteCast } = context.db;
+  const { VotesOnchain } = context.db;
 
-  await VoteCast.create({
+  await VotesOnchain.create({
     id: event.log.id,
     data: {
       proposalId: event.args.proposalId.toString(),
@@ -44,9 +44,9 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
 });
 
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
-  const { ProposalCreated } = context.db;
+  const { ProposalsOnchain } = context.db;
 
-  await ProposalCreated.create({
+  await ProposalsOnchain.create({
     id: event.args.proposalId.toString(),
     data: {
       proposer: event.args.proposer,
@@ -64,18 +64,18 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
 });
 /**/
 ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
-  const { ProposalCreated } = context.db;
+  const { ProposalsOnchain } = context.db;
 
-  await ProposalCreated.update({
+  await ProposalsOnchain.update({
     id: event.args.proposalId.toString(),
     data: { status: "CANCELED" },
   });
 });
 
 ponder.on("ENSGovernor:ProposalExecuted", async ({ event, context }) => {
-  const { ProposalCreated } = context.db;
+  const { ProposalsOnchain } = context.db;
 
-  await ProposalCreated.update({
+  await ProposalsOnchain.update({
     id: event.args.proposalId.toString(),
     data: { status: "EXECUTED" },
   });
