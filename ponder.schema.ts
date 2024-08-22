@@ -7,11 +7,6 @@ export default createSchema((p) => ({
     delegator: p.string().references("Account.id"),
     timestamp: p.bigint(),
   }),
-  DelegationCount: p.createTable({
-    id: p.string(),
-    votingPower: p.bigint(),
-    delegationsReceived: p.int(),
-  }),
   Transfers: p.createTable({
     id: p.string(),
     amount: p.bigint(),
