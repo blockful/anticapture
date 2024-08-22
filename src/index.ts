@@ -49,7 +49,6 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
   await ProposalCreated.create({
     id: event.args.proposalId.toString(),
     data: {
-      proposalId: event.args.proposalId.toString(),
       proposer: event.args.proposer,
       targets: event.args.targets,
       values: event.args.values,
