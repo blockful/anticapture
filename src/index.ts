@@ -12,9 +12,13 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
     },
   });
 
-  const fromDelegateAccount = await Account.findUnique({ id: event.args.fromDelegate });
+  const fromDelegateAccount = await Account.findUnique({
+    id: event.args.fromDelegate,
+  });
 
-  const toDelegateAccount = await Account.findUnique({ id: event.args.toDelegate });
+  const toDelegateAccount = await Account.findUnique({
+    id: event.args.toDelegate,
+  });
   if (!toDelegateAccount) {
     await Account.create({
       id: event.args.toDelegate,
@@ -28,12 +32,16 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
   await Account.update({
     id: event.args.toDelegate,
     data: ({ current }) => ({
-      votingPower: (current.votingPower ?? BigInt(0)) + BigInt(fromDelegateAccount?.balance ?? BigInt(0)),
+      votingPower:
+        (current.votingPower ?? BigInt(0)) +
+        BigInt(fromDelegateAccount?.balance ?? BigInt(0)),
       delegationsCount: (current.delegationsCount ?? 0) + 1,
     }),
   });
 
-  const fromDelegateExists = await Account.findUnique({ id: event.args.fromDelegate });
+  const fromDelegateExists = await Account.findUnique({
+    id: event.args.fromDelegate,
+  });
   if (!fromDelegateExists) {
     await Account.create({
       id: event.args.fromDelegate,
@@ -79,7 +87,8 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     id: event.args.from,
     data: ({ current }) => ({
       balance: (current.balance ?? BigInt(0)) - BigInt(event.args.value),
-      votingPower: (current.votingPower ?? BigInt(0)) - BigInt(event.args.value),
+      votingPower:
+        (current.votingPower ?? BigInt(0)) - BigInt(event.args.value),
     }),
   });
 
@@ -98,7 +107,8 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     id: event.args.to,
     data: ({ current }) => ({
       balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
-      votingPower: (current.votingPower ?? BigInt(0)) + BigInt(event.args.value),
+      votingPower:
+        (current.votingPower ?? BigInt(0)) + BigInt(event.args.value),
     }),
   });
 });
@@ -134,7 +144,6 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
       votesCount: (current.votesCount ?? 0) + 1,
     }),
   });
-
 });
 
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
@@ -144,10 +153,10 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
     id: event.args.proposalId.toString(),
     data: {
       proposer: event.args.proposer,
-      targets: event.args.targets.toString(),
-      values: event.args.values.toString(),
-      signatures: event.args.signatures.toString(),
-      calldatas: event.args.calldatas.toString(),
+      targets: JSON.stringify(event.args.targets),
+      values: JSON.stringify(event.args.values),
+      signatures: JSON.stringify(event.args.signatures),
+      calldatas: JSON.stringify(event.args.calldatas),
       startBlock: event.args.startBlock.toString(),
       endBlock: event.args.endBlock.toString(),
       description: event.args.description,
