@@ -154,7 +154,7 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
     data: {
       proposer: event.args.proposer,
       targets: JSON.stringify(event.args.targets),
-      values: JSON.stringify(event.args.values),
+      values: JSON.stringify(event.args.values.map((v) => v.toString())),
       signatures: JSON.stringify(event.args.signatures),
       calldatas: JSON.stringify(event.args.calldatas),
       startBlock: event.args.startBlock.toString(),
