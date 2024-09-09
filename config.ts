@@ -13,7 +13,7 @@ export const config = {
         contracts: {
             ENSToken: {
                 address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-                startBlock: 13533418,
+                startBlock: 9380410,
             },
             ENSGovernor: {
                 address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -32,7 +32,7 @@ export const config = {
         contracts: {
             ENSToken: {
                 address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-                startBlock: 13533418,
+                startBlock: 9380410,
             },
             ENSGovernor: {
                 address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
