@@ -53,9 +53,11 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
 
   await Account.update({
     id: event.args.fromDelegate,
-    data: {
-      votingPower: BigInt(0),
-    },
+    data: ({ current }) => ({
+      votingPower:
+        (current.votingPower ?? BigInt(0)) -
+        BigInt(fromDelegateAccount?.balance ?? BigInt(0)),
+    }),
   });
 });
 
