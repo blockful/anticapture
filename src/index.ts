@@ -84,7 +84,6 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
       },
     });
   }
-
   await Account.update({
     id: event.args.from,
     data: ({ current }) => ({
@@ -99,20 +98,20 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     await Account.create({
       id: event.args.to,
       data: {
-        balance: BigInt(0),
-        votingPower: BigInt(0),
+        balance: BigInt(event.args.value),
+        votingPower: BigInt(event.args.value),
       },
     });
+  } else {
+    await Account.update({
+      id: event.args.to,
+      data: ({ current }) => ({
+        balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
+        votingPower:
+          (current.votingPower ?? BigInt(0)) + BigInt(event.args.value),
+      }),
+    });
   }
-
-  await Account.update({
-    id: event.args.to,
-    data: ({ current }) => ({
-      balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
-      votingPower:
-        (current.votingPower ?? BigInt(0)) + BigInt(event.args.value),
-    }),
-  });
 });
 
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
