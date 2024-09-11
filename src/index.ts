@@ -28,15 +28,6 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
       },
     });
   }
-  if (!delegatorAccount) {
-    await Account.create({
-      id: event.args.delegator,
-      data: {
-        votingPower: BigInt(0),
-        delegationsCount: 0,
-      },
-    });
-  }
 
   await Account.update({
     id: event.args.toDelegate,
