@@ -12,8 +12,8 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
     },
   });
 
-  const fromDelegateAccount = await Account.findUnique({
-    id: event.args.fromDelegate,
+  const delegatorAccount = await Account.findUnique({
+    id: event.args.delegator,
   });
 
   const toDelegateAccount = await Account.findUnique({
@@ -34,7 +34,7 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
     data: ({ current }) => ({
       votingPower:
         (current.votingPower ?? BigInt(0)) +
-        BigInt(fromDelegateAccount?.balance ?? BigInt(0)),
+        BigInt(delegatorAccount?.balance ?? BigInt(0)),
       delegationsCount: (current.delegationsCount ?? 0) + 1,
     }),
   });
@@ -53,9 +53,11 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
 
   await Account.update({
     id: event.args.fromDelegate,
-    data: {
-      votingPower: BigInt(0),
-    },
+    data: ({ current }) => ({
+      votingPower:
+        (current.votingPower ?? BigInt(0)) -
+        BigInt(delegatorAccount?.balance ?? BigInt(0)),
+    }),
   });
 });
 
@@ -78,17 +80,13 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
       id: event.args.from,
       data: {
         balance: BigInt(0),
-        votingPower: BigInt(0),
       },
     });
   }
-
   await Account.update({
     id: event.args.from,
     data: ({ current }) => ({
       balance: (current.balance ?? BigInt(0)) - BigInt(event.args.value),
-      votingPower:
-        (current.votingPower ?? BigInt(0)) - BigInt(event.args.value),
     }),
   });
 
@@ -97,20 +95,17 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     await Account.create({
       id: event.args.to,
       data: {
-        balance: BigInt(0),
-        votingPower: BigInt(0),
+        balance: BigInt(event.args.value),
       },
     });
+  } else {
+    await Account.update({
+      id: event.args.to,
+      data: ({ current }) => ({
+        balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
+      }),
+    });
   }
-
-  await Account.update({
-    id: event.args.to,
-    data: ({ current }) => ({
-      balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
-      votingPower:
-        (current.votingPower ?? BigInt(0)) + BigInt(event.args.value),
-    }),
-  });
 });
 
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {

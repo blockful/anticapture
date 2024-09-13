@@ -44,23 +44,4 @@ export default createSchema((p) => ({
     proposalCount: p.int().optional(),
     delegationsCount: p.int().optional(),
   }),
-  VotesOffchain: p.createTable({
-    id: p.string(),
-    voter: p.string(),
-    proposalId: p.string(),
-    created: p.bigint(),
-    choice: p.string(),
-    reason: p.string(),
-  }),
-  ProposalsOffchain: p.createTable({
-    id: p.string(),
-    author: p.string(),
-    title: p.string(),
-    body: p.string(),
-    created: p.bigint(),
-    start: p.bigint(),
-    end: p.bigint(),
-    state: p.string(),
-    votes: p.int(),
-  }),
 }));
