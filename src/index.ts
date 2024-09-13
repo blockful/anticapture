@@ -1,7 +1,31 @@
 import { ponder } from "@/generated";
 
+ponder.on("ENSToken:DelegateVotesChanged", async ({ event, context }) => {
+  const { Account } = context.db;
+
+  const delegateAccount = await Account.findUnique({
+    id: event.args.delegate,
+  });
+
+  if (!delegateAccount) {
+    await Account.create({
+      id: event.args.delegate,
+      data: {
+        votingPower: BigInt(event.args.newBalance),
+      },
+    });
+  } else {
+    await Account.update({
+      id: event.args.delegate,
+      data: {
+        votingPower: BigInt(event.args.newBalance),
+      },
+    });
+  }
+});
+
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
-  const { Delegations, Account } = context.db;
+  const { Delegations } = context.db;
 
   await Delegations.create({
     id: event.log.id,
@@ -10,54 +34,6 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
       delegator: event.args.delegator,
       timestamp: event.block.timestamp,
     },
-  });
-
-  const delegatorAccount = await Account.findUnique({
-    id: event.args.delegator,
-  });
-
-  const toDelegateAccount = await Account.findUnique({
-    id: event.args.toDelegate,
-  });
-  if (!toDelegateAccount) {
-    await Account.create({
-      id: event.args.toDelegate,
-      data: {
-        votingPower: BigInt(0),
-        delegationsCount: 0,
-      },
-    });
-  }
-
-  await Account.update({
-    id: event.args.toDelegate,
-    data: ({ current }) => ({
-      votingPower:
-        (current.votingPower ?? BigInt(0)) +
-        BigInt(delegatorAccount?.balance ?? BigInt(0)),
-      delegationsCount: (current.delegationsCount ?? 0) + 1,
-    }),
-  });
-
-  const fromDelegateExists = await Account.findUnique({
-    id: event.args.fromDelegate,
-  });
-  if (!fromDelegateExists) {
-    await Account.create({
-      id: event.args.fromDelegate,
-      data: {
-        votingPower: BigInt(0),
-      },
-    });
-  }
-
-  await Account.update({
-    id: event.args.fromDelegate,
-    data: ({ current }) => ({
-      votingPower:
-        (current.votingPower ?? BigInt(0)) -
-        BigInt(delegatorAccount?.balance ?? BigInt(0)),
-    }),
   });
 });
 
