@@ -1,5 +1,16 @@
+/**
+ * @file index.ts
+ * @description This file contains Ponder event handlers for ENS (Ethereum Name Service) related smart contracts.
+ * It indexes various events such as delegate changes, transfers, votes, and proposal actions.
+ *
+ */
+
 import { ponder } from "@/generated";
 
+/**
+ * Handler for DelegateVotesChanged event of ENSToken contract
+ * Updates or creates an Account with new voting power
+ */
 ponder.on("ENSToken:DelegateVotesChanged", async ({ event, context }) => {
   const { Account } = context.db;
 
@@ -24,6 +35,10 @@ ponder.on("ENSToken:DelegateVotesChanged", async ({ event, context }) => {
   }
 });
 
+/**
+ * Handler for DelegateChanged event of ENSToken contract
+ * Creates a new Delegation record
+ */
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
   const { Delegations } = context.db;
 
@@ -37,9 +52,14 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
   });
 });
 
+/**
+ * Handler for Transfer event of ENSToken contract
+ * Creates a new Transfer record and updates Account balances
+ */
 ponder.on("ENSToken:Transfer", async ({ event, context }) => {
   const { Transfers, Account } = context.db;
 
+  // Create transfer record
   await Transfers.create({
     id: event.log.id,
     data: {
@@ -50,6 +70,7 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     },
   });
 
+  // Update or create 'from' account
   const fromAccount = await Account.findUnique({ id: event.args.from });
   if (!fromAccount) {
     await Account.create({
@@ -66,6 +87,7 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     }),
   });
 
+  // Update or create 'to' account
   const toAccount = await Account.findUnique({ id: event.args.to });
   if (!toAccount) {
     await Account.create({
@@ -84,9 +106,14 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
   }
 });
 
+/**
+ * Handler for VoteCast event of ENSGovernor contract
+ * Creates a new VotesOnchain record and updates the voter's vote count
+ */
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
   const { VotesOnchain, Account } = context.db;
 
+  // Create vote record
   await VotesOnchain.create({
     id: event.log.id,
     data: {
@@ -99,6 +126,7 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
     },
   });
 
+  // Update or create voter account
   const voterAccount = await Account.findUnique({ id: event.args.voter });
   if (!voterAccount) {
     await Account.create({
@@ -117,9 +145,14 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
   });
 });
 
+/**
+ * Handler for ProposalCreated event of ENSGovernor contract
+ * Creates a new ProposalsOnchain record and updates the proposer's proposal count
+ */
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
   const { ProposalsOnchain, Account } = context.db;
 
+  // Create proposal record
   await ProposalsOnchain.create({
     id: event.args.proposalId.toString(),
     data: {
@@ -136,6 +169,7 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
     },
   });
 
+  // Update or create proposer account
   const proposerAccount = await Account.findUnique({ id: event.args.proposer });
   if (!proposerAccount) {
     await Account.create({
@@ -154,6 +188,10 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
   });
 });
 
+/**
+ * Handler for ProposalCanceled event of ENSGovernor contract
+ * Updates the status of a proposal to CANCELED
+ */
 ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
   const { ProposalsOnchain } = context.db;
 
@@ -163,6 +201,10 @@ ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
   });
 });
 
+/**
+ * Handler for ProposalExecuted event of ENSGovernor contract
+ * Updates the status of a proposal to EXECUTED
+ */
 ponder.on("ENSGovernor:ProposalExecuted", async ({ event, context }) => {
   const { ProposalsOnchain } = context.db;
 
