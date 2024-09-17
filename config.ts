@@ -6,9 +6,7 @@ export const config = {
         networks: {
             name: "mainnet",
             chainId: 1,
-            rpcUrl1: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-            rpcUrl2:
-                `https://rpc.ankr.com/eth/${process.env.ANKR_API_KEY}`,
+            rpcUrl1: `http://127.0.0.1:8545`,
         },
         contracts: {
             ENSToken: {
@@ -25,9 +23,7 @@ export const config = {
         networks: {
             name: "mainnet",
             chainId: 1,
-            rpcUrl1: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-            rpcUrl2:
-                `https://rpc.ankr.com/eth/${process.env.ANKR_API_KEY}`,
+            rpcUrl1: `http://127.0.0.1:8545`,
         },
         contracts: {
             ENSToken: {
@@ -40,4 +36,4 @@ export const config = {
             },
         },
     },
-};
+}

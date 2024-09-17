@@ -3,6 +3,7 @@ import { ponder } from "@/generated";
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
   const { Delegations, Account } = context.db;
 
+  // Create a new delegation record
   await Delegations.create({
     id: event.log.id,
     data: {
@@ -12,58 +13,58 @@ ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
     },
   });
 
-  const delegatorAccount = await Account.findUnique({
+  // Update the delegator's delegate
+  await Account.upsert({
     id: event.args.delegator,
-  });
-
-  const toDelegateAccount = await Account.findUnique({
-    id: event.args.toDelegate,
-  });
-  if (!toDelegateAccount) {
-    await Account.create({
-      id: event.args.toDelegate,
-      data: {
-        votingPower: BigInt(0),
-        delegationsCount: 0,
-      },
-    });
-  }
-
-  await Account.update({
-    id: event.args.toDelegate,
-    data: ({ current }) => ({
-      votingPower:
-        (current.votingPower ?? BigInt(0)) +
-        BigInt(delegatorAccount?.balance ?? BigInt(0)),
-      delegationsCount: (current.delegationsCount ?? 0) + 1,
+    create: {
+      delegate: event.args.toDelegate,
+    },
+    update: () => ({
+      delegate: event.args.toDelegate,
     }),
   });
 
-  const fromDelegateExists = await Account.findUnique({
-    id: event.args.fromDelegate,
-  });
-  if (!fromDelegateExists) {
-    await Account.create({
-      id: event.args.fromDelegate,
-      data: {
-        votingPower: BigInt(0),
-      },
-    });
-  }
-
-  await Account.update({
-    id: event.args.fromDelegate,
-    data: ({ current }) => ({
-      votingPower:
-        (current.votingPower ?? BigInt(0)) -
-        BigInt(delegatorAccount?.balance ?? BigInt(0)),
+  // Update the delegatee's delegations count
+  await Account.upsert({
+    id: event.args.toDelegate,
+    create: {
+      delegationsCount: 1,
+    },
+    update: ({ current }) => ({
+      delegationsCount: (current.delegationsCount ?? 0) + 1,
     }),
   });
 });
 
+ponder.on("ENSToken:DelegateVotesChanged", async ({ event, context }) => {
+  const { VotingPowerHistory, Account } = context.db;
+
+  // Create a new voting power history record
+  await VotingPowerHistory.create({
+    id: event.log.id,
+    data: {
+      account: event.args.delegate,
+      votingPower: event.args.newBalance,
+      timestamp: event.block.timestamp,
+    },
+  });
+
+  // Update the delegate's voting power
+  await Account.upsert({
+    id: event.args.delegate,
+    create: {
+      votingPower: event.args.newBalance,
+    },
+    update: () => ({
+      votingPower: event.args.newBalance,
+    }),
+  });
+})
+
 ponder.on("ENSToken:Transfer", async ({ event, context }) => {
   const { Transfers, Account } = context.db;
 
+  // Create a new transfer record
   await Transfers.create({
     id: event.log.id,
     data: {
@@ -74,42 +75,46 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
     },
   });
 
-  const fromAccount = await Account.findUnique({ id: event.args.from });
-  if (!fromAccount) {
-    await Account.create({
-      id: event.args.from,
-      data: {
-        balance: BigInt(0),
-      },
-    });
-  }
-  await Account.update({
+  // Update the from account's balance
+  const fromAccount = await Account.upsert({
     id: event.args.from,
-    data: ({ current }) => ({
+    create: {
+      balance: BigInt(event.args.value),
+    },
+    update: ({ current }) => ({
       balance: (current.balance ?? BigInt(0)) - BigInt(event.args.value),
     }),
   });
 
-  const toAccount = await Account.findUnique({ id: event.args.to });
-  if (!toAccount) {
-    await Account.create({
-      id: event.args.to,
-      data: {
-        balance: BigInt(event.args.value),
-      },
-    });
-  } else {
-    await Account.update({
-      id: event.args.to,
-      data: ({ current }) => ({
-        balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
-      }),
-    });
+  // Update the to account's balance
+  const toAccount = await Account.upsert({
+    id: event.args.to,
+    create: {
+      balance: BigInt(event.args.value),
+    },
+    update: ({ current }) => ({
+      balance: (current.balance ?? BigInt(0)) + BigInt(event.args.value),
+    }),
+  });
+
+  // Check if the balances are valid
+  if (fromAccount.balance! < BigInt(0) ||  toAccount.balance! < BigInt(0)) {
+    throw new Error("Invalid balance");
   }
 });
 
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
   const { VotesOnchain, Account } = context.db;
+
+  await Account.upsert({
+    id: event.args.voter,
+    create: {
+      votesCount: 1,
+    },
+    update: ({ current }) => ({
+      votesCount: (current.votesCount ?? 0) + 1,
+    }),
+  })
 
   await VotesOnchain.create({
     id: event.log.id,
@@ -121,25 +126,8 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
       reason: event.args.reason,
       timestamp: event.block.timestamp,
     },
-  });
-
-  const voterAccount = await Account.findUnique({ id: event.args.voter });
-  if (!voterAccount) {
-    await Account.create({
-      id: event.args.voter,
-      data: {
-        votesCount: 0,
-      },
-    });
-  }
-
-  await Account.update({
-    id: event.args.voter,
-    data: ({ current }) => ({
-      votesCount: (current.votesCount ?? 0) + 1,
-    }),
-  });
-});
+  });  
+})
 
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
   const { ProposalsOnchain, Account } = context.db;
