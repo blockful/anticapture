@@ -7,22 +7,23 @@ import { config } from "./config";
 dotenv.config();
 
 let networks, contracts;
-if (!process.env.STATUS) {
-  throw new Error("Env variable STATUS is not defined");
-} else if (process.env.STATUS === "production") {
-  ({ networks, contracts } = config["production"]);
-} else {
-  ({ networks, contracts } = config["staging"]);
-}
+// if (!process.env.STATUS) {
+//   throw new Error("Env variable STATUS is not defined");
+// } else if (process.env.STATUS === "production") {
+//   ({ networks, contracts } = config["production"]);
+// } else {
+//   ({ networks, contracts } = config["staging"]);
+// }
+
+({ networks, contracts } = config["production"]);
 
 export default createConfig({
   networks: {
     mainnet: {
       chainId: networks.chainId,
-      transport: loadBalance([http(networks.rpcUrl1), http(networks.rpcUrl2)]),
+      transport: loadBalance([http(networks.rpcUrl1)]),
     },
   },
-
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,

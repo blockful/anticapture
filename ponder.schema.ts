@@ -1,6 +1,21 @@
 import { createSchema } from "@ponder/core";
 
 export default createSchema((p) => ({
+  Account: p.createTable({
+    id: p.string(),
+    votingPower: p.bigint().optional(),
+    balance: p.bigint().optional(),
+    votesCount: p.int().optional(),
+    proposalCount: p.int().optional(),
+    delegationsCount: p.int().optional(),
+    delegate: p.string().optional(),
+  }),
+  VotingPowerHistory: p.createTable({
+    id: p.string(),
+    account: p.string().references("Account.id"),
+    votingPower: p.bigint(),
+    timestamp: p.bigint(),
+  }),
   Delegations: p.createTable({
     id: p.string(),
     delegatee: p.string().references("Account.id"),
@@ -35,13 +50,5 @@ export default createSchema((p) => ({
     description: p.string(),
     timestamp: p.bigint(),
     status: p.string(),
-  }),
-  Account: p.createTable({
-    id: p.string(),
-    votingPower: p.bigint().optional(),
-    balance: p.bigint().optional(),
-    votesCount: p.int().optional(),
-    proposalCount: p.int().optional(),
-    delegationsCount: p.int().optional(),
-  }),
+  })
 }));
