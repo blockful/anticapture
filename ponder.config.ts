@@ -11,8 +11,12 @@ if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
 } else if (process.env.STATUS === "production") {
   ({ networks, contracts } = config["production"]);
-} else {
+} else if (process.env.STATUS === "staging") {
   ({ networks, contracts } = config["staging"]);
+} else if (process.env.STATUS === "test") {
+  ({ networks, contracts } = config["staging"]);
+} else {
+  throw new Error("No ENV variable STATUS");
 }
 
 export default createConfig({
@@ -21,8 +25,12 @@ export default createConfig({
       chainId: networks.chainId,
       transport: loadBalance([http(networks.rpcUrl1), http(networks.rpcUrl2)]),
     },
+    anvil: {
+      chainId: 31337,
+      transport: http("http://127.0.0.1:8545"),
+      disableCache: true,
+    },
   },
-
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,

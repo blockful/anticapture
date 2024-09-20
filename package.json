@@ -9,20 +9,23 @@
     "codegen": "ponder codegen",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "start-anvil": "tsx ./src/lib/start-anvil.ts"
   },
   "dependencies": {
     "@ponder/core": "^0.5.6",
+    "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
-    "viem": "^1.19.3"
+    "viem": "^2.21.9"
   },
   "devDependencies": {
-    "@types/node": "^20.14.14",
+    "@types/node": "^20.16.5",
     "eslint": "^8.53.0",
     "eslint-config-ponder": "^0.5.6",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.3.3",
+    "tsx": "^4.19.1",
     "typescript": "^5.3.3"
   },
   "engines": {
