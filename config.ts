@@ -17,6 +17,10 @@ export const config = {
                 address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
                 startBlock: 13533772,
             },
+            UNIToken: {
+                address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+                startBlock: 10861674,
+            },
         },
     },
     staging: {
@@ -33,6 +37,10 @@ export const config = {
             ENSGovernor: {
                 address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
                 startBlock: 13533772,
+            },
+            UNIToken: {
+                address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+                startBlock: 10861674,
             },
         },
     },

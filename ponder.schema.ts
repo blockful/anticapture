@@ -1,29 +1,39 @@
 import { createSchema } from "@ponder/core";
 
 export default createSchema((p) => ({
+  DAOS: p.createEnum(["ENS", "UNI"]),
   Account: p.createTable({
     id: p.string(),
-    votingPower: p.bigint().optional(),
-    balance: p.bigint().optional(),
-    votesCount: p.int().optional(),
-    proposalCount: p.int().optional(),
-    delegationsCount: p.int().optional(),
-    delegate: p.string().optional(),
+    ENSVotingPower: p.bigint().optional(),
+    ENSBalance: p.bigint().optional(),
+    ENSVotesCount: p.int().optional(),
+    ENSProposalCount: p.int().optional(),
+    ENSDelegationsCount: p.int().optional(),
+    ENSDelegate: p.string().optional(),
+    UNIVotingPower: p.bigint().optional(),
+    UNIBalance: p.bigint().optional(),
+    UNIVotesCount: p.int().optional(),
+    UNIProposalCount: p.int().optional(),
+    UNIDelegationsCount: p.int().optional(),
+    UNIDelegate: p.string().optional(),
   }),
   VotingPowerHistory: p.createTable({
     id: p.string(),
+    dao: p.enum("DAOS"),
     account: p.string().references("Account.id"),
     votingPower: p.bigint(),
     timestamp: p.bigint(),
   }),
   Delegations: p.createTable({
     id: p.string(),
+    dao: p.enum("DAOS"),
     delegatee: p.string().references("Account.id"),
     delegator: p.string().references("Account.id"),
     timestamp: p.bigint(),
   }),
   Transfers: p.createTable({
     id: p.string(),
+    dao: p.enum("DAOS"),
     amount: p.bigint(),
     from: p.string().references("Account.id"),
     to: p.string().references("Account.id"),
@@ -31,6 +41,7 @@ export default createSchema((p) => ({
   }),
   VotesOnchain: p.createTable({
     id: p.string(),
+    dao: p.enum("DAOS"),
     voter: p.string().references("Account.id"),
     proposalId: p.string().references("ProposalsOnchain.id"),
     support: p.string(),
@@ -40,6 +51,7 @@ export default createSchema((p) => ({
   }),
   ProposalsOnchain: p.createTable({
     id: p.string(),
+    dao: p.enum("DAOS"),
     proposer: p.string(),
     targets: p.json(),
     values: p.json(),
@@ -50,5 +62,8 @@ export default createSchema((p) => ({
     description: p.string(),
     timestamp: p.bigint(),
     status: p.string(),
-  })
+    forVotes: p.bigint(),
+    againstVotes: p.bigint(),
+    abstainVotes: p.bigint(),
+  }),
 }));
