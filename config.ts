@@ -21,6 +21,10 @@ export const config = {
                 address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
                 startBlock: 10861674,
             },
+            COMPToken: {
+                address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+                startBlock: 9601359,
+            },
         },
     },
     staging: {
@@ -41,6 +45,10 @@ export const config = {
             UNIToken: {
                 address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
                 startBlock: 10861674,
+            },
+            COMPToken: {
+                address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+                startBlock: 9601359,
             },
         },
     },

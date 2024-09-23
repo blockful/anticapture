@@ -1,7 +1,7 @@
 import { createSchema } from "@ponder/core";
 
 export default createSchema((p) => ({
-  DAOS: p.createEnum(["ENS", "UNI"]),
+  DAOS: p.createEnum(["ENS", "UNI", "COMP"]),
   Account: p.createTable({
     id: p.string(),
     ENSVotingPower: p.bigint().optional(),
@@ -16,6 +16,12 @@ export default createSchema((p) => ({
     UNIProposalCount: p.int().optional(),
     UNIDelegationsCount: p.int().optional(),
     UNIDelegate: p.string().optional(),
+    COMPVotingPower: p.bigint().optional(),
+    COMPBalance: p.bigint().optional(),
+    COMPVotesCount: p.int().optional(),
+    COMPProposalCount: p.int().optional(),
+    COMPDelegationsCount: p.int().optional(),
+    COMPDelegate: p.string().optional(),
   }),
   VotingPowerHistory: p.createTable({
     id: p.string(),

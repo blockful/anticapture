@@ -2,6 +2,7 @@ import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
 import { ENSTokenAbi, ENSGovernorAbi } from "./src/ens/abi";
 import { UNITokenAbi } from "./src/uni/abi";
+import { COMPTokenAbi } from "./src/comp/abi";
 import dotenv from "dotenv";
 import { config } from "./config";
 dotenv.config();
@@ -43,6 +44,12 @@ export default createConfig({
       address: contracts.UNIToken.address as `0x${string}`,
       network: networks.name as any,
       startBlock: contracts.UNIToken.startBlock,
+    },
+    COMPToken: {
+      abi: COMPTokenAbi,
+      address: contracts.COMPToken.address as `0x${string}`,
+      network: networks.name as any,
+      startBlock: contracts.COMPToken.startBlock,
     },
   },
 });
