@@ -23,11 +23,11 @@ contract ENSGovernor is Governor, GovernorProposalThreshold, GovernorCountingSim
     }
 
     function votingPeriod() public pure override returns (uint256) {
-        return 45818; // 1 week
+        return 10; // 1 week
     }
 
     function proposalThreshold() public pure override returns (uint256) {
-        return 100_000e18;
+        return 1;
     }
 
     function quorumDenominator() public pure virtual override returns (uint256) {

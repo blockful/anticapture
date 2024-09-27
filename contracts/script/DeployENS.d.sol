@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import {Script, console} from "forge-std/Script.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {ENSGovernor, TimelockController} from "../src/ENSGovernor.sol";
+import {console} from "forge-std/console.sol";
 
 contract DeployENS is Script {
     uint256 MAX_INT =
@@ -34,12 +35,34 @@ contract DeployENS is Script {
             claimPeriodEnds
         );
         TimelockController timelockController = new TimelockController(
-            MAX_INT,
+            1,
             proposers,
             executors,
             proposers[0]
         );
         ENSGovernor ensGovernor = new ENSGovernor(ensToken, timelockController);
+        timelockController.grantRole(
+            timelockController.PROPOSER_ROLE(),
+            address(ensGovernor)
+        );
+        timelockController.grantRole(
+            timelockController.EXECUTOR_ROLE(),
+            address(ensGovernor)
+        );
+        timelockController.grantRole(
+            timelockController.CANCELLER_ROLE(),
+            address(ensGovernor)
+        );
+        timelockController.grantRole(
+            timelockController.TIMELOCK_ADMIN_ROLE(),
+            address(ensGovernor)
+        );
+        console.logString("ENS Token Address");
+        console.logAddress(address(ensToken));
+        console.logString("ENS Governor Address");
+        console.logAddress(address(ensGovernor));
+        console.logString("ENS Timelock Address");
+        console.logAddress(address(timelockController));
         vm.stopBroadcast();
     }
 }

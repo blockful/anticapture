@@ -14,16 +14,28 @@ if (!process.env.STATUS) {
 } else if (process.env.STATUS === "staging") {
   ({ networks, contracts } = config["staging"]);
 } else if (process.env.STATUS === "test") {
-  ({ networks, contracts } = config["staging"]);
+  ({ networks, contracts } = config["test"]);
 } else {
   throw new Error("No ENV variable STATUS");
 }
+
+const databaseConfig = process.env.DATABASE_URL
+  ? {
+      database: {
+        kind: "postgres" as "postgres",
+        connectionString: process.env.DATABASE_URL,
+      },
+    }
+  : {};
 
 export default createConfig({
   networks: {
     mainnet: {
       chainId: networks.chainId,
-      transport: loadBalance([http(networks.rpcUrl1), http(networks.rpcUrl2)]),
+      transport:
+        networks.rpcUrls.length > 1
+          ? loadBalance(networks.rpcUrls.map((url) => http(url)))
+          : http(networks.rpcUrls[0]),
     },
     anvil: {
       chainId: 31337,
@@ -45,4 +57,5 @@ export default createConfig({
       startBlock: contracts.ENSGovernor.startBlock,
     },
   },
+  ...databaseConfig,
 });
