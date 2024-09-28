@@ -1,12 +1,12 @@
 import { Anvil, createAnvil } from "@viem/anvil";
 
 export class AnvilInstance {
-  private readonly forkUrl: string;
+  private readonly forkUrl?: string;
   private readonly blockNumber?: bigint;
   private _anvil?: Anvil;
   private readonly port?: number;
 
-  constructor(forkUrl: string, blockNumber?: bigint, port?: number) {
+  constructor(forkUrl?: string, blockNumber?: bigint, port?: number) {
     this.forkUrl = forkUrl;
     this.blockNumber = blockNumber;
     this.port = port;
@@ -22,7 +22,8 @@ export class AnvilInstance {
       port: this.port,
     });
     this._anvil = anvil;
-    await this._anvil.start();
+    const hey = await this._anvil.start();
+    console.log(hey);
   }
 
   async stopAnvil() {

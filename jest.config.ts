@@ -8,8 +8,8 @@ const config: Config = {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
   },
-  testTimeout: 0,
-  moduleDirectories: ["./ponder-env.d.ts"],
+  testTimeout: 30000,
+  // setupFilesAfterEnv: ["./test/lib/jest-setup.ts"]
 };
 
 export default config;

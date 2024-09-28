@@ -1,6 +1,5 @@
 import {
   Address,
-  decodeEventLog,
   Hex,
   keccak256,
   PublicActions,
@@ -9,7 +8,6 @@ import {
 } from "viem";
 import { config } from "../../../config";
 import { ENSGovernorAbi } from "../../../abis/ENSGovernorAbi";
-import { emptyCall, zeroEther } from "../../lib/constants";
 
 export async function queueProposal(
   client: WalletClient & PublicActions,

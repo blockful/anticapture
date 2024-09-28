@@ -9,14 +9,13 @@ export async function isOperationReady(
   try {
     const timelockAddress = config.test.contracts.ENSTimelockController
       .address as Address;
-    const isProposalReady = await client.readContract({
+    const isOperationReady = await client.readContract({
       address: timelockAddress,
       abi: ENSTimelockControllerAbi,
       functionName: "isOperationReady",
       args: [proposalIdInTimelock],
     });
-    console.log(isProposalReady);
-    return isProposalReady;
+    return isOperationReady;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to get Proposal Id in timelock");

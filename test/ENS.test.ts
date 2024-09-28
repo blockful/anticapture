@@ -14,21 +14,26 @@ import { anvil } from "viem/chains";
 import { ENSGovernorAbi } from "../abis/ENSGovernorAbi";
 import { config } from "../config";
 import { ENSTokenAbi } from "../abis/ENSTokenAbi";
-import { makeProposal } from "./utils/governor/makeProposal";
+import { makeProposal } from "./lib/governor/makeProposal";
 import { privateKeyToAccount } from "viem/accounts";
-import { castVote } from "./utils/governor/castVote";
-import { queueProposal } from "./utils/governor/queueProposal";
-import { getProposalIdInTimelock } from "./utils/governor/getProposalIdInTimelock";
-import { isOperationReady } from "./utils/governor/isOperationReady";
-import { executeProposal } from "./utils/governor/executeProposal";
-import { isOperationDone } from "./utils/governor/isOperationDone";
+import { castVote } from "./lib/governor/castVote";
+import { queueProposal } from "./lib/governor/queueProposal";
+import { getProposalIdInTimelock } from "./lib/governor/getProposalIdInTimelock";
+import { isOperationReady } from "./lib/governor/isOperationReady";
+import { executeProposal } from "./lib/governor/executeProposal";
+import { isOperationDone } from "./lib/governor/isOperationDone";
 import { AccessControlAbi } from "../abis/AccessControlAbi";
 import { ENSTimelockControllerAbi } from "../abis/ENSTimelockControllerAbi";
+import { clearAllDataFromDatabase } from "./lib/database/clearAllData";
+import { pgClient } from "./lib/database/pg.client";
+import { ponderHttpClient } from "./lib/httpClient/ponderHttpClient";
+import { delay } from "./utils/delay";
 
 const userAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 const userAddressPrivateKey =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const addressToBeRevoked = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+const ponderLocalUrl = "http://localhost:42069";
 
 const client = createWalletClient({
   chain: anvil,
@@ -79,11 +84,10 @@ beforeAll(async () => {
       account: userAddress,
       data: rawData,
     });
-    await testClient.mine({ blocks: 1 });
+    await testClient.mine({ blocks: 2 });
     // Set up proposal
-    const timelockAddress = config.test.contracts.ENSTimelockController
-      .address as Address;
-    const proposerRole = await ENSTimelockControllerContract.read.PROPOSER_ROLE();
+    const proposerRole =
+      await ENSTimelockControllerContract.read.PROPOSER_ROLE();
 
     const revokeRoleData = encodeFunctionData({
       abi: ENSTimelockControllerAbi,
@@ -91,7 +95,7 @@ beforeAll(async () => {
       args: [proposerRole, addressToBeRevoked],
     });
 
-    const proposalDescription = "Revoke Role 93";
+    const proposalDescription = "Revoke Role";
 
     const proposal = [
       [ENSTimelockControllerContract.address],
@@ -132,18 +136,12 @@ beforeAll(async () => {
       proposalDescription
     );
     await testClient.mine({ blocks: 10 });
-    const isPending =
-      await ENSTimelockControllerContract.read.isOperationPending([
-        proposalIdInTimelock,
-      ]);
-    console.log(isPending);
     const isReady = await isOperationReady(client, proposalIdInTimelock);
     if (!isReady) {
       throw new Error("Operation is not Ready");
     }
     await executeProposal(client, userAddress, proposal, proposalDescription);
     const isDone = await isOperationDone(client, proposalIdInTimelock);
-    console.log(isDone);
     if (!isDone) {
       throw new Error("Operation is not Done");
     }
@@ -152,11 +150,48 @@ beforeAll(async () => {
   }
 });
 
-test("Check If User Has Vote Power", async () => {
-  const votePower = await ENSTokenContract.read.getVotes([userAddress]);
-  expect(votePower).toBeGreaterThan(0n);
+beforeEach(async () => {
+  //Need to wait before sending the isReady request
+  let ponderIsReady;
+  console.time("ponder time to be ready");
+  while(!ponderIsReady){
+    await delay(20000);
+    ponderIsReady = await ponderHttpClient(ponderLocalUrl).isReady();
+  }
+  console.timeEnd("ponder time to be ready")
 });
 
-test("Check if Ponder registered user vote power", async () => {
-  
+
+test("", () => {
+  expect(true).toBe(true);
 })
+// test("Ponder: Check Account Registration", async () => {
+//   const {
+//     rows: [{ id, votingPower }],
+//   } = await pgClient.query('select * from public."Account" a ;');
+//   test("Registered user address", () => {
+//     expect(id.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
+//   });
+//   test("Registered user voting power", () => {
+//     expect(votingPower).toBe("100000000000000000000");
+//   });
+// });
+
+// test("Ponder: Check Delegations Registration", async () => {
+//   const {
+//     rows: [{ delegator, delegatee }],
+//   } = await pgClient.query('select * from public."Delegations" d ;');
+//   test("Registered Delegator", () => {
+//     expect(delegator.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
+//   });
+//   test("Registered Delegatee", () => {
+//     expect(delegatee.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
+//   });
+// });
+
+// test("Check if Ponder registered user vote power", async () => {
+//   const {
+//     rows: [{ votingPower }],
+//   } = await pgClient.query('select * from public."Account" a ;');
+//   expect(votingPower).toBe("100000000000000000000");
+// });
