@@ -7,7 +7,7 @@ import {
   WalletClient,
 } from "viem";
 import { config } from "../../../config";
-import { ENSGovernorAbi } from "../../../abis/ENSGovernorAbi";
+import { ENSGovernorAbi } from "../../../src/ens/abi";
 
 export async function queueProposal(
   client: WalletClient & PublicActions,
@@ -15,7 +15,7 @@ export async function queueProposal(
   proposal: [[target: Address], [value: bigint], [callData: Hex]],
   proposalDescription: string
 ) {
-  const governorAddress = config.test.contracts.ENSGovernor.address as Address;
+  const governorAddress = config.test.contracts.ENSGovernor?.address as Address;
   const proposalHash = keccak256(toBytes(proposalDescription));
   const { request } = await client.simulateContract({
     account: signerAddress,

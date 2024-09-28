@@ -1,12 +1,13 @@
 import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
-import { ENSTokenAbi } from "./abis/ENSTokenAbi";
-import { ENSGovernorAbi } from "./abis/ENSGovernorAbi";
+import { ENSTokenAbi, ENSGovernorAbi } from "./src/ens/abi";
+import { UNITokenAbi } from "./src/uni/abi";
+import { COMPTokenAbi } from "./src/comp/abi";
 import dotenv from "dotenv";
-import { config } from "./config";
+import { config, PonderContracts } from "./config";
 dotenv.config();
 
-let networks, contracts;
+let networks, contracts: PonderContracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
 } else if (process.env.STATUS === "production") {
@@ -36,6 +37,7 @@ export default createConfig({
         networks.rpcUrls.length > 1
           ? loadBalance(networks.rpcUrls.map((url) => http(url)))
           : http(networks.rpcUrls[0]),
+          maxRequestsPerSecond: 10000,
     },
     anvil: {
       chainId: 31337,
@@ -43,19 +45,6 @@ export default createConfig({
       disableCache: true,
     },
   },
-  contracts: {
-    ENSToken: {
-      abi: ENSTokenAbi,
-      address: contracts.ENSToken.address as `0x${string}`,
-      network: networks.name as any,
-      startBlock: contracts.ENSToken.startBlock,
-    },
-    ENSGovernor: {
-      abi: ENSGovernorAbi,
-      address: contracts.ENSGovernor.address as `0x${string}`,
-      network: networks.name as any,
-      startBlock: contracts.ENSGovernor.startBlock,
-    },
-  },
+  contracts,
   ...databaseConfig,
 });

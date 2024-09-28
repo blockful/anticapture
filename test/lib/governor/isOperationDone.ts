@@ -1,13 +1,14 @@
 import { Address, Hex, PublicActions, WalletClient } from "viem";
 import { config } from "../../../config";
-import { ENSTimelockControllerAbi } from "../../../abis/ENSTimelockControllerAbi";
+import { ENSTimelockControllerAbi } from "../../abi/ENSTimelockControllerAbi";
+import { testContracts } from "../constants";
 
 export async function isOperationDone(
   client: WalletClient & PublicActions,
   proposalIdInTimelock: Hex
 ) {
   try {
-    const timelockAddress = config.test.contracts.ENSTimelockController
+    const timelockAddress = testContracts.ENSTimelockController
       .address as Address;
     const isOperationDone = await client.readContract({
       address: timelockAddress,

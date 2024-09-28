@@ -11,9 +11,7 @@ import {
   walletActions,
 } from "viem";
 import { anvil } from "viem/chains";
-import { ENSGovernorAbi } from "../abis/ENSGovernorAbi";
 import { config } from "../config";
-import { ENSTokenAbi } from "../abis/ENSTokenAbi";
 import { makeProposal } from "./lib/governor/makeProposal";
 import { privateKeyToAccount } from "viem/accounts";
 import { castVote } from "./lib/governor/castVote";
@@ -22,12 +20,9 @@ import { getProposalIdInTimelock } from "./lib/governor/getProposalIdInTimelock"
 import { isOperationReady } from "./lib/governor/isOperationReady";
 import { executeProposal } from "./lib/governor/executeProposal";
 import { isOperationDone } from "./lib/governor/isOperationDone";
-import { AccessControlAbi } from "../abis/AccessControlAbi";
-import { ENSTimelockControllerAbi } from "../abis/ENSTimelockControllerAbi";
-import { clearAllDataFromDatabase } from "./lib/database/clearAllData";
-import { pgClient } from "./lib/database/pg.client";
-import { ponderHttpClient } from "./lib/httpClient/ponderHttpClient";
-import { delay } from "./utils/delay";
+import { ENSGovernorAbi, ENSTokenAbi } from "../src/ens/abi";
+import { testContracts } from "./lib/constants";
+import { ENSTimelockControllerAbi } from "./abi/ENSTimelockControllerAbi";
 
 const userAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 const userAddressPrivateKey =
@@ -52,7 +47,7 @@ const testClient = createTestClient({
 const ENSGovernorContract = getContract({
   abi: ENSGovernorAbi,
   client,
-  address: config.test.contracts.ENSGovernor.address as `0x${string}`,
+  address: config.test.contracts.ENSGovernor?.address as `0x${string}`,
 });
 const ENSTokenContract = getContract({
   abi: ENSTokenAbi,
@@ -60,7 +55,7 @@ const ENSTokenContract = getContract({
     wallet: client,
     public: client,
   },
-  address: config.test.contracts.ENSToken.address as `0x${string}`,
+  address: config.test.contracts.ENSToken?.address as `0x${string}`,
 });
 
 const ENSTimelockControllerContract = getContract({
@@ -69,7 +64,8 @@ const ENSTimelockControllerContract = getContract({
     wallet: client,
     public: client,
   },
-  address: config.test.contracts.ENSTimelockController.address as `0x${string}`,
+  address: testContracts.ENSTimelockController
+  .address as Address,
 });
 
 beforeAll(async () => {
@@ -152,19 +148,18 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   //Need to wait before sending the isReady request
-  let ponderIsReady;
-  console.time("ponder time to be ready");
-  while(!ponderIsReady){
-    await delay(20000);
-    ponderIsReady = await ponderHttpClient(ponderLocalUrl).isReady();
-  }
-  console.timeEnd("ponder time to be ready")
+  // let ponderIsReady;
+  // console.time("ponder time to be ready");
+  // while (!ponderIsReady) {
+  //   await delay(20000);
+  //   ponderIsReady = await ponderHttpClient(ponderLocalUrl).isReady();
+  // }
+  // console.timeEnd("ponder time to be ready");
 });
-
 
 test("", () => {
   expect(true).toBe(true);
-})
+});
 // test("Ponder: Check Account Registration", async () => {
 //   const {
 //     rows: [{ id, votingPower }],

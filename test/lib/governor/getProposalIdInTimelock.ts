@@ -7,7 +7,7 @@ import {
   WalletClient,
 } from "viem";
 import { config } from "../../../config";
-import { ENSTimelockControllerAbi } from "../../../abis/ENSTimelockControllerAbi";
+import { ENSTimelockControllerAbi } from "../../abi/ENSTimelockControllerAbi";
 
 export async function getProposalIdInTimelock(
   client: WalletClient & PublicActions,
@@ -16,8 +16,7 @@ export async function getProposalIdInTimelock(
   proposalDescription: string
 ) {
   try {
-    const timelockAddress = config.test.contracts.ENSTimelockController
-      .address as Address;
+    const timelockAddress = config.test.contracts.ENSTimelockController?.address as Address;
     const proposalHash = keccak256(toBytes(proposalDescription));
     const proposalIdInTimelock = await client.readContract({
       account: signerAddress,

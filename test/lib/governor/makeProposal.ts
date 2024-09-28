@@ -5,9 +5,8 @@ import {
   PublicActions,
   WalletClient,
 } from "viem";
-import { ENSGovernorAbi } from "../../../abis/ENSGovernorAbi";
 import { config } from "../../../config";
-import { emptyCall, zeroEther } from "../../lib/constants";
+import { ENSGovernorAbi } from "../../../src/ens/abi";
 
 export async function makeProposal(
   client: WalletClient & PublicActions,
@@ -15,7 +14,7 @@ export async function makeProposal(
   proposal: [[target: Address], [value: bigint], [callData: Hex]],
   proposalDescription: string
 ) {
-  const governorAddress = config.test.contracts.ENSGovernor.address as Address;
+  const governorAddress = config.test.contracts.ENSGovernor?.address as Address;
   const { request } = await client.simulateContract({
     account: signerAddress,
     address: governorAddress,
