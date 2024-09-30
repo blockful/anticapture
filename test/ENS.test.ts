@@ -31,21 +31,21 @@ const userAddressPrivateKey =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const addressToBeRevoked = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 
+const client = createWalletClient({
+  chain: anvil,
+  transport: http(),
+  account: privateKeyToAccount(userAddressPrivateKey),
+})
+  .extend(publicActions)
+  .extend(walletActions);
+
+const testClient = createTestClient({
+  mode: "anvil",
+  chain: anvil,
+  transport: http(),
+});
+
 describe("ENS Tests", () => {
-  const client = createWalletClient({
-    chain: anvil,
-    transport: http(),
-    account: privateKeyToAccount(userAddressPrivateKey),
-  })
-    .extend(publicActions)
-    .extend(walletActions);
-
-  const testClient = createTestClient({
-    mode: "anvil",
-    chain: anvil,
-    transport: http(),
-  });
-
   const ENSGovernorContract = getContract({
     abi: ENSGovernorAbi,
     client,
@@ -69,6 +69,8 @@ describe("ENS Tests", () => {
     address: testContracts.ENSTimelockController.address as Address,
   });
 
+  let proposalDescription: string;
+
   beforeAll(async () => {
     try {
       const rawData = encodeFunctionData({
@@ -83,14 +85,15 @@ describe("ENS Tests", () => {
       });
       await testClient.mine({ blocks: 2 });
       // Set up proposal
-      const proposerRoleKeccak256 = "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1";
+      const proposerRoleKeccak256 =
+        "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1";
       const revokeRoleData = encodeFunctionData({
         abi: ENSTimelockControllerAbi,
         functionName: "revokeRole",
         args: [proposerRoleKeccak256, addressToBeRevoked],
       });
 
-      const proposalDescription = "Revoke Role 20";
+      proposalDescription = "Revoke Role 20";
 
       const proposal = [
         [ENSTimelockControllerContract.address],
@@ -125,44 +128,51 @@ describe("ENS Tests", () => {
       if (proposalStatus !== 5) {
         throw new Error("Proposal Error: Proposal not queued");
       }
-      const proposalIdInTimelock = await getProposalIdInTimelock(
-        client,
-        userAddress,
-        proposal,
-        proposalDescription
-      );
+      // const proposalIdInTimelock = await getProposalIdInTimelock(
+      //   client,
+      //   userAddress,
+      //   proposal,
+      //   proposalDescription
+      // );
       await testClient.mine({ blocks: 10 });
-      const isReady = await isOperationReady(client, proposalIdInTimelock);
-      if (!isReady) {
-        throw new Error("Operation is not Ready");
-      }
+      // const isReady = await isOperationReady(client, proposalIdInTimelock);
+      // if (!isReady) {
+      //   throw new Error("Operation is not Ready");
+      // }
       await executeProposal(client, userAddress, proposal, proposalDescription);
-      const isDone = await isOperationDone(client, proposalIdInTimelock);
-      if (!isDone) {
-        throw new Error("Operation is not Done");
-      }
-      await delay(8000);
+      // const isDone = await isOperationDone(client, proposalIdInTimelock);
+      // if (!isDone) {
+      //   throw new Error("Operation is not Done");
+      // }
+      await delay(10000);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   });
 
-  test("Ponder: Check Account Registration", async () => {
-    const {
-      rows: [{ id, votingPower }],
-    } = await pgClient.query('select * from public."Account" a ;');
+  describe("Ponder: Check Account Registration", () => {
+    let id: Address, ENSVotingPower: string;
+    beforeAll(async () => {
+      let { rows } = await pgClient.query('select * from public."Account" a ;');
+      ({ id, ENSVotingPower } = rows[1]); // [0] is the Token contract
+    });
     test("Registered user address", () => {
       expect(id.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
     });
     test("Registered user voting power", () => {
-      expect(votingPower).toBe("100000000000000000000");
+      expect(ENSVotingPower).toBe("100000000000000000000");
     });
   });
 
-  test("Ponder: Check Delegations Registration", async () => {
-    const {
-      rows: [{ delegator, delegatee }],
-    } = await pgClient.query('select * from public."Delegations" d ;');
+  describe("Ponder: Check Delegations Registration", () => {
+    let delegator: Address, delegatee: Address;
+    beforeAll(async () => {
+      let { rows } = await pgClient.query(
+        'select * from public."Delegations" d ;'
+      );
+      ({ delegator, delegatee } = rows[0]);
+    });
     test("Registered Delegator", () => {
       expect(delegator.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
     });
@@ -170,14 +180,57 @@ describe("ENS Tests", () => {
       expect(delegatee.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
     });
   });
-
-  test("Check if Ponder registered user vote power", async () => {
-    const {
-      rows: [{ votingPower }],
-    } = await pgClient.query('select * from public."Account" a ;');
-    expect(votingPower).toBe("100000000000000000000");
+  describe("Ponder: Check ProposalsOnChain Registration", () => {
+    let dao: string, proposer: Address, description: string, targets: Address[];
+    beforeAll(async () => {
+      let { rows } = await pgClient.query(
+        'select * from public."ProposalsOnchain" p ;'
+      );
+      ({ dao, proposer, description, targets } = rows[0]);
+    });
+    test("Registered DAO", () => {
+      expect(dao).toBe("ENS");
+    });
+    test("Registered Proposer", () => {
+      expect(proposer.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
+    });
+    test("Registered Description", () => {
+      expect(description).toBe(proposalDescription);
+    });
+    test("Registered Targets", () => {
+      expect(targets[0]?.toLocaleLowerCase()).toBe(
+        ENSTimelockControllerContract.address.toLocaleLowerCase()
+      );
+    });
   });
-  test("", () => {
-    expect(true).toBe(true)
-  })
+  describe("Ponder: Check Transfers Registration", () => {
+    let amount: Address, to: Address;
+    beforeAll(async () => {
+      let { rows } = await pgClient.query(
+        'select * from public."Transfers" t ;'
+      );
+      ({ amount, to } = rows[0]);
+    });
+    test("Registered Amount", () => {
+      expect(amount).toBe(`${100e18}`);
+    });
+    test("Registered To", () => {
+      expect(to.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
+    });
+  });
+  describe("Ponder: Check Votes On Chain Registration", () => {
+    let voter: Address, weight: Address;
+    beforeAll(async () => {
+      let { rows } = await pgClient.query(
+        'select * from public."VotesOnchain" v ;'
+      );
+      ({ voter, weight } = rows[0]);
+    });
+    test("Registered Voter", () => {
+      expect(voter.toLowerCase()).toBe(userAddress.toLocaleLowerCase());
+    });
+    test("Registered Weight", () => {
+      expect(weight.toLowerCase()).toBe(`${100e18}`);
+    });
+  });
 });

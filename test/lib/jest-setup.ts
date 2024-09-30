@@ -9,6 +9,7 @@ dotenv.config();
 let localNode: ChildProcessWithoutNullStreams;
 let ponderProcess: ChildProcessWithoutNullStreams;
 beforeAll(async () => {
+  await pgClient.connect();
   localNode = spawn("anvil");
   await delay(3000);
   const deployContracts = spawn("npm", ["run", "locally:deploy-ens"]);

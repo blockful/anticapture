@@ -24,12 +24,16 @@ export async function getProposalIdInTimelock(
     });
     const proposalHash = keccak256(toBytes(proposalDescription));
 
-    const proposalIdInTimelock: Hex =
-      (await TimelockContract.read.hashOperationBatch([
-        ...proposal,
-        ["0x", Array(64).fill("0").join("")].join("") as Hex,
+    const proposalIdInTimelock: Hex = (await client.readContract({
+      abi: ENSTimelockControllerAbi,
+      address: config.test.contracts.ENSTimelockController?.address as Address,
+      functionName: "hashOperation",
+      args: [
+        ...(proposal.flat(1) as [Address, bigint, Hex]),
+        [Array(32).fill("0").join("")].join(""),
         proposalHash,
-      ])) as Hex;
+      ],
+    })) as Hex;
     return proposalIdInTimelock;
   } catch (error) {
     console.error(error);

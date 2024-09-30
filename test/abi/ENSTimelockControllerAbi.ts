@@ -380,4 +380,4 @@ export const ENSTimelockControllerAbi = [
     type: "function",
   },
   { stateMutability: "payable", type: "receive" },
-] as const;
+];

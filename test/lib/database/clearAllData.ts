@@ -13,7 +13,6 @@ export const clearAllDataFromDatabase = async () => {
   if (process.env.STATUS !== "test") {
     throw new Error("ERROR: You are not in a test environment");
   }
-  await pgClient.connect();
   await pgClient.query('DROP SCHEMA IF EXISTS ponder CASCADE');
   await pgClient.query('DROP SCHEMA IF EXISTS ponder_sync CASCADE');
   await pgClient.query('DROP SCHEMA IF EXISTS public CASCADE');
