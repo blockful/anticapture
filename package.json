@@ -12,10 +12,11 @@
     "typecheck": "tsc",
     "start-anvil": "tsx ./test/lib/start-anvil.ts",
     "test": "jest --detectOpenHandles",
-    "clear-database": "tsx ./test/lib/database/clearDatabase.script.ts"
+    "clear-database": "tsx ./test/lib/database/clearDatabase.script.ts",
+    "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens"
   },
   "dependencies": {
-    "@ponder/core": "^0.6.2",
+    "@ponder/core": "^0.6.3",
     "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
     "viem": "^2.21.9"

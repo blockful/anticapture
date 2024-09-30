@@ -1,5 +1,6 @@
 import {
   Address,
+  getContract,
   Hex,
   keccak256,
   PublicActions,
@@ -16,19 +17,19 @@ export async function getProposalIdInTimelock(
   proposalDescription: string
 ) {
   try {
-    const timelockAddress = config.test.contracts.ENSTimelockController?.address as Address;
-    const proposalHash = keccak256(toBytes(proposalDescription));
-    const proposalIdInTimelock = await client.readContract({
-      account: signerAddress,
-      address: timelockAddress,
+    const TimelockContract = getContract({
       abi: ENSTimelockControllerAbi,
-      functionName: "hashOperationBatch",
-      args: [
+      address: config.test.contracts.ENSTimelockController?.address as Address,
+      client,
+    });
+    const proposalHash = keccak256(toBytes(proposalDescription));
+
+    const proposalIdInTimelock: Hex =
+      (await TimelockContract.read.hashOperationBatch([
         ...proposal,
         ["0x", Array(64).fill("0").join("")].join("") as Hex,
         proposalHash,
-      ],
-    });
+      ])) as Hex;
     return proposalIdInTimelock;
   } catch (error) {
     console.error(error);
