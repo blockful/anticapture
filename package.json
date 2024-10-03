@@ -12,7 +12,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@ponder/core": "^0.6.2",
+    "@ponder/core": "^0.6.3",
     "hono": "^4.5.0"
   },
   "devDependencies": {

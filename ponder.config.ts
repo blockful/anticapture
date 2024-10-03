@@ -5,6 +5,7 @@ import { UNITokenAbi } from "./src/uni/abi";
 import { COMPTokenAbi } from "./src/comp/abi";
 import dotenv from "dotenv";
 import { config } from "./config";
+import { SHUTokenAbi } from "./src/shu/abi/SHUTokenAbi";
 dotenv.config();
 
 let networks, contracts;
@@ -50,6 +51,12 @@ export default createConfig({
       address: contracts.COMPToken.address as `0x${string}`,
       network: networks.name as any,
       startBlock: contracts.COMPToken.startBlock,
+    },
+    SHUToken: {
+      abi: SHUTokenAbi,
+      address: contracts.SHUToken.address as `0x${string}`,
+      network: networks.name as any,
+      startBlock: contracts.SHUToken.startBlock,
     },
   },
 });

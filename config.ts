@@ -25,6 +25,10 @@ export const config = {
                 address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
                 startBlock: 9601359,
             },
+            SHUToken: {
+                address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
+                startBlock: 19021394,
+            },
         },
     },
     staging: {
@@ -50,6 +54,10 @@ export const config = {
                 address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
                 startBlock: 9601359,
             },
+            SHUToken: {
+                address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
+                startBlock: 19021394,
+            }
         },
     },
 }
