@@ -130,6 +130,7 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
  * Creates a new VotesOnchain record and updates the voter's vote count
  */
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
+  console.log(event);
   const { VotesOnchain, Account, ProposalsOnchain } = context.db;
 
   await Account.upsert({

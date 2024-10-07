@@ -1,55 +1,47 @@
 import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
-import { ENSTokenAbi, ENSGovernorAbi } from "./src/ens/abi";
-import { UNITokenAbi } from "./src/uni/abi";
-import { COMPTokenAbi } from "./src/comp/abi";
 import dotenv from "dotenv";
-import { config } from "./config";
+import { config, PonderContracts } from "./config";
 dotenv.config();
 
-let networks, contracts;
+let networks, contracts: PonderContracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
 } else if (process.env.STATUS === "production") {
   ({ networks, contracts } = config["production"]);
-} else {
+} else if (process.env.STATUS === "staging") {
   ({ networks, contracts } = config["staging"]);
+} else if (process.env.STATUS === "test") {
+  ({ networks, contracts } = config["test"]);
+} else {
+  throw new Error("No ENV variable STATUS");
 }
 
-({ networks, contracts } = config["production"]);
+const databaseConfig = process.env.DATABASE_URL
+  ? {
+      database: {
+        kind: "postgres" as "postgres",
+        connectionString: process.env.DATABASE_URL,
+      },
+    }
+  : {};
 
 export default createConfig({
   networks: {
     mainnet: {
       chainId: networks.chainId,
-      transport: loadBalance([http(networks.rpcUrl1)]),
-      maxRequestsPerSecond: 10000,
+      transport:
+        networks.rpcUrls.length > 1
+          ? loadBalance(networks.rpcUrls.map((url) => http(url)))
+          : http(networks.rpcUrls[0]),
+          maxRequestsPerSecond: 10000,
+    },
+    anvil: {
+      chainId: 31337,
+      transport: http("http://127.0.0.1:8545"),
+      disableCache: true,
     },
   },
-  contracts: {
-    ENSToken: {
-      abi: ENSTokenAbi,
-      address: contracts.ENSToken.address as `0x${string}`,
-      network: networks.name as any,
-      startBlock: contracts.ENSToken.startBlock,
-    },
-    ENSGovernor: {
-      abi: ENSGovernorAbi,
-      address: contracts.ENSGovernor.address as `0x${string}`,
-      network: networks.name as any,
-      startBlock: contracts.ENSGovernor.startBlock,
-    },
-    UNIToken: {
-      abi: UNITokenAbi,
-      address: contracts.UNIToken.address as `0x${string}`,
-      network: networks.name as any,
-      startBlock: contracts.UNIToken.startBlock,
-    },
-    COMPToken: {
-      abi: COMPTokenAbi,
-      address: contracts.COMPToken.address as `0x${string}`,
-      network: networks.name as any,
-      startBlock: contracts.COMPToken.startBlock,
-    },
-  },
+  contracts,
+  ...databaseConfig,
 });
