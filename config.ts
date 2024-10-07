@@ -1,12 +1,10 @@
 /* eslint-disable prettier/prettier */
 import dotenv from "dotenv";
-import {
-  ENSGovernorAbi,
-  ENSTokenAbi,
-} from "./src/ens/abi";
+import { ENSGovernorAbi, ENSTokenAbi } from "./src/ens/abi";
 import { UNITokenAbi } from "./src/uni/abi";
 import { COMPTokenAbi } from "./src/comp/abi";
 import { Address, zeroAddress } from "viem";
+import { SHUTokenAbi } from "./src/shu/abi";
 dotenv.config();
 
 export type PonderContracts = {
@@ -50,6 +48,12 @@ export const config = {
         address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
         startBlock: 9601359,
       },
+      SHUToken: {
+        abi: SHUTokenAbi,
+        address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
+        startBlock: 19021394,
+        network: "mainnet",
+      },
     } as PonderContracts,
   },
   staging: {
@@ -82,6 +86,12 @@ export const config = {
         network: "mainnet",
         address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
         startBlock: 9601359,
+      },
+      SHUToken: {
+        abi: SHUTokenAbi,
+        address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
+        startBlock: 19021394,
+        network: "mainnet",
       },
     } as PonderContracts,
   },
@@ -116,6 +126,12 @@ export const config = {
         network: "anvil",
         address: zeroAddress,
         startBlock: 0,
+      },
+      SHUToken: {
+        abi: SHUTokenAbi,
+        address: zeroAddress,
+        startBlock: 0,
+        network: "anvil",
       },
     } as PonderContracts,
   },
