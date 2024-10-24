@@ -7,13 +7,11 @@ import { Address, zeroAddress } from "viem";
 import { SHUTokenAbi } from "./src/shu/abi";
 dotenv.config();
 
-export type PonderContracts = {
-  [contractName: string]: {
-    abi: readonly any[];
-    network: string;
-    address: Address;
-    startBlock: number;
-  };
+export type PonderContract<AbiType> = {
+  abi: AbiType;
+  network: "mainnet" | "anvil";
+  address: Address;
+  startBlock: number;
 };
 
 export const config = {
@@ -29,32 +27,32 @@ export const config = {
         network: "mainnet",
         address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
         startBlock: 9380410,
-      },
+      } as PonderContract<typeof ENSTokenAbi>,
       ENSGovernor: {
-        abi: ENSGovernorAbi,
+        abi: ENSGovernorAbi as typeof ENSGovernorAbi,
         network: "mainnet",
         address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
         startBlock: 13533772,
-      },
+      } as PonderContract<typeof ENSGovernorAbi>,
       UNIToken: {
-        abi: UNITokenAbi,
+        abi: UNITokenAbi as typeof UNITokenAbi,
         network: "mainnet",
         address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
         startBlock: 10861674,
-      },
+      } as PonderContract<typeof UNITokenAbi>,
       COMPToken: {
-        abi: COMPTokenAbi,
+        abi: COMPTokenAbi as typeof COMPTokenAbi,
         network: "mainnet",
         address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
         startBlock: 9601359,
-      },
+      } as PonderContract<typeof COMPTokenAbi>,
       SHUToken: {
         abi: SHUTokenAbi,
         address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
         startBlock: 19021394,
         network: "mainnet",
-      },
-    } as PonderContracts,
+      } as PonderContract<typeof SHUTokenAbi>,
+    },
   },
   staging: {
     networks: {
@@ -68,32 +66,32 @@ export const config = {
         network: "mainnet",
         address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
         startBlock: 9380410,
-      },
+      } as PonderContract<typeof ENSTokenAbi>,
       ENSGovernor: {
         abi: ENSGovernorAbi,
         network: "mainnet",
         address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
         startBlock: 13533772,
-      },
+      } as PonderContract<typeof ENSGovernorAbi>,
       UNIToken: {
         abi: UNITokenAbi,
         network: "mainnet",
         address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
         startBlock: 10861674,
-      },
+      } as PonderContract<typeof UNITokenAbi>,
       COMPToken: {
         abi: COMPTokenAbi,
         network: "mainnet",
         address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
         startBlock: 9601359,
-      },
+      } as PonderContract<typeof COMPTokenAbi>,
       SHUToken: {
         abi: SHUTokenAbi,
         address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
         startBlock: 19021394,
         network: "mainnet",
-      },
-    } as PonderContracts,
+      } as PonderContract<typeof SHUTokenAbi>,
+    },
   },
   test: {
     networks: {
@@ -108,31 +106,31 @@ export const config = {
         network: "anvil",
         address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
         startBlock: 0,
-      },
+      } as PonderContract<typeof ENSTokenAbi>,
       ENSGovernor: {
         abi: ENSGovernorAbi,
         network: "anvil",
         address: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
         startBlock: 0,
-      },
+      } as PonderContract<typeof ENSGovernorAbi>,
       UNIToken: {
         abi: UNITokenAbi,
         network: "anvil",
         address: zeroAddress,
         startBlock: 0,
-      },
+      } as PonderContract<typeof UNITokenAbi>,
       COMPToken: {
         abi: COMPTokenAbi,
         network: "anvil",
         address: zeroAddress,
         startBlock: 0,
-      },
+      } as PonderContract<typeof COMPTokenAbi>,
       SHUToken: {
         abi: SHUTokenAbi,
         address: zeroAddress,
         startBlock: 0,
         network: "anvil",
-      },
-    } as PonderContracts,
+      } as PonderContract<typeof SHUTokenAbi>,
+    },
   },
 };

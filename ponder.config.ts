@@ -1,10 +1,10 @@
 import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
 import dotenv from "dotenv";
-import { config, PonderContracts } from "./config";
+import { config } from "./config";
 dotenv.config();
 
-let networks, contracts: PonderContracts;
+let networks, contracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
 } else if (process.env.STATUS === "production") {
