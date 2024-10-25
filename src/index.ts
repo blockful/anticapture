@@ -1,6 +1,6 @@
 import { ponder } from "@/generated";
 
-ponder.on("SETUP:setup", async ({ context }) => {
+ponder.on("ENSToken:setup", async ({ context }) => {
   const { DAO } = context.db;
   await DAO.create({
     id: "ENS",
