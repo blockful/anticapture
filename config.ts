@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { ENSGovernorAbi, ENSTokenAbi } from "./src/ens/abi";
 import { UNITokenAbi } from "./src/uni/abi";
 import { COMPTokenAbi } from "./src/comp/abi";
-import { Address, zeroAddress } from "viem";
+import { Abi, Address, zeroAddress } from "viem";
 import { SHUTokenAbi } from "./src/shu/abi";
 dotenv.config();
 
@@ -52,6 +52,12 @@ export const config = {
         startBlock: 19021394,
         network: "mainnet",
       } as PonderContract<typeof SHUTokenAbi>,
+      SETUP: {
+        abi: [],
+        address: zeroAddress,
+        startBlock: 0,
+        network: "mainnet"
+      } as PonderContract<Abi>
     },
   },
   staging: {
@@ -91,6 +97,12 @@ export const config = {
         startBlock: 19021394,
         network: "mainnet",
       } as PonderContract<typeof SHUTokenAbi>,
+      SETUP: {
+        abi: [],
+        address: zeroAddress,
+        startBlock: 0,
+        network: "mainnet"
+      } as PonderContract<Abi>
     },
   },
   test: {
@@ -131,6 +143,12 @@ export const config = {
         startBlock: 0,
         network: "anvil",
       } as PonderContract<typeof SHUTokenAbi>,
+      SETUP: {
+        abi: [],
+        address: zeroAddress,
+        startBlock: 0,
+        network: "mainnet"
+      } as PonderContract<Abi>
     },
   },
 };
