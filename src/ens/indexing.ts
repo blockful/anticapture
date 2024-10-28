@@ -18,6 +18,13 @@
 
 // const daoId = "ENS";
 
+// ponder.on("ENSToken:setup", async ({ context }) => {
+//   const { DAO } = context.db;
+//   await DAO.create({
+//     id: daoId,
+//   });
+// });
+
 // ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
 //   await delegateChanged(event, context, daoId);
 // });

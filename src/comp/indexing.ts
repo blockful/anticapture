@@ -14,6 +14,13 @@
 
 // const daoId = "COMP";
 
+// ponder.on("COMPToken:setup", async ({ context }) => {
+//   const { DAO } = context.db;
+//   await DAO.create({
+//     id: daoId,
+//   });
+// });
+
 // ponder.on("COMPToken:DelegateChanged", async ({ event, context }) => {
 //   await delegateChanged(event, context, daoId);
 // });

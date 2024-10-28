@@ -7,6 +7,13 @@
 
 // const daoId = "SHU";
 
+// ponder.on("SHUToken:setup", async ({ context }) => {
+//   const { DAO } = context.db;
+//   await DAO.create({
+//     id: daoId,
+//   });
+// });
+
 // ponder.on("SHUToken:DelegateChanged", async ({ event, context }) => {
 //   await delegateChanged(event, context, daoId);
 // });
