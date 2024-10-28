@@ -34,7 +34,7 @@ export default createConfig({
         networks.rpcUrls.length > 1
           ? loadBalance(networks.rpcUrls.map((url) => http(url)))
           : http(networks.rpcUrls[0]),
-          maxRequestsPerSecond: 10000,
+      maxRequestsPerSecond: 10000,
     },
     anvil: {
       chainId: 31337,

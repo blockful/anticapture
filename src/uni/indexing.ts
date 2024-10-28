@@ -113,3 +113,113 @@ ponder.on("UNIToken:Transfer", async ({ event, context }) => {
     }),
   });
 });
+
+ponder.on("UNIGovernor:VoteCast", async ({ event, context }) => {
+  const { VotesOnchain, Account, ProposalsOnchain } = context.db;
+
+  await Account.upsert({
+    id: event.args.voter,
+    create: {
+      UNIVotesCount: 1,
+    },
+    update: ({ current }) => ({
+      UNIVotesCount: (current.UNIVotesCount ?? 0) + 1,
+    }),
+  });
+
+  // Create vote record
+  await VotesOnchain.create({
+    id: event.log.id,
+    data: {
+      dao: "UNI",
+      proposalId: "UNI" + event.args.proposalId.toString(),
+      voter: event.args.voter,
+      support: event.args.support.toString(),
+      weight: event.args.votes.toString(),
+      reason: event.args.reason,
+      timestamp: event.block.timestamp,
+    },
+  });
+
+  await ProposalsOnchain.update({
+    id: "UNI" + event.args.proposalId.toString(),
+    data: ({ current }) => ({
+      forVotes:
+        (current.forVotes ?? BigInt(0)) +
+        (event.args.support === 0 ? event.args.votes : BigInt(0)),
+      againstVotes:
+        (current.againstVotes ?? BigInt(0)) +
+        (event.args.support === 1 ? event.args.votes : BigInt(0)),
+    }),
+  });
+});
+
+/**
+ * Handler for ProposalCreated event of UNIGovernor contract
+ * Creates a new ProposalsOnchain record and updates the proposer's proposal count
+ */
+ponder.on("UNIGovernor:ProposalCreated", async ({ event, context }) => {
+  const { ProposalsOnchain, Account } = context.db;
+
+  // Create proposal record
+  await ProposalsOnchain.create({
+    id: "UNI" + event.args.id.toString(),
+    data: {
+      dao: "UNI",
+      proposer: event.args.proposer,
+      targets: JSON.stringify(event.args.targets),
+      values: JSON.stringify(event.args.values.map((v) => v.toString())),
+      signatures: JSON.stringify(event.args.signatures),
+      calldatas: JSON.stringify(event.args.calldatas),
+      startBlock: event.args.startBlock.toString(),
+      endBlock: event.args.endBlock.toString(),
+      description: event.args.description,
+      timestamp: event.block.timestamp,
+      status: "PENDING",
+      forVotes: BigInt(0),
+      againstVotes: BigInt(0),
+      abstainVotes: BigInt(0),
+    },
+  });
+
+  await Account.upsert({
+    id: event.args.proposer,
+    create: {
+      UNIProposalCount: 1,
+    },
+    update: ({ current }) => ({
+      UNIProposalCount: (current.UNIProposalCount ?? 0) + 1,
+    }),
+  });
+});
+
+/**
+ * Handler for ProposalCanceled event of UNIGovernor contract
+ * Updates the status of a proposal to CANCELED
+ */
+ponder.on("UNIGovernor:ProposalCanceled", async ({ event, context }) => {
+  const { ProposalsOnchain } = context.db;
+
+  await ProposalsOnchain.update({
+    id: "UNI" + event.args.id.toString(),
+    data: ({ current }) => ({
+      status: "CANCELED",
+    }),
+  });
+});
+
+
+/**
+ * Handler for ProposalExecuted event of UNIGovernor contract
+ * Updates the status of a proposal to EXECUTED
+ */
+ponder.on("UNIGovernor:ProposalExecuted", async ({ event, context }) => {
+  const { ProposalsOnchain } = context.db;
+
+  await ProposalsOnchain.update({
+    id: "UNI" + event.args.id.toString(),
+    data: ({ current }) => ({
+      status: "EXECUTED",
+    }),
+  });
+});

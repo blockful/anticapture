@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import dotenv from "dotenv";
 import { ENSGovernorAbi, ENSTokenAbi } from "./src/ens/abi";
-import { UNITokenAbi } from "./src/uni/abi";
+import { UNIGovernorAbi, UNITokenAbi } from "./src/uni/abi";
 import { COMPTokenAbi } from "./src/comp/abi";
 import { Address, zeroAddress } from "viem";
 import { SHUTokenAbi } from "./src/shu/abi";
@@ -42,6 +42,12 @@ export const config = {
         address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
         startBlock: 10861674,
       },
+      UNIGovernor: {
+        abi: UNIGovernorAbi,
+        network: "mainnet",
+        address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+        startBlock: 13059157,
+      },
       COMPToken: {
         abi: COMPTokenAbi,
         network: "mainnet",
@@ -81,6 +87,12 @@ export const config = {
         address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
         startBlock: 10861674,
       },
+      UNIGovernor: {
+        abi: UNIGovernorAbi,
+        network: "mainnet",
+        address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+        startBlock: 13059157,
+      },
       COMPToken: {
         abi: COMPTokenAbi,
         network: "mainnet",
@@ -117,6 +129,12 @@ export const config = {
       },
       UNIToken: {
         abi: UNITokenAbi,
+        network: "anvil",
+        address: zeroAddress,
+        startBlock: 0,
+      },
+      UNIGovernor: {
+        abi: UNIGovernorAbi,
         network: "anvil",
         address: zeroAddress,
         startBlock: 0,
