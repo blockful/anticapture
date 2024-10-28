@@ -7,7 +7,7 @@ export async function castVote(
   signerAddress: Address,
   proposalId: bigint,
 ) {
-  const governorAddress = config.test.contracts.ENSGovernor?.address as Address;
+  const governorAddress = config.ponder.test.contracts.ENSGovernor?.address as Address;
   const { request } = await client.simulateContract({
     account: signerAddress,
     address: governorAddress,

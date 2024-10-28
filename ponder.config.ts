@@ -8,11 +8,11 @@ let networks, contracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
 } else if (process.env.STATUS === "production") {
-  ({ networks, contracts } = config["production"]);
+  ({ networks, contracts } = config.ponder["production"]);
 } else if (process.env.STATUS === "staging") {
-  ({ networks, contracts } = config["staging"]);
+  ({ networks, contracts } = config.ponder["staging"]);
 } else if (process.env.STATUS === "test") {
-  ({ networks, contracts } = config["test"]);
+  ({ networks, contracts } = config.ponder["test"]);
 } else {
   throw new Error("No ENV variable STATUS");
 }

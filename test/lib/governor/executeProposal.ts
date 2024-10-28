@@ -17,7 +17,7 @@ export async function executeProposal(
   proposal: [[target: Address], [value: bigint], [callData: Hex]],
   proposalDescription: string
 ) {
-  const governorAddress = config.test.contracts.ENSGovernor?.address as Address;
+  const governorAddress = config.ponder.test.contracts.ENSGovernor?.address as Address;
   const proposalHash = keccak256(toBytes(proposalDescription));
   const { request } = await client.simulateContract({
     account: signerAddress,

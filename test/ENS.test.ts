@@ -49,7 +49,7 @@ describe("ENS Tests", () => {
   const ENSGovernorContract = getContract({
     abi: ENSGovernorAbi,
     client,
-    address: config.test.contracts.ENSGovernor?.address as `0x${string}`,
+    address: config.ponder.test.contracts.ENSGovernor?.address as `0x${string}`,
   });
   const ENSTokenContract = getContract({
     abi: ENSTokenAbi,
@@ -57,7 +57,7 @@ describe("ENS Tests", () => {
       wallet: client,
       public: client,
     },
-    address: config.test.contracts.ENSToken?.address as `0x${string}`,
+    address: config.ponder.test.contracts.ENSToken?.address as `0x${string}`,
   });
 
   const ENSTimelockControllerContract = getContract({
