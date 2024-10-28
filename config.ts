@@ -90,7 +90,7 @@ export const config = {
         network: "mainnet",
         address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
         startBlock: 13059157,
-      },
+      } as PonderContract<typeof UNIGovernorAbi>,
       // COMPToken: {
       //   abi: COMPTokenAbi,
       //   network: "mainnet",
@@ -130,13 +130,13 @@ export const config = {
         network: "anvil",
         address: zeroAddress,
         startBlock: 0,
-      },
+      } as PonderContract<typeof UNITokenAbi>,
       UNIGovernor: {
         abi: UNIGovernorAbi,
         network: "anvil",
         address: zeroAddress,
         startBlock: 0,
-      },
+      } as PonderContract<typeof UNIGovernorAbi>,
       // COMPToken: {
       //   abi: COMPTokenAbi,
       //   network: "anvil",
