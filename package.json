@@ -16,7 +16,7 @@
     "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens"
   },
   "dependencies": {
-    "@ponder/core": "^0.6.3",
+    "@ponder/core": "^0.6.22",
     "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
     "viem": "^2.21.9"

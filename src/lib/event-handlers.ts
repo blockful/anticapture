@@ -1,11 +1,11 @@
 import { Context, Event } from "@/generated";
+import { getValueFromEventArgs } from "./utils";
 
 export const delegateChanged = async (
-  event:
-    | Event<"ENSToken:DelegateChanged">
-    | Event<"COMPToken:DelegateChanged">
-    | Event<"UNIToken:DelegateChanged">
-    | Event<"SHUToken:DelegateChanged">,
+  event: // | Event<"ENSToken:DelegateChanged">
+  // | Event<"COMPToken:DelegateChanged">
+  // | Event<"SHUToken:DelegateChanged">
+  Event<"UNIToken:DelegateChanged">,
   context: Context,
   daoId: string
 ) => {
@@ -57,11 +57,10 @@ export const delegateChanged = async (
 };
 
 export const delegatedVotesChanged = async (
-  event:
-    | Event<"ENSToken:DelegateVotesChanged">
-    | Event<"COMPToken:DelegateVotesChanged">
-    | Event<"UNIToken:DelegateVotesChanged">
-    | Event<"SHUToken:DelegateVotesChanged">,
+  event: // | Event<"ENSToken:DelegateVotesChanged">
+  // | Event<"COMPToken:DelegateVotesChanged">
+  // | Event<"SHUToken:DelegateVotesChanged">
+  Event<"UNIToken:DelegateVotesChanged">,
   context: Context,
   daoId: string
 ) => {
@@ -72,11 +71,14 @@ export const delegatedVotesChanged = async (
     id: event.args.delegate,
   });
 
-  const newBalance =
-    daoId !== "SHU"
-      ? (event as Exclude<typeof event, Event<"SHUToken:DelegateVotesChanged">>)
-          .args.newBalance
-      : (event as Event<"SHUToken:DelegateVotesChanged">).args.newVotes;
+  const newBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "newBalance", daos: ["ENS", "COMP", "UNI"] },
+      { name: "newVotes", daos: ["SHU"] },
+    ],
+    event.args,
+    daoId
+  );
 
   // Create a new voting power history record
   await VotingPowerHistory.create({
@@ -104,30 +106,24 @@ export const delegatedVotesChanged = async (
 };
 
 export const tokenTransfer = async (
-  event:
-    | Event<"ENSToken:Transfer">
-    | Event<"COMPToken:Transfer">
-    | Event<"UNIToken:Transfer">
-    | Event<"SHUToken:Transfer">,
+  event: // | Event<"ENSToken:Transfer">
+  // | Event<"COMPToken:Transfer">
+  // | Event<"SHUToken:Transfer">
+  Event<"UNIToken:Transfer">,
   context: Context,
   daoId: string
 ) => {
   const { Transfers, AccountPower, Account } = context.db;
 
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
-  const value = ["ENS", "SHU"].includes(daoId)
-    ? (
-        event as Exclude<
-          typeof event,
-          Event<"COMPToken:Transfer"> & Event<"UNIToken:Transfer">
-        >
-      ).args.value
-    : (
-        event as Exclude<
-          typeof event,
-          Event<"ENSToken:Transfer"> & Event<"SHUToken:Transfer">
-        >
-      ).args.amount;
+  const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "value", daos: ["ENS", "SHU"] },
+      { name: "amount", daos: ["COMP", "UNI"] },
+    ],
+    event.args,
+    daoId
+  );
 
   //Inserting delegate account if didn't exist
   await Account.upsert({
@@ -189,12 +185,21 @@ export const tokenTransfer = async (
 };
 
 export const voteCast = async (
-  event:
-    | Event<"ENSGovernor:VoteCast">,
+  event: // | Event<"ENSGovernor:VoteCast">
+  Event<"UNIGovernor:VoteCast">,
   context: Context,
   daoId: string
 ) => {
   const { VotesOnchain, AccountPower, Account, ProposalsOnchain } = context.db;
+
+  const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "weight", daos: ["ENS"] },
+      { name: "votes", daos: ["UNI"] },
+    ],
+    event.args,
+    daoId
+  );
 
   await Account.upsert({
     id: event.args.voter,
@@ -220,7 +225,7 @@ export const voteCast = async (
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
       support: event.args.support.toString(),
-      weight: event.args.weight.toString(),
+      weight: weight.toString(),
       reason: event.args.reason,
       timestamp: event.block.timestamp,
     },
@@ -231,13 +236,110 @@ export const voteCast = async (
     data: ({ current }) => ({
       forVotes:
         (current.forVotes ?? BigInt(0)) +
-        (event.args.support === 0 ? event.args.weight : BigInt(0)),
+        (event.args.support === 0 ? weight : BigInt(0)),
       againstVotes:
         (current.againstVotes ?? BigInt(0)) +
-        (event.args.support === 1 ? event.args.weight : BigInt(0)),
+        (event.args.support === 1 ? weight : BigInt(0)),
       abstainVotes:
         (current.abstainVotes ?? BigInt(0)) +
-        (event.args.support === 2 ? event.args.weight : BigInt(0)),
+        (event.args.support === 2 ? weight : BigInt(0)),
     }),
+  });
+};
+
+export const proposalCreated = async (
+  event: // | Event<"ENSGovernor:ProposalCreated">
+  Event<"UNIGovernor:ProposalCreated">,
+  context: Context,
+  daoId: string
+) => {
+  const { ProposalsOnchain, Account, AccountPower } = context.db;
+
+  const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "proposalId", daos: ["ENS"] },
+      { name: "id", daos: ["UNI"] },
+    ],
+    event.args,
+    daoId
+  );
+
+  await Account.upsert({
+    id: event.args.proposer,
+  });
+
+  // Create proposal record
+  await ProposalsOnchain.create({
+    id: daoId + "-" + proposalId.toString(),
+    data: {
+      dao: daoId,
+      proposer: event.args.proposer,
+      targets: JSON.stringify(event.args.targets),
+      values: JSON.stringify(event.args.values.map((v) => v.toString())),
+      signatures: JSON.stringify(event.args.signatures),
+      calldatas: JSON.stringify(event.args.calldatas),
+      startBlock: event.args.startBlock.toString(),
+      endBlock: event.args.endBlock.toString(),
+      description: event.args.description,
+      timestamp: event.block.timestamp,
+      status: "Pending",
+      forVotes: BigInt(0),
+      againstVotes: BigInt(0),
+      abstainVotes: BigInt(0),
+    },
+  });
+
+  await AccountPower.upsert({
+    id: event.args.proposer,
+    create: {
+      dao: daoId,
+      account: event.args.proposer,
+      proposalsCount: 1,
+    },
+    update: ({ current }) => ({
+      proposalsCount: (current.proposalsCount ?? 0) + 1,
+    }),
+  });
+};
+
+export const proposalCanceled = async (
+  event: // | Event<"ENSGovernor:ProposalCanceled">
+  Event<"UNIGovernor:ProposalCanceled">,
+  context: Context,
+  daoId: string
+) => {
+  const { ProposalsOnchain } = context.db;
+  const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "proposalId", daos: ["ENS"] },
+      { name: "id", daos: ["UNI"] },
+    ],
+    event.args,
+    daoId
+  );
+  await ProposalsOnchain.update({
+    id: daoId + "-" + proposalId.toString(),
+    data: { status: "CANCELED" },
+  });
+};
+
+export const proposalExecuted = async (
+  event: // | Event<"ENSGovernor:ProposalExecuted">
+  Event<"UNIGovernor:ProposalExecuted">,
+  context: Context,
+  daoId: string
+) => {
+  const { ProposalsOnchain } = context.db;
+  const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "proposalId", daos: ["ENS"] },
+      { name: "id", daos: ["UNI"] },
+    ],
+    event.args,
+    daoId
+  );
+  await ProposalsOnchain.update({
+    id: proposalId.toString(),
+    data: { status: "EXECUTED" },
   });
 };
