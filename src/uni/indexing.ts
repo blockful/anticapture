@@ -8,13 +8,32 @@ import {
   tokenTransfer,
   voteCast,
 } from "../lib/event-handlers";
+import viemClient from "../lib/viemClient";
 
 const daoId = "UNI";
 
 ponder.on("UNIToken:setup", async ({ context }) => {
-  const { DAO } = context.db;
+  const { DAO, Token, DAOToken } = context.db;
   await DAO.create({
     id: daoId,
+  });
+  const totalSupply = await viemClient.getTotalSupply();
+  const decimals = await viemClient.getDecimals();
+  const uniTokenAddress = viemClient.tokenConfigsByDaoId[daoId].address;
+  await Token.create({
+    id: uniTokenAddress,
+    data: {
+      name: daoId,
+      decimals,
+      totalSupply,
+    },
+  });
+  await DAOToken.create({
+    id: daoId + "-" + uniTokenAddress,
+    data: {
+      dao: daoId,
+      token: uniTokenAddress,
+    },
   });
 });
 

@@ -4,15 +4,31 @@ export default createSchema((p) => ({
   DAO: p.createTable({
     id: p.string(),
   }),
+  DAOToken: p.createTable({
+    id: p.string(),
+    dao: p.string().references("DAO.id"),
+    token: p.string().references("Token.id"),
+  }),
+  Token: p.createTable({
+    id: p.string(),
+    name: p.string(),
+    decimals: p.int(),
+    totalSupply: p.bigint(),
+  }),
   Account: p.createTable({
     id: p.string(),
+  }),
+  AccountBalance: p.createTable({
+    id: p.string(),
+    token: p.string().references("Token.id"),
+    account: p.string().references("Account.id"),
+    balance: p.bigint(),
   }),
   AccountPower: p.createTable({
     id: p.string(),
     account: p.string().references("Account.id"),
     dao: p.string().references("DAO.id"),
     votingPower: p.bigint().optional(),
-    balance: p.bigint().optional(),
     votesCount: p.int().optional(),
     proposalsCount: p.int().optional(),
     delegationsCount: p.int().optional(),
@@ -35,6 +51,7 @@ export default createSchema((p) => ({
   Transfers: p.createTable({
     id: p.string(),
     dao: p.string().references("DAO.id"),
+    token: p.string().references("Token.id"),
     amount: p.bigint(),
     from: p.string().references("Account.id"),
     to: p.string().references("Account.id"),

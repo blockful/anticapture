@@ -1,5 +1,6 @@
 import { Context, Event } from "@/generated";
 import { getValueFromEventArgs } from "./utils";
+import viemClient from "./viemClient";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -111,9 +112,9 @@ export const tokenTransfer = async (
   // | Event<"SHUToken:Transfer">
   Event<"UNIToken:Transfer">,
   context: Context,
-  daoId: string
+  daoId: "UNI"
 ) => {
-  const { Transfers, AccountPower, Account } = context.db;
+  const { Transfers, AccountPower, Account, AccountBalance } = context.db;
 
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -133,11 +134,14 @@ export const tokenTransfer = async (
     id: event.args.from,
   });
 
+  const uniTokenAddress = viemClient.tokenConfigsByDaoId[daoId].address;
+
   // Create a new transfer record
   await Transfers.create({
     id: event.log.id,
     data: {
       dao: daoId,
+      token: uniTokenAddress,
       amount: value,
       from: event.args.from,
       to: event.args.to,
@@ -147,10 +151,10 @@ export const tokenTransfer = async (
 
   // Update the from account's balance
   if (event.args.from !== "0x0000000000000000000000000000000000000000") {
-    const fromAccount = await AccountPower.upsert({
-      id: [event.args.from, daoId].join("-"),
+    const fromAccount = await AccountBalance.upsert({
+      id: [event.args.from, uniTokenAddress].join("-"),
       create: {
-        dao: daoId,
+        token: viemClient.tokenConfigsByDaoId[daoId].address,
         account: event.args.from,
         balance: BigInt(value),
       },
@@ -158,23 +162,18 @@ export const tokenTransfer = async (
         balance: (current.balance ?? BigInt(0)) - BigInt(value),
       }),
     });
-
     // Check if the balances are valid
     if (fromAccount.balance! < BigInt(0)) {
       console.log(`Invalid balance for ${event.args.from}`);
-      console.log(
-        "evaluation",
-        event.args.from !== "0x0000000000000000000000000000000000000000"
-      );
       throw new Error(`Invalid balance`);
     }
   }
 
   // Update the to account's balance
-  await AccountPower.upsert({
-    id: [event.args.to, daoId].join("-"),
+  await AccountBalance.upsert({
+    id: [event.args.to, uniTokenAddress].join("-"),
     create: {
-      dao: daoId,
+      token: uniTokenAddress,
       account: event.args.to,
       balance: BigInt(value),
     },
