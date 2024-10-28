@@ -11,6 +11,13 @@ import {
 
 const daoId = "UNI";
 
+ponder.on("UNIToken:setup", async ({ context }) => {
+  const { DAO } = context.db;
+  await DAO.create({
+    id: daoId,
+  });
+});
+
 ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
   await delegateChanged(event, context, daoId);
 });
