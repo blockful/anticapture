@@ -14,12 +14,26 @@ const daoId = "UNI";
 
 ponder.on("UNIToken:setup", async ({ context }) => {
   const { DAO, Token, DAOToken } = context.db;
+
+  const votingPeriod = await viemClient.getVotingPeriod();
+  const quorum = await viemClient.getQuorum();
+  const votingDelay = await viemClient.getVotingDelay();
+  const timelockDelay = await viemClient.getTimelockDelay();
+  const proposalThreshold = await viemClient.getProposalThreshold();
+
   await DAO.create({
     id: daoId,
+    data: {
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
+    },
   });
   const totalSupply = await viemClient.getTotalSupply();
   const decimals = await viemClient.getDecimals();
-  const uniTokenAddress = viemClient.tokenConfigsByDaoId[daoId].address;
+  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
   await Token.create({
     id: uniTokenAddress,
     data: {

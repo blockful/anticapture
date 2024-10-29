@@ -3,6 +3,11 @@ import { createSchema } from "@ponder/core";
 export default createSchema((p) => ({
   DAO: p.createTable({
     id: p.string(),
+    quorum: p.bigint().optional(),
+    proposalThreshold: p.bigint().optional(),
+    votingDelay: p.bigint().optional(),
+    votingPeriod: p.bigint().optional(),
+    timelockDelay: p.bigint().optional(),
   }),
   DAOToken: p.createTable({
     id: p.string(),

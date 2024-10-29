@@ -114,7 +114,7 @@ export const tokenTransfer = async (
   context: Context,
   daoId: "UNI"
 ) => {
-  const { Transfers, AccountPower, Account, AccountBalance } = context.db;
+  const { Transfers, Account, AccountBalance } = context.db;
 
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -134,7 +134,7 @@ export const tokenTransfer = async (
     id: event.args.from,
   });
 
-  const uniTokenAddress = viemClient.tokenConfigsByDaoId[daoId].address;
+  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
 
   // Create a new transfer record
   await Transfers.create({
@@ -154,7 +154,7 @@ export const tokenTransfer = async (
     const fromAccount = await AccountBalance.upsert({
       id: [event.args.from, uniTokenAddress].join("-"),
       create: {
-        token: viemClient.tokenConfigsByDaoId[daoId].address,
+        token: uniTokenAddress,
         account: event.args.from,
         balance: BigInt(value),
       },
