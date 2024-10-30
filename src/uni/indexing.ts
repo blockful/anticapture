@@ -1,115 +1,92 @@
 import { ponder } from "@/generated";
+import {
+  delegateChanged,
+  delegatedVotesChanged,
+  proposalCanceled,
+  proposalCreated,
+  proposalExecuted,
+  tokenTransfer,
+  voteCast,
+} from "../lib/event-handlers";
+import viemClient from "../lib/viemClient";
+
+const daoId = "UNI";
+
+ponder.on("UNIToken:setup", async ({ context }) => {
+  const { DAO, Token, DAOToken } = context.db;
+
+  const votingPeriod = await viemClient.getVotingPeriod();
+  const quorum = await viemClient.getQuorum();
+  const votingDelay = await viemClient.getVotingDelay();
+  const timelockDelay = await viemClient.getTimelockDelay();
+  const proposalThreshold = await viemClient.getProposalThreshold();
+
+  await DAO.create({
+    id: daoId,
+    data: {
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
+    },
+  });
+  const totalSupply = await viemClient.getTotalSupply();
+  const decimals = await viemClient.getDecimals();
+  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  await Token.create({
+    id: uniTokenAddress,
+    data: {
+      name: daoId,
+      decimals,
+      totalSupply,
+    },
+  });
+  await DAOToken.create({
+    id: daoId + "-" + uniTokenAddress,
+    data: {
+      dao: daoId,
+      token: uniTokenAddress,
+    },
+  });
+});
 
 ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
-  const { Delegations, Account } = context.db;
-
-  // Create a new delegation record
-  await Delegations.create({
-    id: event.log.id,
-    data: {
-      delegatee: event.args.toDelegate,
-      delegator: event.args.delegator,
-      dao: "UNI",
-      timestamp: event.block.timestamp,
-    },
-  });
-
-  // Update the delegator's delegate
-  await Account.upsert({
-    id: event.args.delegator,
-    create: {
-      UNIDelegate: event.args.toDelegate,
-    },
-    update: () => ({
-      UNIDelegate: event.args.toDelegate,
-    }),
-  });
-
-  // Update the delegatee's delegations count
-  await Account.upsert({
-    id: event.args.toDelegate,
-    create: {
-      UNIDelegationsCount: 1,
-    },
-    update: ({ current }) => ({
-      UNIDelegationsCount: (current.UNIDelegationsCount ?? 0) + 1,
-    }),
-  });
+  await delegateChanged(event, context, daoId);
 });
 
 ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
-  const { VotingPowerHistory, Account } = context.db;
-
-  // Create a new voting power history record
-  await VotingPowerHistory.create({
-    id: event.log.id,
-    data: {
-      account: event.args.delegate,
-      dao: "UNI",
-      votingPower: event.args.newBalance,
-      timestamp: event.block.timestamp,
-    },
-  });
-
-  // Update the delegate's voting power
-  await Account.upsert({
-    id: event.args.delegate,
-    create: {
-      UNIVotingPower: event.args.newBalance,
-    },
-    update: () => ({
-      UNIVotingPower: event.args.newBalance,
-    }),
-  });
+  await delegatedVotesChanged(event, context, daoId);
 });
 
 ponder.on("UNIToken:Transfer", async ({ event, context }) => {
-  const { Transfers, Account } = context.db;
+  await tokenTransfer(event, context, daoId);
+});
 
-  // Create a new transfer record
-  await Transfers.create({
-    id: event.log.id,
-    data: {
-      amount: event.args.amount,
-      dao: "UNI",
-      from: event.args.from,
-      to: event.args.to,
-      timestamp: event.block.timestamp,
-    },
-  });
+ponder.on("UNIGovernor:VoteCast", async ({ event, context }) => {
+  await voteCast(event, context, daoId);
+});
 
-  // Update the from account's balance
-  if (event.args.from !== "0x0000000000000000000000000000000000000000") {
-    const fromAccount = await Account.upsert({
-      id: event.args.from,
-      create: {
-        UNIBalance: BigInt(event.args.amount),
-      },
-      update: ({ current }) => ({
-        UNIBalance:
-          (current.UNIBalance ?? BigInt(0)) - BigInt(event.args.amount),
-      }),
-    });
+/**
+ * Handler for ProposalCreated event of UNIGovernor contract
+ * Creates a new ProposalsOnchain record and updates the proposer's proposal count
+ */
+ponder.on("UNIGovernor:ProposalCreated", async ({ event, context }) => {
+  await proposalCreated(event, context, daoId);
+});
 
-    // Check if the balances are valid
-    if (fromAccount.UNIBalance! < BigInt(0)) {
-      console.log(`Invalid balance for ${event.args.from}`);
-      console.log(
-        "evaluation",
-        event.args.from !== "0x0000000000000000000000000000000000000000",
-      );
-      throw new Error(`Invalid balance`);
-    }
-  }
+/**
+ * Handler for ProposalCanceled event of UNIGovernor contract
+ * Updates the status of a proposal to CANCELED
+ */
+ponder.on("UNIGovernor:ProposalCanceled", async ({ event, context }) => {
+  await proposalCanceled(event, context, daoId);
+});
 
-  // Update the to account's balance
-  const toAccount = await Account.upsert({
-    id: event.args.to,
-    create: {
-      UNIBalance: BigInt(event.args.amount),
-    },
-    update: ({ current }) => ({
-      UNIBalance: (current.UNIBalance ?? BigInt(0)) + BigInt(event.args.amount),
-    }),
-  });
+/**
+ * Handler for ProposalExecuted event of UNIGovernor contract
+ * Updates the status of a proposal to EXECUTED
+ */
+ponder.on("UNIGovernor:ProposalExecuted", async ({ event, context }) => {
+  await proposalExecuted(event, context, daoId);
 });

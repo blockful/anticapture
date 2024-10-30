@@ -19,7 +19,12 @@
     ],
     "target": "ES2022",
     // Skip type checking for node modules
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "./**/*.ts"

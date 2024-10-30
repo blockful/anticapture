@@ -9,6 +9,7 @@ import {
 } from "viem";
 import { config } from "../../../config";
 import { ENSTimelockControllerAbi } from "../../abi/ENSTimelockControllerAbi";
+import { testContracts } from "../constants";
 
 export async function getProposalIdInTimelock(
   client: WalletClient & PublicActions,
@@ -19,14 +20,14 @@ export async function getProposalIdInTimelock(
   try {
     const TimelockContract = getContract({
       abi: ENSTimelockControllerAbi,
-      address: config.test.contracts.ENSTimelockController?.address as Address,
+      address: testContracts.ENSTimelockController?.address as Address,
       client,
     });
     const proposalHash = keccak256(toBytes(proposalDescription));
 
     const proposalIdInTimelock: Hex = (await client.readContract({
       abi: ENSTimelockControllerAbi,
-      address: config.test.contracts.ENSTimelockController?.address as Address,
+      address: testContracts.ENSTimelockController?.address as Address,
       functionName: "hashOperation",
       args: [
         ...(proposal.flat(1) as [Address, bigint, Hex]),
