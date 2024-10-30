@@ -1,14 +1,62 @@
 import { createSchema } from "@ponder/core";
 
 export default createSchema((p) => ({
+  DAO: p.createTable({
+    id: p.string(),
+    quorum: p.bigint().optional(),
+    proposalThreshold: p.bigint().optional(),
+    votingDelay: p.bigint().optional(),
+    votingPeriod: p.bigint().optional(),
+    timelockDelay: p.bigint().optional(),
+  }),
+  DAOToken: p.createTable({
+    id: p.string(),
+    dao: p.string().references("DAO.id"),
+    token: p.string().references("Token.id"),
+  }),
+  Token: p.createTable({
+    id: p.string(),
+    name: p.string(),
+    decimals: p.int(),
+    totalSupply: p.bigint(),
+  }),
+  Account: p.createTable({
+    id: p.string(),
+  }),
+  AccountBalance: p.createTable({
+    id: p.string(),
+    token: p.string().references("Token.id"),
+    account: p.string().references("Account.id"),
+    balance: p.bigint(),
+  }),
+  AccountPower: p.createTable({
+    id: p.string(),
+    account: p.string().references("Account.id"),
+    dao: p.string().references("DAO.id"),
+    votingPower: p.bigint().optional(),
+    votesCount: p.int().optional(),
+    proposalsCount: p.int().optional(),
+    delegationsCount: p.int().optional(),
+    delegate: p.string().optional(),
+  }),
+  VotingPowerHistory: p.createTable({
+    id: p.string(),
+    dao: p.string().references("DAO.id"),
+    account: p.string().references("Account.id"),
+    votingPower: p.bigint(),
+    timestamp: p.bigint(),
+  }),
   Delegations: p.createTable({
     id: p.string(),
+    dao: p.string().references("DAO.id"),
     delegatee: p.string().references("Account.id"),
     delegator: p.string().references("Account.id"),
     timestamp: p.bigint(),
   }),
   Transfers: p.createTable({
     id: p.string(),
+    dao: p.string().references("DAO.id"),
+    token: p.string().references("Token.id"),
     amount: p.bigint(),
     from: p.string().references("Account.id"),
     to: p.string().references("Account.id"),
@@ -16,6 +64,7 @@ export default createSchema((p) => ({
   }),
   VotesOnchain: p.createTable({
     id: p.string(),
+    dao: p.string().references("DAO.id"),
     voter: p.string().references("Account.id"),
     proposalId: p.string().references("ProposalsOnchain.id"),
     support: p.string(),
@@ -25,7 +74,8 @@ export default createSchema((p) => ({
   }),
   ProposalsOnchain: p.createTable({
     id: p.string(),
-    proposer: p.string(),
+    dao: p.string().references("DAO.id"),
+    proposer: p.string().references("Account.id"),
     targets: p.json(),
     values: p.json(),
     signatures: p.json(),
@@ -35,13 +85,8 @@ export default createSchema((p) => ({
     description: p.string(),
     timestamp: p.bigint(),
     status: p.string(),
-  }),
-  Account: p.createTable({
-    id: p.string(),
-    votingPower: p.bigint().optional(),
-    balance: p.bigint().optional(),
-    votesCount: p.int().optional(),
-    proposalCount: p.int().optional(),
-    delegationsCount: p.int().optional(),
+    forVotes: p.bigint(),
+    againstVotes: p.bigint(),
+    abstainVotes: p.bigint(),
   }),
 }));

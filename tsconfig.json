@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     // Language and environment
     "moduleResolution": "bundler",
@@ -18,12 +19,18 @@
     ],
     "target": "ES2022",
     // Skip type checking for node modules
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "./**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test"
   ]
 }
