@@ -202,8 +202,7 @@ export const voteCast = async (
 
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
-      { name: "proposalId", daos: ["ENS"] },
-      { name: "id", daos: ["UNI"] },
+      { name: "proposalId", daos: ["ENS", "UNI"] },
     ],
     event.args,
     daoId
