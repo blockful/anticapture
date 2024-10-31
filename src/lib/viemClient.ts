@@ -1,6 +1,6 @@
 import { createPublicClient, getContract, http } from "viem";
 import { config, ViemConfig } from "../../config";
-import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
+import { UNIGovernorAbi, UNITokenAbi } from "@/modules/uni/abi";
 import dotenv from "dotenv";
 dotenv.config();
 

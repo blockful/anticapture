@@ -7,8 +7,8 @@ import {
   proposalExecuted,
   tokenTransfer,
   voteCast,
-} from "../lib/event-handlers";
-import viemClient from "../lib/viemClient";
+} from "../../lib/event-handlers";
+import viemClient from "../../lib/viemClient";
 
 const daoId = "UNI";
 

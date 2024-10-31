@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 import dotenv from "dotenv";
-import { ENSGovernorAbi, ENSTokenAbi } from "./src/ens/abi";
-import { UNIGovernorAbi, UNITokenAbi } from "./src/uni/abi";
-import { COMPTokenAbi } from "./src/comp/abi";
+import { ENSGovernorAbi, ENSTokenAbi } from "./src/modules/ens/abi";
+import { UNIGovernorAbi, UNITokenAbi } from "./src/modules/uni/abi";
+import { COMPTokenAbi } from "./src/modules/comp/abi";
 import { Abi, Address, zeroAddress } from "viem";
-import { SHUTokenAbi } from "./src/shu/abi";
+import { SHUTokenAbi } from "./src/modules/shu/abi";
 import { anvil, mainnet } from "viem/chains";
 dotenv.config();
 

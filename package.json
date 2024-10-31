@@ -18,11 +18,13 @@
     "@ponder/core": "^0.6.22",
     "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
+    "lodash": "^4.17.21",
     "viem": "^2.21.9"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.4",
     "@types/jest": "^29.5.13",
+    "@types/lodash": "^4.17.13",
     "@types/node": "^20.16.5",
     "@types/pg": "^8.11.10",
     "axios": "^1.7.7",
