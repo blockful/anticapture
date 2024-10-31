@@ -83,7 +83,7 @@ export const delegatedVotesChanged = async (
 
   // Create a new voting power history record
   await VotingPowerHistory.create({
-    id: [event.log.id, daoId].join("-"),
+    id: event.log.id,
     data: {
       account: event.args.delegate,
       dao: daoId,
@@ -200,6 +200,15 @@ export const voteCast = async (
     daoId
   );
 
+  const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "proposalId", daos: ["ENS"] },
+      { name: "id", daos: ["UNI"] },
+    ],
+    event.args,
+    daoId
+  );
+
   await Account.upsert({
     id: event.args.voter,
   });
@@ -221,7 +230,7 @@ export const voteCast = async (
     id: event.log.id,
     data: {
       dao: daoId,
-      proposalId: event.args.proposalId.toString(),
+      proposalId: [proposalId, daoId].join("-"),
       voter: event.args.voter,
       support: event.args.support.toString(),
       weight: weight.toString(),
@@ -231,7 +240,7 @@ export const voteCast = async (
   });
 
   await ProposalsOnchain.update({
-    id: event.args.proposalId.toString(),
+    id: [proposalId, daoId].join("-"),
     data: ({ current }) => ({
       forVotes:
         (current.forVotes ?? BigInt(0)) +
@@ -269,7 +278,7 @@ export const proposalCreated = async (
 
   // Create proposal record
   await ProposalsOnchain.create({
-    id: daoId + "-" + proposalId.toString(),
+    id: [proposalId, daoId].join("-"),
     data: {
       dao: daoId,
       proposer: event.args.proposer,
@@ -317,7 +326,7 @@ export const proposalCanceled = async (
     daoId
   );
   await ProposalsOnchain.update({
-    id: daoId + "-" + proposalId.toString(),
+    id: [proposalId, daoId].join("-"),
     data: { status: "CANCELED" },
   });
 };
@@ -338,7 +347,7 @@ export const proposalExecuted = async (
     daoId
   );
   await ProposalsOnchain.update({
-    id: proposalId.toString(),
+    id: [proposalId, daoId].join("-"),
     data: { status: "EXECUTED" },
   });
 };

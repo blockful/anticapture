@@ -10,7 +10,6 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc",
-    "start-anvil": "tsx ./test/lib/start-anvil.ts",
     "test": "jest --detectOpenHandles",
     "clear-database": "tsx ./test/lib/database/clearDatabase.script.ts",
     "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens"
