@@ -21,10 +21,13 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^10.0.0",
+    "@nestjs/mapped-types": "^2.0.5",
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.21.1",
     "@types/node-fetch": "^2.6.11",
+    "class-validator": "^0.14.1",
     "node-fetch": "^2.7.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
