@@ -1,0 +1,39 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id    String @id
+  users User[]
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  address   String     @unique // Add unique constraint here
+  account   Account    @relation(fields: [address], references: [id])
+  userRoles UserRole[]
+}
+
+model UserRole {
+  id          Int     @id @default(autoincrement())
+  userId      Int
+  roleId      Int
+  user        User    @relation(fields: [userId], references: [id])
+  role        Role    @relation(fields: [roleId], references: [id])
+  firstSignIn BigInt?
+  lastSignIn  BigInt?
+}
+
+model Role {
+  id        Int        @id @default(autoincrement())
+  name      String
+  daoId     String
+  createdAt BigInt
+  userRoles UserRole[]
+}
