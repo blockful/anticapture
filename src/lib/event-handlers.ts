@@ -23,9 +23,9 @@ export const delegateChanged = async (
   await Delegations.create({
     id: event.log.id,
     data: {
-      dao: daoId,
-      delegatee: event.args.toDelegate,
-      delegator: event.args.delegator,
+      daoId,
+      delegateeAccountId: event.args.toDelegate,
+      delegatorAccountId: event.args.delegator,
       timestamp: event.block.timestamp,
     },
   });
@@ -34,8 +34,8 @@ export const delegateChanged = async (
   await AccountPower.upsert({
     id: [event.args.delegator, daoId].join("-"),
     create: {
-      account: event.args.delegator,
-      dao: daoId,
+      accountId: event.args.delegator,
+      daoId,
       delegate: event.args.toDelegate,
     },
     update: () => ({
@@ -47,8 +47,8 @@ export const delegateChanged = async (
   await AccountPower.upsert({
     id: [event.args.toDelegate, daoId].join("-"),
     create: {
-      account: event.args.delegator,
-      dao: daoId,
+      accountId: event.args.delegator,
+      daoId,
       delegationsCount: 1,
     },
     update: ({ current }) => ({
@@ -85,8 +85,8 @@ export const delegatedVotesChanged = async (
   await VotingPowerHistory.create({
     id: event.log.id,
     data: {
-      account: event.args.delegate,
-      dao: daoId,
+      accountId: event.args.delegate,
+      daoId,
       votingPower: newBalance,
       timestamp: event.block.timestamp,
     },
@@ -96,8 +96,8 @@ export const delegatedVotesChanged = async (
   await AccountPower.upsert({
     id: [event.args.delegate, daoId].join("-"),
     create: {
-      account: event.args.delegate,
-      dao: daoId,
+      accountId: event.args.delegate,
+      daoId,
       votingPower: newBalance,
     },
     update: () => ({
@@ -140,11 +140,11 @@ export const tokenTransfer = async (
   await Transfers.create({
     id: event.log.id,
     data: {
-      dao: daoId,
-      token: uniTokenAddress,
+      daoId,
+      tokenId: uniTokenAddress,
       amount: value,
-      from: event.args.from,
-      to: event.args.to,
+      fromAccountId: event.args.from,
+      toAccountId: event.args.to,
       timestamp: event.block.timestamp,
     },
   });
@@ -154,8 +154,8 @@ export const tokenTransfer = async (
     const fromAccount = await AccountBalance.upsert({
       id: [event.args.from, uniTokenAddress].join("-"),
       create: {
-        token: uniTokenAddress,
-        account: event.args.from,
+        tokenId: uniTokenAddress,
+        accountId: event.args.from,
         balance: BigInt(value),
       },
       update: ({ current }) => ({
@@ -173,8 +173,8 @@ export const tokenTransfer = async (
   await AccountBalance.upsert({
     id: [event.args.to, uniTokenAddress].join("-"),
     create: {
-      token: uniTokenAddress,
-      account: event.args.to,
+      tokenId: uniTokenAddress,
+      accountId: event.args.to,
       balance: BigInt(value),
     },
     update: ({ current }) => ({
@@ -215,8 +215,8 @@ export const voteCast = async (
   await AccountPower.upsert({
     id: [event.args.voter, daoId].join("-"),
     create: {
-      dao: daoId,
-      account: event.args.voter,
+      daoId,
+      accountId: event.args.voter,
       votesCount: 1,
     },
     update: ({ current }) => ({
@@ -228,9 +228,9 @@ export const voteCast = async (
   await VotesOnchain.create({
     id: event.log.id,
     data: {
-      dao: daoId,
+      daoId,
       proposalId: [proposalId, daoId].join("-"),
-      voter: event.args.voter,
+      voterAccountId: event.args.voter,
       support: event.args.support.toString(),
       weight: weight.toString(),
       reason: event.args.reason,
@@ -279,8 +279,8 @@ export const proposalCreated = async (
   await ProposalsOnchain.create({
     id: [proposalId, daoId].join("-"),
     data: {
-      dao: daoId,
-      proposer: event.args.proposer,
+      daoId,
+      proposerAccountId: event.args.proposer,
       targets: JSON.stringify(event.args.targets),
       values: JSON.stringify(event.args.values.map((v) => v.toString())),
       signatures: JSON.stringify(event.args.signatures),
@@ -299,8 +299,8 @@ export const proposalCreated = async (
   await AccountPower.upsert({
     id: event.args.proposer,
     create: {
-      dao: daoId,
-      account: event.args.proposer,
+      daoId,
+      accountId: event.args.proposer,
       proposalsCount: 1,
     },
     update: ({ current }) => ({
