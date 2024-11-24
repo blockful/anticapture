@@ -1,0 +1,26 @@
+FROM node:20 AS pruner
+RUN npm i -g pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY . .
+RUN pnpm add -g turbo
+RUN turbo prune --docker @defendao/server
+
+FROM node:20 AS builder
+RUN npm i -g pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY --from=pruner /app/out/full/ .
+RUN pnpm install
+RUN pnpm build:server
+
+FROM node:20-slim AS release
+RUN npm i -g pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY --from=builder /app/ .
+EXPOSE 3000
+RUN pnpm start:server

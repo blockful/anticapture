@@ -8,7 +8,7 @@ import {
   WalletClient,
 } from "viem";
 import { config } from "../../../config";
-import { emptyCall, zeroEther } from "../../lib/constants";
+import { emptyCall, zeroEther } from "../constants";
 import { ENSGovernorAbi } from "../../../src/ens/abi";
 
 export async function executeProposal(

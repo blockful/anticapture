@@ -1,0 +1,371 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public", "gov-app"]
+}
+
+model Account {
+  id                 String               @id
+  accountBalances    AccountBalance[]
+  accountPowerObj    AccountPower[]
+  delegateeDels      Delegations[]        @relation("delegatee")
+  delegatorDels      Delegations[]        @relation("delegator")
+  proposalsOnchain   ProposalsOnchain[]
+  transfersFrom      Transfers[]          @relation("transfersFrom")
+  transfersTo        Transfers[]          @relation("transfersTo")
+  votesOnchain       VotesOnchain[]
+  VotingPowerHistory VotingPowerHistory[]
+
+  @@schema("public")
+}
+
+model AccountBalance {
+  id      String  @id
+  token   String
+  account String  @unique
+  balance Decimal @db.Decimal(78, 0)
+
+  accountObj Account? @relation(fields: [account], references: [id])
+
+  @@schema("public")
+}
+
+model AccountPower {
+  id               String   @id
+  account          String
+  dao              String
+  votingPower      Decimal? @db.Decimal(78, 0)
+  votesCount       Int?
+  proposalsCount   Int?
+  delegationsCount Int?
+  delegate         String?
+  accountObj       Account? @relation(fields: [account], references: [id])
+  daoObj           DAO?      @relation(fields: [dao], references: [id])
+
+  @@schema("public")
+}
+
+model DAO {
+  id                 String               @id
+  quorum             Decimal?             @db.Decimal(78, 0)
+  proposalThreshold  Decimal?             @db.Decimal(78, 0)
+  votingDelay        Decimal?             @db.Decimal(78, 0)
+  votingPeriod       Decimal?             @db.Decimal(78, 0)
+  timelockDelay      Decimal?             @db.Decimal(78, 0)
+  accountPowerObj    AccountPower[]
+  DAOToken           DAOToken[]
+  delegations        Delegations[]
+  ProposalsOnchain   ProposalsOnchain[]
+  Transfers          Transfers[]
+  VotesOnchain       VotesOnchain[]
+  VotingPowerHistory VotingPowerHistory[]
+
+  @@schema("public")
+}
+
+model DAOToken {
+  id       String @id
+  dao      String
+  token    String
+  daoObj   DAO?    @relation(fields: [dao], references: [id])
+  tokenObj Token?  @relation(fields: [token], references: [id])
+
+  @@schema("public")
+}
+
+model Delegations {
+  id           String  @id
+  dao          String
+  delegatee    String
+  delegator    String
+  timestamp    Decimal @db.Decimal(78, 0)
+  daoObj       DAO?     @relation(fields: [dao], references: [id])
+  delegateeObj Account? @relation("delegatee", fields: [delegatee], references: [id])
+  delegatorObj Account? @relation("delegator", fields: [delegator], references: [id])
+
+  @@schema("public")
+}
+
+model ProposalsOnchain {
+  id           String  @id
+  dao          String
+  proposer     String
+  targets      Json
+  values       Json
+  signatures   Json
+  calldatas    Json
+  startBlock   String
+  endBlock     String
+  description  String
+  timestamp    Decimal @db.Decimal(78, 0)
+  status       String
+  forVotes     Decimal @db.Decimal(78, 0)
+  againstVotes Decimal @db.Decimal(78, 0)
+  abstainVotes Decimal @db.Decimal(78, 0)
+
+  daoObj       DAO?            @relation(fields: [dao], references: [id])
+  proposerObj  Account?        @relation(fields: [proposer], references: [id])
+  VotesOnchain VotesOnchain[]
+
+  @@schema("public")
+}
+
+model Token {
+  id          String      @id
+  name        String
+  decimals    Int
+  totalSupply Decimal     @db.Decimal(78, 0)
+  DAOToken    DAOToken[]
+  Transfers   Transfers[]
+
+  @@schema("public")
+}
+
+model Transfers {
+  id          String  @id
+  dao         String
+  token       String
+  amount      Decimal @db.Decimal(78, 0)
+  from        String
+  to          String
+  timestamp   Decimal @db.Decimal(78, 0)
+  daoObj      DAO?     @relation(fields: [dao], references: [id])
+  tokenObj    Token?   @relation(fields: [token], references: [id])
+  fromAccount Account? @relation("transfersFrom", fields: [from], references: [id])
+  toAccount   Account? @relation("transfersTo", fields: [to], references: [id])
+
+  @@schema("public")
+}
+
+model VotesOnchain {
+  id         String  @id
+  dao        String
+  voter      String
+  proposalId String
+  support    String
+  weight     String
+  reason     String
+  timestamp  Decimal @db.Decimal(78, 0)
+
+  daoObj   DAO?              @relation(fields: [dao], references: [id])
+  voterObj Account?          @relation(fields: [voter], references: [id])
+  proposal ProposalsOnchain? @relation(fields: [proposalId], references: [id])
+
+  @@schema("public")
+}
+
+model VotingPowerHistory {
+  id          String  @id
+  dao         String
+  account     String
+  votingPower Decimal @db.Decimal(78, 0)
+  timestamp   Decimal @db.Decimal(78, 0)
+  daoObj      DAO?     @relation(fields: [dao], references: [id])
+  accountObj  Account? @relation(fields: [account], references: [id])
+
+  @@schema("public")
+}
+
+model ponder_meta {
+  key   String @id
+  value Json?
+
+  @@map("_ponder_meta")
+  @@schema("public")
+}
+
+model ponder_reorg__Account {
+  id           String
+  operation_id Int    @id @default(autoincrement())
+  checkpoint   String @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__Account")
+  @@schema("public")
+}
+
+model ponder_reorg__AccountBalance {
+  id           String
+  token        String?
+  account      String?
+  balance      Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__AccountBalance")
+  @@schema("public")
+}
+
+model ponder_reorg__AccountPower {
+  id               String
+  account          String?
+  dao              String?
+  votingPower      Decimal? @db.Decimal(78, 0)
+  votesCount       Int?
+  proposalsCount   Int?
+  delegationsCount Int?
+  delegate         String?
+  operation_id     Int      @id @default(autoincrement())
+  checkpoint       String   @db.VarChar(75)
+  operation        Int
+
+  @@map("_ponder_reorg__AccountPower")
+  @@schema("public")
+}
+
+model ponder_reorg__DAO {
+  id                String
+  quorum            Decimal? @db.Decimal(78, 0)
+  proposalThreshold Decimal? @db.Decimal(78, 0)
+  votingDelay       Decimal? @db.Decimal(78, 0)
+  votingPeriod      Decimal? @db.Decimal(78, 0)
+  timelockDelay     Decimal? @db.Decimal(78, 0)
+  operation_id      Int      @id @default(autoincrement())
+  checkpoint        String   @db.VarChar(75)
+  operation         Int
+
+  @@map("_ponder_reorg__DAO")
+  @@schema("public")
+}
+
+model ponder_reorg__DAOToken {
+  id           String
+  dao          String?
+  token        String?
+  operation_id Int     @id @default(autoincrement())
+  checkpoint   String  @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__DAOToken")
+  @@schema("public")
+}
+
+model ponder_reorg__Delegations {
+  id           String
+  dao          String?
+  delegatee    String?
+  delegator    String?
+  timestamp    Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__Delegations")
+  @@schema("public")
+}
+
+model ponder_reorg__ProposalsOnchain {
+  id           String
+  dao          String?
+  proposer     String?
+  targets      Json?
+  values       Json?
+  signatures   Json?
+  calldatas    Json?
+  startBlock   String?
+  endBlock     String?
+  description  String?
+  timestamp    Decimal? @db.Decimal(78, 0)
+  status       String?
+  forVotes     Decimal? @db.Decimal(78, 0)
+  againstVotes Decimal? @db.Decimal(78, 0)
+  abstainVotes Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__ProposalsOnchain")
+  @@schema("public")
+}
+
+model ponder_reorg__Token {
+  id           String
+  name         String?
+  decimals     Int?
+  totalSupply  Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__Token")
+  @@schema("public")
+}
+
+model ponder_reorg__Transfers {
+  id           String
+  dao          String?
+  token        String?
+  amount       Decimal? @db.Decimal(78, 0)
+  from         String?
+  to           String?
+  timestamp    Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__Transfers")
+  @@schema("public")
+}
+
+model ponder_reorg__VotesOnchain {
+  id           String
+  dao          String?
+  voter        String?
+  proposalId   String?
+  support      String?
+  weight       String?
+  reason       String?
+  timestamp    Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__VotesOnchain")
+  @@schema("public")
+}
+
+model ponder_reorg__VotingPowerHistory {
+  id           String
+  dao          String?
+  account      String?
+  votingPower  Decimal? @db.Decimal(78, 0)
+  timestamp    Decimal? @db.Decimal(78, 0)
+  operation_id Int      @id @default(autoincrement())
+  checkpoint   String   @db.VarChar(75)
+  operation    Int
+
+  @@map("_ponder_reorg__VotingPowerHistory")
+  @@schema("public")
+}
+
+model User {
+  id       String     @id
+  roles UserRole[]
+
+  @@schema("gov-app")
+}
+
+model UserRole {
+  id     Int @id @default(autoincrement())
+  userId String
+  roleId Int
+  user   User   @relation(fields: [userId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@schema("gov-app")
+}
+
+model Role {
+  id       Int        @id @default(autoincrement())
+  name     String
+  daoId    String
+  users UserRole[]
+
+  @@schema("gov-app")
+}
