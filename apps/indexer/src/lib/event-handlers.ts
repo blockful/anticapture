@@ -47,7 +47,7 @@ export const delegateChanged = async (
   await AccountPower.upsert({
     id: [event.args.toDelegate, daoId].join("-"),
     create: {
-      account: event.args.delegator,
+      account: event.args.toDelegate,
       dao: daoId,
       delegationsCount: 1,
     },
