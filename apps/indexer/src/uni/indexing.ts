@@ -45,8 +45,8 @@ ponder.on("UNIToken:setup", async ({ context }) => {
   await DAOToken.create({
     id: daoId + "-" + uniTokenAddress,
     data: {
-      dao: daoId,
-      token: uniTokenAddress,
+      daoId,
+      tokenId: uniTokenAddress,
     },
   });
 });
