@@ -1,12 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [".env", "NODE_ENV"],
+  "globalEnv": ["NODE_ENV", "DATABASE_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [""]
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
-    "start": {},
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
     "install": {},
     "dev": {
       "persistent": true,
@@ -15,8 +19,7 @@
     "start:prod": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^build"],
-      "env": ["DATABASE_URL"]
+      "dependsOn": ["^build"]
     }
   }
 }
