@@ -1,0 +1,35 @@
+
+FROM node:20 AS pruner
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
+RUN echo $DATABASE_URL
+RUN npm i -g pnpm 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY . .
+RUN pnpm add -g turbo
+RUN turbo prune --docker @defendao/server
+
+FROM node:20 AS builder
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
+RUN npm i -g pnpm tsx
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY --from=pruner /app/out/full/ .
+RUN pnpm install
+RUN pnpm build:server
+
+FROM node:20 AS release
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
+RUN npm i -g pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY --from=builder /app/ .
+EXPOSE 3000
+RUN pnpm apply-migration
+RUN pnpm start:server

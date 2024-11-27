@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": ["NODE_ENV", "DATABASE_URL"],
+  "globalDependencies": [".env", "test.ts", "./migrations"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -20,6 +21,7 @@
       "cache": false,
       "persistent": true,
       "dependsOn": ["^build"]
-    }
+    },
+    "apply-migration": {}
   }
 }
