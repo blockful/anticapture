@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "DefenDAO Monorepo",
   "scripts": {
+    "start": "dotenv -- turbo start",
+    "build": "dotenv -- turbo build",
     "build:server": "dotenv -- turbo run build --filter=@defendao/server",
     "dev:server": "dotenv -- turbo run dev --filter=@defendao/server",
     "install:dashboard": "cd ./apps/dashboard && npm install",

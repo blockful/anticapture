@@ -31,6 +31,4 @@ COPY --from=build /app /app
 
 EXPOSE 3000
 
-RUN npm run prisma:generate
-
 CMD [ "npm", "run", "start:prod" ]
