@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["DATABASE_URL", "PORT"],
+  "globalEnv": [".env", "NODE_ENV"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -12,6 +12,11 @@
       "persistent": true,
       "cache": false
     },
-    "start:prod": {}
+    "start:prod": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"]
+    }
   }
 }
