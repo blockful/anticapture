@@ -1,6 +1,6 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "apps/server/Dockerfile"
+dockerfilePath = "Dockerfile.server"
 buildCommand = "docker build -f ./Dockerfile.server --build-arg DATABASE_URL=${DATABASE_URL} ."
 
 [deploy]
