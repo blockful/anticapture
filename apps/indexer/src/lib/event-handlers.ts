@@ -241,11 +241,11 @@ export const voteCast = async (
   await ProposalsOnchain.update({
     id: [proposalId, daoId].join("-"),
     data: ({ current }) => ({
-      forVotes:
-        (current.forVotes ?? BigInt(0)) +
-        (event.args.support === 0 ? weight : BigInt(0)),
       againstVotes:
         (current.againstVotes ?? BigInt(0)) +
+        (event.args.support === 0 ? weight : BigInt(0)),
+      forVotes:
+        (current.forVotes ?? BigInt(0)) +
         (event.args.support === 1 ? weight : BigInt(0)),
       abstainVotes:
         (current.abstainVotes ?? BigInt(0)) +
