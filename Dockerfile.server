@@ -32,4 +32,4 @@ WORKDIR /app/
 COPY --from=builder /app/ .
 EXPOSE 3000
 RUN pnpm apply-migration
-RUN pnpm start:server
+CMD [ "pnpm", "start:server"]
