@@ -1,16 +1,27 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV", "DATABASE_URL"],
+  "globalDependencies": [".env", "test.ts", "./migrations"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [""]
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
-    "start": {},
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
     "install": {},
     "dev": {
       "persistent": true,
       "cache": false
     },
-    "start:prod": {}
+    "start:prod": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "apply-migration": {}
   }
 }

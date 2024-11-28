@@ -1,24 +1,34 @@
-# Use an official Node.js runtime as the base image
-FROM node:20
+# syntax = docker/dockerfile:1
 
-# Set working directory
+# Adjust NODE_VERSION as desired
+ARG NODE_VERSION=20
+FROM node:${NODE_VERSION}-alpine as base
+
+LABEL fly_launch_runtime="NestJS"
+
+# NestJS app lives here
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Throw-away build stage to reduce size of final image
+FROM base as build
+
+WORKDIR /app
+
+# Install node modules
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY . .
+# Copy application code
+COPY --link . .
 
-# Expose the port your NestJS server will run on
-EXPOSE 3000
-
-RUN npx prisma generate
-
+# Build application
 RUN npm run build
 
-# Run the migrations and start the server
-CMD ["sh", "-c", "npm run start:prod"]
+FROM base
+
+COPY --from=build /app /app
+
+EXPOSE 3000
+
+CMD [ "npm", "run", "start:prod" ]

@@ -4,3 +4,4 @@ out/
 .turbo
 .husky/*
 .vscode/*
+.env
