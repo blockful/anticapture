@@ -1,15 +1,18 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
-import { ColumnDef } from "@tanstack/react-table";
+import { cn } from "@/lib/server/utils";
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
+  <div className="relative w-full overflow-auto scrollbar-none">
     <table
       ref={ref}
+      style={{
+        borderRadius: "4px",
+        border: "1px solid #27272A",
+      }}
       className={cn("w-full caption-bottom text-sm", className)}
       {...props}
     />
@@ -35,7 +38,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
+    className={cn("[&_tr:last-child]:border-0 scrollbar-none", className)}
     {...props}
   />
 ));
@@ -62,6 +65,9 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
+    style={{
+      height: "53px",
+    }}
     className={cn(
       "border-b transition-colors hover:bg-accent data-[state=selected]:bg-muted",
       className
@@ -93,7 +99,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "p-4 align-middle bg-light rounded [&:has([role=checkbox])]:pr-0",
+      "p-4 align-middle bg-light [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}

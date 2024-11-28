@@ -9,10 +9,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xl: "1200px",
+      },
       colors: {
-        dark: "#131313",
-        middleDark: "#1A1B1A",
-        light: "#F6F6F7",
+        darkest: "#09090B",
+        dark: "#18181B",
+        middleDark: "#3F3F46",
+        lightDark: "#27272A",
+        foreground: "#A1A1AA",
+        white: "#FFFFFF",
         colored: "#E66AE9",
         accentColored: "#332433",
       },

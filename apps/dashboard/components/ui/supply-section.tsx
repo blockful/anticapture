@@ -2,10 +2,11 @@
 
 import { useContext, useEffect, useState } from "react";
 
-import { DAO } from "@/lib/backend";
+import { DAO } from "@/lib/server/backend";
 
 import { AnimatedNumber } from "./animated-number";
 import { DaoDataContext } from "../contexts/dao-data-provider";
+import { SupplyIcon } from "./supply-icon";
 
 export const SupplySection = () => {
   const { daoData } = useContext(DaoDataContext);
@@ -21,28 +22,46 @@ export const SupplySection = () => {
   }, [daoData]);
 
   return (
-    <div className="flex flex-col text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-      <h1 className="text-center w-full font-bold mb-10 border-b-4 pb-2 border-colored">
-        Delegated supply
-      </h1>
-      <div className="flex space-x-24 mx-auto">
-        <div className="flex flex-col space-y-2 items-center bg-light rounded p-6">
-          <div className="text-3xl">
-            {totalVotingPower && totalSupply ? (
-              <>
-                <AnimatedNumber
-                  num={Math.round((totalVotingPower / totalSupply) * 100)}
-                />
-                %
-              </>
-            ) : (
-              <div className="flex space-x-2">
-                <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
-                <p>%</p>
-              </div>
-            )}
+    <div className="flex flex-col text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left border border-lightDark rounded-lg p-3">
+      <div className="flex space-x-3 items-center pb-4">
+        <SupplyIcon />
+        <h1 className="text-lg text-white text-left font-medium">Supply</h1>
+      </div>
+      <div className="bg-dark rounded-[4px] flex flex-grow space-x-4">
+        <div className="w-full flex flex-col">
+          <h3 className="text-foreground text-sm p-4 pb-0 mb-2">
+            Delegated Supply
+          </h3>
+          <div className="flex w-full justify-center lg:justify-start p-4 pt-0">
+            <div className="flex flex-col space-y-1 w-1/2 justify-center lg:justify-start">
+              <p className="text-2xl font-semibold text-white">
+                {totalVotingPower && totalSupply ? (
+                  <>
+                    <AnimatedNumber
+                      num={Math.round((totalVotingPower / totalSupply) * 100)}
+                    />
+                    %
+                  </>
+                ) : (
+                  <div className="flex w-full justify-center lg:justify-start space-x-2">
+                    <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
+                    <p>%</p>
+                  </div>
+                )}
+              </p>
+              <p className="text-xs text-foreground font-medium">
+                of total supply
+              </p>
+            </div>
           </div>
-          <p>of total supply</p>
+          <div className="w-full border-t border-lightDark">
+            <h3 className="text-foreground text-sm p-4 pb-2">Liquid Supply</h3>
+            <div className="flex w-full p-4 pt-0">
+              <div className="flex flex-col space-y-1 w-full items-center lg:items-start">
+                <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

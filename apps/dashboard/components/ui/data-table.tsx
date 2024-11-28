@@ -22,9 +22,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import React from "react";
+import React, { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
+  title?: string;
+  icon: null | JSX.Element;
+  isLoading: boolean;
   filterColumn?: string;
   withSorting?: boolean;
   withPagination?: boolean;
@@ -33,6 +36,9 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({
+  isLoading,
+  title = "",
+  icon = null,
   withPagination = false,
   withSorting = false,
   filterColumn = "",
@@ -82,24 +88,30 @@ export function DataTable<TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
+  const [currentPageNumber, setCurrentPageNumber] = useState<number>(1);
+
   return (
-    <div className="rounded-md border">
-      <div className="flex items-center py-4 pl-4">
+    <div className="w-full p-4 rounded-md border border-lightDark text-foreground">
+      <div className="flex items-center justify-between mb-4 space-x-4">
+        <div className="flex space-x-3">
+          {icon}
+          <h3 className="text-white font-medium">{title}</h3>
+        </div>
         <Input
-          placeholder="Filter..."
+          placeholder="Filter by ENS name or ETH address..."
           value={
             (table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""
           }
           onChange={(event: any) =>
             table.getColumn(filterColumn)?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="max-w-sm bg-dark border-lightDark placeholder:text-middleDark"
         />
       </div>
-      <Table>
-        <TableHeader>
+      <Table className="bg-dark text-foreground">
+        <TableHeader className="text-foreground text-sm font-medium">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="border-lightDark">
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead key={header.id}>
@@ -121,6 +133,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className="border-lightDark"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -131,43 +144,63 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+              <TableCell
+                colSpan={columns.length}
+                className="h-[530px] text-center"
+              >
+                {isLoading ? "Loading..." : "No results."}
               </TableCell>
             </TableRow>
           )}
 
-          {table.getRowModel().rows.length < 10
+          {/* Below we render blank rows for completing 10 rows per page */}
+          {table.getRowModel().rows.length &&
+          table.getRowModel().rows.length < 10
             ? Array(10 - table.getRowModel().rows.length)
                 .fill(0)
                 .map((idx) => (
-                  <TableRow key={idx}>
+                  <TableRow key={idx} className="border border-lightDark">
                     <TableCell
                       colSpan={columns.length}
-                      className="h-[53px] text-center"
+                      className="text-center"
                     ></TableCell>
                   </TableRow>
                 ))
             : null}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 py-4 pr-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between space-x-2 py-4 pr-4">
+        {table.getPageCount() ? (
+          <p>
+            {currentPageNumber} / {table.getPageCount()}
+          </p>
+        ) : (
+          <div></div>
+        )}
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setCurrentPageNumber(currentPageNumber - 1);
+              table.previousPage();
+            }}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setCurrentPageNumber(currentPageNumber + 1);
+              table.nextPage();
+            }}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
