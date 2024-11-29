@@ -19,7 +19,7 @@ ponder.on("UNIToken:setup", async ({ context }) => {
   const votingDelay = await onchainClient(context).getVotingDelay();
   const timelockDelay = await onchainClient(context).getTimelockDelay();
   const proposalThreshold = await onchainClient(context).getProposalThreshold();
-
+  
   await context.db.insert(DAO).values({
     id: daoId,
     votingPeriod,
