@@ -1,6 +1,6 @@
 import { Context, Event } from "@/generated";
 import { getValueFromEventArgs } from "./utils";
-import viemClient from "./viemClient";
+import onchainClient from "./onchainClient";
 import {
   Account,
   AccountBalance,
@@ -149,7 +149,8 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  const uniTokenAddress =
+    onchainClient(context).daoConfigParams[daoId].tokenAddress;
 
   // Create a new transfer record
   await context.db.insert(Transfers).values({
@@ -249,7 +250,7 @@ export const voteCast = async (
   });
 
   await context.db
-    .update(ProposalsOnchain, [proposalId, daoId].join("-"))
+    .update(ProposalsOnchain, { id: [proposalId, daoId].join("-") })
     .set((current) => ({
       againstVotes:
         (current.againstVotes ?? BigInt(0)) +
@@ -353,7 +354,9 @@ export const proposalExecuted = async (
     event.args,
     daoId
   );
-  await context.db.update(ProposalsOnchain, [proposalId, daoId].join("-")).set({
-    status: "EXECUTED",
-  });
+  await context.db
+    .update(ProposalsOnchain, { id: [proposalId, daoId].join("-") })
+    .set({
+      status: "EXECUTED",
+    });
 };

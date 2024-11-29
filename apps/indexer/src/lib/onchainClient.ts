@@ -1,20 +1,10 @@
-import { createPublicClient, getContract, http } from "viem";
-import { config, ViemConfig } from "../../config";
 import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
 import dotenv from "dotenv";
+import { Context } from "@/generated";
+import ponderConfig from "../../ponder.config";
 dotenv.config();
 
-const viemConfig =
-  config.viem[process.env.STATUS as "production" | "staging" | "test"];
-const ponderConfig =
-  config.ponder[process.env.STATUS as "production" | "staging" | "test"];
-
-const viemClient = (viemConfig: ViemConfig) => {
-  const publicClient = createPublicClient({
-    chain: viemConfig.chain,
-    transport: http(viemConfig.url),
-  });
-
+const onchainClient = (context: Context) => {
   const daoConfigParams = {
     UNI: {
       tokenAbi: UNITokenAbi,
@@ -24,64 +14,58 @@ const viemClient = (viemConfig: ViemConfig) => {
     },
   };
   const getTotalSupply = async (daoId: "UNI" = "UNI") => {
-    const tokenContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: daoConfigParams[daoId].tokenAbi,
       address: daoConfigParams[daoId].tokenAddress,
+      functionName: "totalSupply",
     });
-    return await tokenContract.read.totalSupply();
   };
 
   const getDecimals = async (daoId: "UNI" = "UNI") => {
-    const tokenContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: daoConfigParams[daoId].tokenAbi,
       address: daoConfigParams[daoId].tokenAddress,
+      functionName: "decimals",
     });
-    return await tokenContract.read.decimals();
   };
 
   const getQuorum = async (daoId: "UNI" = "UNI") => {
-    const governorContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
+      functionName: "quorumVotes",
     });
-    return await governorContract.read.quorumVotes();
   };
 
   const getProposalThreshold = async (daoId: "UNI" = "UNI") => {
-    const governorContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
+      functionName: "proposalThreshold",
     });
-    return await governorContract.read.proposalThreshold();
   };
 
   const getVotingDelay = async (daoId: "UNI" = "UNI") => {
-    const governorContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
+      functionName: "votingDelay",
     });
-    return await governorContract.read.votingDelay();
   };
 
   const getVotingPeriod = async (daoId: "UNI" = "UNI") => {
-    const governorContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
+      functionName: "votingPeriod",
     });
-    return await governorContract.read.votingPeriod();
   };
 
   const getTimelockDelay = async (daoId: "UNI" = "UNI") => {
-    const governorContract = getContract({
-      client: publicClient,
+    const timelockAddress = await context.client.readContract({
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
+      functionName: "timelock",
     });
     const timelockAbi = [
       {
@@ -94,13 +78,11 @@ const viemClient = (viemConfig: ViemConfig) => {
         type: "function",
       },
     ] as const;
-    const timelockAddress = await governorContract.read.timelock();
-    const timelockContract = getContract({
-      client: publicClient,
+    return await context.client.readContract({
       abi: timelockAbi,
       address: timelockAddress,
+      functionName: "delay",
     });
-    return await timelockContract.read.delay();
   };
 
   return {
@@ -115,4 +97,4 @@ const viemClient = (viemConfig: ViemConfig) => {
   };
 };
 
-export default viemClient(viemConfig);
+export default onchainClient;
