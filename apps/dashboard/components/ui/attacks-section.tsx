@@ -6,6 +6,12 @@ import { AnimatedNumber } from "./animated-number";
 import { AttacksIcon } from "./attacks-icon";
 import { sanitizeNumber } from "@/lib/client/utils";
 import { approxScaleBigInt } from "@namehash/ens-utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip";
+import { InfoIcon } from "./info-icon";
 
 export const AttacksSection = () => {
   const { daoData, tokenPrice } = useContext(DaoDataContext);
@@ -43,9 +49,20 @@ export const AttacksSection = () => {
       </div>
       <div className="bg-dark rounded-[4px] flex space-x-4">
         <div className="w-full flex flex-col">
-          <h3 className="text-foreground text-sm p-4 pb-2">
-            Delegates to Pass
-          </h3>
+          <div className="flex space-x-1.5 items-center mb-2">
+            <h3 className="text-foreground text-sm p-4 pb-2">
+              Delegates to Pass
+            </h3>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoIcon />
+              </TooltipTrigger>
+              <TooltipContent className="bg-dark border-foreground m-1">
+                <p className="text-white"></p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
           <div className="flex w-full justify-between p-4 pt-0">
             <div className="flex flex-col space-y-1 w-1/2">
               <p className="text-2xl font-semibold text-white flex justify-center lg:justify-start">
