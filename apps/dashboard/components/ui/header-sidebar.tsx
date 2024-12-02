@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UniswapIcon } from "./uniswap-icon";
+import { UniswapIcon } from "@/components/01-atoms";
 import { ConnectWallet } from "./connect-wallet";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toggleScreenScroll } from "@/lib/client/utils";

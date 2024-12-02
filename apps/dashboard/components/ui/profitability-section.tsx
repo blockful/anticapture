@@ -1,4 +1,4 @@
-import { DollarIcon } from "./dolar-icon";
+import { DollarIcon } from "@/components/01-atoms";
 
 export const ProfitabilitySection = () => {
   return (

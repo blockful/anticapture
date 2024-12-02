@@ -5,8 +5,8 @@ import { useContext, useEffect, useState } from "react";
 import { DAO } from "@/lib/server/backend";
 
 import { AnimatedNumber } from "./animated-number";
-import { DaoDataContext } from "../contexts/dao-data-provider";
-import { SupplyIcon } from "./supply-icon";
+import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { SupplyIcon } from "@/components/01-atoms";
 
 export const SupplySection = () => {
   const { daoData } = useContext(DaoDataContext);

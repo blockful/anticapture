@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
 import { Button } from "./button";
@@ -7,8 +8,7 @@ import { ArrowUpDown } from "lucide-react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { RED_COLOR, GREEN_COLOR, sanitizeNumber } from "@/lib/client/utils";
 import { Holders, holdersData, IsDelegated } from "@/lib/mocked-data";
-import { useEffect, useState } from "react";
-import { HandIcon } from "./hand-icon";
+import { HandIcon } from "@/components/01-atoms";
 
 export const holdersColumns: ColumnDef<Holders>[] = [
   {
