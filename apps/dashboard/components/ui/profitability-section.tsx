@@ -14,9 +14,9 @@ export const ProfitabilitySection = () => {
           <h3 className="text-foreground text-sm text-left mb-2">Cost/Drain</h3>
           <div>
             <p className="text-2xl font-semibold text-white mb-1">
-              <div className="flex space-x-2">
+              {/* <div className="flex space-x-2">
                 <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
-              </div>
+              </div> */}
             </p>
           </div>
         </div>
