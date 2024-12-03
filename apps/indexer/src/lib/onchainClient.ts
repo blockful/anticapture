@@ -22,6 +22,7 @@ const onchainClient = (context: Context) => {
 
   const getTotalSupply = async (daoId: "UNI" = "UNI") => {
     const blockNumber = await publicClient.getBlockNumber();
+    console.log(blockNumber);
     return await context.client.readContract({
       abi: daoConfigParams[daoId].tokenAbi,
       address: daoConfigParams[daoId].tokenAddress,
@@ -72,6 +73,7 @@ const onchainClient = (context: Context) => {
 
   const getVotingPeriod = async (daoId: "UNI" = "UNI") => {
     const blockNumber = await publicClient.getBlockNumber();
+    console.log(blockNumber);
     const votingPeriod = await context.client.readContract({
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,

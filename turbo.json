@@ -35,6 +35,8 @@
       "persistent": true,
       "dependsOn": ["^build"]
     },
-    "apply-migration": {}
+    "apply-migration": {},
+    "restore-database": {},
+    "dump-database": {}
   }
 }

@@ -12,13 +12,13 @@
     "test": "jest --detectOpenHandles",
     "clear-database": "tsx ./test/lib/database/clearDatabase.script.ts",
     "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dump-database": "rm -rf dump && pg_dump $DATABASE_URL -n ponder_sync > dump",
+    "restore-database": "psql -d $DATABASE_URL < dump"
   },
   "dependencies": {
     "@ponder/core": "^0.7.11",
-    "@viem/anvil": "^0.0.10",
-    "hono": "^4.5.0",
-    "viem": "^2.21.9"
+    "hono": "^4.5.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.4",
