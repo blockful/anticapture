@@ -1,0 +1,22 @@
+FROM node:20 AS pruner
+RUN npm i -g pnpm dotenv-cli
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY . .
+RUN dotenv -e ./.env -- bash -c 'echo "$DATABASE_URL"'
+RUN pnpm add -g turbo
+RUN turbo prune --docker @defendao/indexer
+
+FROM node:20 AS release
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+RUN npm i -g pnpm 
+RUN echo ${DATABASE_URL}
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+WORKDIR /app/
+COPY --from=pruner /app/out/full/ .
+COPY --from=pruner /app/.env .
+RUN pnpm install
+CMD [ "pnpm", "start:indexer"]
