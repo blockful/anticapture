@@ -22,68 +22,68 @@ export const AttacksSection = () => {
     if (daoData) {
       setFiftyPercentPlusOneDelegatedTokensCount(
         (BigInt(daoData.totalVotingPower) / BigInt(2) + BigInt(1)) /
-          BigInt(10) ** BigInt(18)
+          BigInt(10) ** BigInt(18),
       );
     }
     if (tokenPrice && daoData) {
       setFiftyPercentPlusOneAverageTurnoutTokensCount(
         (BigInt(daoData.averageTurnout) / BigInt(2) + BigInt(1)) /
-          BigInt(10) ** BigInt(18)
+          BigInt(10) ** BigInt(18),
       );
     }
   }, [daoData, tokenPrice]);
 
   return (
-    <div className="flex flex-col text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left border border-lightDark rounded-lg p-3">
-      <div className="flex space-x-3 items-center pb-4">
+    <div className="flex flex-col rounded-lg border border-lightDark p-3 text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
+      <div className="flex items-center space-x-3 pb-4">
         <AttacksIcon />
-        <h1 className="text-lg text-white text-left font-medium">
+        <h1 className="text-left text-lg font-medium text-white">
           Attack Costs
         </h1>
       </div>
-      <div className="bg-dark rounded-[4px] flex space-x-4">
-        <div className="w-full flex flex-col">
-          <h3 className="text-foreground text-sm p-4 pb-2">
+      <div className="flex space-x-4 rounded-[4px] bg-dark">
+        <div className="flex w-full flex-col">
+          <h3 className="p-4 pb-2 text-sm text-foreground">
             Delegates to Pass
           </h3>
           <div className="flex w-full justify-between p-4 pt-0">
-            <div className="flex flex-col space-y-1 w-1/2">
-              <p className="text-2xl font-semibold text-white flex justify-center lg:justify-start">
+            <div className="flex w-1/2 flex-col space-y-1">
+              <p className="flex justify-center text-2xl font-semibold text-white lg:justify-start">
                 Top{" "}
-                {daoData ? (
+                {daoData && daoData.attackCosts ? (
                   <AnimatedNumber
                     num={
                       daoData.attackCosts.topActiveDelegatesForTotalVotingPower
                     }
                   />
                 ) : (
-                  <div className="bg-gray-200 h-8 w-6 rounded-md ml-1"></div>
+                  <div className="ml-1 h-8 w-6 rounded-md bg-gray-200"></div>
                 )}
               </p>
-              <p className="text-xs text-foreground font-medium">
+              <p className="text-xs font-medium text-foreground">
                 based on active delegates
               </p>
             </div>
-            <div className="flex flex-col space-y-1 w-1/2">
-              <p className="text-2xl font-semibold text-white flex justify-center lg:justify-start">
+            <div className="flex w-1/2 flex-col space-y-1">
+              <p className="flex justify-center text-2xl font-semibold text-white lg:justify-start">
                 Top{" "}
-                {daoData ? (
+                {daoData && daoData.attackCosts ? (
                   <AnimatedNumber
                     num={daoData.attackCosts.topDelegatesForActiveVotingPower}
                   />
                 ) : (
-                  <div className="bg-gray-200 h-8 w-6 rounded-md ml-1"></div>
+                  <div className="ml-1 h-8 w-6 rounded-md bg-gray-200"></div>
                 )}
               </p>
-              <p className="text-xs text-foreground font-medium">
+              <p className="text-xs font-medium text-foreground">
                 based on all delegates
               </p>
             </div>
           </div>
           <div className="w-full border-t border-lightDark">
-            <h3 className="text-foreground text-sm p-4 pb-2">Cost to Pass</h3>
+            <h3 className="p-4 pb-2 text-sm text-foreground">Cost to Pass</h3>
             <div className="flex w-full justify-between p-4 pt-0">
-              <div className="flex flex-col space-y-1 w-1/2 items-center lg:items-start">
+              <div className="flex w-1/2 flex-col items-center space-y-1 lg:items-start">
                 <p className="text-2xl font-semibold text-white">
                   {fiftyPercentPlusOneDelegatedTokensCount && tokenPrice ? (
                     <p className="text-3xl">
@@ -93,23 +93,23 @@ export const AttacksSection = () => {
                           approxScaleBigInt(
                             fiftyPercentPlusOneDelegatedTokensCount,
                             tokenPrice,
-                            BigInt(2)
-                          )
-                        )
+                            BigInt(2),
+                          ),
+                        ),
                       )}
                     </p>
                   ) : (
-                    <div className="text-3xl flex space-x-2">
+                    <div className="flex space-x-2 text-3xl">
                       <p>$</p>
-                      <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
+                      <div className="h-8 w-6 rounded-md bg-gray-200"></div>
                     </div>
                   )}
                 </p>
-                <p className="text-xs text-foreground font-medium w-fit">
+                <p className="w-fit text-xs font-medium text-foreground">
                   based on delegated supply
                 </p>
               </div>
-              <div className="flex flex-col space-y-1 w-1/2 items-center lg:items-start">
+              <div className="flex w-1/2 flex-col items-center space-y-1 lg:items-start">
                 <p className="text-2xl font-semibold text-white">
                   {fiftyPercentPlusOneAverageTurnoutTokensCount &&
                   tokenPrice ? (
@@ -120,19 +120,19 @@ export const AttacksSection = () => {
                           approxScaleBigInt(
                             fiftyPercentPlusOneAverageTurnoutTokensCount,
                             tokenPrice,
-                            BigInt(2)
-                          )
-                        )
+                            BigInt(2),
+                          ),
+                        ),
                       )}
                     </p>
                   ) : (
-                    <div className="text-3xl flex space-x-2">
+                    <div className="flex space-x-2 text-3xl">
                       <p>$</p>
-                      <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
+                      <div className="h-8 w-6 rounded-md bg-gray-200"></div>
                     </div>
                   )}
                 </p>
-                <p className="text-xs text-foreground font-medium">
+                <p className="text-xs font-medium text-foreground">
                   based on average turnout
                 </p>
               </div>
