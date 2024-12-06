@@ -1,6 +1,6 @@
 "use client";
 
-import { UniswapIcon } from "@/components/01-atoms";
+import { AboutUniswapSection } from "@/components/03-organisms";
 import { AttacksSection } from "../ui/attacks-section";
 import { DelegatesTable } from "../ui/delegates-table";
 import { HoldersTable } from "../ui/holders-table";
@@ -10,13 +10,8 @@ import { UncertaintySection } from "../ui/uncertainty-section";
 
 export const HomeTemplate = () => {
   return (
-    <main className="mx-auto flex flex-col items-center justify-between p-6 xl:overflow-auto">
-      <div className="mb-7 flex h-full w-full pt-12">
-        <h1 className="flex h-full w-full gap-3 text-left text-3xl font-semibold text-white">
-          <UniswapIcon className="text-foreground" />
-          About Uniswap
-        </h1>
-      </div>
+    <main className="mx-auto flex flex-col items-center gap-8 px-8 py-6 lg:gap-16 xl:overflow-auto">
+      <AboutUniswapSection />
       <div className="grid w-full grid-cols-1 grid-rows-[183px_auto] gap-4 md:grid-cols-2">
         <ProfitabilitySection />
         <UncertaintySection />
