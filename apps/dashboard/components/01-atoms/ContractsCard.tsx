@@ -16,17 +16,14 @@ import {
 
 export const ContractsCard = () => {
   return (
-    <div className="flex max-w-[250px] flex-col gap-3 rounded-lg border border-lightDark bg-dark shadow">
-      <div
-        id="card-header"
-        className="flex items-center gap-3 rounded-t-lg border-b border-lightDark px-4 py-3"
-      >
+    <div className="card-container-about">
+      <div className="card-header-about">
         <NewspaperIcon />
-        <h1 className="text-base font-normal leading-normal">Contracts</h1>
+        <h1 className="card-header-about-text">Contracts</h1>
       </div>
-      <div id="card-body" className="flex flex-col gap-4 px-3">
-        <div id="card-description" className="flex flex-col gap-2 p-1">
-          <div id="title" className="flex items-center gap-1.5">
+      <div className="card-body-about">
+        <div className="card-description-about">
+          <div className="card-description-title">
             <h1 className="text-foreground">Onchain Gov</h1>
             <Tooltip>
               <TooltipTrigger>
@@ -40,20 +37,20 @@ export const ContractsCard = () => {
             </Tooltip>
           </div>
           <div className="flex gap-2">
-            <button>
-              <Badge>
+            <button className="w-full">
+              <Badge className="w-full">
                 <CrownIcon /> Governor
               </Badge>
             </button>
-            <button>
-              <Badge>
+            <button className="w-full">
+              <Badge className="w-full">
                 <TokensIcon /> Token
               </Badge>
             </button>
           </div>
         </div>
-        <div id="card-description" className="flex flex-col gap-2 p-1">
-          <div id="title" className="flex items-center gap-1.5">
+        <div className="card-description-about">
+          <div className="card-description-title">
             <h1 className="text-foreground">OffChain Gov</h1>
             <Tooltip>
               <TooltipTrigger>
@@ -67,13 +64,13 @@ export const ContractsCard = () => {
             </Tooltip>
           </div>
           <div className="flex gap-2">
-            <button>
-              <Badge>
+            <button className="w-full">
+              <Badge className="w-full">
                 <FocusIcon /> Snapshot
               </Badge>
             </button>
-            <button>
-              <Badge>
+            <button className="w-full">
+              <Badge className="w-full">
                 <TokensIcon /> Token
               </Badge>
             </button>
