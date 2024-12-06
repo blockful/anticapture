@@ -1,9 +1,9 @@
 import { AttacksSection } from "@/components/ui/attacks-section";
 import { DelegatesTable } from "@/components/ui/delegates-table";
 import { HoldersTable } from "@/components/ui/holders-table";
-import { InactiveDelegationsSection } from "@/components/ui/inactive-delegations-section";
 import { ProfitabilitySection } from "@/components/ui/profitability-section";
 import { SupplySection } from "@/components/ui/supply-section";
+import { UncertaintySection } from "@/components/ui/uncertainty-section";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default function Home() {
       </h1>
       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 grid-rows-[183px_auto]">
         <ProfitabilitySection />
-        <InactiveDelegationsSection />
+        <UncertaintySection />
         <AttacksSection />
         <SupplySection />
       </div>

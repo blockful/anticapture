@@ -1,17 +1,20 @@
 {
   "name": "defendao",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "DefenDAO Monorepo",
   "scripts": {
     "start": "dotenv -- turbo start",
     "build": "dotenv -- turbo build",
     "build:server": "dotenv -- turbo run build --filter=@defendao/server",
+    "build:dashboard": "dotenv -- turbo run build --filter=@defendao/dashboard",
     "dev:server": "dotenv -- turbo run dev --filter=@defendao/server",
+    "dev:dashboard": "dotenv -- turbo run dev --filter=@defendao/dashboard",
     "install:dashboard": "cd ./apps/dashboard && npm install",
     "install:indexer": "cd ./apps/indexer && npm install",
     "install:server": "cd ./apps/server && npm install",
-    "start:server": "dotenv -- turbo run start --filter=@defendao/server",
+    "start:dashboard": "dotenv -- turbo run start --filter=@defendao/dashboard",
     "start:indexer": "dotenv -- turbo run start --filter=@defendao/indexer",
+    "start:server": "dotenv -- turbo run start --filter=@defendao/server",
     "apply-migration": "dotenv -- turbo run apply-migration --filter=@defendao/server"
   },
   "author": "",
@@ -19,6 +22,7 @@
   "dependencies": {
     "@defendao/indexer": "./apps/indexer",
     "@defendao/server": "./apps/server",
+    "@defendao/dashboard": "./apps/dashboard",
     "turbo": "^2.3.1"
   },
   "packageManager": "pnpm@9.14.2",

@@ -8,7 +8,7 @@ import { AnimatedNumber } from "./animated-number";
 import { DaoDataContext } from "../contexts/dao-data-provider";
 import { UncertaintyIcon } from "./uncertainty-icon";
 
-export const InactiveDelegationsSection = () => {
+export const UncertaintySection = () => {
   const { daoData } = useContext(DaoDataContext);
 
   const [totalSupply, setTotalSupply] = useState<number | null>(null);
