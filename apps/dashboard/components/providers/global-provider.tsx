@@ -10,6 +10,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { DaoDataProvider } from "@/components/contexts/dao-data-provider";
 import { wagmiConfig } from "@/lib/wallet";
 import { DaoName } from "@/lib/server/backend";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 const queryClient = new QueryClient();
 
@@ -22,13 +23,15 @@ export const GlobalProviders = ({
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <DaoDataProvider daoName={DaoName.UNISWAP}>
-          <RainbowKitProvider
-            theme={lightTheme({
-              accentColor: "#E66AE9",
-            })}
-          >
-            {children}
-          </RainbowKitProvider>
+          <TooltipProvider>
+            <RainbowKitProvider
+              theme={lightTheme({
+                accentColor: "#E66AE9",
+              })}
+            >
+              {children}
+            </RainbowKitProvider>
+          </TooltipProvider>
         </DaoDataProvider>
       </QueryClientProvider>
     </WagmiProvider>
