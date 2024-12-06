@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { AttacksIcon } from "@/components/01-atoms";
+import { AttacksIcon, InfoIcon } from "@/components/01-atoms";
 import { sanitizeNumber } from "@/lib/client/utils";
 import { approxScaleBigInt } from "@namehash/ens-utils";
 import {
@@ -11,7 +11,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
-import { InfoIcon } from "./info-icon";
 
 export const AttacksSection = () => {
   const { daoData, tokenPrice } = useContext(DaoDataContext);

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { GlobalProviders } from "@/components/providers/global-provider";
 import { ReactNode } from "react";
-import { HeaderSidebar } from "@/components/ui/header-sidebar";
+import { HeaderSidebar } from "@/components/02-molecules";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +18,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
-        className={`${inter.className} bg-darkest overflow-x-hidden xl:overflow-hidden`}
+        className={`${inter.className} overflow-x-hidden bg-darkest xl:overflow-hidden`}
       >
         <GlobalProviders>
           <HeaderSidebar />
-          <div className="xl:ml-[330px] xl:overflow-auto xl:max-h-screen">
+          <div className="xl:ml-[330px] xl:max-h-screen xl:overflow-auto">
             {children}
           </div>
         </GlobalProviders>

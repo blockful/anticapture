@@ -1,5 +1,3 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { publicClient } from "@/lib/wallet";
 import { Address } from "viem";
 
@@ -10,10 +8,6 @@ export type User = {
 
 export const BACKEND_ENDPOINT =
   "https://gov-indexer-backend-production.up.railway.app";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export const bulkGetEnsName = async (addresses: Address[]) => {
   const names = [];

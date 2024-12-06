@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { UniswapIcon } from "@/components/01-atoms";
-import { ConnectWallet } from "./connect-wallet";
+import { ConnectWallet } from "@/components/ui/connect-wallet";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toggleScreenScroll } from "@/lib/client/utils";
 
@@ -23,25 +23,25 @@ export const HeaderSidebar = () => {
         style={{
           transform: displaySidebar ? "translateX(284px)" : "",
         }}
-        className="z-50 fixed top-6 left-6 border border-middleDark hover:bg-dark group transition rounded-full bg-darkest text-xs p-2 xl:hidden"
+        className="group fixed left-6 top-6 z-50 rounded-full border border-middleDark bg-darkest p-2 text-xs transition hover:bg-dark xl:hidden"
       >
         {displaySidebar ? (
-          <ChevronLeft className="w-4 h-4 group-hover:text-foreground text-middleDark" />
+          <ChevronLeft className="h-4 w-4 text-middleDark group-hover:text-foreground" />
         ) : (
-          <ChevronRight className="w-4 h-4 group-hover:text-foreground text-middleDark" />
+          <ChevronRight className="h-4 w-4 text-middleDark group-hover:text-foreground" />
         )}
       </button>
       <header
         style={{
           transform: displaySidebar ? "translateX(0px)" : "translateX(-354px)",
         }}
-        className="z-40 absolute transition xl:absolute top-0 left-0 xl:transform xl:!translate-x-0 bg-dark border-l-none border-t-none border-b-none border border-middleDark w-[330px] h-screen shadow-lg flex flex-col space-x-6 space-y-12 items-start justify-start p-6"
+        className="border-l-none border-t-none border-b-none absolute left-0 top-0 z-40 flex h-screen w-[330px] flex-col items-start justify-start space-x-6 space-y-12 border border-middleDark bg-dark p-6 shadow-lg transition xl:absolute xl:!translate-x-0 xl:transform"
       >
-        <div className="flex space-x-2 items-center">
-          <div className="p-1.5 bg-lightDark border-middleDark border rounded-[6px]">
-            <UniswapIcon />
+        <div className="flex items-center space-x-2">
+          <div className="rounded-[6px] border border-middleDark bg-lightDark p-1.5">
+            <UniswapIcon className="h-5 w-5 text-[#FC72FF]" />
           </div>
-          <h1 className="font-semibold text-sm text-white">Uniswap GovRisk</h1>
+          <h1 className="text-sm font-semibold text-white">Uniswap GovRisk</h1>
         </div>
         <ConnectWallet />
       </header>
