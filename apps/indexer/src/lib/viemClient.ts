@@ -1,93 +1,87 @@
+import { createPublicClient, getContract, http } from "viem";
+import { config, ViemConfig } from "../../config";
+import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
 import dotenv from "dotenv";
-import { Context } from "@/generated";
-import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
 dotenv.config();
 
-const onchainClient = (context: Context) => {
-  const daoConfigParams = {
-    UNI: {
-      tokenAbi: context.contracts.UNIToken.abi,
-      tokenAddress: context.contracts.UNIToken.address,
-      governorAbi: context.contracts.UNIGovernor.abi,
-      governorAddress: context.contracts.UNIGovernor.address,
-    },
-  };
+const viemConfig =
+  config.viem[process.env.STATUS as "production" | "staging" | "test"];
+const ponderConfig =
+  config.ponder[process.env.STATUS as "production" | "staging" | "test"];
 
+const viemClient = (viemConfig: ViemConfig) => {
   const publicClient = createPublicClient({
-    chain: mainnet,
-    transport: http(process.env.PONDER_RPC_URL_1),
+    chain: viemConfig.chain,
+    transport: http(viemConfig.url),
   });
 
-
+  const daoConfigParams = {
+    UNI: {
+      tokenAbi: UNITokenAbi,
+      tokenAddress: ponderConfig.contracts.UNIToken.address,
+      governorAbi: UNIGovernorAbi,
+      governorAddress: ponderConfig.contracts.UNIGovernor.address,
+    },
+  };
   const getTotalSupply = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    return await context.client.readContract({
+    const tokenContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].tokenAbi,
       address: daoConfigParams[daoId].tokenAddress,
-      functionName: "totalSupply",
-      blockNumber,
     });
+    return await tokenContract.read.totalSupply();
   };
 
   const getDecimals = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    return await context.client.readContract({
+    const tokenContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].tokenAbi,
       address: daoConfigParams[daoId].tokenAddress,
-      functionName: "decimals",
-      blockNumber,
     });
+    return await tokenContract.read.decimals();
   };
 
   const getQuorum = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    return await context.client.readContract({
+    const governorContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
-      functionName: "quorumVotes",
-      blockNumber,
     });
+    return await governorContract.read.quorumVotes();
   };
 
   const getProposalThreshold = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    return await context.client.readContract({
+    const governorContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
-      functionName: "proposalThreshold",
-      blockNumber,
     });
+    return await governorContract.read.proposalThreshold();
   };
 
   const getVotingDelay = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    return await context.client.readContract({
+    const governorContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
-      functionName: "votingDelay",
-      blockNumber,
     });
+    return await governorContract.read.votingDelay();
   };
 
   const getVotingPeriod = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    const votingPeriod = await context.client.readContract({
+    const governorContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
-      functionName: "votingPeriod",
-      blockNumber,
     });
-    return votingPeriod;
+    return await governorContract.read.votingPeriod();
   };
 
   const getTimelockDelay = async (daoId: "UNI" = "UNI") => {
-    const blockNumber = await publicClient.getBlockNumber();
-    const timelockAddress = await context.client.readContract({
+    const governorContract = getContract({
+      client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
       address: daoConfigParams[daoId].governorAddress,
-      functionName: "timelock",
-      blockNumber,
     });
     const timelockAbi = [
       {
@@ -100,12 +94,13 @@ const onchainClient = (context: Context) => {
         type: "function",
       },
     ] as const;
-    return await context.client.readContract({
+    const timelockAddress = await governorContract.read.timelock();
+    const timelockContract = getContract({
+      client: publicClient,
       abi: timelockAbi,
       address: timelockAddress,
-      functionName: "delay",
-      blockNumber,
     });
+    return await timelockContract.read.delay();
   };
 
   return {
@@ -120,4 +115,4 @@ const onchainClient = (context: Context) => {
   };
 };
 
-export default onchainClient;
+export default viemClient(viemConfig);
