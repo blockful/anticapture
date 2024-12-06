@@ -1,6 +1,6 @@
 import { createConfig, loadBalance } from "@ponder/core";
 import { http } from "viem";
-import dotenv from "dotenv";
+import dotenv from "dotenv"; 
 import { config } from "./config";
 dotenv.config();
 
