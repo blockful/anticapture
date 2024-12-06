@@ -11,6 +11,7 @@ const config: Config = {
     extend: {
       screens: {
         xl: "1200px",
+        xl4k: "2000px",
       },
       colors: {
         darkest: "#09090B",

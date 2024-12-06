@@ -1,6 +1,6 @@
 "use client";
 
-import { UniswapIcon } from "@/components/01-atoms";
+import { ContractsCard, UniswapIcon } from "@/components/01-atoms";
 
 export const AboutUniswapSection = () => {
   return (
@@ -11,8 +11,8 @@ export const AboutUniswapSection = () => {
           About Uniswap
         </h1>
       </div>
-      <div className="grid text-white lg:grid-cols-4">
-        <div>CARD 1</div>
+      <div className="grid text-white md:grid-cols-2 lg:grid-cols-4">
+        <ContractsCard />
         <div>CARD 2</div>
         <div>CARD 3</div>
         <div>card 4</div>
