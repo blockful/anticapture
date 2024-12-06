@@ -1,4 +1,4 @@
-import { createPublicClient, getContract, http } from "viem";
+import { createPublicClient, getContract, http, webSocket } from "viem";
 import { config, ViemConfig } from "../../config";
 import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
 import dotenv from "dotenv";
@@ -12,7 +12,7 @@ const ponderConfig =
 const viemClient = (viemConfig: ViemConfig) => {
   const publicClient = createPublicClient({
     chain: viemConfig.chain,
-    transport: http(viemConfig.url),
+    transport: webSocket(viemConfig.url),
   });
 
   const daoConfigParams = {

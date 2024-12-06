@@ -1,5 +1,5 @@
 import { createConfig, loadBalance } from "@ponder/core";
-import { http } from "viem";
+import { http, webSocket } from "viem";
 import dotenv from "dotenv"; 
 import { config } from "./config";
 dotenv.config();
@@ -33,7 +33,7 @@ export default createConfig({
       transport:
         networks.rpcUrls.length > 1
           ? loadBalance(networks.rpcUrls.map((url) => http(url)))
-          : http(networks.rpcUrls[0]),
+          : webSocket(networks.rpcUrls[0]),
       maxRequestsPerSecond: 10000,
     },
     anvil: {
