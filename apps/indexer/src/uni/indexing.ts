@@ -8,40 +8,46 @@ import {
   tokenTransfer,
   voteCast,
 } from "../lib/event-handlers";
-import onchainClient from "../lib/onchainClient";
-import { DAO, DAOToken, Token } from "../../ponder.schema";
+import viemClient from "../lib/viemClient";
 
 const daoId = "UNI";
 
 ponder.on("UNIToken:setup", async ({ context }) => {
-  const votingPeriod = await onchainClient(context).getVotingPeriod();
-  const quorum = await onchainClient(context).getQuorum();
-  const votingDelay = await onchainClient(context).getVotingDelay();
-  const timelockDelay = await onchainClient(context).getTimelockDelay();
-  const proposalThreshold = await onchainClient(context).getProposalThreshold();
-  
-  await context.db.insert(DAO).values({
+  const { DAO, Token, DAOToken } = context.db;
+
+  const votingPeriod = await viemClient.getVotingPeriod();
+  const quorum = await viemClient.getQuorum();
+  const votingDelay = await viemClient.getVotingDelay();
+  const timelockDelay = await viemClient.getTimelockDelay();
+  const proposalThreshold = await viemClient.getProposalThreshold();
+
+  await DAO.create({
     id: daoId,
-    votingPeriod,
-    quorum,
-    votingDelay,
-    timelockDelay,
-    proposalThreshold,
+    data: {
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
+    },
   });
-  const totalSupply = await onchainClient(context).getTotalSupply();
-  const decimals = await onchainClient(context).getDecimals();
-  const uniTokenAddress =
-    onchainClient(context).daoConfigParams[daoId].tokenAddress;
-  await context.db.insert(Token).values({
+  const totalSupply = await viemClient.getTotalSupply();
+  const decimals = await viemClient.getDecimals();
+  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  await Token.create({
     id: uniTokenAddress,
-    name: daoId,
-    decimals,
-    totalSupply,
+    data: {
+      name: daoId,
+      decimals,
+      totalSupply,
+    },
   });
-  await context.db.insert(DAOToken).values({
+  await DAOToken.create({
     id: daoId + "-" + uniTokenAddress,
-    daoId,
-    tokenId: uniTokenAddress,
+    data: {
+      daoId,
+      tokenId: uniTokenAddress,
+    },
   });
 });
 

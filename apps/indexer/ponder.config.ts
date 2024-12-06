@@ -1,7 +1,7 @@
 import { createConfig, loadBalance } from "@ponder/core";
-import dotenv from "dotenv";
-import { config } from "./config";
 import { http } from "viem";
+import dotenv from "dotenv"; 
+import { config } from "./config";
 dotenv.config();
 
 let networks, contracts;
