@@ -19,7 +19,7 @@ export const ContractsCard = () => {
     <div className="flex max-w-[250px] flex-col gap-3 rounded-lg border border-lightDark bg-dark shadow">
       <div
         id="card-header"
-        className="flex gap-3 rounded-t-lg border-b border-lightDark px-4 py-3"
+        className="flex items-center gap-3 rounded-t-lg border-b border-lightDark px-4 py-3"
       >
         <NewspaperIcon />
         <h1 className="text-base font-normal leading-normal">Contracts</h1>
@@ -40,12 +40,16 @@ export const ContractsCard = () => {
             </Tooltip>
           </div>
           <div className="flex gap-2">
-            <Badge>
-              <CrownIcon /> Governor
-            </Badge>
-            <Badge>
-              <TokensIcon /> Token
-            </Badge>
+            <button>
+              <Badge>
+                <CrownIcon /> Governor
+              </Badge>
+            </button>
+            <button>
+              <Badge>
+                <TokensIcon /> Token
+              </Badge>
+            </button>
           </div>
         </div>
         <div id="card-description" className="flex flex-col gap-2 p-1">
@@ -63,12 +67,16 @@ export const ContractsCard = () => {
             </Tooltip>
           </div>
           <div className="flex gap-2">
-            <Badge>
-              <FocusIcon /> Snapshot
-            </Badge>
-            <Badge>
-              <TokensIcon /> Token
-            </Badge>
+            <button>
+              <Badge>
+                <FocusIcon /> Snapshot
+              </Badge>
+            </button>
+            <button>
+              <Badge>
+                <TokensIcon /> Token
+              </Badge>
+            </button>
           </div>
         </div>
       </div>
