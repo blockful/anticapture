@@ -1,4 +1,5 @@
-import { BACKEND_ENDPOINT } from "./utils";
+import { BACKEND_ENDPOINT } from "@/lib/server/utils";
+import { Address } from "viem";
 
 export interface DAO {
   activeDelegatesCount: number;
@@ -58,11 +59,11 @@ export enum ChainName {
   Ethereum = "ethereum",
 }
 
-export const TokenContract: Record<DaoName, `0x${string}`> = {
+export const TokenContract: Record<DaoName, Address> = {
   [DaoName.UNISWAP]: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
 };
 
-// Fetch Dao Token price from Defi Llama API
+/* Fetch Dao Token price from Defi Llama API */
 export const fetchTokenPrice = async (
   chainName: ChainName,
   daoName: DaoName

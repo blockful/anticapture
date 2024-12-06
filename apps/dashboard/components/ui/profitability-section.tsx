@@ -3,7 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
-import { DollarIcon } from "./dolar-icon";
+import { DollarIcon } from "@/components/01-atoms";
 import { InfoIcon } from "./info-icon";
 
 export const ProfitabilitySection = () => {
@@ -32,9 +32,9 @@ export const ProfitabilitySection = () => {
           </div>
           <div>
             <p className="text-2xl font-semibold text-white mb-1">
-              <div className="flex space-x-2">
+              {/* <div className="flex space-x-2">
                 <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
-              </div>
+              </div> */}
             </p>
           </div>
         </div>
