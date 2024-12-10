@@ -398,26 +398,30 @@ export class DaoService {
         WITH (
           SELECT SUM(t.amount) as "fromAmount" 
           FROM "Transfers" t 
-          WHERE timestamp < ${oldTimestamp}
-            AND t.from='${zeroAddress}'
+          WHERE t.from='${zeroAddress}' 
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${oldTimestamp}
         ) as "fromZeroAddressOld",
         (
           SELECT SUM(t.amount) as "toAmount" 
           FROM "Transfers" t 
-          WHERE timestamp < ${oldTimestamp}
-            AND t.to='${zeroAddress}'
+          WHERE t.to='${zeroAddress}' 
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${oldTimestamp}
         ) as "toZeroAddressOld",
         (
           SELECT SUM(t.amount) as "fromAmount" 
           FROM "Transfers" t 
-          WHERE timestamp < ${Date.now()}
-            AND t.from='${zeroAddress}'
+          WHERE t.from='${zeroAddress}' 
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${Date.now()}
         ) as "fromZeroAddressCurrent",
         (
           SELECT SUM(t.amount) as "toAmount" 
           FROM "Transfers" t 
-          WHERE timestamp < ${Date.now()}
-            AND t.to='${zeroAddress}'
+          WHERE t.to='${zeroAddress}' 
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${Date.now()}
         ) as "toZeroAddressCurrent"
         SELECT "fromZeroAddressOld"."fromAmount" - "toZeroAddressOld"."toAmount" as "oldTotalSupply" ,
         "fromZeroAddressCurrent"."fromAmount" - "toZeroAddressCurrent"."toAmount" as "currentTotalSupply"
