@@ -32,7 +32,8 @@
     "@types/pg": "^8.11.10",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "viem": "^2.21.54"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

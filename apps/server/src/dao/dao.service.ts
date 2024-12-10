@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { zeroAddress } from 'src/lib/constants';
+import { DaysEnum } from 'src/lib/enums/dateEnum';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { formatUnits } from 'viem';
 
 @Injectable()
 export class DaoService {
@@ -384,5 +387,50 @@ export class DaoService {
       topDelegatesForActiveVotingPower,
       topDelegatesForTotalVotingPower,
     };
+  }
+
+  async getTotalSupplyCompare(daoId: string, days: DaysEnum) {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(days.toString());
+    const totalSupplyCompare: {
+      oldTotalSupply: bigint;
+      currentTotalSupply: bigint;
+    } = await this.prisma.$queryRaw`
+        WITH (
+          SELECT SUM(t.amount) as "fromAmount" 
+          FROM "Transfers" t 
+          WHERE timestamp < ${oldTimestamp}
+            AND t.from='${zeroAddress}'
+        ) as "fromZeroAddressOld",
+        (
+          SELECT SUM(t.amount) as "toAmount" 
+          FROM "Transfers" t 
+          WHERE timestamp < ${oldTimestamp}
+            AND t.to='${zeroAddress}'
+        ) as "toZeroAddressOld",
+        (
+          SELECT SUM(t.amount) as "fromAmount" 
+          FROM "Transfers" t 
+          WHERE timestamp < ${Date.now()}
+            AND t.from='${zeroAddress}'
+        ) as "fromZeroAddressCurrent",
+        (
+          SELECT SUM(t.amount) as "toAmount" 
+          FROM "Transfers" t 
+          WHERE timestamp < ${Date.now()}
+            AND t.to='${zeroAddress}'
+        ) as "toZeroAddressCurrent"
+        SELECT "fromZeroAddressOld"."fromAmount" - "toZeroAddressOld"."toAmount" as "oldTotalSupply" ,
+        "fromZeroAddressCurrent"."fromAmount" - "toZeroAddressCurrent"."toAmount" as "currentTotalSupply"
+        FROM "fromZeroAddressOld" 
+        JOIN "toZeroAddressOld" ON 1=1
+        JOIN "fromZeroAddressCurrent" ON 1=1
+        JOIN "toZeroAddressCurrent" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (totalSupplyCompare.currentTotalSupply * BigInt(10e18)) /
+        totalSupplyCompare.oldTotalSupply,
+      18,
+    );
+    return { ...totalSupplyCompare, changeRate };
   }
 }

@@ -8,6 +8,7 @@ import {
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DaoService } from './dao.service';
 import { RequiredPipe } from 'src/lib/custom-pipes/requiredPipe';
+import { DaysEnum } from 'src/lib/enums/dateEnum';
 
 @ApiTags('dao')
 @Controller('dao')
@@ -162,6 +163,22 @@ export class DaoController {
       skip,
       orderBy,
       ordering,
+    );
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+  })
+  @Get('total-supply/compare/:daoId')
+  getTotalSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('days', new DefaultValuePipe(1)) days?: DaysEnum,
+  ) {
+    return this.daoService.getTotalSupplyCompare(
+      daoId,
+      days,
     );
   }
 }
