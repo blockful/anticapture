@@ -17,10 +17,10 @@ export class DaoService {
   ) {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
-      include: { DAOToken: { include: { tokenObj: true } } },
+      include: { dAOTokens: { include: { token: true } } },
     });
 
-    const totalSupply = dao.DAOToken[0].tokenObj.totalSupply;
+    const totalSupply = dao.dAOTokens[0].token.totalSupply;
     const votingPowerWithActivity = await this.votingPowerWithActivity(
       id,
       activeSince,
@@ -36,7 +36,7 @@ export class DaoService {
       votingPowerWithActivity,
       avgTurnoutAndApproval,
     );
-    delete dao.DAOToken;
+    delete dao.dAOTokens;
     return {
       ...dao,
       totalSupply,
@@ -51,29 +51,29 @@ export class DaoService {
       { activeDelegatesCount: string; activeVotingPower: string },
     ] = await this.prisma.$queryRaw`
         with lastActivityByUser as (
-          SELECT GREATEST(voc.timestamp, poc.timestamp) as "lastActivityTimestamp", voc.voter as user, voc.dao,
+          SELECT GREATEST(voc.timestamp, poc.timestamp) as "lastActivityTimestamp", voc."voterAccountId" as user, voc."daoId",
           case when GREATEST(voc.timestamp, poc.timestamp) >= CAST(${activeSince} as bigint) then true
             else false END
             as "active"
           FROM public."VotesOnchain" voc 
-          full outer join public."ProposalsOnchain" poc on voc."voter"=poc."proposer" 
+          full outer join public."ProposalsOnchain" poc on voc."voterAccountId"=poc."proposerAccountId" 
         )
         SELECT TEXT(COUNT(distinct lastActivityByUser.user)) as "activeDelegatesCount",
         TEXT(SUM(distinct activeAp."votingPower")) as "activeVotingPower"
         from lastActivityByUser
-        join "AccountPower" activeAp on activeAp.account=lastActivityByUser.user
-        where lastActivityByUser.dao=${id}
-        and activeAp.dao=${id}
+        join "AccountPower" activeAp on activeAp."accountId"=lastActivityByUser.user
+        where lastActivityByUser."daoId"=${id}
+        and activeAp."daoId"=${id}
         and lastActivityByUser.active=true
         and activeAp."delegationsCount">0;
       `;
     const totalVotingPowerAndCount: [
       { totalDelegatesCount: string; totalVotingPower: string },
     ] = await this.prisma.$queryRaw`
-      SELECT TEXT(COUNT(DISTINCT ap."account")) as "totalDelegatesCount", 
+      SELECT TEXT(COUNT(DISTINCT ap."accountId")) as "totalDelegatesCount", 
       TEXT(SUM(ap."votingPower")) as "totalVotingPower" 
       FROM "AccountPower" ap 
-      WHERE ap.dao=${id} and ap."delegationsCount">0;
+      WHERE ap."daoId"=${id} and ap."delegationsCount">0;
     `;
     return { ...activeVotingPowerAndCount[0], ...totalVotingPowerAndCount[0] };
   }
@@ -87,14 +87,14 @@ export class DaoService {
       .$queryRaw`
         select TEXT(AVG(po."forVotes" + po."againstVotes" + po."abstainVotes")) as "averageTurnout"
         from "ProposalsOnchain" po where po.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
-        AND po.status='EXECUTED' or po.status='CANCELED' AND po.dao=${id};
+        AND po.status='EXECUTED' or po.status='CANCELED' AND po."daoId"=${id};
       `;
     const averageApprovalVotesQtd: [{ averageApprovalVotes: string }] =
       await this.prisma.$queryRaw`
       select TEXT(AVG(po."forVotes")) as "averageApprovalVotes"
       from "ProposalsOnchain" po 
       where po.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
-      and po.status='EXECUTED'  AND po.dao=${id};
+      and po.status='EXECUTED'  AND po."daoId"=${id};
     `;
     return { ...averageTurnout[0], ...averageApprovalVotesQtd[0] };
   }
@@ -132,11 +132,11 @@ export class DaoService {
       TEXT(ap."delegationsCount") as "delegationsCount", 
       TEXT(COUNT(distinct voc.*)) as "proposalsVoted" 
       from "Account" a 
-      left join "AccountPower" ap on a.id=ap.account
-      left join "VotesOnchain" voc on voc.voter=a.id
+      left join "AccountPower" ap on a.id=ap."accountId"
+      left join "VotesOnchain" voc on voc."voterAccountId"=a.id
       where voc.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
       AND ap."votingPower" is not null
-      and ap.dao='${daoId}'
+      and ap."daoId"='${daoId}'
       group by a.id, ap."votingPower", ap."delegationsCount"
       order by ${orderByValues[orderBy]} ${ordering}
       offset ${skip} limit ${take};
@@ -172,12 +172,12 @@ export class DaoService {
       TEXT(ab.balance) as "amount",
       TEXT(COUNT(d.*)) as "countOfDelegates",
       TEXT(MAX(tr.timestamp)) as "lastBuy" from "Account" a 
-      left join "AccountBalance" ab on a.id=ab.account
-      right join "Token" t on t.id =ab.token
-      right join "DAOToken" dt on dt.token=t.id
-      right join "Transfers" tr on tr.to=a.id
-      left join "Delegations" d on a.id=d.delegator
-      where dt.dao='${daoId}'
+      left join "AccountBalance" ab on a.id=ab."accountId"
+      right join "Token" t on t.id =ab."tokenId"
+      right join "DAOToken" dt on dt."tokenId"=t.id
+      right join "Transfers" tr on tr."toAccountId"=a.id
+      left join "Delegations" d on a.id=d."delegatorAccountId"
+      where dt."daoId"='${daoId}'
       group by a.id, ab.balance
       order by ${orderByValues[orderBy]} ${ordering || 'DESC'}
       offset ${skip ?? 0} limit ${take ?? 10};
