@@ -12,3 +12,4 @@ export * from "./SupplyIcon";
 export * from "./TokensIcon";
 export * from "./UncertaintyIcon";
 export * from "./UniswapIcon";
+export * from "./UsersIcon";
