@@ -12,7 +12,9 @@
     "test": "jest --detectOpenHandles",
     "clear-database": "tsx ./test/lib/database/clearDatabase.script.ts",
     "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dump-database": "rm -rf dump && pg_dump $DATABASE_URL -n ponder_sync > dump",
+    "restore-database": "psql -d $DATABASE_URL < dump"
   },
   "dependencies": {
     "@ponder/core": "^0.6.22",
@@ -29,6 +31,7 @@
     "@types/pg": "^8.11.10",
     "axios": "^1.7.7",
     "babel-jest": "^29.7.0",
+    "dotenv": "^16.4.7",
     "eslint": "^8.53.0",
     "eslint-config-ponder": "^0.5.6",
     "eslint-config-prettier": "^9.1.0",

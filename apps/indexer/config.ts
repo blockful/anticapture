@@ -40,7 +40,7 @@ export const config = {
       networks: {
         name: "mainnet",
         chainId: 1,
-        rpcUrls: [process.env.PONDER_RPC_URL_1, process.env.PONDER_RPC_URL_2],
+        rpcUrls: [process.env.PONDER_RPC_URL_1],
       },
       contracts: {
         // ENSToken: {

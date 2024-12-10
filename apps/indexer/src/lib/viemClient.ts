@@ -1,18 +1,17 @@
-import { createPublicClient, getContract, http } from "viem";
+import { createPublicClient, getContract, http, webSocket } from "viem";
 import { config, ViemConfig } from "../../config";
 import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
 import dotenv from "dotenv";
+import { anvil, mainnet } from "viem/chains";
 dotenv.config();
 
-const viemConfig =
-  config.viem[process.env.STATUS as "production" | "staging" | "test"];
 const ponderConfig =
   config.ponder[process.env.STATUS as "production" | "staging" | "test"];
 
-const viemClient = (viemConfig: ViemConfig) => {
+const viemClient = () => {
   const publicClient = createPublicClient({
-    chain: viemConfig.chain,
-    transport: http(viemConfig.url),
+    chain: process.env.STATUS !== "test" ? mainnet : anvil,
+    transport: webSocket(process.env.PONDER_RPC_URL_1),
   });
 
   const daoConfigParams = {
@@ -115,4 +114,4 @@ const viemClient = (viemConfig: ViemConfig) => {
   };
 };
 
-export default viemClient(viemConfig);
+export default viemClient();

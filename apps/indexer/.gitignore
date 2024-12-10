@@ -16,3 +16,5 @@ yarn-error.log*
 # Ponder
 /generated/
 /.ponder/
+
+dump
