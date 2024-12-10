@@ -18,7 +18,7 @@ export class AccountService {
         transfersFrom: true,
         transfersTo: true,
         votesOnchain: true,
-        VotingPowerHistory: true,
+        votingPowerHistory: true,
       },
       skip,
       take,
@@ -36,7 +36,7 @@ export class AccountService {
         transfersFrom: true,
         transfersTo: true,
         votesOnchain: true,
-        VotingPowerHistory: true,
+        votingPowerHistory: true,
       },
       where: {
         id,

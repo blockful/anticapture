@@ -6,7 +6,7 @@ import {
   ChainName,
   fetchDaoData,
   fetchTokenPrice,
-} from "@/lib/backend";
+} from "@/lib/server/backend";
 import { createContext, useEffect, useState } from "react";
 
 interface DaoDataContext {

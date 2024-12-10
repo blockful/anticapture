@@ -21,7 +21,7 @@ export const rpcHttpUrl = `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}
 export const publicClient = createPublicClient({
   chain: mainnet,
   batch: { multicall: true },
-  transport: http(),
+  transport: http(rpcHttpUrl),
 });
 
 export const walletClient = createWalletClient({

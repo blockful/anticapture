@@ -12,6 +12,19 @@ export interface DAO {
   totalVotingPower: number;
   votingDelay: number;
   votingPeriod: number;
+  averageApprovalVotes: string;
+  averageTurnout: string;
+  attackCosts: {
+    activeVotingPowerCost: string;
+    averageTurnoutCost: string;
+    topActiveDelegatesForActiveVotingPower: number;
+    topActiveDelegatesForAverageTurnout: number;
+    topActiveDelegatesForTotalVotingPower: number;
+    topDelegatesForActiveVotingPower: number;
+    topDelegatesForAverageTurnout: number;
+    topDelegatesForTotalVotingPower: number;
+    totalVotingPowerCost: string;
+  };
 }
 
 export interface DAOVotingPower {

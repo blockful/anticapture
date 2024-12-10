@@ -9,7 +9,7 @@ import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { DaoDataProvider } from "../contexts/dao-data-provider";
 import { wagmiConfig } from "@/lib/wallet";
-import { DaoName } from "@/lib/backend";
+import { DaoName } from "@/lib/server/backend";
 
 const queryClient = new QueryClient();
 

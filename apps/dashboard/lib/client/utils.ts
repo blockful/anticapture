@@ -1,12 +1,12 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+export const toggleScreenScroll = () => {
+  const body = document.getElementsByTagName("body")[0];
 
-export const BACKEND_ENDPOINT =
-  "https://gov-indexer-backend-production.up.railway.app";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+  if (body.classList.contains("no-scroll")) {
+    body.classList.remove("no-scroll");
+  } else {
+    body.classList.add("no-scroll");
+  }
+};
 
 export function sanitizeNumber(amount: number) {
   const lookup = [
@@ -23,3 +23,6 @@ export function sanitizeNumber(amount: number) {
     ? (amount / item.value).toFixed(1).replace(regexp, "").concat(item.symbol)
     : "0";
 }
+
+export const RED_COLOR = "#FCA5A5";
+export const GREEN_COLOR = "#5BB98B";

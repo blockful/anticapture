@@ -4,29 +4,41 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
 import { Button } from "./button";
 import { ArrowUpDown, InfoIcon } from "lucide-react";
-import { useState } from "react";
-import { sanitizeNumber } from "@/lib/utils";
-
-export type Delegates = {
-  address: `0x${string}`;
-  amount: number;
-  delegators: number;
-  voted: number;
-};
+import { useEffect, useState } from "react";
+import { bulkGetEnsName, User } from "@/lib/server/utils";
+import { sanitizeNumber } from "@/lib/client/utils";
+import { Delegates, delegatesData } from "@/lib/mocked-data";
+import { HeartIcon } from "./HeartIcon";
 
 export const delegatesColumns: ColumnDef<Delegates>[] = [
   {
-    accessorKey: "address",
+    accessorKey: "user",
     cell: ({ row }) => {
-      const address: `0x${string}` = row.getValue("address");
+      const user: User = row.getValue("user");
+
+      const ensName = user.ensName;
+      const walletAddress = user.walletAddress;
+
+      const etherscanAddressURL: string = `https://etherscan.io/address/${user.walletAddress}`;
+      const ensDomainsAccountURL: string = `https://app.ens.domains/${ensName}`;
+
       return (
-        <>
-          {address.slice(0, 6)}...
-          {address.slice(address.length - 4, address.length)}
-        </>
+        <p className="max-w-40 overflow-auto flex items-center space-x-1 scrollbar-none">
+          {ensName ? (
+            <>
+              <a className="hover:underline" href={ensDomainsAccountURL}>
+                {ensName}
+              </a>
+              <p>|</p>
+            </>
+          ) : null}
+          <a className="hover:underline" href={etherscanAddressURL}>
+            {walletAddress}
+          </a>
+        </p>
       );
     },
-    header: "Address",
+    header: "Delegate",
   },
   {
     accessorKey: "amount",
@@ -101,115 +113,38 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
 ];
 
 export const DelegatesTable = () => {
-  const data: Delegates[] = [
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 1200000,
-      delegators: 2000,
-      voted: 0.96,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 200100000,
-      delegators: 1000,
-      voted: 0.6,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      delegators: 500,
-      voted: 0.76,
-    },
-  ];
+  const [data, setData] = useState<Delegates[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    bulkGetEnsName(delegatesData.map((holder) => holder.user.walletAddress))
+      .then((ensNames) => {
+        const data = delegatesData.map((holder, idx) => {
+          return {
+            ...holder,
+            user: {
+              ...holder.user,
+              ensName: ensNames[idx] || null,
+            },
+          };
+        });
+
+        setData(data);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
-    <div className="container mx-auto py-10">
-      <DataTable
-        withPagination={true}
-        withSorting={true}
-        filterColumn="address"
-        columns={delegatesColumns}
-        data={data}
-      />
-    </div>
+    <DataTable
+      title="Delegates"
+      icon={<HeartIcon />}
+      isLoading={isLoading}
+      withSorting={true}
+      withPagination={true}
+      filterColumn={"ensNameAndAddress"}
+      columns={delegatesColumns}
+      data={data}
+    />
   );
 };
 

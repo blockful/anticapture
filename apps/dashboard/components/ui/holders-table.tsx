@@ -4,35 +4,41 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
 import { Button } from "./button";
 import { ArrowUpDown } from "lucide-react";
-import { sanitizeNumber } from "@/lib/utils";
-
-const IsDelegated = {
-  Yes: "Yes",
-  No: "No",
-} as const;
-
-export type IsDelegated = (typeof IsDelegated)[keyof typeof IsDelegated];
-
-export type Holders = {
-  address: `0x${string}`;
-  amount: number;
-  delegated: IsDelegated;
-  lastBuy: Date;
-};
+import { bulkGetEnsName, User } from "@/lib/server/utils";
+import { RED_COLOR, GREEN_COLOR, sanitizeNumber } from "@/lib/client/utils";
+import { Holders, holdersData, IsDelegated } from "@/lib/mocked-data";
+import { useEffect, useState } from "react";
+import { HandIcon } from "./hand-icon";
 
 export const holdersColumns: ColumnDef<Holders>[] = [
   {
-    accessorKey: "address",
+    accessorKey: "user",
     cell: ({ row }) => {
-      const address: `0x${string}` = row.getValue("address");
+      const user: User = row.getValue("user");
+
+      const ensName = user.ensName;
+      const walletAddress = user.walletAddress;
+
+      const etherscanAddressURL = `https://etherscan.io/address/${user.walletAddress}`;
+      const ensDomainsAccountURL = `https://app.ens.domains/${ensName}`;
+
       return (
-        <>
-          {address.slice(0, 6)}...
-          {address.slice(address.length - 4, address.length)}
-        </>
+        <p className="text-white max-w-40 overflow-auto flex items-center space-x-1 scrollbar-none">
+          {ensName ? (
+            <>
+              <a className="hover:underline" href={ensDomainsAccountURL}>
+                {ensName}
+              </a>
+              <p>|</p>
+            </>
+          ) : null}
+          <a className="hover:underline" href={etherscanAddressURL}>
+            {walletAddress}
+          </a>
+        </p>
       );
     },
-    header: "Address",
+    header: "Holder",
   },
   {
     accessorKey: "amount",
@@ -79,7 +85,15 @@ export const holdersColumns: ColumnDef<Holders>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex justify-center items-center">
+        <div
+          className="flex justify-center items-center"
+          style={{
+            color:
+              row.getValue("delegated") === IsDelegated.No
+                ? RED_COLOR
+                : GREEN_COLOR,
+          }}
+        >
           {row.getValue("delegated")}
         </div>
       );
@@ -90,7 +104,11 @@ export const holdersColumns: ColumnDef<Holders>[] = [
     cell: ({ row }) => {
       const lastBuyDate: Date = row.getValue("lastBuy");
 
-      return <>{lastBuyDate.toLocaleString("en-US")}</>;
+      return (
+        <p className="mx-auto text-center">
+          {lastBuyDate.toLocaleString("en-US").split(",")[0]}
+        </p>
+      );
     },
     header: ({ column }) => {
       return (
@@ -107,126 +125,37 @@ export const holdersColumns: ColumnDef<Holders>[] = [
 ];
 
 export const HoldersTable = () => {
-  const data: Holders[] = [
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 120000000,
-      lastBuy: new Date(180000000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 20000000,
-      lastBuy: new Date(180000000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180050000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180000300000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180200000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180000050000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180500000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180000001000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180000000900),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180000500000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(185000000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180000000600),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180000600000),
-      delegated: IsDelegated.No,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180007000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180000000800),
-      delegated: IsDelegated.No,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180000000000),
-      delegated: IsDelegated.No,
-    },
-    {
-      address: "0xFAFaC5F0571aa0F12A156FFdCD37E8a7dd694c4F",
-      amount: 10000000,
-      lastBuy: new Date(180600000000),
-      delegated: IsDelegated.Yes,
-    },
-    {
-      address: "0xBbCdd0B478E9c2a34b779C27AA17Db4bA7DBa7cf",
-      amount: 10000000,
-      lastBuy: new Date(180040000000),
-      delegated: IsDelegated.Yes,
-    },
-  ];
+  const [data, setData] = useState<Holders[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    bulkGetEnsName(holdersData.map((holder) => holder.user.walletAddress))
+      .then((ensNames) => {
+        const data = holdersData.map((holder, idx) => {
+          return {
+            ...holder,
+            user: {
+              ...holder.user,
+              ensName: ensNames[idx] || null,
+            },
+          };
+        });
+
+        setData(data);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
-    <div className="container mx-auto py-10">
-      <DataTable
-        withPagination={true}
-        withSorting={true}
-        filterColumn="address"
-        columns={holdersColumns}
-        data={data}
-      />
-    </div>
+    <DataTable
+      title="Holders"
+      icon={<HandIcon />}
+      isLoading={isLoading}
+      withSorting={true}
+      withPagination={true}
+      filterColumn={"ensNameAndAddress"}
+      columns={holdersColumns}
+      data={data}
+    />
   );
 };
