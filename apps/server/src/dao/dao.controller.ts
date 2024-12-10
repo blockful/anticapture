@@ -181,4 +181,20 @@ export class DaoController {
       days,
     );
   }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+  })
+  @Get('total-supply/compare/:daoId')
+  getDelegatedSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('days', new DefaultValuePipe(1)) days?: DaysEnum,
+  ) {
+    return this.daoService.getDelegatedSupplyCompare(
+      daoId,
+      days,
+    );
+  }
 }

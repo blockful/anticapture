@@ -433,4 +433,30 @@ export class DaoService {
     );
     return { ...totalSupplyCompare, changeRate };
   }
+
+  async getDelegatedSupplyCompare(daoId: string, days: DaysEnum) {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(days.toString());
+    const delegatedSupplyCompare: {
+      oldDelegatedSupply: bigint;
+      currentDelegatedSupply: bigint;
+    } = await this.prisma.$queryRaw`
+    WITH (
+      SELECT GREATEST(vp.timestamp), DISTINCT vp.accountId, vp."votingPower"
+      FROM "VotingPower" vp WHERE vp.timestamp<${oldTimestamp} AND vp."daoId" = ${daoId}
+    ) as "lastVotingPowerByUserOld",
+    (
+    SELECT GREATEST(vp.timestamp), DISTINCT vp.accountId, vp."votingPower"
+    FROM "VotingPower" vp WHERE vp.timestamp<${Date.now()} AND vp."daoId" = ${daoId}
+    ) as "lastVotingPowerByUserCurrent"
+    SELECT SUM("lastVotingPowerByUserOld"."votingPower") as "oldDelegatedSupply", 
+    SUM("lastVotingPowerByUserCurrent"."votingPower") as "currentDelegatedSupply"
+    FROM "lastVotingPowerByUserOld"
+    `;
+    const changeRate = formatUnits(
+      (delegatedSupplyCompare.currentDelegatedSupply * BigInt(10e18)) /
+        delegatedSupplyCompare.oldDelegatedSupply,
+      18,
+    );
+    return { ...delegatedSupplyCompare, changeRate };
+  }
 }
