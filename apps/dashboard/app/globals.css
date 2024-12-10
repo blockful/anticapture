@@ -18,29 +18,27 @@
 }
 
 @layer utilities {
-
   .card-container-about {
-    @apply flex flex-col gap-3 xl4k:max-w-full max-w-[250px] rounded-lg border border-lightDark bg-dark shadow;
+    @apply flex max-w-[230px] flex-col rounded-lg border border-lightDark bg-dark shadow xl4k:max-w-full;
   }
 
   .card-header-about {
-    @apply flex items-center gap-3 rounded-t-lg border-b border-lightDark px-4 py-3
+    @apply flex items-center gap-3 rounded-t-lg border-b border-lightDark px-4 py-3;
   }
 
   .card-header-about-text {
-    @apply text-base font-normal leading-normal
+    @apply text-base font-normal leading-normal;
   }
 
   .card-body-about {
-    @apply flex flex-col gap-4 px-3
+    @apply flex flex-col gap-4 p-3 h-full;
   }
 
   .card-description-about {
-    @apply flex flex-col gap-2 p-1
-  }
-  
-  .card-description-title {
-    @apply flex items-center gap-1.5
+    @apply flex flex-col space-y-2 p-1 h-full ;
   }
 
+  .card-description-title {
+    @apply flex items-center gap-1.5;
+  }
 }
