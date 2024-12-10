@@ -36,15 +36,17 @@ export const ContractsCard = () => {
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex gap-2">
-            <button className="w-full">
-              <Badge className="w-full">
-                <CrownIcon /> Governor
+          <div className="flex h-full w-full justify-between gap-2">
+            <button className="flex h-full w-full">
+              <Badge className="h-full w-full">
+                <CrownIcon />
+                <p className="text-sm font-medium leading-tight">Governor</p>
               </Badge>
             </button>
-            <button className="w-full">
-              <Badge className="w-full">
-                <TokensIcon /> Token
+            <button className="flex h-full w-full">
+              <Badge className="h-full w-full">
+                <TokensIcon />
+                <p className="text-sm font-medium leading-tight">Token</p>
               </Badge>
             </button>
           </div>
@@ -63,21 +65,22 @@ export const ContractsCard = () => {
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex gap-2">
-            <button className="w-full">
-              <Badge className="w-full">
-                <FocusIcon /> Snapshot
+          <div className="flex h-full w-full justify-between gap-2">
+            <button className="flex h-full w-full">
+              <Badge className="h-full w-full">
+                <FocusIcon />
+                <p className="text-sm font-medium leading-tight">Snapshot </p>
               </Badge>
             </button>
-            <button className="w-full">
-              <Badge className="w-full">
-                <TokensIcon /> Token
+            <button className="flex h-full w-full">
+              <Badge className="h-full w-full">
+                <TokensIcon />
+                <p className="text-sm font-medium leading-tight">Token </p>
               </Badge>
             </button>
           </div>
         </div>
       </div>
-      <div />
     </div>
   );
 };

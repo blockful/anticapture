@@ -1,6 +1,12 @@
 "use client";
 
-import { ContractsCard, UniswapIcon } from "@/components/01-atoms";
+import {
+  ContractsCard,
+  QuorumCard,
+  UniswapIcon,
+  TimelockCard,
+  VoteCard,
+} from "@/components/01-atoms";
 
 export const AboutUniswapSection = () => {
   return (
@@ -13,9 +19,9 @@ export const AboutUniswapSection = () => {
       </div>
       <div className="grid text-white md:grid-cols-2 lg:grid-cols-4">
         <ContractsCard />
-        <div>CARD 2</div>
-        <div>CARD 3</div>
-        <div>card 4</div>
+        <VoteCard />
+        <TimelockCard />
+        <QuorumCard />
       </div>
     </div>
   );
