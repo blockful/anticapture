@@ -1,4 +1,6 @@
 export * from "./AttacksIcon";
+export * from "./BlocksIcon";
+export * from "./ClickIcon";
 export * from "./CrownIcon";
 export * from "./FocusIcon";
 export * from "./DollarIcon";
