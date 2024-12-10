@@ -37,7 +37,10 @@ export default createConfig({
         networks.rpcUrls.length > 1
           ? loadBalance(networks.rpcUrls.map((url) => http(url)))
           : webSocket(networks.rpcUrls[0]),
-      maxRequestsPerSecond: process.env.STATUS === 'nodeful' ? 10000 : 6000,
+      maxRequestsPerSecond:
+        process.env.STATUS !== "production" && process.env.STATUS !== "staging"
+          ? 10000
+          : 2000,
     },
     anvil: {
       chainId: 31337,
