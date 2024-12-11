@@ -24,7 +24,7 @@ export const TimelockCard = () => {
           <div className="flex w-full justify-between gap-1.5">
             <Switcher />
             <button className="flex h-full w-full">
-              <Badge className="h-full w-full px-2.5 sm:w-fit xl4k:w-full">
+              <Badge className="h-full w-full px-2.5 lg:w-fit xl4k:w-full">
                 <p className="text-sm font-medium leading-tight">View</p>
                 <ExternalLinkIcon />
               </Badge>

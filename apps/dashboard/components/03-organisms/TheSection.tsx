@@ -15,10 +15,10 @@ export const TheSection = ({
 }) => {
   return (
     <div className="flex h-full w-full flex-col gap-5">
-      <div className="flex h-full w-full justify-between">
-        <div className="flex gap-3">
+      <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
+        <div className="flex items-center gap-3">
           {icon}
-          <h1 className="text-left text-3xl font-semibold text-white">
+          <h1 className="text-left text-xl font-semibold text-white sm:text-3xl">
             {title}
           </h1>
         </div>

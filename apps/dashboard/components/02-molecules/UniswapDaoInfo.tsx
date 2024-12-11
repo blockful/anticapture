@@ -14,7 +14,7 @@ export const UniswapDaoInfo = () => {
   const { daoData } = useContext(DaoDataContext);
 
   return (
-    <div className="grid text-white md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid w-full gap-2 text-white md:grid-cols-2 lg:grid-cols-4 xl:gap-4">
       <ContractsCard />
       <VoteCard />
       <TimelockCard />
