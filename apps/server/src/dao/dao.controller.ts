@@ -148,7 +148,7 @@ export class DaoController {
     description: 'DESC for descending order, ASC for ascending order',
     default: 'DESC',
   })
-  @Get('holders/:daoId')
+  @Get(':daoId/holders')
   getHoldersFromDao(
     @Param('daoId') daoId: string,
     @Query('take', new DefaultValuePipe(10)) take?: number,
@@ -171,7 +171,7 @@ export class DaoController {
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
   })
-  @Get('total-supply/compare/:daoId')
+  @Get('/:daoId/total-supply/compare')
   getTotalSupplyCompare(
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,
@@ -187,7 +187,7 @@ export class DaoController {
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
   })
-  @Get('delegated-supply/compare/:daoId')
+  @Get(':daoId/delegated-supply/compare')
   getDelegatedSupplyCompare(
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,

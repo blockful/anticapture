@@ -20,10 +20,10 @@ export class DaoService {
   ) {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
-      include: { dAOTokens: { include: { token: true } } },
+      include: { daoTokens: { include: { token: true } } },
     });
 
-    const totalSupply = dao.dAOTokens[0].token.totalSupply;
+    const totalSupply = dao.daoTokens[0].token.totalSupply;
     const votingPowerWithActivity = await this.votingPowerWithActivity(
       id,
       activeSince,
@@ -39,7 +39,7 @@ export class DaoService {
       votingPowerWithActivity,
       avgTurnoutAndApproval,
     );
-    delete dao.dAOTokens;
+    delete dao.daoTokens;
     return {
       ...dao,
       totalSupply,
