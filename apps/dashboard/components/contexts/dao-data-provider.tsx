@@ -49,7 +49,7 @@ export const DaoDataProvider = ({
 
   useEffect(() => {
     fetchTokenPrice(ChainName.Ethereum, DaoName.UNISWAP).then((tokenPrice) =>
-      setTokenPrice(tokenPrice)
+      setTokenPrice(tokenPrice),
     );
   }, []);
 

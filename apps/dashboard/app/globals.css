@@ -41,4 +41,13 @@
   .card-description-title {
     @apply flex items-center gap-1.5;
   }
+
+  .skeleton-text {
+    @apply bg-gray-300 rounded-md animate-pulse;
+  }
+  
+  .skeleton-icon {
+    @apply bg-gray-300 rounded-full animate-pulse;
+  }
+  
 }
