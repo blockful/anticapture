@@ -390,49 +390,52 @@ export class DaoService {
   }
 
   async getTotalSupplyCompare(daoId: string, days: DaysEnum) {
-    const oldTimestamp = BigInt(Date.now()) - BigInt(days.toString());
-    const totalSupplyCompare: {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
+    console.log(oldTimestamp);
+    console.log(zeroAddress);
+    const [totalSupplyCompare]: [{
       oldTotalSupply: bigint;
       currentTotalSupply: bigint;
-    } = await this.prisma.$queryRaw`
-        WITH (
-          SELECT SUM(t.amount) as "fromAmount" 
-          FROM "Transfers" t 
-          WHERE t.from='${zeroAddress}' 
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${oldTimestamp}
-        ) as "fromZeroAddressOld",
-        (
-          SELECT SUM(t.amount) as "toAmount" 
-          FROM "Transfers" t 
-          WHERE t.to='${zeroAddress}' 
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${oldTimestamp}
-        ) as "toZeroAddressOld",
-        (
-          SELECT SUM(t.amount) as "fromAmount" 
-          FROM "Transfers" t 
-          WHERE t.from='${zeroAddress}' 
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${Date.now()}
-        ) as "fromZeroAddressCurrent",
-        (
-          SELECT SUM(t.amount) as "toAmount" 
-          FROM "Transfers" t 
-          WHERE t.to='${zeroAddress}' 
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${Date.now()}
-        ) as "toZeroAddressCurrent"
-        SELECT "fromZeroAddressOld"."fromAmount" - "toZeroAddressOld"."toAmount" as "oldTotalSupply" ,
-        "fromZeroAddressCurrent"."fromAmount" - "toZeroAddressCurrent"."toAmount" as "currentTotalSupply"
-        FROM "fromZeroAddressOld" 
-        JOIN "toZeroAddressOld" ON 1=1
-        JOIN "fromZeroAddressCurrent" ON 1=1
-        JOIN "toZeroAddressCurrent" ON 1=1;
+    }] = await this.prisma.$queryRaw`
+          WITH "fromZeroAddressOld" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId"=${zeroAddress} 
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${oldTimestamp}
+          ),
+          "toZeroAddressOld" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId"=${zeroAddress} 
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${oldTimestamp}
+          ),
+          "fromZeroAddressCurrent" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId"=${zeroAddress}  
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${Date.now()}
+          ),
+          "toZeroAddressCurrent" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId"=${zeroAddress}  
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${Date.now()}
+          ) 
+          SELECT "fromZeroAddressOld"."fromAmount" - COALESCE("toZeroAddressOld"."toAmount", 0) as "oldTotalSupply" ,
+          "fromZeroAddressCurrent"."fromAmount" - COALESCE("toZeroAddressCurrent"."toAmount", 0) as "currentTotalSupply"
+          FROM "fromZeroAddressOld" 
+          JOIN "toZeroAddressOld" ON 1=1
+          JOIN "fromZeroAddressCurrent" ON 1=1
+          JOIN "toZeroAddressCurrent" ON 1=1;
     `;
+    console.log(totalSupplyCompare);
     const changeRate = formatUnits(
-      (totalSupplyCompare.currentTotalSupply * BigInt(10e18)) /
-        totalSupplyCompare.oldTotalSupply,
+      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+        BigInt(totalSupplyCompare.oldTotalSupply),
       18,
     );
     return { ...totalSupplyCompare, changeRate };

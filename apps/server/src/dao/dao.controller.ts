@@ -174,7 +174,7 @@ export class DaoController {
   @Get('total-supply/compare/:daoId')
   getTotalSupplyCompare(
     @Param('daoId') daoId: string,
-    @Query('days', new DefaultValuePipe(1)) days?: DaysEnum,
+    @Query('days') days?: DaysEnum,
   ) {
     return this.daoService.getTotalSupplyCompare(
       daoId,
