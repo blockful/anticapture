@@ -7,7 +7,7 @@ export type User = {
 };
 
 export const BACKEND_ENDPOINT =
-  "https://gov-indexer-backend-production.up.railway.app";
+  "https://defendao-server-production.up.railway.app";
 
 export const bulkGetEnsName = async (addresses: Address[]) => {
   const names = [];
