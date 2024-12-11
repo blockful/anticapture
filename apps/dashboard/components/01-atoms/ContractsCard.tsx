@@ -6,13 +6,8 @@ import {
   TokensIcon,
   NewspaperIcon,
   FocusIcon,
-  InfoIcon,
+  TooltipInfo,
 } from "@/components/01-atoms";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
 
 export const ContractsCard = () => {
   return (
@@ -25,16 +20,7 @@ export const ContractsCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">Onchain Gov</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
           <div className="flex h-full w-full justify-between gap-2">
             <button className="flex h-full w-full">
@@ -54,16 +40,7 @@ export const ContractsCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">OffChain Gov</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
           <div className="flex h-full w-full justify-between gap-2">
             <button className="flex h-full w-full">
