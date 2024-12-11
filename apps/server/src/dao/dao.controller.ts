@@ -8,6 +8,7 @@ import {
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DaoService } from './dao.service';
 import { RequiredPipe } from 'src/lib/custom-pipes/requiredPipe';
+import { DaysEnum } from 'src/lib/enums/dateEnum';
 
 @ApiTags('dao')
 @Controller('dao')
@@ -147,7 +148,7 @@ export class DaoController {
     description: 'DESC for descending order, ASC for ascending order',
     default: 'DESC',
   })
-  @Get('holders/:daoId')
+  @Get(':daoId/holders')
   getHoldersFromDao(
     @Param('daoId') daoId: string,
     @Query('take', new DefaultValuePipe(10)) take?: number,
@@ -162,6 +163,38 @@ export class DaoController {
       skip,
       orderBy,
       ordering,
+    );
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+  })
+  @Get('/:daoId/total-supply/compare')
+  getTotalSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getTotalSupplyCompare(
+      daoId,
+      timeInterval,
+    );
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+  })
+  @Get(':daoId/delegated-supply/compare')
+  getDelegatedSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getDelegatedSupplyCompare(
+      daoId,
+      timeInterval,
     );
   }
 }
