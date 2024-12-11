@@ -8,7 +8,8 @@ import {
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DaoService } from './dao.service';
 import { RequiredPipe } from 'src/lib/custom-pipes/requiredPipe';
-import { DaysEnum } from 'src/lib/enums/dateEnum';
+import { DaysEnum } from 'src/lib';
+import { DAOEnum } from 'src/lib';
 
 @ApiTags('dao')
 @Controller('dao')
@@ -25,38 +26,10 @@ export class DaoController {
     name: 'id',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum
   })
-  @ApiQuery({
-    name: 'activeSince',
-    required: true,
-    description: 'Timestamp to be used to get active users from this date on',
-  })
-  @ApiQuery({
-    name: 'avgFromDate',
-    required: true,
-    description:
-      'Timestamp to be used as a lower limit for average turnout and approval votes calculation',
-  })
-  @ApiQuery({
-    name: 'avgToDate',
-    required: false,
-    description:
-      'Timestamp to be used as an upper limit for average turnout and approval votes calculation',
-    default: '${Date.now().toString()}',
-  })
-  findOne(
-    @Param('id') id: string,
-    @Query('activeSince', new RequiredPipe<bigint>()) activeSince: bigint,
-    @Query('avgFromDate', new RequiredPipe<string>()) avgFromDate: number,
-    @Query('avgToDate', new DefaultValuePipe(parseInt(Date.now().toString())))
-    avgToDate: number,
-  ) {
-    return this.daoService.findOne(
-      id,
-      activeSince,
-      BigInt(avgFromDate),
-      BigInt(avgToDate),
-    );
+  findOne(@Param('id') id: string) {
+    return this.daoService.findOne(id);
   }
 
   @Get('delegates/:daoId')
@@ -64,6 +37,7 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
   })
   @ApiQuery({
     name: 'fromDate',
@@ -125,6 +99,7 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
   })
   @ApiQuery({
     name: 'take',
@@ -170,31 +145,28 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+
   })
   @Get('/:daoId/total-supply/compare')
   getTotalSupplyCompare(
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
-    return this.daoService.getTotalSupplyCompare(
-      daoId,
-      timeInterval,
-    );
+    return this.daoService.getTotalSupplyCompare(daoId, timeInterval);
   }
 
   @ApiParam({
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+        enum: DAOEnum,
   })
   @Get(':daoId/delegated-supply/compare')
   getDelegatedSupplyCompare(
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
-    return this.daoService.getDelegatedSupplyCompare(
-      daoId,
-      timeInterval,
-    );
+    return this.daoService.getDelegatedSupplyCompare(daoId, timeInterval);
   }
 }
