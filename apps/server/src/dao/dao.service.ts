@@ -391,39 +391,39 @@ export class DaoService {
 
   async getTotalSupplyCompare(daoId: string, days: DaysEnum) {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
-    console.log(oldTimestamp);
-    console.log(zeroAddress);
-    const [totalSupplyCompare]: [{
-      oldTotalSupply: bigint;
-      currentTotalSupply: bigint;
-    }] = await this.prisma.$queryRaw`
+    const [totalSupplyCompare]: [
+      {
+        oldTotalSupply: bigint;
+        currentTotalSupply: bigint;
+      },
+    ] = await this.prisma.$queryRaw`
           WITH "fromZeroAddressOld" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
             WHERE t."fromAccountId"=${zeroAddress} 
           AND t."daoId" = ${daoId}
-          AND timestamp < ${oldTimestamp}
+          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
           "toZeroAddressOld" as (
             SELECT SUM(t.amount) as "toAmount" 
             FROM "Transfers" t 
             WHERE t."toAccountId"=${zeroAddress} 
           AND t."daoId" = ${daoId}
-          AND timestamp < ${oldTimestamp}
+          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
           "fromZeroAddressCurrent" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
             WHERE t."fromAccountId"=${zeroAddress}  
           AND t."daoId" = ${daoId}
-          AND timestamp < ${Date.now()}
+          AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
           ),
           "toZeroAddressCurrent" as (
             SELECT SUM(t.amount) as "toAmount" 
             FROM "Transfers" t 
             WHERE t."toAccountId"=${zeroAddress}  
           AND t."daoId" = ${daoId}
-          AND timestamp < ${Date.now()}
+          AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
           ) 
           SELECT "fromZeroAddressOld"."fromAmount" - COALESCE("toZeroAddressOld"."toAmount", 0) as "oldTotalSupply" ,
           "fromZeroAddressCurrent"."fromAmount" - COALESCE("toZeroAddressCurrent"."toAmount", 0) as "currentTotalSupply"
@@ -432,36 +432,44 @@ export class DaoService {
           JOIN "fromZeroAddressCurrent" ON 1=1
           JOIN "toZeroAddressCurrent" ON 1=1;
     `;
-    console.log(totalSupplyCompare);
     const changeRate = formatUnits(
-      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
-        BigInt(totalSupplyCompare.oldTotalSupply),
+      BigInt(1e18) -
+        (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+          BigInt(totalSupplyCompare.oldTotalSupply),
       18,
     );
     return { ...totalSupplyCompare, changeRate };
   }
 
   async getDelegatedSupplyCompare(daoId: string, days: DaysEnum) {
-    const oldTimestamp = BigInt(Date.now()) - BigInt(days.toString());
-    const delegatedSupplyCompare: {
-      oldDelegatedSupply: bigint;
-      currentDelegatedSupply: bigint;
-    } = await this.prisma.$queryRaw`
-    WITH (
-      SELECT GREATEST(vp.timestamp), DISTINCT vp.accountId, vp."votingPower"
-      FROM "VotingPower" vp WHERE vp.timestamp<${oldTimestamp} AND vp."daoId" = ${daoId}
-    ) as "lastVotingPowerByUserOld",
-    (
-    SELECT GREATEST(vp.timestamp), DISTINCT vp.accountId, vp."votingPower"
-    FROM "VotingPower" vp WHERE vp.timestamp<${Date.now()} AND vp."daoId" = ${daoId}
-    ) as "lastVotingPowerByUserCurrent"
-    SELECT SUM("lastVotingPowerByUserOld"."votingPower") as "oldDelegatedSupply", 
-    SUM("lastVotingPowerByUserCurrent"."votingPower") as "currentDelegatedSupply"
-    FROM "lastVotingPowerByUserOld"
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [delegatedSupplyCompare]: [
+      {
+        oldDelegatedSupply: bigint;
+        currentDelegatedSupply: bigint;
+      },
+    ] = await this.prisma.$queryRaw`
+    WITH  "oldDelegatedSupplyByUser" as (
+      select distinct on (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" as "oldDelegatedSupply"
+      FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
+      AND vp."daoId" = ${daoId}
+      order by vp."accountId", vp.timestamp desc
+    ) ,
+   "currentDelegatedSupplyByUser"  as (
+      select distinct on (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" as "currentDelegatedSupply"
+      FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(Date.now().toString().slice(0, 10))}
+      AND vp."daoId" = ${daoId}
+      order by vp."accountId", vp.timestamp desc
+    ) 
+    SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupply", 
+    SUM("currentDelegatedSupplyByUser"."currentDelegatedSupply") as "currentDelegatedSupply"
+    FROM "oldDelegatedSupplyByUser"
+    join "currentDelegatedSupplyByUser" on "oldDelegatedSupplyByUser"."accountId"="currentDelegatedSupplyByUser"."accountId";
     `;
     const changeRate = formatUnits(
-      (delegatedSupplyCompare.currentDelegatedSupply * BigInt(10e18)) /
-        delegatedSupplyCompare.oldDelegatedSupply,
+      BigInt(1e18) -
+        (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
+          BigInt(delegatedSupplyCompare.oldDelegatedSupply),
       18,
     );
     return { ...delegatedSupplyCompare, changeRate };

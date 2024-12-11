@@ -174,11 +174,11 @@ export class DaoController {
   @Get('total-supply/compare/:daoId')
   getTotalSupplyCompare(
     @Param('daoId') daoId: string,
-    @Query('days') days?: DaysEnum,
+    @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getTotalSupplyCompare(
       daoId,
-      days,
+      timeInterval,
     );
   }
 
@@ -187,14 +187,14 @@ export class DaoController {
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
   })
-  @Get('total-supply/compare/:daoId')
+  @Get('delegated-supply/compare/:daoId')
   getDelegatedSupplyCompare(
     @Param('daoId') daoId: string,
-    @Query('days', new DefaultValuePipe(1)) days?: DaysEnum,
+    @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getDelegatedSupplyCompare(
       daoId,
-      days,
+      timeInterval,
     );
   }
 }
