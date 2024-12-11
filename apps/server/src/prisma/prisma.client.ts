@@ -3,6 +3,8 @@
 import { PrismaClient } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
+Decimal.set({ toExpPos: 78, precision: 78 });
+
 function extendPrismaClient() {
   const prisma = new PrismaClient();
   return prisma.$extends({
