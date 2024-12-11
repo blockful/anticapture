@@ -8,8 +8,8 @@ import {
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DaoService } from './dao.service';
 import { RequiredPipe } from 'src/lib/custom-pipes/requiredPipe';
-import { DaysEnum } from 'src/lib/enums/dateEnum';
-import { DAOEnum } from 'src/lib/enums/daoEnum';
+import { DaysEnum } from 'src/lib';
+import { DAOEnum } from 'src/lib';
 
 @ApiTags('dao')
 @Controller('dao')
