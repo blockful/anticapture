@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { zeroAddress } from 'src/lib/constants';
-import { DaysEnum } from 'src/lib/enums/dateEnum';
+import { zeroAddress } from 'src/lib';
+import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { formatUnits } from 'viem';
 
