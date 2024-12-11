@@ -40,12 +40,12 @@ export enum DaoName {
 export const fetchDaoData = async (
   daoName: DaoName,
   activeSince: number,
-  avgFromDate: number
+  avgFromDate: number,
 ) => {
   return new Promise(async (res, rej) => {
     try {
       const daoData = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}?activeSince=${activeSince}&avgFromDate=${avgFromDate}`
+        `${BACKEND_ENDPOINT}/dao/${daoName}?activeSince=${activeSince}&avgFromDate=${avgFromDate}`,
       );
 
       res(daoData);
@@ -66,7 +66,7 @@ export const TokenContract: Record<DaoName, Address> = {
 /* Fetch Dao Token price from Defi Llama API */
 export const fetchTokenPrice = async (
   chainName: ChainName,
-  daoName: DaoName
+  daoName: DaoName,
 ) => {
   const daoToken = TokenContract[daoName];
 
