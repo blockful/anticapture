@@ -26,37 +26,8 @@ export class DaoController {
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
   })
-  @ApiQuery({
-    name: 'activeSince',
-    required: true,
-    description: 'Timestamp to be used to get active users from this date on',
-  })
-  @ApiQuery({
-    name: 'avgFromDate',
-    required: true,
-    description:
-      'Timestamp to be used as a lower limit for average turnout and approval votes calculation',
-  })
-  @ApiQuery({
-    name: 'avgToDate',
-    required: false,
-    description:
-      'Timestamp to be used as an upper limit for average turnout and approval votes calculation',
-    default: '${Date.now().toString()}',
-  })
-  findOne(
-    @Param('id') id: string,
-    @Query('activeSince', new RequiredPipe<bigint>()) activeSince: bigint,
-    @Query('avgFromDate', new RequiredPipe<string>()) avgFromDate: number,
-    @Query('avgToDate', new DefaultValuePipe(parseInt(Date.now().toString())))
-    avgToDate: number,
-  ) {
-    return this.daoService.findOne(
-      id,
-      activeSince,
-      BigInt(avgFromDate),
-      BigInt(avgToDate),
-    );
+  findOne(@Param('id') id: string) {
+    return this.daoService.findOne(id);
   }
 
   @Get('delegates/:daoId')
@@ -176,10 +147,7 @@ export class DaoController {
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
-    return this.daoService.getTotalSupplyCompare(
-      daoId,
-      timeInterval,
-    );
+    return this.daoService.getTotalSupplyCompare(daoId, timeInterval);
   }
 
   @ApiParam({
@@ -192,9 +160,6 @@ export class DaoController {
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
-    return this.daoService.getDelegatedSupplyCompare(
-      daoId,
-      timeInterval,
-    );
+    return this.daoService.getDelegatedSupplyCompare(daoId, timeInterval);
   }
 }

@@ -12,40 +12,17 @@ export class DaoService {
     return this.prisma.dAO.findMany();
   }
 
-  async findOne(
-    id: string,
-    activeSince: bigint,
-    avgFromDate: bigint,
-    avgToDate: bigint,
-  ) {
+  async findOne(id: string) {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
       include: { dAOTokens: { include: { token: true } } },
     });
 
     const totalSupply = dao.dAOTokens[0].token.totalSupply;
-    const votingPowerWithActivity = await this.votingPowerWithActivity(
-      id,
-      activeSince,
-    );
-    const avgTurnoutAndApproval = await this.avgTurnoutAndApproval(
-      id,
-      avgFromDate,
-      avgToDate,
-    );
-    const attackCosts = await this.attackCosts(
-      id,
-      activeSince,
-      votingPowerWithActivity,
-      avgTurnoutAndApproval,
-    );
     delete dao.dAOTokens;
     return {
       ...dao,
       totalSupply,
-      ...votingPowerWithActivity,
-      ...avgTurnoutAndApproval,
-      attackCosts,
     };
   }
 
@@ -81,25 +58,14 @@ export class DaoService {
     return { ...activeVotingPowerAndCount[0], ...totalVotingPowerAndCount[0] };
   }
 
-  private async avgTurnoutAndApproval(
-    id: string,
-    fromDate: bigint,
-    toDate: bigint,
-  ) {
+  private async averageTurnout(id: string, fromDate: bigint, toDate: bigint) {
     const averageTurnout: [{ averageTurnout: string }] = await this.prisma
       .$queryRaw`
         select TEXT(AVG(po."forVotes" + po."againstVotes" + po."abstainVotes")) as "averageTurnout"
         from "ProposalsOnchain" po where po.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
         AND po.status='EXECUTED' or po.status='CANCELED' AND po."daoId"=${id};
       `;
-    const averageApprovalVotesQtd: [{ averageApprovalVotes: string }] =
-      await this.prisma.$queryRaw`
-      select TEXT(AVG(po."forVotes")) as "averageApprovalVotes"
-      from "ProposalsOnchain" po 
-      where po.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
-      and po.status='EXECUTED'  AND po."daoId"=${id};
-    `;
-    return { ...averageTurnout[0], ...averageApprovalVotesQtd[0] };
+    return { ...averageTurnout[0] };
   }
 
   public async getDelegatesFromDao(
