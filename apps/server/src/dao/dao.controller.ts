@@ -9,6 +9,7 @@ import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DaoService } from './dao.service';
 import { RequiredPipe } from 'src/lib/custom-pipes/requiredPipe';
 import { DaysEnum } from 'src/lib/enums/dateEnum';
+import { DAOEnum } from 'src/lib/enums/daoEnum';
 
 @ApiTags('dao')
 @Controller('dao')
@@ -25,6 +26,7 @@ export class DaoController {
     name: 'id',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum
   })
   findOne(@Param('id') id: string) {
     return this.daoService.findOne(id);
@@ -35,6 +37,7 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
   })
   @ApiQuery({
     name: 'fromDate',
@@ -96,6 +99,7 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
   })
   @ApiQuery({
     name: 'take',
@@ -119,7 +123,7 @@ export class DaoController {
     description: 'DESC for descending order, ASC for ascending order',
     default: 'DESC',
   })
-  @Get('holders/:daoId')
+  @Get(':daoId/holders')
   getHoldersFromDao(
     @Param('daoId') daoId: string,
     @Query('take', new DefaultValuePipe(10)) take?: number,
@@ -141,8 +145,10 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+
   })
-  @Get('total-supply/compare/:daoId')
+  @Get('/:daoId/total-supply/compare')
   getTotalSupplyCompare(
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,
@@ -154,8 +160,9 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+        enum: DAOEnum,
   })
-  @Get('delegated-supply/compare/:daoId')
+  @Get(':daoId/delegated-supply/compare')
   getDelegatedSupplyCompare(
     @Param('daoId') daoId: string,
     @Query('timeInterval') timeInterval: DaysEnum,

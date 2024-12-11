@@ -11,7 +11,7 @@ export class AccountService {
     return this.prisma.account.findMany({
       include: {
         accountBalances: true,
-        accountPowerObj: true,
+        accountPowers: true,
         delegateeDels: true,
         delegatorDels: true,
         proposalsOnchain: true,
@@ -29,7 +29,7 @@ export class AccountService {
     return this.prisma.account.findUnique({
       include: {
         accountBalances: true,
-        accountPowerObj: true,
+        accountPowers: true,
         delegateeDels: true,
         delegatorDels: true,
         proposalsOnchain: true,

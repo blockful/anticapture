@@ -12,7 +12,7 @@ datasource db {
 model Account {
   id                 String               @id
   accountBalances    AccountBalance[]
-  accountPowerObj    AccountPower[]
+  accountPowers      AccountPower[]
   delegateeDels      Delegations[]        @relation("delegatee")
   delegatorDels      Delegations[]        @relation("delegator")
   proposalsOnchain   ProposalsOnchain[]
@@ -25,12 +25,12 @@ model Account {
 }
 
 model AccountBalance {
-  id      String  @id
-  token   String
-  account String  @unique
-  balance Decimal @db.Decimal(78, 0)
+  id        String  @id
+  token     String
+  accountId String  @unique
+  balance   Decimal @db.Decimal(78, 0)
 
-  accountObj Account? @relation(fields: [account], references: [id])
+  account Account? @relation(fields: [accountId], references: [id])
 
   @@schema("public")
 }
@@ -58,7 +58,7 @@ model DAO {
   votingPeriod       Decimal?             @db.Decimal(78, 0)
   timelockDelay      Decimal?             @db.Decimal(78, 0)
   accountPowers      AccountPower[]
-  dAOTokens          DAOToken[]
+  daoTokens          DAOToken[]
   delegations        Delegations[]
   proposalsOnchain   ProposalsOnchain[]
   transfers          Transfers[]
@@ -84,7 +84,7 @@ model Delegations {
   delegateeAccountId String
   delegatorAccountId String
   timestamp          Decimal  @db.Decimal(78, 0)
-  daoObj             DAO?     @relation(fields: [daoId], references: [id])
+  dao                DAO?     @relation(fields: [daoId], references: [id])
   delegatee          Account? @relation("delegatee", fields: [delegateeAccountId], references: [id])
   delegator          Account? @relation("delegator", fields: [delegatorAccountId], references: [id])
 
@@ -108,8 +108,8 @@ model ProposalsOnchain {
   againstVotes      Decimal @db.Decimal(78, 0)
   abstainVotes      Decimal @db.Decimal(78, 0)
 
-  daoObj       DAO?           @relation(fields: [daoId], references: [id])
-  proposerObj  Account?       @relation(fields: [proposerAccountId], references: [id])
+  dao          DAO?           @relation(fields: [daoId], references: [id])
+  proposer     Account?       @relation(fields: [proposerAccountId], references: [id])
   VotesOnchain VotesOnchain[]
 
   @@schema("public")
@@ -120,7 +120,7 @@ model Token {
   name        String
   decimals    Int
   totalSupply Decimal     @db.Decimal(78, 0)
-  DAOToken    DAOToken[]
+  daoToken    DAOToken[]
   Transfers   Transfers[]
 
   @@schema("public")
@@ -152,8 +152,8 @@ model VotesOnchain {
   reason         String
   timestamp      Decimal @db.Decimal(78, 0)
 
-  daoObj   DAO?              @relation(fields: [daoId], references: [id])
-  voterObj Account?          @relation(fields: [voterAccountId], references: [id])
+  dao      DAO?              @relation(fields: [daoId], references: [id])
+  voter    Account?          @relation(fields: [voterAccountId], references: [id])
   proposal ProposalsOnchain? @relation(fields: [proposalId], references: [id])
 
   @@schema("public")
@@ -165,8 +165,8 @@ model VotingPowerHistory {
   accountId   String
   votingPower Decimal  @db.Decimal(78, 0)
   timestamp   Decimal  @db.Decimal(78, 0)
-  daoObj      DAO?     @relation(fields: [daoId], references: [id])
-  accountObj  Account? @relation(fields: [accountId], references: [id])
+  dao         DAO?     @relation(fields: [daoId], references: [id])
+  account     Account? @relation(fields: [accountId], references: [id])
 
   @@schema("public")
 }

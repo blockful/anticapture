@@ -15,11 +15,11 @@ export class DaoService {
   async findOne(id: string) {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
-      include: { dAOTokens: { include: { token: true } } },
+      include: { daoTokens: { include: { token: true } } },
     });
 
-    const totalSupply = dao.dAOTokens[0].token.totalSupply;
-    delete dao.dAOTokens;
+    const totalSupply = dao.daoTokens[0].token.totalSupply;
+    delete dao.daoTokens;
     return {
       ...dao,
       totalSupply,
