@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import { zeroAddress } from 'src/lib';
 import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
