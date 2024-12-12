@@ -7,8 +7,9 @@ import {
   Switcher,
   TooltipInfo,
 } from "@/components/01-atoms";
+import { DAO } from "@/lib/server/backend";
 
-export const VoteCard = () => {
+export const VoteCard = ({ daoData }: { daoData: DAO }) => {
   return (
     <div className="card-container-about">
       <div className="card-header-about">
@@ -26,7 +27,9 @@ export const VoteCard = () => {
             <div className="flex h-full w-full">
               <Badge className="w-full">
                 <BlocksIcon />
-                <p className="text-sm font-medium leading-tight">2 Blocks</p>
+                <p className="text-sm font-medium leading-tight">
+                  {daoData.votingDelay} seconds
+                </p>
               </Badge>
             </div>
           </div>

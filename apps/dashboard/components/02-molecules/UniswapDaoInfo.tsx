@@ -16,7 +16,7 @@ export const UniswapDaoInfo = () => {
   return (
     <div className="grid w-full gap-2 text-white md:grid-cols-2 lg:grid-cols-4 xl:gap-4">
       <ContractsCard />
-      <VoteCard />
+      {daoData ? <VoteCard daoData={daoData} /> : <Skeleton />}
       <TimelockCard />
       {daoData ? <QuorumCard daoData={daoData} /> : <Skeleton />}
     </div>

@@ -2,18 +2,17 @@
 
 import { UsersIcon, TooltipInfo } from "@/components/01-atoms";
 import { DAO } from "@/lib/server/backend";
-import { formatEther, formatUnits } from "viem";
+import { formatEther } from "viem";
 
 export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
-  const quorumMin = formatEther(
-    (BigInt(daoData.quorum) * BigInt(1e18)) / BigInt(daoData.totalSupply),
+  const quorumMinPercentage = formatEther(
+    (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(daoData.totalSupply),
   );
 
-  const proposalThreshold =
-    BigInt(daoData.proposalThreshold) / BigInt(daoData.totalSupply);
-
-  const quorumMinPercentage = quorumMin;
-  const proposalThresholdPercentage = formatUnits(proposalThreshold, 18);
+  const proposalThresholdPercentage = formatEther(
+    (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
+      BigInt(daoData.totalSupply),
+  );
 
   return (
     <div className="card-container-about">
@@ -44,7 +43,7 @@ export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
             <div className="flex h-full w-full items-center justify-start gap-1.5">
               <div className="flex w-full">
                 <p className="flex text-sm font-medium leading-tight">
-                  {quorumMinPercentage}%
+                  {quorumMinPercentage.toString()}%
                 </p>
               </div>
             </div>
@@ -58,7 +57,7 @@ export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
           <div className="flex h-full w-full items-center justify-start gap-1.5">
             <div className="flex w-1/2">
               <p className="flex text-sm font-medium leading-tight">
-                {proposalThresholdPercentage}%
+                {proposalThresholdPercentage.toString()}%
               </p>
             </div>
           </div>
