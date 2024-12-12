@@ -2,15 +2,17 @@
 
 import { UsersIcon, TooltipInfo } from "@/components/01-atoms";
 import { DAO } from "@/lib/server/backend";
-import { formatUnits } from "viem";
+import { formatEther, formatUnits } from "viem";
 
 export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
-  const quorumMin = BigInt(daoData.quorum) / BigInt(daoData.totalSupply);
+  const quorumMin = formatEther(
+    (BigInt(daoData.quorum) * BigInt(1e18)) / BigInt(daoData.totalSupply),
+  );
 
   const proposalThreshold =
     BigInt(daoData.proposalThreshold) / BigInt(daoData.totalSupply);
 
-  const quorumMinPercentage = formatUnits(quorumMin, 18);
+  const quorumMinPercentage = quorumMin;
   const proposalThresholdPercentage = formatUnits(proposalThreshold, 18);
 
   return (
