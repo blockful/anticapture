@@ -399,9 +399,9 @@ export class DaoService {
           JOIN "toZeroAddressCurrent" ON 1=1;
     `;
     const changeRate = formatUnits(
-      BigInt(1e18) -
-        (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
-          BigInt(totalSupplyCompare.oldTotalSupply),
+      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+        BigInt(totalSupplyCompare.oldTotalSupply) -
+        BigInt(1e18),
       18,
     );
     return { ...totalSupplyCompare, changeRate };
@@ -433,9 +433,9 @@ export class DaoService {
     join "currentDelegatedSupplyByUser" on "oldDelegatedSupplyByUser"."accountId"="currentDelegatedSupplyByUser"."accountId";
     `;
     const changeRate = formatUnits(
-      BigInt(1e18) -
-        (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
-          BigInt(delegatedSupplyCompare.oldDelegatedSupply),
+      (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
+        BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
+        BigInt(1e18),
       18,
     );
     return { ...delegatedSupplyCompare, changeRate };
