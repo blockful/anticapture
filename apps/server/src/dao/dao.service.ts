@@ -175,22 +175,21 @@ export class DaoService {
         currentDelegatedSupply: bigint;
       },
     ] = await this.prisma.$queryRaw`
-    WITH  "oldDelegatedSupplyByUser" as (
-      select distinct on (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" as "oldDelegatedSupply"
-      FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
-      AND vp."daoId" = ${daoId}
-      order by vp."accountId", vp.timestamp desc
-    ) ,
-   "currentDelegatedSupplyByUser"  as (
-      select distinct on (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" as "currentDelegatedSupply"
-      FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(Date.now().toString().slice(0, 10))}
-      AND vp."daoId" = ${daoId}
-      order by vp."accountId", vp.timestamp desc
-    ) 
-    SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupply", 
-    SUM("currentDelegatedSupplyByUser"."currentDelegatedSupply") as "currentDelegatedSupply"
-    FROM "oldDelegatedSupplyByUser"
-    join "currentDelegatedSupplyByUser" on "oldDelegatedSupplyByUser"."accountId"="currentDelegatedSupplyByUser"."accountId";
+    WITH  "oldDelegatedSupply" as (
+      SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupplyAmount" from (
+        SELECT DISTINCT ON (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" AS "oldDelegatedSupply"
+        FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
+        AND vp."daoId" = ${daoId}
+        ORDER BY vp."accountId", vp.timestamp DESC
+      ) "oldDelegatedSupplyByUser"
+   ),
+   "currentDelegatedSupply"  AS (
+      SELECT SUM(ap."votingPower") AS "currentDelegatedSupplyAmount" FROM "AccountPower" ap
+    )
+    SELECT "oldDelegatedSupply"."oldDelegatedSupplyAmount" AS "oldDelegatedSupply", 
+    "currentDelegatedSupply"."currentDelegatedSupplyAmount" AS "currentDelegatedSupply"
+    FROM "currentDelegatedSupply"
+    JOIN "oldDelegatedSupply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
