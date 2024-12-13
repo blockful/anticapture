@@ -169,4 +169,18 @@ export class DaoController {
   ) {
     return this.daoService.getDelegatedSupplyCompare(daoId, timeInterval);
   }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+        enum: DAOEnum,
+  })
+  @Get(':daoId/circulating-supply/compare')
+  getCirculatingSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getCirculatingSupplyCompare(daoId, timeInterval);
+  }
 }
