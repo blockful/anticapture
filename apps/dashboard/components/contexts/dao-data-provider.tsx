@@ -19,9 +19,6 @@ export const DaoDataContext = createContext<DaoDataContext>({
   tokenPrice: null,
 });
 
-const ACTIVE_SINCE = 1642002717;
-const AVG_FROM_DATE = 1642002717;
-
 export const DaoDataProvider = ({
   children,
   daoName,
@@ -32,7 +29,7 @@ export const DaoDataProvider = ({
   const [daoData, setDaoData] = useState<DAO | null>(null);
 
   useEffect(() => {
-    fetchDaoData(daoName, ACTIVE_SINCE, AVG_FROM_DATE)
+    fetchDaoData(daoName)
       .then((uniData) => {
         try {
           return (uniData as Response).json();

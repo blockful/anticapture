@@ -2,30 +2,13 @@ import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { Address } from "viem";
 
 export interface DAO {
-  activeDelegatesCount: number;
-  activeVotingPower: number;
-  id: string;
-  proposalThreshold: number;
+  id: DaoName;
   quorum: number;
-  timelockDelay: number;
-  totalDelegatesCount: number;
-  totalSupply: number;
-  totalVotingPower: number;
+  proposalThreshold: number;
   votingDelay: number;
   votingPeriod: number;
-  averageApprovalVotes: string;
-  averageTurnout: string;
-  attackCosts: {
-    activeVotingPowerCost: string;
-    averageTurnoutCost: string;
-    topActiveDelegatesForActiveVotingPower: number;
-    topActiveDelegatesForAverageTurnout: number;
-    topActiveDelegatesForTotalVotingPower: number;
-    topDelegatesForActiveVotingPower: number;
-    topDelegatesForAverageTurnout: number;
-    topDelegatesForTotalVotingPower: number;
-    totalVotingPowerCost: string;
-  };
+  timelockDelay: number;
+  totalSupply: number;
 }
 
 export interface DAOVotingPower {
@@ -37,16 +20,10 @@ export enum DaoName {
   UNISWAP = "UNI",
 }
 
-export const fetchDaoData = async (
-  daoName: DaoName,
-  activeSince: number,
-  avgFromDate: number,
-) => {
+export const fetchDaoData = async (daoName: DaoName) => {
   return new Promise(async (res, rej) => {
     try {
-      const daoData = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}?activeSince=${activeSince}&avgFromDate=${avgFromDate}`,
-      );
+      const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoName}`);
 
       res(daoData);
     } catch (e) {
