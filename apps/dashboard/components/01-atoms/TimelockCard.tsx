@@ -23,7 +23,16 @@ export const TimelockCard = () => {
           </div>
           <div className="flex w-full justify-between gap-1.5">
             <Switcher />
-            <button className="flex h-full w-full">
+            <button
+              className="flex h-full w-full"
+              onClick={() => {
+                window.open(
+                  "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+            >
               <Badge className="h-full w-full px-2.5 lg:w-fit xl4k:w-full">
                 <p className="text-sm font-medium leading-tight">View</p>
                 <ExternalLinkIcon />

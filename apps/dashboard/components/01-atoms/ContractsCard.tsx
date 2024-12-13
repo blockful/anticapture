@@ -30,6 +30,7 @@ export const ContractsCard = () => {
                 window.open(
                   "https://etherscan.io/address/0x408ED6354d4973f66138C91495F2f2FCbd8724C3#code",
                   "_blank",
+                  "noopener,noreferrer",
                 );
               }}
             >
@@ -45,6 +46,7 @@ export const ContractsCard = () => {
                 window.open(
                   "https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
                   "_blank",
+                  "noopener,noreferrer",
                 );
               }}
             >
@@ -68,6 +70,7 @@ export const ContractsCard = () => {
                 window.open(
                   "https://snapshot.box/#/s:uniswapgovernance.eth",
                   "_blank",
+                  "noopener,noreferrer",
                 );
               }}
             >
@@ -83,6 +86,7 @@ export const ContractsCard = () => {
                 window.open(
                   "https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
                   "_blank",
+                  "noopener,noreferrer",
                 );
               }}
             >
