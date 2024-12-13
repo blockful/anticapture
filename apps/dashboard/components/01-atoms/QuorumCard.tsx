@@ -37,7 +37,7 @@ export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
           </div>
           <div className="card-description-about">
             <div className="card-description-title">
-              <h1 className="text-foreground">Votes needed</h1>
+              <h1 className="text-foreground">Min</h1>
               <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
             </div>
             <div className="flex h-full w-full items-center justify-start gap-1.5">
