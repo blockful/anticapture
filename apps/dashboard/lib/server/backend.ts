@@ -62,3 +62,58 @@ export const fetchTokenPrice = async (
     throw new Error("Error fetching token price:");
   }
 };
+
+interface TotalSupplyPromise {
+  oldTotalSupply: string;
+  currentTotalSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Total Supply */
+export const fetchTotalSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<TotalSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/total-supply/compare?timeInterval=${timeInterval}`,
+      );
+      const totalSupplyData = await response.json();
+      res(totalSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface DelegatedSupplyPromise {
+  oldDelegatedSupply: string;
+  currentDelegatedSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Total Supply */
+export const fetchDelegatedSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/delegated-supply/compare?timeInterval=${timeInterval}`,
+      );
+      const delegatedSupplyData = await response.json();
+      console.log("delegatedSupplyData", delegatedSupplyData);
+      res(delegatedSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};

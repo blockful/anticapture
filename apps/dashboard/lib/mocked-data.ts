@@ -1,5 +1,11 @@
 import { User } from "@/lib/server/utils";
 
+export type TokenDistribution = {
+  metric: string;
+  amount: string;
+  variation: string; // % change
+};
+
 export type Delegates = {
   amount: number;
   delegators: number;
@@ -20,6 +26,39 @@ export type Holders = {
   lastBuy: Date;
   user: User;
 };
+
+export const tokenDistributionData: TokenDistribution[] = [
+  {
+    metric: "Total Supply",
+    amount: "100M",
+    variation: "35%",
+  },
+  {
+    metric: "Delegated Supply",
+    amount: "92M",
+    variation: "5%",
+  },
+  {
+    metric: "Circulating Supply",
+    amount: "92M",
+    variation: "5%",
+  },
+  {
+    metric: "CEX Supply",
+    amount: "92M",
+    variation: "5%",
+  },
+  {
+    metric: "DEX Supply",
+    amount: "92M",
+    variation: "5%",
+  },
+  {
+    metric: "Lending Supply",
+    amount: "92M",
+    variation: "5%",
+  },
+];
 
 export const delegatesData: Delegates[] = [
   {
