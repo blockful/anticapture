@@ -1,0 +1,10 @@
+{
+  "name": "@defendao/indexer-metrics",
+  "version": "0.0.1",
+  "description": "Grafana and Prometheus for Indexer metrics",
+  "scripts": {
+    "start": "docker compose -p ponder-monitoring -f ./docker-monitoring.yml up"
+  },
+  "author": "",
+  "license": "ISC"
+}

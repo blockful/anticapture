@@ -1,13 +1,16 @@
 import { createConfig, loadBalance } from "@ponder/core";
+import { http, webSocket } from "viem";
 import dotenv from "dotenv";
 import { config } from "./config";
-import { http } from "viem";
 dotenv.config();
 
 let networks, contracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
-} else if (process.env.STATUS === "production") {
+} else if (
+  process.env.STATUS === "production" ||
+  process.env.STATUS === "nodeful"
+) {
   ({ networks, contracts } = config.ponder["production"]);
 } else if (process.env.STATUS === "staging") {
   ({ networks, contracts } = config.ponder["staging"]);
@@ -33,8 +36,11 @@ export default createConfig({
       transport:
         networks.rpcUrls.length > 1
           ? loadBalance(networks.rpcUrls.map((url) => http(url)))
-          : http(networks.rpcUrls[0]),
-      maxRequestsPerSecond: 10000,
+          : webSocket(networks.rpcUrls[0]),
+      maxRequestsPerSecond:
+        process.env.STATUS !== "production" && process.env.STATUS !== "staging"
+          ? 10000
+          : 1,
     },
     anvil: {
       chainId: 31337,

@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { zeroAddress } from 'src/lib';
+import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { formatUnits } from 'viem';
 
 @Injectable()
 export class DaoService {
@@ -9,40 +12,17 @@ export class DaoService {
     return this.prisma.dAO.findMany();
   }
 
-  async findOne(
-    id: string,
-    activeSince: bigint,
-    avgFromDate: bigint,
-    avgToDate: bigint,
-  ) {
+  async findOne(id: string) {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
-      include: { DAOToken: { include: { tokenObj: true } } },
+      include: { daoTokens: { include: { token: true } } },
     });
 
-    const totalSupply = dao.DAOToken[0].tokenObj.totalSupply;
-    const votingPowerWithActivity = await this.votingPowerWithActivity(
-      id,
-      activeSince,
-    );
-    const avgTurnoutAndApproval = await this.avgTurnoutAndApproval(
-      id,
-      avgFromDate,
-      avgToDate,
-    );
-    const attackCosts = await this.attackCosts(
-      id,
-      activeSince,
-      votingPowerWithActivity,
-      avgTurnoutAndApproval,
-    );
-    delete dao.DAOToken;
+    const totalSupply = dao.daoTokens[0].token.totalSupply;
+    delete dao.daoTokens;
     return {
       ...dao,
       totalSupply,
-      ...votingPowerWithActivity,
-      ...avgTurnoutAndApproval,
-      attackCosts,
     };
   }
 
@@ -51,52 +31,41 @@ export class DaoService {
       { activeDelegatesCount: string; activeVotingPower: string },
     ] = await this.prisma.$queryRaw`
         with lastActivityByUser as (
-          SELECT GREATEST(voc.timestamp, poc.timestamp) as "lastActivityTimestamp", voc.voter as user, voc.dao,
+          SELECT GREATEST(voc.timestamp, poc.timestamp) as "lastActivityTimestamp", voc."voterAccountId" as user, voc."daoId",
           case when GREATEST(voc.timestamp, poc.timestamp) >= CAST(${activeSince} as bigint) then true
             else false END
             as "active"
           FROM public."VotesOnchain" voc 
-          full outer join public."ProposalsOnchain" poc on voc."voter"=poc."proposer" 
+          full outer join public."ProposalsOnchain" poc on voc."voterAccountId"=poc."proposerAccountId" 
         )
         SELECT TEXT(COUNT(distinct lastActivityByUser.user)) as "activeDelegatesCount",
         TEXT(SUM(distinct activeAp."votingPower")) as "activeVotingPower"
         from lastActivityByUser
-        join "AccountPower" activeAp on activeAp.account=lastActivityByUser.user
-        where lastActivityByUser.dao=${id}
-        and activeAp.dao=${id}
+        join "AccountPower" activeAp on activeAp."accountId"=lastActivityByUser.user
+        where lastActivityByUser."daoId"=${id}
+        and activeAp."daoId"=${id}
         and lastActivityByUser.active=true
         and activeAp."delegationsCount">0;
       `;
     const totalVotingPowerAndCount: [
       { totalDelegatesCount: string; totalVotingPower: string },
     ] = await this.prisma.$queryRaw`
-      SELECT TEXT(COUNT(DISTINCT ap."account")) as "totalDelegatesCount", 
+      SELECT TEXT(COUNT(DISTINCT ap."accountId")) as "totalDelegatesCount", 
       TEXT(SUM(ap."votingPower")) as "totalVotingPower" 
       FROM "AccountPower" ap 
-      WHERE ap.dao=${id} and ap."delegationsCount">0;
+      WHERE ap."daoId"=${id} and ap."delegationsCount">0;
     `;
     return { ...activeVotingPowerAndCount[0], ...totalVotingPowerAndCount[0] };
   }
 
-  private async avgTurnoutAndApproval(
-    id: string,
-    fromDate: bigint,
-    toDate: bigint,
-  ) {
+  private async averageTurnout(id: string, fromDate: bigint, toDate: bigint) {
     const averageTurnout: [{ averageTurnout: string }] = await this.prisma
       .$queryRaw`
         select TEXT(AVG(po."forVotes" + po."againstVotes" + po."abstainVotes")) as "averageTurnout"
         from "ProposalsOnchain" po where po.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
-        AND po.status='EXECUTED' or po.status='CANCELED' AND po.dao=${id};
+        AND po.status='EXECUTED' or po.status='CANCELED' AND po."daoId"=${id};
       `;
-    const averageApprovalVotesQtd: [{ averageApprovalVotes: string }] =
-      await this.prisma.$queryRaw`
-      select TEXT(AVG(po."forVotes")) as "averageApprovalVotes"
-      from "ProposalsOnchain" po 
-      where po.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
-      and po.status='EXECUTED'  AND po.dao=${id};
-    `;
-    return { ...averageTurnout[0], ...averageApprovalVotesQtd[0] };
+    return { ...averageTurnout[0] };
   }
 
   public async getDelegatesFromDao(
@@ -132,11 +101,11 @@ export class DaoService {
       TEXT(ap."delegationsCount") as "delegationsCount", 
       TEXT(COUNT(distinct voc.*)) as "proposalsVoted" 
       from "Account" a 
-      left join "AccountPower" ap on a.id=ap.account
-      left join "VotesOnchain" voc on voc.voter=a.id
+      left join "AccountPower" ap on a.id=ap."accountId"
+      left join "VotesOnchain" voc on voc."voterAccountId"=a.id
       where voc.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
       AND ap."votingPower" is not null
-      and ap.dao='${daoId}'
+      and ap."daoId"='${daoId}'
       group by a.id, ap."votingPower", ap."delegationsCount"
       order by ${orderByValues[orderBy]} ${ordering}
       offset ${skip} limit ${take};
@@ -172,12 +141,12 @@ export class DaoService {
       TEXT(ab.balance) as "amount",
       TEXT(COUNT(d.*)) as "countOfDelegates",
       TEXT(MAX(tr.timestamp)) as "lastBuy" from "Account" a 
-      left join "AccountBalance" ab on a.id=ab.account
-      right join "Token" t on t.id =ab.token
-      right join "DAOToken" dt on dt.token=t.id
-      right join "Transfers" tr on tr.to=a.id
-      left join "Delegations" d on a.id=d.delegator
-      where dt.dao='${daoId}'
+      left join "AccountBalance" ab on a.id=ab."accountId"
+      right join "Token" t on t.id =ab."tokenId"
+      right join "DAOToken" dt on dt."tokenId"=t.id
+      right join "Transfers" tr on tr."toAccountId"=a.id
+      left join "Delegations" d on a.id=d."delegatorAccountId"
+      where dt."daoId"='${daoId}'
       group by a.id, ab.balance
       order by ${orderByValues[orderBy]} ${ordering || 'DESC'}
       offset ${skip ?? 0} limit ${take ?? 10};
@@ -384,5 +353,91 @@ export class DaoService {
       topDelegatesForActiveVotingPower,
       topDelegatesForTotalVotingPower,
     };
+  }
+
+  async getTotalSupplyCompare(daoId: string, days: DaysEnum) {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
+    const [totalSupplyCompare]: [
+      {
+        oldTotalSupply: bigint;
+        currentTotalSupply: bigint;
+      },
+    ] = await this.prisma.$queryRaw`
+          WITH "fromZeroAddressOld" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId"=${zeroAddress} 
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "toZeroAddressOld" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId"=${zeroAddress} 
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "fromZeroAddressCurrent" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId"=${zeroAddress}  
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
+          ),
+          "toZeroAddressCurrent" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId"=${zeroAddress}  
+          AND t."daoId" = ${daoId}
+          AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
+          ) 
+          SELECT "fromZeroAddressOld"."fromAmount" - COALESCE("toZeroAddressOld"."toAmount", 0) as "oldTotalSupply" ,
+          "fromZeroAddressCurrent"."fromAmount" - COALESCE("toZeroAddressCurrent"."toAmount", 0) as "currentTotalSupply"
+          FROM "fromZeroAddressOld" 
+          JOIN "toZeroAddressOld" ON 1=1
+          JOIN "fromZeroAddressCurrent" ON 1=1
+          JOIN "toZeroAddressCurrent" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+        BigInt(totalSupplyCompare.oldTotalSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...totalSupplyCompare, changeRate };
+  }
+
+  async getDelegatedSupplyCompare(daoId: string, days: DaysEnum) {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [delegatedSupplyCompare]: [
+      {
+        oldDelegatedSupply: bigint;
+        currentDelegatedSupply: bigint;
+      },
+    ] = await this.prisma.$queryRaw`
+    WITH  "oldDelegatedSupplyByUser" as (
+      select distinct on (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" as "oldDelegatedSupply"
+      FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
+      AND vp."daoId" = ${daoId}
+      order by vp."accountId", vp.timestamp desc
+    ) ,
+   "currentDelegatedSupplyByUser"  as (
+      select distinct on (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" as "currentDelegatedSupply"
+      FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(Date.now().toString().slice(0, 10))}
+      AND vp."daoId" = ${daoId}
+      order by vp."accountId", vp.timestamp desc
+    ) 
+    SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupply", 
+    SUM("currentDelegatedSupplyByUser"."currentDelegatedSupply") as "currentDelegatedSupply"
+    FROM "oldDelegatedSupplyByUser"
+    join "currentDelegatedSupplyByUser" on "oldDelegatedSupplyByUser"."accountId"="currentDelegatedSupplyByUser"."accountId";
+    `;
+    const changeRate = formatUnits(
+      (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
+        BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...delegatedSupplyCompare, changeRate };
   }
 }

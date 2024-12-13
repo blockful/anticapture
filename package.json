@@ -15,7 +15,11 @@
     "start:dashboard": "dotenv -- turbo run start --filter=@defendao/dashboard",
     "start:indexer": "dotenv -- turbo run start --filter=@defendao/indexer",
     "start:server": "dotenv -- turbo run start --filter=@defendao/server",
-    "apply-migration": "dotenv -- turbo run apply-migration --filter=@defendao/server"
+    "start:indexer-metrics": "dotenv -- turbo run start --filter=@defendao/indexer-metrics",
+    "apply-migration": "dotenv -- turbo run apply-migration --filter=@defendao/server",
+    "dump-database": "dotenv -- turbo run dump-database --filter=@defendao/indexer",
+    "restore-database": "dotenv -- turbo run restore-database --filter=@defendao/indexer",
+    "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'"
   },
   "author": "",
   "license": "ISC",

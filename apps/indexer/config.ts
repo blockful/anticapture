@@ -1,23 +1,46 @@
 /* eslint-disable prettier/prettier */
 import dotenv from "dotenv";
+import { ENSGovernorAbi, ENSTokenAbi } from "./src/ens/abi";
 import { UNIGovernorAbi, UNITokenAbi } from "./src/uni/abi";
-import { zeroAddress } from "@/lib/constants";
+import { COMPTokenAbi } from "./src/comp/abi";
+import { Abi, Address, zeroAddress } from "viem";
+import { SHUTokenAbi } from "./src/shu/abi";
+import { anvil, mainnet } from "viem/chains";
 dotenv.config();
 
 export type PonderContract<AbiType> = {
   abi: AbiType;
   network: "mainnet" | "anvil";
-  address: `0x${string}`;
+  address: Address;
   startBlock: number;
 };
 
+export type ViemConfig = {
+  url: string;
+  chain: typeof mainnet | typeof anvil;
+};
+
 export const config = {
+  viem: {
+    production: {
+      url: process.env.PONDER_RPC_URL_1,
+      chain: mainnet,
+    } as ViemConfig,
+    staging: {
+      url: process.env.PONDER_RPC_URL_1,
+      chain: mainnet,
+    } as ViemConfig,
+    test: {
+      url: process.env.PONDER_TEST_RPC_URL_1,
+      chain: anvil,
+    } as ViemConfig,
+  },
   ponder: {
     production: {
       networks: {
         name: "mainnet",
         chainId: 1,
-        rpcUrls: [process.env.PONDER_RPC_URL_1, process.env.PONDER_RPC_URL_2],
+        rpcUrls: [process.env.PONDER_RPC_URL_1],
       },
       contracts: {
         // ENSToken: {
