@@ -5,39 +5,39 @@ import { useContext, useEffect, useState } from "react";
 import { DAO } from "@/lib/server/backend";
 
 import { AnimatedNumber } from "./animated-number";
-import { DaoDataContext } from "../contexts/dao-data-provider";
-import { UncertaintyIcon } from "./uncertainty-icon";
+import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { UncertaintyIcon } from "@/components/01-atoms";
 
-export const InactiveDelegationsSection = () => {
+export const UncertaintySection = () => {
   const { daoData } = useContext(DaoDataContext);
 
   const [totalSupply, setTotalSupply] = useState<number | null>(null);
   const [inactiveVotingPower, setInactiveVotingPower] = useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {
     if (daoData) {
       setTotalSupply((daoData as DAO).totalSupply);
-      setInactiveVotingPower(
-        (daoData as DAO).totalVotingPower - (daoData as DAO).activeVotingPower
-      );
+      // setInactiveVotingPower(
+      //   (daoData as DAO).totalVotingPower - (daoData as DAO).activeVotingPower
+      // );
     }
   }, [daoData]);
 
   return (
-    <div className="flex flex-col text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left border border-lightDark rounded-lg p-3">
-      <div className="flex space-x-3 items-center pb-4">
+    <div className="flex flex-col rounded-lg border border-lightDark p-3 text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
+      <div className="flex items-center space-x-3 pb-4">
         <UncertaintyIcon />
-        <h1 className="text-lg text-white text-left font-medium">
+        <h1 className="text-left text-lg font-medium text-white">
           Uncertainty
         </h1>
       </div>
-      <div className="bg-dark rounded-[4px] p-4 flex space-x-4 flex-grow">
+      <div className="flex flex-grow space-x-4 rounded-[4px] bg-dark p-4">
         <div className="flex flex-col">
-          <h3 className="text-foreground text-sm mb-2">Inactive delegations</h3>
+          <h3 className="mb-2 text-sm text-foreground">Inactive delegations</h3>
           <div>
-            <p className="text-2xl font-semibold text-white pb-5">
+            <p className="pb-5 text-2xl font-semibold text-white">
               {inactiveVotingPower && totalSupply ? (
                 <div className="flex space-x-2">
                   <p>
@@ -47,7 +47,7 @@ export const InactiveDelegationsSection = () => {
                 </div>
               ) : (
                 <div className="flex space-x-1">
-                  <div className="bg-gray-200 h-8 w-6 rounded-md"></div>
+                  <div className="h-8 w-6 rounded-md bg-gray-200"></div>
                   <p>%</p>
                 </div>
               )}

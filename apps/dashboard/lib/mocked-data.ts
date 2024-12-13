@@ -1,4 +1,4 @@
-import { User } from "./server/utils";
+import { User } from "@/lib/server/utils";
 
 export type Delegates = {
   amount: number;
