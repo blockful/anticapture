@@ -2,8 +2,15 @@
 
 import { DelegatesTable } from "../ui/delegates-table";
 import { HoldersTable } from "../ui/holders-table";
-import { UniswapIcon } from "@/components/01-atoms";
-import { UniswapDaoInfo } from "@/components/02-molecules";
+import {
+  ArrowLeftRight,
+  SwitcherDate,
+  UniswapIcon,
+} from "@/components/01-atoms";
+import {
+  TokenDistributionTable,
+  UniswapDaoInfo,
+} from "@/components/02-molecules";
 import { TheSection } from "@/components/03-organisms";
 
 export const HomeTemplate = () => {
@@ -14,6 +21,13 @@ export const HomeTemplate = () => {
         icon={<UniswapIcon className="text-foreground" />}
       >
         <UniswapDaoInfo />
+      </TheSection>
+      <TheSection
+        title="Token Distribution"
+        icon={<ArrowLeftRight className="text-foreground" />}
+        switchDate={<SwitcherDate />}
+      >
+        <TokenDistributionTable />
       </TheSection>
 
       <div className="mt-4 grid w-full grid-cols-1 grid-rows-[auto] gap-4 xl:grid-cols-2">
