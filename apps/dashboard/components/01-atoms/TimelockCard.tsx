@@ -2,16 +2,11 @@
 
 import {
   Badge,
-  InfoIcon,
   Switcher,
   LockIcon,
   ExternalLinkIcon,
+  TooltipInfo,
 } from "@/components/01-atoms";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
 
 export const TimelockCard = () => {
   return (
@@ -24,21 +19,21 @@ export const TimelockCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">Timelock</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
           <div className="flex w-full justify-between gap-1.5">
             <Switcher />
-            <button className="flex h-full w-full">
-              <Badge className="h-full px-2.5">
+            <button
+              className="flex h-full w-full"
+              onClick={() => {
+                window.open(
+                  "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+            >
+              <Badge className="h-full w-full px-2.5 lg:w-fit xl4k:w-full">
                 <p className="text-sm font-medium leading-tight">View</p>
                 <ExternalLinkIcon />
               </Badge>
@@ -48,16 +43,7 @@ export const TimelockCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">Cancel function</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
           <div className="flex h-full">
             <div className="flex w-1/2">

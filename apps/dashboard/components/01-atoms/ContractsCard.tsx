@@ -6,13 +6,9 @@ import {
   TokensIcon,
   NewspaperIcon,
   FocusIcon,
-  InfoIcon,
+  TooltipInfo,
+  ExternalLinkIcon,
 } from "@/components/01-atoms";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
 
 export const ContractsCard = () => {
   return (
@@ -25,26 +21,39 @@ export const ContractsCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">Onchain Gov</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
-          <div className="flex gap-2">
-            <button className="w-full">
-              <Badge className="w-full">
-                <CrownIcon /> Governor
+          <div className="flex h-full w-full justify-between gap-2">
+            <button
+              className="flex h-full w-full"
+              onClick={() => {
+                window.open(
+                  "https://etherscan.io/address/0x408ED6354d4973f66138C91495F2f2FCbd8724C3#code",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+            >
+              <Badge className="h-full w-full">
+                <CrownIcon />
+                <p className="text-sm font-medium leading-tight">Governor</p>
+                <ExternalLinkIcon />
               </Badge>
             </button>
-            <button className="w-full">
-              <Badge className="w-full">
-                <TokensIcon /> Token
+            <button
+              className="flex h-full w-full"
+              onClick={() => {
+                window.open(
+                  "https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+            >
+              <Badge className="h-full w-full">
+                <TokensIcon />
+                <p className="text-sm font-medium leading-tight">Token</p>
+                <ExternalLinkIcon />
               </Badge>
             </button>
           </div>
@@ -52,32 +61,44 @@ export const ContractsCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">OffChain Gov</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
-          <div className="flex gap-2">
-            <button className="w-full">
-              <Badge className="w-full">
-                <FocusIcon /> Snapshot
+          <div className="flex h-full w-full justify-between gap-2">
+            <button
+              className="flex h-full w-full"
+              onClick={() => {
+                window.open(
+                  "https://snapshot.box/#/s:uniswapgovernance.eth",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+            >
+              <Badge className="h-full w-full">
+                <FocusIcon />
+                <p className="text-sm font-medium leading-tight">Snapshot </p>
+                <ExternalLinkIcon />
               </Badge>
             </button>
-            <button className="w-full">
-              <Badge className="w-full">
-                <TokensIcon /> Token
+            <button
+              className="flex h-full w-full"
+              onClick={() => {
+                window.open(
+                  "https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+            >
+              <Badge className="h-full w-full">
+                <TokensIcon />
+                <p className="text-sm font-medium leading-tight">Token </p>
+                <ExternalLinkIcon />
               </Badge>
             </button>
           </div>
         </div>
       </div>
-      <div />
     </div>
   );
 };

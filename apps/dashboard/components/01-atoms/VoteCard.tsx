@@ -4,16 +4,12 @@ import {
   Badge,
   BlocksIcon,
   ClickIcon,
-  InfoIcon,
   Switcher,
+  TooltipInfo,
 } from "@/components/01-atoms";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
+import { DAO } from "@/lib/server/backend";
 
-export const VoteCard = () => {
+export const VoteCard = ({ daoData }: { daoData: DAO }) => {
   return (
     <div className="card-container-about">
       <div className="card-header-about">
@@ -24,23 +20,17 @@ export const VoteCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">Delay</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
           <div className="flex h-full w-full justify-between gap-1.5">
             <Switcher />
             <div className="flex h-full w-full">
-              <Badge>
+              <Badge className="w-full">
                 <BlocksIcon />
-                <p className="text-sm font-medium leading-tight">2 Blocks</p>
+                <p className="text-sm font-medium leading-tight">
+                  {/* {daoData.votingDelay} seconds */}
+                  21 blocks
+                </p>
               </Badge>
             </div>
           </div>
@@ -48,16 +38,7 @@ export const VoteCard = () => {
         <div className="card-description-about">
           <div className="card-description-title">
             <h1 className="text-foreground">Change vote</h1>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="m-1 border-foreground bg-dark">
-                <p className="text-white">
-                  Direct liquid profit: Cost of direct capture
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
           </div>
           <div className="flex h-full">
             <div className="flex w-1/2">

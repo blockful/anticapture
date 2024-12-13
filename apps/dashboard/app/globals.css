@@ -19,7 +19,7 @@
 
 @layer utilities {
   .card-container-about {
-    @apply flex md:max-w-[230px] lg:max-w-[250px] flex-col rounded-lg border border-lightDark bg-dark shadow xl4k:max-w-full;
+    @apply flex sm:max-w-full lg:max-w-[250px] flex-col rounded-lg border border-lightDark bg-dark shadow xl4k:max-w-full;
   }
 
   .card-header-about {
@@ -41,4 +41,13 @@
   .card-description-title {
     @apply flex items-center gap-1.5;
   }
+
+  .skeleton-text {
+    @apply bg-gray-300 rounded-md animate-pulse;
+  }
+  
+  .skeleton-icon {
+    @apply bg-gray-300 rounded-full animate-pulse;
+  }
+  
 }
