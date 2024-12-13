@@ -23,20 +23,20 @@ export const AttacksSection = () => {
     fiftyPercentPlusOneDelegatedTokensCount,
     setFiftyPercentPlusOneDelegatedTokensCount,
   ] = useState<null | bigint>(null);
-  useEffect(() => {
-    if (daoData) {
-      setFiftyPercentPlusOneDelegatedTokensCount(
-        (BigInt(daoData.totalVotingPower) / BigInt(2) + BigInt(1)) /
-          BigInt(10) ** BigInt(18),
-      );
-    }
-    if (tokenPrice && daoData) {
-      setFiftyPercentPlusOneAverageTurnoutTokensCount(
-        (BigInt(daoData.averageTurnout) / BigInt(2) + BigInt(1)) /
-          BigInt(10) ** BigInt(18),
-      );
-    }
-  }, [daoData, tokenPrice]);
+  // useEffect(() => {
+  //   if (daoData && daoData.totalVotingPower) {
+  //     setFiftyPercentPlusOneDelegatedTokensCount(
+  //       (BigInt(daoData.totalVotingPower) / BigInt(2) + BigInt(1)) /
+  //         BigInt(10) ** BigInt(18),
+  //     );
+  //   }
+  //   if (tokenPrice && daoData && daoData.averageTurnout) {
+  //     setFiftyPercentPlusOneAverageTurnoutTokensCount(
+  //       (BigInt(daoData.averageTurnout) / BigInt(2) + BigInt(1)) /
+  //         BigInt(10) ** BigInt(18),
+  //     );
+  //   }
+  // }, [daoData, tokenPrice]);
 
   return (
     <div className="flex flex-col rounded-lg border border-lightDark p-3 text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
@@ -46,17 +46,17 @@ export const AttacksSection = () => {
           Attack Costs
         </h1>
       </div>
-      <div className="bg-dark rounded-[4px] flex space-x-4">
-        <div className="w-full flex flex-col">
-          <div className="flex space-x-1.5 items-center mb-2">
-            <h3 className="text-foreground text-sm p-4 pb-2">
+      <div className="flex space-x-4 rounded-[4px] bg-dark">
+        <div className="flex w-full flex-col">
+          <div className="mb-2 flex items-center space-x-1.5">
+            <h3 className="p-4 pb-2 text-sm text-foreground">
               Delegates to Pass
             </h3>
             <Tooltip>
               <TooltipTrigger>
                 <InfoIcon />
               </TooltipTrigger>
-              <TooltipContent className="bg-dark border-foreground m-1">
+              <TooltipContent className="m-1 border-foreground bg-dark">
                 <p className="text-white"></p>
               </TooltipContent>
             </Tooltip>
@@ -66,7 +66,7 @@ export const AttacksSection = () => {
             <div className="flex w-1/2 flex-col space-y-1">
               <p className="flex justify-center text-2xl font-semibold text-white lg:justify-start">
                 Top{" "}
-                {daoData && daoData.attackCosts ? (
+                {/* {daoData && daoData.attackCosts ? (
                   <AnimatedNumber
                     num={
                       daoData.attackCosts.topActiveDelegatesForTotalVotingPower
@@ -74,7 +74,7 @@ export const AttacksSection = () => {
                   />
                 ) : (
                   <div className="ml-1 h-8 w-6 rounded-md bg-gray-200"></div>
-                )}
+                )} */}
               </p>
               <p className="text-xs font-medium text-foreground">
                 based on active delegates
@@ -83,13 +83,13 @@ export const AttacksSection = () => {
             <div className="flex w-1/2 flex-col space-y-1">
               <p className="flex justify-center text-2xl font-semibold text-white lg:justify-start">
                 Top{" "}
-                {daoData && daoData.attackCosts ? (
+                {/* {daoData && daoData.attackCosts ? (
                   <AnimatedNumber
                     num={daoData.attackCosts.topDelegatesForActiveVotingPower}
                   />
                 ) : (
                   <div className="ml-1 h-8 w-6 rounded-md bg-gray-200"></div>
-                )}
+                )} */}
               </p>
               <p className="text-xs font-medium text-foreground">
                 based on all delegates
