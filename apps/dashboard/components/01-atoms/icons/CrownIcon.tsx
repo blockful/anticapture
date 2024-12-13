@@ -12,9 +12,9 @@ export const CrownIcon = () => {
           id="Vector"
           d="M2.5 10H9.5M1 2L2.5 8H9.5L11 2L8 5.5L6 2L4 5.5L1 2Z"
           stroke="#FC72FF"
-          stroke-width="1.25"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </g>
     </svg>
