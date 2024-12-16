@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev",
-    "start": "ponder start",
+    "start": "ponder start --schema public",
     "codegen": "ponder codegen",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
@@ -17,9 +17,9 @@
     "restore-database": "psql -d $DATABASE_URL < dump"
   },
   "dependencies": {
-    "@ponder/core": "^0.6.22",
     "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
+    "ponder": "^0.8.5",
     "viem": "^2.21.9"
   },
   "devDependencies": {
