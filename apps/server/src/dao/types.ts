@@ -113,3 +113,23 @@ export class CirculatingSupplyCompareReturnType {
   })
   changeRate: string;
 }
+
+export class TreasuryCompareReturnType {
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  oldTreasury: string;
+  
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  currentTreasury: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: '0',
+  })
+  changeRate: string;
+}

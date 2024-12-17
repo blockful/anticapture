@@ -4,7 +4,7 @@ import { DAOEnum, UNITreasuryAddresses, zeroAddress } from 'src/lib';
 import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Address, formatUnits } from 'viem';
-import { CirculatingSupplyCompareReturnType, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType } from './types';
+import { CirculatingSupplyCompareReturnType, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType, TreasuryCompareReturnType } from './types';
 
 @Injectable()
 export class DaoService {
@@ -228,6 +228,46 @@ export class DaoService {
       18,
     );
     return { ...circulatingSupplyCompare, changeRate };
+  }
+
+  async getTreasuryCompare(daoId: string, days: DaysEnum): Promise<TreasuryCompareReturnType>  {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [treasuryCompare]:[Omit<TreasuryCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
+          WITH "oldFromTreasury" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToTreasury" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentTreasury" as (
+            SELECT SUM(ab.balance) AS "currentTreasury"
+            FROM "AccountBalance" ab WHERE ab."accountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+          )
+          SELECT (COALESCE("oldToTreasury"."toAmount", 0) - "oldFromTreasury"."fromAmount")
+          as "oldTreasury",
+          "currentTreasury"."currentTreasury"
+          as "currentTreasury"
+          FROM "oldFromTreasury"
+          JOIN "oldToTreasury" ON 1=1
+          JOIN "currentTreasury" ON 1=1;
+    `;
+    console.log(treasuryCompare);
+    const changeRate = formatUnits(
+      (BigInt(treasuryCompare.currentTreasury) *
+        BigInt(1e18)) /
+        BigInt(treasuryCompare.oldTreasury) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...treasuryCompare, changeRate };
   }
   // private async votingPowerWithActivity(id: string, activeSince: bigint) {
   //   const activeVotingPowerAndCount: [
