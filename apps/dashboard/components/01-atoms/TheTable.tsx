@@ -24,7 +24,7 @@ import {
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
-  isLoading: boolean;
+  isLoading: { [key: string]: boolean };
   filterColumn?: string;
   withSorting?: boolean;
   withPagination?: boolean;
@@ -61,9 +61,7 @@ export const TheTable = <TData, TValue>({
       ...tableConfig,
       getSortedRowModel: getSortedRowModel(),
       onSortingChange: setSorting,
-      state: {
-        sorting,
-      },
+      state: { sorting },
     };
   }
 
@@ -72,50 +70,80 @@ export const TheTable = <TData, TValue>({
       ...tableConfig,
       onColumnFiltersChange: setColumnFilters,
       getFilteredRowModel: getFilteredRowModel(),
-      state: {
-        ...tableConfig.state,
-        columnFilters,
-      },
+      state: { ...tableConfig.state, columnFilters },
     };
   }
 
   const table = useReactTable(tableConfig);
+
+  const normalizeToCamelCase = (str: string) =>
+    str
+      .split(" ")
+      .map((word, index) =>
+        word === word.toUpperCase()
+          ? word.toLowerCase()
+          : index === 0
+            ? word.toLowerCase()
+            : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+      )
+      .join("");
+
+  const SkeletonRow = ({ width = "w-32", height = "h-5" }) => {
+    return (
+      <div className={`flex animate-pulse justify-center space-x-2`}>
+        <div className={`${width} ${height} rounded bg-gray-300`} />
+      </div>
+    );
+  };
 
   return (
     <Table className="bg-dark text-foreground">
       <TableHeader className="text-sm font-medium text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-lightDark">
-            {headerGroup.headers.map((header) => {
-              return (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </TableHead>
-              );
-            })}
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+              </TableHead>
+            ))}
           </TableRow>
         ))}
       </TableHeader>
       <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              className="border-transparent"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))
+        {table.getRowModel().rows.length > 0 ? (
+          table.getRowModel().rows.map((row) => {
+            /* Normalize metric to camelCase because static metrics in the table are coming as lowercase keys during loading */
+            const metric: string = row.getValue("metric");
+            const normalizedKey = normalizeToCamelCase(metric);
+            const isMetricLoading = isLoading[normalizedKey];
+
+            return (
+              <TableRow key={row.id} className="border-transparent">
+                {row.getVisibleCells().map((cell) => {
+                  const isAmountOrVariation =
+                    cell.column.id === "amount" ||
+                    cell.column.id === "variation";
+                  return (
+                    <TableCell key={cell.id}>
+                      {isMetricLoading && isAmountOrVariation ? (
+                        <SkeletonRow />
+                      ) : (
+                        flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })
         ) : (
           <TableRow>
             <TableCell

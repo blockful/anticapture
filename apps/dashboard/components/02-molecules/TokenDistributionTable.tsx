@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useReducer } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
@@ -17,9 +17,7 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
   {
     accessorKey: "metric",
     cell: ({ row }) => {
-      console.log("rowMetric", row);
       const metric: string = row.getValue("metric");
-
       return (
         <p className="scrollbar-none flex max-w-40 items-center space-x-1 overflow-auto">
           {metric}
@@ -35,7 +33,7 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
 
       return (
         <div className="flex items-center justify-center text-center">
-          {amount}%
+          {amount}
         </div>
       );
     },
@@ -74,79 +72,132 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
   },
 ];
 
-export const TokenDistributionTable = () => {
-  const { daoData } = useContext(DaoDataContext);
-  const [data, setData] = useState<TokenDistribution[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+interface LoadingState {
+  totalSupply: boolean;
+  delegatedSupply: boolean;
+  circulatingSupply: boolean;
+  cexSupply: boolean;
+  dexSupply: boolean;
+  lendingSupply: boolean;
+}
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const results = await Promise.allSettled([
-          fetchTotalSupply({
-            daoName: (daoData && daoData.id) || DaoName.UNISWAP,
-            timeInterval: "7d",
-          }),
-          fetchDelegatedSupply({
-            daoName: (daoData && daoData.id) || DaoName.UNISWAP,
-            timeInterval: "7d",
-          }),
-        ]);
+interface State {
+  data: TokenDistribution[];
+  loadingState: LoadingState;
+}
 
-        const totalSupplyResult = results[0];
-        const delegatedSupplyResult = results[1];
+enum ActionType {
+  UPDATE_METRIC = "UPDATE_METRIC",
+  STOP_LOADING = "STOP_LOADING",
+}
 
-        const totalSupplyData =
-          totalSupplyResult.status === "fulfilled"
-            ? totalSupplyResult.value
-            : null;
-        const delegatedSupplyData =
-          delegatedSupplyResult.status === "fulfilled"
-            ? delegatedSupplyResult.value
-            : null;
-
-        const updatedData: TokenDistribution[] = tokenDistributionData.map(
-          (tokenDistributionData) => {
-            if (
-              tokenDistributionData.metric === "Total Supply" &&
-              totalSupplyData
-            ) {
-              return {
-                ...tokenDistributionData,
-                amount: totalSupplyData.currentTotalSupply,
-                variation: totalSupplyData.changeRate,
-              };
-            }
-            if (
-              tokenDistributionData.metric === "Delegated Supply" &&
-              delegatedSupplyData
-            ) {
-              return {
-                ...tokenDistributionData,
-                amount: delegatedSupplyData.currentDelegatedSupply,
-                variation: delegatedSupplyData.changeRate,
-              };
-            }
-            return tokenDistributionData;
-          },
-        );
-
-        setData(updatedData);
-      } catch (error) {
-        console.error("Failed to process data", error);
-      } finally {
-        setIsLoading(false);
-      }
+type Action =
+  | {
+      type: ActionType.UPDATE_METRIC;
+      payload: { index: number; amount: string; variation: string };
+    }
+  | {
+      type: ActionType.STOP_LOADING;
+      payload: { key: keyof LoadingState };
     };
 
-    fetchData();
+const initialState: State = {
+  data: tokenDistributionData,
+  loadingState: {
+    totalSupply: true,
+    delegatedSupply: true,
+    circulatingSupply: true,
+    cexSupply: true,
+    dexSupply: true,
+    lendingSupply: true,
+  },
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case ActionType.UPDATE_METRIC:
+      return {
+        ...state,
+        data: state.data.map((item, index) =>
+          index === action.payload.index
+            ? {
+                ...item,
+                amount: action.payload.amount,
+                variation: action.payload.variation,
+              }
+            : item,
+        ),
+      };
+    case ActionType.STOP_LOADING:
+      return {
+        ...state,
+        loadingState: { ...state.loadingState, [action.payload.key]: false },
+      };
+    default:
+      return state;
+  }
+}
+
+export const TokenDistributionTable = () => {
+  const { daoData } = useContext(DaoDataContext);
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
+
+    fetchTotalSupply({ daoName, timeInterval: "7d" })
+      .then((result) => {
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 0,
+            amount: String(
+              BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
+            ),
+            variation: result.changeRate,
+          },
+        });
+      })
+      .finally(() =>
+        dispatch({
+          type: ActionType.STOP_LOADING,
+          payload: { key: "totalSupply" },
+        }),
+      );
+
+    fetchDelegatedSupply({ daoName, timeInterval: "7d" })
+      .then((result) => {
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 1,
+            amount: String(
+              BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+            ),
+            variation: `${Number(Number(result.changeRate) * 100).toFixed(2)}%`,
+          },
+        });
+      })
+      .finally(() =>
+        dispatch({
+          type: ActionType.STOP_LOADING,
+          payload: { key: "delegatedSupply" },
+        }),
+      );
   }, [daoData]);
 
   return (
     <TheTable
-      isLoading={true}
+      isLoading={{
+        totalSupply: state.loadingState.totalSupply,
+        delegatedSupply: state.loadingState.delegatedSupply,
+        circulatingSupply: state.loadingState.circulatingSupply,
+        cexSupply: state.loadingState.cexSupply,
+        dexSupply: state.loadingState.dexSupply,
+        lendingSupply: state.loadingState.lendingSupply,
+      }}
       columns={tokenDistributionColumns}
-      data={data}
+      data={state.data}
       withPagination={true}
       filterColumn={"ensNameAndAddress"}
       withSorting={true}
