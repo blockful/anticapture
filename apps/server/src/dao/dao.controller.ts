@@ -13,7 +13,7 @@ import { DAOEnum } from 'src/lib';
 import { Prisma } from '@prisma/client';
 import {
   CirculatingSupplyCompareReturnType,
-  DAOQueryReturnType,
+  DAOReturnType,
   DelegatedSupplyCompareReturnType,
   DelegatesReturnType,
   HoldersReturnType,
@@ -39,7 +39,7 @@ export class DaoController {
   })
   @ApiOkResponse({
     description: 'Dao Information',
-    type: DAOQueryReturnType,
+    type: DAOReturnType,
   })
   findOne(@Param('id') id: string) {
     return this.daoService.findOne(id);

@@ -1,22 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Decimal } from '@prisma/client/runtime/library';
 import { DAOEnum } from 'src/lib';
 import { Address, zeroAddress } from 'viem';
 
-export class DAOQueryReturnType {
+export class DAOReturnType {
   @ApiProperty({ enum: ['UNI'] })
   id: DAOEnum;
   @ApiProperty()
-  quorum: string;
+  quorum: Decimal;
   @ApiProperty()
-  proposalThreshold: string;
+  proposalThreshold: Decimal;
   @ApiProperty()
-  votingDelay: string;
+  votingDelay: Decimal;
   @ApiProperty()
-  votingPeriod: string;
+  votingPeriod: Decimal;
   @ApiProperty()
-  timelockDelay: string;
+  timelockDelay: Decimal;
   @ApiProperty()
-  totalSupply: string;
+  totalSupply: Decimal;
 }
 
 export class DelegatesReturnType {

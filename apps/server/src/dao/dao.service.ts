@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { UNITreasuryAddresses, zeroAddress } from 'src/lib';
+import { DAOEnum, UNITreasuryAddresses, zeroAddress } from 'src/lib';
 import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { formatUnits } from 'viem';
+import { Address, formatUnits } from 'viem';
+import { CirculatingSupplyCompareReturnType, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType } from './types';
 
 @Injectable()
 export class DaoService {
@@ -13,7 +14,7 @@ export class DaoService {
     return this.prisma.dAO.findMany();
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<DAOReturnType> {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
       include: { daoTokens: { include: { token: true } } },
@@ -23,6 +24,7 @@ export class DaoService {
     delete dao.daoTokens;
     return {
       ...dao,
+      id: dao.id as DAOEnum,
       totalSupply,
     };
   }
@@ -35,14 +37,7 @@ export class DaoService {
     orderBy: 'account' | 'delegationsCount' | 'votingPower' | 'proposalsVoted',
     ordering: 'ASC' | 'DESC',
     toDate: bigint,
-  ): Promise<{
-    delegates: {
-      account: string;
-      votingPower: string;
-      proposalsVoted: string;
-    }[];
-    totalProposals: number;
-  }> {
+  ): Promise<DelegatesReturnType> {
     const orderByValues = {
       account: 'a.id',
       delegationsCount: 'ap."delegationsCount"',
@@ -51,9 +46,10 @@ export class DaoService {
     };
 
     const delegates: {
-      account: string;
+      account: Address;
       votingPower: string;
       proposalsVoted: string;
+      delegationsCount: string;
     }[] = await this.prisma.$queryRawUnsafe(`
       select a.id as "account", 
       TEXT(ap."votingPower") as "votingPower", 
@@ -88,7 +84,7 @@ export class DaoService {
     skip?: number,
     orderBy?: 'account' | 'amount' | 'lastBuy',
     ordering?: 'ASC' | 'DESC',
-  ) {
+  ): Promise<HoldersReturnType>  {
     const orderByValues = {
       amount: 'ab.balance',
       account: 'a.id',
@@ -110,19 +106,14 @@ export class DaoService {
       order by ${orderByValues[orderBy]} ${ordering || 'DESC'}
       offset ${skip ?? 0} limit ${take ?? 10};
       `;
-    const holders = await this.prisma.$queryRawUnsafe(getHoldersQuery);
+    const holders: HoldersReturnType = await this.prisma.$queryRawUnsafe(getHoldersQuery);
 
     return holders;
   }
 
-  async getTotalSupplyCompare(daoId: string, days: DaysEnum) {
+  async getTotalSupplyCompare(daoId: string, days: DaysEnum): Promise<TotalSupplyCompareReturnType>  {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
-    const [totalSupplyCompare]: [
-      {
-        oldTotalSupply: bigint;
-        currentTotalSupply: bigint;
-      },
-    ] = await this.prisma.$queryRaw`
+    const [totalSupplyCompare]: [Omit<TotalSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
           WITH "oldFromZeroAddress" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
@@ -155,14 +146,9 @@ export class DaoService {
     return { ...totalSupplyCompare, changeRate };
   }
 
-  async getDelegatedSupplyCompare(daoId: string, days: DaysEnum) {
+  async getDelegatedSupplyCompare(daoId: string, days: DaysEnum): Promise<DelegatedSupplyCompareReturnType>  {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
-    const [delegatedSupplyCompare]: [
-      {
-        oldDelegatedSupply: bigint;
-        currentDelegatedSupply: bigint;
-      },
-    ] = await this.prisma.$queryRaw`
+    const [delegatedSupplyCompare]: [Omit<DelegatedSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
     WITH  "oldDelegatedSupply" as (
       SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupplyAmount" from (
         SELECT DISTINCT ON (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" AS "oldDelegatedSupply"
@@ -188,14 +174,9 @@ export class DaoService {
     return { ...delegatedSupplyCompare, changeRate };
   }
 
-  async getCirculatingSupplyCompare(daoId: string, days: DaysEnum) {
+  async getCirculatingSupplyCompare(daoId: string, days: DaysEnum): Promise<CirculatingSupplyCompareReturnType>  {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
-    const [circulatingSupplyCompare]: [
-      {
-        oldCirculatingSupply: bigint;
-        currentCirculatingSupply: bigint;
-      },
-    ] = await this.prisma.$queryRaw`
+    const [circulatingSupplyCompare]:[Omit<CirculatingSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
           WITH "oldFromZeroAddress" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
