@@ -117,3 +117,31 @@ export const fetchDelegatedSupply = async ({
     }
   });
 };
+
+interface CirculatingSupplyPromise {
+  oldCirculatingSupply: string;
+  currentCirculatingSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Circulating Supply */
+export const fetchCirculatingSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<CirculatingSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/circulating-supply/compare?timeInterval=${timeInterval}`,
+      );
+      const circulatingSupplyData = await response.json();
+      console.log("circulatingSupplyData", circulatingSupplyData);
+      res(circulatingSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};

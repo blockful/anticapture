@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { TheTable } from "@/components/01-atoms";
 import {
   DaoName,
+  fetchCirculatingSupply,
   fetchDelegatedSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
@@ -182,6 +183,29 @@ export const TokenDistributionTable = () => {
         dispatch({
           type: ActionType.STOP_LOADING,
           payload: { key: "delegatedSupply" },
+        }),
+      );
+
+    fetchCirculatingSupply({
+      daoName,
+      timeInterval: "7d",
+    })
+      .then((result) => {
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 2,
+            amount: String(
+              BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
+            ),
+            variation: result.changeRate,
+          },
+        });
+      })
+      .finally(() =>
+        dispatch({
+          type: ActionType.STOP_LOADING,
+          payload: { key: "circulatingSupply" },
         }),
       );
   }, [daoData]);
