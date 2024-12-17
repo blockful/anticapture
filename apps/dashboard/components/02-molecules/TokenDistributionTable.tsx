@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import { TheTable } from "@/components/01-atoms";
+import { TimeInterval, TheTable } from "@/components/01-atoms";
 import {
   DaoName,
   fetchCirculatingSupply,
@@ -139,14 +139,18 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const TokenDistributionTable = () => {
+export const TokenDistributionTable = ({
+  timeInterval,
+}: {
+  timeInterval: TimeInterval;
+}) => {
   const { daoData } = useContext(DaoDataContext);
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
 
-    fetchTotalSupply({ daoName, timeInterval: "7d" })
+    fetchTotalSupply({ daoName, timeInterval: timeInterval })
       .then((result) => {
         dispatch({
           type: ActionType.UPDATE_METRIC,
@@ -166,7 +170,7 @@ export const TokenDistributionTable = () => {
         }),
       );
 
-    fetchDelegatedSupply({ daoName, timeInterval: "7d" })
+    fetchDelegatedSupply({ daoName, timeInterval: timeInterval })
       .then((result) => {
         dispatch({
           type: ActionType.UPDATE_METRIC,
@@ -188,7 +192,7 @@ export const TokenDistributionTable = () => {
 
     fetchCirculatingSupply({
       daoName,
-      timeInterval: "7d",
+      timeInterval: timeInterval,
     })
       .then((result) => {
         dispatch({
@@ -208,7 +212,7 @@ export const TokenDistributionTable = () => {
           payload: { key: "circulatingSupply" },
         }),
       );
-  }, [daoData]);
+  }, [daoData, timeInterval]);
 
   return (
     <TheTable

@@ -2,31 +2,50 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const SwitcherDate = () => {
+export enum TimeInterval {
+  SEVEN_DAYS = "7d",
+  THIRTY_DAYS = "30d",
+  NINETY_DAYS = "90d",
+  ONE_YEAR = "365d",
+}
+
+export const SwitcherDate = ({
+  setTimeInterval,
+}: {
+  setTimeInterval: (timeInterval: TimeInterval) => void;
+}) => {
   /**
    * This function is called when a new date is selected.
    * It handles the API call and updates the data accordingly.
    */
-  const handleNewDate = () => {
-    console.log("New date selected");
-  };
-
-  enum Date {
-    SEVEN_DAYS = "7d",
-    THIRTY_DAYS = "30d",
-    NINETY_DAYS = "90d",
-    ONE_YEAR = "1y",
-  }
 
   return (
-    <Tabs defaultValue={Date.SEVEN_DAYS}>
+    <Tabs defaultValue={TimeInterval.SEVEN_DAYS}>
       <TabsList>
-        <TabsTrigger value={Date.SEVEN_DAYS} onClick={handleNewDate}>
-          {Date.SEVEN_DAYS}
+        <TabsTrigger
+          value={TimeInterval.SEVEN_DAYS}
+          onClick={() => setTimeInterval(TimeInterval.SEVEN_DAYS)}
+        >
+          {TimeInterval.SEVEN_DAYS}
         </TabsTrigger>
-        <TabsTrigger value={Date.THIRTY_DAYS}>{Date.THIRTY_DAYS}</TabsTrigger>
-        <TabsTrigger value={Date.NINETY_DAYS}>{Date.NINETY_DAYS}</TabsTrigger>
-        <TabsTrigger value={Date.ONE_YEAR}>{Date.ONE_YEAR}</TabsTrigger>
+        <TabsTrigger
+          value={TimeInterval.THIRTY_DAYS}
+          onClick={() => setTimeInterval(TimeInterval.THIRTY_DAYS)}
+        >
+          {TimeInterval.THIRTY_DAYS}
+        </TabsTrigger>
+        <TabsTrigger
+          value={TimeInterval.NINETY_DAYS}
+          onClick={() => setTimeInterval(TimeInterval.NINETY_DAYS)}
+        >
+          {TimeInterval.NINETY_DAYS}
+        </TabsTrigger>
+        <TabsTrigger
+          value={TimeInterval.ONE_YEAR}
+          onClick={() => setTimeInterval(TimeInterval.ONE_YEAR)}
+        >
+          1y
+        </TabsTrigger>
       </TabsList>
     </Tabs>
   );
