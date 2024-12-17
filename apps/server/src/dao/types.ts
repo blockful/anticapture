@@ -3,21 +3,31 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { DAOEnum } from 'src/lib';
 import { Address, zeroAddress } from 'viem';
 
+export class DAODto {
+  id: DAOEnum;
+  quorum: Decimal;
+  proposalThreshold: Decimal;
+  votingDelay: Decimal;
+  votingPeriod: Decimal;
+  timelockDelay: Decimal;
+  totalSupply: Decimal;
+}
+
 export class DAOReturnType {
   @ApiProperty({ enum: ['UNI'] })
   id: DAOEnum;
   @ApiProperty()
-  quorum: Decimal;
+  quorum: string;
   @ApiProperty()
-  proposalThreshold: Decimal;
+  proposalThreshold: string;
   @ApiProperty()
-  votingDelay: Decimal;
+  votingDelay: string;
   @ApiProperty()
-  votingPeriod: Decimal;
+  votingPeriod: string;
   @ApiProperty()
-  timelockDelay: Decimal;
+  timelockDelay: string;
   @ApiProperty()
-  totalSupply: Decimal;
+  totalSupply: string;
 }
 
 export class DelegatesReturnType {
