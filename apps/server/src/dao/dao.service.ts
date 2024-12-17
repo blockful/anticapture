@@ -134,29 +134,17 @@ export class DaoService {
             SELECT SUM(t.amount) as "toAmount" 
             FROM "Transfers" t 
             WHERE t."toAccountId"=${zeroAddress} 
-          AND t."daoId" = ${daoId}
-          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentFromZeroAddress" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId"=${zeroAddress}  
-          AND t."daoId" = ${daoId}
-          AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
-          ),
-          "currentToZeroAddress" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId"=${zeroAddress}  
-          AND t."daoId" = ${daoId}
-          AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
-          ) 
-          SELECT "oldFromZeroAddress"."fromAmount" - COALESCE("oldToZeroAddress"."toAmount", 0) as "oldTotalSupply" ,
-          "currentFromZeroAddress"."fromAmount" - COALESCE("currentToZeroAddress"."toAmount", 0) as "currentTotalSupply"
+          "currentTotalSupply" as (
+          SELECT SUM(ab.balance) as "balance" FROM "AccountBalance" ab
+          )
+          SELECT "oldFromZeroAddress"."fromAmount" - COALESCE("oldToZeroAddress"."toAmount", 0) as "oldTotalSupply",
+          "currentTotalSupply"."balance" as "currentTotalSupply"
           FROM "oldFromZeroAddress" 
-          JOIN "oldToZeroAddress" ON 1=1
-          JOIN "currentFromZeroAddress" ON 1=1
-          JOIN "currentToZeroAddress" ON 1=1;
+          JOIN "oldToZeroAddress" on 1=1
+          JOIN "currentTotalSupply" on 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
@@ -222,33 +210,12 @@ export class DaoService {
             AND t."daoId" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentFromZeroAddress" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId"=${zeroAddress}  
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
-          ),
-          "currentToZeroAddress" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId"=${zeroAddress}  
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
-          ),
           "oldFromTreasury" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
             WHERE t."fromAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
             AND t."daoId" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-          ),
-          "currentFromTreasury" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
           ),
           "oldToTreasury"as (
             SELECT SUM(t.amount) as "toAmount" 
@@ -257,28 +224,20 @@ export class DaoService {
             AND t."daoId" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentToTreasury" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
-            AND t."daoId" = ${daoId}
-            AND timestamp < ${BigInt(Date.now().toString().slice(0, 10))}
+          "currentCirculatingSupply" as (
+            SELECT SUM(ab.balance) AS "currentCirculatingSupply"
+            FROM "AccountBalance" ab WHERE ab."accountId" NOT IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
           )
           SELECT ("oldFromZeroAddress"."fromAmount" - COALESCE("oldToZeroAddress"."toAmount", 0)) - 
           (COALESCE("oldToTreasury"."toAmount", 0) - "oldFromTreasury"."fromAmount")
           as "oldCirculatingSupply",
-          ("currentFromZeroAddress"."fromAmount" - 
-          COALESCE("currentToZeroAddress"."toAmount", 0)) - 
-          (COALESCE("currentToTreasury"."toAmount", 0) - "currentFromTreasury"."fromAmount")
+          "currentCirculatingSupply"."currentCirculatingSupply"
           as "currentCirculatingSupply"
           FROM "oldFromZeroAddress" 
           JOIN "oldToZeroAddress" ON 1=1
-          JOIN "currentFromZeroAddress" ON 1=1
-          JOIN "currentToZeroAddress" ON 1=1
           JOIN "oldFromTreasury" ON 1=1
-          JOIN "currentFromTreasury" ON 1=1
           JOIN "oldToTreasury" ON 1=1
-          JOIN "currentToTreasury" ON 1=1;
+          JOIN "currentCirculatingSupply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(circulatingSupplyCompare.currentCirculatingSupply) *
