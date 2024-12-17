@@ -259,7 +259,6 @@ export class DaoService {
           JOIN "oldToTreasury" ON 1=1
           JOIN "currentTreasury" ON 1=1;
     `;
-    console.log(treasuryCompare);
     const changeRate = formatUnits(
       (BigInt(treasuryCompare.currentTreasury) *
         BigInt(1e18)) /
