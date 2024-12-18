@@ -62,3 +62,87 @@ export const fetchTokenPrice = async (
     throw new Error("Error fetching token price:");
   }
 };
+
+interface TotalSupplyPromise {
+  oldTotalSupply: string;
+  currentTotalSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Total Supply */
+export const fetchTotalSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<TotalSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/total-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const totalSupplyData = await response.json();
+      res(totalSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface DelegatedSupplyPromise {
+  oldDelegatedSupply: string;
+  currentDelegatedSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Total Supply */
+export const fetchDelegatedSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/delegated-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const delegatedSupplyData = await response.json();
+      res(delegatedSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface CirculatingSupplyPromise {
+  oldCirculatingSupply: string;
+  currentCirculatingSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Circulating Supply */
+export const fetchCirculatingSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<CirculatingSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/circulating-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const circulatingSupplyData = await response.json();
+      res(circulatingSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
