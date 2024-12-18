@@ -2,10 +2,10 @@
 
 import { useContext, useEffect, useReducer } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import { TimeInterval, TheTable } from "@/components/01-atoms";
+import { TimeInterval, TheTable, TooltipInfo } from "@/components/01-atoms";
 import {
   DaoName,
   fetchCirculatingSupply,
@@ -13,6 +13,7 @@ import {
   fetchTotalSupply,
 } from "@/lib/server/backend";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 
 export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
   {
@@ -20,8 +21,34 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     cell: ({ row }) => {
       const metric: string = row.getValue("metric");
       return (
-        <p className="scrollbar-none flex max-w-40 items-center space-x-1 overflow-auto">
+        <p className="scrollbar-none flex max-w-40 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          {metric === "Total Supply" ? (
+            <AppleIcon className="h-5 w-5" />
+          ) : metric === "Delegated Supply" ? (
+            <AppleIcon className="h-5 w-5" />
+          ) : metric === "Circulating Supply" ? (
+            <AppleIcon className="h-5 w-5" />
+          ) : metric === "CEX Supply" ? (
+            <AppleIcon className="h-5 w-5" />
+          ) : metric === "DEX Supply" ? (
+            <AppleIcon className="h-5 w-5" />
+          ) : metric === "Lending Supply" ? (
+            <AppleIcon className="h-5 w-5" />
+          ) : null}
           {metric}
+          {metric === "Total Supply" ? (
+            <TooltipInfo text={"Total amount of tokens in circulation"} />
+          ) : metric === "Delegated Supply" ? (
+            <TooltipInfo text={"Total amount of tokens delegated"} />
+          ) : metric === "Circulating Supply" ? (
+            <TooltipInfo text={"Total amount of tokens in circulation"} />
+          ) : metric === "CEX Supply" ? (
+            <TooltipInfo text={"Total amount of tokens in CEX"} />
+          ) : metric === "DEX Supply" ? (
+            <TooltipInfo text={"Total amount of tokens in DEX"} />
+          ) : metric === "Lending Supply" ? (
+            <TooltipInfo text={"Total amount of tokens in lending"} />
+          ) : null}
         </p>
       );
     },
@@ -45,7 +72,7 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
           className="w-full"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Amount | %
+          Current value (UNI)
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -56,7 +83,18 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     cell: ({ row }) => {
       const variation: string = row.getValue("variation");
 
-      return <p className="mr-4 text-center">{variation}</p>;
+      return (
+        <p
+          className={`flex items-center justify-center gap-1 text-center ${Number(variation) >= 0 ? "text-[#4ade80]" : "text-red-500"}`}
+        >
+          {Number(variation) >= 0 ? (
+            <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-red-500" />
+          )}
+          {variation}
+        </p>
+      );
     },
     header: ({ column }) => {
       return (
