@@ -169,6 +169,12 @@ export class DaoController {
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
   })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
   @ApiOkResponse({
     description: 'Dao Total Supply',
     type: TotalSupplyCompareReturnType,
@@ -186,6 +192,12 @@ export class DaoController {
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
   })
   @ApiOkResponse({
     description: 'Dao Delegated Supply',
@@ -205,6 +217,12 @@ export class DaoController {
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
         enum: DAOEnum,
   })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
   @ApiOkResponse({
     description: 'Dao Delegated Supply',
     type: CirculatingSupplyCompareReturnType,
@@ -215,5 +233,29 @@ export class DaoController {
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getCirculatingSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+        enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Dao Delegated Supply',
+    type: CirculatingSupplyCompareReturnType,
+  })
+  @Get(':daoId/treasury/compare')
+  getTreasuryCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getTreasuryCompare(daoId, timeInterval);
   }
 }
