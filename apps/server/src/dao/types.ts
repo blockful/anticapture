@@ -110,7 +110,7 @@ export class CirculatingSupplyCompareReturnType {
     example: BigInt(1e18).toString(),
   })
   oldCirculatingSupply: string;
-  
+
   @ApiProperty({
     type: 'string',
     example: BigInt(1e18).toString(),
@@ -130,12 +130,32 @@ export class TreasuryCompareReturnType {
     example: BigInt(1e18).toString(),
   })
   oldTreasury: string;
-  
+
   @ApiProperty({
     type: 'string',
     example: BigInt(1e18).toString(),
   })
   currentTreasury: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: '0',
+  })
+  changeRate: string;
+}
+
+export class CexSupplyCompareReturnType {
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  oldCexSupply: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  currentCexSupply: string;
 
   @ApiProperty({
     type: 'string',

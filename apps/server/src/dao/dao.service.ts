@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DAOEnum, UNITreasuryAddresses, zeroAddress } from 'src/lib';
+import { CEXAddresses, DAOEnum, UNITreasuryAddresses, zeroAddress } from 'src/lib';
 import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Address, formatUnits } from 'viem';
-import { CirculatingSupplyCompareReturnType, DAODto, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType, TreasuryCompareReturnType } from './types';
+import { CexSupplyCompareReturnType, CirculatingSupplyCompareReturnType, DAODto, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType, TreasuryCompareReturnType } from './types';
 
 @Injectable()
 export class DaoService {
@@ -267,6 +267,45 @@ export class DaoService {
       18,
     );
     return { ...treasuryCompare, changeRate };
+  }
+
+  async getCexSupplyCompare(daoId: string, days: DaysEnum): Promise<CexSupplyCompareReturnType>  {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [cexCompare]:[Omit<CexSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
+          WITH "oldFromCex" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(CEXAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToCex" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId" IN (${Prisma.join(Object.values(CEXAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentCexSupply" as (
+            SELECT SUM(ab.balance) AS "currentCexSupply"
+            FROM "AccountBalance" ab WHERE ab."accountId" IN (${Prisma.join(Object.values(CEXAddresses))})
+          )
+          SELECT (COALESCE("oldFromCex"."toAmount", 0) - "oldToCex"."fromAmount")
+          as "oldCexSupply",
+          "currentCexSupply"."currentCexSupply"
+          as "currentCexSupply"
+          FROM "oldFromCex"
+          JOIN "oldToCex" ON 1=1
+          JOIN "currentCexSupply" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(cexCompare.currentCexSupply) *
+        BigInt(1e18)) /
+        BigInt(cexCompare.oldCexSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...cexCompare, changeRate };
   }
   // private async votingPowerWithActivity(id: string, activeSince: bigint) {
   //   const activeVotingPowerAndCount: [

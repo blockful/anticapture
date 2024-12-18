@@ -12,6 +12,7 @@ import { DaysEnum } from 'src/lib';
 import { DAOEnum } from 'src/lib';
 import { Prisma } from '@prisma/client';
 import {
+  CexSupplyCompareReturnType,
   CirculatingSupplyCompareReturnType,
   DAOReturnType,
   DelegatedSupplyCompareReturnType,
@@ -215,7 +216,7 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
-        enum: DAOEnum,
+    enum: DAOEnum,
   })
   @ApiParam({
     name: 'timeInterval',
@@ -239,7 +240,7 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
-        enum: DAOEnum,
+    enum: DAOEnum,
   })
   @ApiParam({
     name: 'timeInterval',
@@ -257,5 +258,17 @@ export class DaoController {
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getTreasuryCompare(daoId, timeInterval);
+  }
+  
+  @ApiOkResponse({
+    description: 'Cex Supply Return Object',
+    type: CexSupplyCompareReturnType,
+  })
+  @Get(':daoId/cex-supply/compare')
+  getCexSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getCexSupplyCompare(daoId, timeInterval);
   }
 }
