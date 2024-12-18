@@ -81,6 +81,7 @@ export const fetchTotalSupply = async ({
     try {
       const response = await fetch(
         `${BACKEND_ENDPOINT}/dao/${daoName}/total-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
       );
       const totalSupplyData = await response.json();
       res(totalSupplyData);
@@ -108,9 +109,9 @@ export const fetchDelegatedSupply = async ({
     try {
       const response = await fetch(
         `${BACKEND_ENDPOINT}/dao/${daoName}/delegated-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
       );
       const delegatedSupplyData = await response.json();
-      console.log("delegatedSupplyData", delegatedSupplyData);
       res(delegatedSupplyData);
     } catch (e) {
       rej(e);
@@ -136,9 +137,9 @@ export const fetchCirculatingSupply = async ({
     try {
       const response = await fetch(
         `${BACKEND_ENDPOINT}/dao/${daoName}/circulating-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
       );
       const circulatingSupplyData = await response.json();
-      console.log("circulatingSupplyData", circulatingSupplyData);
       res(circulatingSupplyData);
     } catch (e) {
       rej(e);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
@@ -15,40 +15,47 @@ import {
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 
+const metricDetails: Record<
+  string,
+  { icon: React.ReactNode; tooltip: string }
+> = {
+  "Total Supply": {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total amount of tokens in circulation",
+  },
+  "Delegated Supply": {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total amount of tokens delegated",
+  },
+  "Circulating Supply": {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total amount of tokens in circulation",
+  },
+  "CEX Supply": {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total amount of tokens in CEX",
+  },
+  "DEX Supply": {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total amount of tokens in DEX",
+  },
+  "Lending Supply": {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total amount of tokens in lending",
+  },
+};
+
 export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
   {
     accessorKey: "metric",
     cell: ({ row }) => {
       const metric: string = row.getValue("metric");
+      const details = metric ? metricDetails[metric] : null;
       return (
-        <p className="scrollbar-none flex max-w-40 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-          {metric === "Total Supply" ? (
-            <AppleIcon className="h-5 w-5" />
-          ) : metric === "Delegated Supply" ? (
-            <AppleIcon className="h-5 w-5" />
-          ) : metric === "Circulating Supply" ? (
-            <AppleIcon className="h-5 w-5" />
-          ) : metric === "CEX Supply" ? (
-            <AppleIcon className="h-5 w-5" />
-          ) : metric === "DEX Supply" ? (
-            <AppleIcon className="h-5 w-5" />
-          ) : metric === "Lending Supply" ? (
-            <AppleIcon className="h-5 w-5" />
-          ) : null}
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          {details && details.icon}
           {metric}
-          {metric === "Total Supply" ? (
-            <TooltipInfo text={"Total amount of tokens in circulation"} />
-          ) : metric === "Delegated Supply" ? (
-            <TooltipInfo text={"Total amount of tokens delegated"} />
-          ) : metric === "Circulating Supply" ? (
-            <TooltipInfo text={"Total amount of tokens in circulation"} />
-          ) : metric === "CEX Supply" ? (
-            <TooltipInfo text={"Total amount of tokens in CEX"} />
-          ) : metric === "DEX Supply" ? (
-            <TooltipInfo text={"Total amount of tokens in DEX"} />
-          ) : metric === "Lending Supply" ? (
-            <TooltipInfo text={"Total amount of tokens in lending"} />
-          ) : null}
+          {details && <TooltipInfo text={details.tooltip} />}
         </p>
       );
     },
