@@ -14,6 +14,7 @@ import {
 } from "@/lib/server/backend";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
+import { formatNumberUserReadble } from "@/lib/client/utils";
 
 const metricDetails: Record<
   string,
@@ -68,7 +69,7 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
 
       return (
         <div className="flex items-center justify-center text-center">
-          {amount}
+          {formatNumberUserReadble(amount)}
         </div>
       );
     },
