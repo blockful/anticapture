@@ -16,6 +16,9 @@ import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 
+const formatVariation = (rateRaw: string): string =>
+  `${Number(Number(rateRaw) * 100).toFixed(2)}%`;
+
 const metricDetails: Record<
   string,
   { icon: React.ReactNode; tooltip: string }
@@ -205,7 +208,7 @@ export const TokenDistributionTable = ({
             amount: String(
               BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
             ),
-            variation: `${Number(Number(result.changeRate) * 100).toFixed(2)}%`,
+            variation: formatVariation(result.changeRate),
           },
         });
       })
@@ -225,7 +228,7 @@ export const TokenDistributionTable = ({
             amount: String(
               BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
             ),
-            variation: `${Number(Number(result.changeRate) * 100).toFixed(2)}%`,
+            variation: formatVariation(result.changeRate),
           },
         });
       })
@@ -248,7 +251,7 @@ export const TokenDistributionTable = ({
             amount: String(
               BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
             ),
-            variation: `${Number(Number(result.changeRate) * 100).toFixed(2)}%`,
+            variation: formatVariation(result.changeRate),
           },
         });
       })
