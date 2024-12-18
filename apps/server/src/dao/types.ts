@@ -163,3 +163,23 @@ export class CexSupplyCompareReturnType {
   })
   changeRate: string;
 }
+
+export class DexSupplyCompareReturnType {
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  oldDexSupply: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  currentDexSupply: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: '0',
+  })
+  changeRate: string;
+}

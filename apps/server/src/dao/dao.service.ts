@@ -4,7 +4,7 @@ import { CEXAddresses, DAOEnum, UNITreasuryAddresses, zeroAddress } from 'src/li
 import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Address, formatUnits } from 'viem';
-import { CexSupplyCompareReturnType, CirculatingSupplyCompareReturnType, DAODto, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType, TreasuryCompareReturnType } from './types';
+import { CexSupplyCompareReturnType, CirculatingSupplyCompareReturnType, DAODto, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, DexSupplyCompareReturnType, HoldersReturnType, TotalSupplyCompareReturnType, TreasuryCompareReturnType } from './types';
 
 @Injectable()
 export class DaoService {
@@ -307,6 +307,48 @@ export class DaoService {
     );
     return { ...cexCompare, changeRate };
   }
+
+  async getDexSupplyCompare(daoId: string, days: DaysEnum): Promise<DexSupplyCompareReturnType>  {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [dexCompare]:[Omit<DexSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
+          WITH "oldFromCex" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(DEXAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToDex" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId" IN (${Prisma.join(Object.values(DEXAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentDexSupply" as (
+            SELECT SUM(ab.balance) AS "currentDexSupply"
+            FROM "AccountBalance" ab WHERE ab."accountId" IN (${Prisma.join(Object.values(DEXAddresses))})
+          )
+          SELECT (COALESCE("oldFromDex"."toAmount", 0) - "oldToDex"."fromAmount")
+          as "oldDexSupply",
+          "currentDexSupply"."currentDexSupply"
+          as "currentDexSupply"
+          FROM "oldFromDex"
+          JOIN "oldToDex" ON 1=1
+          JOIN "currentDexSupply" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(dexCompare.currentDexSupply) *
+        BigInt(1e18)) /
+        BigInt(dexCompare.oldDexSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...dexCompare, changeRate };
+  }
+
+
+
   // private async votingPowerWithActivity(id: string, activeSince: bigint) {
   //   const activeVotingPowerAndCount: [
   //     { activeDelegatesCount: string; activeVotingPower: string },
