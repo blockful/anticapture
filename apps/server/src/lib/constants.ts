@@ -44,8 +44,8 @@ export const DEXAddresses = {
   GMXMarket: '0xc7abb2c5f3bf3ceb389df0eecd6120d451170b50',
   PancakeSwapV3Pool: '0x647d99772863e09f47435782cbb6c96ec4a75f12',
   ThenafiAlgebraPool: '0x117e96887b20d4db40df85fa2b7302ca0d63c5e3',
-  UniswapV3Pool: '0x554548b404213c7efcdbab933f52edfe3c581834',
-  UniswapV3Pool2: '0xc24f7d8e51a64dc1238880bd00bb961d54cbeb29',
-  UniswapV3Pool3: '0x929fcf81102c5577243ee614c2c455acd6681f1a',
-  UniswapV3Pool4: '0x357faf5843c7fd7fb4e34fbeabdac16eabe8a5bc',
+  UniswapPool1: '0x554548b404213c7efcdbab933f52edfe3c581834',
+  UniswapPool2: '0xc24f7d8e51a64dc1238880bd00bb961d54cbeb29',
+  UniswapPool3: '0x929fcf81102c5577243ee614c2c455acd6681f1a',
+  UniswapPool4: '0x357faf5843c7fd7fb4e34fbeabdac16eabe8a5bc',
 };
