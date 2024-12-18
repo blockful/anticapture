@@ -5,11 +5,13 @@ import React from "react";
 export const TheSection = ({
   icon,
   title,
+  description,
   switchDate,
   children,
 }: {
   icon: React.JSX.Element;
   title: string;
+  description?: string;
   switchDate?: React.JSX.Element;
   children: React.ReactNode;
 }) => {
@@ -22,8 +24,12 @@ export const TheSection = ({
             {title}
           </h1>
         </div>
+
         <div className="flex">{switchDate}</div>
       </div>
+      <p className="flex w-[50%] flex-col text-start text-xs text-[#a1a1aa]">
+        {description}
+      </p>
       {children}
     </div>
   );
