@@ -19,6 +19,7 @@ import {
   DelegatesReturnType,
   HoldersReturnType,
   TotalSupplyCompareReturnType,
+  TreasuryCompareReturnType,
 } from './types';
 
 @ApiTags('dao')
@@ -250,7 +251,7 @@ export class DaoController {
   })
   @ApiOkResponse({
     description: 'Dao Delegated Supply',
-    type: CirculatingSupplyCompareReturnType,
+    type: TreasuryCompareReturnType,
   })
   @Get(':daoId/treasury/compare')
   getTreasuryCompare(
