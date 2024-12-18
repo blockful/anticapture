@@ -34,3 +34,18 @@ export const CEXAddresses = {
   BinanceWithdrawalHotWallet: '0xe2fc31F816A9b94326492132018C3aEcC4a93aE1',
   NobitexIrHotWallet2: '0xd582C78a04E7379DfC9EE991A25f549576962eE1',
 };
+
+export const DEXAddresses = {
+  CompoundCUNI: '0x35a18000230da775cac24873d00ff85bccded550',
+  ArbitrumL1ERC20Gateway: '0xa3a7b6f88361f48403514059f1f16c8e78d60eec',
+  VenusVUNI: '0x27ff564707786720c71a2e5c1490a63266683612',
+  DolomiteMargin: '0x6bd780e7fdf01d77e4d475c821f1e7ae05409072',
+  GMXVault: '0x489ee077994b6658eafa855c308275ead8097c4a',
+  GMXMarket: '0xc7abb2c5f3bf3ceb389df0eecd6120d451170b50',
+  PancakeSwapV3Pool: '0x647d99772863e09f47435782cbb6c96ec4a75f12',
+  ThenafiAlgebraPool: '0x117e96887b20d4db40df85fa2b7302ca0d63c5e3',
+  UniswapV3Pool: '0x554548b404213c7efcdbab933f52edfe3c581834',
+  UniswapV3Pool2: '0xc24f7d8e51a64dc1238880bd00bb961d54cbeb29',
+  UniswapV3Pool3: '0x929fcf81102c5577243ee614c2c455acd6681f1a',
+  UniswapV3Pool4: '0x357faf5843c7fd7fb4e34fbeabdac16eabe8a5bc',
+};
