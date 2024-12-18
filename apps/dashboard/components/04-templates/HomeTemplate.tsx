@@ -32,6 +32,9 @@ export const HomeTemplate = () => {
         switchDate={
           <SwitcherDate setTimeInterval={setTimeIntervalTokenDistribution} />
         }
+        description="Token distribution metrics are based on Blockful's Governance
+        Indexer and are updated after a new block is confirmed with new
+        interaction with relevant contracts."
       >
         <TokenDistributionTable timeInterval={timeIntervalTokenDistribution} />
       </TheSection>
