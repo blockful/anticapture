@@ -248,7 +248,7 @@ export const TokenDistributionTable = ({
             amount: String(
               BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
             ),
-            variation: result.changeRate,
+            variation: `${Number(Number(result.changeRate) * 100).toFixed(2)}%`,
           },
         });
       })
