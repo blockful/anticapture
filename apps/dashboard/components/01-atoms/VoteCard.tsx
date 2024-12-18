@@ -28,8 +28,7 @@ export const VoteCard = ({ daoData }: { daoData: DAO }) => {
               <Badge className="w-full">
                 <BlocksIcon />
                 <p className="text-sm font-medium leading-tight">
-                  {/* {daoData.votingDelay} seconds */}
-                  21 blocks
+                  {daoData.votingDelay} seconds
                 </p>
               </Badge>
             </div>
