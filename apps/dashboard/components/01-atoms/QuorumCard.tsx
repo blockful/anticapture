@@ -29,7 +29,7 @@ export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
             </div>
             <div className="flex h-full w-full items-center justify-start gap-1.5">
               <div className="flex w-full">
-                <p className="flex text-sm font-medium leading-tight">For +</p>
+                <p className="flex text-sm font-medium leading-tight">For</p>
               </div>
             </div>
           </div>
