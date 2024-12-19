@@ -12,11 +12,13 @@ import { DaysEnum } from 'src/lib';
 import { DAOEnum } from 'src/lib';
 import { Prisma } from '@prisma/client';
 import {
+  ActiveSupplyReturnType,
   CexSupplyCompareReturnType,
   CirculatingSupplyCompareReturnType,
   DAOReturnType,
   DelegatedSupplyCompareReturnType,
   DelegatesReturnType,
+  DexSupplyCompareReturnType,
   HoldersReturnType,
   TotalSupplyCompareReturnType,
   TreasuryCompareReturnType,
@@ -275,7 +277,7 @@ export class DaoController {
 
   @ApiOkResponse({
     description: 'Dex Supply Return Object',
-    type: CexSupplyCompareReturnType,
+    type: DexSupplyCompareReturnType,
   })
   @Get(':daoId/dex-supply/compare')
   getDexSupplyCompare(
@@ -286,8 +288,8 @@ export class DaoController {
   }
 
   @ApiOkResponse({
-    description: 'Dex Supply Return Object',
-    type: CexSupplyCompareReturnType,
+    description: 'Active Supply Return Object',
+    type: ActiveSupplyReturnType,
   })
   @Get(':daoId/active-supply')
   getActiveSupply(
