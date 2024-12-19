@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { TimeInterval, TheTable, TooltipInfo } from "@/components/01-atoms";
 import {
   DaoName,
+  fetchCexSupply,
   fetchCirculatingSupply,
   fetchDelegatedSupply,
   fetchTotalSupply,
@@ -25,27 +26,27 @@ const metricDetails: Record<
 > = {
   "Total Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total amount of tokens in circulation",
+    tooltip: "Total currentValue of tokens in circulation",
   },
   "Delegated Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total amount of tokens delegated",
+    tooltip: "Total currentValue of tokens delegated",
   },
   "Circulating Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total amount of tokens in circulation",
+    tooltip: "Total currentValue of tokens in circulation",
   },
   "CEX Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total amount of tokens in CEX",
+    tooltip: "Total currentValue of tokens in CEX",
   },
   "DEX Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total amount of tokens in DEX",
+    tooltip: "Total currentValue of tokens in DEX",
   },
   "Lending Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total amount of tokens in lending",
+    tooltip: "Total currentValue of tokens in lending",
   },
 };
 
@@ -66,13 +67,12 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     header: "Metrics",
   },
   {
-    accessorKey: "amount",
+    accessorKey: "currentValue",
     cell: ({ row }) => {
-      const amount: number = row.getValue("amount");
-
+      const currentValue: number = row.getValue("currentValue");
       return (
         <div className="flex items-center justify-center text-center">
-          {formatNumberUserReadble(amount)}
+          {currentValue && formatNumberUserReadble(currentValue)}
         </div>
       );
     },
@@ -144,7 +144,7 @@ enum ActionType {
 type Action =
   | {
       type: ActionType.UPDATE_METRIC;
-      payload: { index: number; amount: string; variation: string };
+      payload: { index: number; currentValue: string; variation: string };
     }
   | {
       type: ActionType.STOP_LOADING;
@@ -172,7 +172,7 @@ function reducer(state: State, action: Action): State {
           index === action.payload.index
             ? {
                 ...item,
-                amount: action.payload.amount,
+                currentValue: action.payload.currentValue,
                 variation: action.payload.variation,
               }
             : item,
@@ -205,7 +205,7 @@ export const TokenDistributionTable = ({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 0,
-            amount: String(
+            currentValue: String(
               BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
             ),
             variation: formatVariation(result.changeRate),
@@ -225,7 +225,7 @@ export const TokenDistributionTable = ({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 1,
-            amount: String(
+            currentValue: String(
               BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
             ),
             variation: formatVariation(result.changeRate),
@@ -248,7 +248,7 @@ export const TokenDistributionTable = ({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 2,
-            amount: String(
+            currentValue: String(
               BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
             ),
             variation: formatVariation(result.changeRate),
@@ -259,6 +259,29 @@ export const TokenDistributionTable = ({
         dispatch({
           type: ActionType.STOP_LOADING,
           payload: { key: "circulatingSupply" },
+        }),
+      );
+
+    fetchCexSupply({
+      daoName,
+      timeInterval: timeInterval,
+    })
+      .then((result) => {
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 3,
+            currentValue: String(
+              BigInt(result.currentCexSupply) / BigInt(10 ** 18),
+            ),
+            variation: result.changeRate,
+          },
+        });
+      })
+      .finally(() =>
+        dispatch({
+          type: ActionType.STOP_LOADING,
+          payload: { key: "cexSupply" },
         }),
       );
   }, [daoData, timeInterval]);

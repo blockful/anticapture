@@ -121,12 +121,11 @@ export const TheTable = <TData, TValue>({
             const metric: string = row.getValue("metric");
             const normalizedKey = normalizeToCamelCase(metric);
             const isMetricLoading = isLoading[normalizedKey];
-
             return (
               <TableRow key={row.id} className="border-transparent">
                 {row.getVisibleCells().map((cell) => {
                   const isAmountOrVariation =
-                    cell.column.id === "amount" ||
+                    cell.column.id === "currentValue" ||
                     cell.column.id === "variation";
                   return (
                     <TableCell key={cell.id}>
