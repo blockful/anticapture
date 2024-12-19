@@ -47,7 +47,7 @@ export class DaoController {
     return this.daoService.findOne(id);
   }
 
-  @Get('delegates/:daoId')
+  @Get(':daoId/delegates')
   @ApiParam({
     name: 'daoId',
     required: true,
