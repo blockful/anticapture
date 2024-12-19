@@ -32,9 +32,9 @@ export class DaoController {
     return this.daoService.findAll();
   }
 
-  @Get(':id')
+  @Get(':daoId')
   @ApiParam({
-    name: 'id',
+    name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
@@ -43,8 +43,8 @@ export class DaoController {
     description: 'Dao Information',
     type: DAOReturnType,
   })
-  findOne(@Param('id') id: string) {
-    return this.daoService.findOne(id);
+  findOne(@Param('daoId') daoId: string) {
+    return this.daoService.findOne(daoId);
   }
 
   @Get(':daoId/delegates')
