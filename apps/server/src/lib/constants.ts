@@ -49,3 +49,7 @@ export const DEXAddresses = {
   UniswapPool3: '0x929fcf81102c5577243ee614c2c455acd6681f1a',
   UniswapPool4: '0x357faf5843c7fd7fb4e34fbeabdac16eabe8a5bc',
 };
+
+export const LendingAddresses = {
+  Aave: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18"
+}

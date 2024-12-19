@@ -4,6 +4,7 @@ import {
   CEXAddresses,
   DAOEnum,
   DEXAddresses,
+  LendingAddresses,
   UNITreasuryAddresses,
   zeroAddress,
 } from 'src/lib';
@@ -20,6 +21,7 @@ import {
   DelegatesReturnType,
   DexSupplyCompareReturnType,
   HoldersReturnType,
+  LendingSupplyCompareReturnType,
   TotalSupplyCompareReturnType,
   TreasuryCompareReturnType,
 } from './types';
@@ -388,6 +390,49 @@ export class DaoService {
       18,
     );
     return { ...dexCompare, changeRate };
+  }
+
+  async getLendingSupply(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<LendingSupplyCompareReturnType> {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [lendingCompare]: [
+      Omit<LendingSupplyCompareReturnType, 'changeRate'>,
+    ] = await this.prisma.$queryRaw`
+          WITH "oldFromLending" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE UPPER(t."fromAccountId") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToLending" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE UPPER(t."toAccountId") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentLendingSupply" as (
+            SELECT SUM(ab.balance) AS "currentLendingSupply"
+            FROM "AccountBalance" ab WHERE UPPER(ab."accountId") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
+          )
+          SELECT COALESCE(("oldToLending"."toAmount" - "oldFromLending"."fromAmount"),0)
+          as "oldLendingSupply",
+          "currentLendingSupply"."currentLendingSupply"
+          as "currentLendingSupply"
+          FROM "oldFromLending"
+          JOIN "oldToLending" ON 1=1
+          JOIN "currentLendingSupply" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(lendingCompare.currentLendingSupply) * BigInt(1e18)) /
+        BigInt(lendingCompare.oldLendingSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...lendingCompare, changeRate };
   }
 
   async getActiveSupply(daoId: string): Promise<ActiveSupplyReturnType> {
