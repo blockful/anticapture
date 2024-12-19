@@ -1,10 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DAOEnum, UNITreasuryAddresses, zeroAddress } from 'src/lib';
+import {
+  CEXAddresses,
+  DAOEnum,
+  DEXAddresses,
+  UNITreasuryAddresses,
+  zeroAddress,
+} from 'src/lib';
 import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Address, formatUnits } from 'viem';
-import { CirculatingSupplyCompareReturnType, DAOReturnType, DelegatedSupplyCompareReturnType, DelegatesReturnType, HoldersReturnType, TotalSupplyCompareReturnType } from './types';
+import {
+  CexSupplyCompareReturnType,
+  CirculatingSupplyCompareReturnType,
+  DAODto,
+  DAOReturnType,
+  DelegatedSupplyCompareReturnType,
+  DelegatesReturnType,
+  DexSupplyCompareReturnType,
+  HoldersReturnType,
+  TotalSupplyCompareReturnType,
+  TreasuryCompareReturnType,
+} from './types';
 
 @Injectable()
 export class DaoService {
@@ -14,7 +31,7 @@ export class DaoService {
     return this.prisma.dAO.findMany();
   }
 
-  async findOne(id: string): Promise<DAOReturnType> {
+  async findOne(id: string): Promise<DAODto> {
     const dao = await this.prisma.dAO.findUnique({
       where: { id },
       include: { daoTokens: { include: { token: true } } },
@@ -25,7 +42,7 @@ export class DaoService {
     return {
       ...dao,
       id: dao.id as DAOEnum,
-      totalSupply,
+      totalSupply: totalSupply,
     };
   }
 
@@ -84,7 +101,7 @@ export class DaoService {
     skip?: number,
     orderBy?: 'account' | 'amount' | 'lastBuy',
     ordering?: 'ASC' | 'DESC',
-  ): Promise<HoldersReturnType>  {
+  ): Promise<HoldersReturnType> {
     const orderByValues = {
       amount: 'ab.balance',
       account: 'a.id',
@@ -106,14 +123,20 @@ export class DaoService {
       order by ${orderByValues[orderBy]} ${ordering || 'DESC'}
       offset ${skip ?? 0} limit ${take ?? 10};
       `;
-    const holders: HoldersReturnType = await this.prisma.$queryRawUnsafe(getHoldersQuery);
+    const holders: HoldersReturnType =
+      await this.prisma.$queryRawUnsafe(getHoldersQuery);
 
     return holders;
   }
 
-  async getTotalSupplyCompare(daoId: string, days: DaysEnum): Promise<TotalSupplyCompareReturnType>  {
+  async getTotalSupplyCompare(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<TotalSupplyCompareReturnType> {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
-    const [totalSupplyCompare]: [Omit<TotalSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
+    const [totalSupplyCompare]: [
+      Omit<TotalSupplyCompareReturnType, 'changeRate'>,
+    ] = await this.prisma.$queryRaw`
           WITH "oldFromZeroAddress" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
@@ -146,9 +169,14 @@ export class DaoService {
     return { ...totalSupplyCompare, changeRate };
   }
 
-  async getDelegatedSupplyCompare(daoId: string, days: DaysEnum): Promise<DelegatedSupplyCompareReturnType>  {
+  async getDelegatedSupplyCompare(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<DelegatedSupplyCompareReturnType> {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
-    const [delegatedSupplyCompare]: [Omit<DelegatedSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
+    const [delegatedSupplyCompare]: [
+      Omit<DelegatedSupplyCompareReturnType, 'changeRate'>,
+    ] = await this.prisma.$queryRaw`
     WITH  "oldDelegatedSupply" as (
       SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupplyAmount" from (
         SELECT DISTINCT ON (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" AS "oldDelegatedSupply"
@@ -174,9 +202,14 @@ export class DaoService {
     return { ...delegatedSupplyCompare, changeRate };
   }
 
-  async getCirculatingSupplyCompare(daoId: string, days: DaysEnum): Promise<CirculatingSupplyCompareReturnType>  {
+  async getCirculatingSupplyCompare(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<CirculatingSupplyCompareReturnType> {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
-    const [circulatingSupplyCompare]:[Omit<CirculatingSupplyCompareReturnType, "changeRate">] = await this.prisma.$queryRaw`
+    const [circulatingSupplyCompare]: [
+      Omit<CirculatingSupplyCompareReturnType, 'changeRate'>,
+    ] = await this.prisma.$queryRaw`
           WITH "oldFromZeroAddress" as (
             SELECT SUM(t.amount) as "fromAmount" 
             FROM "Transfers" t 
@@ -229,6 +262,133 @@ export class DaoService {
     );
     return { ...circulatingSupplyCompare, changeRate };
   }
+
+  async getTreasuryCompare(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<TreasuryCompareReturnType> {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [treasuryCompare]: [Omit<TreasuryCompareReturnType, 'changeRate'>] =
+      await this.prisma.$queryRaw`
+          WITH "oldFromTreasury" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToTreasury" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE t."toAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentTreasury" as (
+            SELECT SUM(ab.balance) AS "currentTreasury"
+            FROM "AccountBalance" ab WHERE ab."accountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+          )
+          SELECT (COALESCE("oldToTreasury"."toAmount", 0) - "oldFromTreasury"."fromAmount")
+          as "oldTreasury",
+          "currentTreasury"."currentTreasury"
+          as "currentTreasury"
+          FROM "oldFromTreasury"
+          JOIN "oldToTreasury" ON 1=1
+          JOIN "currentTreasury" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(treasuryCompare.currentTreasury) * BigInt(1e18)) /
+        BigInt(treasuryCompare.oldTreasury) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...treasuryCompare, changeRate };
+  }
+
+  async getCexSupplyCompare(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<CexSupplyCompareReturnType> {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [cexCompare]: [Omit<CexSupplyCompareReturnType, 'changeRate'>] =
+      await this.prisma.$queryRaw`
+          WITH "oldFromCex" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE UPPER(t."fromAccountId") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToCex" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE UPPER(t."toAccountId") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentCexSupply" as (
+            SELECT SUM(ab.balance) AS "currentCexSupply"
+            FROM "AccountBalance" ab WHERE UPPER(ab."accountId") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
+          )
+          SELECT (COALESCE("oldToCex"."toAmount", 0) - "oldFromCex"."fromAmount")
+          as "oldCexSupply",
+          "currentCexSupply"."currentCexSupply"
+          as "currentCexSupply"
+          FROM "oldFromCex"
+          JOIN "oldToCex" ON 1=1
+          JOIN "currentCexSupply" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(cexCompare.currentCexSupply) * BigInt(1e18)) /
+        BigInt(cexCompare.oldCexSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...cexCompare, changeRate };
+  }
+
+  async getDexSupplyCompare(
+    daoId: string,
+    days: DaysEnum,
+  ): Promise<DexSupplyCompareReturnType> {
+    const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
+    const [dexCompare]: [Omit<DexSupplyCompareReturnType, 'changeRate'>] =
+      await this.prisma.$queryRaw`
+          WITH "oldFromDex" as (
+            SELECT SUM(t.amount) as "fromAmount" 
+            FROM "Transfers" t 
+            WHERE UPPER(t."fromAccountId") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "oldToDex" as (
+            SELECT SUM(t.amount) as "toAmount" 
+            FROM "Transfers" t 
+            WHERE UPPER(t."toAccountId") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."daoId" = ${daoId}
+            AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+          ),
+          "currentDexSupply" as (
+            SELECT SUM(ab.balance) AS "currentDexSupply"
+            FROM "AccountBalance" ab WHERE UPPER(ab."accountId") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
+          )
+          SELECT (COALESCE("oldToDex"."toAmount",0) - "oldFromDex"."fromAmount")
+          as "oldDexSupply",
+          "currentDexSupply"."currentDexSupply"
+          as "currentDexSupply"
+          FROM "oldFromDex"
+          JOIN "oldToDex" ON 1=1
+          JOIN "currentDexSupply" ON 1=1;
+    `;
+    const changeRate = formatUnits(
+      (BigInt(dexCompare.currentDexSupply) * BigInt(1e18)) /
+        BigInt(dexCompare.oldDexSupply) -
+        BigInt(1e18),
+      18,
+    );
+    return { ...dexCompare, changeRate };
+  }
+
   // private async votingPowerWithActivity(id: string, activeSince: bigint) {
   //   const activeVotingPowerAndCount: [
   //     { activeDelegatesCount: string; activeVotingPower: string },

@@ -12,12 +12,14 @@ import { DaysEnum } from 'src/lib';
 import { DAOEnum } from 'src/lib';
 import { Prisma } from '@prisma/client';
 import {
+  CexSupplyCompareReturnType,
   CirculatingSupplyCompareReturnType,
   DAOReturnType,
   DelegatedSupplyCompareReturnType,
   DelegatesReturnType,
   HoldersReturnType,
   TotalSupplyCompareReturnType,
+  TreasuryCompareReturnType,
 } from './types';
 
 @ApiTags('dao')
@@ -30,9 +32,9 @@ export class DaoController {
     return this.daoService.findAll();
   }
 
-  @Get(':id')
+  @Get(':daoId')
   @ApiParam({
-    name: 'id',
+    name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
@@ -41,11 +43,11 @@ export class DaoController {
     description: 'Dao Information',
     type: DAOReturnType,
   })
-  findOne(@Param('id') id: string) {
-    return this.daoService.findOne(id);
+  findOne(@Param('daoId') daoId: string) {
+    return this.daoService.findOne(daoId);
   }
 
-  @Get('delegates/:daoId')
+  @Get(':daoId/delegates')
   @ApiParam({
     name: 'daoId',
     required: true,
@@ -169,6 +171,12 @@ export class DaoController {
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
   })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
   @ApiOkResponse({
     description: 'Dao Total Supply',
     type: TotalSupplyCompareReturnType,
@@ -187,6 +195,12 @@ export class DaoController {
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
   })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
   @ApiOkResponse({
     description: 'Dao Delegated Supply',
     type: DelegatedSupplyCompareReturnType,
@@ -203,7 +217,13 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
-        enum: DAOEnum,
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
   })
   @ApiOkResponse({
     description: 'Dao Delegated Supply',
@@ -215,5 +235,53 @@ export class DaoController {
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getCirculatingSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Dao Delegated Supply',
+    type: TreasuryCompareReturnType,
+  })
+  @Get(':daoId/treasury/compare')
+  getTreasuryCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getTreasuryCompare(daoId, timeInterval);
+  }
+  
+  @ApiOkResponse({
+    description: 'Cex Supply Return Object',
+    type: CexSupplyCompareReturnType,
+  })
+  @Get(':daoId/cex-supply/compare')
+  getCexSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getCexSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiOkResponse({
+    description: 'Dex Supply Return Object',
+    type: CexSupplyCompareReturnType,
+  })
+  @Get(':daoId/dex-supply/compare')
+  getDexSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getDexSupplyCompare(daoId, timeInterval);
   }
 }
