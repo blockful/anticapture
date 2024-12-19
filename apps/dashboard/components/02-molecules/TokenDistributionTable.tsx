@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useContext, useEffect, useReducer } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
+import { ColumnDef, Row } from "@tanstack/react-table";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import { TimeInterval, TheTable, TooltipInfo } from "@/components/01-atoms";
+import {
+  ArrowUpDown,
+  TimeInterval,
+  TheTable,
+  TooltipInfo,
+} from "@/components/01-atoms";
 import {
   DaoName,
   fetchCexSupply,
@@ -16,6 +21,16 @@ import {
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
+
+const sortingByAscendingOrDescendingNumber = (
+  rowA: Row<TokenDistribution>,
+  rowB: Row<TokenDistribution>,
+  columnId: string,
+) => {
+  const a = Number(rowA.getValue(columnId)) ?? 0;
+  const b = Number(rowB.getValue(columnId)) ?? 0;
+  return a - b;
+};
 
 const formatVariation = (rateRaw: string): string =>
   `${Number(Number(rateRaw) * 100).toFixed(2)}%`;
@@ -88,6 +103,8 @@ export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
         </Button>
       );
     },
+    enableSorting: true,
+    sortingFn: sortingByAscendingOrDescendingNumber,
   },
   {
     accessorKey: "variation",
