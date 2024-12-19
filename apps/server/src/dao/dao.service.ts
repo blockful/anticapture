@@ -11,6 +11,7 @@ import { DaysEnum } from 'src/lib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Address, formatUnits } from 'viem';
 import {
+  ActiveSupplyReturnType,
   CexSupplyCompareReturnType,
   CirculatingSupplyCompareReturnType,
   DAODto,
@@ -389,37 +390,22 @@ export class DaoService {
     return { ...dexCompare, changeRate };
   }
 
-  // private async votingPowerWithActivity(id: string, activeSince: bigint) {
-  //   const activeVotingPowerAndCount: [
-  //     { activeDelegatesCount: string; activeVotingPower: string },
-  //   ] = await this.prisma.$queryRaw`
-  //       with lastActivityByUser as (
-  //         SELECT GREATEST(voc.timestamp, poc.timestamp) as "lastActivityTimestamp", voc."voterAccountId" as user, voc."daoId",
-  //         case when GREATEST(voc.timestamp, poc.timestamp) >= CAST(${activeSince} as bigint) then true
-  //           else false END
-  //           as "active"
-  //         FROM public."VotesOnchain" voc
-  //         full outer join public."ProposalsOnchain" poc on voc."voterAccountId"=poc."proposerAccountId"
-  //       )
-  //       SELECT TEXT(COUNT(distinct lastActivityByUser.user)) as "activeDelegatesCount",
-  //       TEXT(SUM(distinct activeAp."votingPower")) as "activeVotingPower"
-  //       from lastActivityByUser
-  //       join "AccountPower" activeAp on activeAp."accountId"=lastActivityByUser.user
-  //       where lastActivityByUser."daoId"=${id}
-  //       and activeAp."daoId"=${id}
-  //       and lastActivityByUser.active=true
-  //       and activeAp."delegationsCount">0;
-  //     `;
-  //   const totalVotingPowerAndCount: [
-  //     { totalDelegatesCount: string; totalVotingPower: string },
-  //   ] = await this.prisma.$queryRaw`
-  //     SELECT TEXT(COUNT(DISTINCT ap."accountId")) as "totalDelegatesCount",
-  //     TEXT(SUM(ap."votingPower")) as "totalVotingPower"
-  //     FROM "AccountPower" ap
-  //     WHERE ap."daoId"=${id} and ap."delegationsCount">0;
-  //   `;
-  //   return { ...activeVotingPowerAndCount[0], ...totalVotingPowerAndCount[0] };
-  // }
+  async getActiveSupply(daoId: string): Promise<ActiveSupplyReturnType> {
+    const oldTimestamp =
+      BigInt(Date.now()) - BigInt((180 * 86400000).toString());
+    const [activeSupply]: [ActiveSupplyReturnType] = await this.prisma
+      .$queryRaw`
+        WITH  "activeUsers" as (
+          SELECT DISTINCT ON (voc."voterAccountId") voc."voterAccountId", voc.timestamp
+          FROM "VotesOnchain" voc WHERE voc.timestamp>CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+          AND voc."daoId" = ${daoId}
+          ORDER BY voc."voterAccountId", voc.timestamp DESC
+        )
+        SELECT SUM(ap."votingPower") as "activeSupply", TEXT(COUNT("activeUsers".*)) AS "activeUsers" FROM "AccountPower" ap
+        JOIN "activeUsers" ON ap."accountId" = "activeUsers"."voterAccountId";
+      `;
+    return activeSupply;
+  }
 
   // private async averageTurnout(id: string, fromDate: bigint, toDate: bigint) {
   //   const averageTurnout: [{ averageTurnout: string }] = await this.prisma

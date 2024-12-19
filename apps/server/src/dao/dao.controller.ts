@@ -284,4 +284,15 @@ export class DaoController {
   ) {
     return this.daoService.getDexSupplyCompare(daoId, timeInterval);
   }
+
+  @ApiOkResponse({
+    description: 'Dex Supply Return Object',
+    type: CexSupplyCompareReturnType,
+  })
+  @Get(':daoId/active-supply')
+  getActiveSupply(
+    @Param('daoId') daoId: string,
+  ) {
+    return this.daoService.getActiveSupply(daoId);
+  }
 }
