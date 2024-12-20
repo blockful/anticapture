@@ -7,6 +7,7 @@ import {
   Switcher,
   TooltipInfo,
 } from "@/components/01-atoms";
+import { formatTimestampUserReadable } from "@/lib/client/utils";
 import { DAO } from "@/lib/server/backend";
 
 export const VoteCard = ({ daoData }: { daoData: DAO }) => {
@@ -28,7 +29,7 @@ export const VoteCard = ({ daoData }: { daoData: DAO }) => {
               <Badge className="w-full">
                 <BlocksIcon />
                 <p className="text-sm font-medium leading-tight">
-                  {daoData.votingDelay} seconds
+                  {formatTimestampUserReadable(daoData.votingDelay)}
                 </p>
               </Badge>
             </div>
