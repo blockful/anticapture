@@ -146,3 +146,31 @@ export const fetchCirculatingSupply = async ({
     }
   });
 };
+
+interface CexSupplyPromise {
+  oldCexSupply: string;
+  currentCexSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Cex Supply */
+export const fetchCexSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<CexSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/cex-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const cexSupplyData = await response.json();
+      res(cexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};

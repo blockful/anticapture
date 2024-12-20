@@ -5,14 +5,18 @@ import { DAO } from "@/lib/server/backend";
 import { formatEther } from "viem";
 
 export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
-  const quorumMinPercentage = formatEther(
-    (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(daoData.totalSupply),
-  );
+  const quorumMinPercentage =
+    daoData &&
+    formatEther(
+      (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(daoData.totalSupply),
+    );
 
-  const proposalThresholdPercentage = formatEther(
-    (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
-      BigInt(daoData.totalSupply),
-  );
+  const proposalThresholdPercentage =
+    daoData &&
+    formatEther(
+      (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
+        BigInt(daoData.totalSupply),
+    );
 
   return (
     <div className="card-container-about">

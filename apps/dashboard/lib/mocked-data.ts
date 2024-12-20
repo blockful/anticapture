@@ -2,7 +2,7 @@ import { User } from "@/lib/server/utils";
 
 export type TokenDistribution = {
   metric: string | undefined;
-  amount: string | undefined;
+  currentValue: string | undefined;
   variation: string | undefined;
 };
 
@@ -30,32 +30,32 @@ export type Holders = {
 export const tokenDistributionData: TokenDistribution[] = [
   {
     metric: "Total Supply",
-    amount: undefined,
+    currentValue: undefined,
     variation: undefined,
   },
   {
     metric: "Delegated Supply",
-    amount: undefined,
+    currentValue: undefined,
     variation: undefined,
   },
   {
     metric: "Circulating Supply",
-    amount: undefined,
+    currentValue: undefined,
     variation: undefined,
   },
   {
     metric: "CEX Supply",
-    amount: undefined,
+    currentValue: undefined,
     variation: undefined,
   },
   {
     metric: "DEX Supply",
-    amount: undefined,
+    currentValue: undefined,
     variation: undefined,
   },
   {
     metric: "Lending Supply",
-    amount: undefined,
+    currentValue: undefined,
     variation: undefined,
   },
 ];
