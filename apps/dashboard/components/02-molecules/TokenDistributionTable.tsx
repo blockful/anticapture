@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
@@ -10,6 +10,7 @@ import {
   TimeInterval,
   TheTable,
   TooltipInfo,
+  ArrowState,
 } from "@/components/01-atoms";
 import {
   DaoName,
@@ -64,80 +65,6 @@ const metricDetails: Record<
     tooltip: "Total currentValue of tokens in lending",
   },
 };
-
-export const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
-  {
-    accessorKey: "metric",
-    cell: ({ row }) => {
-      const metric: string = row.getValue("metric");
-      const details = metric ? metricDetails[metric] : null;
-      return (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-          {details && details.icon}
-          {metric}
-          {details && <TooltipInfo text={details.tooltip} />}
-        </p>
-      );
-    },
-    header: "Metrics",
-  },
-  {
-    accessorKey: "currentValue",
-    cell: ({ row }) => {
-      const currentValue: number = row.getValue("currentValue");
-      return (
-        <div className="flex items-center justify-center text-center">
-          {currentValue && formatNumberUserReadble(currentValue)}
-        </div>
-      );
-    },
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Current value (UNI)
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    enableSorting: true,
-    sortingFn: sortingByAscendingOrDescendingNumber,
-  },
-  {
-    accessorKey: "variation",
-    cell: ({ row }) => {
-      const variation: string = row.getValue("variation");
-
-      return (
-        <p
-          className={`flex items-center justify-center gap-1 text-center ${Number(variation) >= 0 ? "text-[#4ade80]" : "text-red-500"}`}
-        >
-          {Number(variation) >= 0 ? (
-            <ChevronUp className="h-4 w-4 text-[#4ade80]" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-red-500" />
-          )}
-          {variation}
-        </p>
-      );
-    },
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Variation
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-];
 
 interface LoadingState {
   totalSupply: boolean;
@@ -212,6 +139,11 @@ export const TokenDistributionTable = ({
 }) => {
   const { daoData } = useContext(DaoDataContext);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isCurrentValueArrowState, setCurrentValueArrowState] =
+    useState<ArrowState>(ArrowState.DEFAULT);
+  const [isVariationArrowState, setVariationArrowState] = useState<ArrowState>(
+    ArrowState.DEFAULT,
+  );
 
   useEffect(() => {
     const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
@@ -302,6 +234,110 @@ export const TokenDistributionTable = ({
         }),
       );
   }, [daoData, timeInterval]);
+
+  const toggleArrowState = (
+    currentState: ArrowState,
+    setState: React.Dispatch<React.SetStateAction<ArrowState>>,
+  ) => {
+    const nextState =
+      currentState === ArrowState.DEFAULT
+        ? ArrowState.UP
+        : currentState === ArrowState.UP
+          ? ArrowState.DOWN
+          : ArrowState.UP;
+    setState(nextState);
+  };
+
+  const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
+    {
+      accessorKey: "metric",
+      cell: ({ row }) => {
+        const metric: string = row.getValue("metric");
+        const details = metric ? metricDetails[metric] : null;
+        return (
+          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+            {details && details.icon}
+            {metric}
+            {details && <TooltipInfo text={details.tooltip} />}
+          </p>
+        );
+      },
+      header: "Metrics",
+    },
+    {
+      accessorKey: "currentValue",
+      cell: ({ row }) => {
+        const currentValue: number = row.getValue("currentValue");
+        return (
+          <div className="flex items-center justify-center text-center">
+            {currentValue && formatNumberUserReadble(currentValue)}
+          </div>
+        );
+      },
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="w-full"
+            onClick={() => {
+              column.toggleSorting(column.getIsSorted() === "asc");
+              toggleArrowState(
+                isCurrentValueArrowState,
+                setCurrentValueArrowState,
+              );
+            }}
+          >
+            Current value (UNI)
+            <ArrowUpDown
+              props={{
+                className: "ml-2 h-4 w-4",
+              }}
+              activeState={isCurrentValueArrowState}
+            />
+          </Button>
+        );
+      },
+      enableSorting: true,
+      sortingFn: sortingByAscendingOrDescendingNumber,
+    },
+    {
+      accessorKey: "variation",
+      cell: ({ row }) => {
+        const variation: string = row.getValue("variation");
+
+        return (
+          <p
+            className={`flex items-center justify-center gap-1 text-center ${Number(variation) >= 0 ? "text-[#4ade80]" : "text-red-500"}`}
+          >
+            {Number(variation) >= 0 ? (
+              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-red-500" />
+            )}
+            {variation}
+          </p>
+        );
+      },
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="w-full"
+            onClick={() => {
+              column.toggleSorting(column.getIsSorted() === "asc");
+              toggleArrowState(isVariationArrowState, setVariationArrowState);
+            }}
+          >
+            Variation
+            <ArrowUpDown
+              activeState={isVariationArrowState}
+              props={{ className: "ml-2 h-4 w-4" }}
+            />
+          </Button>
+        );
+      },
+    },
+  ];
 
   return (
     <TheTable
