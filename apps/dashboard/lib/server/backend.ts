@@ -174,3 +174,31 @@ export const fetchCexSupply = async ({
     }
   });
 };
+
+interface DexSupplyPromise {
+  oldDexSupply: string;
+  currentDexSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Dex Supply */
+export const fetchDexSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<DexSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/dex-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
