@@ -17,6 +17,7 @@ import {
   fetchCexSupply,
   fetchCirculatingSupply,
   fetchDelegatedSupply,
+  fetchDexSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
@@ -231,6 +232,29 @@ export const TokenDistributionTable = ({
         dispatch({
           type: ActionType.STOP_LOADING,
           payload: { key: "cexSupply" },
+        }),
+      );
+
+    fetchDexSupply({
+      daoName,
+      timeInterval: timeInterval,
+    })
+      .then((result) => {
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 4,
+            currentValue: String(
+              BigInt(result.currentDexSupply) / BigInt(10 ** 18),
+            ),
+            variation: formatVariation(result.changeRate),
+          },
+        });
+      })
+      .finally(() =>
+        dispatch({
+          type: ActionType.STOP_LOADING,
+          payload: { key: "dexSupply" },
         }),
       );
   }, [daoData, timeInterval]);
