@@ -1,3 +1,5 @@
+export * from "./ArrowLeftRight";
+export * from "./ArrowUpDown";
 export * from "./AttacksIcon";
 export * from "./BlocksIcon";
 export * from "./ClickIcon";

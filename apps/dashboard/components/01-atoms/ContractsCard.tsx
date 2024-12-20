@@ -34,7 +34,7 @@ export const ContractsCard = () => {
                 );
               }}
             >
-              <Badge className="h-full w-full">
+              <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
                 <CrownIcon />
                 <p className="text-sm font-medium leading-tight">Governor</p>
                 <ExternalLinkIcon />
@@ -50,7 +50,7 @@ export const ContractsCard = () => {
                 );
               }}
             >
-              <Badge className="h-full w-full">
+              <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
                 <TokensIcon />
                 <p className="text-sm font-medium leading-tight">Token</p>
                 <ExternalLinkIcon />
@@ -74,7 +74,7 @@ export const ContractsCard = () => {
                 );
               }}
             >
-              <Badge className="h-full w-full">
+              <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
                 <FocusIcon />
                 <p className="text-sm font-medium leading-tight">Snapshot </p>
                 <ExternalLinkIcon />
@@ -90,7 +90,7 @@ export const ContractsCard = () => {
                 );
               }}
             >
-              <Badge className="h-full w-full">
+              <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
                 <TokensIcon />
                 <p className="text-sm font-medium leading-tight">Token </p>
                 <ExternalLinkIcon />

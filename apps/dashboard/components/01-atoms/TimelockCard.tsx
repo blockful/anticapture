@@ -33,7 +33,7 @@ export const TimelockCard = () => {
                 );
               }}
             >
-              <Badge className="h-full w-full px-2.5 lg:w-fit xl4k:w-full">
+              <Badge className="h-full w-full px-2.5 hover:border-lightDark hover:bg-transparent lg:w-fit xl4k:w-full">
                 <p className="text-sm font-medium leading-tight">View</p>
                 <ExternalLinkIcon />
               </Badge>
