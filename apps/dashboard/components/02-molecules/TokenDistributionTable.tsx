@@ -281,6 +281,7 @@ export const TokenDistributionTable = ({
             className="w-full"
             onClick={() => {
               column.toggleSorting(column.getIsSorted() === "asc");
+              setVariationArrowState(ArrowState.DEFAULT);
               toggleArrowState(
                 isCurrentValueArrowState,
                 setCurrentValueArrowState,
@@ -325,6 +326,7 @@ export const TokenDistributionTable = ({
             className="w-full"
             onClick={() => {
               column.toggleSorting(column.getIsSorted() === "asc");
+              setCurrentValueArrowState(ArrowState.DEFAULT);
               toggleArrowState(isVariationArrowState, setVariationArrowState);
             }}
           >

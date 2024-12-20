@@ -46,3 +46,27 @@ export function formatNumberUserReadble(num: number): string {
   }
   return num.toString();
 }
+
+export function formatTimestampUserReadable(num: number): string {
+  const timestamp = [
+    { value: 1, symbol: "sec" },
+    { value: 60, symbol: "min" },
+    { value: 3600, symbol: "hour" },
+    { value: 86400, symbol: "day" },
+    { value: 604800, symbol: "week" },
+    { value: 2592000, symbol: "month" },
+    { value: 31536000, symbol: "year" },
+  ];
+
+  const matchedUnit = timestamp
+    .slice()
+    .reverse()
+    .find((item) => num >= item.value);
+
+  if (matchedUnit) {
+    const value = (num / matchedUnit.value).toFixed(1).replace(/\.0$/, "");
+    return `${value} ${matchedUnit.symbol}`;
+  }
+
+  return "0 sec";
+}
