@@ -42,27 +42,27 @@ const metricDetails: Record<
 > = {
   "Total Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total currentValue of tokens in circulation",
+    tooltip: "Total current value of tokens in circulation",
   },
   "Delegated Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total currentValue of tokens delegated",
+    tooltip: "Total current value of tokens delegated",
   },
   "Circulating Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total currentValue of tokens in circulation",
+    tooltip: "Total current value of tokens in circulation",
   },
   "CEX Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total currentValue of tokens in CEX",
+    tooltip: "Total current value of tokens in CEX",
   },
   "DEX Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total currentValue of tokens in DEX",
+    tooltip: "Total current value of tokens in DEX",
   },
   "Lending Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total currentValue of tokens in lending",
+    tooltip: "Total current value of tokens in lending",
   },
 };
 
