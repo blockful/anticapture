@@ -34,7 +34,7 @@ const sortingByAscendingOrDescendingNumber = (
 };
 
 const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}%`;
+  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
 
 const metricDetails: Record<
   string,
@@ -223,7 +223,7 @@ export const TokenDistributionTable = ({
             currentValue: String(
               BigInt(result.currentCexSupply) / BigInt(10 ** 18),
             ),
-            variation: result.changeRate,
+            variation: formatVariation(result.changeRate),
           },
         });
       })
@@ -307,14 +307,14 @@ export const TokenDistributionTable = ({
 
         return (
           <p
-            className={`flex items-center justify-center gap-1 text-center ${Number(variation) >= 0 ? "text-[#4ade80]" : "text-red-500"}`}
+            className={`flex items-center justify-center gap-1 text-center ${Number(variation) > 0 ? "text-[#4ade80]" : Number(variation) < 0 ? "text-red-500" : ""}`}
           >
-            {Number(variation) >= 0 ? (
+            {Number(variation) > 0 ? (
               <ChevronUp className="h-4 w-4 text-[#4ade80]" />
-            ) : (
+            ) : Number(variation) < 0 ? (
               <ChevronDown className="h-4 w-4 text-red-500" />
-            )}
-            {variation}
+            ) : null}
+            {variation}%
           </p>
         );
       },
