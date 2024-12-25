@@ -27,6 +27,7 @@ export const Token = onchainTable("Token", (drizzle) => ({
   name: drizzle.text(),
   decimals: drizzle.integer(),
   totalSupply: drizzle.bigint(),
+  delegatedSupply: drizzle.bigint().notNull(),
 }));
 export const Account = onchainTable("Account", (drizzle) => ({
   id: drizzle.text().primaryKey(),

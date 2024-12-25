@@ -36,6 +36,7 @@ ponder.on("UNIToken:setup", async ({ context }) => {
     name: daoId,
     decimals,
     totalSupply,
+    delegatedSupply: BigInt(0) 
   });
   await context.db.insert(DAOToken).values({
     id: daoId + "-" + uniTokenAddress,

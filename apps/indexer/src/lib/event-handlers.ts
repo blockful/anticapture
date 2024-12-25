@@ -115,6 +115,11 @@ export const delegatedVotesChanged = async (
     .onConflictDoUpdate({
       votingPower: newBalance,
     });
+  
+  // Update the delegated supply
+  const updatedToken = await context.db
+  .update(Token, {id: event.log.address})
+  .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
 };
 
 export const tokenTransfer = async (
