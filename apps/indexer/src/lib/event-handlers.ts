@@ -10,7 +10,11 @@ import {
   Transfers,
   VotesOnchain,
   VotingPowerHistory,
+  DayBucket,
+  Token
 } from "ponder:schema";
+import { secondsInDay } from "./constants";
+import { table } from "console";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -94,9 +98,18 @@ export const delegatedVotesChanged = async (
     daoId
   );
 
+  const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "previousBalance", daos: ["ENS", "COMP", "UNI"] },
+      { name: "previousVotes", daos: ["SHU"] },
+    ],
+    event.args,
+    daoId
+  );
+
   // Create a new voting power history record
   await context.db.insert(VotingPowerHistory).values({
-    id: event.log.id,
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
     accountId: event.args.delegate,
     daoId,
     votingPower: newBalance,
@@ -120,6 +133,31 @@ export const delegatedVotesChanged = async (
   const updatedToken = await context.db
   .update(Token, {id: event.log.address})
   .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
+
+  const delegatedSupply = updatedToken.delegatedSupply
+
+  // Calculate the day's start timestamp (UTC)
+  const dayId = Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
+
+  await context.db
+    .insert(DayBucket)
+    .values({
+      id: dayId,
+      daoId,
+      average: delegatedSupply,
+      open: delegatedSupply,
+      high: delegatedSupply,
+      low: delegatedSupply,
+      close: delegatedSupply,
+      count: 1,
+    })
+    .onConflictDoUpdate((row) => ({
+      average: (row.average * BigInt(row.count) + delegatedSupply) / BigInt(row.count + 1),
+      high: delegatedSupply > row.low ? delegatedSupply : row.low,
+      low: delegatedSupply < row.low ? delegatedSupply : row.low,
+      close: delegatedSupply,
+      count: row.count + 1,
+    }))
 };
 
 export const tokenTransfer = async (

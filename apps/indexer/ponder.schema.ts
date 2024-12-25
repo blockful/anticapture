@@ -152,3 +152,15 @@ export const ProposalsOnchain = onchainTable(
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),
   })
 );
+
+export const DayBucket = onchainTable("day_buckets", (drizzle) => ({
+  id: drizzle.integer().primaryKey(),
+  daoId: drizzle.text(),
+  open: drizzle.bigint().notNull(),
+  close: drizzle.bigint().notNull(),
+  low: drizzle.bigint().notNull(),
+  high: drizzle.bigint().notNull(),
+  average: drizzle.bigint().notNull(),
+  count: drizzle.integer().notNull(),
+  }),
+);
