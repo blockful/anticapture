@@ -1,4 +1,4 @@
-import { createConfig, loadBalance } from "@ponder/core";
+import { createConfig, loadBalance } from "ponder";
 import { http, webSocket } from "viem";
 import dotenv from "dotenv";
 import { config } from "./config";
@@ -40,7 +40,7 @@ export default createConfig({
       maxRequestsPerSecond:
         process.env.STATUS !== "production" && process.env.STATUS !== "staging"
           ? 10000
-          : 1,
+          : 10000,
     },
     anvil: {
       chainId: 31337,
