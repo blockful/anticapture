@@ -13,8 +13,7 @@ import {
   DayBucket,
   Token
 } from "ponder:schema";
-import { secondsInDay } from "./constants";
-import { table } from "console";
+import { addressZero, secondsInDay } from "./constants";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -24,22 +23,24 @@ export const delegateChanged = async (
   context: Context,
   daoId: string
 ) => {
-  //Inserting accounts if didn't exist
+  // Inserting accounts if didn't exist
   await context.db
     .insert(Account)
     .values({
       id: event.args.delegator,
     })
     .onConflictDoNothing();
+
   await context.db
     .insert(Account)
     .values({
       id: event.args.toDelegate,
     })
     .onConflictDoNothing();
+
   // Create a new delegation record
   await context.db.insert(Delegations).values({
-    id: event.log.id,
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
     delegateeAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
@@ -58,6 +59,13 @@ export const delegateChanged = async (
     .onConflictDoUpdate({
       delegate: event.args.toDelegate,
     });
+
+  // Update the old delegatee's delegations count
+  if (event.args.fromDelegate != addressZero) {
+    await context.db
+      .update(AccountPower, { id: [event.args.fromDelegate, daoId].join("-") })
+      .set((row) => ({delegationsCount: row.delegationsCount - 1}))
+  }
 
   // Update the delegatee's delegations count
   await context.db
@@ -196,7 +204,7 @@ export const tokenTransfer = async (
 
   // Create a new transfer record
   await context.db.insert(Transfers).values({
-    id: event.log.id,
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
     tokenId: uniTokenAddress,
     amount: value,
@@ -281,7 +289,7 @@ export const voteCast = async (
 
   // Create vote record
   await context.db.insert(VotesOnchain).values({
-    id: event.log.id,
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
     proposalId: [proposalId, daoId].join("-"),
     voterAccountId: event.args.voter,

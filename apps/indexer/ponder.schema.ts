@@ -1,3 +1,4 @@
+import { addressZero } from "@/lib/constants";
 import { onchainTable, index } from "ponder";
 
 export const DAO = onchainTable("DAO", (drizzle) => ({
@@ -29,9 +30,11 @@ export const Token = onchainTable("Token", (drizzle) => ({
   totalSupply: drizzle.bigint(),
   delegatedSupply: drizzle.bigint().notNull(),
 }));
+
 export const Account = onchainTable("Account", (drizzle) => ({
   id: drizzle.text().primaryKey(),
 }));
+
 export const AccountBalance = onchainTable(
   "AccountBalance",
   (drizzle) => ({
@@ -52,17 +55,18 @@ export const AccountPower = onchainTable(
     id: drizzle.text().primaryKey(),
     accountId: drizzle.text(),
     daoId: drizzle.text(),
-    votingPower: drizzle.bigint(),
-    votesCount: drizzle.integer(),
-    proposalsCount: drizzle.integer(),
-    delegationsCount: drizzle.integer(),
-    delegate: drizzle.text(),
+    votingPower: drizzle.bigint().default(BigInt(0)).notNull(),
+    votesCount: drizzle.integer().default(0).notNull(),
+    proposalsCount: drizzle.integer().default(0).notNull(),
+    delegationsCount: drizzle.integer().default(0).notNull(),
+    delegate: drizzle.text().default(addressZero).notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
   })
 );
+
 export const VotingPowerHistory = onchainTable(
   "VotingPowerHistory",
   (drizzle) => ({
@@ -77,6 +81,7 @@ export const VotingPowerHistory = onchainTable(
     votingPowerHistoryDaoIdx: index().on(table.daoId),
   })
 );
+
 export const Delegations = onchainTable(
   "Delegations",
   (drizzle) => ({
@@ -109,6 +114,7 @@ export const Transfers = onchainTable(
     transfersTokenIdx: index().on(table.tokenId),
   })
 );
+
 export const VotesOnchain = onchainTable(
   "VotesOnchain",
   (drizzle) => ({
