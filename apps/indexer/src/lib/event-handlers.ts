@@ -384,10 +384,10 @@ export const proposalCanceled = async (
     event.args,
     daoId
   );
-  await context.db.insert(ProposalsOnchain).values({
-    id: [proposalId, daoId].join("-"),
-    status: "CANCELED",
-  });
+  await context.db
+    .update(ProposalsOnchain, { id: [proposalId, daoId].join("-") })    .set({
+      status: "CANCELED",
+    });
 };
 
 export const proposalExecuted = async (
