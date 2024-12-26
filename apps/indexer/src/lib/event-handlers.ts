@@ -137,14 +137,19 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
     });
   
-  // Update the delegated supply
-  const updatedToken = await context.db
-  .update(token, {id: event.log.address})
-  .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
+  const oldDelegatedSupply = (
+    await context.db
+      .find(token,{id: event.log.address})
+    )!.delegatedSupply
 
-  const delegatedSupply = updatedToken.delegatedSupply
+  // Update the delegated supply
+  const newDelegatedSupply = (
+    await context.db
+      .update(token, {id: event.log.address})
+      .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
+  ).delegatedSupply
   
-  const delegatedVolume = newBalance > oldBalance ? newBalance - oldBalance : oldBalance - newBalance;
+  const delegationVolume = newBalance > oldBalance ? newBalance - oldBalance : oldBalance - newBalance;
 
   // Calculate the day's start timestamp (UTC)
   const dayId = Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
@@ -154,20 +159,20 @@ export const delegatedVotesChanged = async (
     .values({
       id: dayId,
       daoId,
-      average: delegatedSupply,
-      open: delegatedSupply,
-      high: delegatedSupply,
-      low: delegatedSupply,
-      close: delegatedSupply,
-      volume: delegatedVolume,
+      average: newDelegatedSupply,
+      open: oldDelegatedSupply,
+      high: newDelegatedSupply > oldDelegatedSupply ? newDelegatedSupply : oldDelegatedSupply,
+      low: newDelegatedSupply > oldDelegatedSupply ? oldDelegatedSupply : newDelegatedSupply,
+      close: newDelegatedSupply,
+      volume: delegationVolume,
       count: 1,
     })
     .onConflictDoUpdate((row) => ({
-      average: (row.average * BigInt(row.count) + delegatedSupply) / BigInt(row.count + 1),
-      high: delegatedSupply > row.low ? delegatedSupply : row.low,
-      low: delegatedSupply < row.low ? delegatedSupply : row.low,
-      close: delegatedSupply,
-      volume: row.volume + delegatedVolume,
+      average: (row.average * BigInt(row.count) + newDelegatedSupply) / BigInt(row.count + 1),
+      high: newDelegatedSupply > row.low ? newDelegatedSupply : row.low,
+      low: newDelegatedSupply < row.low ? newDelegatedSupply : row.low,
+      close: newDelegatedSupply,
+      volume: row.volume + delegationVolume,
       count: row.count + 1,
     }))
 };
