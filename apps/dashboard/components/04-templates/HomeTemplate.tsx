@@ -14,9 +14,12 @@ import {
 } from "@/components/02-molecules";
 import { TheSection } from "@/components/03-organisms";
 import { useState } from "react";
+import { GovernanceActivityTable } from "../02-molecules/GovernanceActivityTable";
 
 export const HomeTemplate = () => {
   const [timeIntervalTokenDistribution, setTimeIntervalTokenDistribution] =
+    useState<TimeInterval>(TimeInterval.SEVEN_DAYS);
+  const [timeIntervalGovernanceActivity, setTimeIntervalGovernanceActivity] =
     useState<TimeInterval>(TimeInterval.SEVEN_DAYS);
   return (
     <main className="mx-auto flex flex-col items-center gap-8 px-8 py-6 lg:gap-16 xl:overflow-auto">
@@ -38,7 +41,18 @@ export const HomeTemplate = () => {
       >
         <TokenDistributionTable timeInterval={timeIntervalTokenDistribution} />
       </TheSection>
-
+      <TheSection
+        title="Governance activity"
+        icon={<ArrowLeftRight className="text-foreground" />}
+        switchDate={
+          <SwitcherDate setTimeInterval={setTimeIntervalGovernanceActivity} />
+        }
+        description="Governance activity metrics are based on a 30 days average. Choosing the time frame buttons above will give you the variation based on the 30 days average prior to that date compared to the current"
+      >
+        <GovernanceActivityTable
+          timeInterval={timeIntervalGovernanceActivity}
+        />
+      </TheSection>
       <div className="mt-4 grid w-full grid-cols-1 grid-rows-[auto] gap-4 xl:grid-cols-2">
         <HoldersTable />
         <DelegatesTable />

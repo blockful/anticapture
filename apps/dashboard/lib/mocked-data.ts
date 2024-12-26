@@ -6,6 +6,12 @@ export type TokenDistribution = {
   variation: string | undefined;
 };
 
+export type GovernanceActivity = {
+  metric: string | undefined;
+  average: string | undefined;
+  variation: string | undefined;
+};
+
 export type Delegates = {
   amount: number;
   delegators: number;
@@ -56,6 +62,36 @@ export const tokenDistributionData: TokenDistribution[] = [
   {
     metric: "Lending Supply",
     currentValue: undefined,
+    variation: undefined,
+  },
+];
+
+export const enum GovernanceActivityMetrics {
+  PROPOSALS = "Proposals",
+  ACTIVE_SUPPLY = "Active Supply",
+  VOTES = "Votes",
+  AVERAGE_TURNOUT = "Average Turnout",
+}
+
+export const governanceActivityData: GovernanceActivity[] = [
+  {
+    metric: "Proposals",
+    average: undefined,
+    variation: undefined,
+  },
+  {
+    metric: "Active Supply",
+    average: undefined,
+    variation: undefined,
+  },
+  {
+    metric: "Votes",
+    average: undefined,
+    variation: undefined,
+  },
+  {
+    metric: "Average Turnout",
+    average: undefined,
     variation: undefined,
   },
 ];
