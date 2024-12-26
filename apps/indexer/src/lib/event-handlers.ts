@@ -385,7 +385,8 @@ export const proposalCanceled = async (
     daoId
   );
   await context.db
-    .update(ProposalsOnchain, { id: [proposalId, daoId].join("-") })    .set({
+    .update(ProposalsOnchain, { id: [proposalId, daoId].join("-") })    
+    .set({
       status: "CANCELED",
     });
 };
