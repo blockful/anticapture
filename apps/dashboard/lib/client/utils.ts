@@ -1,3 +1,10 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 export const toggleScreenScroll = () => {
   const body = document.getElementsByTagName("body")[0];
 
@@ -26,3 +33,40 @@ export function sanitizeNumber(amount: number) {
 
 export const RED_COLOR = "#FCA5A5";
 export const GREEN_COLOR = "#5BB98B";
+
+export function formatNumberUserReadble(num: number): string {
+  if (num >= 1e9) {
+    return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+  }
+  if (num >= 1e6) {
+    return (num / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  if (num >= 1e3) {
+    return (num / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+  }
+  return num.toString();
+}
+
+export function formatTimestampUserReadable(num: number): string {
+  const timestamp = [
+    { value: 1, symbol: "sec" },
+    { value: 60, symbol: "min" },
+    { value: 3600, symbol: "hour" },
+    { value: 86400, symbol: "day" },
+    { value: 604800, symbol: "week" },
+    { value: 2592000, symbol: "month" },
+    { value: 31536000, symbol: "year" },
+  ];
+
+  const matchedUnit = timestamp
+    .slice()
+    .reverse()
+    .find((item) => num >= item.value);
+
+  if (matchedUnit) {
+    const value = (num / matchedUnit.value).toFixed(1).replace(/\.0$/, "");
+    return `${value} ${matchedUnit.symbol}`;
+  }
+
+  return "0 sec";
+}

@@ -1,30 +1,14 @@
-import { BACKEND_ENDPOINT } from "./utils";
+import { BACKEND_ENDPOINT } from "@/lib/server/utils";
+import { Address } from "viem";
 
 export interface DAO {
-  activeDelegatesCount: number;
-  activeVotingPower: number;
-  id: string;
-  proposalThreshold: number;
+  id: DaoName;
   quorum: number;
-  timelockDelay: number;
-  totalDelegatesCount: number;
-  totalSupply: number;
-  totalVotingPower: number;
+  proposalThreshold: number;
   votingDelay: number;
   votingPeriod: number;
-  averageApprovalVotes: string;
-  averageTurnout: string;
-  attackCosts: {
-    activeVotingPowerCost: string;
-    averageTurnoutCost: string;
-    topActiveDelegatesForActiveVotingPower: number;
-    topActiveDelegatesForAverageTurnout: number;
-    topActiveDelegatesForTotalVotingPower: number;
-    topDelegatesForActiveVotingPower: number;
-    topDelegatesForAverageTurnout: number;
-    topDelegatesForTotalVotingPower: number;
-    totalVotingPowerCost: string;
-  };
+  timelockDelay: number;
+  totalSupply: number;
 }
 
 export interface DAOVotingPower {
@@ -36,16 +20,10 @@ export enum DaoName {
   UNISWAP = "UNI",
 }
 
-export const fetchDaoData = async (
-  daoName: DaoName,
-  activeSince: number,
-  avgFromDate: number
-) => {
+export const fetchDaoData = async (daoName: DaoName) => {
   return new Promise(async (res, rej) => {
     try {
-      const daoData = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}?activeSince=${activeSince}&avgFromDate=${avgFromDate}`
-      );
+      const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoName}`);
 
       res(daoData);
     } catch (e) {
@@ -58,14 +36,14 @@ export enum ChainName {
   Ethereum = "ethereum",
 }
 
-export const TokenContract: Record<DaoName, `0x${string}`> = {
+export const TokenContract: Record<DaoName, Address> = {
   [DaoName.UNISWAP]: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
 };
 
-// Fetch Dao Token price from Defi Llama API
+/* Fetch Dao Token price from Defi Llama API */
 export const fetchTokenPrice = async (
   chainName: ChainName,
-  daoName: DaoName
+  daoName: DaoName,
 ) => {
   const daoToken = TokenContract[daoName];
 
@@ -83,4 +61,144 @@ export const fetchTokenPrice = async (
   } catch (error) {
     throw new Error("Error fetching token price:");
   }
+};
+
+interface TotalSupplyPromise {
+  oldTotalSupply: string;
+  currentTotalSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Total Supply */
+export const fetchTotalSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<TotalSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/total-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const totalSupplyData = await response.json();
+      res(totalSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface DelegatedSupplyPromise {
+  oldDelegatedSupply: string;
+  currentDelegatedSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Total Supply */
+export const fetchDelegatedSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/delegated-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const delegatedSupplyData = await response.json();
+      res(delegatedSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface CirculatingSupplyPromise {
+  oldCirculatingSupply: string;
+  currentCirculatingSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Circulating Supply */
+export const fetchCirculatingSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<CirculatingSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/circulating-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const circulatingSupplyData = await response.json();
+      res(circulatingSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface CexSupplyPromise {
+  oldCexSupply: string;
+  currentCexSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Cex Supply */
+export const fetchCexSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<CexSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/cex-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const cexSupplyData = await response.json();
+      res(cexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface DexSupplyPromise {
+  oldDexSupply: string;
+  currentDexSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Dao Dex Supply */
+export const fetchDexSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<DexSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/dex-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
 };

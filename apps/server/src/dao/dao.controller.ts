@@ -5,11 +5,22 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiQuery, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { DaoService } from './dao.service';
 import { RequiredPipe } from 'src/lib/custom-pipes/requiredPipe';
 import { DaysEnum } from 'src/lib';
 import { DAOEnum } from 'src/lib';
+import { Prisma } from '@prisma/client';
+import {
+  CexSupplyCompareReturnType,
+  CirculatingSupplyCompareReturnType,
+  DAOReturnType,
+  DelegatedSupplyCompareReturnType,
+  DelegatesReturnType,
+  HoldersReturnType,
+  TotalSupplyCompareReturnType,
+  TreasuryCompareReturnType,
+} from './types';
 
 @ApiTags('dao')
 @Controller('dao')
@@ -21,18 +32,22 @@ export class DaoController {
     return this.daoService.findAll();
   }
 
-  @Get(':id')
+  @Get(':daoId')
   @ApiParam({
-    name: 'id',
+    name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
-    enum: DAOEnum
+    enum: DAOEnum,
   })
-  findOne(@Param('id') id: string) {
-    return this.daoService.findOne(id);
+  @ApiOkResponse({
+    description: 'Dao Information',
+    type: DAOReturnType,
+  })
+  findOne(@Param('daoId') daoId: string) {
+    return this.daoService.findOne(daoId);
   }
 
-  @Get('delegates/:daoId')
+  @Get(':daoId/delegates')
   @ApiParam({
     name: 'daoId',
     required: true,
@@ -73,6 +88,10 @@ export class DaoController {
     required: false,
     description: 'DESC for descending order, ASC for ascending order',
     default: 'DESC',
+  })
+  @ApiOkResponse({
+    description: 'Dao Delegates',
+    type: DelegatesReturnType,
   })
   getDelegatesFromDao(
     @Param('daoId') daoId: string,
@@ -123,6 +142,11 @@ export class DaoController {
     description: 'DESC for descending order, ASC for ascending order',
     default: 'DESC',
   })
+  @ApiOkResponse({
+    description: 'Dao Holders',
+    type: HoldersReturnType,
+    isArray: true,
+  })
   @Get(':daoId/holders')
   getHoldersFromDao(
     @Param('daoId') daoId: string,
@@ -146,7 +170,16 @@ export class DaoController {
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
     enum: DAOEnum,
-
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Dao Total Supply',
+    type: TotalSupplyCompareReturnType,
   })
   @Get('/:daoId/total-supply/compare')
   getTotalSupplyCompare(
@@ -160,7 +193,17 @@ export class DaoController {
     name: 'daoId',
     required: true,
     description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
-        enum: DAOEnum,
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Dao Delegated Supply',
+    type: DelegatedSupplyCompareReturnType,
   })
   @Get(':daoId/delegated-supply/compare')
   getDelegatedSupplyCompare(
@@ -168,5 +211,77 @@ export class DaoController {
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getDelegatedSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Dao Delegated Supply',
+    type: CirculatingSupplyCompareReturnType,
+  })
+  @Get(':daoId/circulating-supply/compare')
+  getCirculatingSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getCirculatingSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Dao Delegated Supply',
+    type: TreasuryCompareReturnType,
+  })
+  @Get(':daoId/treasury/compare')
+  getTreasuryCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getTreasuryCompare(daoId, timeInterval);
+  }
+  
+  @ApiOkResponse({
+    description: 'Cex Supply Return Object',
+    type: CexSupplyCompareReturnType,
+  })
+  @Get(':daoId/cex-supply/compare')
+  getCexSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getCexSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiOkResponse({
+    description: 'Dex Supply Return Object',
+    type: CexSupplyCompareReturnType,
+  })
+  @Get(':daoId/dex-supply/compare')
+  getDexSupplyCompare(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getDexSupplyCompare(daoId, timeInterval);
   }
 }

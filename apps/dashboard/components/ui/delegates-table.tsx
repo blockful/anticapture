@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { sanitizeNumber } from "@/lib/client/utils";
 import { Delegates, delegatesData } from "@/lib/mocked-data";
-import { HeartIcon } from "./HeartIcon";
+import { HeartIcon } from "@/components/01-atoms";
 
 export const delegatesColumns: ColumnDef<Delegates>[] = [
   {
