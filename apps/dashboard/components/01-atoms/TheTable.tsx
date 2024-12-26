@@ -126,6 +126,7 @@ export const TheTable = <TData, TValue>({
                 {row.getVisibleCells().map((cell) => {
                   const isAmountOrVariation =
                     cell.column.id === "currentValue" ||
+                    cell.column.id === "average" ||
                     cell.column.id === "variation";
                   return (
                     <TableCell key={cell.id}>
