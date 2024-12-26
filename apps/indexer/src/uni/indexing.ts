@@ -1,4 +1,4 @@
-import { ponder } from "@/generated";
+import { ponder } from "ponder:registry";
 import {
   delegateChanged,
   delegatedVotesChanged,
@@ -9,45 +9,39 @@ import {
   voteCast,
 } from "../lib/event-handlers";
 import viemClient from "../lib/viemClient";
+import { dao, daoToken, token } from "ponder:schema";
 
 const daoId = "UNI";
 
 ponder.on("UNIToken:setup", async ({ context }) => {
-  const { DAO, Token, DAOToken } = context.db;
-
   const votingPeriod = await viemClient.getVotingPeriod();
   const quorum = await viemClient.getQuorum();
   const votingDelay = await viemClient.getVotingDelay();
   const timelockDelay = await viemClient.getTimelockDelay();
   const proposalThreshold = await viemClient.getProposalThreshold();
 
-  await DAO.create({
+  await context.db.insert(dao).values({
     id: daoId,
-    data: {
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    },
+    votingPeriod,
+    quorum,
+    votingDelay,
+    timelockDelay,
+    proposalThreshold,
   });
   const totalSupply = await viemClient.getTotalSupply();
   const decimals = await viemClient.getDecimals();
   const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
-  await Token.create({
+  await context.db.insert(token).values({
     id: uniTokenAddress,
-    data: {
-      name: daoId,
-      decimals,
-      totalSupply,
-    },
+    name: daoId,
+    decimals,
+    totalSupply,
+    delegatedSupply: BigInt(0) 
   });
-  await DAOToken.create({
+  await context.db.insert(daoToken).values({
     id: daoId + "-" + uniTokenAddress,
-    data: {
-      daoId,
-      tokenId: uniTokenAddress,
-    },
+    daoId,
+    tokenId: uniTokenAddress,
   });
 });
 

@@ -1,127 +1,172 @@
-import { createSchema } from "@ponder/core";
+import { addressZero } from "@/lib/constants";
+import { onchainTable, index } from "ponder";
 
-export default createSchema((p) => ({
-  DAO: p.createTable({
-    id: p.string(),
-    quorum: p.bigint().optional(),
-    proposalThreshold: p.bigint().optional(),
-    votingDelay: p.bigint().optional(),
-    votingPeriod: p.bigint().optional(),
-    timelockDelay: p.bigint().optional(),
-    daoTokens: p.many("DAOToken.daoId"),
-    accountPowers: p.many("AccountPower.daoId"),
-  }),
-  DAOToken: p.createTable({
-      id: p.string(),
-      daoId: p.string().references("DAO.id"),
-      tokenId: p.string().references("Token.id"),
-      dao: p.one("daoId"),
-      token: p.one("tokenId"),
-    }),
-  Token: p.createTable({
-    id: p.string(),
-    name: p.string(),
-    decimals: p.int(),
-    totalSupply: p.bigint(),
-    daoTokens: p.many("DAOToken.tokenId"),
-    accountBalances: p.many("AccountBalance.tokenId"),
-    transfers: p.many("Transfers.tokenId"),
-  }),
-  Account: p.createTable({
-    id: p.string(),
-    accountBalances: p.many("AccountBalance.accountId"),
-    accountPowers: p.many("AccountPower.accountId"),
-    votingPowerHistory: p.many("VotingPowerHistory.accountId"),
-    delegateeDelegations: p.many("Delegations.delegateeAccountId"),
-    delegatorDelegations: p.many("Delegations.delegatorAccountId"),
-    transfersFrom: p.many("Transfers.fromAccountId"),
-    transfersTo: p.many("Transfers.toAccountId"),
-    votesOnchain: p.many("VotesOnchain.voterAccountId"),
-    proposalsOnchain: p.many("ProposalsOnchain.proposerAccountId"),
-  }),
-  AccountBalance: p.createTable({
-    id: p.string(),
-    tokenId: p.string().references("Token.id"),
-    accountId: p.string().references("Account.id"),
-    balance: p.bigint(),
-    token: p.one("tokenId"),
-    account: p.one("accountId"),
-  }),
-  AccountPower: p.createTable({
-    id: p.string(),
-    accountId: p.string().references("Account.id"),
-    daoId: p.string().references("DAO.id"),
-    votingPower: p.bigint().optional(),
-    votesCount: p.int().optional(),
-    proposalsCount: p.int().optional(),
-    delegationsCount: p.int().optional(),
-    delegate: p.string().optional(),
-    account: p.one("accountId"),
-    dao: p.one("daoId"),
-  }),
-  VotingPowerHistory: p.createTable({
-    id: p.string(),
-    daoId: p.string().references("DAO.id"),
-    accountId: p.string().references("Account.id"),
-    votingPower: p.bigint(),
-    timestamp: p.bigint(),
-    dao: p.one("daoId"),
-    account: p.one("accountId"),
-  }),
-  Delegations: p.createTable({
-    id: p.string(),
-    daoId: p.string().references("DAO.id"),
-    delegateeAccountId: p.string().references("Account.id"),
-    delegatorAccountId: p.string().references("Account.id"),
-    timestamp: p.bigint(),
-    dao: p.one("daoId"),
-    delegateeAccount: p.one("delegateeAccountId"),
-    delegatorAccount: p.one("delegatorAccountId"),
-  }),
-  Transfers: p.createTable({
-    id: p.string(),
-    daoId: p.string().references("DAO.id"),
-    tokenId: p.string().references("Token.id"),
-    amount: p.bigint(),
-    fromAccountId: p.string().references("Account.id"),
-    toAccountId: p.string().references("Account.id"),
-    timestamp: p.bigint(),
-    fromAccount: p.one("fromAccountId"),
-    toAccount: p.one("toAccountId"),
-    dao: p.one("daoId"),
-    token: p.one("tokenId"),
-  }),
-  VotesOnchain: p.createTable({
-    id: p.string(),
-    daoId: p.string().references("DAO.id"),
-    voterAccountId: p.string().references("Account.id"),
-    proposalId: p.string().references("ProposalsOnchain.id"),
-    support: p.string(),
-    weight: p.string(),
-    reason: p.string(),
-    timestamp: p.bigint(),
-    dao: p.one("daoId"),
-    voterAccount: p.one("voterAccountId"),
-    proposal: p.one("proposalId"),
-  }),
-  ProposalsOnchain: p.createTable({
-    id: p.string(),
-    daoId: p.string().references("DAO.id"),
-    proposerAccountId: p.string().references("Account.id"),
-    targets: p.json(),
-    values: p.json(),
-    signatures: p.json(),
-    calldatas: p.json(),
-    startBlock: p.string(),
-    endBlock: p.string(),
-    description: p.string(),
-    timestamp: p.bigint(),
-    status: p.string(),
-    forVotes: p.bigint(),
-    againstVotes: p.bigint(),
-    abstainVotes: p.bigint(),
-    dao: p.one("daoId"),
-    proposerAccount: p.one("proposerAccountId"),
-    votes: p.many("VotesOnchain.proposalId"),
-  }),
+export const dao = onchainTable("dao", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  quorum: drizzle.bigint(),
+  proposalThreshold: drizzle.bigint(),
+  votingDelay: drizzle.bigint(),
+  votingPeriod: drizzle.bigint(),
+  timelockDelay: drizzle.bigint(),
 }));
+
+export const daoToken = onchainTable(
+  "dao_token",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    daoId: drizzle.text().notNull(),
+    tokenId: drizzle.text().notNull(),
+  }),
+  (table) => ({
+    daoTokenDaoIdx: index().on(table.daoId),
+    daoTokenTokenIdx: index().on(table.tokenId),
+  })
+);
+
+export const token = onchainTable("token", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  name: drizzle.text(),
+  decimals: drizzle.integer(),
+  totalSupply: drizzle.bigint(),
+  delegatedSupply: drizzle.bigint().notNull(),
+}));
+
+export const account = onchainTable("account", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+}));
+
+export const accountBalance = onchainTable(
+  "account_balance",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    tokenId: drizzle.text(),
+    accountId: drizzle.text(),
+    balance: drizzle.bigint().notNull(),
+  }),
+  (table) => ({
+    accountBalanceAccountIdx: index().on(table.accountId),
+    accountBalanceTokenIdx: index().on(table.tokenId),
+  })
+);
+
+export const accountPower = onchainTable(
+  "account_power",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    accountId: drizzle.text(),
+    daoId: drizzle.text(),
+    votingPower: drizzle.bigint().default(BigInt(0)).notNull(),
+    votesCount: drizzle.integer().default(0).notNull(),
+    proposalsCount: drizzle.integer().default(0).notNull(),
+    delegationsCount: drizzle.integer().default(0).notNull(),
+    delegate: drizzle.text().default(addressZero).notNull(),
+  }),
+  (table) => ({
+    accountPowerAccountIdx: index().on(table.accountId),
+    accountPowerDaoIdx: index().on(table.daoId),
+  })
+);
+
+export const votingPowerHistory = onchainTable(
+  "voting_power_history",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    daoId: drizzle.text(),
+    accountId: drizzle.text(),
+    votingPower: drizzle.bigint().notNull(),
+    timestamp: drizzle.bigint().notNull(),
+  }),
+  (table) => ({
+    votingPowerHistoryAccountIdx: index().on(table.accountId),
+    votingPowerHistoryDaoIdx: index().on(table.daoId),
+  })
+);
+
+export const delegations = onchainTable(
+  "delegations",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    daoId: drizzle.text(),
+    delegateeAccountId: drizzle.text(),
+    delegatorAccountId: drizzle.text(),
+    timestamp: drizzle.bigint(),
+  }),
+  (table) => ({
+    delegationsDaoIdx: index().on(table.daoId),
+    delegationsDelegateeIdx: index().on(table.delegateeAccountId),
+    delegationsDelegatorIdx: index().on(table.delegatorAccountId),
+  })
+);
+
+export const transfers = onchainTable(
+  "transfers",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    daoId: drizzle.text(),
+    tokenId: drizzle.text(),
+    amount: drizzle.bigint(),
+    fromAccountId: drizzle.text(),
+    toAccountId: drizzle.text(),
+    timestamp: drizzle.bigint(),
+  }),
+  (table) => ({
+    transfersDaoIdx: index().on(table.daoId),
+    transfersTokenIdx: index().on(table.tokenId),
+  })
+);
+
+export const votesOnchain = onchainTable(
+  "votes_onchain",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    daoId: drizzle.text(),
+    voterAccountId: drizzle.text(),
+    proposalId: drizzle.text(),
+    support: drizzle.text(),
+    weight: drizzle.text(),
+    reason: drizzle.text(),
+    timestamp: drizzle.bigint(),
+  }),
+  (table) => ({
+    votesOnchainDaoIdx: index().on(table.daoId),
+    votesOnchainVoterIdx: index().on(table.voterAccountId),
+    votesOnchainProposalIdx: index().on(table.proposalId),
+  })
+);
+
+export const proposalsOnchain = onchainTable(
+  "proposals_onchain",
+  (drizzle) => ({
+    id: drizzle.text().primaryKey(),
+    daoId: drizzle.text(),
+    proposerAccountId: drizzle.text(),
+    targets: drizzle.json(),
+    values: drizzle.json(),
+    signatures: drizzle.json(),
+    calldatas: drizzle.json(),
+    startBlock: drizzle.text(),
+    endBlock: drizzle.text(),
+    description: drizzle.text(),
+    timestamp: drizzle.bigint(),
+    status: drizzle.text(),
+    forVotes: drizzle.bigint(),
+    againstVotes: drizzle.bigint(),
+    abstainVotes: drizzle.bigint(),
+  }),
+  (table) => ({
+    proposalsOnchainDaoIdx: index().on(table.daoId),
+    proposalsOnchainProposerIdx: index().on(table.proposerAccountId),
+  })
+);
+
+export const daoMetricsDayBuckets = onchainTable("dao_metrics_day_buckets", (drizzle) => ({
+  id: drizzle.integer().primaryKey(),
+  daoId: drizzle.text(),
+  open: drizzle.bigint().notNull(),
+  close: drizzle.bigint().notNull(),
+  low: drizzle.bigint().notNull(),
+  high: drizzle.bigint().notNull(),
+  average: drizzle.bigint().notNull(),
+  count: drizzle.integer().notNull(),
+  }),
+);

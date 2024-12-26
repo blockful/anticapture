@@ -1,6 +1,19 @@
-import { Context, Event } from "@/generated";
+import { Context, Event } from "ponder:registry";
 import { getValueFromEventArgs } from "./utils";
 import viemClient from "./viemClient";
+import {
+  account,
+  accountBalance,
+  accountPower,
+  delegations,
+  proposalsOnchain,
+  transfers,
+  votesOnchain,
+  votingPowerHistory,
+  daoMetricsDayBuckets,
+  token
+} from "ponder:schema";
+import { addressZero, secondsInDay } from "./constants";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -10,51 +23,62 @@ export const delegateChanged = async (
   context: Context,
   daoId: string
 ) => {
-  const { Delegations, Account, AccountPower } = context.db;
+  // Inserting accounts if didn't exist
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.delegator,
+    })
+    .onConflictDoNothing();
 
-  //Inserting accounts if didn't exist
-  await Account.upsert({
-    id: event.args.delegator,
-  });
-  await Account.upsert({
-    id: event.args.toDelegate,
-  });
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.toDelegate,
+    })
+    .onConflictDoNothing();
+
   // Create a new delegation record
-  await Delegations.create({
-    id: event.log.id,
-    data: {
-      daoId,
-      delegateeAccountId: event.args.toDelegate,
-      delegatorAccountId: event.args.delegator,
-      timestamp: event.block.timestamp,
-    },
+  await context.db.insert(delegations).values({
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    daoId,
+    delegateeAccountId: event.args.toDelegate,
+    delegatorAccountId: event.args.delegator,
+    timestamp: event.block.timestamp,
   });
 
   // Update the delegator's delegate
-  await AccountPower.upsert({
-    id: [event.args.delegator, daoId].join("-"),
-    create: {
+  await context.db
+    .insert(accountPower)
+    .values({
+      id: [event.args.delegator, daoId].join("-"),
       accountId: event.args.delegator,
       daoId,
       delegate: event.args.toDelegate,
-    },
-    update: () => ({
+    })
+    .onConflictDoUpdate({
       delegate: event.args.toDelegate,
-    }),
-  });
+    });
+
+  // Update the old delegatee's delegations count
+  if (event.args.fromDelegate != addressZero) {
+    await context.db
+      .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
+      .set((row) => ({delegationsCount: row.delegationsCount - 1}))
+  }
 
   // Update the delegatee's delegations count
-  await AccountPower.upsert({
-    id: [event.args.toDelegate, daoId].join("-"),
-    create: {
+  await context.db
+    .insert(accountPower)
+    .values({
+      id: [event.args.toDelegate, daoId].join("-"),
       accountId: event.args.toDelegate,
       daoId,
       delegationsCount: 1,
-    },
-    update: ({ current }) => ({
+    })
+    .onConflictDoUpdate((current) => ({
       delegationsCount: (current.delegationsCount ?? 0) + 1,
-    }),
-  });
+    }));
 };
 
 export const delegatedVotesChanged = async (
@@ -65,12 +89,13 @@ export const delegatedVotesChanged = async (
   context: Context,
   daoId: string
 ) => {
-  const { VotingPowerHistory, AccountPower, Account } = context.db;
-
   //Inserting delegate account if didn't exist
-  await Account.upsert({
-    id: event.args.delegate,
-  });
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.delegate,
+    })
+    .onConflictDoNothing();
 
   const newBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -81,29 +106,66 @@ export const delegatedVotesChanged = async (
     daoId
   );
 
+  const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
+    [
+      { name: "previousBalance", daos: ["ENS", "COMP", "UNI"] },
+      { name: "previousVotes", daos: ["SHU"] },
+    ],
+    event.args,
+    daoId
+  );
+
   // Create a new voting power history record
-  await VotingPowerHistory.create({
-    id: event.log.id,
-    data: {
-      accountId: event.args.delegate,
-      daoId,
-      votingPower: newBalance,
-      timestamp: event.block.timestamp,
-    },
+  await context.db.insert(votingPowerHistory).values({
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    accountId: event.args.delegate,
+    daoId,
+    votingPower: newBalance,
+    timestamp: event.block.timestamp,
   });
 
   // Update the delegate's voting power
-  await AccountPower.upsert({
-    id: [event.args.delegate, daoId].join("-"),
-    create: {
+  await context.db
+    .insert(accountPower)
+    .values({
+      id: [event.args.delegate, daoId].join("-"),
       accountId: event.args.delegate,
       daoId,
       votingPower: newBalance,
-    },
-    update: () => ({
+    })
+    .onConflictDoUpdate({
       votingPower: newBalance,
-    }),
-  });
+    });
+  
+  // Update the delegated supply
+  const updatedToken = await context.db
+  .update(token, {id: event.log.address})
+  .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
+
+  const delegatedSupply = updatedToken.delegatedSupply
+
+  // Calculate the day's start timestamp (UTC)
+  const dayId = Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
+
+  await context.db
+    .insert(daoMetricsDayBuckets)
+    .values({
+      id: dayId,
+      daoId,
+      average: delegatedSupply,
+      open: delegatedSupply,
+      high: delegatedSupply,
+      low: delegatedSupply,
+      close: delegatedSupply,
+      count: 1,
+    })
+    .onConflictDoUpdate((row) => ({
+      average: (row.average * BigInt(row.count) + delegatedSupply) / BigInt(row.count + 1),
+      high: delegatedSupply > row.low ? delegatedSupply : row.low,
+      low: delegatedSupply < row.low ? delegatedSupply : row.low,
+      close: delegatedSupply,
+      count: row.count + 1,
+    }))
 };
 
 export const tokenTransfer = async (
@@ -114,8 +176,6 @@ export const tokenTransfer = async (
   context: Context,
   daoId: "UNI"
 ) => {
-  const { Transfers, Account, AccountBalance } = context.db;
-
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -127,41 +187,45 @@ export const tokenTransfer = async (
   );
 
   //Inserting delegate account if didn't exist
-  await Account.upsert({
-    id: event.args.to,
-  });
-  await Account.upsert({
-    id: event.args.from,
-  });
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.to,
+    })
+    .onConflictDoNothing();
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.from,
+    })
+    .onConflictDoNothing();
 
   const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
 
   // Create a new transfer record
-  await Transfers.create({
-    id: event.log.id,
-    data: {
-      daoId,
-      tokenId: uniTokenAddress,
-      amount: value,
-      fromAccountId: event.args.from,
-      toAccountId: event.args.to,
-      timestamp: event.block.timestamp,
-    },
+  await context.db.insert(transfers).values({
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    daoId,
+    tokenId: uniTokenAddress,
+    amount: value,
+    fromAccountId: event.args.from,
+    toAccountId: event.args.to,
+    timestamp: event.block.timestamp,
   });
 
   // Update the from account's balance
   if (event.args.from !== "0x0000000000000000000000000000000000000000") {
-    const fromAccount = await AccountBalance.upsert({
-      id: [event.args.from, uniTokenAddress].join("-"),
-      create: {
+    const fromAccount = await context.db
+      .insert(accountBalance)
+      .values({
+        id: [event.args.from, uniTokenAddress].join("-"),
         tokenId: uniTokenAddress,
         accountId: event.args.from,
         balance: BigInt(value),
-      },
-      update: ({ current }) => ({
+      })
+      .onConflictDoUpdate((current) => ({
         balance: (current.balance ?? BigInt(0)) - BigInt(value),
-      }),
-    });
+      }));
     // Check if the balances are valid
     if (fromAccount.balance! < BigInt(0)) {
       console.log(`Invalid balance for ${event.args.from}`);
@@ -170,17 +234,17 @@ export const tokenTransfer = async (
   }
 
   // Update the to account's balance
-  await AccountBalance.upsert({
-    id: [event.args.to, uniTokenAddress].join("-"),
-    create: {
+  await context.db
+    .insert(accountBalance)
+    .values({
+      id: [event.args.to, uniTokenAddress].join("-"),
       tokenId: uniTokenAddress,
       accountId: event.args.to,
       balance: BigInt(value),
-    },
-    update: ({ current }) => ({
+    })
+    .onConflictDoUpdate((current) => ({
       balance: (current.balance ?? BigInt(0)) + BigInt(value),
-    }),
-  });
+    }));
 };
 
 export const voteCast = async (
@@ -189,8 +253,6 @@ export const voteCast = async (
   context: Context,
   daoId: string
 ) => {
-  const { VotesOnchain, AccountPower, Account, ProposalsOnchain } = context.db;
-
   const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
       { name: "weight", daos: ["ENS"] },
@@ -201,46 +263,45 @@ export const voteCast = async (
   );
 
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
-    [
-      { name: "proposalId", daos: ["ENS", "UNI"] },
-    ],
+    [{ name: "proposalId", daos: ["ENS", "UNI"] }],
     event.args,
     daoId
   );
 
-  await Account.upsert({
-    id: event.args.voter,
-  });
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.voter,
+    })
+    .onConflictDoNothing();
 
-  await AccountPower.upsert({
-    id: [event.args.voter, daoId].join("-"),
-    create: {
+  await context.db
+    .insert(accountPower)
+    .values({
+      id: [event.args.voter, daoId].join("-"),
       daoId,
       accountId: event.args.voter,
       votesCount: 1,
-    },
-    update: ({ current }) => ({
+    })
+    .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
-    }),
-  });
+    }));
 
   // Create vote record
-  await VotesOnchain.create({
-    id: event.log.id,
-    data: {
-      daoId,
-      proposalId: [proposalId, daoId].join("-"),
-      voterAccountId: event.args.voter,
-      support: event.args.support.toString(),
-      weight: weight.toString(),
-      reason: event.args.reason,
-      timestamp: event.block.timestamp,
-    },
+  await context.db.insert(votesOnchain).values({
+    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    daoId,
+    proposalId: [proposalId, daoId].join("-"),
+    voterAccountId: event.args.voter,
+    support: event.args.support.toString(),
+    weight: weight.toString(),
+    reason: event.args.reason,
+    timestamp: event.block.timestamp,
   });
 
-  await ProposalsOnchain.update({
-    id: [proposalId, daoId].join("-"),
-    data: ({ current }) => ({
+  await context.db
+    .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
+    .set((current) => ({
       againstVotes:
         (current.againstVotes ?? BigInt(0)) +
         (event.args.support === 0 ? weight : BigInt(0)),
@@ -250,8 +311,7 @@ export const voteCast = async (
       abstainVotes:
         (current.abstainVotes ?? BigInt(0)) +
         (event.args.support === 2 ? weight : BigInt(0)),
-    }),
-  });
+    }));
 };
 
 export const proposalCreated = async (
@@ -260,8 +320,6 @@ export const proposalCreated = async (
   context: Context,
   daoId: string
 ) => {
-  const { ProposalsOnchain, Account, AccountPower } = context.db;
-
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
       { name: "proposalId", daos: ["ENS"] },
@@ -271,42 +329,45 @@ export const proposalCreated = async (
     daoId
   );
 
-  await Account.upsert({
-    id: event.args.proposer,
-  });
+  await context.db
+    .insert(account)
+    .values({
+      id: event.args.proposer,
+    })
+    .onConflictDoNothing();
 
   // Create proposal record
-  await ProposalsOnchain.create({
+  await context.db.insert(proposalsOnchain).values({
     id: [proposalId, daoId].join("-"),
-    data: {
-      daoId,
-      proposerAccountId: event.args.proposer,
-      targets: JSON.stringify(event.args.targets),
-      values: JSON.stringify(event.args.values.map((v) => v.toString())),
-      signatures: JSON.stringify(event.args.signatures),
-      calldatas: JSON.stringify(event.args.calldatas),
-      startBlock: event.args.startBlock.toString(),
-      endBlock: event.args.endBlock.toString(),
-      description: event.args.description,
-      timestamp: event.block.timestamp,
-      status: "Pending",
-      forVotes: BigInt(0),
-      againstVotes: BigInt(0),
-      abstainVotes: BigInt(0),
-    },
+    daoId,
+    proposerAccountId: event.args.proposer,
+    targets: JSON.stringify(event.args.targets),
+    values: JSON.stringify(event.args.values.map((v) => v.toString())),
+    signatures: JSON.stringify(event.args.signatures),
+    calldatas: JSON.stringify(event.args.calldatas),
+    startBlock: event.args.startBlock.toString(),
+    endBlock: event.args.endBlock.toString(),
+    description: event.args.description,
+    timestamp: event.block.timestamp,
+    status: "Pending",
+    forVotes: BigInt(0),
+    againstVotes: BigInt(0),
+    abstainVotes: BigInt(0),
   });
 
-  await AccountPower.upsert({
-    id: event.args.proposer,
-    create: {
-      daoId,
-      accountId: event.args.proposer,
-      proposalsCount: 1,
-    },
-    update: ({ current }) => ({
+  await context.db
+    .insert(accountPower)
+    .values({
+      id: event.args.proposer,
+      create: {
+        daoId,
+        accountId: event.args.proposer,
+        proposalsCount: 1,
+      },
+    })
+    .onConflictDoUpdate((current) => ({
       proposalsCount: (current.proposalsCount ?? 0) + 1,
-    }),
-  });
+    }));
 };
 
 export const proposalCanceled = async (
@@ -315,7 +376,6 @@ export const proposalCanceled = async (
   context: Context,
   daoId: string
 ) => {
-  const { ProposalsOnchain } = context.db;
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
       { name: "proposalId", daos: ["ENS"] },
@@ -324,10 +384,11 @@ export const proposalCanceled = async (
     event.args,
     daoId
   );
-  await ProposalsOnchain.update({
-    id: [proposalId, daoId].join("-"),
-    data: { status: "CANCELED" },
-  });
+  await context.db
+    .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })    
+    .set({
+      status: "CANCELED",
+    });
 };
 
 export const proposalExecuted = async (
@@ -336,7 +397,6 @@ export const proposalExecuted = async (
   context: Context,
   daoId: string
 ) => {
-  const { ProposalsOnchain } = context.db;
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
       { name: "proposalId", daos: ["ENS"] },
@@ -345,8 +405,9 @@ export const proposalExecuted = async (
     event.args,
     daoId
   );
-  await ProposalsOnchain.update({
-    id: [proposalId, daoId].join("-"),
-    data: { status: "EXECUTED" },
-  });
+  await context.db
+    .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
+    .set({
+      status: "EXECUTED",
+    });
 };
