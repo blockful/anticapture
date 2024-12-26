@@ -1,7 +1,7 @@
 import { addressZero } from "@/lib/constants";
 import { onchainTable, index } from "ponder";
 
-export const DAO = onchainTable("DAO", (drizzle) => ({
+export const dao = onchainTable("dao", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   quorum: drizzle.bigint(),
   proposalThreshold: drizzle.bigint(),
@@ -10,8 +10,8 @@ export const DAO = onchainTable("DAO", (drizzle) => ({
   timelockDelay: drizzle.bigint(),
 }));
 
-export const DAOToken = onchainTable(
-  "DAOToken",
+export const daoToken = onchainTable(
+  "dao_token",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text().notNull(),
@@ -23,7 +23,7 @@ export const DAOToken = onchainTable(
   })
 );
 
-export const Token = onchainTable("Token", (drizzle) => ({
+export const token = onchainTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
   decimals: drizzle.integer(),
@@ -31,12 +31,12 @@ export const Token = onchainTable("Token", (drizzle) => ({
   delegatedSupply: drizzle.bigint().notNull(),
 }));
 
-export const Account = onchainTable("Account", (drizzle) => ({
+export const account = onchainTable("account", (drizzle) => ({
   id: drizzle.text().primaryKey(),
 }));
 
-export const AccountBalance = onchainTable(
-  "AccountBalance",
+export const accountBalance = onchainTable(
+  "account_balance",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     tokenId: drizzle.text(),
@@ -49,8 +49,8 @@ export const AccountBalance = onchainTable(
   })
 );
 
-export const AccountPower = onchainTable(
-  "AccountPower",
+export const accountPower = onchainTable(
+  "account_power",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     accountId: drizzle.text(),
@@ -67,8 +67,8 @@ export const AccountPower = onchainTable(
   })
 );
 
-export const VotingPowerHistory = onchainTable(
-  "VotingPowerHistory",
+export const votingPowerHistory = onchainTable(
+  "voting_power_history",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text(),
@@ -82,8 +82,8 @@ export const VotingPowerHistory = onchainTable(
   })
 );
 
-export const Delegations = onchainTable(
-  "Delegations",
+export const delegations = onchainTable(
+  "delegations",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text(),
@@ -98,8 +98,8 @@ export const Delegations = onchainTable(
   })
 );
 
-export const Transfers = onchainTable(
-  "Transfers",
+export const transfers = onchainTable(
+  "transfers",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text(),
@@ -115,8 +115,8 @@ export const Transfers = onchainTable(
   })
 );
 
-export const VotesOnchain = onchainTable(
-  "VotesOnchain",
+export const votesOnchain = onchainTable(
+  "votes_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text(),
@@ -134,8 +134,8 @@ export const VotesOnchain = onchainTable(
   })
 );
 
-export const ProposalsOnchain = onchainTable(
-  "ProposalsOnchain",
+export const proposalsOnchain = onchainTable(
+  "proposals_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text(),
@@ -159,7 +159,7 @@ export const ProposalsOnchain = onchainTable(
   })
 );
 
-export const DayBucket = onchainTable("day_buckets", (drizzle) => ({
+export const daoMetricsDayBuckets = onchainTable("dao_metrics_day_buckets", (drizzle) => ({
   id: drizzle.integer().primaryKey(),
   daoId: drizzle.text(),
   open: drizzle.bigint().notNull(),

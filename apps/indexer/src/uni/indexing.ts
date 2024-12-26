@@ -9,7 +9,7 @@ import {
   voteCast,
 } from "../lib/event-handlers";
 import viemClient from "../lib/viemClient";
-import { DAO, DAOToken, Token } from "ponder:schema";
+import { dao, daoToken, token } from "ponder:schema";
 
 const daoId = "UNI";
 
@@ -20,7 +20,7 @@ ponder.on("UNIToken:setup", async ({ context }) => {
   const timelockDelay = await viemClient.getTimelockDelay();
   const proposalThreshold = await viemClient.getProposalThreshold();
 
-  await context.db.insert(DAO).values({
+  await context.db.insert(dao).values({
     id: daoId,
     votingPeriod,
     quorum,
@@ -31,14 +31,14 @@ ponder.on("UNIToken:setup", async ({ context }) => {
   const totalSupply = await viemClient.getTotalSupply();
   const decimals = await viemClient.getDecimals();
   const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
-  await context.db.insert(Token).values({
+  await context.db.insert(token).values({
     id: uniTokenAddress,
     name: daoId,
     decimals,
     totalSupply,
     delegatedSupply: BigInt(0) 
   });
-  await context.db.insert(DAOToken).values({
+  await context.db.insert(daoToken).values({
     id: daoId + "-" + uniTokenAddress,
     daoId,
     tokenId: uniTokenAddress,
