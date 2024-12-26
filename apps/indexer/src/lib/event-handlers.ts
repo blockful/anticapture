@@ -143,6 +143,8 @@ export const delegatedVotesChanged = async (
   .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
 
   const delegatedSupply = updatedToken.delegatedSupply
+  
+  const delegatedVolume = newBalance > oldBalance ? newBalance - oldBalance : oldBalance - newBalance;
 
   // Calculate the day's start timestamp (UTC)
   const dayId = Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
@@ -157,6 +159,7 @@ export const delegatedVotesChanged = async (
       high: delegatedSupply,
       low: delegatedSupply,
       close: delegatedSupply,
+      volume: delegatedVolume,
       count: 1,
     })
     .onConflictDoUpdate((row) => ({
@@ -164,6 +167,7 @@ export const delegatedVotesChanged = async (
       high: delegatedSupply > row.low ? delegatedSupply : row.low,
       low: delegatedSupply < row.low ? delegatedSupply : row.low,
       close: delegatedSupply,
+      volume: row.volume + delegatedVolume,
       count: row.count + 1,
     }))
 };

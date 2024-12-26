@@ -167,6 +167,7 @@ export const daoMetricsDayBuckets = onchainTable("dao_metrics_day_buckets", (dri
   low: drizzle.bigint().notNull(),
   high: drizzle.bigint().notNull(),
   average: drizzle.bigint().notNull(),
+  volume: drizzle.bigint().notNull(),
   count: drizzle.integer().notNull(),
   }),
 );
