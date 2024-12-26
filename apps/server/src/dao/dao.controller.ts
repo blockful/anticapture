@@ -12,12 +12,15 @@ import { DaysEnum } from 'src/lib';
 import { DAOEnum } from 'src/lib';
 import { Prisma } from '@prisma/client';
 import {
+  ActiveSupplyReturnType,
   CexSupplyCompareReturnType,
   CirculatingSupplyCompareReturnType,
   DAOReturnType,
   DelegatedSupplyCompareReturnType,
   DelegatesReturnType,
+  DexSupplyCompareReturnType,
   HoldersReturnType,
+  LendingSupplyCompareReturnType,
   TotalSupplyCompareReturnType,
   TreasuryCompareReturnType,
 } from './types';
@@ -260,7 +263,19 @@ export class DaoController {
   ) {
     return this.daoService.getTreasuryCompare(daoId, timeInterval);
   }
-  
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
   @ApiOkResponse({
     description: 'Cex Supply Return Object',
     type: CexSupplyCompareReturnType,
@@ -273,9 +288,21 @@ export class DaoController {
     return this.daoService.getCexSupplyCompare(daoId, timeInterval);
   }
 
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
   @ApiOkResponse({
     description: 'Dex Supply Return Object',
-    type: CexSupplyCompareReturnType,
+    type: DexSupplyCompareReturnType,
   })
   @Get(':daoId/dex-supply/compare')
   getDexSupplyCompare(
@@ -283,5 +310,38 @@ export class DaoController {
     @Query('timeInterval') timeInterval: DaysEnum,
   ) {
     return this.daoService.getDexSupplyCompare(daoId, timeInterval);
+  }
+
+  @ApiParam({
+    name: 'daoId',
+    required: true,
+    description: 'Id of the DAO. Ex.: UNI, ENS, COMP...',
+    enum: DAOEnum,
+  })
+  @ApiParam({
+    name: 'timeInterval',
+    required: true,
+    description: 'Time interval in days. Ex.: 7d, 30d, 90d, 365d.',
+    enum: DaysEnum,
+  })
+  @ApiOkResponse({
+    description: 'Lending Supply Return Object',
+    type: LendingSupplyCompareReturnType,
+  })
+  @Get(':daoId/lending-supply/compare')
+  getLendingSupply(
+    @Param('daoId') daoId: string,
+    @Query('timeInterval') timeInterval: DaysEnum,
+  ) {
+    return this.daoService.getLendingSupply(daoId, timeInterval);
+  }
+
+  @ApiOkResponse({
+    description: 'Active Supply Return Object',
+    type: ActiveSupplyReturnType,
+  })
+  @Get(':daoId/active-supply')
+  getActiveSupply(@Param('daoId') daoId: string) {
+    return this.daoService.getActiveSupply(daoId);
   }
 }

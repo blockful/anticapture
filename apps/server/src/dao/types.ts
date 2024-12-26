@@ -183,3 +183,37 @@ export class DexSupplyCompareReturnType {
   })
   changeRate: string;
 }
+
+export class LendingSupplyCompareReturnType {
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  oldLendingSupply: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  currentLendingSupply: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: '0',
+  })
+  changeRate: string;
+}
+
+
+export class ActiveSupplyReturnType {
+  @ApiProperty({
+    type: 'string',
+    example: BigInt(1e18).toString(),
+  })
+  activeSupply: string;
+  @ApiProperty({
+    type: 'string',
+    example: "1342",
+  })
+  activeUsers: string;
+}
