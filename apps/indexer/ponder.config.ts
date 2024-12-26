@@ -40,7 +40,7 @@ export default createConfig({
       maxRequestsPerSecond:
         process.env.STATUS !== "production" && process.env.STATUS !== "staging"
           ? 10000
-          : 10000,
+          : 1,
     },
     anvil: {
       chainId: 31337,
