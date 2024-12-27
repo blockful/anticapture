@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export const TheSection = ({
+export const TheSectionLayout = ({
   icon,
   title,
   description,

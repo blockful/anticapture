@@ -12,13 +12,7 @@ import {
   TooltipInfo,
   ArrowState,
 } from "@/components/01-atoms";
-import {
-  DaoName,
-  fetchCexSupply,
-  fetchCirculatingSupply,
-  fetchDelegatedSupply,
-  fetchTotalSupply,
-} from "@/lib/server/backend";
+import { DaoName } from "@/lib/server/backend";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
@@ -58,41 +52,21 @@ const metricDetails: Record<
   },
 };
 
-interface LoadingState {
-  proposals: boolean;
-  activeSupply: boolean;
-  votes: boolean;
-  averageTurnout: boolean;
-}
-
 interface State {
   data: GovernanceActivity[];
-  loadingState: LoadingState;
 }
 
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
-  STOP_LOADING = "STOP_LOADING",
 }
 
-type Action =
-  | {
-      type: ActionType.UPDATE_METRIC;
-      payload: { index: number; average: string; variation: string };
-    }
-  | {
-      type: ActionType.STOP_LOADING;
-      payload: { key: keyof LoadingState };
-    };
+type Action = {
+  type: ActionType.UPDATE_METRIC;
+  payload: { index: number; average: string; variation: string };
+};
 
 const initialState: State = {
   data: governanceActivityData,
-  loadingState: {
-    proposals: true,
-    activeSupply: true,
-    votes: true,
-    averageTurnout: true,
-  },
 };
 
 function reducer(state: State, action: Action): State {
@@ -110,11 +84,7 @@ function reducer(state: State, action: Action): State {
             : item,
         ),
       };
-    case ActionType.STOP_LOADING:
-      return {
-        ...state,
-        loadingState: { ...state.loadingState, [action.payload.key]: false },
-      };
+
     default:
       return state;
   }
@@ -245,12 +215,6 @@ export const GovernanceActivityTable = ({
 
   return (
     <TheTable
-      isLoading={{
-        proposals: state.loadingState.proposals,
-        activeSupply: state.loadingState.activeSupply,
-        votes: state.loadingState.votes,
-        averageTurnout: state.loadingState.averageTurnout,
-      }}
       columns={governanceActivityColumns}
       data={state.data}
       withPagination={true}

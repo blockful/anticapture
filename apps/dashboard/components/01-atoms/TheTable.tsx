@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -12,7 +13,6 @@ import {
   useReactTable,
   TableOptions,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -21,10 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
-  isLoading: { [key: string]: boolean };
   filterColumn?: string;
   withSorting?: boolean;
   withPagination?: boolean;
@@ -33,7 +31,6 @@ interface DataTableProps<TData, TValue> {
 }
 
 export const TheTable = <TData, TValue>({
-  isLoading,
   withPagination = false,
   withSorting = false,
   filterColumn = "",
@@ -76,18 +73,6 @@ export const TheTable = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const normalizeToCamelCase = (str: string) =>
-    str
-      .split(" ")
-      .map((word, index) =>
-        word === word.toUpperCase()
-          ? word.toLowerCase()
-          : index === 0
-            ? word.toLowerCase()
-            : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-      )
-      .join("");
-
   const SkeletonRow = ({ width = "w-32", height = "h-5" }) => {
     return (
       <div className={`flex animate-pulse justify-center space-x-2`}>
@@ -117,20 +102,14 @@ export const TheTable = <TData, TValue>({
       <TableBody>
         {table.getRowModel().rows.length > 0 ? (
           table.getRowModel().rows.map((row) => {
-            /* Normalize metric to camelCase because static metrics in the table are coming as lowercase keys during loading */
-            const metric: string = row.getValue("metric");
-            const normalizedKey = normalizeToCamelCase(metric);
-            const isMetricLoading = isLoading[normalizedKey];
             return (
               <TableRow key={row.id} className="border-transparent">
                 {row.getVisibleCells().map((cell) => {
-                  const isAmountOrVariation =
-                    cell.column.id === "currentValue" ||
-                    cell.column.id === "average" ||
-                    cell.column.id === "variation";
+                  const cellValue = cell.getValue();
+                  const isCellLoading = cellValue === undefined;
                   return (
                     <TableCell key={cell.id}>
-                      {isMetricLoading && isAmountOrVariation ? (
+                      {isCellLoading ? (
                         <SkeletonRow />
                       ) : (
                         flexRender(
@@ -150,7 +129,7 @@ export const TheTable = <TData, TValue>({
               colSpan={columns.length}
               className="h-[530px] text-center"
             >
-              {isLoading ? "Loading..." : "No results."}
+              No results.
             </TableCell>
           </TableRow>
         )}

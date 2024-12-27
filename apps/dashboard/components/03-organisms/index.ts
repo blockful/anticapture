@@ -1,1 +1,2 @@
-export * from "./TheSection";
+export * from "./GovernanceActivitySection";
+export * from "./TokenDistributionSection";
