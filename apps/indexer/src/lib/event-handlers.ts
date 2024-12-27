@@ -1,5 +1,5 @@
 import { Context, Event } from "ponder:registry";
-import { getValueFromEventArgs } from "./utils";
+import { convertSecondsTimestampToDate, getValueFromEventArgs } from "./utils";
 import viemClient from "./viemClient";
 import {
   account,
@@ -11,7 +11,7 @@ import {
   votesOnchain,
   votingPowerHistory,
   daoMetricsDayBuckets,
-  token
+  token,
 } from "ponder:schema";
 import { addressZero, secondsInDay } from "./constants";
 
@@ -64,7 +64,7 @@ export const delegateChanged = async (
   if (event.args.fromDelegate != addressZero) {
     await context.db
       .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
-      .set((row) => ({delegationsCount: row.delegationsCount - 1}))
+      .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
 
   // Update the delegatee's delegations count
@@ -136,45 +136,55 @@ export const delegatedVotesChanged = async (
     .onConflictDoUpdate({
       votingPower: newBalance,
     });
-  
-  const oldDelegatedSupply = (
-    await context.db
-      .find(token,{id: event.log.address})
-    )!.delegatedSupply
+
+  const oldDelegatedSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.delegatedSupply;
 
   // Update the delegated supply
   const newDelegatedSupply = (
-    await context.db
-      .update(token, {id: event.log.address})
-      .set((row) => ({ delegatedSupply: row.delegatedSupply + (newBalance - oldBalance)}))
-  ).delegatedSupply
-  
-  const delegationVolume = newBalance > oldBalance ? newBalance - oldBalance : oldBalance - newBalance;
+    await context.db.update(token, { id: event.log.address }).set((row) => ({
+      delegatedSupply: row.delegatedSupply + (newBalance - oldBalance),
+    }))
+  ).delegatedSupply;
+
+  const delegationVolume =
+    newBalance > oldBalance ? newBalance - oldBalance : oldBalance - newBalance;
 
   // Calculate the day's start timestamp (UTC)
-  const dayId = Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
-
+  const dayTimestamp =
+    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
-      id: dayId,
+      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
       daoId,
+      tokenId: event.log.address,
+      metricType: "DELEGATED_SUPPLY",
       average: newDelegatedSupply,
       open: oldDelegatedSupply,
-      high: newDelegatedSupply > oldDelegatedSupply ? newDelegatedSupply : oldDelegatedSupply,
-      low: newDelegatedSupply > oldDelegatedSupply ? oldDelegatedSupply : newDelegatedSupply,
+      high:
+        newDelegatedSupply > oldDelegatedSupply
+          ? newDelegatedSupply
+          : oldDelegatedSupply,
+      low:
+        newDelegatedSupply > oldDelegatedSupply
+          ? oldDelegatedSupply
+          : newDelegatedSupply,
       close: newDelegatedSupply,
       volume: delegationVolume,
       count: 1,
     })
     .onConflictDoUpdate((row) => ({
-      average: (row.average * BigInt(row.count) + newDelegatedSupply) / BigInt(row.count + 1),
+      average:
+        (row.average * BigInt(row.count) + newDelegatedSupply) /
+        BigInt(row.count + 1),
       high: newDelegatedSupply > row.low ? newDelegatedSupply : row.low,
       low: newDelegatedSupply < row.low ? newDelegatedSupply : row.low,
       close: newDelegatedSupply,
       volume: row.volume + delegationVolume,
       count: row.count + 1,
-    }))
+    }));
 };
 
 export const tokenTransfer = async (
@@ -394,7 +404,7 @@ export const proposalCanceled = async (
     daoId
   );
   await context.db
-    .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })    
+    .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
     .set({
       status: "CANCELED",
     });

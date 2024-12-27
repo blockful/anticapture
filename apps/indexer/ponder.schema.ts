@@ -1,5 +1,5 @@
 import { addressZero } from "@/lib/constants";
-import { onchainTable, index } from "ponder";
+import { onchainTable, index, onchainEnum, primaryKey } from "ponder";
 
 export const dao = onchainTable("dao", (drizzle) => ({
   id: drizzle.text().primaryKey(),
@@ -26,9 +26,15 @@ export const daoToken = onchainTable(
 export const token = onchainTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
-  decimals: drizzle.integer(),
-  totalSupply: drizzle.bigint(),
+  decimals: drizzle.integer().notNull(),
+  totalSupply: drizzle.bigint().notNull(),
   delegatedSupply: drizzle.bigint().notNull(),
+  activeSupply180d: drizzle.bigint().notNull(),
+  cexSupply: drizzle.bigint().notNull(),
+  dexSupply: drizzle.bigint().notNull(),
+  lendingSupply: drizzle.bigint().notNull(),
+  circulatingSupply: drizzle.bigint().notNull(),
+  treasury: drizzle.bigint().notNull(),
 }));
 
 export const account = onchainTable("account", (drizzle) => ({
@@ -159,15 +165,40 @@ export const proposalsOnchain = onchainTable(
   })
 );
 
-export const daoMetricsDayBuckets = onchainTable("dao_metrics_day_buckets", (drizzle) => ({
-  id: drizzle.integer().primaryKey(),
-  daoId: drizzle.text(),
-  open: drizzle.bigint().notNull(),
-  close: drizzle.bigint().notNull(),
-  low: drizzle.bigint().notNull(),
-  high: drizzle.bigint().notNull(),
-  average: drizzle.bigint().notNull(),
-  volume: drizzle.bigint().notNull(),
-  count: drizzle.integer().notNull(),
+export const metricType = onchainEnum("metricType", [
+  "TOTAL_SUPPLY",
+  "DELEGATED_SUPPLY",
+  "ACTIVE_SUPPLY_180d",
+  "CEX_SUPPLY",
+  "DEX_SUPPLY",
+  "LENDING_SUPPLY",
+  "CIRCULATING_SUPPLY",
+  "TREASURY",
+]);
+
+export const daoMetricsDayBuckets = onchainTable(
+  "dao_metrics_day_buckets",
+  (drizzle) => ({
+    dayTimestamp: drizzle.timestamp(),
+    daoId: drizzle.text().notNull(),
+    tokenId: drizzle.text().notNull(),
+    metricType: metricType("metricType").notNull(),
+    open: drizzle.bigint().notNull(),
+    close: drizzle.bigint().notNull(),
+    low: drizzle.bigint().notNull(),
+    high: drizzle.bigint().notNull(),
+    average: drizzle.bigint().notNull(),
+    volume: drizzle.bigint().notNull(),
+    count: drizzle.integer().notNull(),
   }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [
+        table.dayTimestamp,
+        table.daoId,
+        table.tokenId,
+        table.metricType,
+      ],
+    }),
+  })
 );
