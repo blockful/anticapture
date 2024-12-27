@@ -6,6 +6,7 @@ export * from "./QuorumCard";
 export * from "./Skeleton";
 export * from "./Switcher";
 export * from "./SwitcherDate";
+export * from "./TheSectionLayout";
 export * from "./TheTable";
 export * from "./TimelockCard";
 export * from "./TooltipInfo";
