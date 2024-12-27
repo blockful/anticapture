@@ -67,45 +67,21 @@ const metricDetails: Record<
   },
 };
 
-interface LoadingState {
-  totalSupply: boolean;
-  delegatedSupply: boolean;
-  circulatingSupply: boolean;
-  cexSupply: boolean;
-  dexSupply: boolean;
-  lendingSupply: boolean;
-}
-
 interface State {
   data: TokenDistribution[];
-  loadingState: LoadingState;
 }
 
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
-  STOP_LOADING = "STOP_LOADING",
 }
 
-type Action =
-  | {
-      type: ActionType.UPDATE_METRIC;
-      payload: { index: number; currentValue: string; variation: string };
-    }
-  | {
-      type: ActionType.STOP_LOADING;
-      payload: { key: keyof LoadingState };
-    };
+type Action = {
+  type: ActionType.UPDATE_METRIC;
+  payload: { index: number; currentValue: string; variation: string };
+};
 
 const initialState: State = {
   data: tokenDistributionData,
-  loadingState: {
-    totalSupply: true,
-    delegatedSupply: true,
-    circulatingSupply: true,
-    cexSupply: true,
-    dexSupply: true,
-    lendingSupply: true,
-  },
 };
 
 function reducer(state: State, action: Action): State {
@@ -122,11 +98,6 @@ function reducer(state: State, action: Action): State {
               }
             : item,
         ),
-      };
-    case ActionType.STOP_LOADING:
-      return {
-        ...state,
-        loadingState: { ...state.loadingState, [action.payload.key]: false },
       };
     default:
       return state;
@@ -149,8 +120,8 @@ export const TokenDistributionTable = ({
   useEffect(() => {
     const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
 
-    fetchTotalSupply({ daoName, timeInterval: timeInterval })
-      .then((result) => {
+    fetchTotalSupply({ daoName, timeInterval: timeInterval }).then((result) => {
+      result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
@@ -161,39 +132,29 @@ export const TokenDistributionTable = ({
             variation: formatVariation(result.changeRate),
           },
         });
-      })
-      .finally(() =>
-        dispatch({
-          type: ActionType.STOP_LOADING,
-          payload: { key: "totalSupply" },
-        }),
-      );
+    });
 
-    fetchDelegatedSupply({ daoName, timeInterval: timeInterval })
-      .then((result) => {
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 1,
-            currentValue: String(
-              BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
-          },
-        });
-      })
-      .finally(() =>
-        dispatch({
-          type: ActionType.STOP_LOADING,
-          payload: { key: "delegatedSupply" },
-        }),
-      );
+    fetchDelegatedSupply({ daoName, timeInterval: timeInterval }).then(
+      (result) => {
+        result &&
+          dispatch({
+            type: ActionType.UPDATE_METRIC,
+            payload: {
+              index: 1,
+              currentValue: String(
+                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
+          });
+      },
+    );
 
     fetchCirculatingSupply({
       daoName,
       timeInterval: timeInterval,
-    })
-      .then((result) => {
+    }).then((result) => {
+      result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
@@ -204,19 +165,13 @@ export const TokenDistributionTable = ({
             variation: formatVariation(result.changeRate),
           },
         });
-      })
-      .finally(() =>
-        dispatch({
-          type: ActionType.STOP_LOADING,
-          payload: { key: "circulatingSupply" },
-        }),
-      );
+    });
 
     fetchCexSupply({
       daoName,
       timeInterval: timeInterval,
-    })
-      .then((result) => {
+    }).then((result) => {
+      result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
@@ -227,19 +182,13 @@ export const TokenDistributionTable = ({
             variation: formatVariation(result.changeRate),
           },
         });
-      })
-      .finally(() =>
-        dispatch({
-          type: ActionType.STOP_LOADING,
-          payload: { key: "cexSupply" },
-        }),
-      );
+    });
 
     fetchDexSupply({
       daoName,
       timeInterval: timeInterval,
-    })
-      .then((result) => {
+    }).then((result) => {
+      result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
@@ -250,13 +199,7 @@ export const TokenDistributionTable = ({
             variation: formatVariation(result.changeRate),
           },
         });
-      })
-      .finally(() =>
-        dispatch({
-          type: ActionType.STOP_LOADING,
-          payload: { key: "dexSupply" },
-        }),
-      );
+    });
   }, [daoData, timeInterval]);
 
   const toggleArrowState = (
@@ -367,14 +310,6 @@ export const TokenDistributionTable = ({
 
   return (
     <TheTable
-      isLoading={{
-        totalSupply: state.loadingState.totalSupply,
-        delegatedSupply: state.loadingState.delegatedSupply,
-        circulatingSupply: state.loadingState.circulatingSupply,
-        cexSupply: state.loadingState.cexSupply,
-        dexSupply: state.loadingState.dexSupply,
-        lendingSupply: state.loadingState.lendingSupply,
-      }}
       columns={tokenDistributionColumns}
       data={state.data}
       withPagination={true}
