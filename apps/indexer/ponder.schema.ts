@@ -179,7 +179,7 @@ export const metricType = onchainEnum("metricType", [
 export const daoMetricsDayBuckets = onchainTable(
   "dao_metrics_day_buckets",
   (drizzle) => ({
-    dayTimestamp: drizzle.timestamp(),
+    dayTimestamp: drizzle.date("date", { mode: "date" }),
     daoId: drizzle.text().notNull(),
     tokenId: drizzle.text().notNull(),
     metricType: metricType("metricType").notNull(),
