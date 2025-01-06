@@ -106,7 +106,7 @@ export const TheTable = <TData, TValue>({
               <TableRow key={row.id} className="border-transparent">
                 {row.getVisibleCells().map((cell) => {
                   const cellValue = cell.getValue();
-                  const isCellLoading = cellValue === undefined;
+                  const isCellLoading = cellValue === null;
                   return (
                     <TableCell key={cell.id}>
                       {isCellLoading ? (
