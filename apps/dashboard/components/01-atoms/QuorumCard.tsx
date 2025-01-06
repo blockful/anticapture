@@ -2,18 +2,24 @@
 
 import { UsersIcon, TooltipInfo } from "@/components/01-atoms";
 import { formatNumberUserReadble } from "@/lib/client/utils";
-import { DAO } from "@/lib/server/backend";
+import { DAO } from "@/lib/types/daos";
 import { formatEther } from "viem";
 
 export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
+  if (!daoData) {
+    console.error("daoData is undefined or null.");
+  }
+
   const quorumMinPercentage =
-    daoData &&
+    daoData.quorum &&
+    daoData.totalSupply &&
     formatEther(
       (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(daoData.totalSupply),
     );
 
   const proposalThresholdPercentage =
-    daoData &&
+    daoData.proposalThreshold &&
+    daoData.totalSupply &&
     formatEther(
       (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
         BigInt(daoData.totalSupply),
@@ -46,10 +52,15 @@ export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
             <div className="flex h-full w-full items-center justify-start gap-1.5">
               <div className="flex w-full">
                 <p className="flex text-sm font-medium leading-tight">
-                  {formatNumberUserReadble(
-                    Number(daoData.quorum) / Number(10 ** 18),
-                  ).toString()}{" "}
-                  {daoData.id} {"(" + quorumMinPercentage.toString() + "%)"}
+                  {daoData.quorum
+                    ? formatNumberUserReadble(
+                        Number(daoData.quorum) / Number(10 ** 18),
+                      ).toString()
+                    : "No Quorum"}{" "}
+                  {daoData.id || "Unknown ID"}{" "}
+                  {quorumMinPercentage
+                    ? `(${quorumMinPercentage.toString()}%)`
+                    : "(N/A)"}
                 </p>
               </div>
             </div>
@@ -63,11 +74,15 @@ export const QuorumCard = ({ daoData }: { daoData: DAO }) => {
           <div className="flex h-full w-full items-center justify-start gap-1.5">
             <div className="flex w-1/2">
               <p className="flex text-sm font-medium leading-tight">
-                {formatNumberUserReadble(
-                  Number(daoData.proposalThreshold) / Number(10 ** 18),
-                ).toString()}{" "}
-                {daoData.id}{" "}
-                {"(" + proposalThresholdPercentage.toString() + "%)"}
+                {daoData.proposalThreshold
+                  ? formatNumberUserReadble(
+                      Number(daoData.proposalThreshold) / Number(10 ** 18),
+                    ).toString()
+                  : "No Threshold"}{" "}
+                {daoData.id || "Unknown ID"}{" "}
+                {proposalThresholdPercentage
+                  ? `(${proposalThresholdPercentage.toString()}%)`
+                  : "(N/A)"}
               </p>
             </div>
           </div>

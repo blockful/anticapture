@@ -8,7 +8,7 @@ import {
   TooltipInfo,
 } from "@/components/01-atoms";
 import { formatTimestampUserReadable } from "@/lib/client/utils";
-import { DAO } from "@/lib/server/backend";
+import { DAO } from "@/lib/types/daos";
 
 export const VoteCard = ({ daoData }: { daoData: DAO }) => {
   return (
