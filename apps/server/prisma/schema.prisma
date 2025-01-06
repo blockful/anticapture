@@ -423,3 +423,29 @@ enum metricType {
 
   @@schema("public")
 }
+
+model User {
+  id    String     @id
+  roles UserRole[]
+
+  @@schema("gov-app")
+}
+
+model UserRole {
+  id     Int    @id @default(autoincrement())
+  userId String
+  roleId Int
+  user   User   @relation(fields: [userId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@schema("gov-app")
+}
+
+model Role {
+  id    Int        @id @default(autoincrement())
+  name  String
+  daoId String
+  users UserRole[]
+
+  @@schema("gov-app")
+}

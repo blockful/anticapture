@@ -10,7 +10,7 @@ export class RoleService {
 
   async create(createRoleDto: CreateRoleDto) {
     const daoId = createRoleDto.daoId;
-    const dao = await this.prisma.dAO.findUnique({
+    const dao = await this.prisma.dao.findUnique({
       where: { id: daoId },
     });
     if (!dao) {
