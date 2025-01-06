@@ -9,6 +9,7 @@ import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoName } from "@/lib/types/daos";
+import { useRouter } from "next/navigation";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<DashboardDao>,
@@ -67,7 +68,12 @@ enum ActionType {
 
 type Action = {
   type: ActionType.UPDATE_METRIC;
-  payload: DashboardDao & { index: number };
+  payload: {
+    index: number;
+    delegatedSupply: string;
+    profitability: string;
+    delegatesToPass: string;
+  };
 };
 
 const initialState: State = {
@@ -99,65 +105,43 @@ function reducer(state: State, action: Action): State {
 export const DashboardTable = () => {
   const { daoData } = useContext(DaoDataContext);
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [isCurrentValueArrowState, setCurrentValueArrowState] =
-    useState<ArrowState>(ArrowState.DEFAULT);
-  const [isVariationArrowState, setVariationArrowState] = useState<ArrowState>(
-    ArrowState.DEFAULT,
-  );
+  const router = useRouter();
 
   useEffect(() => {
     const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
   }, [daoData]);
 
-  const toggleArrowState = (
-    currentState: ArrowState,
-    setState: React.Dispatch<React.SetStateAction<ArrowState>>,
-  ) => {
-    const nextState =
-      currentState === ArrowState.DEFAULT
-        ? ArrowState.UP
-        : currentState === ArrowState.UP
-          ? ArrowState.DOWN
-          : ArrowState.UP;
-    setState(nextState);
-  };
-
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
       accessorKey: "#",
-      cell: ({ row }) => {
-        return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-            {row.index + 1}
-          </p>
-        );
-      },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setVariationArrowState(ArrowState.DEFAULT);
-              toggleArrowState(
-                isCurrentValueArrowState,
-                setCurrentValueArrowState,
-              );
+      cell: ({ row }) => (
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          {row.index + 1}
+        </p>
+      ),
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-fit"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          #
+          <ArrowUpDown
+            props={{
+              className: "ml-2 h-4 w-4",
             }}
-          >
-            #
-            <ArrowUpDown
-              props={{
-                className: "ml-2 h-4 w-4",
-              }}
-              activeState={isCurrentValueArrowState}
-            />
-          </Button>
-        );
-      },
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       enableSorting: true,
-      sortingFn: sortingByAscendingOrDescendingNumber,
+      sortingFn: (rowA, rowB) => rowA.index - rowB.index,
     },
     {
       accessorKey: "dao",
@@ -165,7 +149,10 @@ export const DashboardTable = () => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoDetails["UNI"] : null;
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          <p
+            className="scrollbar-none flex w-full max-w-48 cursor-pointer items-center gap-2 space-x-1 overflow-auto text-[#fafafa]"
+            onClick={() => router.push(`/${dao.toLowerCase()}`)}
+          >
             {details && details.icon}
             {dao}
           </p>
@@ -183,30 +170,27 @@ export const DashboardTable = () => {
           </div>
         );
       },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setVariationArrowState(ArrowState.DEFAULT);
-              toggleArrowState(
-                isCurrentValueArrowState,
-                setCurrentValueArrowState,
-              );
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Delegated Supply
+          <ArrowUpDown
+            props={{
+              className: "ml-2 h-4 w-4",
             }}
-          >
-            Delegated Supply
-            <ArrowUpDown
-              props={{
-                className: "ml-2 h-4 w-4",
-              }}
-              activeState={isCurrentValueArrowState}
-            />
-          </Button>
-        );
-      },
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
     },
@@ -220,161 +204,30 @@ export const DashboardTable = () => {
           </div>
         );
       },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setVariationArrowState(ArrowState.DEFAULT);
-              toggleArrowState(
-                isCurrentValueArrowState,
-                setCurrentValueArrowState,
-              );
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Profitability
+          <ArrowUpDown
+            props={{
+              className: "ml-2 h-4 w-4",
             }}
-          >
-            Profitability
-            <ArrowUpDown
-              props={{
-                className: "ml-2 h-4 w-4",
-              }}
-              activeState={isCurrentValueArrowState}
-            />
-          </Button>
-        );
-      },
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
     },
-    {
-      accessorKey: "delegatesToPass",
-      cell: ({ row }) => {
-        const delegatesToPass: number = row.getValue("delegatesToPass");
-        return (
-          <div className="flex items-center justify-center text-center">
-            {delegatesToPass && formatNumberUserReadble(delegatesToPass)}
-          </div>
-        );
-      },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setVariationArrowState(ArrowState.DEFAULT);
-              toggleArrowState(
-                isCurrentValueArrowState,
-                setCurrentValueArrowState,
-              );
-            }}
-          >
-            Delegates To Pass
-            <ArrowUpDown
-              props={{
-                className: "ml-2 h-4 w-4",
-              }}
-              activeState={isCurrentValueArrowState}
-            />
-          </Button>
-        );
-      },
-      enableSorting: true,
-      sortingFn: sortingByAscendingOrDescendingNumber,
-    },
-
-    // {
-    //   accessorKey: "metric",
-    //   cell: ({ row }) => {
-    //     const metric: string = row.getValue("metric");
-    //     const details = metric ? metricDetails[metric] : null;
-    //     return (
-    //       <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-    //         {details && details.icon}
-    //         {metric}
-    //         {details && <TooltipInfo text={details.tooltip} />}
-    //       </p>
-    //     );
-    //   },
-    //   header: "Metrics",
-    // },
-    // {
-    //   accessorKey: "average",
-    //   cell: ({ row }) => {
-    //     const average: number = row.getValue("average");
-    //     return (
-    //       <div className="flex items-center justify-center text-center">
-    //         {average && formatNumberUserReadble(average)}
-    //       </div>
-    //     );
-    //   },
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         variant="ghost"
-    //         className="w-full"
-    //         onClick={() => {
-    //           column.toggleSorting(column.getIsSorted() === "asc");
-    //           setVariationArrowState(ArrowState.DEFAULT);
-    //           toggleArrowState(
-    //             isCurrentValueArrowState,
-    //             setCurrentValueArrowState,
-    //           );
-    //         }}
-    //       >
-    //         Average
-    //         <ArrowUpDown
-    //           props={{
-    //             className: "ml-2 h-4 w-4",
-    //           }}
-    //           activeState={isCurrentValueArrowState}
-    //         />
-    //       </Button>
-    //     );
-    //   },
-    //   enableSorting: true,
-    //   sortingFn: sortingByAscendingOrDescendingNumber,
-    // },
-    // {
-    //   accessorKey: "variation",
-    //   cell: ({ row }) => {
-    //     const variation: string = row.getValue("variation");
-
-    //     return (
-    //       <p
-    //         className={`flex items-center justify-center gap-1 text-center ${Number(variation) > 0 ? "text-[#4ade80]" : Number(variation) < 0 ? "text-red-500" : ""}`}
-    //       >
-    //         {Number(variation) > 0 ? (
-    //           <ChevronUp className="h-4 w-4 text-[#4ade80]" />
-    //         ) : Number(variation) < 0 ? (
-    //           <ChevronDown className="h-4 w-4 text-red-500" />
-    //         ) : null}
-    //         {variation}%
-    //       </p>
-    //     );
-    //   },
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         variant="ghost"
-    //         className="w-full"
-    //         onClick={() => {
-    //           column.toggleSorting(column.getIsSorted() === "asc");
-    //           setCurrentValueArrowState(ArrowState.DEFAULT);
-    //           toggleArrowState(isVariationArrowState, setVariationArrowState);
-    //         }}
-    //       >
-    //         Variation
-    //         <ArrowUpDown
-    //           activeState={isVariationArrowState}
-    //           props={{ className: "ml-2 h-4 w-4" }}
-    //         />
-    //       </Button>
-    //     );
-    //   },
-    // },
   ];
 
   return (

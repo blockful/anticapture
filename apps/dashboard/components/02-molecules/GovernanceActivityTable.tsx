@@ -97,28 +97,9 @@ export const GovernanceActivityTable = ({
 }) => {
   const { daoData } = useContext(DaoDataContext);
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [isCurrentValueArrowState, setCurrentValueArrowState] =
-    useState<ArrowState>(ArrowState.DEFAULT);
-  const [isVariationArrowState, setVariationArrowState] = useState<ArrowState>(
-    ArrowState.DEFAULT,
-  );
-
   useEffect(() => {
     const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
   }, [daoData, timeInterval]);
-
-  const toggleArrowState = (
-    currentState: ArrowState,
-    setState: React.Dispatch<React.SetStateAction<ArrowState>>,
-  ) => {
-    const nextState =
-      currentState === ArrowState.DEFAULT
-        ? ArrowState.UP
-        : currentState === ArrowState.UP
-          ? ArrowState.DOWN
-          : ArrowState.UP;
-    setState(nextState);
-  };
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
     {
@@ -146,30 +127,27 @@ export const GovernanceActivityTable = ({
           </div>
         );
       },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setVariationArrowState(ArrowState.DEFAULT);
-              toggleArrowState(
-                isCurrentValueArrowState,
-                setCurrentValueArrowState,
-              );
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Average
+          <ArrowUpDown
+            props={{
+              className: "ml-2 h-4 w-4",
             }}
-          >
-            Average
-            <ArrowUpDown
-              props={{
-                className: "ml-2 h-4 w-4",
-              }}
-              activeState={isCurrentValueArrowState}
-            />
-          </Button>
-        );
-      },
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
     },
@@ -180,7 +158,13 @@ export const GovernanceActivityTable = ({
 
         return (
           <p
-            className={`flex items-center justify-center gap-1 text-center ${Number(variation) > 0 ? "text-[#4ade80]" : Number(variation) < 0 ? "text-red-500" : ""}`}
+            className={`flex items-center justify-center gap-1 text-center ${
+              Number(variation) > 0
+                ? "text-[#4ade80]"
+                : Number(variation) < 0
+                  ? "text-red-500"
+                  : ""
+            }`}
           >
             {Number(variation) > 0 ? (
               <ChevronUp className="h-4 w-4 text-[#4ade80]" />
@@ -191,25 +175,27 @@ export const GovernanceActivityTable = ({
           </p>
         );
       },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setCurrentValueArrowState(ArrowState.DEFAULT);
-              toggleArrowState(isVariationArrowState, setVariationArrowState);
-            }}
-          >
-            Variation
-            <ArrowUpDown
-              activeState={isVariationArrowState}
-              props={{ className: "ml-2 h-4 w-4" }}
-            />
-          </Button>
-        );
-      },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Variation
+          <ArrowUpDown
+            props={{ className: "ml-2 h-4 w-4" }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: sortingByAscendingOrDescendingNumber,
     },
   ];
 
