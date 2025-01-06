@@ -1,15 +1,23 @@
 import { User } from "@/lib/server/utils";
+import { DaoName } from "./types/daos";
+
+export type DashboardDao = {
+  dao: string;
+  delegatedSupply: string | null;
+  profitability: string | null;
+  delegatesToPass: string | null;
+};
 
 export type TokenDistribution = {
-  metric: string | undefined;
-  currentValue: string | undefined;
-  variation: string | undefined;
+  metric: string | null;
+  currentValue: string | null;
+  variation: string | null;
 };
 
 export type GovernanceActivity = {
-  metric: string | undefined;
-  average: string | undefined;
-  variation: string | undefined;
+  metric: string | null;
+  average: string | null;
+  variation: string | null;
 };
 
 export type Delegates = {
@@ -36,33 +44,48 @@ export type Holders = {
 export const tokenDistributionData: TokenDistribution[] = [
   {
     metric: "Total Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "Delegated Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "Circulating Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "CEX Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "DEX Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "Lending Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
+  },
+];
+
+export const dashboardData: DashboardDao[] = [
+  {
+    dao: DaoName.UNISWAP,
+    delegatedSupply: null,
+    profitability: null,
+    delegatesToPass: null,
+  },
+  {
+    dao: DaoName.ENS,
+    delegatedSupply: null,
+    profitability: null,
+    delegatesToPass: null,
   },
 ];
 
@@ -76,23 +99,23 @@ export const enum GovernanceActivityMetrics {
 export const governanceActivityData: GovernanceActivity[] = [
   {
     metric: "Proposals",
-    average: undefined,
-    variation: undefined,
+    average: null,
+    variation: null,
   },
   {
     metric: "Active Supply",
-    average: undefined,
-    variation: undefined,
+    average: null,
+    variation: null,
   },
   {
     metric: "Votes",
-    average: undefined,
-    variation: undefined,
+    average: null,
+    variation: null,
   },
   {
     metric: "Average Turnout",
-    average: undefined,
-    variation: undefined,
+    average: null,
+    variation: null,
   },
 ];
 
