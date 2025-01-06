@@ -114,8 +114,8 @@ export class DaoService {
     const getHoldersQuery = `
       select a.id as "account",
       TEXT(ab.balance) as "amount",
-      TEXT(COUNT(d.*)) as "count_of_delegates",
-      TEXT(MAX(tr.timestamp)) as "last_buy" from "account" a 
+      TEXT(COUNT(d.*)) as "countOfDelegates",
+      TEXT(MAX(tr.timestamp)) as "lastBuy" from "account" a 
       left join "account_balance" ab on a.id=ab."account_id"
       right join "token" t on t.id =ab."token_id"
       right join "dao_token" dt on dt."token_id"=t.id
@@ -157,8 +157,8 @@ export class DaoService {
           "current_total_supply" as (
           SELECT SUM(ab.balance) as "balance" FROM "account_balance" ab
           )
-          SELECT "old_from_zero_address"."from_amount" - COALESCE("old_to_zero_address"."to_amount", 0) as "old_total_supply",
-          "current_total_supply"."balance" as "current_total_supply"
+          SELECT "old_from_zero_address"."from_amount" - COALESCE("old_to_zero_address"."to_amount", 0) as "oldTotalSupply",
+          "current_total_supply"."balance" as "currentTotalSupply"
           FROM "old_from_zero_address" 
           JOIN "old_to_zero_address" on 1=1
           JOIN "current_total_supply" on 1=1;
@@ -191,8 +191,8 @@ export class DaoService {
    "current_delegated_supply"  AS (
       SELECT SUM(ap."voting_power") AS "current_delegated_supply_amount" FROM "account_power" ap
     )
-    SELECT "old_delegated_supply"."old_delegated_supply_amount" AS "old_delegated_supply", 
-    "current_delegated_supply"."current_delegated_supply_amount" AS "current_delegated_supply"
+    SELECT "old_delegated_supply"."old_delegated_supply_amount" AS "oldDelegatedSupply", 
+    "current_delegated_supply"."current_delegated_supply_amount" AS "currentDelegatedSupply"
     FROM "current_delegated_supply"
     JOIN "old_delegated_supply" ON 1=1;
     `;
@@ -247,9 +247,9 @@ export class DaoService {
           )
           SELECT ("old_from_zero_address"."from_amount" - COALESCE("old_to_zero_address"."to_amount", 0)) - 
           (COALESCE("old_to_treasury"."to_amount", 0) - "old_from_treasury"."from_amount")
-          as "old_circulating_supply",
+          as "oldCirculatingSupply",
           "current_circulating_supply"."current_circulating_supply"
-          as "current_circulating_supply"
+          as "currentCirculatingSupply"
           FROM "old_from_zero_address" 
           JOIN "old_to_zero_address" ON 1=1
           JOIN "old_from_treasury" ON 1=1
@@ -292,9 +292,9 @@ export class DaoService {
             FROM "account_balance" ab WHERE ab."account_id" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
           )
           SELECT (COALESCE("old_to_treasury"."to_amount", 0) - "old_from_treasury"."from_amount")
-          as "old_treasury",
+          as "oldTreasury",
           "current_treasury"."current_treasury"
-          as "current_treasury"
+          as "currentTreasury"
           FROM "old_from_treasury"
           JOIN "old_to_treasury" ON 1=1
           JOIN "current_treasury" ON 1=1;
@@ -334,9 +334,9 @@ export class DaoService {
             FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
           )
           SELECT (COALESCE("old_to_cex"."to_amount", 0) - "old_from_cex"."from_amount")
-          as "old_cex_supply",
+          as "oldCexSupply",
           "current_cex_supply"."current_cex_supply"
-          as "current_cex_supply"
+          as "currentCexSupply"
           FROM "old_from_cex"
           JOIN "old_to_cex" ON 1=1
           JOIN "current_cex_supply" ON 1=1;
@@ -376,9 +376,9 @@ export class DaoService {
             FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
           )
           SELECT (COALESCE("old_to_dex"."to_amount",0) - "old_from_dex"."from_amount")
-          as "old_dex_supply",
+          as "oldDexSupply",
           "current_dex_supply"."current_dex_supply"
-          as "current_dex_supply"
+          as "currentDexSupply"
           FROM "old_from_dex"
           JOIN "old_to_dex" ON 1=1
           JOIN "current_dex_supply" ON 1=1;
@@ -419,9 +419,9 @@ export class DaoService {
             FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
           )
           SELECT COALESCE(("old_to_lending"."to_amount" - "old_from_lending"."from_amount"),0)
-          as "old_lending_supply",
+          as "oldLendingSupply",
           "current_lending_supply"."current_lending_supply"
-          as "current_lending_supply"
+          as "currentLendingSupply"
           FROM "old_from_lending"
           JOIN "old_to_lending" ON 1=1
           JOIN "current_lending_supply" ON 1=1;
@@ -446,7 +446,7 @@ export class DaoService {
           AND voc."dao_id" = ${daoId}
           ORDER BY voc."voter_account_id", voc.timestamp DESC
         )
-        SELECT SUM(ap."voting_power") as "active_supply", TEXT(COUNT("active_users".*)) AS "active_users" FROM "account_power" ap
+        SELECT SUM(ap."voting_power") as "activeSupply", TEXT(COUNT("active_users".*)) AS "activeUsers" FROM "account_power" ap
         JOIN "active_users" ON ap."account_id" = "active_users"."voter_account_id";
       `;
     return activeSupply;
