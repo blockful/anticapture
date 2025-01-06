@@ -12,10 +12,10 @@ import {
   TooltipInfo,
   ArrowState,
 } from "@/components/01-atoms";
-import { DaoName } from "@/lib/server/backend";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
+import { DaoName } from "@/lib/types/daos";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
