@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 
-import { DAO } from "@/lib/server/backend";
+import { DAO } from "@/lib/types/daos";
 
 import { AnimatedNumber } from "./animated-number";
 import { DaoDataContext } from "@/components/contexts/dao-data-provider";
