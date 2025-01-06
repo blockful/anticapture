@@ -28,15 +28,20 @@ ponder.on("UNIToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const totalSupply = await viemClient.getTotalSupply();
   const decimals = await viemClient.getDecimals();
   const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
   await context.db.insert(token).values({
     id: uniTokenAddress,
     name: daoId,
     decimals,
-    totalSupply,
-    delegatedSupply: BigInt(0) 
+    totalSupply: BigInt(0),
+    delegatedSupply: BigInt(0),
+    activeSupply180d: BigInt(0),
+    cexSupply: BigInt(0),
+    dexSupply: BigInt(0),
+    lendingSupply: BigInt(0),
+    circulatingSupply: BigInt(0),
+    treasury: BigInt(0),
   });
   await context.db.insert(daoToken).values({
     id: daoId + "-" + uniTokenAddress,
