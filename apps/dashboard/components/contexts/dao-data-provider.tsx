@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  DAO,
-  DaoName,
-  ChainName,
-  fetchDaoData,
-  fetchTokenPrice,
-} from "@/lib/server/backend";
+import { ChainName, fetchDaoData, fetchTokenPrice } from "@/lib/server/backend";
+import { DAO, DaoName } from "@/lib/types/daos";
 import { createContext, useEffect, useState } from "react";
 
 interface DaoDataContext {
@@ -23,10 +18,11 @@ export const DaoDataProvider = ({
   children,
   daoName,
 }: {
-  children: JSX.Element;
+  children: React.ReactNode;
   daoName: DaoName;
 }) => {
   const [daoData, setDaoData] = useState<DAO | null>(null);
+  const [tokenPrice, setTokenPrice] = useState<null | number>(null);
 
   useEffect(() => {
     fetchDaoData(daoName)
@@ -41,8 +37,6 @@ export const DaoDataProvider = ({
         setDaoData(uniData as DAO);
       });
   }, []);
-
-  const [tokenPrice, setTokenPrice] = useState<null | number>(null);
 
   useEffect(() => {
     fetchTokenPrice(ChainName.Ethereum, DaoName.UNISWAP).then((tokenPrice) =>
