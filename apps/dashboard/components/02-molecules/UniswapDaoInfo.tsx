@@ -7,11 +7,10 @@ import {
   QuorumCard,
   Skeleton,
 } from "@/components/01-atoms";
-import { useContext } from "react";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 
 export const UniswapDaoInfo = () => {
-  const { daoData } = useContext(DaoDataContext);
+  const { daoData } = useDaoDataContext();
 
   return (
     <div className="grid w-full gap-2 text-white md:grid-cols-2 lg:grid-cols-4 xl:gap-4">

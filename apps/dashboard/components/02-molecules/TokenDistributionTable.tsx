@@ -19,7 +19,7 @@ import {
   fetchDexSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoName } from "@/lib/types/daos";
@@ -109,7 +109,7 @@ export const TokenDistributionTable = ({
 }: {
   timeInterval: TimeInterval;
 }) => {
-  const { daoData } = useContext(DaoDataContext);
+  const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {

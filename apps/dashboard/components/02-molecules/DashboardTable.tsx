@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, TheTable, ArrowState } from "@/components/01-atoms";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoName } from "@/lib/types/daos";
@@ -103,7 +103,7 @@ function reducer(state: State, action: Action): State {
 }
 
 export const DashboardTable = () => {
-  const { daoData } = useContext(DaoDataContext);
+  const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
 

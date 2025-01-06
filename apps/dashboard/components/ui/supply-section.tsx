@@ -1,15 +1,15 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DAO } from "@/lib/types/daos";
 
 import { AnimatedNumber } from "./animated-number";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { SupplyIcon } from "@/components/01-atoms";
 
 export const SupplySection = () => {
-  const { daoData } = useContext(DaoDataContext);
+  const { daoData } = useDaoDataContext();
 
   const [totalSupply, setTotalSupply] = useState<number | null>(null);
   const [totalVotingPower, setTotalVotingPower] = useState<number | null>(null);

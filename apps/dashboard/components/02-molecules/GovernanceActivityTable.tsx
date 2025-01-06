@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
@@ -12,7 +12,7 @@ import {
   TooltipInfo,
   ArrowState,
 } from "@/components/01-atoms";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoName } from "@/lib/types/daos";
@@ -95,7 +95,7 @@ export const GovernanceActivityTable = ({
 }: {
   timeInterval: TimeInterval;
 }) => {
-  const { daoData } = useContext(DaoDataContext);
+  const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
     const daoName = (daoData && daoData.id) || DaoName.UNISWAP;

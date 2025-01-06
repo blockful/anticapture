@@ -1,5 +1,5 @@
 import { DaoName, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
-import { DaoDataProvider } from "@/components/contexts/dao-data-provider";
+import { DaoDataProvider } from "@/components/contexts/DaoDataContext";
 import NotFound from "./not-found";
 
 interface DaoLayoutProps {
