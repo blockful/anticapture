@@ -2,7 +2,7 @@
 
 import { ChainName, fetchDaoData, fetchTokenPrice } from "@/lib/server/backend";
 import { DAO, DaoName } from "@/lib/types/daos";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface DaoDataContext {
   daoData: null | DAO;
@@ -50,3 +50,5 @@ export const DaoDataProvider = ({
     </DaoDataContext.Provider>
   );
 };
+
+export const useDaoDataContext = () => useContext(DaoDataContext);
