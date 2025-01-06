@@ -31,11 +31,11 @@ export class DaoService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.dAO.findMany();
+    return this.prisma.dao.findMany();
   }
 
   async findOne(id: string): Promise<DAODto> {
-    const dao = await this.prisma.dAO.findUnique({
+    const dao = await this.prisma.dao.findUnique({
       where: { id },
       include: { daoTokens: { include: { token: true } } },
     });
@@ -60,9 +60,9 @@ export class DaoService {
   ): Promise<DelegatesReturnType> {
     const orderByValues = {
       account: 'a.id',
-      delegationsCount: 'ap."delegationsCount"',
-      votingPower: 'ap."votingPower"',
-      proposalsVoted: '"proposalsVoted"',
+      delegationsCount: 'ap."delegations_count"',
+      votingPower: 'ap."voting_power"',
+      proposalsVoted: '"proposals_voted"',
     };
 
     const delegates: {
@@ -72,16 +72,16 @@ export class DaoService {
       delegationsCount: string;
     }[] = await this.prisma.$queryRawUnsafe(`
       select a.id as "account", 
-      TEXT(ap."votingPower") as "votingPower", 
-      TEXT(ap."delegationsCount") as "delegationsCount", 
-      TEXT(COUNT(distinct voc.*)) as "proposalsVoted" 
-      from "Account" a 
-      left join "AccountPower" ap on a.id=ap."accountId"
-      left join "VotesOnchain" voc on voc."voterAccountId"=a.id
+      TEXT(ap."voting_power") as "voting_power", 
+      TEXT(ap."delegations_count") as "delegations_count", 
+      TEXT(COUNT(distinct voc.*)) as "proposals_voted" 
+      from "account" a 
+      left join "account_power" ap on a.id=ap."account_id"
+      left join "votes_onchain" voc on voc."voter_account_id"=a.id
       where voc.timestamp BETWEEN CAST(${fromDate} as bigint) and CAST(${toDate} as bigint)
-      AND ap."votingPower" is not null
+      AND ap."voting_power" is not null
       and ap."daoId"='${daoId}'
-      group by a.id, ap."votingPower", ap."delegationsCount"
+      group by a.id, ap."voting_power", ap."delegations_count"
       order by ${orderByValues[orderBy]} ${ordering}
       offset ${skip} limit ${take};
       `);
@@ -114,14 +114,14 @@ export class DaoService {
     const getHoldersQuery = `
       select a.id as "account",
       TEXT(ab.balance) as "amount",
-      TEXT(COUNT(d.*)) as "countOfDelegates",
-      TEXT(MAX(tr.timestamp)) as "lastBuy" from "Account" a 
-      left join "AccountBalance" ab on a.id=ab."accountId"
-      right join "Token" t on t.id =ab."tokenId"
-      right join "DAOToken" dt on dt."tokenId"=t.id
-      right join "Transfers" tr on tr."toAccountId"=a.id
-      left join "Delegations" d on a.id=d."delegatorAccountId"
-      where dt."daoId"='${daoId}'
+      TEXT(COUNT(d.*)) as "count_of_delegates",
+      TEXT(MAX(tr.timestamp)) as "last_buy" from "account" a 
+      left join "account_balance" ab on a.id=ab."account_id"
+      right join "token" t on t.id =ab."token_id"
+      right join "dao_token" dt on dt."token_id"=t.id
+      right join "transfers" tr on tr."to_account_id"=a.id
+      left join "delegations" d on a.id=d."delegator_account_id"
+      where dt."dao_id"='${daoId}'
       group by a.id, ab.balance
       order by ${orderByValues[orderBy]} ${ordering || 'DESC'}
       offset ${skip ?? 0} limit ${take ?? 10};
@@ -140,28 +140,28 @@ export class DaoService {
     const [totalSupplyCompare]: [
       Omit<TotalSupplyCompareReturnType, 'changeRate'>,
     ] = await this.prisma.$queryRaw`
-          WITH "oldFromZeroAddress" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId"=${zeroAddress} 
-          AND t."daoId" = ${daoId}
+          WITH "old_from_zero_address" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE t."from_account_id"=${zeroAddress} 
+          AND t."dao_id" = ${daoId}
           AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldToZeroAddress" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId"=${zeroAddress} 
-            AND t."daoId" = ${daoId}
+          "old_to_zero_address" as (
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE t."to_account_id"=${zeroAddress} 
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentTotalSupply" as (
-          SELECT SUM(ab.balance) as "balance" FROM "AccountBalance" ab
+          "current_total_supply" as (
+          SELECT SUM(ab.balance) as "balance" FROM "account_balance" ab
           )
-          SELECT "oldFromZeroAddress"."fromAmount" - COALESCE("oldToZeroAddress"."toAmount", 0) as "oldTotalSupply",
-          "currentTotalSupply"."balance" as "currentTotalSupply"
-          FROM "oldFromZeroAddress" 
-          JOIN "oldToZeroAddress" on 1=1
-          JOIN "currentTotalSupply" on 1=1;
+          SELECT "old_from_zero_address"."from_amount" - COALESCE("old_to_zero_address"."to_amount", 0) as "old_total_supply",
+          "current_total_supply"."balance" as "current_total_supply"
+          FROM "old_from_zero_address" 
+          JOIN "old_to_zero_address" on 1=1
+          JOIN "current_total_supply" on 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
@@ -180,21 +180,21 @@ export class DaoService {
     const [delegatedSupplyCompare]: [
       Omit<DelegatedSupplyCompareReturnType, 'changeRate'>,
     ] = await this.prisma.$queryRaw`
-    WITH  "oldDelegatedSupply" as (
-      SELECT SUM("oldDelegatedSupplyByUser"."oldDelegatedSupply") as "oldDelegatedSupplyAmount" from (
-        SELECT DISTINCT ON (vp."accountId") vp."accountId", vp.timestamp, vp."votingPower" AS "oldDelegatedSupply"
-        FROM "VotingPowerHistory" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
-        AND vp."daoId" = ${daoId}
-        ORDER BY vp."accountId", vp.timestamp DESC
-      ) "oldDelegatedSupplyByUser"
+    WITH  "old_delegated_supply" as (
+      SELECT SUM("old_delegated_supply_by_user"."old_delegated_supply") as "old_delegated_supply_amount" from (
+        SELECT DISTINCT ON (vp."account_id") vp."account_id", vp.timestamp, vp."voting_power" AS "old_delegated_supply"
+        FROM "voting_power_history" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
+        AND vp."dao_id" = ${daoId}
+        ORDER BY vp."account_id", vp.timestamp DESC
+      ) "old_delegated_supply_by_user"
    ),
-   "currentDelegatedSupply"  AS (
-      SELECT SUM(ap."votingPower") AS "currentDelegatedSupplyAmount" FROM "AccountPower" ap
+   "current_delegated_supply"  AS (
+      SELECT SUM(ap."voting_power") AS "current_delegated_supply_amount" FROM "account_power" ap
     )
-    SELECT "oldDelegatedSupply"."oldDelegatedSupplyAmount" AS "oldDelegatedSupply", 
-    "currentDelegatedSupply"."currentDelegatedSupplyAmount" AS "currentDelegatedSupply"
-    FROM "currentDelegatedSupply"
-    JOIN "oldDelegatedSupply" ON 1=1;
+    SELECT "old_delegated_supply"."old_delegated_supply_amount" AS "old_delegated_supply", 
+    "current_delegated_supply"."current_delegated_supply_amount" AS "current_delegated_supply"
+    FROM "current_delegated_supply"
+    JOIN "old_delegated_supply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
@@ -213,48 +213,48 @@ export class DaoService {
     const [circulatingSupplyCompare]: [
       Omit<CirculatingSupplyCompareReturnType, 'changeRate'>,
     ] = await this.prisma.$queryRaw`
-          WITH "oldFromZeroAddress" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId"=${zeroAddress} 
-            AND t."daoId" = ${daoId}
+          WITH "old_from_zero_address" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE t."from_account_id"=${zeroAddress} 
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldToZeroAddress" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId"=${zeroAddress} 
-            AND t."daoId" = ${daoId}
+          "old_to_zero_address" as (
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE t."to_account_id"=${zeroAddress} 
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldFromTreasury" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
-            AND t."daoId" = ${daoId}
+          "old_from_treasury" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE t."from_account_id" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldToTreasury"as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
-            AND t."daoId" = ${daoId}
+          "old_to_treasury"as (
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE t."to_account_id" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentCirculatingSupply" as (
-            SELECT SUM(ab.balance) AS "currentCirculatingSupply"
-            FROM "AccountBalance" ab WHERE ab."accountId" NOT IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+          "current_circulating_supply" as (
+            SELECT SUM(ab.balance) AS "current_circulating_supply"
+            FROM "account_balance" ab WHERE ab."account_id" NOT IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
           )
-          SELECT ("oldFromZeroAddress"."fromAmount" - COALESCE("oldToZeroAddress"."toAmount", 0)) - 
-          (COALESCE("oldToTreasury"."toAmount", 0) - "oldFromTreasury"."fromAmount")
-          as "oldCirculatingSupply",
-          "currentCirculatingSupply"."currentCirculatingSupply"
-          as "currentCirculatingSupply"
-          FROM "oldFromZeroAddress" 
-          JOIN "oldToZeroAddress" ON 1=1
-          JOIN "oldFromTreasury" ON 1=1
-          JOIN "oldToTreasury" ON 1=1
-          JOIN "currentCirculatingSupply" ON 1=1;
+          SELECT ("old_from_zero_address"."from_amount" - COALESCE("old_to_zero_address"."to_amount", 0)) - 
+          (COALESCE("old_to_treasury"."to_amount", 0) - "old_from_treasury"."from_amount")
+          as "old_circulating_supply",
+          "current_circulating_supply"."current_circulating_supply"
+          as "current_circulating_supply"
+          FROM "old_from_zero_address" 
+          JOIN "old_to_zero_address" ON 1=1
+          JOIN "old_from_treasury" ON 1=1
+          JOIN "old_to_treasury" ON 1=1
+          JOIN "current_circulating_supply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(circulatingSupplyCompare.currentCirculatingSupply) *
@@ -273,31 +273,31 @@ export class DaoService {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
     const [treasuryCompare]: [Omit<TreasuryCompareReturnType, 'changeRate'>] =
       await this.prisma.$queryRaw`
-          WITH "oldFromTreasury" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE t."fromAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
-            AND t."daoId" = ${daoId}
+          WITH "old_from_treasury" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE t."from_account_id" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldToTreasury" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE t."toAccountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
-            AND t."daoId" = ${daoId}
+          "old_to_treasury" as (
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE t."to_account_id" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentTreasury" as (
-            SELECT SUM(ab.balance) AS "currentTreasury"
-            FROM "AccountBalance" ab WHERE ab."accountId" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
+          "current_treasury" as (
+            SELECT SUM(ab.balance) AS "current_treasury"
+            FROM "account_balance" ab WHERE ab."account_id" IN (${Prisma.join(Object.values(UNITreasuryAddresses))})
           )
-          SELECT (COALESCE("oldToTreasury"."toAmount", 0) - "oldFromTreasury"."fromAmount")
-          as "oldTreasury",
-          "currentTreasury"."currentTreasury"
-          as "currentTreasury"
-          FROM "oldFromTreasury"
-          JOIN "oldToTreasury" ON 1=1
-          JOIN "currentTreasury" ON 1=1;
+          SELECT (COALESCE("old_to_treasury"."to_amount", 0) - "old_from_treasury"."from_amount")
+          as "old_treasury",
+          "current_treasury"."current_treasury"
+          as "current_treasury"
+          FROM "old_from_treasury"
+          JOIN "old_to_treasury" ON 1=1
+          JOIN "current_treasury" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(treasuryCompare.currentTreasury) * BigInt(1e18)) /
@@ -315,31 +315,31 @@ export class DaoService {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
     const [cexCompare]: [Omit<CexSupplyCompareReturnType, 'changeRate'>] =
       await this.prisma.$queryRaw`
-          WITH "oldFromCex" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE UPPER(t."fromAccountId") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
-            AND t."daoId" = ${daoId}
+          WITH "old_from_cex" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE UPPER(t."from_account_id") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldToCex" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE UPPER(t."toAccountId") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
-            AND t."daoId" = ${daoId}
+          "old_to_cex" as (
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE UPPER(t."to_account_id") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentCexSupply" as (
-            SELECT SUM(ab.balance) AS "currentCexSupply"
-            FROM "AccountBalance" ab WHERE UPPER(ab."accountId") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
+          "current_cex_supply" as (
+            SELECT SUM(ab.balance) AS "current_cex_supply"
+            FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Prisma.join(Object.values(CEXAddresses).map((addr) => addr.toUpperCase()))})
           )
-          SELECT (COALESCE("oldToCex"."toAmount", 0) - "oldFromCex"."fromAmount")
-          as "oldCexSupply",
-          "currentCexSupply"."currentCexSupply"
-          as "currentCexSupply"
-          FROM "oldFromCex"
-          JOIN "oldToCex" ON 1=1
-          JOIN "currentCexSupply" ON 1=1;
+          SELECT (COALESCE("old_to_cex"."to_amount", 0) - "old_from_cex"."from_amount")
+          as "old_cex_supply",
+          "current_cex_supply"."current_cex_supply"
+          as "current_cex_supply"
+          FROM "old_from_cex"
+          JOIN "old_to_cex" ON 1=1
+          JOIN "current_cex_supply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(cexCompare.currentCexSupply) * BigInt(1e18)) /
@@ -357,31 +357,31 @@ export class DaoService {
     const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days].toString());
     const [dexCompare]: [Omit<DexSupplyCompareReturnType, 'changeRate'>] =
       await this.prisma.$queryRaw`
-          WITH "oldFromDex" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE UPPER(t."fromAccountId") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
-            AND t."daoId" = ${daoId}
+          WITH "old_from_dex" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE UPPER(t."from_account_id") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "oldToDex" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE UPPER(t."toAccountId") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
-            AND t."daoId" = ${daoId}
+          "old_to_dex" as (
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE UPPER(t."to_account_id") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentDexSupply" as (
-            SELECT SUM(ab.balance) AS "currentDexSupply"
-            FROM "AccountBalance" ab WHERE UPPER(ab."accountId") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
+          "current_dex_supply" as (
+            SELECT SUM(ab.balance) AS "current_dex_supply"
+            FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Prisma.join(Object.values(DEXAddresses).map((addr) => addr.toUpperCase()))})
           )
-          SELECT (COALESCE("oldToDex"."toAmount",0) - "oldFromDex"."fromAmount")
-          as "oldDexSupply",
-          "currentDexSupply"."currentDexSupply"
-          as "currentDexSupply"
-          FROM "oldFromDex"
-          JOIN "oldToDex" ON 1=1
-          JOIN "currentDexSupply" ON 1=1;
+          SELECT (COALESCE("old_to_dex"."to_amount",0) - "old_from_dex"."from_amount")
+          as "old_dex_supply",
+          "current_dex_supply"."current_dex_supply"
+          as "current_dex_supply"
+          FROM "old_from_dex"
+          JOIN "old_to_dex" ON 1=1
+          JOIN "current_dex_supply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(dexCompare.currentDexSupply) * BigInt(1e18)) /
@@ -400,31 +400,31 @@ export class DaoService {
     const [lendingCompare]: [
       Omit<LendingSupplyCompareReturnType, 'changeRate'>,
     ] = await this.prisma.$queryRaw`
-          WITH "oldFromLending" as (
-            SELECT SUM(t.amount) as "fromAmount" 
-            FROM "Transfers" t 
-            WHERE UPPER(t."fromAccountId") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
-            AND t."daoId" = ${daoId}
+          WITH "old_from_lending" as (
+            SELECT SUM(t.amount) as "from_amount" 
+            FROM "transfers" t 
+            WHERE UPPER(t."from_account_id") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
           "oldToLending" as (
-            SELECT SUM(t.amount) as "toAmount" 
-            FROM "Transfers" t 
-            WHERE UPPER(t."toAccountId") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
-            AND t."daoId" = ${daoId}
+            SELECT SUM(t.amount) as "to_amount" 
+            FROM "transfers" t 
+            WHERE UPPER(t."to_account_id") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
+            AND t."dao_id" = ${daoId}
             AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
           ),
-          "currentLendingSupply" as (
-            SELECT SUM(ab.balance) AS "currentLendingSupply"
-            FROM "AccountBalance" ab WHERE UPPER(ab."accountId") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
+          "current_lending_supply" as (
+            SELECT SUM(ab.balance) AS "current_lending_supply"
+            FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Prisma.join(Object.values(LendingAddresses).map((addr) => addr.toUpperCase()))})
           )
-          SELECT COALESCE(("oldToLending"."toAmount" - "oldFromLending"."fromAmount"),0)
-          as "oldLendingSupply",
-          "currentLendingSupply"."currentLendingSupply"
-          as "currentLendingSupply"
-          FROM "oldFromLending"
-          JOIN "oldToLending" ON 1=1
-          JOIN "currentLendingSupply" ON 1=1;
+          SELECT COALESCE(("old_to_lending"."to_amount" - "old_from_lending"."from_amount"),0)
+          as "old_lending_supply",
+          "current_lending_supply"."current_lending_supply"
+          as "current_lending_supply"
+          FROM "old_from_lending"
+          JOIN "old_to_lending" ON 1=1
+          JOIN "current_lending_supply" ON 1=1;
     `;
     const changeRate = formatUnits(
       (BigInt(lendingCompare.currentLendingSupply) * BigInt(1e18)) /
@@ -440,14 +440,14 @@ export class DaoService {
       BigInt(Date.now()) - BigInt((180 * 86400000).toString());
     const [activeSupply]: [ActiveSupplyReturnType] = await this.prisma
       .$queryRaw`
-        WITH  "activeUsers" as (
-          SELECT DISTINCT ON (voc."voterAccountId") voc."voterAccountId", voc.timestamp
-          FROM "VotesOnchain" voc WHERE voc.timestamp>CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
-          AND voc."daoId" = ${daoId}
-          ORDER BY voc."voterAccountId", voc.timestamp DESC
+        WITH  "active_users" as (
+          SELECT DISTINCT ON (voc."voter_account_id") voc."voter_account_id", voc.timestamp
+          FROM "votes_onchain" voc WHERE voc.timestamp>CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+          AND voc."dao_id" = ${daoId}
+          ORDER BY voc."voter_account_id", voc.timestamp DESC
         )
-        SELECT SUM(ap."votingPower") as "activeSupply", TEXT(COUNT("activeUsers".*)) AS "activeUsers" FROM "AccountPower" ap
-        JOIN "activeUsers" ON ap."accountId" = "activeUsers"."voterAccountId";
+        SELECT SUM(ap."voting_power") as "active_supply", TEXT(COUNT("active_users".*)) AS "active_users" FROM "account_power" ap
+        JOIN "active_users" ON ap."account_id" = "active_users"."voter_account_id";
       `;
     return activeSupply;
   }

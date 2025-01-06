@@ -6,169 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["public", "gov-app"]
-}
-
-model Account {
-  id                 String               @id
-  accountBalances    AccountBalance[]
-  accountPowers      AccountPower[]
-  delegateeDels      Delegations[]        @relation("delegatee")
-  delegatorDels      Delegations[]        @relation("delegator")
-  proposalsOnchain   ProposalsOnchain[]
-  transfersFrom      Transfers[]          @relation("transfersFrom")
-  transfersTo        Transfers[]          @relation("transfersTo")
-  votesOnchain       VotesOnchain[]
-  votingPowerHistory VotingPowerHistory[]
-
-  @@schema("public")
-}
-
-model AccountBalance {
-  id        String  @id
-  token     String
-  accountId String  @unique
-  balance   Decimal @db.Decimal(78, 0)
-
-  account Account? @relation(fields: [accountId], references: [id])
-
-  @@schema("public")
-}
-
-model AccountPower {
-  id               String   @id
-  accountId        String
-  daoId            String
-  votingPower      Decimal? @db.Decimal(78, 0)
-  votesCount       Int?
-  proposalsCount   Int?
-  delegationsCount Int?
-  delegate         String?
-  account          Account? @relation(fields: [accountId], references: [id])
-  dao              DAO?     @relation(fields: [daoId], references: [id])
-
-  @@schema("public")
-}
-
-model DAO {
-  id                 String               @id
-  quorum             Decimal?             @db.Decimal(78, 0)
-  proposalThreshold  Decimal?             @db.Decimal(78, 0)
-  votingDelay        Decimal?             @db.Decimal(78, 0)
-  votingPeriod       Decimal?             @db.Decimal(78, 0)
-  timelockDelay      Decimal?             @db.Decimal(78, 0)
-  accountPowers      AccountPower[]
-  daoTokens          DAOToken[]
-  delegations        Delegations[]
-  proposalsOnchain   ProposalsOnchain[]
-  transfers          Transfers[]
-  votesOnchain       VotesOnchain[]
-  votingPowerHistory VotingPowerHistory[]
-
-  @@schema("public")
-}
-
-model DAOToken {
-  id      String @id
-  daoId   String
-  tokenId String
-  dao     DAO?   @relation(fields: [daoId], references: [id])
-  token   Token? @relation(fields: [tokenId], references: [id])
-
-  @@schema("public")
-}
-
-model Delegations {
-  id                 String   @id
-  daoId              String
-  delegateeAccountId String
-  delegatorAccountId String
-  timestamp          Decimal  @db.Decimal(78, 0)
-  dao                DAO?     @relation(fields: [daoId], references: [id])
-  delegatee          Account? @relation("delegatee", fields: [delegateeAccountId], references: [id])
-  delegator          Account? @relation("delegator", fields: [delegatorAccountId], references: [id])
-
-  @@schema("public")
-}
-
-model ProposalsOnchain {
-  id                String  @id
-  daoId             String
-  proposerAccountId String
-  targets           Json
-  values            Json
-  signatures        Json
-  calldatas         Json
-  startBlock        String
-  endBlock          String
-  description       String
-  timestamp         Decimal @db.Decimal(78, 0)
-  status            String
-  forVotes          Decimal @db.Decimal(78, 0)
-  againstVotes      Decimal @db.Decimal(78, 0)
-  abstainVotes      Decimal @db.Decimal(78, 0)
-
-  dao          DAO?           @relation(fields: [daoId], references: [id])
-  proposer     Account?       @relation(fields: [proposerAccountId], references: [id])
-  VotesOnchain VotesOnchain[]
-
-  @@schema("public")
-}
-
-model Token {
-  id          String      @id
-  name        String
-  decimals    Int
-  totalSupply Decimal     @db.Decimal(78, 0)
-  daoToken    DAOToken[]
-  Transfers   Transfers[]
-
-  @@schema("public")
-}
-
-model Transfers {
-  id            String   @id
-  daoId         String
-  tokenId       String
-  amount        Decimal  @db.Decimal(78, 0)
-  fromAccountId String
-  toAccountId   String
-  timestamp     Decimal  @db.Decimal(78, 0)
-  dao           DAO?     @relation(fields: [daoId], references: [id])
-  token         Token?   @relation(fields: [tokenId], references: [id])
-  fromAccount   Account? @relation("transfersFrom", fields: [fromAccountId], references: [id])
-  toAccount     Account? @relation("transfersTo", fields: [toAccountId], references: [id])
-
-  @@schema("public")
-}
-
-model VotesOnchain {
-  id             String  @id
-  daoId          String
-  voterAccountId String
-  proposalId     String
-  support        String
-  weight         String
-  reason         String
-  timestamp      Decimal @db.Decimal(78, 0)
-
-  dao      DAO?              @relation(fields: [daoId], references: [id])
-  voter    Account?          @relation(fields: [voterAccountId], references: [id])
-  proposal ProposalsOnchain? @relation(fields: [proposalId], references: [id])
-
-  @@schema("public")
-}
-
-model VotingPowerHistory {
-  id          String   @id
-  daoId       String
-  accountId   String
-  votingPower Decimal  @db.Decimal(78, 0)
-  timestamp   Decimal  @db.Decimal(78, 0)
-  dao         DAO?     @relation(fields: [daoId], references: [id])
-  account     Account? @relation(fields: [accountId], references: [id])
-
-  @@schema("public")
+  schemas  = ["gov-app", "public"]
 }
 
 model ponder_meta {
@@ -179,193 +17,409 @@ model ponder_meta {
   @@schema("public")
 }
 
-model ponder_reorg__Account {
+model pgmigrations {
+  id     Int      @id @default(autoincrement())
+  name   String   @db.VarChar(255)
+  run_on DateTime @db.Timestamp(6)
+
+  @@schema("gov-app")
+}
+
+model reorg__account {
   id           String
-  operation_id Int    @id @default(autoincrement())
+  operation_id Int    @id @default(dbgenerated("nextval('_reorg__account_operation_id_seq'::regclass)"))
+  operation    Int
   checkpoint   String @db.VarChar(75)
-  operation    Int
 
-  @@map("_ponder_reorg__Account")
+  @@map("_reorg__account")
   @@schema("public")
 }
 
-model ponder_reorg__AccountBalance {
+model reorg__account_balance {
   id           String
-  token        String?
-  account      String?
-  balance      Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
+  token_id     String?
+  account_id   String?
+  balance      Decimal @db.Decimal(78, 0)
+  operation_id Int     @id @default(dbgenerated("nextval('_reorg__account_balance_operation_id_seq'::regclass)"))
   operation    Int
-
-  @@map("_ponder_reorg__AccountBalance")
-  @@schema("public")
-}
-
-model ponder_reorg__AccountPower {
-  id               String
-  account          String?
-  dao              String?
-  votingPower      Decimal? @db.Decimal(78, 0)
-  votesCount       Int?
-  proposalsCount   Int?
-  delegationsCount Int?
-  delegate         String?
-  operation_id     Int      @id @default(autoincrement())
-  checkpoint       String   @db.VarChar(75)
-  operation        Int
-
-  @@map("_ponder_reorg__AccountPower")
-  @@schema("public")
-}
-
-model ponder_reorg__DAO {
-  id                String
-  quorum            Decimal? @db.Decimal(78, 0)
-  proposalThreshold Decimal? @db.Decimal(78, 0)
-  votingDelay       Decimal? @db.Decimal(78, 0)
-  votingPeriod      Decimal? @db.Decimal(78, 0)
-  timelockDelay     Decimal? @db.Decimal(78, 0)
-  operation_id      Int      @id @default(autoincrement())
-  checkpoint        String   @db.VarChar(75)
-  operation         Int
-
-  @@map("_ponder_reorg__DAO")
-  @@schema("public")
-}
-
-model ponder_reorg__DAOToken {
-  id           String
-  dao          String?
-  token        String?
-  operation_id Int     @id @default(autoincrement())
   checkpoint   String  @db.VarChar(75)
-  operation    Int
 
-  @@map("_ponder_reorg__DAOToken")
+  @@map("_reorg__account_balance")
   @@schema("public")
 }
 
-model ponder_reorg__Delegations {
+model reorg__account_power {
+  id                String
+  account_id        String?
+  dao_id            String?
+  voting_power      Decimal @default(0) @db.Decimal(78, 0)
+  votes_count       Int     @default(0)
+  proposals_count   Int     @default(0)
+  delegations_count Int     @default(0)
+  delegate          String  @default("0x0000000000000000000000000000000000000000")
+  operation_id      Int     @id @default(dbgenerated("nextval('_reorg__account_power_operation_id_seq'::regclass)"))
+  operation         Int
+  checkpoint        String  @db.VarChar(75)
+
+  @@map("_reorg__account_power")
+  @@schema("public")
+}
+
+model reorg__dao {
+  id                 String
+  quorum             Decimal? @db.Decimal(78, 0)
+  proposal_threshold Decimal? @db.Decimal(78, 0)
+  voting_delay       Decimal? @db.Decimal(78, 0)
+  voting_period      Decimal? @db.Decimal(78, 0)
+  timelock_delay     Decimal? @db.Decimal(78, 0)
+  operation_id       Int      @id @default(dbgenerated("nextval('_reorg__dao_operation_id_seq'::regclass)"))
+  operation          Int
+  checkpoint         String   @db.VarChar(75)
+
+  @@map("_reorg__dao")
+  @@schema("public")
+}
+
+model reorg__dao_metrics_day_buckets {
+  date         DateTime?  @db.Date
+  dao_id       String
+  token_id     String
+  metricType   metricType
+  open         Decimal    @db.Decimal(78, 0)
+  close        Decimal    @db.Decimal(78, 0)
+  low          Decimal    @db.Decimal(78, 0)
+  high         Decimal    @db.Decimal(78, 0)
+  average      Decimal    @db.Decimal(78, 0)
+  volume       Decimal    @db.Decimal(78, 0)
+  count        Int
+  operation_id Int        @id @default(dbgenerated("nextval('_reorg__dao_metrics_day_buckets_operation_id_seq'::regclass)"))
+  operation    Int
+  checkpoint   String     @db.VarChar(75)
+
+  @@map("_reorg__dao_metrics_day_buckets")
+  @@schema("public")
+}
+
+model reorg__dao_token {
   id           String
-  dao          String?
-  delegatee    String?
-  delegator    String?
-  timestamp    Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
+  dao_id       String
+  token_id     String
+  operation_id Int    @id @default(dbgenerated("nextval('_reorg__dao_token_operation_id_seq'::regclass)"))
   operation    Int
+  checkpoint   String @db.VarChar(75)
 
-  @@map("_ponder_reorg__Delegations")
+  @@map("_reorg__dao_token")
   @@schema("public")
 }
 
-model ponder_reorg__ProposalsOnchain {
+model reorg__delegations {
+  id                   String
+  dao_id               String?
+  delegatee_account_id String?
+  delegator_account_id String?
+  timestamp            Decimal? @db.Decimal(78, 0)
+  operation_id         Int      @id @default(dbgenerated("nextval('_reorg__delegations_operation_id_seq'::regclass)"))
+  operation            Int
+  checkpoint           String   @db.VarChar(75)
+
+  @@map("_reorg__delegations")
+  @@schema("public")
+}
+
+model reorg__proposals_onchain {
+  id                  String
+  dao_id              String?
+  proposer_account_id String?
+  targets             Json?    @db.Json
+  values              Json?    @db.Json
+  signatures          Json?    @db.Json
+  calldatas           Json?    @db.Json
+  start_block         String?
+  end_block           String?
+  description         String?
+  timestamp           Decimal? @db.Decimal(78, 0)
+  status              String?
+  for_votes           Decimal? @db.Decimal(78, 0)
+  against_votes       Decimal? @db.Decimal(78, 0)
+  abstain_votes       Decimal? @db.Decimal(78, 0)
+  operation_id        Int      @id @default(dbgenerated("nextval('_reorg__proposals_onchain_operation_id_seq'::regclass)"))
+  operation           Int
+  checkpoint          String   @db.VarChar(75)
+
+  @@map("_reorg__proposals_onchain")
+  @@schema("public")
+}
+
+model reorg__token {
+  id                 String
+  name               String?
+  decimals           Int
+  total_supply       Decimal @db.Decimal(78, 0)
+  delegated_supply   Decimal @db.Decimal(78, 0)
+  active_supply180d  Decimal @db.Decimal(78, 0)
+  cex_supply         Decimal @db.Decimal(78, 0)
+  dex_supply         Decimal @db.Decimal(78, 0)
+  lending_supply     Decimal @db.Decimal(78, 0)
+  circulating_supply Decimal @db.Decimal(78, 0)
+  treasury           Decimal @db.Decimal(78, 0)
+  operation_id       Int     @id @default(dbgenerated("nextval('_reorg__token_operation_id_seq'::regclass)"))
+  operation          Int
+  checkpoint         String  @db.VarChar(75)
+
+  @@map("_reorg__token")
+  @@schema("public")
+}
+
+model reorg__transfers {
+  id              String
+  dao_id          String?
+  token_id        String?
+  amount          Decimal? @db.Decimal(78, 0)
+  from_account_id String?
+  to_account_id   String?
+  timestamp       Decimal? @db.Decimal(78, 0)
+  operation_id    Int      @id @default(dbgenerated("nextval('_reorg__transfers_operation_id_seq'::regclass)"))
+  operation       Int
+  checkpoint      String   @db.VarChar(75)
+
+  @@map("_reorg__transfers")
+  @@schema("public")
+}
+
+model reorg__votes_onchain {
+  id               String
+  dao_id           String?
+  voter_account_id String?
+  proposal_id      String?
+  support          String?
+  weight           String?
+  reason           String?
+  timestamp        Decimal? @db.Decimal(78, 0)
+  operation_id     Int      @id @default(dbgenerated("nextval('_reorg__votes_onchain_operation_id_seq'::regclass)"))
+  operation        Int
+  checkpoint       String   @db.VarChar(75)
+
+  @@map("_reorg__votes_onchain")
+  @@schema("public")
+}
+
+model reorg__voting_power_history {
   id           String
-  dao          String?
-  proposer     String?
-  targets      Json?
-  values       Json?
-  signatures   Json?
-  calldatas    Json?
-  startBlock   String?
-  endBlock     String?
-  description  String?
-  timestamp    Decimal? @db.Decimal(78, 0)
-  status       String?
-  forVotes     Decimal? @db.Decimal(78, 0)
-  againstVotes Decimal? @db.Decimal(78, 0)
-  abstainVotes Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
+  dao_id       String?
+  account_id   String?
+  voting_power Decimal @db.Decimal(78, 0)
+  timestamp    Decimal @db.Decimal(78, 0)
+  operation_id Int     @id @default(dbgenerated("nextval('_reorg__voting_power_history_operation_id_seq'::regclass)"))
   operation    Int
+  checkpoint   String  @db.VarChar(75)
 
-  @@map("_ponder_reorg__ProposalsOnchain")
+  @@map("_reorg__voting_power_history")
   @@schema("public")
 }
 
-model ponder_reorg__Token {
-  id           String
-  name         String?
-  decimals     Int?
-  totalSupply  Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
+model account {
+  id                 String               @id
+  accountBalances    accountBalance[]
+  accountPowers      accountPower[]
+  delegateeDels      delegations[]        @relation("delegatee")
+  delegatorDels      delegations[]        @relation("delegator")
+  proposalsOnchain   proposalsOnchain[]
+  transfersFrom      transfers[]          @relation("transfersFrom")
+  transfersTo        transfers[]          @relation("transfersTo")
+  votesOnchain       votesOnchain[]
+  votingPowerHistory votingPowerHistory[]
 
-  @@map("_ponder_reorg__Token")
   @@schema("public")
 }
 
-model ponder_reorg__Transfers {
-  id           String
-  dao          String?
-  token        String?
-  amount       Decimal? @db.Decimal(78, 0)
-  from         String?
-  to           String?
-  timestamp    Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
+model accountBalance {
+  id        String   @id
+  tokenId   String?  @map("token_id")
+  accountId String?  @map("account_id")
+  balance   Decimal  @db.Decimal(78, 0)
+  account   account? @relation(fields: [accountId], references: [id])
 
-  @@map("_ponder_reorg__Transfers")
+  @@map("account_balance")
   @@schema("public")
 }
 
-model ponder_reorg__VotesOnchain {
-  id           String
-  dao          String?
-  voter        String?
-  proposalId   String?
-  support      String?
-  weight       String?
-  reason       String?
-  timestamp    Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
+model accountPower {
+  id               String   @id
+  accountId        String?  @map("account_id")
+  daoId            String?  @map("dao_id")
+  votingPower      Decimal  @default(0) @db.Decimal(78, 0)
+  votesCount       Int      @default(0) @map("votes_count")
+  proposalsCount   Int      @default(0) @map("proposals_count")
+  delegationsCount Int      @default(0) @map("delegations_count")
+  delegate         String   @default("0x0000000000000000000000000000000000000000")
+  account          account? @relation(fields: [accountId], references: [id])
+  dao              dao?     @relation(fields: [daoId], references: [id])
 
-  @@map("_ponder_reorg__VotesOnchain")
+  @@map("account_power")
   @@schema("public")
 }
 
-model ponder_reorg__VotingPowerHistory {
-  id           String
-  dao          String?
-  account      String?
-  votingPower  Decimal? @db.Decimal(78, 0)
-  timestamp    Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
+model dao {
+  id                      String                 @id
+  quorum                  Decimal?               @db.Decimal(78, 0)
+  proposalThreshold       Decimal?               @map("proposal_threshold") @db.Decimal(78, 0)
+  votingDelay             Decimal?               @map("voting_delay") @db.Decimal(78, 0)
+  votingPeriod            Decimal?               @map("voting_period") @db.Decimal(78, 0)
+  timelockDelay           Decimal?               @map("timelock_delay") @db.Decimal(78, 0)
+  accountPowers           accountPower[]
+  daoTokens               dao_token[]
+  delegations             delegations[]
+  proposalsOnchain        proposalsOnchain[]
+  transfers               transfers[]
+  votesOnchain            votesOnchain[]
+  votingPowerHistory      votingPowerHistory[]
+  dao_metrics_day_buckets daoMetricsDayBuckets[]
 
-  @@map("_ponder_reorg__VotingPowerHistory")
   @@schema("public")
 }
 
-model User {
-  id    String     @id
-  roles UserRole[]
+model daoMetricsDayBuckets {
+  date       DateTime   @db.Date
+  daoId      String     @map("dao_id")
+  tokenId    String     @map("token_id")
+  metricType metricType
+  open       Decimal    @db.Decimal(78, 0)
+  close      Decimal    @db.Decimal(78, 0)
+  low        Decimal    @db.Decimal(78, 0)
+  high       Decimal    @db.Decimal(78, 0)
+  average    Decimal    @db.Decimal(78, 0)
+  volume     Decimal    @db.Decimal(78, 0)
+  count      Int
+  dao        dao?       @relation(fields: [daoId], references: [id])
+  token      token?     @relation(fields: [tokenId], references: [id])
 
-  @@schema("gov-app")
+  @@id([date, daoId, tokenId, metricType], map: "dao_metrics_day_buckets_date_dao_id_token_id_metricType_pk")
+  @@map("dao_metrics_day_buckets")
+  @@schema("public")
 }
 
-model UserRole {
-  id     Int    @id @default(autoincrement())
-  userId String
-  roleId Int
-  user   User   @relation(fields: [userId], references: [id])
-  role   Role   @relation(fields: [roleId], references: [id])
+model dao_token {
+  id      String @id
+  daoId   String @map("dao_id")
+  tokenId String @map("token_id")
+  dao     dao?   @relation(fields: [daoId], references: [id])
+  token   token? @relation(fields: [tokenId], references: [id])
 
-  @@schema("gov-app")
+  @@schema("public")
 }
 
-model Role {
-  id    Int        @id @default(autoincrement())
-  name  String
-  daoId String
-  users UserRole[]
+model delegations {
+  id                 String   @id
+  daoId              String?  @map("dao_id")
+  delegateeAccountId String?  @map("delegatee_account_id")
+  delegatorAccountId String?  @map("delegator_account_id")
+  timestamp          Decimal? @db.Decimal(78, 0)
+  delegatee          account? @relation("delegatee", fields: [delegateeAccountId], references: [id])
+  delegator          account? @relation("delegator", fields: [delegatorAccountId], references: [id])
+  dao                dao?     @relation(fields: [daoId], references: [id])
 
-  @@schema("gov-app")
+  @@schema("public")
+}
+
+model proposalsOnchain {
+  id                String         @id
+  daoId             String?        @map("dao_id")
+  proposerAccountId String?        @map("proposer_account_id")
+  targets           Json?          @db.Json
+  values            Json?          @db.Json
+  signatures        Json?          @db.Json
+  calldatas         Json?          @db.Json
+  startBlock        String?        @map("start_block")
+  endBlock          String?        @map("end_block")
+  description       String?
+  timestamp         Decimal?       @db.Decimal(78, 0)
+  status            String?
+  forVotes          Decimal?       @map("for_votes") @db.Decimal(78, 0)
+  againstVotes      Decimal?       @map("against_votes") @db.Decimal(78, 0)
+  abstainVotes      Decimal?       @map("abstain_votes") @db.Decimal(78, 0)
+  dao               dao?           @relation(fields: [daoId], references: [id])
+  proposer          account?       @relation(fields: [proposerAccountId], references: [id])
+  VotesOnchain      votesOnchain[]
+
+  @@map("proposals_onchain")
+  @@schema("public")
+}
+
+model token {
+  id                String  @id
+  name              String?
+  decimals          Int
+  totalSupply       Decimal @map("total_supply") @db.Decimal(78, 0)
+  delegatedSupply   Decimal @map("delegated_supply") @db.Decimal(78, 0)
+  activeSupply180d  Decimal @map("active_supply180d") @db.Decimal(78, 0)
+  cexSupply         Decimal @map("cex_supply") @db.Decimal(78, 0)
+  dexSupply         Decimal @map("dex_supply") @db.Decimal(78, 0)
+  lendingSupply     Decimal @map("lending_supply") @db.Decimal(78, 0)
+  circulatingSupply Decimal @map("circulating_supply") @db.Decimal(78, 0)
+  treasury          Decimal @db.Decimal(78, 0)
+
+  daoToken             dao_token[]
+  Transfers            transfers[]
+  daoMetricsDayBuckets daoMetricsDayBuckets[]
+
+  @@schema("public")
+}
+
+model transfers {
+  id            String   @id
+  daoId         String?  @map("dao_id")
+  tokenId       String?  @map("token_id")
+  amount        Decimal? @db.Decimal(78, 0)
+  fromAccountId String?  @map("from_account_id")
+  toAccountId   String?  @map("to_account_id")
+  timestamp     Decimal? @db.Decimal(78, 0)
+  dao           dao?     @relation(fields: [daoId], references: [id])
+  token         token?   @relation(fields: [tokenId], references: [id])
+  fromAccount   account? @relation("transfersFrom", fields: [fromAccountId], references: [id])
+  toAccount     account? @relation("transfersTo", fields: [toAccountId], references: [id])
+
+  @@schema("public")
+}
+
+model votesOnchain {
+  id             String            @id
+  daoId          String?           @map("dao_id")
+  voterAccountId String?           @map("voter_account_id")
+  proposalId     String?           @map("proposal_id")
+  support        String?
+  weight         String?
+  reason         String?
+  timestamp      Decimal?          @db.Decimal(78, 0)
+  dao            dao?              @relation(fields: [daoId], references: [id])
+  voter          account?          @relation(fields: [voterAccountId], references: [id])
+  proposal       proposalsOnchain? @relation(fields: [proposalId], references: [id])
+
+  @@map("votes_onchain")
+  @@schema("public")
+}
+
+model votingPowerHistory {
+  id          String   @id
+  daoId       String?  @map("dao_id")
+  accountId   String?  @map("account_id")
+  votingPower Decimal  @map("voting_power") @db.Decimal(78, 0)
+  timestamp   Decimal  @db.Decimal(78, 0)
+  dao         dao?     @relation(fields: [daoId], references: [id])
+  account     account? @relation(fields: [accountId], references: [id])
+
+  @@map("voting_power_history")
+  @@schema("public")
+}
+
+enum metricType {
+  TOTAL_SUPPLY
+  DELEGATED_SUPPLY
+  ACTIVE_SUPPLY_180d
+  CEX_SUPPLY
+  DEX_SUPPLY
+  LENDING_SUPPLY
+  CIRCULATING_SUPPLY
+  TREASURY
+
+  @@schema("public")
 }
