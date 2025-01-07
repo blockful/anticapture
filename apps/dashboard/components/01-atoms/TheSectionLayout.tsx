@@ -27,7 +27,7 @@ export const TheSectionLayout = ({
         <div className="flex">{switchDate}</div>
       </div>
       {description && (
-        <p className="flex w-[50%] flex-col text-start text-xs text-[#a1a1aa]">
+        <p className="flex w-full flex-col text-start text-xs text-[#a1a1aa] sm:w-[75%] lg:w-[50%]">
           {description}
         </p>
       )}
