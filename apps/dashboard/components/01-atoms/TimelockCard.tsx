@@ -18,7 +18,7 @@ export const TimelockCard = () => {
           <h1 className="text-foreground">Timelock</h1>
           <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
         </div>
-        <div className="flex w-full justify-between gap-1.5">
+        <div className="flex h-full w-full justify-between gap-1.5">
           <Switcher />
           <button
             className="flex h-full w-full"
