@@ -82,7 +82,15 @@ export const TheTable = <TData, TValue>({
   };
 
   return (
-    <Table className="bg-dark text-foreground">
+    <Table
+      style={{
+        borderRadius: "6px",
+        borderColor: "var(--color-lightDark)",
+        borderWidth: "1px",
+        overflow: "hidden",
+      }}
+      className="border-lightDark bg-dark text-foreground"
+    >
       <TableHeader className="text-sm font-medium text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-lightDark">
