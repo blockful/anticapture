@@ -35,7 +35,7 @@
   }
 
   .card-description-about {
-    @apply flex flex-col space-y-2 p-1 h-full ;
+    @apply flex flex-col space-y-2 p-1 h-full;
   }
 
   .card-description-title {
