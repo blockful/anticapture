@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
+  AppleIcon,
   ArrowUpDown,
   TimeInterval,
   TheTable,
@@ -13,9 +14,8 @@ import {
   ArrowState,
 } from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
-import { DaoName } from "@/lib/types/daos";
+import { DaoId } from "@/lib/types/daos";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -98,7 +98,7 @@ export const GovernanceActivityTable = ({
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
-    const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
+    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
   }, [daoData, timeInterval]);
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [

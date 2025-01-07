@@ -1,15 +1,19 @@
 "use client";
 
 import React, { useEffect, useReducer } from "react";
+import { useRouter } from "next/navigation";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, TheTable, ArrowState } from "@/components/01-atoms";
+import {
+  AppleIcon,
+  ArrowUpDown,
+  TheTable,
+  ArrowState,
+} from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
-import { DaoName } from "@/lib/types/daos";
-import { useRouter } from "next/navigation";
+import { DaoId } from "@/lib/types/daos";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<DashboardDao>,
@@ -46,17 +50,16 @@ const metricDetails: Record<
   },
 };
 
-const daoDetails: Record<DaoName, { icon: React.ReactNode; tooltip: string }> =
-  {
-    [DaoName.UNISWAP]: {
-      icon: <AppleIcon className="h-5 w-5" />,
-      tooltip: "Total current value of tokens in circulation",
-    },
-    [DaoName.ENS]: {
-      icon: undefined,
-      tooltip: "",
-    },
-  };
+const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
+  [DaoId.UNISWAP]: {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total current value of tokens in circulation",
+  },
+  [DaoId.ENS]: {
+    icon: undefined,
+    tooltip: "",
+  },
+};
 
 interface State {
   data: DashboardDao[];
@@ -108,7 +111,7 @@ export const DashboardTable = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
+    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
   }, [daoData]);
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [

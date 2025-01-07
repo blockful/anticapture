@@ -7,17 +7,13 @@ import {
   TokenDistributionSection,
 } from "@/components/03-organisms";
 
-export const DaoInfoTemplate = ({
-  params,
-}: {
-  params: { daoName: string };
-}) => {
-  const { daoName } = params;
+export const DaoInfoTemplate = ({ params }: { params: { daoId: string } }) => {
+  const { daoId } = params;
 
   return (
     <>
       <TheSectionLayout
-        title={`${daoName} DAO Info`}
+        title={`${daoId} DAO Info`}
         icon={<UniswapIcon className="text-foreground" />}
       >
         <UniswapDaoInfo />

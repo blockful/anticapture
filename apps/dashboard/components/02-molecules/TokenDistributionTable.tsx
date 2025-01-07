@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
+  AppleIcon,
   ArrowUpDown,
   TimeInterval,
   TheTable,
@@ -21,9 +22,8 @@ import {
   fetchTotalSupply,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { AppleIcon } from "../01-atoms/icons/AppleIcon";
 import { formatNumberUserReadble } from "@/lib/client/utils";
-import { DaoName } from "@/lib/types/daos";
+import { DaoId } from "@/lib/types/daos";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -114,9 +114,9 @@ export const TokenDistributionTable = ({
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
+    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTotalSupply({ daoName, timeInterval: timeInterval }).then((result) => {
+    fetchTotalSupply({ daoId, timeInterval: timeInterval }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
@@ -130,7 +130,7 @@ export const TokenDistributionTable = ({
         });
     });
 
-    fetchDelegatedSupply({ daoName, timeInterval: timeInterval }).then(
+    fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
       (result) => {
         result &&
           dispatch({
@@ -147,7 +147,7 @@ export const TokenDistributionTable = ({
     );
 
     fetchCirculatingSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&
@@ -164,7 +164,7 @@ export const TokenDistributionTable = ({
     });
 
     fetchCexSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&
@@ -181,7 +181,7 @@ export const TokenDistributionTable = ({
     });
 
     fetchDexSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&
@@ -198,7 +198,7 @@ export const TokenDistributionTable = ({
     });
 
     fetchLendingSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&

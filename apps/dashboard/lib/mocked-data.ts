@@ -1,5 +1,5 @@
 import { User } from "@/lib/server/utils";
-import { DaoName } from "./types/daos";
+import { DaoId } from "@/lib/types/daos";
 
 export type DashboardDao = {
   dao: string;
@@ -76,13 +76,13 @@ export const tokenDistributionData: TokenDistribution[] = [
 
 export const dashboardData: DashboardDao[] = [
   {
-    dao: DaoName.UNISWAP,
+    dao: DaoId.UNISWAP,
     delegatedSupply: null,
     profitability: null,
     delegatesToPass: null,
   },
   {
-    dao: DaoName.ENS,
+    dao: DaoId.ENS,
     delegatedSupply: null,
     profitability: null,
     delegatesToPass: null,
