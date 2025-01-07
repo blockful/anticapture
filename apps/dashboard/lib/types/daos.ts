@@ -5,6 +5,11 @@ export enum DaoId {
   ENS = "ENS",
 }
 
+export enum DaoName {
+  UNI = "Uniswap",
+  ENS = "Ethereum Name Service",
+}
+
 export const SUPPORTED_DAO_NAMES = Object.values(DaoId);
 
 export interface DAO {
