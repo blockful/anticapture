@@ -98,6 +98,11 @@ export const enum GovernanceActivityMetrics {
 
 export const governanceActivityData: GovernanceActivity[] = [
   {
+    metric: "Treasury",
+    average: null,
+    variation: null,
+  },
+  {
     metric: "Proposals",
     average: null,
     variation: null,

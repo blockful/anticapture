@@ -10,6 +10,11 @@ export enum DaoName {
   ENS = "Ethereum Name Service",
 }
 
+export const daoIdToNameMap: Record<DaoId, DaoName> = {
+  [DaoId.UNISWAP]: DaoName.UNI,
+  [DaoId.ENS]: DaoName.ENS,
+};
+
 export const SUPPORTED_DAO_NAMES = Object.values(DaoId);
 
 export interface DAO {

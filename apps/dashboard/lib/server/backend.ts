@@ -209,3 +209,52 @@ export const fetchLendingSupply = async ({
     }
   });
 };
+
+interface TreasurySupplyPromise {
+  oldTreasury: string;
+  currentTreasury: string;
+  changeRate: string;
+}
+
+/* Fetch Lending Supply */
+export const fetchTreasurySupply = async ({
+  daoId,
+  timeInterval,
+}: {
+  daoId: DaoId;
+  timeInterval: string;
+}) => {
+  return new Promise<TreasurySupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoId}/treasury/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface ActiveSupplyPromise {
+  activeSupply: string;
+  activeUsers: string;
+}
+
+/* Fetch Lending Supply */
+export const fetchActiveSupply = async ({ daoId }: { daoId: DaoId }) => {
+  return new Promise<ActiveSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};

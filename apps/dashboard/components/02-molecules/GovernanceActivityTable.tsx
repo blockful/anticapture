@@ -16,6 +16,7 @@ import {
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
+import { fetchActiveSupply, fetchTreasurySupply } from "@/lib/server/backend";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -34,6 +35,10 @@ const metricDetails: Record<
   string,
   { icon: React.ReactNode; tooltip: string }
 > = {
+  Treasury: {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total current value of tokens in circulation",
+  },
   Proposals: {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
@@ -99,6 +104,34 @@ export const GovernanceActivityTable = ({
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
+
+    fetchTreasurySupply({ daoId, timeInterval: timeInterval }).then(
+      (result) => {
+        result &&
+          dispatch({
+            type: ActionType.UPDATE_METRIC,
+            payload: {
+              index: 0,
+              average: String(
+                BigInt(result.currentTreasury) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
+          });
+      },
+    );
+
+    fetchActiveSupply({ daoId }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 2,
+            average: String(BigInt(result.activeSupply) / BigInt(10 ** 18)),
+            variation: result.activeUsers,
+          },
+        });
+    });
   }, [daoData, timeInterval]);
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [

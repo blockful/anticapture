@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useReducer } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
@@ -10,56 +10,11 @@ import {
   ArrowUpDown,
   TheTable,
   ArrowState,
+  TimeInterval,
 } from "@/components/01-atoms";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
-
-const sortingByAscendingOrDescendingNumber = (
-  rowA: Row<DashboardDao>,
-  rowB: Row<DashboardDao>,
-  columnId: string,
-) => {
-  const a = Number(rowA.getValue(columnId)) ?? 0;
-  const b = Number(rowB.getValue(columnId)) ?? 0;
-  return a - b;
-};
-
-const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
-
-const metricDetails: Record<
-  string,
-  { icon: React.ReactNode; tooltip: string }
-> = {
-  Proposals: {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
-  },
-  "Active Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens delegated",
-  },
-  Votes: {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
-  },
-  "Average Turnout": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in CEX",
-  },
-};
-
-const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
-  [DaoId.UNISWAP]: {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
-  },
-  [DaoId.ENS]: {
-    icon: undefined,
-    tooltip: "",
-  },
-};
+import { fetchDelegatedSupply } from "@/lib/server/backend";
 
 interface State {
   data: DashboardDao[];
@@ -77,6 +32,30 @@ type Action = {
     profitability: string;
     delegatesToPass: string;
   };
+};
+
+const sortingByAscendingOrDescendingNumber = (
+  rowA: Row<DashboardDao>,
+  rowB: Row<DashboardDao>,
+  columnId: string,
+) => {
+  const a = Number(rowA.getValue(columnId)) ?? 0;
+  const b = Number(rowB.getValue(columnId)) ?? 0;
+  return a - b;
+};
+
+const formatVariation = (rateRaw: string): string =>
+  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
+
+const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
+  [DaoId.UNISWAP]: {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total current value of tokens in circulation",
+  },
+  [DaoId.ENS]: {
+    icon: undefined,
+    tooltip: "",
+  },
 };
 
 const initialState: State = {
@@ -106,13 +85,31 @@ function reducer(state: State, action: Action): State {
 }
 
 export const DashboardTable = () => {
-  const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
+  const timeInterval = TimeInterval.SEVEN_DAYS;
+  const daoIds = Object.values(DaoId);
 
   useEffect(() => {
-    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
-  }, [daoData]);
+    daoIds.map((daoId, index) => {
+      fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
+        (result) => {
+          result &&
+            dispatch({
+              type: ActionType.UPDATE_METRIC,
+              payload: {
+                index: index,
+                delegatedSupply: String(
+                  BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+                ),
+                profitability: formatVariation(result.changeRate),
+                delegatesToPass: "0",
+              },
+            });
+        },
+      );
+    });
+  }, [timeInterval]);
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
@@ -211,6 +208,40 @@ export const DashboardTable = () => {
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Profitability
+          <ArrowUpDown
+            props={{
+              className: "ml-2 h-4 w-4",
+            }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: sortingByAscendingOrDescendingNumber,
+    },
+    {
+      accessorKey: "delegatesToPass",
+      cell: ({ row }) => {
+        const delegatesToPass: number = row.getValue("delegatesToPass");
+        return (
+          <div className="flex items-center justify-center text-center">
+            {delegatesToPass && formatNumberUserReadble(delegatesToPass)}
+          </div>
+        );
+      },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Delegates to pass
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
