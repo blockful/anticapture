@@ -184,3 +184,31 @@ export const fetchDexSupply = async ({
     }
   });
 };
+
+interface LendingSupplyPromise {
+  oldLendingSupply: string;
+  currentLendingSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Lending Supply */
+export const fetchLendingSupply = async ({
+  daoName,
+  timeInterval,
+}: {
+  daoName: DaoName;
+  timeInterval: string;
+}) => {
+  return new Promise<LendingSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoName}/lending-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};

@@ -17,6 +17,7 @@ import {
   fetchCirculatingSupply,
   fetchDelegatedSupply,
   fetchDexSupply,
+  fetchLendingSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
@@ -190,6 +191,23 @@ export const TokenDistributionTable = ({
             index: 4,
             currentValue: String(
               BigInt(result.currentDexSupply) / BigInt(10 ** 18),
+            ),
+            variation: formatVariation(result.changeRate),
+          },
+        });
+    });
+
+    fetchLendingSupply({
+      daoName,
+      timeInterval: timeInterval,
+    }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 5,
+            currentValue: String(
+              BigInt(result.currentLendingSupply) / BigInt(10 ** 18),
             ),
             variation: formatVariation(result.changeRate),
           },
