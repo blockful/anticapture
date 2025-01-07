@@ -149,10 +149,7 @@ export const DashboardTable = () => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoDetails["UNI"] : null;
         return (
-          <p
-            className="scrollbar-none flex w-full max-w-48 cursor-pointer items-center gap-2 space-x-1 overflow-auto text-[#fafafa]"
-            onClick={() => router.push(`/${dao.toLowerCase()}`)}
-          >
+          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
             {details && details.icon}
             {dao}
           </p>
@@ -230,12 +227,17 @@ export const DashboardTable = () => {
     },
   ];
 
+  const handleRowClick = (row: DashboardDao) => {
+    row.dao && router.push(`/${row.dao.toLowerCase()}`);
+  };
+
   return (
     <TheTable
       columns={dashboardColumns}
       data={state.data}
       withPagination={true}
       withSorting={true}
+      onRowClick={handleRowClick}
     />
   );
 };

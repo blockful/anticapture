@@ -28,6 +28,7 @@ interface DataTableProps<TData, TValue> {
   withPagination?: boolean;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onRowClick?: (row: TData) => void;
 }
 
 export const TheTable = <TData, TValue>({
@@ -36,6 +37,7 @@ export const TheTable = <TData, TValue>({
   filterColumn = "",
   columns,
   data,
+  onRowClick,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -111,7 +113,11 @@ export const TheTable = <TData, TValue>({
         {table.getRowModel().rows.length > 0 ? (
           table.getRowModel().rows.map((row) => {
             return (
-              <TableRow key={row.id} className="border-transparent">
+              <TableRow
+                key={row.id}
+                className={`border-transparent ${onRowClick && "cursor-pointer hover:bg-darkest"}`}
+                onClick={() => onRowClick?.(row.original)}
+              >
                 {row.getVisibleCells().map((cell) => {
                   const cellValue = cell.getValue();
                   const isCellLoading = cellValue === null;
