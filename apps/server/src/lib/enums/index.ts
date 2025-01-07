@@ -1,2 +1,2 @@
 export * from './daoEnum';
-export * from './dateEnum'
+export * from './daysEnum'
