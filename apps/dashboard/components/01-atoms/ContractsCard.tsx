@@ -34,7 +34,7 @@ export const ContractsCard = () => {
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
               <CrownIcon />
               <p className="text-sm font-medium leading-tight">Governor</p>
-              <ExternalLinkIcon />
+              {/* <ExternalLinkIcon /> */}
             </Badge>
           </button>
           <button
@@ -50,7 +50,7 @@ export const ContractsCard = () => {
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
               <TokensIcon />
               <p className="text-sm font-medium leading-tight">Token</p>
-              <ExternalLinkIcon />
+              {/* <ExternalLinkIcon /> */}
             </Badge>
           </button>
         </div>
@@ -76,7 +76,7 @@ export const ContractsCard = () => {
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
               <FocusIcon />
               <p className="text-sm font-medium leading-tight">Snapshot</p>
-              <ExternalLinkIcon />
+              {/* <ExternalLinkIcon /> */}
             </Badge>
           </button>
           <button
@@ -92,7 +92,7 @@ export const ContractsCard = () => {
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
               <TokensIcon />
               <p className="text-sm font-medium leading-tight">Token</p>
-              <ExternalLinkIcon />
+              {/* <ExternalLinkIcon /> */}
             </Badge>
           </button>
         </div>
