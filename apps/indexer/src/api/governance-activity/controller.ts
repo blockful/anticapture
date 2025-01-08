@@ -51,7 +51,7 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
           WHERE p.dao_id=${daoId}
           AND p.timestamp > CAST(${currentBeginTimestamp.toString().slice(0, 10)} as bigint)
         )
-        SELECT "current_proposals"."current_proposals_launched" as "currentProposalsLauncher",
+        SELECT "current_proposals"."current_proposals_launched" as "currentProposalsLaunched",
         "old_proposals"."old_proposals_launched" as "oldProposalsLaunched" 
         FROM "current_proposals"
         JOIN "old_proposals" ON 1=1;
