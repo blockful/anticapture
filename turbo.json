@@ -30,12 +30,10 @@
       "persistent": true,
       "cache": false
     },
-    "start:prod": {
+    "serve": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"]
+      "persistent": true
     },
-    "apply-migration": {},
     "restore-database": {},
     "dump-database": {}
   }

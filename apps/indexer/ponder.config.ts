@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { config } from "./config";
 dotenv.config();
 
+
 let networks, contracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");
@@ -40,7 +41,7 @@ export default createConfig({
       maxRequestsPerSecond:
         process.env.STATUS !== "production" && process.env.STATUS !== "staging"
           ? 10000
-          : 1,
+          : 10000,
     },
     anvil: {
       chainId: 31337,
@@ -51,3 +52,9 @@ export default createConfig({
   contracts,
   ...databaseConfig,
 });
+
+//@ts-ignore
+//This line is to avoid the error "Do not know how to serialize a BigInt"
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};

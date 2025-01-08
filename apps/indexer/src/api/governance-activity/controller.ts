@@ -1,0 +1,28 @@
+import { DaysEnum } from "@/lib/daysEnum";
+import { sql } from "ponder";
+import { ponder } from "ponder:registry";
+import { ActiveSupplyQueryResult } from "./types";
+import { formatUnits } from "viem";
+
+ponder.get("/dao/:daoId/active-supply", async (context) => {
+  const daoId = context.req.param("daoId");
+  const days: string | undefined = context.req.query("days");
+  if (!days) {
+    throw new Error('Query param "days" is mandatory');
+  }
+  const oldTimestamp =
+    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  const queryResult = await context.db.execute(sql`
+            WITH  "active_users" as (
+          SELECT DISTINCT ON (voc."voter_account_id") voc."voter_account_id", voc.timestamp
+          FROM "votes_onchain" voc WHERE voc.timestamp>CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+          AND voc."dao_id" = ${daoId}
+          ORDER BY voc."voter_account_id", voc.timestamp DESC
+        )
+        SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply", TEXT(COUNT("active_users".*)) AS "activeUsers" FROM "account_power" ap
+        JOIN "active_users" ON ap."account_id" = "active_users"."voter_account_id";
+    `);
+  const activeSupply: ActiveSupplyQueryResult = queryResult
+    .rows[0] as ActiveSupplyQueryResult;
+  return context.json(activeSupply);
+});

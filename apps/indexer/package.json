@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "ponder dev",
+    "dev": "psql -d $DATABASE_URL -c \"DROP SCHEMA public CASCADE;\" && ponder dev --schema public",
     "start": "psql -d $DATABASE_URL -c \"DROP SCHEMA public CASCADE;\" && ponder start --schema public",
     "codegen": "ponder codegen",
+    "serve": "ponder serve --schema public",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc",
