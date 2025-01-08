@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
+  AppleIcon,
   ArrowUpDown,
   TimeInterval,
   TheTable,
@@ -13,16 +14,16 @@ import {
   ArrowState,
 } from "@/components/01-atoms";
 import {
-  DaoName,
   fetchCexSupply,
   fetchCirculatingSupply,
   fetchDelegatedSupply,
   fetchDexSupply,
+  fetchLendingSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
-import { AppleIcon } from "../01-atoms/icons/AppleIcon";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
+import { DaoId } from "@/lib/types/daos";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -109,18 +110,13 @@ export const TokenDistributionTable = ({
 }: {
   timeInterval: TimeInterval;
 }) => {
-  const { daoData } = useContext(DaoDataContext);
+  const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [isCurrentValueArrowState, setCurrentValueArrowState] =
-    useState<ArrowState>(ArrowState.DEFAULT);
-  const [isVariationArrowState, setVariationArrowState] = useState<ArrowState>(
-    ArrowState.DEFAULT,
-  );
 
   useEffect(() => {
-    const daoName = (daoData && daoData.id) || DaoName.UNISWAP;
+    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTotalSupply({ daoName, timeInterval: timeInterval }).then((result) => {
+    fetchTotalSupply({ daoId, timeInterval: timeInterval }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
@@ -134,7 +130,7 @@ export const TokenDistributionTable = ({
         });
     });
 
-    fetchDelegatedSupply({ daoName, timeInterval: timeInterval }).then(
+    fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
       (result) => {
         result &&
           dispatch({
@@ -151,7 +147,7 @@ export const TokenDistributionTable = ({
     );
 
     fetchCirculatingSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&
@@ -168,7 +164,7 @@ export const TokenDistributionTable = ({
     });
 
     fetchCexSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&
@@ -185,7 +181,7 @@ export const TokenDistributionTable = ({
     });
 
     fetchDexSupply({
-      daoName,
+      daoId,
       timeInterval: timeInterval,
     }).then((result) => {
       result &&
@@ -200,20 +196,24 @@ export const TokenDistributionTable = ({
           },
         });
     });
-  }, [daoData, timeInterval]);
 
-  const toggleArrowState = (
-    currentState: ArrowState,
-    setState: React.Dispatch<React.SetStateAction<ArrowState>>,
-  ) => {
-    const nextState =
-      currentState === ArrowState.DEFAULT
-        ? ArrowState.UP
-        : currentState === ArrowState.UP
-          ? ArrowState.DOWN
-          : ArrowState.UP;
-    setState(nextState);
-  };
+    fetchLendingSupply({
+      daoId,
+      timeInterval: timeInterval,
+    }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 5,
+            currentValue: String(
+              BigInt(result.currentLendingSupply) / BigInt(10 ** 18),
+            ),
+            variation: formatVariation(result.changeRate),
+          },
+        });
+    });
+  }, [daoData, timeInterval]);
 
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
@@ -241,30 +241,27 @@ export const TokenDistributionTable = ({
           </div>
         );
       },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setVariationArrowState(ArrowState.DEFAULT);
-              toggleArrowState(
-                isCurrentValueArrowState,
-                setCurrentValueArrowState,
-              );
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Current value (UNI)
+          <ArrowUpDown
+            props={{
+              className: "ml-2 h-4 w-4",
             }}
-          >
-            Current value (UNI)
-            <ArrowUpDown
-              props={{
-                className: "ml-2 h-4 w-4",
-              }}
-              activeState={isCurrentValueArrowState}
-            />
-          </Button>
-        );
-      },
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
     },
@@ -275,7 +272,13 @@ export const TokenDistributionTable = ({
 
         return (
           <p
-            className={`flex items-center justify-center gap-1 text-center ${Number(variation) > 0 ? "text-[#4ade80]" : Number(variation) < 0 ? "text-red-500" : ""}`}
+            className={`flex items-center justify-center gap-1 text-center ${
+              Number(variation) > 0
+                ? "text-[#4ade80]"
+                : Number(variation) < 0
+                  ? "text-red-500"
+                  : ""
+            }`}
           >
             {Number(variation) > 0 ? (
               <ChevronUp className="h-4 w-4 text-[#4ade80]" />
@@ -286,25 +289,27 @@ export const TokenDistributionTable = ({
           </p>
         );
       },
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-              setCurrentValueArrowState(ArrowState.DEFAULT);
-              toggleArrowState(isVariationArrowState, setVariationArrowState);
-            }}
-          >
-            Variation
-            <ArrowUpDown
-              activeState={isVariationArrowState}
-              props={{ className: "ml-2 h-4 w-4" }}
-            />
-          </Button>
-        );
-      },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Variation
+          <ArrowUpDown
+            props={{ className: "ml-2 h-4 w-4" }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: sortingByAscendingOrDescendingNumber,
     },
   ];
 

@@ -28,6 +28,7 @@ interface DataTableProps<TData, TValue> {
   withPagination?: boolean;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onRowClick?: (row: TData) => void;
 }
 
 export const TheTable = <TData, TValue>({
@@ -36,6 +37,7 @@ export const TheTable = <TData, TValue>({
   filterColumn = "",
   columns,
   data,
+  onRowClick,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -82,7 +84,15 @@ export const TheTable = <TData, TValue>({
   };
 
   return (
-    <Table className="bg-dark text-foreground">
+    <Table
+      style={{
+        borderRadius: "6px",
+        borderColor: "var(--color-lightDark)",
+        borderWidth: "1px",
+        overflow: "hidden",
+      }}
+      className="border-lightDark bg-dark text-foreground"
+    >
       <TableHeader className="text-sm font-medium text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-lightDark">
@@ -103,10 +113,14 @@ export const TheTable = <TData, TValue>({
         {table.getRowModel().rows.length > 0 ? (
           table.getRowModel().rows.map((row) => {
             return (
-              <TableRow key={row.id} className="border-transparent">
+              <TableRow
+                key={row.id}
+                className={`border-transparent ${onRowClick && "cursor-pointer hover:bg-darkest"}`}
+                onClick={() => onRowClick?.(row.original)}
+              >
                 {row.getVisibleCells().map((cell) => {
                   const cellValue = cell.getValue();
-                  const isCellLoading = cellValue === undefined;
+                  const isCellLoading = cellValue === null;
                   return (
                     <TableCell key={cell.id}>
                       {isCellLoading ? (
