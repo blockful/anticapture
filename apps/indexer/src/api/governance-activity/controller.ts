@@ -1,7 +1,7 @@
 import { DaysEnum } from "@/lib/daysEnum";
 import { sql } from "ponder";
 import { ponder } from "ponder:registry";
-import { ActiveSupplyQueryResult, ProposalsCompareQueryResult } from "./types";
+import { ActiveSupplyQueryResult, ProposalsCompareQueryResult, VotesCompareQueryResult } from "./types";
 import { formatUnits } from "viem";
 
 ponder.get("/dao/:daoId/active-supply", async (context) => {
@@ -67,4 +67,46 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
       parseFloat(proposalsCompare.oldProposalsLaunched);
   }
   return context.json({ ...proposalsCompare, changeRate });
+});
+
+ponder.get("/dao/:daoId/votes/compare", async (context) => {
+  const daoId = context.req.param("daoId");
+  const days: string | undefined = context.req.query("days");
+  if (!days) {
+    throw new Error('Query param "days" is mandatory');
+  }
+  const oldBeginTimestamp =
+    BigInt(Date.now()) -
+    BigInt(DaysEnum[days as unknown as DaysEnum]) -
+    BigInt(DaysEnum["180d"]);
+  const oldEndTimestamp =
+    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+  const queryResult = await context.db.execute(sql`
+        WITH "old_votes" AS (
+          SELECT COUNT(*) AS "old_votes" FROM "votes_onchain" v 
+          WHERE v.dao_id=${daoId}
+          AND v.timestamp BETWEEN CAST(${oldBeginTimestamp.toString().slice(0, 10)} as bigint) AND CAST(${oldEndTimestamp.toString().slice(0, 10)} as bigint)
+        ),
+        "current_votes" AS (
+          SELECT COUNT(*) AS "current_votes" FROM "votes_onchain" v
+          WHERE v.dao_id=${daoId}
+          AND v.timestamp > CAST(${currentBeginTimestamp.toString().slice(0, 10)} as bigint)
+        )
+        SELECT "current_votes"."current_votes" as "currentVotes",
+        "old_votes"."old_votes" as "oldVotes" 
+        FROM "current_votes"
+        JOIN "old_votes" ON 1=1;
+  `);
+  const votesCompare: VotesCompareQueryResult = queryResult
+    .rows[0] as VotesCompareQueryResult;
+  let changeRate;
+  if (votesCompare.oldVotes === "0") {
+    changeRate = "0";
+  } else {
+    changeRate =
+      parseFloat(votesCompare.currentVotes) /
+      parseFloat(votesCompare.oldVotes);
+  }
+  return context.json({ ...votesCompare, changeRate });
 });
