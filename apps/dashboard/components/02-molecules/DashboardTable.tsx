@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useReducer } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
@@ -21,16 +21,14 @@ interface State {
 }
 
 enum ActionType {
-  UPDATE_METRIC = "UPDATE_METRIC",
+  UPDATE_DELEGATED_SUPPLY = "DELEGATED SUPPLY",
 }
 
 type Action = {
-  type: ActionType.UPDATE_METRIC;
+  type: ActionType.UPDATE_DELEGATED_SUPPLY;
   payload: {
     index: number;
     delegatedSupply: string;
-    profitability: string;
-    delegatesToPass: string;
   };
 };
 
@@ -64,7 +62,7 @@ const initialState: State = {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case ActionType.UPDATE_METRIC:
+    case ActionType.UPDATE_DELEGATED_SUPPLY:
       return {
         ...state,
         data: state.data.map((item, index) =>
@@ -72,8 +70,6 @@ function reducer(state: State, action: Action): State {
             ? {
                 ...item,
                 delegatedSupply: action.payload.delegatedSupply,
-                profitability: action.payload.profitability,
-                delegatesToPass: action.payload.delegatesToPass,
               }
             : item,
         ),
@@ -87,7 +83,7 @@ function reducer(state: State, action: Action): State {
 export const DashboardTable = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
-  const timeInterval = TimeInterval.SEVEN_DAYS;
+  const timeInterval = TimeInterval.THIRTY_DAYS;
   const daoIds = Object.values(DaoId);
 
   useEffect(() => {
@@ -96,20 +92,18 @@ export const DashboardTable = () => {
         (result) => {
           result &&
             dispatch({
-              type: ActionType.UPDATE_METRIC,
+              type: ActionType.UPDATE_DELEGATED_SUPPLY,
               payload: {
                 index: index,
                 delegatedSupply: String(
                   BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
                 ),
-                profitability: formatVariation(result.changeRate),
-                delegatesToPass: "0",
               },
             });
         },
       );
     });
-  }, [timeInterval]);
+  }, [daoIds, timeInterval]);
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
@@ -163,7 +157,7 @@ export const DashboardTable = () => {
         const delegatedSupply: number = row.getValue("delegatedSupply");
         return (
           <div className="flex items-center justify-center text-center">
-            {delegatedSupply && formatNumberUserReadble(delegatedSupply)}
+            {`${delegatedSupply && formatNumberUserReadble(delegatedSupply)}  (${timeInterval})`}
           </div>
         );
       },
