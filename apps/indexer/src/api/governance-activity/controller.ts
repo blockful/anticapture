@@ -1,7 +1,7 @@
 import { DaysEnum } from "@/lib/daysEnum";
 import { sql } from "ponder";
 import { ponder } from "ponder:registry";
-import { ActiveSupplyQueryResult } from "./types";
+import { ActiveSupplyQueryResult, ProposalsCompareQueryResult } from "./types";
 import { formatUnits } from "viem";
 
 ponder.get("/dao/:daoId/active-supply", async (context) => {
@@ -25,4 +25,46 @@ ponder.get("/dao/:daoId/active-supply", async (context) => {
   const activeSupply: ActiveSupplyQueryResult = queryResult
     .rows[0] as ActiveSupplyQueryResult;
   return context.json(activeSupply);
+});
+
+ponder.get("/dao/:daoId/proposals/compare", async (context) => {
+  const daoId = context.req.param("daoId");
+  const days: string | undefined = context.req.query("days");
+  if (!days) {
+    throw new Error('Query param "days" is mandatory');
+  }
+  const oldBeginTimestamp =
+    BigInt(Date.now()) -
+    BigInt(DaysEnum[days as unknown as DaysEnum]) -
+    BigInt(DaysEnum["180d"]);
+  const oldEndTimestamp =
+    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+  const queryResult = await context.db.execute(sql`
+        WITH "old_proposals" AS (
+          SELECT COUNT(*) AS "old_proposals_launched" FROM "proposals_onchain" p 
+          WHERE p.dao_id=${daoId}
+          AND p.timestamp BETWEEN CAST(${oldBeginTimestamp.toString().slice(0, 10)} as bigint) AND CAST(${oldEndTimestamp.toString().slice(0, 10)} as bigint)
+        ),
+        "current_proposals" AS (
+          SELECT COUNT(*) AS "current_proposals_launched" FROM "proposals_onchain" p
+          WHERE p.dao_id=${daoId}
+          AND p.timestamp > CAST(${currentBeginTimestamp.toString().slice(0, 10)} as bigint)
+        )
+        SELECT "current_proposals"."current_proposals_launched" as "currentProposalsLauncher",
+        "old_proposals"."old_proposals_launched" as "oldProposalsLaunched" 
+        FROM "current_proposals"
+        JOIN "old_proposals" ON 1=1;
+  `);
+  const proposalsCompare: ProposalsCompareQueryResult = queryResult
+    .rows[0] as ProposalsCompareQueryResult;
+  let changeRate;
+  if (proposalsCompare.oldProposalsLaunched === "0") {
+    changeRate = "0";
+  } else {
+    changeRate =
+      parseFloat(proposalsCompare.currentProposalsLaunched) /
+      parseFloat(proposalsCompare.oldProposalsLaunched);
+  }
+  return context.json({ ...proposalsCompare, changeRate });
 });
