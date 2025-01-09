@@ -1,29 +1,15 @@
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
-import { Address } from "viem";
-
-export interface DAO {
-  id: DaoName;
-  quorum: number;
-  proposalThreshold: number;
-  votingDelay: number;
-  votingPeriod: number;
-  timelockDelay: number;
-  totalSupply: number;
-}
+import { DaoId, TokenContract } from "@/lib/types/daos";
 
 export interface DAOVotingPower {
   dao: string;
   totalDelegatedVotingPower: number;
 }
 
-export enum DaoName {
-  UNISWAP = "UNI",
-}
-
-export const fetchDaoData = async (daoName: DaoName) => {
+export const fetchDaoData = async (daoId: DaoId) => {
   return new Promise(async (res, rej) => {
     try {
-      const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoName}`);
+      const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoId}`);
 
       res(daoData);
     } catch (e) {
@@ -36,16 +22,9 @@ export enum ChainName {
   Ethereum = "ethereum",
 }
 
-export const TokenContract: Record<DaoName, Address> = {
-  [DaoName.UNISWAP]: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-};
-
 /* Fetch Dao Token price from Defi Llama API */
-export const fetchTokenPrice = async (
-  chainName: ChainName,
-  daoName: DaoName,
-) => {
-  const daoToken = TokenContract[daoName];
+export const fetchTokenPrice = async (chainName: ChainName, daoId: DaoId) => {
+  const daoToken = TokenContract[daoId];
 
   try {
     const url = `https://coins.llama.fi/prices/current/${chainName}:${daoToken}`;
@@ -71,16 +50,16 @@ interface TotalSupplyPromise {
 
 /* Fetch Dao Total Supply */
 export const fetchTotalSupply = async ({
-  daoName,
+  daoId,
   timeInterval,
 }: {
-  daoName: DaoName;
+  daoId: DaoId;
   timeInterval: string;
 }) => {
   return new Promise<TotalSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}/total-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/total-supply/compare?timeInterval=${timeInterval}`,
         { next: { revalidate: 3600 } },
       );
       const totalSupplyData = await response.json();
@@ -99,16 +78,16 @@ interface DelegatedSupplyPromise {
 
 /* Fetch Dao Total Supply */
 export const fetchDelegatedSupply = async ({
-  daoName,
+  daoId,
   timeInterval,
 }: {
-  daoName: DaoName;
+  daoId: DaoId;
   timeInterval: string;
 }) => {
   return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}/delegated-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?timeInterval=${timeInterval}`,
         { next: { revalidate: 3600 } },
       );
       const delegatedSupplyData = await response.json();
@@ -127,16 +106,16 @@ interface CirculatingSupplyPromise {
 
 /* Fetch Dao Circulating Supply */
 export const fetchCirculatingSupply = async ({
-  daoName,
+  daoId,
   timeInterval,
 }: {
-  daoName: DaoName;
+  daoId: DaoId;
   timeInterval: string;
 }) => {
   return new Promise<CirculatingSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}/circulating-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/circulating-supply/compare?timeInterval=${timeInterval}`,
         { next: { revalidate: 3600 } },
       );
       const circulatingSupplyData = await response.json();
@@ -155,16 +134,16 @@ interface CexSupplyPromise {
 
 /* Fetch Dao Cex Supply */
 export const fetchCexSupply = async ({
-  daoName,
+  daoId,
   timeInterval,
 }: {
-  daoName: DaoName;
+  daoId: DaoId;
   timeInterval: string;
 }) => {
   return new Promise<CexSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}/cex-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/cex-supply/compare?timeInterval=${timeInterval}`,
         { next: { revalidate: 3600 } },
       );
       const cexSupplyData = await response.json();
@@ -183,16 +162,93 @@ interface DexSupplyPromise {
 
 /* Fetch Dao Dex Supply */
 export const fetchDexSupply = async ({
-  daoName,
+  daoId,
   timeInterval,
 }: {
-  daoName: DaoName;
+  daoId: DaoId;
   timeInterval: string;
 }) => {
   return new Promise<DexSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoName}/dex-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/dex-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface LendingSupplyPromise {
+  oldLendingSupply: string;
+  currentLendingSupply: string;
+  changeRate: string;
+}
+
+/* Fetch Lending Supply */
+export const fetchLendingSupply = async ({
+  daoId,
+  timeInterval,
+}: {
+  daoId: DaoId;
+  timeInterval: string;
+}) => {
+  return new Promise<LendingSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoId}/lending-supply/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface TreasurySupplyPromise {
+  oldTreasury: string;
+  currentTreasury: string;
+  changeRate: string;
+}
+
+/* Fetch Lending Supply */
+export const fetchTreasurySupply = async ({
+  daoId,
+  timeInterval,
+}: {
+  daoId: DaoId;
+  timeInterval: string;
+}) => {
+  return new Promise<TreasurySupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoId}/treasury/compare?timeInterval=${timeInterval}`,
+        { next: { revalidate: 3600 } },
+      );
+      const dexSupplyData = await response.json();
+      res(dexSupplyData);
+    } catch (e) {
+      rej(e);
+    }
+  });
+};
+
+interface ActiveSupplyPromise {
+  activeSupply: string;
+  activeUsers: string;
+}
+
+/* Fetch Lending Supply */
+export const fetchActiveSupply = async ({ daoId }: { daoId: DaoId }) => {
+  return new Promise<ActiveSupplyPromise>(async (res, rej) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply`,
         { next: { revalidate: 3600 } },
       );
       const dexSupplyData = await response.json();

@@ -1,3 +1,4 @@
+export * from "./AppleIcon";
 export * from "./ArrowLeftRight";
 export * from "./ArrowUpDown";
 export * from "./AttacksIcon";
