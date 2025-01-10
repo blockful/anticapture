@@ -9,7 +9,7 @@ const config: Config = {
     "^.+\\.(js|jsx)$": "babel-jest",
   },
   testTimeout: 30000,
-  setupFilesAfterEnv: ["./test/lib/jest-setup.ts"]
+  setupFilesAfterEnv: ["./test/lib/jest-setup.ts"],
 };
 
 export default config;
