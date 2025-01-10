@@ -143,7 +143,7 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
     });
 
-  const oldDelegatedSupply = (await context.db.find(token, {
+  const currentDelegatedSupply = (await context.db.find(token, {
     id: event.log.address,
   }))!.delegatedSupply;
 
@@ -154,12 +154,13 @@ export const delegatedVotesChanged = async (
     }))
   ).delegatedSupply;
 
+  // Store delegated supply on daily bucket
   await storeDailyBucket(
     context,
     event,
     daoId,
     MetricTypes.DELEGATED_SUPPLY,
-    oldDelegatedSupply,
+    currentDelegatedSupply,
     newDelegatedSupply,
   );
 };
@@ -182,17 +183,19 @@ export const tokenTransfer = async (
     daoId,
   );
 
+  const { from, to } = event.args
+
   //Inserting delegate account if didn't exist
   await context.db
     .insert(account)
     .values({
-      id: event.args.to,
+      id: to,
     })
     .onConflictDoNothing();
   await context.db
     .insert(account)
     .values({
-      id: event.args.from,
+      id: from,
     })
     .onConflictDoNothing();
 
@@ -204,19 +207,19 @@ export const tokenTransfer = async (
     daoId,
     tokenId: uniTokenAddress,
     amount: value,
-    fromAccountId: event.args.from,
-    toAccountId: event.args.to,
+    fromAccountId: from,
+    toAccountId: to,
     timestamp: event.block.timestamp,
   });
 
   // Update the from account's balance
-  if (event.args.from !== "0x0000000000000000000000000000000000000000") {
+  if (from !== addressZero) {
     const fromAccount = await context.db
       .insert(accountBalance)
       .values({
-        id: [event.args.from, uniTokenAddress].join("-"),
+        id: [from, uniTokenAddress].join("-"),
         tokenId: uniTokenAddress,
-        accountId: event.args.from,
+        accountId: from,
         balance: BigInt(value),
       })
       .onConflictDoUpdate((current) => ({
@@ -224,7 +227,7 @@ export const tokenTransfer = async (
       }));
     // Check if the balances are valid
     if (fromAccount.balance! < BigInt(0)) {
-      console.log(`Invalid balance for ${event.args.from}`);
+      console.log(`Invalid balance for ${from}`);
       throw new Error(`Invalid balance`);
     }
   }
@@ -233,9 +236,9 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [event.args.to, uniTokenAddress].join("-"),
+      id: [to, uniTokenAddress].join("-"),
       tokenId: uniTokenAddress,
-      accountId: event.args.to,
+      accountId: to,
       balance: BigInt(value),
     })
     .onConflictDoUpdate((current) => ({
