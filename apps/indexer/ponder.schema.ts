@@ -1,4 +1,4 @@
-import { addressZero } from "@/lib/constants";
+import { addressZero, metricTypeArray } from "@/lib/constants";
 import { onchainTable, index, onchainEnum, primaryKey } from "ponder";
 
 export const dao = onchainTable("dao", (drizzle) => ({
@@ -165,16 +165,7 @@ export const proposalsOnchain = onchainTable(
   })
 );
 
-export const metricType = onchainEnum("metricType", [
-  "TOTAL_SUPPLY",
-  "DELEGATED_SUPPLY",
-  "ACTIVE_SUPPLY_180d",
-  "CEX_SUPPLY",
-  "DEX_SUPPLY",
-  "LENDING_SUPPLY",
-  "CIRCULATING_SUPPLY",
-  "TREASURY",
-]);
+export const metricType = onchainEnum("metricType", metricTypeArray as [string, ...string[]]);
 
 export const daoMetricsDayBuckets = onchainTable(
   "dao_metrics_day_buckets",

@@ -13,7 +13,7 @@ import {
   daoMetricsDayBuckets,
   token,
 } from "ponder:schema";
-import { addressZero, secondsInDay } from "./constants";
+import { addressZero, MetricTypes, secondsInDay } from "./constants";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -159,7 +159,7 @@ export const delegatedVotesChanged = async (
       dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
       daoId,
       tokenId: event.log.address,
-      metricType: "DELEGATED_SUPPLY",
+      metricType: MetricTypes.DELEGATED_SUPPLY,
       average: newDelegatedSupply,
       open: oldDelegatedSupply,
       high: max(newDelegatedSupply, oldDelegatedSupply),
