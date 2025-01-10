@@ -40,7 +40,7 @@ export const HeaderDAOSidebar = () => {
           <HeaderDAOSidebarDropdown />
           <div className="flex flex-col">
             <button
-              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.DAO_INFO ? "bg-lightDark" : ""}`}
+              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.DAO_INFO && "bg-lightDark"}`}
               onClick={() => {
                 const daoInfoAnchorSection = document.getElementById(
                   daoInfoSectionAnchorID,
@@ -58,7 +58,7 @@ export const HeaderDAOSidebar = () => {
               </p>
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION ? "bg-lightDark" : ""}`}
+              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION && "bg-lightDark"}`}
               onClick={() => {
                 const tokenDistributionAnchorSection = document.getElementById(
                   tokenDistributionSectionAnchorID,
@@ -76,7 +76,7 @@ export const HeaderDAOSidebar = () => {
               </p>
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY ? "bg-lightDark" : ""}`}
+              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY && "bg-lightDark"}`}
               onClick={() => {
                 const governanceActivityAnchorSection = document.getElementById(
                   governanceActivitySectionAnchorID,
