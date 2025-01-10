@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "psql -d $DATABASE_URL -c \"DROP SCHEMA public CASCADE;\" && ponder dev --schema public",
-    "start": "psql -d $DATABASE_URL -c \"DROP SCHEMA public CASCADE;\" && ponder start --schema public",
+    "dev": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE;\" && ponder dev --schema public",
+    "start": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE;\" && ponder start --schema public",
     "codegen": "ponder codegen",
     "serve": "ponder serve --schema public",
     "lint": "eslint . --ext .ts",

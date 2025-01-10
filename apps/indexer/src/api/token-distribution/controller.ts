@@ -15,6 +15,7 @@ import {
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
+  MetricTypesEnum,
   UNITreasuryAddresses,
 } from "@/lib/constants";
 
@@ -72,11 +73,13 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
   WITH  "old_delegated_supply" as (
     SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
+    AND db.metric_type=${MetricTypesEnum.DELEGATED_SUPPLY}
     AND db."day_timestamp"=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
   ),
  "current_delegated_supply"  AS (
     SELECT db.average as current_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
+    AND db.metric_type=${MetricTypesEnum.DELEGATED_SUPPLY}
     ORDER BY db."day_timestamp" DESC LIMIT 1
   )
   SELECT COALESCE("old_delegated_supply"."old_delegated_supply_amount",0) AS "oldDelegatedSupply", 
