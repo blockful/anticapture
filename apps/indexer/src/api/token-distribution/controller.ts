@@ -225,53 +225,38 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const queryResult = await context.db.execute(sql`
-    WITH "old_from_cex" as (
-      SELECT SUM(t.amount) as "from_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."from_account_id") IN (${Object.values(CEXAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-    ),
-    "old_to_cex" as (
-      SELECT SUM(t.amount) as "to_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."to_account_id") IN (${Object.values(CEXAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-    ),
-    "current_cex_supply" as (
-      SELECT SUM(ab.balance) AS "current_cex_supply"
-      FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-        CEXAddresses,
-      )
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-    )
-    SELECT (COALESCE("old_to_cex"."to_amount", 0) - COALESCE("old_from_cex"."from_amount", 0))
-    as "oldCexSupply",
-    COALESCE("current_cex_supply"."current_cex_supply", 0)
-    as "currentCexSupply"
-    FROM "old_from_cex"
-    JOIN "old_to_cex" ON 1=1
-    JOIN "current_cex_supply" ON 1=1;`);
-  const cexCompare: CexSupplyQueryResult = queryResult
+  WITH  "old_cex_supply" as (
+    SELECT db.average as old_cex_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db.metric_type=${MetricTypesEnum.CEX_SUPPLY}
+    AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+    ORDER BY db."date" ASC LIMIT 1
+  ),
+ "current_cex_supply"  AS (
+    SELECT db.average as current_cex_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db.metric_type=${MetricTypesEnum.CEX_SUPPLY}
+    ORDER BY db."date" DESC LIMIT 1
+  )
+  SELECT COALESCE("old_cex_supply"."old_cex_supply_amount",0) AS "oldCexSupply", 
+  COALESCE("current_cex_supply"."current_cex_supply_amount", 0) AS "currentCexSupply"
+  FROM "current_cex_supply"
+  LEFT JOIN "old_cex_supply" ON 1=1;
+`);
+  const cexSupplyCompare: CexSupplyQueryResult = queryResult
     .rows[0] as CexSupplyQueryResult;
   let changeRate;
-  if (cexCompare.oldCexSupply === "0") {
+  if (cexSupplyCompare.oldCexSupply === "0") {
     changeRate = "0";
   } else {
     changeRate = formatUnits(
-      (BigInt(cexCompare.currentCexSupply) * BigInt(1e18)) /
-        BigInt(cexCompare.oldCexSupply) -
+      (BigInt(cexSupplyCompare.currentCexSupply) * BigInt(1e18)) /
+        BigInt(cexSupplyCompare.oldCexSupply) -
         BigInt(1e18),
-      18,
+      18
     );
   }
-  return context.json({ ...cexCompare, changeRate });
+  return context.json({ ...cexSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
