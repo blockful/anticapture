@@ -3,6 +3,7 @@ export * from "./icons";
 export * from "./Badge";
 export * from "./BaseHeaderLayoutSidebar";
 export * from "./ContractsCard";
+export * from "./HeaderDAOSidebarDropdown";
 export * from "./QuorumCard";
 export * from "./Skeleton";
 export * from "./Switcher";

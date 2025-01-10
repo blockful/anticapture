@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ActivityIcon,
-  ArrowLeftRight,
-  BaseHeaderLayoutSidebar,
-  UniswapIcon,
-  PieChartIcon,
-} from "@/components/01-atoms";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { DaoId, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import {
@@ -14,7 +8,13 @@ import {
   governanceActivitySectionAnchorID,
   tokenDistributionSectionAnchorID,
 } from "@/lib/client/constants";
-import { useState } from "react";
+import {
+  ActivityIcon,
+  ArrowLeftRight,
+  BaseHeaderLayoutSidebar,
+  PieChartIcon,
+  HeaderDAOSidebarDropdown,
+} from "@/components/01-atoms";
 
 const enum HeaderNavItems {
   DAO_INFO = "DAO Info",
@@ -37,14 +37,7 @@ export const HeaderDAOSidebar = () => {
     <BaseHeaderLayoutSidebar>
       {isValidDao && (
         <div className="flex w-full flex-col space-x-2 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="rounded-[6px] border border-middleDark bg-lightDark p-1.5">
-              <UniswapIcon className="h-5 w-5 text-[#FC72FF]" />
-            </div>
-            <h1 className="text-sm font-semibold text-white">
-              Uniswap GovRisk
-            </h1>
-          </div>
+          <HeaderDAOSidebarDropdown />
           <div className="flex flex-col">
             <button
               className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.DAO_INFO ? "bg-lightDark" : ""}`}
