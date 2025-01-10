@@ -55,7 +55,7 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
     (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
       BigInt(totalSupplyCompare.oldTotalSupply) -
       BigInt(1e18),
-    18
+    18,
   );
   return context.json({ ...totalSupplyCompare, changeRate });
 });
@@ -90,7 +90,7 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
     (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
       BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
       BigInt(1e18),
-    18
+    18,
   );
   return context.json({ ...delegatedSupplyCompare, changeRate });
 });
@@ -152,7 +152,7 @@ ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
     (BigInt(circulatingSupplyCompare.currentCirculatingSupply) * BigInt(1e18)) /
       BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
       BigInt(1e18),
-    18
+    18,
   );
   return context.json({ ...circulatingSupplyCompare, changeRate });
 });
@@ -202,7 +202,7 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
       (BigInt(treasuryCompare.currentTreasury) * BigInt(1e18)) /
         BigInt(treasuryCompare.oldTreasury) -
         BigInt(1e18),
-      18
+      18,
     );
   }
   return context.json({ ...treasuryCompare, changeRate });
@@ -238,7 +238,7 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
     "current_cex_supply" as (
       SELECT SUM(ab.balance) AS "current_cex_supply"
       FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-        CEXAddresses
+        CEXAddresses,
       )
         .map((addr) => addr.toUpperCase())
         .join(", ")})
@@ -260,7 +260,7 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
       (BigInt(cexCompare.currentCexSupply) * BigInt(1e18)) /
         BigInt(cexCompare.oldCexSupply) -
         BigInt(1e18),
-      18
+      18,
     );
   }
   return context.json({ ...cexCompare, changeRate });
@@ -296,7 +296,7 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
     "current_dex_supply" as (
       SELECT SUM(ab.balance) AS "current_dex_supply"
       FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-        DEXAddresses
+        DEXAddresses,
       )
         .map((addr) => addr.toUpperCase())
         .join(", ")})
@@ -318,7 +318,7 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
       (BigInt(dexCompare.currentDexSupply) * BigInt(1e18)) /
         BigInt(dexCompare.oldDexSupply) -
         BigInt(1e18),
-      18
+      18,
     );
   }
   return context.json({ ...dexCompare, changeRate });
@@ -354,7 +354,7 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
   "current_lending_supply" as (
     SELECT SUM(ab.balance) AS "current_lending_supply"
     FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-      LendingAddresses
+      LendingAddresses,
     )
       .map((addr) => addr.toUpperCase())
       .join(", ")})
@@ -377,7 +377,7 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
       (BigInt(lendingCompare.currentLendingSupply) * BigInt(1e18)) /
         BigInt(lendingCompare.oldLendingSupply) -
         BigInt(1e18),
-      18
+      18,
     );
   }
   return context.json({ ...lendingCompare, changeRate });

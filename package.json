@@ -17,7 +17,8 @@
     "start:indexer-metrics": "dotenv -- turbo run start --filter=@defendao/indexer-metrics",
     "dump-database": "dotenv -- turbo run dump-database --filter=@defendao/indexer",
     "restore-database": "dotenv -- turbo run restore-database --filter=@defendao/indexer",
-    "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'"
+    "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'",
+    "lint:fix": "dotenv -- turbo run lint:fix --filter=@defendao/indexer"
   },
   "author": "",
   "license": "ISC",

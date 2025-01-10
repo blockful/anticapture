@@ -1,6 +1,11 @@
 import { Context, Event } from "ponder:registry";
-import { convertSecondsTimestampToDate, delta, getValueFromEventArgs, max, min } from "./utils";
-import viemClient from "./viemClient";
+import {
+  convertSecondsTimestampToDate,
+  delta,
+  getValueFromEventArgs,
+  max,
+  min,
+} from "./utils";
 import {
   account,
   accountBalance,
@@ -13,7 +18,16 @@ import {
   daoMetricsDayBuckets,
   token,
 } from "ponder:schema";
-import { addressZero, MetricTypes, secondsInDay } from "./constants";
+import {
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+  MetricTypes,
+  secondsInDay,
+} from "./constants";
+import { zeroAddress } from "viem";
+import viemClient from "./viemClient";
+
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -21,7 +35,7 @@ export const delegateChanged = async (
   // | Event<"SHUToken:DelegateChanged">
   Event<"UNIToken:DelegateChanged">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   // Inserting accounts if didn't exist
   await context.db
@@ -61,7 +75,7 @@ export const delegateChanged = async (
     });
 
   // Update the old delegatee's delegations count
-  if (event.args.fromDelegate != addressZero) {
+  if (event.args.fromDelegate != zeroAddress) {
     await context.db
       .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
@@ -87,7 +101,7 @@ export const delegatedVotesChanged = async (
   // | Event<"SHUToken:DelegateVotesChanged">
   Event<"UNIToken:DelegateVotesChanged">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   //Inserting delegate account if didn't exist
   await context.db
@@ -103,7 +117,7 @@ export const delegatedVotesChanged = async (
       { name: "newVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -112,7 +126,7 @@ export const delegatedVotesChanged = async (
       { name: "previousVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   // Create a new voting power history record
@@ -137,7 +151,7 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
     });
 
-  const oldDelegatedSupply = (await context.db.find(token, {
+  const currentDelegatedSupply = (await context.db.find(token, {
     id: event.log.address,
   }))!.delegatedSupply;
 
@@ -148,36 +162,15 @@ export const delegatedVotesChanged = async (
     }))
   ).delegatedSupply;
 
-  const delegationVolume = delta(newDelegatedSupply, oldDelegatedSupply)
-
-  // Calculate the day's start timestamp (UTC)
-  const dayTimestamp =
-    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
-  await context.db
-    .insert(daoMetricsDayBuckets)
-    .values({
-      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
-      daoId,
-      tokenId: event.log.address,
-      metricType: MetricTypes.DELEGATED_SUPPLY,
-      average: newDelegatedSupply,
-      open: oldDelegatedSupply,
-      high: max(newDelegatedSupply, oldDelegatedSupply),
-      low: min(newDelegatedSupply, oldDelegatedSupply),
-      close: newDelegatedSupply,
-      volume: delegationVolume,
-      count: 1,
-    })
-    .onConflictDoUpdate((row) => ({
-      average:
-        (row.average * BigInt(row.count) + newDelegatedSupply) /
-        BigInt(row.count + 1),
-      high: max(newDelegatedSupply, row.low),
-      low: min(newDelegatedSupply, row.low),
-      close: newDelegatedSupply,
-      volume: row.volume + delegationVolume,
-      count: row.count + 1,
-    }));
+  // Store delegated supply on daily bucket
+  await storeDailyBucket(
+    context,
+    event,
+    daoId,
+    MetricTypes.DELEGATED_SUPPLY,
+    currentDelegatedSupply,
+    newDelegatedSupply,
+  );
 };
 
 export const tokenTransfer = async (
@@ -186,7 +179,7 @@ export const tokenTransfer = async (
   // | Event<"SHUToken:Transfer">
   Event<"UNIToken:Transfer">,
   context: Context,
-  daoId: "UNI"
+  daoId: "UNI",
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -195,20 +188,22 @@ export const tokenTransfer = async (
       { name: "amount", daos: ["COMP", "UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
+
+  const { from, to } = event.args;
 
   //Inserting delegate account if didn't exist
   await context.db
     .insert(account)
     .values({
-      id: event.args.to,
+      id: to,
     })
     .onConflictDoNothing();
   await context.db
     .insert(account)
     .values({
-      id: event.args.from,
+      id: from,
     })
     .onConflictDoNothing();
 
@@ -220,19 +215,19 @@ export const tokenTransfer = async (
     daoId,
     tokenId: uniTokenAddress,
     amount: value,
-    fromAccountId: event.args.from,
-    toAccountId: event.args.to,
+    fromAccountId: from,
+    toAccountId: to,
     timestamp: event.block.timestamp,
   });
 
   // Update the from account's balance
-  if (event.args.from !== "0x0000000000000000000000000000000000000000") {
+  if (from !== zeroAddress) {
     const fromAccount = await context.db
       .insert(accountBalance)
       .values({
-        id: [event.args.from, uniTokenAddress].join("-"),
+        id: [from, uniTokenAddress].join("-"),
         tokenId: uniTokenAddress,
-        accountId: event.args.from,
+        accountId: from,
         balance: BigInt(value),
       })
       .onConflictDoUpdate((current) => ({
@@ -240,7 +235,7 @@ export const tokenTransfer = async (
       }));
     // Check if the balances are valid
     if (fromAccount.balance! < BigInt(0)) {
-      console.log(`Invalid balance for ${event.args.from}`);
+      console.log(`Invalid balance for ${from}`);
       throw new Error(`Invalid balance`);
     }
   }
@@ -249,21 +244,101 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [event.args.to, uniTokenAddress].join("-"),
+      id: [to, uniTokenAddress].join("-"),
       tokenId: uniTokenAddress,
-      accountId: event.args.to,
+      accountId: to,
       balance: BigInt(value),
     })
     .onConflictDoUpdate((current) => ({
       balance: (current.balance ?? BigInt(0)) + BigInt(value),
     }));
+
+  const currentLendingSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.lendingSupply;
+
+  const lendingAddressList = Object.values(LendingAddresses);
+  const isLendingTransaction =
+    lendingAddressList.includes(to) || lendingAddressList.includes(from);
+
+  if (isLendingTransaction) {
+    const isToLendingPool = lendingAddressList.includes(to);
+    const newLendingSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        lendingSupply: isToLendingPool
+          ? row.lendingSupply + value
+          : row.lendingSupply - value,
+      }))
+    ).lendingSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypes.LENDING_SUPPLY,
+      currentLendingSupply,
+      newLendingSupply,
+    );
+  }
+
+  const currentCexSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.cexSupply;
+
+  const cexAddressList = Object.values(CEXAddresses);
+  const isCexTransaction =
+    cexAddressList.includes(to) || cexAddressList.includes(from);
+
+  if (isCexTransaction) {
+    const isToCex = cexAddressList.includes(to);
+    const newCexSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        cexSupply: isToCex ? row.cexSupply + value : row.cexSupply - value,
+      }))
+    ).cexSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypes.CEX_SUPPLY,
+      currentCexSupply,
+      newCexSupply,
+    );
+  }
+
+  const currentDexSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.dexSupply;
+
+  const dexAddressList = Object.values(DEXAddresses);
+  const isDexTransaction =
+    dexAddressList.includes(to) || dexAddressList.includes(from);
+
+  if (isDexTransaction) {
+    const isToDex = dexAddressList.includes(to);
+    const newDexSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        dexSupply: isToDex ? row.dexSupply + value : row.dexSupply - value,
+      }))
+    ).dexSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypes.DEX_SUPPLY,
+      currentDexSupply,
+      newDexSupply,
+    );
+  }
 };
 
 export const voteCast = async (
   event: // | Event<"ENSGovernor:VoteCast">
   Event<"UNIGovernor:VoteCast">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -271,13 +346,13 @@ export const voteCast = async (
       { name: "votes", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [{ name: "proposalId", daos: ["ENS", "UNI"] }],
     event.args,
-    daoId
+    daoId,
   );
 
   await context.db
@@ -330,7 +405,7 @@ export const proposalCreated = async (
   event: // | Event<"ENSGovernor:ProposalCreated">
   Event<"UNIGovernor:ProposalCreated">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -338,7 +413,7 @@ export const proposalCreated = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   await context.db
@@ -386,7 +461,7 @@ export const proposalCanceled = async (
   event: // | Event<"ENSGovernor:ProposalCanceled">
   Event<"UNIGovernor:ProposalCanceled">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -394,7 +469,7 @@ export const proposalCanceled = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
   await context.db
     .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
@@ -407,7 +482,7 @@ export const proposalExecuted = async (
   event: // | Event<"ENSGovernor:ProposalExecuted">
   Event<"UNIGovernor:ProposalExecuted">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -415,11 +490,50 @@ export const proposalExecuted = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
   await context.db
     .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
     .set({
       status: "EXECUTED",
     });
+};
+
+const storeDailyBucket = async (
+  context: Context,
+  event: Event,
+  daoId: string,
+  metricType: MetricTypes,
+  currentValue: bigint,
+  newValue: bigint,
+) => {
+  const dayTimestamp =
+    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
+
+  const volume = delta(newValue, currentValue);
+
+  await context.db
+    .insert(daoMetricsDayBuckets)
+    .values({
+      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
+      daoId,
+      tokenId: event.log.address,
+      metricType,
+      average: newValue,
+      open: currentValue,
+      high: max(newValue, currentValue),
+      low: min(newValue, currentValue),
+      close: newValue,
+      volume,
+      count: 1,
+    })
+    .onConflictDoUpdate((row) => ({
+      average:
+        (row.average * BigInt(row.count) + newValue) / BigInt(row.count + 1),
+      high: max(newValue, row.low),
+      low: min(newValue, row.low),
+      close: newValue,
+      volume: row.volume + volume,
+      count: row.count + 1,
+    }));
 };
