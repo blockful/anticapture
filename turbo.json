@@ -35,6 +35,7 @@
       "persistent": true
     },
     "restore-database": {},
-    "dump-database": {}
+    "dump-database": {},
+    "lint:fix": {}
   }
 }

@@ -6,7 +6,7 @@ type ValueNamesByDao = {
 export const getValueFromEventArgs = <T, K extends { [k: string]: any }>(
   valueNames: ValueNamesByDao,
   args: K,
-  daoId: string
+  daoId: string,
 ): T => {
   const valueName = valueNames.find(({ daos }) => daos.includes(daoId))?.name;
   if (!valueName) {
@@ -38,9 +38,9 @@ export function delta(a: bigint, b: bigint): bigint {
  */
 export function min(...values: bigint[]): bigint {
   if (values.length === 0) {
-    throw new Error('At least one value must be provided');
+    throw new Error("At least one value must be provided");
   }
-  return values.reduce((min, value) => value < min ? value : min);
+  return values.reduce((min, value) => (value < min ? value : min));
 }
 
 /**
@@ -48,7 +48,7 @@ export function min(...values: bigint[]): bigint {
  */
 export function max(...values: bigint[]): bigint {
   if (values.length === 0) {
-    throw new Error('At least one value must be provided');
+    throw new Error("At least one value must be provided");
   }
-  return values.reduce((max, value) => value > max ? value : max);
+  return values.reduce((max, value) => (value > max ? value : max));
 }
