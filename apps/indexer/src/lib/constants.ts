@@ -54,7 +54,7 @@ export const LendingAddresses = {
   Aave: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
 };
 
-export enum MetricTypes {
+export enum MetricTypesEnum {
   TOTAL_SUPPLY = "TOTAL_SUPPLY",
   DELEGATED_SUPPLY = "DELEGATED_SUPPLY",
   ACTIVE_SUPPLY_180D = "ACTIVE_SUPPLY_180d",
@@ -64,4 +64,4 @@ export enum MetricTypes {
   CIRCULATING_SUPPLY = "CIRCULATING_SUPPLY",
   TREASURY = "TREASURY",
 }
-export const metricTypeArray = Object.values(MetricTypes);
+export const metricTypeArray = Object.values(MetricTypesEnum);

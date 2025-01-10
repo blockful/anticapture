@@ -22,7 +22,7 @@ import {
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
-  MetricTypes,
+  MetricTypesEnum,
   secondsInDay,
 } from "./constants";
 import { zeroAddress } from "viem";
@@ -167,7 +167,7 @@ export const delegatedVotesChanged = async (
     context,
     event,
     daoId,
-    MetricTypes.DELEGATED_SUPPLY,
+    MetricTypesEnum.DELEGATED_SUPPLY,
     currentDelegatedSupply,
     newDelegatedSupply,
   );
@@ -275,7 +275,7 @@ export const tokenTransfer = async (
       context,
       event,
       daoId,
-      MetricTypes.LENDING_SUPPLY,
+      MetricTypesEnum.LENDING_SUPPLY,
       currentLendingSupply,
       newLendingSupply,
     );
@@ -301,7 +301,7 @@ export const tokenTransfer = async (
       context,
       event,
       daoId,
-      MetricTypes.CEX_SUPPLY,
+      MetricTypesEnum.CEX_SUPPLY,
       currentCexSupply,
       newCexSupply,
     );
@@ -327,7 +327,7 @@ export const tokenTransfer = async (
       context,
       event,
       daoId,
-      MetricTypes.DEX_SUPPLY,
+      MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
       newDexSupply,
     );
@@ -503,7 +503,7 @@ const storeDailyBucket = async (
   context: Context,
   event: Event,
   daoId: string,
-  metricType: MetricTypes,
+  metricType: MetricTypesEnum,
   currentValue: bigint,
   newValue: bigint,
 ) => {
