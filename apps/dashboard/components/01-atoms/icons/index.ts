@@ -1,3 +1,4 @@
+export * from "./ActivityIcon";
 export * from "./AppleIcon";
 export * from "./ArrowLeftRight";
 export * from "./ArrowUpDown";
@@ -15,6 +16,7 @@ export * from "./HeartIcon";
 export * from "./InfoIcon";
 export * from "./LockIcon";
 export * from "./NewspaperIcon";
+export * from "./PieChartIcon";
 export * from "./SupplyIcon";
 export * from "./TokensIcon";
 export * from "./UncertaintyIcon";
