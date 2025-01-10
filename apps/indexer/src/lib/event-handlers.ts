@@ -1,5 +1,5 @@
 import { Context, Event } from "ponder:registry";
-import { convertSecondsTimestampToDate, getValueFromEventArgs } from "./utils";
+import { convertSecondsTimestampToDate, delta, getValueFromEventArgs, max, min } from "./utils";
 import viemClient from "./viemClient";
 import {
   account,
@@ -148,8 +148,7 @@ export const delegatedVotesChanged = async (
     }))
   ).delegatedSupply;
 
-  const delegationVolume =
-    newBalance > oldBalance ? newBalance - oldBalance : oldBalance - newBalance;
+  const delegationVolume = delta(newDelegatedSupply, oldDelegatedSupply)
 
   // Calculate the day's start timestamp (UTC)
   const dayTimestamp =
@@ -163,14 +162,8 @@ export const delegatedVotesChanged = async (
       metricType: "DELEGATED_SUPPLY",
       average: newDelegatedSupply,
       open: oldDelegatedSupply,
-      high:
-        newDelegatedSupply > oldDelegatedSupply
-          ? newDelegatedSupply
-          : oldDelegatedSupply,
-      low:
-        newDelegatedSupply > oldDelegatedSupply
-          ? oldDelegatedSupply
-          : newDelegatedSupply,
+      high: max(newDelegatedSupply, oldDelegatedSupply),
+      low: min(newDelegatedSupply, oldDelegatedSupply),
       close: newDelegatedSupply,
       volume: delegationVolume,
       count: 1,
@@ -179,8 +172,8 @@ export const delegatedVotesChanged = async (
       average:
         (row.average * BigInt(row.count) + newDelegatedSupply) /
         BigInt(row.count + 1),
-      high: newDelegatedSupply > row.low ? newDelegatedSupply : row.low,
-      low: newDelegatedSupply < row.low ? newDelegatedSupply : row.low,
+      high: max(newDelegatedSupply, row.low),
+      low: min(newDelegatedSupply, row.low),
       close: newDelegatedSupply,
       volume: row.volume + delegationVolume,
       count: row.count + 1,
