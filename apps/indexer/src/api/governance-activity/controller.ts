@@ -1,7 +1,11 @@
 import { DaysEnum } from "@/lib/daysEnum";
 import { sql } from "ponder";
 import { ponder } from "ponder:registry";
-import { ActiveSupplyQueryResult, ProposalsCompareQueryResult, VotesCompareQueryResult } from "./types";
+import {
+  ActiveSupplyQueryResult,
+  ProposalsCompareQueryResult,
+  VotesCompareQueryResult,
+} from "./types";
 import { formatUnits } from "viem";
 
 ponder.get("/dao/:daoId/active-supply", async (context) => {
@@ -105,8 +109,7 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
     changeRate = "0";
   } else {
     changeRate =
-      parseFloat(votesCompare.currentVotes) /
-      parseFloat(votesCompare.oldVotes);
+      parseFloat(votesCompare.currentVotes) / parseFloat(votesCompare.oldVotes);
   }
   return context.json({ ...votesCompare, changeRate });
 });

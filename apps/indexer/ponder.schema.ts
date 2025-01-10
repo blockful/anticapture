@@ -188,12 +188,7 @@ export const daoMetricsDayBuckets = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [
-        table.date,
-        table.daoId,
-        table.tokenId,
-        table.metricType,
-      ],
+      columns: [table.date, table.daoId, table.tokenId, table.metricType],
     }),
   }),
 );

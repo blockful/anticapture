@@ -97,7 +97,7 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
       (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
         BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
         BigInt(1e18),
-      18
+      18,
     );
   }
   return context.json({ ...delegatedSupplyCompare, changeRate });
@@ -341,52 +341,36 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const queryResult = await context.db.execute(sql`
-    WITH "old_from_lending" as (
-      SELECT SUM(t.amount) as "from_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."from_account_id") IN (${Object.values(LendingAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+  WITH  "old_lending_supply" as (
+    SELECT db.average as "old_lending_supply_amount" from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.LENDING_SUPPLY}
+    AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+    ORDER BY db."date" ASC LIMIT 1
   ),
-  "old_to_lending" as (
-    SELECT SUM(t.amount) as "to_amount" 
-    FROM "transfers" t 
-    WHERE UPPER(t."to_account_id") IN (${Object.values(LendingAddresses)
-      .map((addr) => addr.toUpperCase())
-      .join(", ")})
-    AND t."dao_id" = ${daoId}
-    AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-  ),
-  "current_lending_supply" as (
-    SELECT SUM(ab.balance) AS "current_lending_supply"
-    FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-      LendingAddresses,
-    )
-      .map((addr) => addr.toUpperCase())
-      .join(", ")})
+ "current_lending_supply"  AS (
+    SELECT db.average as current_lending_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.LENDING_SUPPLY}
+    ORDER BY db."date" DESC LIMIT 1
   )
-  SELECT COALESCE(("old_to_lending"."to_amount" - "old_from_lending"."from_amount"),0)
-  as "oldLendingSupply",
-  COALESCE("current_lending_supply"."current_lending_supply", 0)
-  as "currentLendingSupply"
-  FROM "old_from_lending"
-  JOIN "old_to_lending" ON 1=1
-  JOIN "current_lending_supply" ON 1=1;
-  `);
-  const lendingCompare: LendingSupplyQueryResult = queryResult
+  SELECT COALESCE("old_lending_supply"."old_lending_supply_amount",0) AS "oldLendingSupply", 
+  COALESCE("current_lending_supply"."current_lending_supply_amount", 0) AS "currentLendingSupply"
+  FROM "current_lending_supply"
+  LEFT JOIN "old_lending_supply" ON 1=1;
+`);
+  const lendingSupplyCompare: LendingSupplyQueryResult = queryResult
     .rows[0] as LendingSupplyQueryResult;
   let changeRate;
-  if (lendingCompare.oldLendingSupply === "0") {
+  if (lendingSupplyCompare.oldLendingSupply === "0") {
     changeRate = "0";
   } else {
     changeRate = formatUnits(
-      (BigInt(lendingCompare.currentLendingSupply) * BigInt(1e18)) /
-        BigInt(lendingCompare.oldLendingSupply) -
+      (BigInt(lendingSupplyCompare.currentLendingSupply) * BigInt(1e18)) /
+        BigInt(lendingSupplyCompare.oldLendingSupply) -
         BigInt(1e18),
       18,
     );
   }
-  return context.json({ ...lendingCompare, changeRate });
+  return context.json({ ...lendingSupplyCompare, changeRate });
 });
