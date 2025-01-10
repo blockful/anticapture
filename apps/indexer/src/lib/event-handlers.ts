@@ -6,7 +6,6 @@ import {
   max,
   min,
 } from "./utils";
-import viemClient from "./viemClient";
 import {
   account,
   accountBalance,
@@ -20,13 +19,15 @@ import {
   token,
 } from "ponder:schema";
 import {
-  addressZero,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
   MetricTypes,
   secondsInDay,
 } from "./constants";
+import { zeroAddress } from "viem";
+import viemClient from "./viemClient";
+
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -74,7 +75,7 @@ export const delegateChanged = async (
     });
 
   // Update the old delegatee's delegations count
-  if (event.args.fromDelegate != addressZero) {
+  if (event.args.fromDelegate != zeroAddress) {
     await context.db
       .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
@@ -220,7 +221,7 @@ export const tokenTransfer = async (
   });
 
   // Update the from account's balance
-  if (from !== addressZero) {
+  if (from !== zeroAddress) {
     const fromAccount = await context.db
       .insert(accountBalance)
       .values({

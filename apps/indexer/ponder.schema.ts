@@ -1,5 +1,6 @@
-import { addressZero, metricTypeArray } from "@/lib/constants";
+import { metricTypeArray } from "@/lib/constants";
 import { onchainTable, index, onchainEnum, primaryKey } from "ponder";
+import { zeroAddress } from "viem";
 
 export const dao = onchainTable("dao", (drizzle) => ({
   id: drizzle.text().primaryKey(),
@@ -65,7 +66,7 @@ export const accountPower = onchainTable(
     votesCount: drizzle.integer().default(0).notNull(),
     proposalsCount: drizzle.integer().default(0).notNull(),
     delegationsCount: drizzle.integer().default(0).notNull(),
-    delegate: drizzle.text().default(addressZero).notNull(),
+    delegate: drizzle.text().default(zeroAddress).notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
