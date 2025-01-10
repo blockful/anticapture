@@ -24,6 +24,7 @@ import {
   LendingAddresses,
   MetricTypesEnum,
   secondsInDay,
+  UNITreasuryAddresses,
 } from "./constants";
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
@@ -316,6 +317,7 @@ export const tokenTransfer = async (
     dexAddressList.includes(to) || dexAddressList.includes(from);
 
   if (isDexTransaction) {
+    console.log('DEX!!!!!!')
     const isToDex = dexAddressList.includes(to);
     const newDexSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
@@ -330,6 +332,32 @@ export const tokenTransfer = async (
       MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
       newDexSupply,
+    );
+  }
+
+  const currentTreasury = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.treasury;
+
+  const treasuryAddressList = Object.values(UNITreasuryAddresses);
+  const isTreasuryTransaction =
+    treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
+
+  if (isTreasuryTransaction) {
+    const isToTreasury = treasuryAddressList.includes(to);
+    const newTreasury = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        treasury: isToTreasury ? row.treasury + value : row.treasury - value,
+      }))
+    ).treasury;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.TREASURY,
+      currentTreasury,
+      newTreasury,
     );
   }
 };
