@@ -71,16 +71,16 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const queryResult = await context.db.execute(sql`
   WITH  "old_delegated_supply" as (
-    SELECT db.average as current_delegated_supply_amount from "dao_metrics_day_buckets" db 
+    SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
-    AND db.metric_type=${MetricTypesEnum.DELEGATED_SUPPLY}
+    AND db."metricType"=${MetricTypesEnum.DELEGATED_SUPPLY}
     AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
     ORDER BY db."date" ASC LIMIT 1
   ),
  "current_delegated_supply"  AS (
     SELECT db.average as current_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
-    AND db.metric_type=${MetricTypesEnum.DELEGATED_SUPPLY}
+    AND db."metricType"=${MetricTypesEnum.DELEGATED_SUPPLY}
     ORDER BY db."date" DESC LIMIT 1
   )
   SELECT COALESCE("old_delegated_supply"."old_delegated_supply_amount",0) AS "oldDelegatedSupply", 
