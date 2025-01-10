@@ -148,36 +148,7 @@ export const delegatedVotesChanged = async (
     }))
   ).delegatedSupply;
 
-  const delegationVolume = delta(newDelegatedSupply, oldDelegatedSupply)
-
-  // Calculate the day's start timestamp (UTC)
-  const dayTimestamp =
-    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
-  await context.db
-    .insert(daoMetricsDayBuckets)
-    .values({
-      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
-      daoId,
-      tokenId: event.log.address,
-      metricType: MetricTypes.DELEGATED_SUPPLY,
-      average: newDelegatedSupply,
-      open: oldDelegatedSupply,
-      high: max(newDelegatedSupply, oldDelegatedSupply),
-      low: min(newDelegatedSupply, oldDelegatedSupply),
-      close: newDelegatedSupply,
-      volume: delegationVolume,
-      count: 1,
-    })
-    .onConflictDoUpdate((row) => ({
-      average:
-        (row.average * BigInt(row.count) + newDelegatedSupply) /
-        BigInt(row.count + 1),
-      high: max(newDelegatedSupply, row.low),
-      low: min(newDelegatedSupply, row.low),
-      close: newDelegatedSupply,
-      volume: row.volume + delegationVolume,
-      count: row.count + 1,
-    }));
+  await storeDailyBucket(context, event, daoId, MetricTypes.DELEGATED_SUPPLY, oldDelegatedSupply, newDelegatedSupply)
 };
 
 export const tokenTransfer = async (
@@ -423,3 +394,37 @@ export const proposalExecuted = async (
       status: "EXECUTED",
     });
 };
+
+const storeDailyBucket = async (context: Context, event: Event, daoId: string, metricType: MetricTypes,currentValue: bigint, newValue: bigint) => {
+  
+  const dayTimestamp =
+      Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
+    
+  const volume = delta(newValue, currentValue)
+
+  await context.db
+    .insert(daoMetricsDayBuckets)
+    .values({
+      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
+      daoId,
+      tokenId: event.log.address,
+      metricType,
+      average: newValue,
+      open: currentValue,
+      high: max(newValue, currentValue),
+      low: min(newValue, currentValue),
+      close: newValue,
+      volume,
+      count: 1,
+    })
+    .onConflictDoUpdate((row) => ({
+      average:
+        (row.average * BigInt(row.count) + newValue) /
+        BigInt(row.count + 1),
+      high: max(newValue, row.low),
+      low: min(newValue, row.low),
+      close: newValue,
+      volume: row.volume + volume,
+      count: row.count + 1,
+    }));
+}
