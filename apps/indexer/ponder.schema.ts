@@ -20,7 +20,7 @@ export const daoToken = onchainTable(
   (table) => ({
     daoTokenDaoIdx: index().on(table.daoId),
     daoTokenTokenIdx: index().on(table.tokenId),
-  })
+  }),
 );
 
 export const token = onchainTable("token", (drizzle) => ({
@@ -52,7 +52,7 @@ export const accountBalance = onchainTable(
   (table) => ({
     accountBalanceAccountIdx: index().on(table.accountId),
     accountBalanceTokenIdx: index().on(table.tokenId),
-  })
+  }),
 );
 
 export const accountPower = onchainTable(
@@ -70,7 +70,7 @@ export const accountPower = onchainTable(
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
-  })
+  }),
 );
 
 export const votingPowerHistory = onchainTable(
@@ -85,7 +85,7 @@ export const votingPowerHistory = onchainTable(
   (table) => ({
     votingPowerHistoryAccountIdx: index().on(table.accountId),
     votingPowerHistoryDaoIdx: index().on(table.daoId),
-  })
+  }),
 );
 
 export const delegations = onchainTable(
@@ -101,7 +101,7 @@ export const delegations = onchainTable(
     delegationsDaoIdx: index().on(table.daoId),
     delegationsDelegateeIdx: index().on(table.delegateeAccountId),
     delegationsDelegatorIdx: index().on(table.delegatorAccountId),
-  })
+  }),
 );
 
 export const transfers = onchainTable(
@@ -118,7 +118,7 @@ export const transfers = onchainTable(
   (table) => ({
     transfersDaoIdx: index().on(table.daoId),
     transfersTokenIdx: index().on(table.tokenId),
-  })
+  }),
 );
 
 export const votesOnchain = onchainTable(
@@ -137,7 +137,7 @@ export const votesOnchain = onchainTable(
     votesOnchainDaoIdx: index().on(table.daoId),
     votesOnchainVoterIdx: index().on(table.voterAccountId),
     votesOnchainProposalIdx: index().on(table.proposalId),
-  })
+  }),
 );
 
 export const proposalsOnchain = onchainTable(
@@ -162,10 +162,13 @@ export const proposalsOnchain = onchainTable(
   (table) => ({
     proposalsOnchainDaoIdx: index().on(table.daoId),
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),
-  })
+  }),
 );
 
-export const metricType = onchainEnum("metricType", metricTypeArray as [string, ...string[]]);
+export const metricType = onchainEnum(
+  "metricType",
+  metricTypeArray as [string, ...string[]],
+);
 
 export const daoMetricsDayBuckets = onchainTable(
   "dao_metrics_day_buckets",
@@ -191,5 +194,5 @@ export const daoMetricsDayBuckets = onchainTable(
         table.metricType,
       ],
     }),
-  })
+  }),
 );

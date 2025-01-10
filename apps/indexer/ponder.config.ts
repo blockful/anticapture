@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import { config } from "./config";
 dotenv.config();
 
-
 let networks, contracts;
 if (!process.env.STATUS) {
   throw new Error("Env variable STATUS is not defined");

@@ -1,4 +1,4 @@
 export type ActiveSupplyQueryResult = {
-    activeSupply: string;
-    activeUsers: string;
-  };
+  activeSupply: string;
+  activeUsers: string;
+};
