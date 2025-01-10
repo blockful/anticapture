@@ -19,7 +19,7 @@ import {
   daoMetricsDayBuckets,
   token,
 } from "ponder:schema";
-import { addressZero, LendingAddresses, MetricTypes, secondsInDay } from "./constants";
+import { addressZero, CEXAddresses, LendingAddresses, MetricTypes, secondsInDay } from "./constants";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -270,6 +270,32 @@ export const tokenTransfer = async (
         newLendingSupply,
       );
     }
+
+    const currentCexSupply = ( await context.db
+      .find(token, { id: event.log.address }))!.cexSupply
+  
+      const cexAddressList = Object.values(CEXAddresses);
+      const isCexTransaction = cexAddressList.includes(to) || cexAddressList.includes(from);
+      
+      if (isCexTransaction) {
+        const isToCex = cexAddressList.includes(to);
+        const newCexSupply = (await context.db
+          .update(token, { id: event.log.address })
+          .set((row) => ({
+            cexSupply: isToCex
+              ? row.cexSupply + value
+              : row.cexSupply - value
+          }))).cexSupply;
+      
+        await storeDailyBucket(
+          context,
+          event,
+          daoId,
+          MetricTypes.CEX_SUPPLY,
+          currentCexSupply,
+          newCexSupply,
+        );
+      }
 };
 
 export const voteCast = async (
