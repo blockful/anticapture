@@ -69,29 +69,33 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const queryResult = await context.db.execute(sql`
-   WITH  "old_delegated_supply" as (
-    SELECT SUM("old_delegated_supply_by_user"."old_delegated_supply") as "old_delegated_supply_amount" from (
-      SELECT DISTINCT ON (vp."account_id") vp."account_id", vp.timestamp, vp."voting_power" AS "old_delegated_supply"
-      FROM "voting_power_history" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
-      AND vp."dao_id" = ${daoId}
-      ORDER BY vp."account_id", vp.timestamp DESC
-    ) "old_delegated_supply_by_user"
- ),
+  WITH  "old_delegated_supply" as (
+    SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."day_timestamp"=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+  ),
  "current_delegated_supply"  AS (
-    SELECT SUM(ap."voting_power") AS "current_delegated_supply_amount" FROM "account_power" ap
+    SELECT db.average as current_delegated_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    ORDER BY db."day_timestamp" DESC LIMIT 1
   )
-  SELECT "old_delegated_supply"."old_delegated_supply_amount" AS "oldDelegatedSupply", 
-  "current_delegated_supply"."current_delegated_supply_amount" AS "currentDelegatedSupply"
+  SELECT COALESCE("old_delegated_supply"."old_delegated_supply_amount",0) AS "oldDelegatedSupply", 
+  COALESCE("current_delegated_supply"."current_delegated_supply_amount", 0) AS "currentDelegatedSupply"
   FROM "current_delegated_supply"
-  JOIN "old_delegated_supply" ON 1=1;`);
+  LEFT JOIN "old_delegated_supply" ON 1=1;`);
   const delegatedSupplyCompare: DelegatedSupplyQueryResult = queryResult
     .rows[0] as DelegatedSupplyQueryResult;
-  const changeRate = formatUnits(
-    (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
-      BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
-      BigInt(1e18),
-    18
-  );
+  let changeRate;
+  if (delegatedSupplyCompare.oldDelegatedSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
+        BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
+        BigInt(1e18),
+      18
+    );
+  }
   return context.json({ ...delegatedSupplyCompare, changeRate });
 });
 
