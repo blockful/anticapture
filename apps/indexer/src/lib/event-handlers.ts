@@ -22,6 +22,7 @@ import {
 import {
   addressZero,
   CEXAddresses,
+  DEXAddresses,
   LendingAddresses,
   MetricTypes,
   secondsInDay,
@@ -302,6 +303,32 @@ export const tokenTransfer = async (
       MetricTypes.CEX_SUPPLY,
       currentCexSupply,
       newCexSupply,
+    );
+  }
+
+  const currentDexSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.dexSupply;
+
+  const dexAddressList = Object.values(DEXAddresses);
+  const isDexTransaction =
+    dexAddressList.includes(to) || dexAddressList.includes(from);
+
+  if (isDexTransaction) {
+    const isToDex = dexAddressList.includes(to);
+    const newDexSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        dexSupply: isToDex ? row.dexSupply + value : row.dexSupply - value,
+      }))
+    ).dexSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypes.DEX_SUPPLY,
+      currentDexSupply,
+      newDexSupply,
     );
   }
 };
