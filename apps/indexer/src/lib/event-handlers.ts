@@ -19,7 +19,13 @@ import {
   daoMetricsDayBuckets,
   token,
 } from "ponder:schema";
-import { addressZero, CEXAddresses, LendingAddresses, MetricTypes, secondsInDay } from "./constants";
+import {
+  addressZero,
+  CEXAddresses,
+  LendingAddresses,
+  MetricTypes,
+  secondsInDay,
+} from "./constants";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -183,7 +189,7 @@ export const tokenTransfer = async (
     daoId,
   );
 
-  const { from, to } = event.args
+  const { from, to } = event.args;
 
   //Inserting delegate account if didn't exist
   await context.db
@@ -244,58 +250,60 @@ export const tokenTransfer = async (
     .onConflictDoUpdate((current) => ({
       balance: (current.balance ?? BigInt(0)) + BigInt(value),
     }));
-  
-  const currentLendingSupply = ( await context.db
-    .find(token, { id: event.log.address }))!.lendingSupply
 
-    const lendingAddressList = Object.values(LendingAddresses);
-    const isLendingTransaction = lendingAddressList.includes(to) || lendingAddressList.includes(from);
-    
-    if (isLendingTransaction) {
-      const isToLendingPool = lendingAddressList.includes(to);
-      const newLendingSupply = (await context.db
-        .update(token, { id: event.log.address })
-        .set((row) => ({
-          lendingSupply: isToLendingPool
-            ? row.lendingSupply + value
-            : row.lendingSupply - value
-        }))).lendingSupply;
-    
-      await storeDailyBucket(
-        context,
-        event,
-        daoId,
-        MetricTypes.LENDING_SUPPLY,
-        currentLendingSupply,
-        newLendingSupply,
-      );
-    }
+  const currentLendingSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.lendingSupply;
 
-    const currentCexSupply = ( await context.db
-      .find(token, { id: event.log.address }))!.cexSupply
-  
-      const cexAddressList = Object.values(CEXAddresses);
-      const isCexTransaction = cexAddressList.includes(to) || cexAddressList.includes(from);
-      
-      if (isCexTransaction) {
-        const isToCex = cexAddressList.includes(to);
-        const newCexSupply = (await context.db
-          .update(token, { id: event.log.address })
-          .set((row) => ({
-            cexSupply: isToCex
-              ? row.cexSupply + value
-              : row.cexSupply - value
-          }))).cexSupply;
-      
-        await storeDailyBucket(
-          context,
-          event,
-          daoId,
-          MetricTypes.CEX_SUPPLY,
-          currentCexSupply,
-          newCexSupply,
-        );
-      }
+  const lendingAddressList = Object.values(LendingAddresses);
+  const isLendingTransaction =
+    lendingAddressList.includes(to) || lendingAddressList.includes(from);
+
+  if (isLendingTransaction) {
+    const isToLendingPool = lendingAddressList.includes(to);
+    const newLendingSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        lendingSupply: isToLendingPool
+          ? row.lendingSupply + value
+          : row.lendingSupply - value,
+      }))
+    ).lendingSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypes.LENDING_SUPPLY,
+      currentLendingSupply,
+      newLendingSupply,
+    );
+  }
+
+  const currentCexSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.cexSupply;
+
+  const cexAddressList = Object.values(CEXAddresses);
+  const isCexTransaction =
+    cexAddressList.includes(to) || cexAddressList.includes(from);
+
+  if (isCexTransaction) {
+    const isToCex = cexAddressList.includes(to);
+    const newCexSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        cexSupply: isToCex ? row.cexSupply + value : row.cexSupply - value,
+      }))
+    ).cexSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypes.CEX_SUPPLY,
+      currentCexSupply,
+      newCexSupply,
+    );
+  }
 };
 
 export const voteCast = async (
