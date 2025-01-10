@@ -1,9 +1,23 @@
 import { User } from "@/lib/server/utils";
+import { DaoId } from "@/lib/types/daos";
+
+export type DashboardDao = {
+  dao: string;
+  delegatedSupply: string | null;
+  profitability: string | null;
+  delegatesToPass: string | null;
+};
 
 export type TokenDistribution = {
-  metric: string | undefined;
-  currentValue: string | undefined;
-  variation: string | undefined;
+  metric: string | null;
+  currentValue: string | null;
+  variation: string | null;
+};
+
+export type GovernanceActivity = {
+  metric: string | null;
+  average: string | null;
+  variation: string | null;
 };
 
 export type Delegates = {
@@ -30,33 +44,83 @@ export type Holders = {
 export const tokenDistributionData: TokenDistribution[] = [
   {
     metric: "Total Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "Delegated Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "Circulating Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "CEX Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "DEX Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
   },
   {
     metric: "Lending Supply",
-    currentValue: undefined,
-    variation: undefined,
+    currentValue: null,
+    variation: null,
+  },
+];
+
+export const dashboardData: DashboardDao[] = [
+  {
+    dao: DaoId.UNISWAP,
+    delegatedSupply: null,
+    profitability: null,
+    delegatesToPass: null,
+  },
+  {
+    dao: DaoId.ENS,
+    delegatedSupply: null,
+    profitability: null,
+    delegatesToPass: null,
+  },
+];
+
+export const enum GovernanceActivityMetrics {
+  PROPOSALS = "Proposals",
+  ACTIVE_SUPPLY = "Active Supply",
+  VOTES = "Votes",
+  AVERAGE_TURNOUT = "Average Turnout",
+}
+
+export const governanceActivityData: GovernanceActivity[] = [
+  {
+    metric: "Treasury",
+    average: null,
+    variation: null,
+  },
+  {
+    metric: "Proposals",
+    average: null,
+    variation: null,
+  },
+  {
+    metric: "Active Supply",
+    average: null,
+    variation: null,
+  },
+  {
+    metric: "Votes",
+    average: null,
+    variation: null,
+  },
+  {
+    metric: "Average Turnout",
+    average: null,
+    variation: null,
   },
 ];
 

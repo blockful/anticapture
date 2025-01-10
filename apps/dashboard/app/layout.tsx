@@ -3,7 +3,7 @@ import "tailwindcss";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { GlobalProviders } from "@/components/providers/global-provider";
+import { GlobalProviders } from "@/components/providers/GlobalProviders";
 import { ReactNode } from "react";
 import { HeaderSidebar } from "@/components/02-molecules";
 

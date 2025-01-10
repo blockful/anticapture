@@ -1,7 +1,7 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { DaoDataContext } from "@/components/contexts/dao-data-provider";
+import { useEffect, useState } from "react";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { AttacksIcon, InfoIcon } from "@/components/01-atoms";
 import { sanitizeNumber } from "@/lib/client/utils";
@@ -13,7 +13,7 @@ import {
 } from "@radix-ui/react-tooltip";
 
 export const AttacksSection = () => {
-  const { daoData, tokenPrice } = useContext(DaoDataContext);
+  const { daoData, tokenPrice } = useDaoDataContext();
 
   const [
     fiftyPercentPlusOneAverageTurnoutTokensCount,

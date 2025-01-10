@@ -3,7 +3,7 @@
 import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
+import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   AppleIcon,
@@ -13,21 +13,14 @@ import {
   TooltipInfo,
   ArrowState,
 } from "@/components/01-atoms";
-import {
-  fetchCexSupply,
-  fetchCirculatingSupply,
-  fetchDelegatedSupply,
-  fetchDexSupply,
-  fetchLendingSupply,
-  fetchTotalSupply,
-} from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
+import { fetchActiveSupply, fetchTreasurySupply } from "@/lib/server/backend";
 
 const sortingByAscendingOrDescendingNumber = (
-  rowA: Row<TokenDistribution>,
-  rowB: Row<TokenDistribution>,
+  rowA: Row<GovernanceActivity>,
+  rowB: Row<GovernanceActivity>,
   columnId: string,
 ) => {
   const a = Number(rowA.getValue(columnId)) ?? 0;
@@ -42,34 +35,30 @@ const metricDetails: Record<
   string,
   { icon: React.ReactNode; tooltip: string }
 > = {
-  "Total Supply": {
+  Treasury: {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
   },
-  "Delegated Supply": {
+  Proposals: {
+    icon: <AppleIcon className="h-5 w-5" />,
+    tooltip: "Total current value of tokens in circulation",
+  },
+  "Active Supply": {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens delegated",
   },
-  "Circulating Supply": {
+  Votes: {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
   },
-  "CEX Supply": {
+  "Average Turnout": {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in CEX",
-  },
-  "DEX Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in DEX",
-  },
-  "Lending Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in lending",
   },
 };
 
 interface State {
-  data: TokenDistribution[];
+  data: GovernanceActivity[];
 }
 
 enum ActionType {
@@ -78,11 +67,11 @@ enum ActionType {
 
 type Action = {
   type: ActionType.UPDATE_METRIC;
-  payload: { index: number; currentValue: string; variation: string };
+  payload: { index: number; average: string; variation: string };
 };
 
 const initialState: State = {
-  data: tokenDistributionData,
+  data: governanceActivityData,
 };
 
 function reducer(state: State, action: Action): State {
@@ -94,51 +83,37 @@ function reducer(state: State, action: Action): State {
           index === action.payload.index
             ? {
                 ...item,
-                currentValue: action.payload.currentValue,
+                average: action.payload.average,
                 variation: action.payload.variation,
               }
             : item,
         ),
       };
+
     default:
       return state;
   }
 }
 
-export const TokenDistributionTable = ({
+export const GovernanceActivityTable = ({
   timeInterval,
 }: {
   timeInterval: TimeInterval;
 }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
-
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTotalSupply({ daoId, timeInterval: timeInterval }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 0,
-            currentValue: String(
-              BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
-          },
-        });
-    });
-
-    fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
+    fetchTreasurySupply({ daoId, timeInterval: timeInterval }).then(
       (result) => {
         result &&
           dispatch({
             type: ActionType.UPDATE_METRIC,
             payload: {
-              index: 1,
-              currentValue: String(
-                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+              index: 0,
+              average: String(
+                BigInt(result.currentTreasury) / BigInt(10 ** 18),
               ),
               variation: formatVariation(result.changeRate),
             },
@@ -146,76 +121,20 @@ export const TokenDistributionTable = ({
       },
     );
 
-    fetchCirculatingSupply({
-      daoId,
-      timeInterval: timeInterval,
-    }).then((result) => {
+    fetchActiveSupply({ daoId }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 2,
-            currentValue: String(
-              BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
-          },
-        });
-    });
-
-    fetchCexSupply({
-      daoId,
-      timeInterval: timeInterval,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 3,
-            currentValue: String(
-              BigInt(result.currentCexSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
-          },
-        });
-    });
-
-    fetchDexSupply({
-      daoId,
-      timeInterval: timeInterval,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 4,
-            currentValue: String(
-              BigInt(result.currentDexSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
-          },
-        });
-    });
-
-    fetchLendingSupply({
-      daoId,
-      timeInterval: timeInterval,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 5,
-            currentValue: String(
-              BigInt(result.currentLendingSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            average: String(BigInt(result.activeSupply) / BigInt(10 ** 18)),
+            variation: result.activeUsers,
           },
         });
     });
   }, [daoData, timeInterval]);
 
-  const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
+  const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
     {
       accessorKey: "metric",
       cell: ({ row }) => {
@@ -232,12 +151,12 @@ export const TokenDistributionTable = ({
       header: "Metrics",
     },
     {
-      accessorKey: "currentValue",
+      accessorKey: "average",
       cell: ({ row }) => {
-        const currentValue: number = row.getValue("currentValue");
+        const average: number = row.getValue("average");
         return (
           <div className="flex items-center justify-center text-center">
-            {currentValue && formatNumberUserReadble(currentValue)}
+            {average && formatNumberUserReadble(average)}
           </div>
         );
       },
@@ -247,7 +166,7 @@ export const TokenDistributionTable = ({
           className="w-full"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Current value (UNI)
+          Average
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -315,10 +234,9 @@ export const TokenDistributionTable = ({
 
   return (
     <TheTable
-      columns={tokenDistributionColumns}
+      columns={governanceActivityColumns}
       data={state.data}
       withPagination={true}
-      filterColumn={"ensNameAndAddress"}
       withSorting={true}
     />
   );
