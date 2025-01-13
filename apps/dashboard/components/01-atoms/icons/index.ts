@@ -23,3 +23,4 @@ export * from "./TokensIcon";
 export * from "./UncertaintyIcon";
 export * from "./UniswapIcon";
 export * from "./UsersIcon";
+export * from "./WalletIcon";

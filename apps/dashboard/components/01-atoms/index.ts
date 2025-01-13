@@ -3,6 +3,7 @@ export * from "./icons";
 export * from "./Badge";
 export * from "./BaseCard";
 export * from "./BaseHeaderLayoutSidebar";
+export * from "./ConnectWallet";
 export * from "./ContractsCard";
 export * from "./HeaderDAOSidebarDropdown";
 export * from "./QuorumCard";

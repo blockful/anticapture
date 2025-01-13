@@ -19,7 +19,7 @@
 
 @layer utilities {
   .card-container-about {
-    @apply flex sm:max-w-full lg:max-w-[250px] flex-col rounded-lg border border-lightDark bg-dark shadow xl4k:max-w-full;
+    @apply flex flex-col rounded-lg border border-lightDark bg-dark shadow sm:max-w-full lg:max-w-[250px] xl4k:max-w-full;
   }
 
   .card-header-about {
@@ -31,11 +31,11 @@
   }
 
   .card-body-about {
-    @apply flex flex-col gap-4 p-3 h-full;
+    @apply flex h-full flex-col gap-4 p-3;
   }
 
   .card-description-about {
-    @apply flex flex-col space-y-2 p-1 h-full;
+    @apply flex h-full flex-col space-y-2 p-1;
   }
 
   .card-description-title {
@@ -43,11 +43,14 @@
   }
 
   .skeleton-text {
-    @apply bg-gray-300 rounded-md animate-pulse;
+    @apply animate-pulse rounded-md bg-gray-300;
   }
-  
+
   .skeleton-icon {
-    @apply bg-gray-300 rounded-full animate-pulse;
+    @apply animate-pulse rounded-full bg-gray-300;
   }
-  
+
+  .btn-connect-wallet {
+    @apply flex w-full items-center justify-center gap-2 rounded-md bg-lightDark px-3 py-1.5 text-white
+  }
 }
