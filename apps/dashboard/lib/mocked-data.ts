@@ -12,6 +12,7 @@ export type TokenDistribution = {
   metric: string | null;
   currentValue: string | null;
   variation: string | null;
+  chartLastDays?: string;
 };
 
 export type GovernanceActivity = {
@@ -46,31 +47,37 @@ export const tokenDistributionData: TokenDistribution[] = [
     metric: "Total Supply",
     currentValue: null,
     variation: null,
+    chartLastDays: undefined,
   },
   {
     metric: "Delegated Supply",
     currentValue: null,
     variation: null,
+    chartLastDays: undefined,
   },
   {
     metric: "Circulating Supply",
     currentValue: null,
     variation: null,
+    chartLastDays: undefined,
   },
   {
     metric: "CEX Supply",
     currentValue: null,
     variation: null,
+    chartLastDays: undefined,
   },
   {
     metric: "DEX Supply",
     currentValue: null,
     variation: null,
+    chartLastDays: undefined,
   },
   {
     metric: "Lending Supply",
     currentValue: null,
     variation: null,
+    chartLastDays: undefined,
   },
 ];
 
@@ -121,6 +128,158 @@ export const governanceActivityData: GovernanceActivity[] = [
     metric: "Average Turnout",
     average: null,
     variation: null,
+  },
+];
+
+export interface ChartMetrics {
+  dayTimestamp: string;
+  high: string;
+}
+
+export const chartMetrics: ChartMetrics[] = [
+  {
+    dayTimestamp: "1736294400000",
+    high: "196525268429952772970493008",
+  },
+  {
+    dayTimestamp: "1736208000000",
+    high: "198625260369467534725057182",
+  },
+  {
+    dayTimestamp: "1736121600000",
+    high: "198622524954852654766707160",
+  },
+  {
+    dayTimestamp: "1736035200000",
+    high: "198627737196287031573770615",
+  },
+  {
+    dayTimestamp: "1735948800000",
+    high: "198627889884685416056723099",
+  },
+  {
+    dayTimestamp: "1735862400000",
+    high: "198627836438234008940432722",
+  },
+  {
+    dayTimestamp: "1735776000000",
+    high: "198844024746312782732696282",
+  },
+  {
+    dayTimestamp: "1735689600000",
+    high: "198844457818957204033112010",
+  },
+  {
+    dayTimestamp: "1735603200000",
+    high: "198847624577754100950807698",
+  },
+  {
+    dayTimestamp: "1735516800000",
+    high: "199021951646369930881678088",
+  },
+  {
+    dayTimestamp: "1735430400000",
+    high: "199021909118940290374874690",
+  },
+  {
+    dayTimestamp: "1735344000000",
+    high: "199022122731244248349283521",
+  },
+  {
+    dayTimestamp: "1735257600000",
+    high: "199122565846608615757764492",
+  },
+  {
+    dayTimestamp: "1735171200000",
+    high: "199122853151225593247371649",
+  },
+  {
+    dayTimestamp: "1735084800000",
+    high: "199122086863529802688454968",
+  },
+  {
+    dayTimestamp: "1734998400000",
+    high: "199221864891805375760938866",
+  },
+  {
+    dayTimestamp: "1734912000000",
+    high: "199221441507478842019560828",
+  },
+  {
+    dayTimestamp: "1734825600000",
+    high: "199298336875822160491401376",
+  },
+  {
+    dayTimestamp: "1734739200000",
+    high: "199399124802978922998815875",
+  },
+  {
+    dayTimestamp: "1734652800000",
+    high: "199370897979613653253501703",
+  },
+  {
+    dayTimestamp: "1734566400000",
+    high: "199572462109760076132482290",
+  },
+  {
+    dayTimestamp: "1734480000000",
+    high: "200634792548489903371257091",
+  },
+  {
+    dayTimestamp: "1734393600000",
+    high: "200666148912083674051008567",
+  },
+  {
+    dayTimestamp: "1734307200000",
+    high: "200657270032422126922635932",
+  },
+  {
+    dayTimestamp: "1734220800000",
+    high: "202660284123696698858916706",
+  },
+  {
+    dayTimestamp: "1734134400000",
+    high: "202665619989468995158048429",
+  },
+  {
+    dayTimestamp: "1734048000000",
+    high: "202665523556916661539487624",
+  },
+  {
+    dayTimestamp: "1733961600000",
+    high: "202665990900118931168145252",
+  },
+  {
+    dayTimestamp: "1733875200000",
+    high: "202666517298361917578765546",
+  },
+  {
+    dayTimestamp: "1733788800000",
+    high: "202668915287396862006645008",
+  },
+  {
+    dayTimestamp: "1733702400000",
+    high: "202726042763852635409767773",
+  },
+  {
+    dayTimestamp: "1733616000000",
+    high: "202759982973192299529164891",
+  },
+  {
+    dayTimestamp: "1733529600000",
+    high: "202761247803012530455709682",
+  },
+  {
+    dayTimestamp: "1733443200000",
+    high: "202800887925756684481337360",
+  },
+  {
+    dayTimestamp: "1733356800000",
+    high: "202847867453029290642479487",
+  },
+  {
+    dayTimestamp: "1733270400000",
+    high: "202846868635824406295751805",
   },
 ];
 

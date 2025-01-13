@@ -3,7 +3,12 @@
 import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
+import {
+  ChartMetrics,
+  chartMetrics,
+  TokenDistribution,
+  tokenDistributionData,
+} from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   AppleIcon,
@@ -24,6 +29,7 @@ import {
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
+import { TheChart } from "../01-atoms/TheChart";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -215,6 +221,25 @@ export const TokenDistributionTable = ({
     });
   }, [daoData, timeInterval]);
 
+  // const transformChartMetrics = (data: ChartMetrics[]) => {
+  //   return data.map((item: ChartMetrics) => ({
+  //     date: new Date(Number(item.dayTimestamp)).toISOString().split("T")[0],
+  //     high: Number(item.high),
+  //   }));
+  // };
+
+  // console.log("transformChartMetrics", transformChartMetrics(chartMetrics));
+  // const formattedChartMetrics = transformChartMetrics(chartMetrics);
+
+  // const chartData = [
+  //   { month: "January", desktop: 186, mobile: 80 },
+  //   { month: "February", desktop: 305, mobile: 200 },
+  //   { month: "March", desktop: 237, mobile: 120 },
+  //   { month: "April", desktop: 73, mobile: 190 },
+  //   { month: "May", desktop: 209, mobile: 130 },
+  //   { month: "June", desktop: 214, mobile: 140 },
+  // ];
+
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
       accessorKey: "metric",
@@ -310,6 +335,24 @@ export const TokenDistributionTable = ({
       ),
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
+    },
+    {
+      accessorKey: "chartLastDays",
+      cell: ({ row }) => {
+        // const chartLastDays: string = row.getValue("chartLastDays");
+        // const formattedData = transformChartMetrics(chartLastDays);
+
+        return <TheChart />;
+      },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="w-full"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Last {timeInterval.slice(0, 1)} days
+        </Button>
+      ),
     },
   ];
 
