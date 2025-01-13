@@ -3,6 +3,7 @@ import { sql } from "ponder";
 import { ponder } from "ponder:registry";
 import {
   ActiveSupplyQueryResult,
+  AverageTurnoutCompareQueryResult,
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
 } from "./types";
@@ -68,7 +69,8 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(proposalsCompare.currentProposalsLaunched) /
-      parseFloat(proposalsCompare.oldProposalsLaunched);
+        parseFloat(proposalsCompare.oldProposalsLaunched) -
+      1;
   }
   return context.json({ ...proposalsCompare, changeRate });
 });
@@ -109,7 +111,53 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
     changeRate = "0";
   } else {
     changeRate =
-      parseFloat(votesCompare.currentVotes) / parseFloat(votesCompare.oldVotes);
+      parseFloat(votesCompare.currentVotes) /
+        parseFloat(votesCompare.oldVotes) -
+      1;
   }
   return context.json({ ...votesCompare, changeRate });
+});
+
+ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
+  const daoId = context.req.param("daoId");
+  const days: string | undefined = context.req.query("days");
+  if (!days) {
+    throw new Error('Query param "days" is mandatory');
+  }
+  const oldBeginTimestamp =
+    BigInt(Date.now()) -
+    BigInt(DaysEnum[days as unknown as DaysEnum]) -
+    BigInt(DaysEnum["180d"]);
+  const oldEndTimestamp =
+    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+  const queryResult = await context.db.execute(sql`
+  with "old_average_turnout" as (
+        select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
+        from "proposals_onchain" po where po.timestamp BETWEEN CAST(${oldBeginTimestamp} as bigint) and CAST(${oldEndTimestamp} as bigint)
+        AND po.status='EXECUTED' or po.status='CANCELED' AND po."dao_id"=${daoId}
+  ),
+  "current_average_turnout" as (
+        select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
+        from "proposals_onchain" po where po.timestamp >= CAST(${currentBeginTimestamp} as bigint)
+        AND po.status='EXECUTED' or po.status='CANCELED' AND po."dao_id"=${daoId}
+  )
+  SELECT "old_average_turnout"."average_turnout" as "oldAverageTurnout",
+  "current_average_turnout"."average_turnout" as "currentAverageTurnout" 
+  FROM "current_average_turnout" 
+  LEFT JOIN "old_average_turnout" 
+  ON 1=1;
+  `);
+  const averageTurnoutCompare: AverageTurnoutCompareQueryResult = queryResult
+    .rows[0] as AverageTurnoutCompareQueryResult;
+  let changeRate;
+  if (averageTurnoutCompare.oldAverageTurnout === "0") {
+    changeRate = "0";
+  } else {
+    changeRate =
+      parseFloat(averageTurnoutCompare.currentAverageTurnout) /
+        parseFloat(averageTurnoutCompare.oldAverageTurnout) -
+      1;
+  }
+  return context.json({ ...averageTurnoutCompare, changeRate });
 });
