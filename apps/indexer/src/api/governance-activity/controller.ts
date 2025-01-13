@@ -7,7 +7,7 @@ import {
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
 } from "./types";
-import { formatUnits } from "viem";
+import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
 
 ponder.get("/dao/:daoId/active-supply", async (context) => {
   const daoId = context.req.param("daoId");
@@ -92,12 +92,14 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
         WITH "old_votes" AS (
           SELECT COUNT(*) AS "old_votes" FROM "votes_onchain" v 
           WHERE v.dao_id=${daoId}
-          AND v.timestamp BETWEEN CAST(${oldBeginTimestamp.toString().slice(0, 10)} as bigint) AND CAST(${oldEndTimestamp.toString().slice(0, 10)} as bigint)
+          AND v.timestamp 
+          BETWEEN CAST(${convertTimestampMilissecondsToSeconds(oldBeginTimestamp)} as bigint) 
+          AND CAST(${convertTimestampMilissecondsToSeconds(oldEndTimestamp)} as bigint)
         ),
         "current_votes" AS (
           SELECT COUNT(*) AS "current_votes" FROM "votes_onchain" v
           WHERE v.dao_id=${daoId}
-          AND v.timestamp > CAST(${currentBeginTimestamp.toString().slice(0, 10)} as bigint)
+          AND v.timestamp > CAST(${convertTimestampMilissecondsToSeconds(currentBeginTimestamp)} as bigint)
         )
         SELECT "current_votes"."current_votes" as "currentVotes",
         "old_votes"."old_votes" as "oldVotes" 
@@ -131,21 +133,25 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
   const oldEndTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+  console.log();
   const queryResult = await context.db.execute(sql`
   with "old_average_turnout" as (
         select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
-        from "proposals_onchain" po where po.timestamp BETWEEN CAST(${oldBeginTimestamp} as bigint) and CAST(${oldEndTimestamp} as bigint)
+        from "proposals_onchain" po where po.timestamp 
+        BETWEEN CAST(${convertTimestampMilissecondsToSeconds(oldBeginTimestamp)} as bigint)
+        and CAST(${convertTimestampMilissecondsToSeconds(oldEndTimestamp)} as bigint)
         AND po.status='EXECUTED' or po.status='CANCELED' AND po."dao_id"=${daoId}
   ),
   "current_average_turnout" as (
         select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
-        from "proposals_onchain" po where po.timestamp >= CAST(${currentBeginTimestamp} as bigint)
+        from "proposals_onchain" po 
+        where po.timestamp >= CAST(${convertTimestampMilissecondsToSeconds(currentBeginTimestamp)} as bigint)
         AND po.status='EXECUTED' or po.status='CANCELED' AND po."dao_id"=${daoId}
   )
   SELECT "old_average_turnout"."average_turnout" as "oldAverageTurnout",
   "current_average_turnout"."average_turnout" as "currentAverageTurnout" 
   FROM "current_average_turnout" 
-  LEFT JOIN "old_average_turnout" 
+  JOIN "old_average_turnout" 
   ON 1=1;
   `);
   const averageTurnoutCompare: AverageTurnoutCompareQueryResult = queryResult
