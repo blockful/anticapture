@@ -2,6 +2,7 @@
 
 import {
   Badge,
+  BaseCard,
   BlocksIcon,
   ClickIcon,
   Skeleton,
@@ -9,8 +10,7 @@ import {
   TooltipInfo,
 } from "@/components/01-atoms";
 import { formatTimestampUserReadable } from "@/lib/client/utils";
-import { useDaoDataContext } from "../contexts/DaoDataContext";
-import { BaseCard } from "@/components/01-atoms/BaseCard";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 
 export const VoteCard = () => {
   const { daoData } = useDaoDataContext();

@@ -2,6 +2,7 @@
 
 import {
   Badge,
+  BaseCard,
   CrownIcon,
   TokensIcon,
   NewspaperIcon,
@@ -9,7 +10,6 @@ import {
   TooltipInfo,
   ExternalLinkIcon,
 } from "@/components/01-atoms";
-import { BaseCard } from "@/components/01-atoms/BaseCard";
 
 export const ContractsCard = () => {
   return (

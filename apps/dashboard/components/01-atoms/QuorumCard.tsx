@@ -1,10 +1,14 @@
 "use client";
 
-import { UsersIcon, TooltipInfo, Skeleton } from "@/components/01-atoms";
+import {
+  BaseCard,
+  UsersIcon,
+  TooltipInfo,
+  Skeleton,
+} from "@/components/01-atoms";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { formatEther } from "viem";
-import { useDaoDataContext } from "../contexts/DaoDataContext";
-import { BaseCard } from "@/components/01-atoms/BaseCard";
+import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();

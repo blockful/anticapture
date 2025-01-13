@@ -1,6 +1,7 @@
 export * from "./icons";
 
 export * from "./Badge";
+export * from "./BaseCard";
 export * from "./BaseHeaderLayoutSidebar";
 export * from "./ContractsCard";
 export * from "./HeaderDAOSidebarDropdown";

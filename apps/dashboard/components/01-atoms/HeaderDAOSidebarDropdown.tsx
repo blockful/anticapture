@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { UniswapIcon } from "@/components/01-atoms";
+import { EnsIcon, UniswapIcon } from "@/components/01-atoms";
 import { useRouter } from "next/navigation";
 import { DaoId } from "@/lib/types/daos";
-import { EnsIcon } from "./icons/EnsIcon";
 import { ChevronsUpDown } from "lucide-react";
 
 export const HeaderDAOSidebarDropdown = () => {

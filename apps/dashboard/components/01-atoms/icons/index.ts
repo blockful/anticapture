@@ -9,6 +9,7 @@ export * from "./ClickIcon";
 export * from "./CrownIcon";
 export * from "./FocusIcon";
 export * from "./DollarIcon";
+export * from "./EnsIcon";
 export * from "./ExternalLinkIcon";
 export * from "./HandIcon";
 export * from "./HeaderIcon";
