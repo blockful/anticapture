@@ -1,6 +1,7 @@
 import { DaoId, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import { DaoDataProvider } from "@/components/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
+import { HeaderDAOSidebar } from "@/components/02-molecules";
 
 interface DaoLayoutProps {
   children: React.ReactNode;
@@ -14,5 +15,10 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
     return <NotFound />;
   }
 
-  return <DaoDataProvider daoId={daoId}>{children}</DaoDataProvider>;
+  return (
+    <DaoDataProvider daoId={daoId}>
+      <HeaderDAOSidebar />
+      {children}
+    </DaoDataProvider>
+  );
 }

@@ -2,12 +2,12 @@
 
 import {
   Badge,
+  BaseCard,
   Switcher,
   LockIcon,
   ExternalLinkIcon,
   TooltipInfo,
 } from "@/components/01-atoms";
-import { BaseCard } from "@/components/01-atoms/BaseCard";
 
 export const TimelockCard = () => {
   return (

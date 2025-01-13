@@ -6,6 +6,7 @@ import {
   GovernanceActivitySection,
   TokenDistributionSection,
 } from "@/components/03-organisms";
+import { daoInfoSectionAnchorID } from "@/lib/client/constants";
 import { DaoId, daoIdToNameMap } from "@/lib/types/daos";
 
 export const DaoInfoTemplate = ({ params }: { params: { daoId: string } }) => {
@@ -16,6 +17,7 @@ export const DaoInfoTemplate = ({ params }: { params: { daoId: string } }) => {
       <TheSectionLayout
         title={`${daoName} DAO Info`}
         icon={<UniswapIcon className="text-foreground" />}
+        anchorId={daoInfoSectionAnchorID}
       >
         <UniswapDaoInfo />
       </TheSectionLayout>

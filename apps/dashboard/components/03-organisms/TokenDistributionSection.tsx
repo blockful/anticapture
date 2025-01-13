@@ -8,6 +8,7 @@ import {
   SwitcherDate,
 } from "@/components/01-atoms";
 import { TokenDistributionTable } from "@/components/02-molecules";
+import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 
 export const TokenDistributionSection = () => {
   const [timeIntervalTokenDistribution, setTimeIntervalTokenDistribution] =
@@ -23,6 +24,7 @@ export const TokenDistributionSection = () => {
       description="Token distribution metrics are based on Blockful's Governance
         Indexer and are updated after a new block is confirmed with new
         interaction with relevant contracts."
+      anchorId={tokenDistributionSectionAnchorID}
     >
       <TokenDistributionTable timeInterval={timeIntervalTokenDistribution} />
     </TheSectionLayout>
