@@ -221,26 +221,6 @@ export const tokenTransfer = async (
     timestamp: event.block.timestamp,
   });
 
-  // Update the from account's balance
-  if (from !== zeroAddress) {
-    const fromAccount = await context.db
-      .insert(accountBalance)
-      .values({
-        id: [from, uniTokenAddress].join("-"),
-        tokenId: uniTokenAddress,
-        accountId: from,
-        balance: BigInt(value),
-      })
-      .onConflictDoUpdate((current) => ({
-        balance: (current.balance ?? BigInt(0)) - BigInt(value),
-      }));
-    // Check if the balances are valid
-    if (fromAccount.balance! < BigInt(0)) {
-      console.log(`Invalid balance for ${from}`);
-      throw new Error(`Invalid balance`);
-    }
-  }
-
   // Update the to account's balance
   await context.db
     .insert(accountBalance)
@@ -248,10 +228,23 @@ export const tokenTransfer = async (
       id: [to, uniTokenAddress].join("-"),
       tokenId: uniTokenAddress,
       accountId: to,
-      balance: BigInt(value),
+      balance: value,
     })
     .onConflictDoUpdate((current) => ({
-      balance: (current.balance ?? BigInt(0)) + BigInt(value),
+      balance: current.balance + value,
+    }));
+    
+  // Update the from account's balance
+  await context.db
+    .insert(accountBalance)
+    .values({
+      id: [from, uniTokenAddress].join("-"),
+      tokenId: uniTokenAddress,
+      accountId: from,
+      balance: - value,
+    })
+    .onConflictDoUpdate((current) => ({
+      balance: current.balance - value,
     }));
 
   const currentLendingSupply = (await context.db.find(token, {
@@ -340,11 +333,12 @@ export const tokenTransfer = async (
   }))!.treasury;
 
   const treasuryAddressList = Object.values(UNITreasuryAddresses);
-  const isTreasuryTransaction =
-    treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
+  const isTreasuryTransaction = treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
+  const isInternalTreasuryTransfer = treasuryAddressList.includes(to) && treasuryAddressList.includes(from);
 
-  if (isTreasuryTransaction) {
+  if (isTreasuryTransaction && !isInternalTreasuryTransfer) {
     const isToTreasury = treasuryAddressList.includes(to);
+
     const newTreasury = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         treasury: isToTreasury ? row.treasury + value : row.treasury - value,
