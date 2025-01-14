@@ -19,6 +19,7 @@ import {
   token,
 } from "ponder:schema";
 import {
+  BurningAddresses,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
@@ -310,7 +311,6 @@ export const tokenTransfer = async (
     dexAddressList.includes(to) || dexAddressList.includes(from);
 
   if (isDexTransaction) {
-    console.log('DEX!!!!!!')
     const isToDex = dexAddressList.includes(to);
     const newDexSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
@@ -351,7 +351,33 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.TREASURY,
       currentTreasury,
-      newTreasury,
+      newTreasury
+    );
+  }
+
+  const currentTotalSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.totalSupply;
+
+  const burningAddressesAddressList = Object.values(BurningAddresses);
+  const isTotalSupplyTransaction =
+  burningAddressesAddressList.includes(to) || burningAddressesAddressList.includes(from);
+
+  if (isTotalSupplyTransaction) {
+    const isBurningTokens = burningAddressesAddressList.includes(to);
+    const newTotalSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        totalSupply: isBurningTokens ? row.totalSupply - value : row.totalSupply + value,
+      }))
+    ).totalSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      currentTotalSupply,
+      newTotalSupply,
     );
   }
 };
