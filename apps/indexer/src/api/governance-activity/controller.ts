@@ -10,13 +10,16 @@ import {
 import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
 
 ponder.get("/dao/:daoId/active-supply", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamps
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  //Running Query
   const queryResult = await context.db.execute(sql`
             WITH  "active_users" as (
           SELECT DISTINCT ON (voc."voter_account_id") voc."voter_account_id", voc.timestamp
@@ -29,15 +32,19 @@ ponder.get("/dao/:daoId/active-supply", async (context) => {
     `);
   const activeSupply: ActiveSupplyQueryResult = queryResult
     .rows[0] as ActiveSupplyQueryResult;
+  // Returning response
   return context.json(activeSupply);
 });
 
 ponder.get("/dao/:daoId/proposals/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+
+  //Creating Timestamp
   const oldBeginTimestamp =
     BigInt(Date.now()) -
     BigInt(DaysEnum[days as unknown as DaysEnum]) -
@@ -45,6 +52,8 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
   const oldEndTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
         WITH "old_proposals" AS (
           SELECT COUNT(*) AS "old_proposals_launched" FROM "proposals_onchain" p 
@@ -61,6 +70,8 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
         FROM "current_proposals"
         JOIN "old_proposals" ON 1=1;
   `);
+
+  //Calculating Change Rate
   const proposalsCompare: ProposalsCompareQueryResult = queryResult
     .rows[0] as ProposalsCompareQueryResult;
   let changeRate;
@@ -72,15 +83,19 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
         parseFloat(proposalsCompare.oldProposalsLaunched) -
       1;
   }
+  // Returning response
   return context.json({ ...proposalsCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/votes/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+
+  //Creating Timestamps
   const oldBeginTimestamp =
     BigInt(Date.now()) -
     BigInt(DaysEnum[days as unknown as DaysEnum]) -
@@ -88,6 +103,8 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
   const oldEndTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
   const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
         WITH "old_votes" AS (
           SELECT COUNT(*) AS "old_votes" FROM "votes_onchain" v 
@@ -106,6 +123,8 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
         FROM "current_votes"
         JOIN "old_votes" ON 1=1;
   `);
+
+  //Calculating Change Rate
   const votesCompare: VotesCompareQueryResult = queryResult
     .rows[0] as VotesCompareQueryResult;
   let changeRate;
@@ -117,15 +136,19 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
         parseFloat(votesCompare.oldVotes) -
       1;
   }
+  // Returning response
   return context.json({ ...votesCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+
+  //Creating Timestamps and Intervals
   const fixedInterval = BigInt(DaysEnum["180d"]);
   const proposalVotingPeriod = BigInt(DaysEnum["7d"]);
   const oldBeginTimestamp =
@@ -138,20 +161,22 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
     proposalVotingPeriod;
   const currentBeginTimestamp = BigInt(Date.now()) - fixedInterval;
   const currentEndTimestamp = BigInt(Date.now()) - proposalVotingPeriod;
-  console.log();
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
   with "old_average_turnout" as (
         select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
         from "proposals_onchain" po where po.timestamp 
         BETWEEN CAST(${convertTimestampMilissecondsToSeconds(oldBeginTimestamp)} as bigint)
         and CAST(${convertTimestampMilissecondsToSeconds(oldEndTimestamp)} as bigint)
-        AND po.status='EXECUTED' or po.status='CANCELED' AND po."dao_id"=${daoId}
+        AND po.status!='CANCELED' AND po."dao_id"=${daoId}
   ),
   "current_average_turnout" as (
         select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
-        from "proposals_onchain" po 
-        where po.timestamp >= CAST(${convertTimestampMilissecondsToSeconds(currentBeginTimestamp)} as bigint)
-        AND po.status='EXECUTED' or po.status='CANCELED' AND po."dao_id"=${daoId}
+        from "proposals_onchain" po WHERE po.timestamp
+        BETWEEN CAST(${convertTimestampMilissecondsToSeconds(currentBeginTimestamp)} as bigint)
+        and CAST(${convertTimestampMilissecondsToSeconds(currentEndTimestamp)} as bigint)
+        AND po.status!='CANCELED' AND po."dao_id"=${daoId}
   )
   SELECT "old_average_turnout"."average_turnout" as "oldAverageTurnout",
   "current_average_turnout"."average_turnout" as "currentAverageTurnout" 
@@ -159,6 +184,8 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
   JOIN "old_average_turnout" 
   ON 1=1;
   `);
+
+  //Calculating Change Rate
   const averageTurnoutCompare: AverageTurnoutCompareQueryResult = queryResult
     .rows[0] as AverageTurnoutCompareQueryResult;
   let changeRate;
@@ -170,5 +197,6 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
         parseFloat(averageTurnoutCompare.oldAverageTurnout) -
       1;
   }
+  // Returning response
   return context.json({ ...averageTurnoutCompare, changeRate });
 });
