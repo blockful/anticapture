@@ -380,6 +380,29 @@ export const tokenTransfer = async (
       newTotalSupply,
     );
   }
+
+  const currentCirculatingSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.circulatingSupply;
+
+  const isCirculatingSupplyTransaction = isTotalSupplyTransaction || isTreasuryTransaction
+
+  if (isCirculatingSupplyTransaction) {
+    const newCirculatingSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        circulatingSupply: row.totalSupply - row.treasury,
+      }))
+    ).circulatingSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      currentCirculatingSupply,
+      newCirculatingSupply,
+    );
+  }
 };
 
 export const voteCast = async (
