@@ -27,15 +27,9 @@ const chartConfig = {
 
 export const TheChart = () => {
   return (
-    <div className="flex max-h-14 w-full max-w-52 items-center justify-center">
-      <ChartContainer config={chartConfig} className="h-[50%] w-full max-w-52">
-        <ResponsiveContainer
-          width="100%"
-          height="50%"
-          style={{
-            display: "flex",
-          }}
-        >
+    <div className="flex h-full w-full items-center justify-center">
+      <ChartContainer className="h-full w-full" config={chartConfig}>
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <XAxis
               dataKey="month"

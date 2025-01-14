@@ -342,7 +342,11 @@ export const TokenDistributionTable = ({
         // const chartLastDays: string = row.getValue("chartLastDays");
         // const formattedData = transformChartMetrics(chartLastDays);
 
-        return <TheChart />;
+        return (
+          <div className="h-20">
+            <TheChart />
+          </div>
+        );
       },
       header: ({ column }) => (
         <Button
