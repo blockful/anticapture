@@ -126,13 +126,18 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  const fixedInterval = BigInt(DaysEnum["180d"]);
+  const proposalVotingPeriod = BigInt(DaysEnum["7d"]);
   const oldBeginTimestamp =
     BigInt(Date.now()) -
     BigInt(DaysEnum[days as unknown as DaysEnum]) -
-    BigInt(DaysEnum["180d"]);
+    fixedInterval;
   const oldEndTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
-  const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+    BigInt(Date.now()) -
+    BigInt(DaysEnum[days as unknown as DaysEnum]) -
+    proposalVotingPeriod;
+  const currentBeginTimestamp = BigInt(Date.now()) - fixedInterval;
+  const currentEndTimestamp = BigInt(Date.now()) - proposalVotingPeriod;
   console.log();
   const queryResult = await context.db.execute(sql`
   with "old_average_turnout" as (
