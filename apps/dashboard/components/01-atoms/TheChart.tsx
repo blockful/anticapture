@@ -1,22 +1,22 @@
 "use client";
 
 import { Area, AreaChart, ResponsiveContainer, XAxis } from "recharts";
-
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { ChartMetrics, chartMetrics } from "@/lib/mocked-data";
 
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 10000 },
-  { month: "March", desktop: 437 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 1000 },
-  { month: "June", desktop: 2000 },
-];
+const transformChartMetrics = (data: ChartMetrics[]) => {
+  return data.map((item: ChartMetrics) => ({
+    date: new Date(Number(item.dayTimestamp)).toISOString().split("T")[0],
+    high: Number(item.high),
+  }));
+};
+
+const formattedChartMetrics = transformChartMetrics(chartMetrics);
 
 const chartConfig = {
   desktop: {
@@ -30,9 +30,9 @@ export const TheChart = () => {
     <div className="flex h-full w-full items-center justify-center">
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData}>
+          <AreaChart data={formattedChartMetrics}>
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               axisLine={false}
               tick={false}
@@ -42,7 +42,7 @@ export const TheChart = () => {
               content={<ChartTooltipContent indicator="dot" hideLabel />}
             />
             <Area
-              dataKey="desktop"
+              dataKey="high"
               type="linear"
               fill="var(--color-desktop)"
               fillOpacity={0.4}

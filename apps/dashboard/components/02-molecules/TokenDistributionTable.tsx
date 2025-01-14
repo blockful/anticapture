@@ -221,16 +221,6 @@ export const TokenDistributionTable = ({
     });
   }, [daoData, timeInterval]);
 
-  // const transformChartMetrics = (data: ChartMetrics[]) => {
-  //   return data.map((item: ChartMetrics) => ({
-  //     date: new Date(Number(item.dayTimestamp)).toISOString().split("T")[0],
-  //     high: Number(item.high),
-  //   }));
-  // };
-
-  // console.log("transformChartMetrics", transformChartMetrics(chartMetrics));
-  // const formattedChartMetrics = transformChartMetrics(chartMetrics);
-
   // const chartData = [
   //   { month: "January", desktop: 186, mobile: 80 },
   //   { month: "February", desktop: 305, mobile: 200 },
@@ -343,7 +333,7 @@ export const TokenDistributionTable = ({
         // const formattedData = transformChartMetrics(chartLastDays);
 
         return (
-          <div className="h-20">
+          <div className="flex items-center justify-center">
             <TheChart />
           </div>
         );
