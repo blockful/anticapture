@@ -1,3 +1,5 @@
+import { zeroAddress } from "viem";
+
 export const secondsInDay = 24 * 60 * 60;
 
 export const UNITreasuryAddresses = {
@@ -53,6 +55,15 @@ export const DEXAddresses = {
 
 export const LendingAddresses = {
   Aave: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
+  MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+  CompoundCUNI: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
+};
+
+export const BurningAddresses = {
+ ZeroAddress: zeroAddress,
+ Dead: "0x000000000000000000000000000000000000dEaD",
+ TokenContract: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+ Airdrop: "0x090D4613473dEE047c3f2706764f49E0821D256e"
 };
 
 export enum MetricTypesEnum {
