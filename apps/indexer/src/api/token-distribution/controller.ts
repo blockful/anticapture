@@ -12,21 +12,23 @@ import {
   TreasuryQueryResult,
 } from "./types";
 import {
-  CEXAddresses,
   DEXAddresses,
-  LendingAddresses,
   MetricTypesEnum,
   UNITreasuryAddresses,
 } from "@/lib/constants";
 
 ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db
     .execute(sql`         WITH "old_from_zero_address" as (
     SELECT SUM(t.amount) as "from_amount" 
@@ -56,19 +58,23 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
     (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
       BigInt(totalSupplyCompare.oldTotalSupply) -
       BigInt(1e18),
-    18,
+    18
   );
   return context.json({ ...totalSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
   WITH  "old_delegated_supply" as (
     SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
@@ -97,20 +103,24 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
       (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
         BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
         BigInt(1e18),
-      18,
+      18
     );
   }
   return context.json({ ...delegatedSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
    WITH "old_from_zero_address" as (
           SELECT SUM(t.amount) as "from_amount" 
@@ -160,19 +170,23 @@ ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
     (BigInt(circulatingSupplyCompare.currentCirculatingSupply) * BigInt(1e18)) /
       BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
       BigInt(1e18),
-    18,
+    18
   );
   return context.json({ ...circulatingSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/treasury/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
     WITH "old_from_treasury" as (
       SELECT SUM(t.amount) as "from_amount" 
@@ -200,6 +214,8 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
     JOIN "old_to_treasury" ON 1=1
     JOIN "current_treasury" ON 1=1;
   `);
+
+  //Calculating Change Rate
   const treasuryCompare: TreasuryQueryResult = queryResult
     .rows[0] as TreasuryQueryResult;
   let changeRate;
@@ -210,20 +226,25 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
       (BigInt(treasuryCompare.currentTreasury) * BigInt(1e18)) /
         BigInt(treasuryCompare.oldTreasury) -
         BigInt(1e18),
-      18,
+      18
     );
   }
+  // Returning response
   return context.json({ ...treasuryCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
   WITH  "old_cex_supply" as (
     SELECT db.average as old_cex_supply_amount from "dao_metrics_day_buckets" db 
@@ -243,6 +264,8 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
   FROM "current_cex_supply"
   LEFT JOIN "old_cex_supply" ON 1=1;
 `);
+
+  //Calculating Change Rate
   const cexSupplyCompare: CexSupplyQueryResult = queryResult
     .rows[0] as CexSupplyQueryResult;
   let changeRate;
@@ -256,17 +279,23 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
       18
     );
   }
+
+  // Returning response
   return context.json({ ...cexSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
     WITH "old_from_dex" as (
       SELECT SUM(t.amount) as "from_amount" 
@@ -289,7 +318,7 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
     "current_dex_supply" as (
       SELECT SUM(ab.balance) AS "current_dex_supply"
       FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-        DEXAddresses,
+        DEXAddresses
       )
         .map((addr) => addr.toUpperCase())
         .join(", ")})
@@ -300,7 +329,10 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
     as "currentDexSupply"
     FROM "old_from_dex"
     JOIN "old_to_dex" ON 1=1
-    JOIN "current_dex_supply" ON 1=1;`);
+    JOIN "current_dex_supply" ON 1=1;
+  `);
+
+  //Calculating Change Rate
   const dexCompare: DexSupplyQueryResult = queryResult
     .rows[0] as DexSupplyQueryResult;
   let changeRate;
@@ -311,20 +343,26 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
       (BigInt(dexCompare.currentDexSupply) * BigInt(1e18)) /
         BigInt(dexCompare.oldDexSupply) -
         BigInt(1e18),
-      18,
+      18
     );
   }
+
+  // Returning response
   return context.json({ ...dexCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
   WITH  "old_lending_supply" as (
     SELECT db.average as "old_lending_supply_amount" from "dao_metrics_day_buckets" db 
@@ -343,7 +381,9 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
   COALESCE("current_lending_supply"."current_lending_supply_amount", 0) AS "currentLendingSupply"
   FROM "current_lending_supply"
   LEFT JOIN "old_lending_supply" ON 1=1;
-`);
+  `);
+
+  //Calculating Change Rate
   const lendingSupplyCompare: LendingSupplyQueryResult = queryResult
     .rows[0] as LendingSupplyQueryResult;
   let changeRate;
@@ -354,8 +394,9 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
       (BigInt(lendingSupplyCompare.currentLendingSupply) * BigInt(1e18)) /
         BigInt(lendingSupplyCompare.oldLendingSupply) -
         BigInt(1e18),
-      18,
+      18
     );
   }
+  // Returning response
   return context.json({ ...lendingSupplyCompare, changeRate });
 });
