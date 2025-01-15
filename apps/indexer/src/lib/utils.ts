@@ -6,7 +6,7 @@ type ValueNamesByDao = {
 export const getValueFromEventArgs = <T, K extends { [k: string]: any }>(
   valueNames: ValueNamesByDao,
   args: K,
-  daoId: string,
+  daoId: string
 ): T => {
   const valueName = valueNames.find(({ daos }) => daos.includes(daoId))?.name;
   if (!valueName) {
@@ -24,6 +24,10 @@ export const getValueFromEventArgs = <T, K extends { [k: string]: any }>(
 
 export const convertSecondsTimestampToDate = (timestamp: number) => {
   return new Date(parseInt(String(timestamp) + "000"));
+};
+
+export const convertTimestampMilissecondsToSeconds = (timestamp: bigint) => {
+  return BigInt(String(timestamp).slice(0, 10));
 };
 
 /**

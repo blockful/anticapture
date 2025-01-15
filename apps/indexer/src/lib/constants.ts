@@ -52,6 +52,10 @@ export const DEXAddresses = {
 
 export const LendingAddresses = {
   Aave: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
+  MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+  VenusUni: "0x27FF564707786720C71A2e5c1490A63266683612",
+  CompoundV2: "0x35a18000230da775cac24873d00ff85bccded550",
+  Dolomite: "0x6Bd780E7fDf01D77e4d475c821f1e7AE05409072",
 };
 
 export enum MetricTypesEnum {

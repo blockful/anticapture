@@ -28,7 +28,6 @@ import {
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
 
-
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
   // | Event<"COMPToken:DelegateChanged">
