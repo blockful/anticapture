@@ -4,7 +4,6 @@ import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
-  ChartMetrics,
   chartMetrics,
   TokenDistribution,
   tokenDistributionData,
@@ -12,11 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   AppleIcon,
+  ArrowState,
   ArrowUpDown,
+  Sparkline,
   TimeInterval,
   TheTable,
   TooltipInfo,
-  ArrowState,
 } from "@/components/01-atoms";
 import {
   fetchCexSupply,
@@ -29,7 +29,6 @@ import {
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
-import { TheChart } from "../01-atoms/TheChart";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -329,22 +328,20 @@ export const TokenDistributionTable = ({
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
-        // const chartLastDays: string = row.getValue("chartLastDays");
-        // const formattedData = transformChartMetrics(chartLastDays);
-
+        // const chartLastDays: ChartMetrics = row.getValue("chartLastDays");
+        // const formattedData = transformChartMetrics([chartLastDays]);
         return (
-          <div className="flex items-center justify-center">
-            <TheChart />
-          </div>
+          <button className="flex w-full items-start justify-start px-4">
+            <Sparkline data={chartMetrics.map((item) => Number(item.high))} />
+          </button>
         );
       },
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="flex w-full items-start justify-start"
         >
-          Last {timeInterval.slice(0, 1)} days
+          Last {timeInterval.slice(0, -1)} days
         </Button>
       ),
     },
