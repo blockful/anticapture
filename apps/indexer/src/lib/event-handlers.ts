@@ -29,6 +29,7 @@ import {
 } from "./constants";
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
+import { and, eq, gte, inArray, sum } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -36,7 +37,7 @@ export const delegateChanged = async (
   // | Event<"SHUToken:DelegateChanged">
   Event<"UNIToken:DelegateChanged">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   // Inserting accounts if didn't exist
   await context.db
@@ -102,7 +103,7 @@ export const delegatedVotesChanged = async (
   // | Event<"SHUToken:DelegateVotesChanged">
   Event<"UNIToken:DelegateVotesChanged">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   //Inserting delegate account if didn't exist
   await context.db
@@ -118,7 +119,7 @@ export const delegatedVotesChanged = async (
       { name: "newVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -127,7 +128,7 @@ export const delegatedVotesChanged = async (
       { name: "previousVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   // Create a new voting power history record
@@ -170,7 +171,7 @@ export const delegatedVotesChanged = async (
     daoId,
     MetricTypesEnum.DELEGATED_SUPPLY,
     currentDelegatedSupply,
-    newDelegatedSupply
+    newDelegatedSupply,
   );
 };
 
@@ -180,7 +181,7 @@ export const tokenTransfer = async (
   // | Event<"SHUToken:Transfer">
   Event<"UNIToken:Transfer">,
   context: Context,
-  daoId: "UNI"
+  daoId: "UNI",
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -189,7 +190,7 @@ export const tokenTransfer = async (
       { name: "amount", daos: ["COMP", "UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const { from, to } = event.args;
@@ -271,7 +272,7 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.LENDING_SUPPLY,
       currentLendingSupply,
-      newLendingSupply
+      newLendingSupply,
     );
   }
 
@@ -297,7 +298,7 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.CEX_SUPPLY,
       currentCexSupply,
-      newCexSupply
+      newCexSupply,
     );
   }
 
@@ -323,7 +324,7 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
-      newDexSupply
+      newDexSupply,
     );
   }
 
@@ -352,7 +353,7 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.TREASURY,
       currentTreasury,
-      newTreasury
+      newTreasury,
     );
   }
 
@@ -381,7 +382,7 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.TOTAL_SUPPLY,
       currentTotalSupply,
-      newTotalSupply
+      newTotalSupply,
     );
   }
 
@@ -405,7 +406,68 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.CIRCULATING_SUPPLY,
       currentCirculatingSupply,
-      newCirculatingSupply
+      newCirculatingSupply,
+    );
+  }
+
+  const currentActiveSupply180d = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.activeSupply180d;
+
+  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
+
+  //   SELECT
+  //    SUM(ap.voting_power) as active_voting_power
+  // FROM
+  //    account_power ap
+  // WHERE
+  //    ap.dao_id = 'UNI'
+  //    AND ap.account_id IN (
+  //        SELECT DISTINCT voter_account_id
+  //        FROM votes_onchain
+  //        WHERE dao_id = 'UNI'
+  // 	   and votes_onchain."timestamp" >= EXTRACT(EPOCH FROM NOW() - INTERVAL '90 days')
+
+  const activeUsers = await context.db.sql
+    .selectDistinct({ account: votesOnchain.voterAccountId })
+    .from(votesOnchain)
+    .where(
+      and(
+        eq(votesOnchain.daoId, "UNI"),
+        gte(votesOnchain.timestamp, beginActiveTimestamp),
+      ),
+    );
+
+  const newActiveSupply180d = BigInt(
+    (
+      await context.db.sql
+        .select({ activeSupply180d: sum(accountPower.votingPower) })
+        .from(accountPower)
+        .where(
+          inArray(
+            accountPower.accountId,
+            activeUsers
+              .map(({ account }) => account)
+              .filter((value) => value != null),
+          ),
+        )
+    )[0]!.activeSupply180d ?? 0,
+  );
+
+  const activeSupply180dChanges =
+    newActiveSupply180d !== currentActiveSupply180d;
+  if (activeSupply180dChanges) {
+    await context.db.update(token, { id: event.log.address }).set((row) => ({
+      activeSupply180d: newActiveSupply180d,
+    }));
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.ACTIVE_SUPPLY_180D,
+      currentActiveSupply180d,
+      newActiveSupply180d,
     );
   }
 };
@@ -414,7 +476,7 @@ export const voteCast = async (
   event: // | Event<"ENSGovernor:VoteCast">
   Event<"UNIGovernor:VoteCast">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -422,13 +484,13 @@ export const voteCast = async (
       { name: "votes", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [{ name: "proposalId", daos: ["ENS", "UNI"] }],
     event.args,
-    daoId
+    daoId,
   );
 
   await context.db
@@ -481,7 +543,7 @@ export const proposalCreated = async (
   event: // | Event<"ENSGovernor:ProposalCreated">
   Event<"UNIGovernor:ProposalCreated">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -489,7 +551,7 @@ export const proposalCreated = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   await context.db
@@ -537,7 +599,7 @@ export const proposalCanceled = async (
   event: // | Event<"ENSGovernor:ProposalCanceled">
   Event<"UNIGovernor:ProposalCanceled">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -545,7 +607,7 @@ export const proposalCanceled = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
   await context.db
     .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
@@ -558,7 +620,7 @@ export const proposalExecuted = async (
   event: // | Event<"ENSGovernor:ProposalExecuted">
   Event<"UNIGovernor:ProposalExecuted">,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -566,7 +628,7 @@ export const proposalExecuted = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
   await context.db
     .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
@@ -581,17 +643,14 @@ const storeDailyBucket = async (
   daoId: string,
   metricType: MetricTypesEnum,
   currentValue: bigint,
-  newValue: bigint
+  newValue: bigint,
 ) => {
-  const dayTimestamp =
-    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
-
   const volume = delta(newValue, currentValue);
 
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
-      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
+      date: event.block.timestamp,
       daoId,
       tokenId: event.log.address,
       metricType,
