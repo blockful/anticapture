@@ -19,14 +19,17 @@ import {
   token,
 } from "ponder:schema";
 import {
+  BurningAddresses,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
   MetricTypesEnum,
   secondsInDay,
+  UNITreasuryAddresses,
 } from "./constants";
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
+import { and, eq, gte, inArray, sum } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -219,26 +222,6 @@ export const tokenTransfer = async (
     timestamp: event.block.timestamp,
   });
 
-  // Update the from account's balance
-  if (from !== zeroAddress) {
-    const fromAccount = await context.db
-      .insert(accountBalance)
-      .values({
-        id: [from, uniTokenAddress].join("-"),
-        tokenId: uniTokenAddress,
-        accountId: from,
-        balance: BigInt(value),
-      })
-      .onConflictDoUpdate((current) => ({
-        balance: (current.balance ?? BigInt(0)) - BigInt(value),
-      }));
-    // Check if the balances are valid
-    if (fromAccount.balance! < BigInt(0)) {
-      console.log(`Invalid balance for ${from}`);
-      throw new Error(`Invalid balance`);
-    }
-  }
-
   // Update the to account's balance
   await context.db
     .insert(accountBalance)
@@ -246,10 +229,23 @@ export const tokenTransfer = async (
       id: [to, uniTokenAddress].join("-"),
       tokenId: uniTokenAddress,
       accountId: to,
-      balance: BigInt(value),
+      balance: value,
     })
     .onConflictDoUpdate((current) => ({
-      balance: (current.balance ?? BigInt(0)) + BigInt(value),
+      balance: current.balance + value,
+    }));
+
+  // Update the from account's balance
+  await context.db
+    .insert(accountBalance)
+    .values({
+      id: [from, uniTokenAddress].join("-"),
+      tokenId: uniTokenAddress,
+      accountId: from,
+      balance: -value,
+    })
+    .onConflictDoUpdate((current) => ({
+      balance: current.balance - value,
     }));
 
   const currentLendingSupply = (await context.db.find(token, {
@@ -329,6 +325,137 @@ export const tokenTransfer = async (
       MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
       newDexSupply,
+    );
+  }
+
+  const currentTreasury = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.treasury;
+
+  const treasuryAddressList = Object.values(UNITreasuryAddresses);
+  const isTreasuryTransaction =
+    treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
+  const isInternalTreasuryTransfer =
+    treasuryAddressList.includes(to) && treasuryAddressList.includes(from);
+
+  if (isTreasuryTransaction && !isInternalTreasuryTransfer) {
+    const isToTreasury = treasuryAddressList.includes(to);
+
+    const newTreasury = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        treasury: isToTreasury ? row.treasury + value : row.treasury - value,
+      }))
+    ).treasury;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.TREASURY,
+      currentTreasury,
+      newTreasury,
+    );
+  }
+
+  const currentTotalSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.totalSupply;
+
+  const burningAddressesAddressList = Object.values(BurningAddresses);
+  const isTotalSupplyTransaction =
+    burningAddressesAddressList.includes(to) ||
+    burningAddressesAddressList.includes(from);
+
+  if (isTotalSupplyTransaction) {
+    const isBurningTokens = burningAddressesAddressList.includes(to);
+    const newTotalSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        totalSupply: isBurningTokens
+          ? row.totalSupply - value
+          : row.totalSupply + value,
+      }))
+    ).totalSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      currentTotalSupply,
+      newTotalSupply,
+    );
+  }
+
+  const currentCirculatingSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.circulatingSupply;
+
+  const isCirculatingSupplyTransaction =
+    isTotalSupplyTransaction || isTreasuryTransaction;
+
+  if (isCirculatingSupplyTransaction) {
+    const newCirculatingSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        circulatingSupply: row.totalSupply - row.treasury,
+      }))
+    ).circulatingSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      currentCirculatingSupply,
+      newCirculatingSupply,
+    );
+  }
+
+  const currentActiveSupply180d = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.activeSupply180d;
+
+  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
+
+  const activeUsers = await context.db.sql
+    .selectDistinct({ account: votesOnchain.voterAccountId })
+    .from(votesOnchain)
+    .where(
+      and(
+        eq(votesOnchain.daoId, "UNI"),
+        gte(votesOnchain.timestamp, beginActiveTimestamp),
+      ),
+    );
+
+  const newActiveSupply180d = BigInt(
+    (
+      await context.db.sql
+        .select({ activeSupply180d: sum(accountPower.votingPower) })
+        .from(accountPower)
+        .where(
+          inArray(
+            accountPower.accountId,
+            activeUsers
+              .map(({ account }) => account)
+              .filter((value) => value != null),
+          ),
+        )
+    )[0]!.activeSupply180d ?? 0,
+  );
+
+  const activeSupply180dChanges =
+    newActiveSupply180d !== currentActiveSupply180d;
+  if (activeSupply180dChanges) {
+    await context.db.update(token, { id: event.log.address }).set((row) => ({
+      activeSupply180d: newActiveSupply180d,
+    }));
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.ACTIVE_SUPPLY_180D,
+      currentActiveSupply180d,
+      newActiveSupply180d,
     );
   }
 };
@@ -506,15 +633,12 @@ const storeDailyBucket = async (
   currentValue: bigint,
   newValue: bigint,
 ) => {
-  const dayTimestamp =
-    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
-
   const volume = delta(newValue, currentValue);
 
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
-      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
+      date: event.block.timestamp,
       daoId,
       tokenId: event.log.address,
       metricType,

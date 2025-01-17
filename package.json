@@ -23,8 +23,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@defendao/indexer": "./apps/indexer",
     "@defendao/dashboard": "./apps/dashboard",
+    "@defendao/indexer": "./apps/indexer",
+    "@hono/swagger-ui": "^0.5.0",
+    "@scalar/hono-api-reference": "^0.5.165",
     "turbo": "^2.3.1"
   },
   "packageManager": "pnpm@9.14.2",

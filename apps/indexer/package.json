@@ -18,6 +18,7 @@
     "restore-database": "psql -d $DATABASE_URL < dump"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.5.0",
     "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
     "ponder": "^0.8.5",
