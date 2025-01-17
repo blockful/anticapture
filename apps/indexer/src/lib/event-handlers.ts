@@ -184,7 +184,7 @@ export const delegatedVotesChanged = async (
     .from(votesOnchain)
     .where(
       and(
-        eq(votesOnchain.daoId, "UNI"),
+        eq(votesOnchain.daoId, daoId),
         gte(votesOnchain.timestamp, beginActiveTimestamp),
       ),
     );
