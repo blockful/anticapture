@@ -67,10 +67,14 @@ export const accountPower = onchainTable(
     proposalsCount: drizzle.integer().default(0).notNull(),
     delegationsCount: drizzle.integer().default(0).notNull(),
     delegate: drizzle.text().default(zeroAddress).notNull(),
+    lastVoteTimestamp: drizzle.bigint().default(BigInt(0)).notNull(),
+    active: drizzle.boolean().notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
+    activeIdx: index().on(table.active),
+    lastVoteTimestamp: index().on(table.lastVoteTimestamp),
   }),
 );
 

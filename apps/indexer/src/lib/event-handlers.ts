@@ -21,9 +21,9 @@ import {
   secondsInDay,
   UNITreasuryAddresses,
 } from "./constants";
-import { zeroAddress } from "viem";
+import { MaxFeePerGasTooLowError, zeroAddress } from "viem";
 import viemClient from "./viemClient";
-import { and, eq, gte, inArray, sql, sum } from "ponder";
+import { and, eq, gte, inArray, lt, sql, sum } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -65,6 +65,8 @@ export const delegateChanged = async (
       accountId: event.args.delegator,
       daoId,
       delegate: event.args.toDelegate,
+      active: false,
+      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate({
       delegate: event.args.toDelegate,
@@ -85,6 +87,8 @@ export const delegateChanged = async (
       accountId: event.args.toDelegate,
       daoId,
       delegationsCount: 1,
+      active: false,
+      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate((current) => ({
       delegationsCount: (current.delegationsCount ?? 0) + 1,
@@ -135,13 +139,15 @@ export const delegatedVotesChanged = async (
   });
 
   // Update the delegate's voting power
-  await context.db
+  const delegateAccountPower = await context.db
     .insert(accountPower)
     .values({
       id: [event.args.delegate, daoId].join("-"),
       accountId: event.args.delegate,
       daoId,
       votingPower: newBalance,
+      active: false,
+      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate({
       votingPower: newBalance,
@@ -168,56 +174,15 @@ export const delegatedVotesChanged = async (
     newDelegatedSupply,
   );
 
-  const currentActiveSupply180d = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.activeSupply180d;
-
-  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
-
-  // const activeUsers = await context.db.sql
-  //   .selectDistinct({ account: votesOnchain.voterAccountId })
-  //   .from(votesOnchain)
-  //   .where(
-  //     and(
-  //       eq(votesOnchain.daoId, daoId),
-  //       gte(votesOnchain.timestamp, beginActiveTimestamp),
-  //     ),
-  //   );
-
-  // const newActiveSupply180d = BigInt(
-  //   (
-  //     await context.db.sql
-  //       .select({ activeSupply180d: sum(accountPower.votingPower) })
-  //       .from(accountPower)
-  //       .where(
-  //         inArray(
-  //           accountPower.accountId,
-  //           activeUsers
-  //             .map(({ account }) => account)
-  //             .filter((value) => value != null),
-  //         ),
-  //       )
-  //   )[0]!.activeSupply180d ?? 0,
-  // );
-
-  const queryResult = await context.db.sql.execute(sql`
-   SELECT SUM(ap.voting_power) as "activeVotingPower"
-   FROM account_power ap
-   WHERE ap.dao_id = ${daoId}
-   AND ap.account_id IN (
-    SELECT DISTINCT voter_account_id
-    FROM votes_onchain
-    WHERE dao_id = ${daoId}
-   	and votes_onchain."timestamp" >= ${beginActiveTimestamp}
-  )
-  `);
-  const newActiveSupply180d = BigInt((queryResult as any)[0][0] ?? BigInt(0));
-  const activeSupply180dChanges =
-    newActiveSupply180d !== currentActiveSupply180d;
-  if (activeSupply180dChanges) {
-    await context.db.update(token, { id: event.log.address }).set((row) => ({
-      activeSupply180d: newActiveSupply180d,
-    }));
+  if (!!delegateAccountPower.active) {
+    const currentActiveSupply180d = (await context.db.find(token, {
+      id: event.log.address,
+    }))!.activeSupply180d;
+    const newActiveSupply180d = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        activeSupply180d: row.activeSupply180d + (newBalance - oldBalance),
+      }))
+    ).activeSupply180d;
 
     await storeDailyBucket(
       context,
@@ -494,13 +459,29 @@ export const voteCast = async (
     })
     .onConflictDoNothing();
 
-  await context.db
+  const voterStatusBeforeUpdate = (
+    (
+      await context.db.sql
+        .select({ active: accountPower.active })
+        .from(accountPower)
+        .where(
+          and(
+            eq(accountPower.accountId, event.args.voter),
+            eq(accountPower.daoId, daoId),
+          ),
+        )
+    )[0] ?? { active: false }
+  ).active;
+
+  const voterAccountPower = await context.db
     .insert(accountPower)
     .values({
       id: [event.args.voter, daoId].join("-"),
       daoId,
       accountId: event.args.voter,
       votesCount: 1,
+      active: true,
+      lastVoteTimestamp: event.block.timestamp,
     })
     .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
@@ -531,6 +512,62 @@ export const voteCast = async (
         (current.abstainVotes ?? BigInt(0)) +
         (event.args.support === 2 ? weight : BigInt(0)),
     }));
+
+  // Calculating Timestamp that is considered the low limit for activity.
+  // Currently the user needs to have voted in the last 180 days to be considered active.
+  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
+
+  const currentActiveSupply180d =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.activeSupply180d ?? BigInt(0);
+
+  // Getting Inactive Supply from Active Users
+  const queryInactiveSupplyFromActiveUsers = await context.db.sql
+    .select({
+      id: accountPower.id,
+      account: accountPower.accountId,
+      votingPower: accountPower.votingPower,
+    })
+    .from(accountPower)
+    .where(
+      and(
+        eq(accountPower.active, true),
+        lt(accountPower.lastVoteTimestamp, beginActiveTimestamp),
+      ),
+    );
+  // Update now inactive users 'active' flag
+  await context.db.sql
+    .update(accountPower)
+    .set({ active: false })
+    .where(
+      inArray(
+        accountPower.id,
+        queryInactiveSupplyFromActiveUsers.map(({ id }) => id),
+      ),
+    );
+  const newActiveSupply180d = (
+    await context.db.update(token, { id: event.log.address }).set((row) => ({
+      activeSupply180d:
+        row.activeSupply180d -
+        queryInactiveSupplyFromActiveUsers.reduce(
+          (acc, current) => acc + current.votingPower,
+          BigInt(0),
+        ) +
+        (!voterStatusBeforeUpdate ? voterAccountPower.votingPower : 0n),
+    }))
+  ).activeSupply180d;
+
+  await storeDailyBucket(
+    context,
+    event,
+    daoId,
+    MetricTypesEnum.ACTIVE_SUPPLY_180D,
+    currentActiveSupply180d,
+    newActiveSupply180d,
+  );
 };
 
 export const proposalCreated = async (
@@ -578,11 +615,11 @@ export const proposalCreated = async (
     .insert(accountPower)
     .values({
       id: event.args.proposer,
-      create: {
-        daoId,
-        accountId: event.args.proposer,
-        proposalsCount: 1,
-      },
+      daoId,
+      accountId: event.args.proposer,
+      proposalsCount: 1,
+      active: false,
+      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate((current) => ({
       proposalsCount: (current.proposalsCount ?? 0) + 1,
