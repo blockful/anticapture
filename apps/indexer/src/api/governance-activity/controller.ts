@@ -8,32 +8,58 @@ import {
   VotesCompareQueryResult,
 } from "./types";
 import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
+import { MetricTypesEnum } from "@/lib/constants";
+import { formatUnits } from "viem";
 
-ponder.get("/dao/:daoId/active-supply", async (context) => {
+ponder.get("/dao/:daoId/active-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
-  //Creating Timestamps
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
   //Running Query
   const queryResult = await context.db.execute(sql`
-            WITH  "active_users" as (
-          SELECT DISTINCT ON (voc."voter_account_id") voc."voter_account_id", voc.timestamp
-          FROM "votes_onchain" voc WHERE voc.timestamp>CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
-          AND voc."dao_id" = ${daoId}
-          ORDER BY voc."voter_account_id", voc.timestamp DESC
-        )
-        SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply", TEXT(COUNT("active_users".*)) AS "activeUsers" FROM "account_power" ap
-        JOIN "active_users" ON ap."account_id" = "active_users"."voter_account_id";
-    `);
-  const activeSupply: ActiveSupplyQueryResult = queryResult
+    WITH  "old_supply" as (
+      SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db.metric_type=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
+      AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+      ORDER BY db."date" ASC LIMIT 1
+    ),
+   "current_supply"  AS (
+      SELECT db.average as current_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db.metric_type=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
+      ORDER BY db."date" DESC LIMIT 1
+    )
+    SELECT COALESCE("old_supply"."old_supply_amount",0) AS "oldActiveSupply", 
+    COALESCE("current_supply"."current_supply_amount", 0) AS "currentActiveSupply"
+    FROM "current_supply"
+    LEFT JOIN "old_supply" ON 1=1;
+  `);
+
+  //Calculating Change Rate
+  const activeSupplyCompare: ActiveSupplyQueryResult = queryResult
     .rows[0] as ActiveSupplyQueryResult;
+  let changeRate;
+  if (activeSupplyCompare.oldActiveSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(activeSupplyCompare.currentActiveSupply) * BigInt(1e18)) /
+        BigInt(activeSupplyCompare.oldActiveSupply) -
+        BigInt(1e18),
+      18,
+    );
+  }
+
   // Returning response
-  return context.json(activeSupply);
+  return context.json({ ...activeSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/proposals/compare", async (context) => {

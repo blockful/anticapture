@@ -1,6 +1,7 @@
 export type ActiveSupplyQueryResult = {
-  activeSupply: string;
-  activeUsers: string;
+  currentActiveSupply: string;
+  oldActiveSupply: string;
+  changeRate: string;
 };
 
 export type ProposalsCompareQueryResult = {
