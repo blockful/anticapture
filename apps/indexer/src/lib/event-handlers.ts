@@ -1,10 +1,5 @@
 import { Context, Event } from "ponder:registry";
-import {
-  delta,
-  getValueFromEventArgs,
-  max,
-  min,
-} from "./utils";
+import { delta, getValueFromEventArgs, max, min } from "./utils";
 import {
   account,
   accountBalance,
@@ -28,7 +23,7 @@ import {
 } from "./constants";
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
-import { and, eq, gte, inArray, sum } from "ponder";
+import { and, eq, gte, inArray, sql, sum } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -179,32 +174,44 @@ export const delegatedVotesChanged = async (
 
   const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
 
-  const activeUsers = await context.db.sql
-    .selectDistinct({ account: votesOnchain.voterAccountId })
-    .from(votesOnchain)
-    .where(
-      and(
-        eq(votesOnchain.daoId, daoId),
-        gte(votesOnchain.timestamp, beginActiveTimestamp),
-      ),
-    );
+  // const activeUsers = await context.db.sql
+  //   .selectDistinct({ account: votesOnchain.voterAccountId })
+  //   .from(votesOnchain)
+  //   .where(
+  //     and(
+  //       eq(votesOnchain.daoId, daoId),
+  //       gte(votesOnchain.timestamp, beginActiveTimestamp),
+  //     ),
+  //   );
 
-  const newActiveSupply180d = BigInt(
-    (
-      await context.db.sql
-        .select({ activeSupply180d: sum(accountPower.votingPower) })
-        .from(accountPower)
-        .where(
-          inArray(
-            accountPower.accountId,
-            activeUsers
-              .map(({ account }) => account)
-              .filter((value) => value != null),
-          ),
-        )
-    )[0]!.activeSupply180d ?? 0,
-  );
+  // const newActiveSupply180d = BigInt(
+  //   (
+  //     await context.db.sql
+  //       .select({ activeSupply180d: sum(accountPower.votingPower) })
+  //       .from(accountPower)
+  //       .where(
+  //         inArray(
+  //           accountPower.accountId,
+  //           activeUsers
+  //             .map(({ account }) => account)
+  //             .filter((value) => value != null),
+  //         ),
+  //       )
+  //   )[0]!.activeSupply180d ?? 0,
+  // );
 
+  const queryResult = await context.db.sql.execute(sql`
+   SELECT SUM(ap.voting_power) as "activeVotingPower"
+   FROM account_power ap
+   WHERE ap.dao_id = ${daoId}
+   AND ap.account_id IN (
+    SELECT DISTINCT voter_account_id
+    FROM votes_onchain
+    WHERE dao_id = ${daoId}
+   	and votes_onchain."timestamp" >= ${beginActiveTimestamp}
+  )
+  `);
+  const newActiveSupply180d = BigInt((queryResult as any)[0][0] ?? BigInt(0));
   const activeSupply180dChanges =
     newActiveSupply180d !== currentActiveSupply180d;
   if (activeSupply180dChanges) {

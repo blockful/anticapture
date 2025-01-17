@@ -6,7 +6,7 @@ type ValueNamesByDao = {
 export const getValueFromEventArgs = <T, K extends { [k: string]: any }>(
   valueNames: ValueNamesByDao,
   args: K,
-  daoId: string
+  daoId: string,
 ): T => {
   const valueName = valueNames.find(({ daos }) => daos.includes(daoId))?.name;
   if (!valueName) {
