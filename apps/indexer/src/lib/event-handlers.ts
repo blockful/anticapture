@@ -1,6 +1,5 @@
 import { Context, Event } from "ponder:registry";
 import {
-  convertSecondsTimestampToDate,
   delta,
   getValueFromEventArgs,
   max,
@@ -173,6 +172,55 @@ export const delegatedVotesChanged = async (
     currentDelegatedSupply,
     newDelegatedSupply,
   );
+
+  const currentActiveSupply180d = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.activeSupply180d;
+
+  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
+
+  const activeUsers = await context.db.sql
+    .selectDistinct({ account: votesOnchain.voterAccountId })
+    .from(votesOnchain)
+    .where(
+      and(
+        eq(votesOnchain.daoId, "UNI"),
+        gte(votesOnchain.timestamp, beginActiveTimestamp),
+      ),
+    );
+
+  const newActiveSupply180d = BigInt(
+    (
+      await context.db.sql
+        .select({ activeSupply180d: sum(accountPower.votingPower) })
+        .from(accountPower)
+        .where(
+          inArray(
+            accountPower.accountId,
+            activeUsers
+              .map(({ account }) => account)
+              .filter((value) => value != null),
+          ),
+        )
+    )[0]!.activeSupply180d ?? 0,
+  );
+
+  const activeSupply180dChanges =
+    newActiveSupply180d !== currentActiveSupply180d;
+  if (activeSupply180dChanges) {
+    await context.db.update(token, { id: event.log.address }).set((row) => ({
+      activeSupply180d: newActiveSupply180d,
+    }));
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.ACTIVE_SUPPLY_180D,
+      currentActiveSupply180d,
+      newActiveSupply180d,
+    );
+  }
 };
 
 export const tokenTransfer = async (
@@ -407,55 +455,6 @@ export const tokenTransfer = async (
       MetricTypesEnum.CIRCULATING_SUPPLY,
       currentCirculatingSupply,
       newCirculatingSupply,
-    );
-  }
-
-  const currentActiveSupply180d = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.activeSupply180d;
-
-  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
-
-  const activeUsers = await context.db.sql
-    .selectDistinct({ account: votesOnchain.voterAccountId })
-    .from(votesOnchain)
-    .where(
-      and(
-        eq(votesOnchain.daoId, "UNI"),
-        gte(votesOnchain.timestamp, beginActiveTimestamp),
-      ),
-    );
-
-  const newActiveSupply180d = BigInt(
-    (
-      await context.db.sql
-        .select({ activeSupply180d: sum(accountPower.votingPower) })
-        .from(accountPower)
-        .where(
-          inArray(
-            accountPower.accountId,
-            activeUsers
-              .map(({ account }) => account)
-              .filter((value) => value != null),
-          ),
-        )
-    )[0]!.activeSupply180d ?? 0,
-  );
-
-  const activeSupply180dChanges =
-    newActiveSupply180d !== currentActiveSupply180d;
-  if (activeSupply180dChanges) {
-    await context.db.update(token, { id: event.log.address }).set((row) => ({
-      activeSupply180d: newActiveSupply180d,
-    }));
-
-    await storeDailyBucket(
-      context,
-      event,
-      daoId,
-      MetricTypesEnum.ACTIVE_SUPPLY_180D,
-      currentActiveSupply180d,
-      newActiveSupply180d,
     );
   }
 };
