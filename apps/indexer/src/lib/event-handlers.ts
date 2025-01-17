@@ -66,7 +66,6 @@ export const delegateChanged = async (
       daoId,
       delegate: event.args.toDelegate,
       active: false,
-      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate({
       delegate: event.args.toDelegate,
@@ -88,7 +87,6 @@ export const delegateChanged = async (
       daoId,
       delegationsCount: 1,
       active: false,
-      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate((current) => ({
       delegationsCount: (current.delegationsCount ?? 0) + 1,
@@ -147,7 +145,6 @@ export const delegatedVotesChanged = async (
       daoId,
       votingPower: newBalance,
       active: false,
-      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate({
       votingPower: newBalance,
@@ -619,7 +616,6 @@ export const proposalCreated = async (
       accountId: event.args.proposer,
       proposalsCount: 1,
       active: false,
-      lastVoteTimestamp: undefined,
     })
     .onConflictDoUpdate((current) => ({
       proposalsCount: (current.proposalsCount ?? 0) + 1,
