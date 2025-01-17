@@ -28,7 +28,7 @@ ponder.get("/dao/:daoId/active-supply/compare", async (context) => {
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
       AND db.metric_type=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
-      AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
       ORDER BY db."date" ASC LIMIT 1
     ),
    "current_supply"  AS (

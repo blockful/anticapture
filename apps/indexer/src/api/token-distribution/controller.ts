@@ -30,7 +30,7 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
     SELECT db.average as old_total_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
     AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
-    AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
     ORDER BY db."date" ASC LIMIT 1
   ),
  "current_total_supply"  AS (
@@ -71,7 +71,7 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
     SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
     AND db."metricType"=${MetricTypesEnum.DELEGATED_SUPPLY}
-    AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
     ORDER BY db."date" ASC LIMIT 1
   ),
  "current_delegated_supply"  AS (
@@ -117,7 +117,7 @@ ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
       AND db.metric_type=${MetricTypesEnum.CIRCULATING_SUPPLY}
-      AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
       ORDER BY db."date" ASC LIMIT 1
     ),
    "current_supply"  AS (
@@ -159,7 +159,7 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
       AND db.metric_type=${MetricTypesEnum.TREASURY}
-      AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
       ORDER BY db."date" ASC LIMIT 1
     ),
    "current_treasury"  AS (
@@ -209,7 +209,7 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
     SELECT db.average as old_cex_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
     AND db.metric_type=${MetricTypesEnum.CEX_SUPPLY}
-    AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
     ORDER BY db."date" ASC LIMIT 1
   ),
  "current_cex_supply"  AS (
@@ -260,7 +260,7 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
       AND db.metric_type=${MetricTypesEnum.DEX_SUPPLY}
-      AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
       ORDER BY db."date" ASC LIMIT 1
     ),
    "current_supply"  AS (
@@ -311,7 +311,7 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
     SELECT db.average as "old_lending_supply_amount" from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
     AND db."metricType"=${MetricTypesEnum.LENDING_SUPPLY}
-    AND db."date">=TO_TIMESTAMP(${oldTimestamp}::bigint / 1000)::DATE
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
     ORDER BY db."date" ASC LIMIT 1
   ),
  "current_lending_supply"  AS (

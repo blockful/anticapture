@@ -416,18 +416,6 @@ export const tokenTransfer = async (
 
   const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
 
-  //   SELECT
-  //    SUM(ap.voting_power) as active_voting_power
-  // FROM
-  //    account_power ap
-  // WHERE
-  //    ap.dao_id = 'UNI'
-  //    AND ap.account_id IN (
-  //        SELECT DISTINCT voter_account_id
-  //        FROM votes_onchain
-  //        WHERE dao_id = 'UNI'
-  // 	   and votes_onchain."timestamp" >= EXTRACT(EPOCH FROM NOW() - INTERVAL '90 days')
-
   const activeUsers = await context.db.sql
     .selectDistinct({ account: votesOnchain.voterAccountId })
     .from(votesOnchain)
