@@ -11,6 +11,7 @@ import {
   votingPowerHistory,
   daoMetricsDayBuckets,
   token,
+  daoToken,
 } from "ponder:schema";
 import {
   BurningAddresses,
@@ -513,11 +514,18 @@ export const voteCast = async (
   // Calculating Timestamp that is considered the low limit for activity.
   // Currently the user needs to have voted in the last 180 days to be considered active.
   const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
+  const tokenAddress =
+    (
+      await context.db.sql
+        .select({ tokenAddress: daoToken.tokenId })
+        .from(daoToken)
+        .where(eq(daoToken.daoId, daoId))
+    )[0]?.tokenAddress ?? zeroAddress;
 
   const currentActiveSupply180d =
     (
       await context.db.find(token, {
-        id: event.log.address,
+        id: tokenAddress,
       })
     )?.activeSupply180d ?? BigInt(0);
 
@@ -546,7 +554,7 @@ export const voteCast = async (
       ),
     );
   const newActiveSupply180d = (
-    await context.db.update(token, { id: event.log.address }).set((row) => ({
+    await context.db.update(token, { id: tokenAddress }).set((row) => ({
       activeSupply180d:
         row.activeSupply180d -
         queryInactiveSupplyFromActiveUsers.reduce(
