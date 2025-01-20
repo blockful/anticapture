@@ -50,10 +50,10 @@ const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
   },
-  [DaoId.ENS]: {
-    icon: undefined,
-    tooltip: "",
-  },
+  // [DaoId.ENS]: {
+  //   icon: undefined,
+  //   tooltip: "",
+  // },
 };
 
 const initialState: State = {
@@ -63,18 +63,16 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.UPDATE_DELEGATED_SUPPLY:
+      const index = action.payload.index;
+      const data = [
+        ...state.data.slice(0, action.payload.index), 
+        {...state.data[index], delegatedSupply: action.payload.delegatedSupply},
+        ...state.data.slice(index+1, state.data.length)
+      ]
       return {
         ...state,
-        data: state.data.map((item, index) =>
-          index === action.payload.index
-            ? {
-                ...item,
-                delegatedSupply: action.payload.delegatedSupply,
-              }
-            : item,
-        ),
+        data
       };
-
     default:
       return state;
   }
@@ -83,12 +81,11 @@ function reducer(state: State, action: Action): State {
 export const DashboardTable = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
-  const timeInterval = TimeInterval.THIRTY_DAYS;
-  const daoIds = Object.values(DaoId);
+  const days = TimeInterval.THIRTY_DAYS;
 
   useEffect(() => {
-    daoIds.map((daoId, index) => {
-      fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
+    Object.values(DaoId).map((daoId, index) => {
+      fetchDelegatedSupply({ daoId, days }).then(
         (result) => {
           result &&
             dispatch({
@@ -98,12 +95,13 @@ export const DashboardTable = () => {
                 delegatedSupply: String(
                   BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
                 ),
+                delegatedSupplyChangeRate: String(parseFloat(result.changeRate)*100).slice(0,5)+"%"
               },
             });
         },
       );
     });
-  }, [daoIds, timeInterval]);
+  }, [days]);
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
@@ -157,7 +155,7 @@ export const DashboardTable = () => {
         const delegatedSupply: number = row.getValue("delegatedSupply");
         return (
           <div className="flex items-center justify-center text-center">
-            {`${delegatedSupply && formatNumberUserReadble(delegatedSupply)}  (${timeInterval})`}
+            {`${delegatedSupply && formatNumberUserReadble(delegatedSupply)}`}
           </div>
         );
       },
@@ -167,7 +165,7 @@ export const DashboardTable = () => {
           className="w-full"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Delegated Supply
+          Delegated Supply (30d)
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -185,74 +183,74 @@ export const DashboardTable = () => {
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
     },
-    {
-      accessorKey: "profitability",
-      cell: ({ row }) => {
-        const profitability: number = row.getValue("profitability");
-        return (
-          <div className="flex items-center justify-center text-center">
-            {profitability && formatNumberUserReadble(profitability)}
-          </div>
-        );
-      },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Profitability
-          <ArrowUpDown
-            props={{
-              className: "ml-2 h-4 w-4",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
-      enableSorting: true,
-      sortingFn: sortingByAscendingOrDescendingNumber,
-    },
-    {
-      accessorKey: "delegatesToPass",
-      cell: ({ row }) => {
-        const delegatesToPass: number = row.getValue("delegatesToPass");
-        return (
-          <div className="flex items-center justify-center text-center">
-            {delegatesToPass && formatNumberUserReadble(delegatesToPass)}
-          </div>
-        );
-      },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Delegates to pass
-          <ArrowUpDown
-            props={{
-              className: "ml-2 h-4 w-4",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
-      enableSorting: true,
-      sortingFn: sortingByAscendingOrDescendingNumber,
-    },
+    // {
+    //   accessorKey: "profitability",
+    //   cell: ({ row }) => {
+    //     const profitability: number = row.getValue("profitability");
+    //     return (
+    //       <div className="flex items-center justify-center text-center">
+    //         {profitability && formatNumberUserReadble(profitability)}
+    //       </div>
+    //     );
+    //   },
+    //   header: ({ column }) => (
+    //     <Button
+    //       variant="ghost"
+    //       className="w-full"
+    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //     >
+    //       Profitability
+    //       <ArrowUpDown
+    //         props={{
+    //           className: "ml-2 h-4 w-4",
+    //         }}
+    //         activeState={
+    //           column.getIsSorted() === "asc"
+    //             ? ArrowState.UP
+    //             : column.getIsSorted() === "desc"
+    //               ? ArrowState.DOWN
+    //               : ArrowState.DEFAULT
+    //         }
+    //       />
+    //     </Button>
+    //   ),
+    //   enableSorting: true,
+    //   sortingFn: sortingByAscendingOrDescendingNumber,
+    // },
+    // {
+    //   accessorKey: "delegatesToPass",
+    //   cell: ({ row }) => {
+    //     const delegatesToPass: number = row.getValue("delegatesToPass");
+    //     return (
+    //       <div className="flex items-center justify-center text-center">
+    //         {delegatesToPass && formatNumberUserReadble(delegatesToPass)}
+    //       </div>
+    //     );
+    //   },
+    //   header: ({ column }) => (
+    //     <Button
+    //       variant="ghost"
+    //       className="w-full"
+    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //     >
+    //       Delegates to pass
+    //       <ArrowUpDown
+    //         props={{
+    //           className: "ml-2 h-4 w-4",
+    //         }}
+    //         activeState={
+    //           column.getIsSorted() === "asc"
+    //             ? ArrowState.UP
+    //             : column.getIsSorted() === "desc"
+    //               ? ArrowState.DOWN
+    //               : ArrowState.DEFAULT
+    //         }
+    //       />
+    //     </Button>
+    //   ),
+    //   enableSorting: true,
+    //   sortingFn: sortingByAscendingOrDescendingNumber,
+    // },
   ];
 
   const handleRowClick = (row: DashboardDao) => {

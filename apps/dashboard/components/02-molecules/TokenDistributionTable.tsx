@@ -106,9 +106,9 @@ function reducer(state: State, action: Action): State {
 }
 
 export const TokenDistributionTable = ({
-  timeInterval,
+  days,
 }: {
-  timeInterval: TimeInterval;
+  days: TimeInterval;
 }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -116,7 +116,7 @@ export const TokenDistributionTable = ({
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTotalSupply({ daoId, timeInterval: timeInterval }).then((result) => {
+    fetchTotalSupply({ daoId, days }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
@@ -130,7 +130,7 @@ export const TokenDistributionTable = ({
         });
     });
 
-    fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
+    fetchDelegatedSupply({ daoId, days }).then(
       (result) => {
         result &&
           dispatch({
@@ -148,7 +148,7 @@ export const TokenDistributionTable = ({
 
     fetchCirculatingSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -165,7 +165,7 @@ export const TokenDistributionTable = ({
 
     fetchCexSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -182,7 +182,7 @@ export const TokenDistributionTable = ({
 
     fetchDexSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -199,7 +199,7 @@ export const TokenDistributionTable = ({
 
     fetchLendingSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -213,7 +213,7 @@ export const TokenDistributionTable = ({
           },
         });
     });
-  }, [daoData, timeInterval]);
+  }, [daoData, days]);
 
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {

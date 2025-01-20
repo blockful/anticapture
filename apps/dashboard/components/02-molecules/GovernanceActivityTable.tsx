@@ -96,16 +96,16 @@ function reducer(state: State, action: Action): State {
 }
 
 export const GovernanceActivityTable = ({
-  timeInterval,
+  days,
 }: {
-  timeInterval: TimeInterval;
+  days: TimeInterval;
 }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTreasurySupply({ daoId, timeInterval: timeInterval }).then(
+    fetchTreasurySupply({ daoId, days: days }).then(
       (result) => {
         result &&
           dispatch({
@@ -121,18 +121,18 @@ export const GovernanceActivityTable = ({
       },
     );
 
-    fetchActiveSupply({ daoId }).then((result) => {
+    fetchActiveSupply({ daoId, days }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 2,
-            average: String(BigInt(result.activeSupply) / BigInt(10 ** 18)),
-            variation: result.activeUsers,
+            average: String(BigInt(result.currentActiveSupply180d) / BigInt(10 ** 18)),
+            variation: result.changeRate,
           },
         });
     });
-  }, [daoData, timeInterval]);
+  }, [daoData, days]);
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
     {
