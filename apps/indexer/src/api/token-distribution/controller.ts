@@ -39,8 +39,8 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
     AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
     ORDER BY db."date" DESC LIMIT 1
   )
-  SELECT COALESCE("old_total_supply"."old_delegated_supply_amount",0) AS "oldTotalupply", 
-  COALESCE("current_total_supply"."current_delegated_supply_amount", 0) AS "currentTotalSupply"
+  SELECT COALESCE("old_total_supply"."old_total_supply_amount",0) AS "oldTotalupply", 
+  COALESCE("current_total_supply"."current_total_supply_amount", 0) AS "currentTotalSupply"
   FROM "current_total_supply"
   LEFT JOIN "old_total_supply" ON 1=1;`);
   const totalSupplyCompare: TotalSupplyQueryResult = queryResult
