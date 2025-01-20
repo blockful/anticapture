@@ -27,14 +27,14 @@ ponder.get("/dao/:daoId/active-supply/compare", async (context) => {
     WITH  "old_supply" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
-      AND db.metric_type=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
+      AND db."metricType"=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
       AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
       ORDER BY db."date" ASC LIMIT 1
     ),
    "current_supply"  AS (
       SELECT db.average as current_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
-      AND db.metric_type=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
+      AND db."metricType"=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
       ORDER BY db."date" DESC LIMIT 1
     )
     SELECT COALESCE("old_supply"."old_supply_amount",0) AS "oldActiveSupply", 
