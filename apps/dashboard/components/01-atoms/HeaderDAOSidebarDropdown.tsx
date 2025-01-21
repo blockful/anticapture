@@ -7,7 +7,7 @@ import { DaoId } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 
 export const HeaderDAOSidebarDropdown = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedHeaderSidebarItem, setSelectedHeaderSidebarItem] =
     useState<number>(0);
   const router = useRouter();
@@ -95,9 +95,9 @@ export const HeaderDAOSidebarDropdown = () => {
           {dropdownItems.map((item) => (
             <button
               key={item.id}
-              className={`flex w-full items-center justify-between gap-2 rounded-lg p-2 hover:bg-[#333] ${
-                item.id === selectedHeaderSidebarItem ? "bg-[#444]" : ""
-              }`}
+              className={
+                "flex w-full items-center justify-between gap-2 rounded-lg p-2 hover:bg-[#333]"
+              }
               onClick={() => handleSelectItem(item.id, item.href)}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}

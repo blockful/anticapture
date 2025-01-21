@@ -54,7 +54,7 @@ export const HeaderDAOSidebar = () => {
               }}
             >
               <PieChartIcon
-                className={cn("text-[#A1A1AA]", {
+                className={cn("text-foreground", {
                   "text-white": isNavSelected === HeaderNavItems.DAO_INFO,
                 })}
               />
@@ -76,7 +76,7 @@ export const HeaderDAOSidebar = () => {
               }}
             >
               <ArrowLeftRight
-                className={cn("text-[#A1A1AA]", {
+                className={cn("text-foreground", {
                   "text-white":
                     isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION,
                 })}
@@ -99,7 +99,7 @@ export const HeaderDAOSidebar = () => {
               }}
             >
               <ActivityIcon
-                className={cn("text-[#A1A1AA]", {
+                className={cn("text-foreground", {
                   "text-white":
                     isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY,
                 })}
