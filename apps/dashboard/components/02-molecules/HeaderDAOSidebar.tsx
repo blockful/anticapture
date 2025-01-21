@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { DaoId, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { cn } from "@/lib/client/utils";
 import {
   daoInfoSectionAnchorID,
   governanceActivitySectionAnchorID,
@@ -52,7 +53,11 @@ export const HeaderDAOSidebar = () => {
                 setIsNavSelected(HeaderNavItems.DAO_INFO);
               }}
             >
-              <PieChartIcon className="text-white" />
+              <PieChartIcon
+                className={cn("text-[#A1A1AA]", {
+                  "text-white": isNavSelected === HeaderNavItems.DAO_INFO,
+                })}
+              />
               <p className="text-sm font-medium text-white">
                 {HeaderNavItems.DAO_INFO}
               </p>
@@ -70,7 +75,12 @@ export const HeaderDAOSidebar = () => {
                 setIsNavSelected(HeaderNavItems.TOKEN_DISTRIBUTION);
               }}
             >
-              <ArrowLeftRight className="text-white" />
+              <ArrowLeftRight
+                className={cn("text-[#A1A1AA]", {
+                  "text-white":
+                    isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION,
+                })}
+              />
               <p className="text-sm font-medium text-white">
                 {HeaderNavItems.TOKEN_DISTRIBUTION}
               </p>
@@ -88,7 +98,12 @@ export const HeaderDAOSidebar = () => {
                 setIsNavSelected(HeaderNavItems.GOVERNANCE_ACTIVITY);
               }}
             >
-              <ActivityIcon className="text-white" />
+              <ActivityIcon
+                className={cn("text-[#A1A1AA]", {
+                  "text-white":
+                    isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY,
+                })}
+              />
               <p className="text-sm font-medium text-white">
                 {HeaderNavItems.GOVERNANCE_ACTIVITY}
               </p>
