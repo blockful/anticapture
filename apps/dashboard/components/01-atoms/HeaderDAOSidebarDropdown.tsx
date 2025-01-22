@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { EnsIcon, UniswapIcon } from "@/components/01-atoms";
+import { UniswapIcon } from "@/components/01-atoms";
 import { useRouter } from "next/navigation";
 import { DaoId } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
