@@ -39,18 +39,23 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
     AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
     ORDER BY db."date" DESC LIMIT 1
   )
-  SELECT COALESCE("old_total_supply"."old_total_supply_amount",0) AS "oldTotalupply", 
+  SELECT COALESCE("old_total_supply"."old_total_supply_amount", 0) AS "oldTotalSupply", 
   COALESCE("current_total_supply"."current_total_supply_amount", 0) AS "currentTotalSupply"
   FROM "current_total_supply"
   LEFT JOIN "old_total_supply" ON 1=1;`);
   const totalSupplyCompare: TotalSupplyQueryResult = queryResult
     .rows[0] as TotalSupplyQueryResult;
-  const changeRate = formatUnits(
-    (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
-      BigInt(totalSupplyCompare.oldTotalSupply) -
-      BigInt(1e18),
-    18,
-  );
+  let changeRate;
+  if (totalSupplyCompare.oldTotalSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+        BigInt(totalSupplyCompare.oldTotalSupply) -
+        BigInt(1e18),
+      18,
+    );
+  }
   return context.json({ ...totalSupplyCompare, changeRate });
 });
 
@@ -133,12 +138,18 @@ ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
         `);
   const circulatingSupplyCompare: CirculatingSupplyQueryResult = queryResult
     .rows[0] as CirculatingSupplyQueryResult;
-  const changeRate = formatUnits(
-    (BigInt(circulatingSupplyCompare.currentCirculatingSupply) * BigInt(1e18)) /
-      BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
-      BigInt(1e18),
-    18,
-  );
+  let changeRate;
+  if (circulatingSupplyCompare.oldCirculatingSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(circulatingSupplyCompare.currentCirculatingSupply) *
+        BigInt(1e18)) /
+        BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
+        BigInt(1e18),
+      18,
+    );
+  }
   return context.json({ ...circulatingSupplyCompare, changeRate });
 });
 
