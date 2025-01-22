@@ -6,8 +6,7 @@ export type User = {
   ensName: string | null;
 };
 
-export const BACKEND_ENDPOINT =
-  "https://staging.api.defendao.com";
+export const BACKEND_ENDPOINT = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const bulkGetEnsName = async (addresses: Address[]) => {
   const names = [];
