@@ -26,9 +26,9 @@ import { and, eq } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
-    // | Event<"COMPToken:DelegateChanged">
-    // | Event<"SHUToken:DelegateChanged">
-    Event<"UNIToken:DelegateChanged">,
+  // | Event<"COMPToken:DelegateChanged">
+  // | Event<"SHUToken:DelegateChanged">
+  Event<"UNIToken:DelegateChanged">,
   context: Context,
   daoId: string,
 ) => {
@@ -92,9 +92,9 @@ export const delegateChanged = async (
 
 export const delegatedVotesChanged = async (
   event: // | Event<"ENSToken:DelegateVotesChanged">
-    // | Event<"COMPToken:DelegateVotesChanged">
-    // | Event<"SHUToken:DelegateVotesChanged">
-    Event<"UNIToken:DelegateVotesChanged">,
+  // | Event<"COMPToken:DelegateVotesChanged">
+  // | Event<"SHUToken:DelegateVotesChanged">
+  Event<"UNIToken:DelegateVotesChanged">,
   context: Context,
   daoId: string,
 ) => {
@@ -170,9 +170,9 @@ export const delegatedVotesChanged = async (
 
 export const tokenTransfer = async (
   event: // | Event<"ENSToken:Transfer">
-    // | Event<"COMPToken:Transfer">
-    // | Event<"SHUToken:Transfer">
-    Event<"UNIToken:Transfer">,
+  // | Event<"COMPToken:Transfer">
+  // | Event<"SHUToken:Transfer">
+  Event<"UNIToken:Transfer">,
   context: Context,
   daoId: "UNI",
 ) => {
@@ -406,7 +406,7 @@ export const tokenTransfer = async (
 
 export const voteCast = async (
   event: // | Event<"ENSGovernor:VoteCast">
-    Event<"UNIGovernor:VoteCast">,
+  Event<"UNIGovernor:VoteCast">,
   context: Context,
   daoId: string,
 ) => {
@@ -474,7 +474,7 @@ export const voteCast = async (
 
 export const proposalCreated = async (
   event: // | Event<"ENSGovernor:ProposalCreated">
-    Event<"UNIGovernor:ProposalCreated">,
+  Event<"UNIGovernor:ProposalCreated">,
   context: Context,
   daoId: string,
 ) => {
@@ -528,7 +528,7 @@ export const proposalCreated = async (
 
 export const proposalCanceled = async (
   event: // | Event<"ENSGovernor:ProposalCanceled">
-    Event<"UNIGovernor:ProposalCanceled">,
+  Event<"UNIGovernor:ProposalCanceled">,
   context: Context,
   daoId: string,
 ) => {
@@ -549,7 +549,7 @@ export const proposalCanceled = async (
 
 export const proposalExecuted = async (
   event: // | Event<"ENSGovernor:ProposalExecuted">
-    Event<"UNIGovernor:ProposalExecuted">,
+  Event<"UNIGovernor:ProposalExecuted">,
   context: Context,
   daoId: string,
 ) => {
@@ -578,9 +578,13 @@ const storeDailyBucket = async (
 ) => {
   const volume = delta(newValue, currentValue);
   // day timestamp = any timestamp / (number of ms in a day)
-  const dayTimestamp = new Date(
-    parseInt(event.block.timestamp.toString() + "000"),
-  ).setHours(0, 0, 0, 0) / 1000;
+  const dayTimestamp =
+    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(
+      0,
+      0,
+      0,
+      0,
+    ) / 1000;
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
