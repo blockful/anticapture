@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
+  ChartMetrics,
   chartMetrics,
   TokenDistribution,
   tokenDistributionData,
@@ -23,12 +24,14 @@ import {
   fetchCirculatingSupply,
   fetchDelegatedSupply,
   fetchDexSupply,
+  fetchGraphData,
   fetchLendingSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { formatNumberUserReadble } from "@/lib/client/utils";
+import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
+import { MetricTypesEnum } from "@/lib/client/constants";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -39,9 +42,6 @@ const sortingByAscendingOrDescendingNumber = (
   const b = Number(rowB.getValue(columnId)) ?? 0;
   return a - b;
 };
-
-const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
 
 const metricDetails: Record<
   string,
@@ -84,9 +84,17 @@ enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
 }
 
+type MetricPayload = Pick<
+  TokenDistribution,
+  "currentValue" | "variation" | "chartLastDays"
+>;
+
 type Action = {
   type: ActionType.UPDATE_METRIC;
-  payload: { index: number; currentValue: string; variation: string };
+  payload: {
+    index: number;
+    metric: MetricPayload;
+  };
 };
 
 const initialState: State = {
@@ -100,8 +108,9 @@ function reducer(state: State, action: Action): State {
         ...state.data.slice(0, action.payload.index),
         {
           ...state.data[action.payload.index],
-          currentValue: action.payload.currentValue,
-          variation: action.payload.variation,
+          currentValue: action.payload.metric.currentValue,
+          variation: action.payload.metric.variation,
+          chartLastDays: action.payload.metric.chartLastDays,
         },
         ...state.data.slice(action.payload.index + 1, state.data.length),
       ];
@@ -121,16 +130,19 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTotalSupply({ daoId, days }).then((result) => {
+    fetchTotalSupply({ daoId, days }).then(async (result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 0,
-            currentValue: String(
-              BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              currentValue: String(
+                BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+              chartLastDays: await fetchGraphData(MetricTypesEnum.TOTAL_SUPPLY),
+            },
           },
         });
     });
@@ -141,10 +153,12 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 1,
-            currentValue: String(
-              BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              currentValue: String(
+                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -158,10 +172,12 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 2,
-            currentValue: String(
-              BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              currentValue: String(
+                BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -175,10 +191,12 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 3,
-            currentValue: String(
-              BigInt(result.currentCexSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              currentValue: String(
+                BigInt(result.currentCexSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -192,10 +210,12 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 4,
-            currentValue: String(
-              BigInt(result.currentDexSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              currentValue: String(
+                BigInt(result.currentDexSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -209,10 +229,12 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 5,
-            currentValue: String(
-              BigInt(result.currentLendingSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              currentValue: String(
+                BigInt(result.currentLendingSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -318,6 +340,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
         // const chartLastDays: ChartMetrics = row.getValue("chartLastDays");
+        // console.log("chartLastDays", chartLastDays);
         // const formattedData = transformChartMetrics([chartLastDays]);
         return (
           <div className="flex w-full items-start justify-start px-4">

@@ -1,5 +1,6 @@
 import { DaoId, TokenContract } from "@/lib/types/daos";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
+import { MetricTypesEnum } from "../client/constants";
 
 export interface DAOVotingPower {
   dao: string;
@@ -21,6 +22,49 @@ export const fetchDaoData = async (daoId: DaoId) => {
 export enum ChainName {
   Ethereum = "ethereum",
 }
+
+export const fetchGraphData = async (
+  metricType: MetricTypesEnum,
+): Promise<string> => {
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+            query DaoMetricsDayBuckets {
+              daoMetricsDayBucketss(
+              where: {
+              metricType: "${metricType}",
+              date_gte: "${String(Date.now() - 90 * 86400000)}"
+              },
+              orderBy: "date",
+              orderDirection: "desc"
+              ) {
+              totalCount
+              items {
+                date
+                daoId
+                tokenId
+                metricType
+                open
+                close
+                low
+                high
+                average
+                volume
+                count
+              }
+              }
+            }
+          `,
+    }),
+  });
+  const data = await response.json();
+  console.log("Graph Data:", data);
+  return JSON.stringify(data);
+};
 
 /* Fetch Dao Token price from Defi Llama API */
 export const fetchTokenPrice = async (chainName: ChainName, daoId: DaoId) => {

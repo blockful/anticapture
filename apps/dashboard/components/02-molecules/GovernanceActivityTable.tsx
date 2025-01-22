@@ -14,7 +14,7 @@ import {
   ArrowState,
 } from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { formatNumberUserReadble } from "@/lib/client/utils";
+import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
 import {
   fetchActiveSupply,
@@ -33,9 +33,6 @@ const sortingByAscendingOrDescendingNumber = (
   const b = Number(rowB.getValue(columnId)) ?? 0;
   return a - b;
 };
-
-const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
 
 const metricDetails: Record<
   string,
