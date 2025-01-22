@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useReducer } from "react";
@@ -103,13 +104,13 @@ export const DashboardTable = () => {
         },
       );
     });
-  }, [daoIds, timeInterval]);
+  }, [timeInterval]);
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
       accessorKey: "#",
       cell: ({ row }) => (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto text-[#fafafa]">
           {row.index + 1}
         </p>
       ),
@@ -122,7 +123,7 @@ export const DashboardTable = () => {
           #
           <ArrowUpDown
             props={{
-              className: "ml-2 h-4 w-4",
+              className: "h-4 w-4",
             }}
             activeState={
               column.getIsSorted() === "asc"

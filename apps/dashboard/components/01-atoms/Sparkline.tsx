@@ -10,9 +10,9 @@ type SparklineProps = {
 
 export const Sparkline: React.FC<SparklineProps> = ({
   data,
-  width = 100,
+  width = 150,
   height = 30,
-  strokeColor = "#4F46E5",
+  strokeColor = "#4ADE80",
   className = "",
 }) => {
   if (data.length === 0) return null;
