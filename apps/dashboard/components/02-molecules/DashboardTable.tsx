@@ -43,9 +43,6 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
-
 const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
   [DaoId.UNISWAP]: {
     icon: <AppleIcon className="h-5 w-5" />,

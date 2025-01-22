@@ -23,8 +23,9 @@ export enum ChainName {
   Ethereum = "ethereum",
 }
 
-export const fetchGraphData = async (
+export const fetchTimeSeriesDataFromGraphQL = async (
   metricType: MetricTypesEnum,
+  days: number,
 ): Promise<string> => {
   const response = await fetch(`${BACKEND_ENDPOINT}`, {
     method: "POST",
@@ -37,7 +38,7 @@ export const fetchGraphData = async (
               daoMetricsDayBucketss(
               where: {
               metricType: "${metricType}",
-              date_gte: "${String(Date.now() - 90 * 86400000)}"
+              date_gte: "${String(Date.now() - days * 86400000)}"
               },
               orderBy: "date",
               orderDirection: "desc"

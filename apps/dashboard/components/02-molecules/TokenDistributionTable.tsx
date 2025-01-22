@@ -24,7 +24,7 @@ import {
   fetchCirculatingSupply,
   fetchDelegatedSupply,
   fetchDexSupply,
-  fetchGraphData,
+  fetchTimeSeriesDataFromGraphQL,
   fetchLendingSupply,
   fetchTotalSupply,
 } from "@/lib/server/backend";
@@ -141,7 +141,10 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
                 BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
               ),
               variation: formatVariation(result.changeRate),
-              chartLastDays: await fetchGraphData(MetricTypesEnum.TOTAL_SUPPLY),
+              chartLastDays: await fetchTimeSeriesDataFromGraphQL(
+                MetricTypesEnum.TOTAL_SUPPLY,
+                90,
+              ),
             },
           },
         });
