@@ -16,7 +16,13 @@ import {
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
-import { fetchActiveSupply, fetchAverageTurnout, fetchProposals, fetchTreasury, fetchVotes } from "@/lib/server/backend";
+import {
+  fetchActiveSupply,
+  fetchAverageTurnout,
+  fetchProposals,
+  fetchTreasury,
+  fetchVotes,
+} from "@/lib/server/backend";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -77,17 +83,15 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.UPDATE_METRIC:
-      console.log(action.payload.index);
       const data = [
-        ...state.data.slice(0,action.payload.index), 
-          {
-            ...state.data[action.payload.index], 
-            average: action.payload.average,
-            variation: action.payload.variation
-          },
-       ...state.data.slice(action.payload.index+1, state.data.length)
+        ...state.data.slice(0, action.payload.index),
+        {
+          ...state.data[action.payload.index],
+          average: action.payload.average,
+          variation: action.payload.variation,
+        },
+        ...state.data.slice(action.payload.index + 1, state.data.length),
       ];
-      console.log(data);
       return {
         ...state,
         data,
@@ -97,31 +101,23 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const GovernanceActivityTable = ({
-  days,
-}: {
-  days: TimeInterval;
-}) => {
+export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTreasury({ daoId, days: days }).then(
-      (result) => {
-        result &&
-          dispatch({
-            type: ActionType.UPDATE_METRIC,
-            payload: {
-              index: 0,
-              average: String(
-                BigInt(result.currentTreasury) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          });
-      },
-    );
+    fetchTreasury({ daoId, days: days }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 0,
+            average: String(BigInt(result.currentTreasury) / BigInt(10 ** 18)),
+            variation: formatVariation(result.changeRate),
+          },
+        });
+    });
 
     fetchActiveSupply({ daoId, days }).then((result) => {
       result &&
@@ -129,7 +125,9 @@ export const GovernanceActivityTable = ({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 2,
-            average: String(BigInt(result.currentActiveSupply) / BigInt(10 ** 18)),
+            average: String(
+              BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
+            ),
             variation: formatVariation(result.changeRate),
           },
         });
@@ -165,12 +163,13 @@ export const GovernanceActivityTable = ({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 4,
-            average: String(BigInt(result.currentAverageTurnout) / BigInt(10 ** 18)),
+            average: String(
+              BigInt(result.currentAverageTurnout) / BigInt(10 ** 18),
+            ),
             variation: formatVariation(result.changeRate),
           },
         });
     });
-
   }, [daoData, days]);
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
