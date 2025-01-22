@@ -2,7 +2,7 @@ import { Address, zeroAddress } from "viem";
 
 export enum DaoId {
   UNISWAP = "UNI",
-  ENS = "ENS",
+  // ENS = "ENS",
 }
 
 export enum DaoName {
@@ -12,7 +12,7 @@ export enum DaoName {
 
 export const daoIdToNameMap: Record<DaoId, DaoName> = {
   [DaoId.UNISWAP]: DaoName.UNI,
-  [DaoId.ENS]: DaoName.ENS,
+  // [DaoId.ENS]: DaoName.ENS,
 };
 
 export const SUPPORTED_DAO_NAMES = Object.values(DaoId);
@@ -29,5 +29,5 @@ export interface DAO {
 
 export const TokenContract: Record<DaoId, Address> = {
   [DaoId.UNISWAP]: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-  [DaoId.ENS]: zeroAddress,
+  // [DaoId.ENS]: zeroAddress,
 };

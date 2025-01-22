@@ -26,7 +26,7 @@ export const TokenDistributionSection = () => {
         interaction with relevant contracts."
       anchorId={tokenDistributionSectionAnchorID}
     >
-      <TokenDistributionTable timeInterval={timeIntervalTokenDistribution} />
+      <TokenDistributionTable days={timeIntervalTokenDistribution} />
     </TheSectionLayout>
   );
 };

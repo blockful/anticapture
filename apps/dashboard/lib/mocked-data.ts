@@ -81,12 +81,12 @@ export const dashboardData: DashboardDao[] = [
     profitability: null,
     delegatesToPass: null,
   },
-  {
-    dao: DaoId.ENS,
-    delegatedSupply: null,
-    profitability: null,
-    delegatesToPass: null,
-  },
+  // {
+  //   dao: DaoId.ENS,
+  //   delegatedSupply: null,
+  //   profitability: null,
+  //   delegatesToPass: null,
+  // },
 ];
 
 export const enum GovernanceActivityMetrics {
