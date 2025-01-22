@@ -77,8 +77,8 @@ interface State {
   data: TokenDistribution[];
 }
 
-//TODO: Doesn't make sense to have only one action of generic type UPDATE_METRIC, 
-// you should create UPDATE_DELEGATED_SUPPLY, UPDATE_TOTAL_SUPPLY, UPDATE_DEX_SUPPLY, 
+//TODO: Doesn't make sense to have only one action of generic type UPDATE_METRIC,
+// you should create UPDATE_DELEGATED_SUPPLY, UPDATE_TOTAL_SUPPLY, UPDATE_DEX_SUPPLY,
 // this way the code will get more organized.
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
@@ -97,13 +97,13 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.UPDATE_METRIC:
       const data = [
-        ...state.data.slice(0,action.payload.index), 
-          {
-            ...state.data[action.payload.index], 
-            currentValue: action.payload.currentValue,
-            variation: action.payload.variation
-          },
-       ...state.data.slice(action.payload.index+1, state.data.length)
+        ...state.data.slice(0, action.payload.index),
+        {
+          ...state.data[action.payload.index],
+          currentValue: action.payload.currentValue,
+          variation: action.payload.variation,
+        },
+        ...state.data.slice(action.payload.index + 1, state.data.length),
       ];
       return {
         ...state,
@@ -114,11 +114,7 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const TokenDistributionTable = ({
-  days,
-}: {
-  days: TimeInterval;
-}) => {
+export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -139,21 +135,19 @@ export const TokenDistributionTable = ({
         });
     });
 
-    fetchDelegatedSupply({ daoId, days }).then(
-      (result) => {
-        result &&
-          dispatch({
-            type: ActionType.UPDATE_METRIC,
-            payload: {
-              index: 1,
-              currentValue: String(
-                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          });
-      },
-    );
+    fetchDelegatedSupply({ daoId, days }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 1,
+            currentValue: String(
+              BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+            ),
+            variation: formatVariation(result.changeRate),
+          },
+        });
+    });
 
     fetchCirculatingSupply({
       daoId,
@@ -345,7 +339,7 @@ export const TokenDistributionTable = ({
           variant="ghost"
           className="flex w-full items-start justify-start"
         >
-          Last {timeInterval.slice(0, -1)} days
+          Last {days.slice(0, -1)} days
         </Button>
       ),
     },
