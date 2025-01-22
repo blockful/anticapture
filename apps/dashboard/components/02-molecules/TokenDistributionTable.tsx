@@ -218,15 +218,6 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
     });
   }, [daoData, days]);
 
-  // const chartData = [
-  //   { month: "January", desktop: 186, mobile: 80 },
-  //   { month: "February", desktop: 305, mobile: 200 },
-  //   { month: "March", desktop: 237, mobile: 120 },
-  //   { month: "April", desktop: 73, mobile: 190 },
-  //   { month: "May", desktop: 209, mobile: 130 },
-  //   { month: "June", desktop: 214, mobile: 140 },
-  // ];
-
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
       accessorKey: "metric",
@@ -329,18 +320,15 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         // const chartLastDays: ChartMetrics = row.getValue("chartLastDays");
         // const formattedData = transformChartMetrics([chartLastDays]);
         return (
-          <button className="flex w-full items-start justify-start px-4">
+          <div className="flex w-full items-start justify-start px-4">
             <Sparkline data={chartMetrics.map((item) => Number(item.high))} />
-          </button>
+          </div>
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="flex w-full items-start justify-start"
-        >
+        <div className="flex w-full items-start justify-start">
           Last {days.slice(0, -1)} days
-        </Button>
+        </div>
       ),
     },
   ];
@@ -350,7 +338,6 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
       columns={tokenDistributionColumns}
       data={state.data}
       withPagination={true}
-      filterColumn={"ensNameAndAddress"}
       withSorting={true}
     />
   );
