@@ -30,7 +30,6 @@ export const token = onchainTable("token", (drizzle) => ({
   decimals: drizzle.integer().notNull(),
   totalSupply: drizzle.bigint().notNull(),
   delegatedSupply: drizzle.bigint().notNull(),
-  activeSupply180d: drizzle.bigint().notNull(),
   cexSupply: drizzle.bigint().notNull(),
   dexSupply: drizzle.bigint().notNull(),
   lendingSupply: drizzle.bigint().notNull(),
@@ -68,12 +67,10 @@ export const accountPower = onchainTable(
     delegationsCount: drizzle.integer().default(0).notNull(),
     delegate: drizzle.text().default(zeroAddress).notNull(),
     lastVoteTimestamp: drizzle.bigint().default(BigInt(0)).notNull(),
-    active: drizzle.boolean().notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
-    activeIdx: index().on(table.active),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
   }),
 );

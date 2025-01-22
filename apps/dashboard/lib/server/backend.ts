@@ -1,5 +1,5 @@
-import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoId, TokenContract } from "@/lib/types/daos";
+import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 
 export interface DAOVotingPower {
   dao: string;
@@ -51,15 +51,15 @@ interface TotalSupplyPromise {
 /* Fetch Dao Total Supply */
 export const fetchTotalSupply = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
+  days: string;
 }) => {
   return new Promise<TotalSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/total-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/total-supply/compare?days=${days}`,
         { next: { revalidate: 3600 } },
       );
       const totalSupplyData = await response.json();
@@ -79,15 +79,15 @@ interface DelegatedSupplyPromise {
 /* Fetch Dao Total Supply */
 export const fetchDelegatedSupply = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
+  days: string;
 }) => {
   return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?timeInterval=${timeInterval}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
         { next: { revalidate: 3600 } },
       );
       const delegatedSupplyData = await response.json();
@@ -107,23 +107,20 @@ interface CirculatingSupplyPromise {
 /* Fetch Dao Circulating Supply */
 export const fetchCirculatingSupply = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
-}) => {
-  return new Promise<CirculatingSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/circulating-supply/compare?timeInterval=${timeInterval}`,
-        { next: { revalidate: 3600 } },
-      );
-      const circulatingSupplyData = await response.json();
-      res(circulatingSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
+  days: string;
+}): Promise<CirculatingSupplyPromise> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/circulating-supply/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
 };
 
 interface CexSupplyPromise {
@@ -135,23 +132,20 @@ interface CexSupplyPromise {
 /* Fetch Dao Cex Supply */
 export const fetchCexSupply = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
-}) => {
-  return new Promise<CexSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/cex-supply/compare?timeInterval=${timeInterval}`,
-        { next: { revalidate: 3600 } },
-      );
-      const cexSupplyData = await response.json();
-      res(cexSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
+  days: string;
+}): Promise<CexSupplyPromise> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/cex-supply/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
 };
 
 interface DexSupplyPromise {
@@ -163,25 +157,23 @@ interface DexSupplyPromise {
 /* Fetch Dao Dex Supply */
 export const fetchDexSupply = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
-}) => {
-  return new Promise<DexSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/dex-supply/compare?timeInterval=${timeInterval}`,
-        { next: { revalidate: 3600 } },
-      );
-      const dexSupplyData = await response.json();
-      res(dexSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
+  days: string;
+}): Promise<DexSupplyPromise> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/dex-supply/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
 };
 
+// TODO: Should have Promise in the name of the object, use "Response" Instead
 interface LendingSupplyPromise {
   oldLendingSupply: string;
   currentLendingSupply: string;
@@ -191,70 +183,145 @@ interface LendingSupplyPromise {
 /* Fetch Lending Supply */
 export const fetchLendingSupply = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
-}) => {
-  return new Promise<LendingSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/lending-supply/compare?timeInterval=${timeInterval}`,
-        { next: { revalidate: 3600 } },
-      );
-      const dexSupplyData = await response.json();
-      res(dexSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
+  days: string;
+}): Promise<LendingSupplyPromise> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/lending-supply/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
 };
 
-interface TreasurySupplyPromise {
+// TODO: Should have Promise in the name of the object, use "Response" Instead
+interface TreasuryPromise {
   oldTreasury: string;
   currentTreasury: string;
   changeRate: string;
 }
 
-/* Fetch Lending Supply */
-export const fetchTreasurySupply = async ({
+/* Fetch Treasury Supply */
+export const fetchTreasury = async ({
   daoId,
-  timeInterval,
+  days,
 }: {
   daoId: DaoId;
-  timeInterval: string;
-}) => {
-  return new Promise<TreasurySupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/treasury/compare?timeInterval=${timeInterval}`,
-        { next: { revalidate: 3600 } },
-      );
-      const dexSupplyData = await response.json();
-      res(dexSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
+  days: string;
+}): Promise<TreasuryPromise> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/treasury/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
 };
 
+// TODO: Should have Promise in the name of the object, use "Response" Instead
 interface ActiveSupplyPromise {
-  activeSupply: string;
-  activeUsers: string;
+  oldActiveSupply: string;
+  currentActiveSupply: string;
+  changeRate: string;
 }
 
-/* Fetch Lending Supply */
-export const fetchActiveSupply = async ({ daoId }: { daoId: DaoId }) => {
-  return new Promise<ActiveSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply`,
-        { next: { revalidate: 3600 } },
-      );
-      const dexSupplyData = await response.json();
-      res(dexSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
+/* Fetch Active Supply */
+export const fetchActiveSupply = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<ActiveSupplyPromise> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
+};
+
+interface ProposalsResponse {
+  currentProposalsLaunched: string;
+  oldProposalsLaunched: string;
+  changeRate: string;
+}
+
+/* Fetch Proposals */
+export const fetchProposals = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<ProposalsResponse> => {
+  try {
+    const response: Response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/proposals/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
+};
+
+interface VotesResponse {
+  currentVotes: string;
+  oldVotes: string;
+  changeRate: string;
+}
+
+/* Fetch Proposals */
+export const fetchVotes = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<VotesResponse> => {
+  try {
+    const response: Response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/votes/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
+};
+
+interface AverageTurnoutResponse {
+  currentAverageTurnout: string;
+  oldAverageTurnout: string;
+  changeRate: string;
+}
+
+/* Fetch Proposals */
+export const fetchAverageTurnout = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<AverageTurnoutResponse> => {
+  try {
+    const response: Response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
+      { next: { revalidate: 3600 } },
+    );
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
 };
