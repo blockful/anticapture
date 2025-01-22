@@ -64,7 +64,6 @@ export const delegateChanged = async (
       accountId: event.args.delegator,
       daoId,
       delegate: event.args.toDelegate,
-      active: false,
     })
     .onConflictDoUpdate({
       delegate: event.args.toDelegate,
@@ -85,7 +84,6 @@ export const delegateChanged = async (
       accountId: event.args.toDelegate,
       daoId,
       delegationsCount: 1,
-      active: false,
     })
     .onConflictDoUpdate((current) => ({
       delegationsCount: (current.delegationsCount ?? 0) + 1,
@@ -136,14 +134,13 @@ export const delegatedVotesChanged = async (
   });
 
   // Update the delegate's voting power
-  const delegateAccountPower = await context.db
+  await context.db
     .insert(accountPower)
     .values({
       id: [event.args.delegate, daoId].join("-"),
       accountId: event.args.delegate,
       daoId,
       votingPower: newBalance,
-      active: false,
     })
     .onConflictDoUpdate({
       votingPower: newBalance,
@@ -435,7 +432,6 @@ export const voteCast = async (
     })
     .onConflictDoNothing();
 
-
   await context.db
     .insert(accountPower)
     .values({
@@ -524,7 +520,6 @@ export const proposalCreated = async (
       daoId,
       accountId: event.args.proposer,
       proposalsCount: 1,
-      active: false,
     })
     .onConflictDoUpdate((current) => ({
       proposalsCount: (current.proposalsCount ?? 0) + 1,
@@ -582,10 +577,14 @@ const storeDailyBucket = async (
   newValue: bigint,
 ) => {
   const volume = delta(newValue, currentValue);
+  // day timestamp = any timestamp / (number of ms in a day)
   const dayTimestamp =
-    Math.floor(
-      new Date(parseInt(event.block.timestamp.toString())).getTime() / 86400000,
-    ) * 86400000;
+    (Math.floor(
+      new Date(parseInt(event.block.timestamp.toString() + "000")).getTime() /
+        86400000,
+    ) *
+      86400000) /
+    1000;
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
