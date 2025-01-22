@@ -11,7 +11,7 @@ import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
 import { MetricTypesEnum } from "@/lib/constants";
 import { formatUnits } from "viem";
 
-ponder.get("/dao/:daoId/active-supply/compare", async (context) => {
+ponder.get("/dao/:daoId/active-supply", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -24,42 +24,22 @@ ponder.get("/dao/:daoId/active-supply/compare", async (context) => {
 
   //Running Query
   const queryResult = await context.db.execute(sql`
-    WITH  "old_supply" as (
-      SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
-      WHERE db.dao_id=${daoId} 
-      AND db."metricType"=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
-      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
-      ORDER BY db."date" ASC LIMIT 1
-    ),
-   "current_supply"  AS (
-      SELECT db.average as current_supply_amount from "dao_metrics_day_buckets" db 
-      WHERE db.dao_id=${daoId} 
-      AND db."metricType"=${MetricTypesEnum.ACTIVE_SUPPLY_180D}
-      ORDER BY db."date" DESC LIMIT 1
+    WITH  "active_users" as (
+    SELECT DISTINCT ON (voc."voter_account_id") voc."voter_account_id", voc.timestamp
+    FROM "votes_onchain" voc WHERE voc.timestamp>CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+    AND voc."dao_id" = ${daoId}
+    ORDER BY voc."voter_account_id", voc.timestamp DESC
     )
-    SELECT COALESCE("old_supply"."old_supply_amount",0) AS "oldActiveSupply", 
-    COALESCE("current_supply"."current_supply_amount", 0) AS "currentActiveSupply"
-    FROM "current_supply"
-    LEFT JOIN "old_supply" ON 1=1;
+    SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply", TEXT(COUNT("active_users".*)) AS "activeUsers" FROM "account_power" ap
+    JOIN "active_users" ON ap."account_id" = "active_users"."voter_account_id"
   `);
 
   //Calculating Change Rate
   const activeSupplyCompare: ActiveSupplyQueryResult = queryResult
     .rows[0] as ActiveSupplyQueryResult;
-  let changeRate;
-  if (activeSupplyCompare.oldActiveSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(activeSupplyCompare.currentActiveSupply) * BigInt(1e18)) /
-        BigInt(activeSupplyCompare.oldActiveSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
 
   // Returning response
-  return context.json({ ...activeSupplyCompare, changeRate });
+  return context.json(activeSupplyCompare);
 });
 
 ponder.get("/dao/:daoId/proposals/compare", async (context) => {
@@ -106,7 +86,7 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(proposalsCompare.currentProposalsLaunched) /
-        parseFloat(proposalsCompare.oldProposalsLaunched) -
+      parseFloat(proposalsCompare.oldProposalsLaunched) -
       1;
   }
   // Returning response
@@ -159,7 +139,7 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(votesCompare.currentVotes) /
-        parseFloat(votesCompare.oldVotes) -
+      parseFloat(votesCompare.oldVotes) -
       1;
   }
   // Returning response
@@ -220,7 +200,7 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(averageTurnoutCompare.currentAverageTurnout) /
-        parseFloat(averageTurnoutCompare.oldAverageTurnout) -
+      parseFloat(averageTurnoutCompare.oldAverageTurnout) -
       1;
   }
   // Returning response

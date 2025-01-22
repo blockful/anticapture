@@ -11,7 +11,6 @@ import {
   votingPowerHistory,
   daoMetricsDayBuckets,
   token,
-  daoToken,
 } from "ponder:schema";
 import {
   BurningAddresses,
@@ -19,12 +18,11 @@ import {
   DEXAddresses,
   LendingAddresses,
   MetricTypesEnum,
-  secondsInDay,
   UNITreasuryAddresses,
 } from "./constants";
-import { MaxFeePerGasTooLowError, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
-import { and, eq, gte, inArray, lt, sql, sum } from "ponder";
+import { and, eq } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -171,26 +169,6 @@ export const delegatedVotesChanged = async (
     currentDelegatedSupply,
     newDelegatedSupply,
   );
-
-  if (!!delegateAccountPower.active) {
-    const currentActiveSupply180d = (await context.db.find(token, {
-      id: event.log.address,
-    }))!.activeSupply180d;
-    const newActiveSupply180d = (
-      await context.db.update(token, { id: event.log.address }).set((row) => ({
-        activeSupply180d: row.activeSupply180d + (newBalance - oldBalance),
-      }))
-    ).activeSupply180d;
-
-    await storeDailyBucket(
-      context,
-      event,
-      daoId,
-      MetricTypesEnum.ACTIVE_SUPPLY_180D,
-      currentActiveSupply180d,
-      newActiveSupply180d,
-    );
-  }
 };
 
 export const tokenTransfer = async (
@@ -510,69 +488,6 @@ export const voteCast = async (
         (current.abstainVotes ?? BigInt(0)) +
         (event.args.support === 2 ? weight : BigInt(0)),
     }));
-
-  // Calculating Timestamp that is considered the low limit for activity.
-  // Currently the user needs to have voted in the last 180 days to be considered active.
-  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
-  const tokenAddress =
-    (
-      await context.db.sql
-        .select({ tokenAddress: daoToken.tokenId })
-        .from(daoToken)
-        .where(eq(daoToken.daoId, daoId))
-    )[0]?.tokenAddress ?? zeroAddress;
-
-  const currentActiveSupply180d =
-    (
-      await context.db.find(token, {
-        id: tokenAddress,
-      })
-    )?.activeSupply180d ?? BigInt(0);
-
-  // Getting Inactive Supply from Active Users
-  const queryInactiveSupplyFromActiveUsers = await context.db.sql
-    .select({
-      id: accountPower.id,
-      account: accountPower.accountId,
-      votingPower: accountPower.votingPower,
-    })
-    .from(accountPower)
-    .where(
-      and(
-        eq(accountPower.active, true),
-        lt(accountPower.lastVoteTimestamp, beginActiveTimestamp),
-      ),
-    );
-  // Update now inactive users 'active' flag
-  await context.db.sql
-    .update(accountPower)
-    .set({ active: false })
-    .where(
-      inArray(
-        accountPower.id,
-        queryInactiveSupplyFromActiveUsers.map(({ id }) => id),
-      ),
-    );
-  const newActiveSupply180d = (
-    await context.db.update(token, { id: tokenAddress }).set((row) => ({
-      activeSupply180d:
-        row.activeSupply180d -
-        queryInactiveSupplyFromActiveUsers.reduce(
-          (acc, current) => acc + current.votingPower,
-          BigInt(0),
-        ) +
-        (!voterStatusBeforeUpdate ? voterAccountPower.votingPower : 0n),
-    }))
-  ).activeSupply180d;
-
-  await storeDailyBucket(
-    context,
-    event,
-    daoId,
-    MetricTypesEnum.ACTIVE_SUPPLY_180D,
-    currentActiveSupply180d,
-    newActiveSupply180d,
-  );
 };
 
 export const proposalCreated = async (
@@ -681,11 +596,14 @@ const storeDailyBucket = async (
   newValue: bigint,
 ) => {
   const volume = delta(newValue, currentValue);
-
+  const dayTimestamp =
+    Math.floor(
+      new Date(parseInt(event.block.timestamp.toString())).getTime() / 86400000,
+    ) * 86400000;
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
-      date: event.block.timestamp,
+      date: BigInt(dayTimestamp),
       daoId,
       tokenId: event.log.address,
       metricType,
