@@ -94,8 +94,7 @@ export const DashboardTable = () => {
                 index: index,
                 delegatedSupply: String(
                   BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-                ),
-                delegatedSupplyChangeRate: String(parseFloat(result.changeRate)*100).slice(0,5)+"%"
+                )
               },
             });
         },

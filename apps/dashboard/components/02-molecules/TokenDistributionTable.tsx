@@ -72,6 +72,9 @@ interface State {
   data: TokenDistribution[];
 }
 
+//TODO: Doesn't make sense to have only one action of generic type UPDATE_METRIC, 
+// you should create UPDATE_DELEGATED_SUPPLY, UPDATE_TOTAL_SUPPLY, UPDATE_DEX_SUPPLY, 
+// this way the code will get more organized.
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
 }
@@ -88,17 +91,18 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.UPDATE_METRIC:
+      const data = [
+        ...state.data.slice(0,action.payload.index), 
+          {
+            ...state.data[action.payload.index], 
+            currentValue: action.payload.currentValue,
+            variation: action.payload.variation
+          },
+       ...state.data.slice(action.payload.index+1, state.data.length)
+      ];
       return {
         ...state,
-        data: state.data.map((item, index) =>
-          index === action.payload.index
-            ? {
-                ...item,
-                currentValue: action.payload.currentValue,
-                variation: action.payload.variation,
-              }
-            : item,
-        ),
+        data,
       };
     default:
       return state;
