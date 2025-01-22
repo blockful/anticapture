@@ -435,28 +435,14 @@ export const voteCast = async (
     })
     .onConflictDoNothing();
 
-  const voterStatusBeforeUpdate = (
-    (
-      await context.db.sql
-        .select({ active: accountPower.active })
-        .from(accountPower)
-        .where(
-          and(
-            eq(accountPower.accountId, event.args.voter),
-            eq(accountPower.daoId, daoId),
-          ),
-        )
-    )[0] ?? { active: false }
-  ).active;
 
-  const voterAccountPower = await context.db
+  await context.db
     .insert(accountPower)
     .values({
       id: [event.args.voter, daoId].join("-"),
       daoId,
       accountId: event.args.voter,
       votesCount: 1,
-      active: true,
       lastVoteTimestamp: event.block.timestamp,
     })
     .onConflictDoUpdate((current) => ({
