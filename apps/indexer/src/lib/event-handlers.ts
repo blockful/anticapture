@@ -578,7 +578,7 @@ const storeDailyBucket = async (
 ) => {
   const volume = delta(newValue, currentValue);
   // day timestamp = any timestamp / (number of ms in a day)
-  const dayTimestamp =
+  const dayStartTimestampInSeconds =
     new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(
       0,
       0,
@@ -588,7 +588,7 @@ const storeDailyBucket = async (
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
-      date: BigInt(dayTimestamp),
+      date: BigInt(dayStartTimestampInSeconds),
       daoId,
       tokenId: event.log.address,
       metricType,

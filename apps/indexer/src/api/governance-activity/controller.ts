@@ -80,7 +80,7 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(proposalsCompare.currentProposalsLaunched) /
-      parseFloat(proposalsCompare.oldProposalsLaunched) -
+        parseFloat(proposalsCompare.oldProposalsLaunched) -
       1;
   }
   // Returning response
@@ -133,7 +133,7 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(votesCompare.currentVotes) /
-      parseFloat(votesCompare.oldVotes) -
+        parseFloat(votesCompare.oldVotes) -
       1;
   }
   // Returning response
@@ -194,7 +194,7 @@ ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
   } else {
     changeRate =
       parseFloat(averageTurnoutCompare.currentAverageTurnout) /
-      parseFloat(averageTurnoutCompare.oldAverageTurnout) -
+        parseFloat(averageTurnoutCompare.oldAverageTurnout) -
       1;
   }
   // Returning response
