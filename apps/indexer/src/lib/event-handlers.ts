@@ -1,11 +1,5 @@
 import { Context, Event } from "ponder:registry";
-import {
-  convertSecondsTimestampToDate,
-  delta,
-  getValueFromEventArgs,
-  max,
-  min,
-} from "./utils";
+import { delta, getValueFromEventArgs, max, min } from "./utils";
 import {
   account,
   accountBalance,
@@ -17,17 +11,20 @@ import {
   votingPowerHistory,
   daoMetricsDayBuckets,
   token,
+  daoToken,
 } from "ponder:schema";
 import {
+  BurningAddresses,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
   MetricTypesEnum,
   secondsInDay,
+  UNITreasuryAddresses,
 } from "./constants";
-import { zeroAddress } from "viem";
+import { MaxFeePerGasTooLowError, zeroAddress } from "viem";
 import viemClient from "./viemClient";
-
+import { and, eq, gte, inArray, lt, sql, sum } from "ponder";
 
 export const delegateChanged = async (
   event: // | Event<"ENSToken:DelegateChanged">
@@ -69,6 +66,7 @@ export const delegateChanged = async (
       accountId: event.args.delegator,
       daoId,
       delegate: event.args.toDelegate,
+      active: false,
     })
     .onConflictDoUpdate({
       delegate: event.args.toDelegate,
@@ -89,6 +87,7 @@ export const delegateChanged = async (
       accountId: event.args.toDelegate,
       daoId,
       delegationsCount: 1,
+      active: false,
     })
     .onConflictDoUpdate((current) => ({
       delegationsCount: (current.delegationsCount ?? 0) + 1,
@@ -139,13 +138,14 @@ export const delegatedVotesChanged = async (
   });
 
   // Update the delegate's voting power
-  await context.db
+  const delegateAccountPower = await context.db
     .insert(accountPower)
     .values({
       id: [event.args.delegate, daoId].join("-"),
       accountId: event.args.delegate,
       daoId,
       votingPower: newBalance,
+      active: false,
     })
     .onConflictDoUpdate({
       votingPower: newBalance,
@@ -171,6 +171,26 @@ export const delegatedVotesChanged = async (
     currentDelegatedSupply,
     newDelegatedSupply,
   );
+
+  if (!!delegateAccountPower.active) {
+    const currentActiveSupply180d = (await context.db.find(token, {
+      id: event.log.address,
+    }))!.activeSupply180d;
+    const newActiveSupply180d = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        activeSupply180d: row.activeSupply180d + (newBalance - oldBalance),
+      }))
+    ).activeSupply180d;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.ACTIVE_SUPPLY_180D,
+      currentActiveSupply180d,
+      newActiveSupply180d,
+    );
+  }
 };
 
 export const tokenTransfer = async (
@@ -220,26 +240,6 @@ export const tokenTransfer = async (
     timestamp: event.block.timestamp,
   });
 
-  // Update the from account's balance
-  if (from !== zeroAddress) {
-    const fromAccount = await context.db
-      .insert(accountBalance)
-      .values({
-        id: [from, uniTokenAddress].join("-"),
-        tokenId: uniTokenAddress,
-        accountId: from,
-        balance: BigInt(value),
-      })
-      .onConflictDoUpdate((current) => ({
-        balance: (current.balance ?? BigInt(0)) - BigInt(value),
-      }));
-    // Check if the balances are valid
-    if (fromAccount.balance! < BigInt(0)) {
-      console.log(`Invalid balance for ${from}`);
-      throw new Error(`Invalid balance`);
-    }
-  }
-
   // Update the to account's balance
   await context.db
     .insert(accountBalance)
@@ -247,10 +247,23 @@ export const tokenTransfer = async (
       id: [to, uniTokenAddress].join("-"),
       tokenId: uniTokenAddress,
       accountId: to,
-      balance: BigInt(value),
+      balance: value,
     })
     .onConflictDoUpdate((current) => ({
-      balance: (current.balance ?? BigInt(0)) + BigInt(value),
+      balance: current.balance + value,
+    }));
+
+  // Update the from account's balance
+  await context.db
+    .insert(accountBalance)
+    .values({
+      id: [from, uniTokenAddress].join("-"),
+      tokenId: uniTokenAddress,
+      accountId: from,
+      balance: -value,
+    })
+    .onConflictDoUpdate((current) => ({
+      balance: current.balance - value,
     }));
 
   const currentLendingSupply = (await context.db.find(token, {
@@ -332,6 +345,88 @@ export const tokenTransfer = async (
       newDexSupply,
     );
   }
+
+  const currentTreasury = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.treasury;
+
+  const treasuryAddressList = Object.values(UNITreasuryAddresses);
+  const isTreasuryTransaction =
+    treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
+  const isInternalTreasuryTransfer =
+    treasuryAddressList.includes(to) && treasuryAddressList.includes(from);
+
+  if (isTreasuryTransaction && !isInternalTreasuryTransfer) {
+    const isToTreasury = treasuryAddressList.includes(to);
+
+    const newTreasury = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        treasury: isToTreasury ? row.treasury + value : row.treasury - value,
+      }))
+    ).treasury;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.TREASURY,
+      currentTreasury,
+      newTreasury,
+    );
+  }
+
+  const currentTotalSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.totalSupply;
+
+  const burningAddressesAddressList = Object.values(BurningAddresses);
+  const isTotalSupplyTransaction =
+    burningAddressesAddressList.includes(to) ||
+    burningAddressesAddressList.includes(from);
+
+  if (isTotalSupplyTransaction) {
+    const isBurningTokens = burningAddressesAddressList.includes(to);
+    const newTotalSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        totalSupply: isBurningTokens
+          ? row.totalSupply - value
+          : row.totalSupply + value,
+      }))
+    ).totalSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      currentTotalSupply,
+      newTotalSupply,
+    );
+  }
+
+  const currentCirculatingSupply = (await context.db.find(token, {
+    id: event.log.address,
+  }))!.circulatingSupply;
+
+  const isCirculatingSupplyTransaction =
+    isTotalSupplyTransaction || isTreasuryTransaction;
+
+  if (isCirculatingSupplyTransaction) {
+    const newCirculatingSupply = (
+      await context.db.update(token, { id: event.log.address }).set((row) => ({
+        circulatingSupply: row.totalSupply - row.treasury,
+      }))
+    ).circulatingSupply;
+
+    await storeDailyBucket(
+      context,
+      event,
+      daoId,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      currentCirculatingSupply,
+      newCirculatingSupply,
+    );
+  }
 };
 
 export const voteCast = async (
@@ -362,13 +457,29 @@ export const voteCast = async (
     })
     .onConflictDoNothing();
 
-  await context.db
+  const voterStatusBeforeUpdate = (
+    (
+      await context.db.sql
+        .select({ active: accountPower.active })
+        .from(accountPower)
+        .where(
+          and(
+            eq(accountPower.accountId, event.args.voter),
+            eq(accountPower.daoId, daoId),
+          ),
+        )
+    )[0] ?? { active: false }
+  ).active;
+
+  const voterAccountPower = await context.db
     .insert(accountPower)
     .values({
       id: [event.args.voter, daoId].join("-"),
       daoId,
       accountId: event.args.voter,
       votesCount: 1,
+      active: true,
+      lastVoteTimestamp: event.block.timestamp,
     })
     .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
@@ -399,6 +510,69 @@ export const voteCast = async (
         (current.abstainVotes ?? BigInt(0)) +
         (event.args.support === 2 ? weight : BigInt(0)),
     }));
+
+  // Calculating Timestamp that is considered the low limit for activity.
+  // Currently the user needs to have voted in the last 180 days to be considered active.
+  const beginActiveTimestamp = event.block.timestamp - BigInt(180 * 86400); // 180 days * 86400 seconds
+  const tokenAddress =
+    (
+      await context.db.sql
+        .select({ tokenAddress: daoToken.tokenId })
+        .from(daoToken)
+        .where(eq(daoToken.daoId, daoId))
+    )[0]?.tokenAddress ?? zeroAddress;
+
+  const currentActiveSupply180d =
+    (
+      await context.db.find(token, {
+        id: tokenAddress,
+      })
+    )?.activeSupply180d ?? BigInt(0);
+
+  // Getting Inactive Supply from Active Users
+  const queryInactiveSupplyFromActiveUsers = await context.db.sql
+    .select({
+      id: accountPower.id,
+      account: accountPower.accountId,
+      votingPower: accountPower.votingPower,
+    })
+    .from(accountPower)
+    .where(
+      and(
+        eq(accountPower.active, true),
+        lt(accountPower.lastVoteTimestamp, beginActiveTimestamp),
+      ),
+    );
+  // Update now inactive users 'active' flag
+  await context.db.sql
+    .update(accountPower)
+    .set({ active: false })
+    .where(
+      inArray(
+        accountPower.id,
+        queryInactiveSupplyFromActiveUsers.map(({ id }) => id),
+      ),
+    );
+  const newActiveSupply180d = (
+    await context.db.update(token, { id: tokenAddress }).set((row) => ({
+      activeSupply180d:
+        row.activeSupply180d -
+        queryInactiveSupplyFromActiveUsers.reduce(
+          (acc, current) => acc + current.votingPower,
+          BigInt(0),
+        ) +
+        (!voterStatusBeforeUpdate ? voterAccountPower.votingPower : 0n),
+    }))
+  ).activeSupply180d;
+
+  await storeDailyBucket(
+    context,
+    event,
+    daoId,
+    MetricTypesEnum.ACTIVE_SUPPLY_180D,
+    currentActiveSupply180d,
+    newActiveSupply180d,
+  );
 };
 
 export const proposalCreated = async (
@@ -446,11 +620,10 @@ export const proposalCreated = async (
     .insert(accountPower)
     .values({
       id: event.args.proposer,
-      create: {
-        daoId,
-        accountId: event.args.proposer,
-        proposalsCount: 1,
-      },
+      daoId,
+      accountId: event.args.proposer,
+      proposalsCount: 1,
+      active: false,
     })
     .onConflictDoUpdate((current) => ({
       proposalsCount: (current.proposalsCount ?? 0) + 1,
@@ -507,15 +680,12 @@ const storeDailyBucket = async (
   currentValue: bigint,
   newValue: bigint,
 ) => {
-  const dayTimestamp =
-    Math.floor(Number(event.block.timestamp) / secondsInDay) * secondsInDay;
-
   const volume = delta(newValue, currentValue);
 
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
-      dayTimestamp: convertSecondsTimestampToDate(dayTimestamp),
+      date: event.block.timestamp,
       daoId,
       tokenId: event.log.address,
       metricType,

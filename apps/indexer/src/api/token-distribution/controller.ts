@@ -11,187 +11,181 @@ import {
   TotalSupplyQueryResult,
   TreasuryQueryResult,
 } from "./types";
-import {
-  CEXAddresses,
-  DEXAddresses,
-  LendingAddresses,
-  UNITreasuryAddresses,
-} from "@/lib/constants";
+import { MetricTypesEnum } from "@/lib/constants";
 
 ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
-  const queryResult = await context.db
-    .execute(sql`         WITH "old_from_zero_address" as (
-    SELECT SUM(t.amount) as "from_amount" 
-    FROM "transfers" t 
-    WHERE t."from_account_id"=${zeroAddress} 
-  AND t."dao_id" = ${daoId}
-  AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+
+  //Running Query
+  const queryResult = await context.db.execute(sql`         
+  WITH  "old_total_supply" as (
+    SELECT db.average as old_total_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+    ORDER BY db."date" ASC LIMIT 1
   ),
-  "old_to_zero_address" as (
-    SELECT SUM(t.amount) as "to_amount" 
-    FROM "transfers" t 
-    WHERE t."to_account_id"=${zeroAddress} 
-    AND t."dao_id" = ${daoId}
-    AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-  ),
-  "current_total_supply" as (
-  SELECT SUM(ab.balance) as "balance" FROM "account_balance" ab
+ "current_total_supply"  AS (
+    SELECT db.average as current_total_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
+    ORDER BY db."date" DESC LIMIT 1
   )
-  SELECT "old_from_zero_address"."from_amount" - COALESCE("old_to_zero_address"."to_amount", 0) as "oldTotalSupply",
-  "current_total_supply"."balance" as "currentTotalSupply"
-  FROM "old_from_zero_address" 
-  JOIN "old_to_zero_address" on 1=1
-  JOIN "current_total_supply" on 1=1;`);
+  SELECT COALESCE("old_total_supply"."old_total_supply_amount", 0) AS "oldTotalSupply", 
+  COALESCE("current_total_supply"."current_total_supply_amount", 0) AS "currentTotalSupply"
+  FROM "current_total_supply"
+  LEFT JOIN "old_total_supply" ON 1=1;`);
   const totalSupplyCompare: TotalSupplyQueryResult = queryResult
     .rows[0] as TotalSupplyQueryResult;
-  const changeRate = formatUnits(
-    (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
-      BigInt(totalSupplyCompare.oldTotalSupply) -
-      BigInt(1e18),
-    18,
-  );
+  let changeRate;
+  if (totalSupplyCompare.oldTotalSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+        BigInt(totalSupplyCompare.oldTotalSupply) -
+        BigInt(1e18),
+      18,
+    );
+  }
   return context.json({ ...totalSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
-   WITH  "old_delegated_supply" as (
-    SELECT SUM("old_delegated_supply_by_user"."old_delegated_supply") as "old_delegated_supply_amount" from (
-      SELECT DISTINCT ON (vp."account_id") vp."account_id", vp.timestamp, vp."voting_power" AS "old_delegated_supply"
-      FROM "voting_power_history" vp WHERE vp.timestamp<${BigInt(oldTimestamp.toString().slice(0, 10))}
-      AND vp."dao_id" = ${daoId}
-      ORDER BY vp."account_id", vp.timestamp DESC
-    ) "old_delegated_supply_by_user"
- ),
+  WITH  "old_delegated_supply" as (
+    SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.DELEGATED_SUPPLY}
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+    ORDER BY db."date" ASC LIMIT 1
+  ),
  "current_delegated_supply"  AS (
-    SELECT SUM(ap."voting_power") AS "current_delegated_supply_amount" FROM "account_power" ap
+    SELECT db.average as current_delegated_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.DELEGATED_SUPPLY}
+    ORDER BY db."date" DESC LIMIT 1
   )
-  SELECT "old_delegated_supply"."old_delegated_supply_amount" AS "oldDelegatedSupply", 
-  "current_delegated_supply"."current_delegated_supply_amount" AS "currentDelegatedSupply"
+  SELECT COALESCE("old_delegated_supply"."old_delegated_supply_amount",0) AS "oldDelegatedSupply", 
+  COALESCE("current_delegated_supply"."current_delegated_supply_amount", 0) AS "currentDelegatedSupply"
   FROM "current_delegated_supply"
-  JOIN "old_delegated_supply" ON 1=1;`);
+  LEFT JOIN "old_delegated_supply" ON 1=1;`);
   const delegatedSupplyCompare: DelegatedSupplyQueryResult = queryResult
     .rows[0] as DelegatedSupplyQueryResult;
-  const changeRate = formatUnits(
-    (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
-      BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
-      BigInt(1e18),
-    18,
-  );
+  let changeRate;
+  if (delegatedSupplyCompare.oldDelegatedSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
+        BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
+        BigInt(1e18),
+      18,
+    );
+  }
   return context.json({ ...delegatedSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
-   WITH "old_from_zero_address" as (
-          SELECT SUM(t.amount) as "from_amount" 
-          FROM "transfers" t 
-          WHERE t."from_account_id"=${zeroAddress} 
-          AND t."dao_id" = ${daoId}
-          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-        ),
-        "old_to_zero_address" as (
-          SELECT SUM(t.amount) as "to_amount" 
-          FROM "transfers" t 
-          WHERE t."to_account_id"=${zeroAddress} 
-          AND t."dao_id" = ${daoId}
-          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-        ),
-        "old_from_treasury" as (
-          SELECT SUM(t.amount) as "from_amount" 
-          FROM "transfers" t 
-          WHERE t."from_account_id" IN (${Object.values(UNITreasuryAddresses).join(", ")})
-          AND t."dao_id" = ${daoId}
-          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-        ),
-        "old_to_treasury"as (
-          SELECT SUM(t.amount) as "to_amount" 
-          FROM "transfers" t 
-          WHERE t."to_account_id" IN (${Object.values(UNITreasuryAddresses).join(", ")})
-          AND t."dao_id" = ${daoId}
-          AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-        ),
-        "current_circulating_supply" as (
-          SELECT SUM(ab.balance) AS "current_circulating_supply"
-          FROM "account_balance" ab WHERE ab."account_id" NOT IN (${Object.values(UNITreasuryAddresses).join(", ")})
-        )
-        SELECT (COALESCE("old_from_zero_address"."from_amount",0) - COALESCE("old_to_zero_address"."to_amount", 0)) - 
-        (COALESCE("old_to_treasury"."to_amount", 0) - COALESCE("old_from_treasury"."from_amount",0))
-        as "oldCirculatingSupply",
-        "current_circulating_supply"."current_circulating_supply"
-        as "currentCirculatingSupply"
-        FROM "old_from_zero_address" 
-        JOIN "old_to_zero_address" ON 1=1
-        JOIN "old_from_treasury" ON 1=1
-        JOIN "old_to_treasury" ON 1=1
-        JOIN "current_circulating_supply" ON 1=1;`);
+    WITH  "old_supply" as (
+      SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db."metricType"=${MetricTypesEnum.CIRCULATING_SUPPLY}
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+      ORDER BY db."date" ASC LIMIT 1
+    ),
+   "current_supply"  AS (
+      SELECT db.average as current_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db."metricType"=${MetricTypesEnum.CIRCULATING_SUPPLY}
+      ORDER BY db."date" DESC LIMIT 1
+    )
+    SELECT COALESCE("old_supply"."old_supply_amount",0) AS "oldCirculatingSupply", 
+    COALESCE("current_supply"."current_supply_amount", 0) AS "currentCirculatingSupply"
+    FROM "current_supply"
+    LEFT JOIN "old_supply" ON 1=1;
+        `);
   const circulatingSupplyCompare: CirculatingSupplyQueryResult = queryResult
     .rows[0] as CirculatingSupplyQueryResult;
-  const changeRate = formatUnits(
-    (BigInt(circulatingSupplyCompare.currentCirculatingSupply) * BigInt(1e18)) /
-      BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
-      BigInt(1e18),
-    18,
-  );
+  let changeRate;
+  if (circulatingSupplyCompare.oldCirculatingSupply === "0") {
+    changeRate = "0";
+  } else {
+    changeRate = formatUnits(
+      (BigInt(circulatingSupplyCompare.currentCirculatingSupply) *
+        BigInt(1e18)) /
+        BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
+        BigInt(1e18),
+      18,
+    );
+  }
   return context.json({ ...circulatingSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/treasury/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
-    WITH "old_from_treasury" as (
-      SELECT SUM(t.amount) as "from_amount" 
-      FROM "transfers" t 
-      WHERE t."from_account_id" IN (${Object.values(UNITreasuryAddresses).join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+    WITH  "old_treasury" as (
+      SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db."metricType"=${MetricTypesEnum.TREASURY}
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+      ORDER BY db."date" ASC LIMIT 1
     ),
-    "old_to_treasury" as (
-      SELECT SUM(t.amount) as "to_amount" 
-      FROM "transfers" t 
-      WHERE t."to_account_id" IN (${Object.values(UNITreasuryAddresses).join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-    ),
-    "current_treasury" as (
-      SELECT SUM(ab.balance) AS "current_treasury"
-      FROM "account_balance" ab WHERE ab."account_id" IN (${Object.values(UNITreasuryAddresses).join(", ")})
+   "current_treasury"  AS (
+      SELECT db.average as current_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db."metricType"=${MetricTypesEnum.TREASURY}
+      ORDER BY db."date" DESC LIMIT 1
     )
-    SELECT (COALESCE("old_to_treasury"."to_amount", 0) - COALESCE("old_from_treasury"."from_amount", 0))
-    as "oldTreasury",
-    COALESCE("current_treasury"."current_treasury", 0)
-    as "currentTreasury"
-    FROM "old_from_treasury"
-    JOIN "old_to_treasury" ON 1=1
-    JOIN "current_treasury" ON 1=1;
+    SELECT COALESCE("old_treasury"."old_supply_amount",0) AS "oldTreasury", 
+    COALESCE("current_treasury"."current_supply_amount", 0) AS "currentTreasury"
+    FROM "current_treasury"
+    LEFT JOIN "old_treasury" ON 1=1;
   `);
+
+  //Calculating Change Rate
   const treasuryCompare: TreasuryQueryResult = queryResult
     .rows[0] as TreasuryQueryResult;
   let changeRate;
@@ -205,180 +199,158 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
       18,
     );
   }
+  // Returning response
   return context.json({ ...treasuryCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
-    WITH "old_from_cex" as (
-      SELECT SUM(t.amount) as "from_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."from_account_id") IN (${Object.values(CEXAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-    ),
-    "old_to_cex" as (
-      SELECT SUM(t.amount) as "to_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."to_account_id") IN (${Object.values(CEXAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-    ),
-    "current_cex_supply" as (
-      SELECT SUM(ab.balance) AS "current_cex_supply"
-      FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-        CEXAddresses,
-      )
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-    )
-    SELECT (COALESCE("old_to_cex"."to_amount", 0) - COALESCE("old_from_cex"."from_amount", 0))
-    as "oldCexSupply",
-    COALESCE("current_cex_supply"."current_cex_supply", 0)
-    as "currentCexSupply"
-    FROM "old_from_cex"
-    JOIN "old_to_cex" ON 1=1
-    JOIN "current_cex_supply" ON 1=1;`);
-  const cexCompare: CexSupplyQueryResult = queryResult
+  WITH  "old_cex_supply" as (
+    SELECT db.average as old_cex_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.CEX_SUPPLY}
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+    ORDER BY db."date" ASC LIMIT 1
+  ),
+ "current_cex_supply"  AS (
+    SELECT db.average as current_cex_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.CEX_SUPPLY}
+    ORDER BY db."date" DESC LIMIT 1
+  )
+  SELECT COALESCE("old_cex_supply"."old_cex_supply_amount",0) AS "oldCexSupply", 
+  COALESCE("current_cex_supply"."current_cex_supply_amount", 0) AS "currentCexSupply"
+  FROM "current_cex_supply"
+  LEFT JOIN "old_cex_supply" ON 1=1;
+`);
+
+  //Calculating Change Rate
+  const cexSupplyCompare: CexSupplyQueryResult = queryResult
     .rows[0] as CexSupplyQueryResult;
   let changeRate;
-  if (cexCompare.oldCexSupply === "0") {
+  if (cexSupplyCompare.oldCexSupply === "0") {
     changeRate = "0";
   } else {
     changeRate = formatUnits(
-      (BigInt(cexCompare.currentCexSupply) * BigInt(1e18)) /
-        BigInt(cexCompare.oldCexSupply) -
+      (BigInt(cexSupplyCompare.currentCexSupply) * BigInt(1e18)) /
+        BigInt(cexSupplyCompare.oldCexSupply) -
         BigInt(1e18),
       18,
     );
   }
-  return context.json({ ...cexCompare, changeRate });
+
+  // Returning response
+  return context.json({ ...cexSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
-    WITH "old_from_dex" as (
-      SELECT SUM(t.amount) as "from_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."from_account_id") IN (${Object.values(DEXAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+    WITH  "old_supply" as (
+      SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db."metricType"=${MetricTypesEnum.DEX_SUPPLY}
+      AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+      ORDER BY db."date" ASC LIMIT 1
     ),
-    "old_to_dex" as (
-      SELECT SUM(t.amount) as "to_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."to_account_id") IN (${Object.values(DEXAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-    ),
-    "current_dex_supply" as (
-      SELECT SUM(ab.balance) AS "current_dex_supply"
-      FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-        DEXAddresses,
-      )
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
+   "current_supply"  AS (
+      SELECT db.average as current_supply_amount from "dao_metrics_day_buckets" db 
+      WHERE db.dao_id=${daoId} 
+      AND db."metricType"=${MetricTypesEnum.DEX_SUPPLY}
+      ORDER BY db."date" DESC LIMIT 1
     )
-    SELECT (COALESCE("old_to_dex"."to_amount",0) - COALESCE("old_from_dex"."from_amount", 0))
-    as "oldDexSupply",
-    COALESCE("current_dex_supply"."current_dex_supply", 0)
-    as "currentDexSupply"
-    FROM "old_from_dex"
-    JOIN "old_to_dex" ON 1=1
-    JOIN "current_dex_supply" ON 1=1;`);
-  const dexCompare: DexSupplyQueryResult = queryResult
+    SELECT COALESCE("old_supply"."old_supply_amount",0) AS "oldDexSupply", 
+    COALESCE("current_supply"."current_supply_amount", 0) AS "currentDexSupply"
+    FROM "current_supply"
+    LEFT JOIN "old_supply" ON 1=1;
+  `);
+
+  //Calculating Change Rate
+  const dexSupplyCompare: DexSupplyQueryResult = queryResult
     .rows[0] as DexSupplyQueryResult;
   let changeRate;
-  if (dexCompare.oldDexSupply === "0") {
+  if (dexSupplyCompare.oldDexSupply === "0") {
     changeRate = "0";
   } else {
     changeRate = formatUnits(
-      (BigInt(dexCompare.currentDexSupply) * BigInt(1e18)) /
-        BigInt(dexCompare.oldDexSupply) -
+      (BigInt(dexSupplyCompare.currentDexSupply) * BigInt(1e18)) /
+        BigInt(dexSupplyCompare.oldDexSupply) -
         BigInt(1e18),
       18,
     );
   }
-  return context.json({ ...dexCompare, changeRate });
+
+  // Returning response
+  return context.json({ ...dexSupplyCompare, changeRate });
 });
 
 ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
+  //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
   if (!days) {
     throw new Error('Query param "days" is mandatory');
   }
+  //Creating Timestamp
   const oldTimestamp =
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+
+  //Running Query
   const queryResult = await context.db.execute(sql`
-    WITH "old_from_lending" as (
-      SELECT SUM(t.amount) as "from_amount" 
-      FROM "transfers" t 
-      WHERE UPPER(t."from_account_id") IN (${Object.values(LendingAddresses)
-        .map((addr) => addr.toUpperCase())
-        .join(", ")})
-      AND t."dao_id" = ${daoId}
-      AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
+  WITH  "old_lending_supply" as (
+    SELECT db.average as "old_lending_supply_amount" from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.LENDING_SUPPLY}
+    AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+    ORDER BY db."date" ASC LIMIT 1
   ),
-  "old_to_lending" as (
-    SELECT SUM(t.amount) as "to_amount" 
-    FROM "transfers" t 
-    WHERE UPPER(t."to_account_id") IN (${Object.values(LendingAddresses)
-      .map((addr) => addr.toUpperCase())
-      .join(", ")})
-    AND t."dao_id" = ${daoId}
-    AND timestamp < ${BigInt(oldTimestamp.toString().slice(0, 10))}
-  ),
-  "current_lending_supply" as (
-    SELECT SUM(ab.balance) AS "current_lending_supply"
-    FROM "account_balance" ab WHERE UPPER(ab."account_id") IN (${Object.values(
-      LendingAddresses,
-    )
-      .map((addr) => addr.toUpperCase())
-      .join(", ")})
+ "current_lending_supply"  AS (
+    SELECT db.average as current_lending_supply_amount from "dao_metrics_day_buckets" db 
+    WHERE db.dao_id=${daoId} 
+    AND db."metricType"=${MetricTypesEnum.LENDING_SUPPLY}
+    ORDER BY db."date" DESC LIMIT 1
   )
-  SELECT COALESCE(("old_to_lending"."to_amount" - "old_from_lending"."from_amount"),0)
-  as "oldLendingSupply",
-  COALESCE("current_lending_supply"."current_lending_supply", 0)
-  as "currentLendingSupply"
-  FROM "old_from_lending"
-  JOIN "old_to_lending" ON 1=1
-  JOIN "current_lending_supply" ON 1=1;
+  SELECT COALESCE("old_lending_supply"."old_lending_supply_amount",0) AS "oldLendingSupply", 
+  COALESCE("current_lending_supply"."current_lending_supply_amount", 0) AS "currentLendingSupply"
+  FROM "current_lending_supply"
+  LEFT JOIN "old_lending_supply" ON 1=1;
   `);
-  const lendingCompare: LendingSupplyQueryResult = queryResult
+
+  //Calculating Change Rate
+  const lendingSupplyCompare: LendingSupplyQueryResult = queryResult
     .rows[0] as LendingSupplyQueryResult;
   let changeRate;
-  if (lendingCompare.oldLendingSupply === "0") {
+  if (lendingSupplyCompare.oldLendingSupply === "0") {
     changeRate = "0";
   } else {
     changeRate = formatUnits(
-      (BigInt(lendingCompare.currentLendingSupply) * BigInt(1e18)) /
-        BigInt(lendingCompare.oldLendingSupply) -
+      (BigInt(lendingSupplyCompare.currentLendingSupply) * BigInt(1e18)) /
+        BigInt(lendingSupplyCompare.oldLendingSupply) -
         BigInt(1e18),
       18,
     );
   }
-  return context.json({ ...lendingCompare, changeRate });
+  // Returning response
+  return context.json({ ...lendingSupplyCompare, changeRate });
 });

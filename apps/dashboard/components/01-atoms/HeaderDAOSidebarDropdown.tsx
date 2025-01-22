@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { EnsIcon, UniswapIcon } from "@/components/01-atoms";
+import { UniswapIcon } from "@/components/01-atoms";
 import { useRouter } from "next/navigation";
 import { DaoId } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
@@ -43,12 +43,12 @@ export const HeaderDAOSidebarDropdown = () => {
         icon: <UniswapIcon className="h-5 w-5 text-[#FC72FF]" />,
         href: `/${DaoId.UNISWAP.toLowerCase()}`,
       },
-      {
-        id: 1,
-        label: "ENS GovRisk",
-        icon: <EnsIcon className="h-5 w-5" />,
-        href: `/${DaoId.ENS.toLowerCase()}`,
-      },
+      // {
+      //   id: 1,
+      //   label: "ENS GovRisk",
+      //   icon: <EnsIcon className="h-5 w-5" />,
+      //   href: `/${DaoId.ENS.toLowerCase()}`,
+      // },
     ],
     [],
   );

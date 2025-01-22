@@ -67,10 +67,14 @@ export const accountPower = onchainTable(
     proposalsCount: drizzle.integer().default(0).notNull(),
     delegationsCount: drizzle.integer().default(0).notNull(),
     delegate: drizzle.text().default(zeroAddress).notNull(),
+    lastVoteTimestamp: drizzle.bigint().default(BigInt(0)).notNull(),
+    active: drizzle.boolean().notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
+    activeIdx: index().on(table.active),
+    lastVoteTimestamp: index().on(table.lastVoteTimestamp),
   }),
 );
 
@@ -174,7 +178,7 @@ export const metricType = onchainEnum(
 export const daoMetricsDayBuckets = onchainTable(
   "dao_metrics_day_buckets",
   (drizzle) => ({
-    dayTimestamp: drizzle.date("date", { mode: "date" }),
+    date: drizzle.bigint().notNull(),
     daoId: drizzle.text().notNull(),
     tokenId: drizzle.text().notNull(),
     metricType: metricType("metricType").notNull(),
@@ -188,12 +192,7 @@ export const daoMetricsDayBuckets = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [
-        table.dayTimestamp,
-        table.daoId,
-        table.tokenId,
-        table.metricType,
-      ],
+      columns: [table.date, table.daoId, table.tokenId, table.metricType],
     }),
   }),
 );

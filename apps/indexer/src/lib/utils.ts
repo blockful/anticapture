@@ -22,8 +22,8 @@ export const getValueFromEventArgs = <T, K extends { [k: string]: any }>(
   return value;
 };
 
-export const convertSecondsTimestampToDate = (timestamp: number) => {
-  return new Date(parseInt(String(timestamp) + "000"));
+export const convertTimestampMilissecondsToSeconds = (timestamp: bigint) => {
+  return BigInt(String(timestamp).slice(0, 10));
 };
 
 /**

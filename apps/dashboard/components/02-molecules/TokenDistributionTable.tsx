@@ -77,6 +77,9 @@ interface State {
   data: TokenDistribution[];
 }
 
+//TODO: Doesn't make sense to have only one action of generic type UPDATE_METRIC, 
+// you should create UPDATE_DELEGATED_SUPPLY, UPDATE_TOTAL_SUPPLY, UPDATE_DEX_SUPPLY, 
+// this way the code will get more organized.
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
 }
@@ -93,17 +96,18 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.UPDATE_METRIC:
+      const data = [
+        ...state.data.slice(0,action.payload.index), 
+          {
+            ...state.data[action.payload.index], 
+            currentValue: action.payload.currentValue,
+            variation: action.payload.variation
+          },
+       ...state.data.slice(action.payload.index+1, state.data.length)
+      ];
       return {
         ...state,
-        data: state.data.map((item, index) =>
-          index === action.payload.index
-            ? {
-                ...item,
-                currentValue: action.payload.currentValue,
-                variation: action.payload.variation,
-              }
-            : item,
-        ),
+        data,
       };
     default:
       return state;
@@ -111,9 +115,9 @@ function reducer(state: State, action: Action): State {
 }
 
 export const TokenDistributionTable = ({
-  timeInterval,
+  days,
 }: {
-  timeInterval: TimeInterval;
+  days: TimeInterval;
 }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -121,7 +125,7 @@ export const TokenDistributionTable = ({
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
-    fetchTotalSupply({ daoId, timeInterval: timeInterval }).then((result) => {
+    fetchTotalSupply({ daoId, days }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
@@ -135,7 +139,7 @@ export const TokenDistributionTable = ({
         });
     });
 
-    fetchDelegatedSupply({ daoId, timeInterval: timeInterval }).then(
+    fetchDelegatedSupply({ daoId, days }).then(
       (result) => {
         result &&
           dispatch({
@@ -153,7 +157,7 @@ export const TokenDistributionTable = ({
 
     fetchCirculatingSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -170,7 +174,7 @@ export const TokenDistributionTable = ({
 
     fetchCexSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -187,7 +191,7 @@ export const TokenDistributionTable = ({
 
     fetchDexSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -204,7 +208,7 @@ export const TokenDistributionTable = ({
 
     fetchLendingSupply({
       daoId,
-      timeInterval: timeInterval,
+      days,
     }).then((result) => {
       result &&
         dispatch({
@@ -218,7 +222,7 @@ export const TokenDistributionTable = ({
           },
         });
     });
-  }, [daoData, timeInterval]);
+  }, [daoData, days]);
 
   // const chartData = [
   //   { month: "January", desktop: 186, mobile: 80 },

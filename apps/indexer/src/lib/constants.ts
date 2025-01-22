@@ -1,3 +1,5 @@
+import { zeroAddress } from "viem";
+
 export const secondsInDay = 24 * 60 * 60;
 
 export const UNITreasuryAddresses = {
@@ -36,22 +38,32 @@ export const CEXAddresses = {
 };
 
 export const DEXAddresses = {
-  CompoundCUNI: "0x35a18000230da775cac24873d00ff85bccded550",
-  ArbitrumL1ERC20Gateway: "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
-  VenusVUNI: "0x27ff564707786720c71a2e5c1490a63266683612",
-  DolomiteMargin: "0x6bd780e7fdf01d77e4d475c821f1e7ae05409072",
-  GMXVault: "0x489ee077994b6658eafa855c308275ead8097c4a",
-  GMXMarket: "0xc7abb2c5f3bf3ceb389df0eecd6120d451170b50",
-  PancakeSwapV3Pool: "0x647d99772863e09f47435782cbb6c96ec4a75f12",
-  ThenafiAlgebraPool: "0x117e96887b20d4db40df85fa2b7302ca0d63c5e3",
-  UniswapPool1: "0x554548b404213c7efcdbab933f52edfe3c581834",
-  UniswapPool2: "0xc24f7d8e51a64dc1238880bd00bb961d54cbeb29",
-  UniswapPool3: "0x929fcf81102c5577243ee614c2c455acd6681f1a",
-  UniswapPool4: "0x357faf5843c7fd7fb4e34fbeabdac16eabe8a5bc",
+  // ArbitrumL1ERC20Gateway: "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+  Uniswap_UNI_ETH_V3_03: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
+  Uniswap_UNI_ETH_V3_1: "0x360b9726186C0F62cc719450685ce70280774Dc8",
+  Uniswap_UNI_ETH_V2_03: "0xd3d2E2692501A5c9Ca623199D38826e513033a17",
+  Uniswap_UNI_USDT_V3_03: "0x3470447f3CecfFAc709D3e783A307790b0208d60",
+  Uniswap_UNI_AAVE_V3_03: "0x59c38b6775Ded821f010DbD30eCabdCF84E04756",
+  Uniswap_UNI_USDC_V3_03: "0xD0fC8bA7E267f2bc56044A7715A489d851dC6D78",
+  Uniswap_UNI_WBTC_V3_03: "0x8F0CB37cdFF37E004E0088f563E5fe39E05CCC5B",
+  Uniswap_UNI_LINK_V3_1: "0xA6B9a13B34db2A00284299c47DACF49FB62C1755",
+  Uniswap_UNI_1INCH_V3_1: "0x0619062B988576FE2d39b33fF23Fb1a0330c0ac7",
+  Uniswap_UNI_ETH_V3_005: "0xfaA318479b7755b2dBfDD34dC306cb28B420Ad12",
+  Sushi_UNI_ETH_V2_03: "0xDafd66636E2561b0284EDdE37e42d192F2844D40",
+  BalancerCow_UNI_ETH: "0xa81b22966f1841e383e69393175e2cc65f0a8854",
 };
 
 export const LendingAddresses = {
   Aave: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
+  MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+  CompoundCUNI: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
+};
+
+export const BurningAddresses = {
+  ZeroAddress: zeroAddress,
+  Dead: "0x000000000000000000000000000000000000dEaD",
+  TokenContract: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+  Airdrop: "0x090D4613473dEE047c3f2706764f49E0821D256e",
 };
 
 export enum MetricTypesEnum {
