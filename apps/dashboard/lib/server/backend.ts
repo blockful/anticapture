@@ -1,4 +1,5 @@
 import { DaoId, TokenContract } from "@/lib/types/daos";
+import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 
 export interface DAOVotingPower {
   dao: string;
@@ -8,7 +9,7 @@ export interface DAOVotingPower {
 export const fetchDaoData = async (daoId: DaoId) => {
   return new Promise(async (res, rej) => {
     try {
-      const daoData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}`);
+      const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoId}`);
 
       res(daoData);
     } catch (e) {
@@ -58,7 +59,7 @@ export const fetchTotalSupply = async ({
   return new Promise<TotalSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/total-supply/compare?days=${days}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/total-supply/compare?days=${days}`,
         { next: { revalidate: 3600 } },
       );
       const totalSupplyData = await response.json();
@@ -86,7 +87,7 @@ export const fetchDelegatedSupply = async ({
   return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/delegated-supply/compare?days=${days}`,
+        `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
         { next: { revalidate: 3600 } },
       );
       const delegatedSupplyData = await response.json();
@@ -113,12 +114,12 @@ export const fetchCirculatingSupply = async ({
 }): Promise<CirculatingSupplyPromise> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/circulating-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/circulating-supply/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -138,12 +139,12 @@ export const fetchCexSupply = async ({
 }): Promise<CexSupplyPromise> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/cex-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/cex-supply/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -163,12 +164,12 @@ export const fetchDexSupply = async ({
 }): Promise<DexSupplyPromise> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/dex-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/dex-supply/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -189,12 +190,12 @@ export const fetchLendingSupply = async ({
 }): Promise<LendingSupplyPromise> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/lending-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/lending-supply/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -215,16 +216,14 @@ export const fetchTreasury = async ({
 }): Promise<TreasuryPromise> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/treasury/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/treasury/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
-  }
-  catch (e) {
+  } catch (e) {
     throw e;
   }
 };
-
 
 // TODO: Should have Promise in the name of the object, use "Response" Instead
 interface ActiveSupplyPromise {
@@ -234,15 +233,21 @@ interface ActiveSupplyPromise {
 }
 
 /* Fetch Active Supply */
-export const fetchActiveSupply = async ({ daoId, days }: { daoId: DaoId; days: string; }): Promise<ActiveSupplyPromise> => {
+export const fetchActiveSupply = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<ActiveSupplyPromise> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/active-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -253,15 +258,21 @@ interface ProposalsResponse {
 }
 
 /* Fetch Proposals */
-export const fetchProposals = async ({ daoId, days }: { daoId: DaoId; days: string; }): Promise<ProposalsResponse> => {
+export const fetchProposals = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<ProposalsResponse> => {
   try {
     const response: Response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/proposals/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/proposals/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -272,15 +283,21 @@ interface VotesResponse {
 }
 
 /* Fetch Proposals */
-export const fetchVotes = async ({ daoId, days }: { daoId: DaoId; days: string; }): Promise<VotesResponse> => {
+export const fetchVotes = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<VotesResponse> => {
   try {
     const response: Response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/votes/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/votes/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
 
@@ -291,14 +308,20 @@ interface AverageTurnoutResponse {
 }
 
 /* Fetch Proposals */
-export const fetchAverageTurnout = async ({ daoId, days }: { daoId: DaoId; days: string; }): Promise<AverageTurnoutResponse> => {
+export const fetchAverageTurnout = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoId;
+  days: string;
+}): Promise<AverageTurnoutResponse> => {
   try {
     const response: Response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/dao/${daoId}/average-turnout/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
   } catch (e) {
-    throw e
+    throw e;
   }
 };
