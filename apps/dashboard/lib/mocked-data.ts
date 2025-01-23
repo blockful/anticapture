@@ -18,8 +18,9 @@ export type TokenDistribution = {
 
 export type GovernanceActivity = {
   metric: string | null;
-  average: string | null;
-  variation: string | null;
+  average?: string | null;
+  variation?: string | null;
+  chartLastDays?: DaoMetricsDayBucket[];
 };
 
 export type Delegates = {

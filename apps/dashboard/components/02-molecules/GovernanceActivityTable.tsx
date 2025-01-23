@@ -22,12 +22,15 @@ import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
+  DaoMetricsDayBucket,
   fetchActiveSupply,
   fetchAverageTurnout,
   fetchProposals,
+  fetchTimeSeriesDataFromGraphQL,
   fetchTreasury,
   fetchVotes,
 } from "@/lib/server/backend";
+import { MetricTypesEnum } from "@/lib/client/constants";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -71,11 +74,20 @@ interface State {
 
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
+  UPDATE_CHART = "UPDATE_CHART",
 }
 
+type MetricPayload = Pick<
+  GovernanceActivity,
+  "average" | "variation" | "chartLastDays"
+>;
+
 type Action = {
-  type: ActionType.UPDATE_METRIC;
-  payload: { index: number; average: string; variation: string };
+  type: ActionType;
+  payload: {
+    index: number;
+    metric: MetricPayload;
+  };
 };
 
 const initialState: State = {
@@ -89,14 +101,27 @@ function reducer(state: State, action: Action): State {
         ...state.data.slice(0, action.payload.index),
         {
           ...state.data[action.payload.index],
-          average: action.payload.average,
-          variation: action.payload.variation,
+          average: action.payload.metric.average,
+          variation: action.payload.metric.variation,
         },
         ...state.data.slice(action.payload.index + 1, state.data.length),
       ];
       return {
         ...state,
         data,
+      };
+    case ActionType.UPDATE_CHART:
+      const chartData = [
+        ...state.data.slice(0, action.payload.index),
+        {
+          ...state.data[action.payload.index],
+          chartLastDays: action.payload.metric.chartLastDays,
+        },
+        ...state.data.slice(action.payload.index + 1, state.data.length),
+      ];
+      return {
+        ...state,
+        data: chartData,
       };
     default:
       return state;
@@ -109,14 +134,45 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoIdEnum.UNISWAP;
 
+    const fetchChartData = async (): Promise<void> => {
+      const metrics = [{ type: MetricTypesEnum.TREASURY, index: 0 }];
+
+      for (const metric of metrics) {
+        const metricType = metric.type
+          .trim()
+          .replace(/^"|"$/g, "") as MetricTypesEnum;
+        const chartData = await fetchTimeSeriesDataFromGraphQL(
+          metricType,
+          parseInt(days.split("d")[0]),
+        );
+        if (chartData) {
+          dispatch({
+            type: ActionType.UPDATE_CHART,
+            payload: {
+              index: metric.index,
+              metric: {
+                chartLastDays: chartData,
+              },
+            },
+          });
+        }
+      }
+    };
+
+    fetchChartData();
+
     fetchTreasury({ daoId, days: days }).then((result) => {
       result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 0,
-            average: String(BigInt(result.currentTreasury) / BigInt(10 ** 18)),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              average: String(
+                BigInt(result.currentTreasury) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -127,10 +183,12 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 2,
-            average: String(
-              BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              average: String(
+                BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -141,8 +199,10 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 1,
-            average: result.currentProposalsLaunched,
-            variation: formatVariation(result.changeRate),
+            metric: {
+              average: result.currentProposalsLaunched,
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -153,8 +213,10 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 3,
-            average: result.currentVotes,
-            variation: formatVariation(result.changeRate),
+            metric: {
+              average: result.currentVotes,
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -165,10 +227,12 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 4,
-            average: String(
-              BigInt(result.currentAverageTurnout) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
+            metric: {
+              average: String(
+                BigInt(result.currentAverageTurnout) / BigInt(10 ** 18),
+              ),
+              variation: formatVariation(result.changeRate),
+            },
           },
         });
     });
@@ -273,12 +337,11 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
-        // const chartLastDays: ChartMetrics = row.getValue("chartLastDays");
-        // console.log("chartLastDays", chartLastDays);
-        // const formattedData = transformChartMetrics([chartLastDays]);
+        const chartLastDays: DaoMetricsDayBucket[] =
+          row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full items-start justify-start px-4">
-            <Sparkline data={chartMetrics.map((item) => Number(item.high))} />
+            <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
           </div>
         );
       },
