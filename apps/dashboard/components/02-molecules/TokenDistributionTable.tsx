@@ -3,10 +3,7 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import {
-  TokenDistribution,
-  tokenDistributionData,
-} from "@/lib/mocked-data";
+import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   AppleIcon,
@@ -152,22 +149,42 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         { type: MetricTypesEnum.LENDING_SUPPLY, index: 5 },
       ];
 
-      for (const metric of metrics) {
-        const metricType = metric.type
-          .trim()
-          .replace(/^"|"$/g, "") as MetricTypesEnum;
-        const chartData = await fetchTimeSeriesDataFromGraphQL(metricType, parseInt(days.split("d")[0]));
-        if (chartData) {
-          dispatch({
-            type: ActionType.UPDATE_CHART,
-            payload: {
+      try {
+        const parsedDays = parseInt(days.split("d")[0]);
+
+        const chartDataPromises = metrics.map(async (metric) => {
+          const metricType = metric.type
+            .trim()
+            .replace(/^"|"$/g, "") as MetricTypesEnum;
+          const chartData = await fetchTimeSeriesDataFromGraphQL(
+            metricType,
+            parsedDays,
+          );
+
+          if (chartData) {
+            return {
               index: metric.index,
               metric: {
                 chartLastDays: chartData,
               },
-            },
-          });
-        }
+            };
+          }
+
+          return null;
+        });
+
+        const results = await Promise.all(chartDataPromises);
+
+        results.forEach((result) => {
+          if (result) {
+            dispatch({
+              type: ActionType.UPDATE_CHART,
+              payload: result,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
       }
     };
 
@@ -381,7 +398,8 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
-        const chartLastDays: DaoMetricsDayBucket[] = row.getValue("chartLastDays") ?? [];
+        const chartLastDays: DaoMetricsDayBucket[] =
+          row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full items-start justify-start px-4">
             <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
