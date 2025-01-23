@@ -3,7 +3,11 @@
 import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
+import {
+  chartMetrics,
+  GovernanceActivity,
+  governanceActivityData,
+} from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   AppleIcon,
@@ -12,12 +16,12 @@ import {
   TheTable,
   TooltipInfo,
   ArrowState,
+  Sparkline,
 } from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
 import { DaoId } from "@/lib/types/daos";
 import {
-  fetchActiveSupply,
   fetchAverageTurnout,
   fetchProposals,
   fetchTreasury,
@@ -116,19 +120,19 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         });
     });
 
-    fetchActiveSupply({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 2,
-            average: String(
-              BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
-            ),
-            variation: formatVariation(result.changeRate),
-          },
-        });
-    });
+    // fetchActiveSupply({ daoId, days }).then((result) => {
+    //   result &&
+    //     dispatch({
+    //       type: ActionType.UPDATE_METRIC,
+    //       payload: {
+    //         index: 2,
+    //         average: String(
+    //           BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
+    //         ),
+    //         variation: formatVariation(result.changeRate),
+    //       },
+    //     });
+    // });
 
     fetchProposals({ daoId, days }).then((result) => {
       result &&
@@ -264,6 +268,24 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
       ),
       enableSorting: true,
       sortingFn: sortingByAscendingOrDescendingNumber,
+    },
+    {
+      accessorKey: "chartLastDays",
+      cell: ({ row }) => {
+        // const chartLastDays: ChartMetrics = row.getValue("chartLastDays");
+        // console.log("chartLastDays", chartLastDays);
+        // const formattedData = transformChartMetrics([chartLastDays]);
+        return (
+          <div className="flex w-full items-start justify-start px-4">
+            <Sparkline data={chartMetrics.map((item) => Number(item.high))} />
+          </div>
+        );
+      },
+      header: ({ column }) => (
+        <div className="flex w-full items-start justify-start">
+          Last {days.slice(0, -1)} days
+        </div>
+      ),
     },
   ];
 

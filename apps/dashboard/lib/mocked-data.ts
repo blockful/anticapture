@@ -114,11 +114,11 @@ export const governanceActivityData: GovernanceActivity[] = [
     average: null,
     variation: null,
   },
-  {
-    metric: "Active Supply",
-    average: null,
-    variation: null,
-  },
+  // {
+  //   metric: "Active Supply",
+  //   average: null,
+  //   variation: null,
+  // },
   {
     metric: "Votes",
     average: null,
