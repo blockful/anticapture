@@ -56,7 +56,7 @@ export const fetchTimeSeriesDataFromGraphQL = async (
               date_gte: "${String(BigInt(Date.now() - days * 86400000)).slice(0, 10)}"
               },
               orderBy: "date",
-              orderDirection: "desc"
+              orderDirection: "asc"
               ) {
               totalCount
               items {
