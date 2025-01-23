@@ -4,8 +4,6 @@ import React, { useEffect, useReducer, useState } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
-  ChartMetrics,
-  chartMetrics,
   TokenDistribution,
   tokenDistributionData,
 } from "@/lib/mocked-data";
@@ -27,10 +25,11 @@ import {
   fetchTimeSeriesDataFromGraphQL,
   fetchLendingSupply,
   fetchTotalSupply,
+  DaoMetricsDayBucket,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
-import { DaoId } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "@/lib/client/constants";
 
 const sortingByAscendingOrDescendingNumber = (
@@ -141,7 +140,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
+    const daoId = (daoData && daoData.id) || DaoIdEnum.UNISWAP;
 
     const fetchChartData = async (): Promise<void> => {
       const metrics = [
@@ -157,9 +156,8 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         const metricType = metric.type
           .trim()
           .replace(/^"|"$/g, "") as MetricTypesEnum;
-        const chartData = await fetchTimeSeriesDataFromGraphQL(metricType, 90);
+        const chartData = await fetchTimeSeriesDataFromGraphQL(metricType, parseInt(days.split("d")[0]));
         if (chartData) {
-          console.log("chartData", chartData);
           dispatch({
             type: ActionType.UPDATE_CHART,
             payload: {
@@ -383,12 +381,10 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
-        // const chartLastDays: ChartMetrics = row.getValue("chartLastDays");
-        // console.log("chartLastDays", chartLastDays);
-        // const formattedData = transformChartMetrics([chartLastDays]);
+        const chartLastDays: DaoMetricsDayBucket[] = row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full items-start justify-start px-4">
-            <Sparkline data={chartMetrics.map((item) => Number(item.high))} />
+            <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
           </div>
         );
       },

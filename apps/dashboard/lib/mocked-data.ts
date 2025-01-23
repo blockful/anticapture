@@ -1,5 +1,5 @@
 import { User } from "@/lib/server/utils";
-import { DaoId } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 
 export type DashboardDao = {
   dao: string;
@@ -12,7 +12,7 @@ export type TokenDistribution = {
   metric: string | null;
   currentValue?: string | null;
   variation?: string | null;
-  chartLastDays?: string;
+  chartLastDays?: DaoMetricDayBucket[];
 };
 
 export type GovernanceActivity = {
@@ -83,7 +83,7 @@ export const tokenDistributionData: TokenDistribution[] = [
 
 export const dashboardData: DashboardDao[] = [
   {
-    dao: DaoId.UNISWAP,
+    dao: DaoIdEnum.UNISWAP,
     delegatedSupply: null,
     profitability: null,
     delegatesToPass: null,

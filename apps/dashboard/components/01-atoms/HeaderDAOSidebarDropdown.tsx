@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { UniswapIcon } from "@/components/01-atoms";
 import { useRouter } from "next/navigation";
-import { DaoId } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 
 export const HeaderDAOSidebarDropdown = () => {
@@ -41,7 +41,7 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 0,
         label: "Uniswap GovRisk",
         icon: <UniswapIcon className="h-5 w-5 text-[#FC72FF]" />,
-        href: `/${DaoId.UNISWAP.toLowerCase()}`,
+        href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
       },
       // {
       //   id: 1,

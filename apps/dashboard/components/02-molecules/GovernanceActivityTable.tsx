@@ -20,7 +20,7 @@ import {
 } from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
-import { DaoId } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import {
   fetchAverageTurnout,
   fetchProposals,
@@ -106,7 +106,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
   const { daoData } = useDaoDataContext();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
-    const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
+    const daoId = (daoData && daoData.id) || DaoIdEnum.UNISWAP;
 
     fetchTreasury({ daoId, days: days }).then((result) => {
       result &&

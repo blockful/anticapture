@@ -14,7 +14,7 @@ import {
   TimeInterval,
 } from "@/components/01-atoms";
 import { formatNumberUserReadble } from "@/lib/client/utils";
-import { DaoId } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
 
 interface State {
@@ -43,8 +43,8 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
-  [DaoId.UNISWAP]: {
+const daoDetails: Record<DaoIdEnum, { icon: React.ReactNode; tooltip: string }> = {
+  [DaoIdEnum.UNISWAP]: {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
   },
@@ -85,7 +85,7 @@ export const DashboardTable = () => {
   const days = TimeInterval.THIRTY_DAYS;
 
   useEffect(() => {
-    Object.values(DaoId).map((daoId, index) => {
+    Object.values(DaoIdEnum).map((daoId, index) => {
       fetchDelegatedSupply({ daoId, days }).then((result) => {
         result &&
           dispatch({

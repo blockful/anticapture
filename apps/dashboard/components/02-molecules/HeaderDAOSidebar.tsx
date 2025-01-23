@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { DaoId, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import { cn } from "@/lib/client/utils";
 import {
   daoInfoSectionAnchorID,
@@ -32,7 +32,7 @@ export const HeaderDAOSidebar = () => {
   const isDefault = pathname === "/";
 
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoId);
+  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
   return (
     <BaseHeaderLayoutSidebar>
