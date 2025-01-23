@@ -22,6 +22,7 @@ import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
+  fetchActiveSupply,
   fetchAverageTurnout,
   fetchProposals,
   fetchTreasury,
@@ -120,19 +121,19 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         });
     });
 
-    // fetchActiveSupply({ daoId, days }).then((result) => {
-    //   result &&
-    //     dispatch({
-    //       type: ActionType.UPDATE_METRIC,
-    //       payload: {
-    //         index: 2,
-    //         average: String(
-    //           BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
-    //         ),
-    //         variation: formatVariation(result.changeRate),
-    //       },
-    //     });
-    // });
+    fetchActiveSupply({ daoId, days }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 2,
+            average: String(
+              BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
+            ),
+            variation: formatVariation(result.changeRate),
+          },
+        });
+    });
 
     fetchProposals({ daoId, days }).then((result) => {
       result &&
