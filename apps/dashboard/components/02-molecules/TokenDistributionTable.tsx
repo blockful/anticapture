@@ -82,6 +82,7 @@ interface State {
 // this way the code will get more organized.
 enum ActionType {
   UPDATE_METRIC = "UPDATE_METRIC",
+  UPDATE_CHART = "UPDATE_CHART",
 }
 
 type MetricPayload = Pick<
@@ -90,7 +91,7 @@ type MetricPayload = Pick<
 >;
 
 type Action = {
-  type: ActionType.UPDATE_METRIC;
+  type: ActionType;
   payload: {
     index: number;
     metric: MetricPayload;
@@ -110,13 +111,25 @@ function reducer(state: State, action: Action): State {
           ...state.data[action.payload.index],
           currentValue: action.payload.metric.currentValue,
           variation: action.payload.metric.variation,
-          chartLastDays: action.payload.metric.chartLastDays,
         },
         ...state.data.slice(action.payload.index + 1, state.data.length),
       ];
       return {
         ...state,
         data,
+      };
+    case ActionType.UPDATE_CHART:
+      const chartData = [
+        ...state.data.slice(0, action.payload.index),
+        {
+          ...state.data[action.payload.index],
+          chartLastDays: action.payload.metric.chartLastDays,
+        },
+        ...state.data.slice(action.payload.index + 1, state.data.length),
+      ];
+      return {
+        ...state,
+        data: chartData,
       };
     default:
       return state;
@@ -130,6 +143,38 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoId.UNISWAP;
 
+    const fetchChartData = async (): Promise<void> => {
+      const metrics = [
+        { type: MetricTypesEnum.TOTAL_SUPPLY, index: 0 },
+        { type: MetricTypesEnum.DELEGATED_SUPPLY, index: 1 },
+        { type: MetricTypesEnum.CIRCULATING_SUPPLY, index: 2 },
+        { type: MetricTypesEnum.CEX_SUPPLY, index: 3 },
+        { type: MetricTypesEnum.DEX_SUPPLY, index: 4 },
+        { type: MetricTypesEnum.LENDING_SUPPLY, index: 5 },
+      ];
+
+      for (const metric of metrics) {
+        const metricType = metric.type
+          .trim()
+          .replace(/^"|"$/g, "") as MetricTypesEnum;
+        const chartData = await fetchTimeSeriesDataFromGraphQL(metricType, 90);
+        if (chartData) {
+          console.log("chartData", chartData);
+          dispatch({
+            type: ActionType.UPDATE_CHART,
+            payload: {
+              index: metric.index,
+              metric: {
+                chartLastDays: chartData,
+              },
+            },
+          });
+        }
+      }
+    };
+
+    fetchChartData();
+
     fetchTotalSupply({ daoId, days }).then(async (result) => {
       result &&
         dispatch({
@@ -141,10 +186,6 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
                 BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
               ),
               variation: formatVariation(result.changeRate),
-              chartLastDays: await fetchTimeSeriesDataFromGraphQL(
-                MetricTypesEnum.TOTAL_SUPPLY,
-                90,
-              ),
             },
           },
         });

@@ -37,8 +37,8 @@ export const fetchTimeSeriesDataFromGraphQL = async (
             query DaoMetricsDayBuckets {
               daoMetricsDayBucketss(
               where: {
-              metricType: "${metricType}",
-              date_gte: "${String(Date.now() - days * 86400000)}"
+              metricType: ${metricType},
+              date_gte: ${String(BigInt(Date.now() - days * 86400000))}
               },
               orderBy: "date",
               orderDirection: "desc"
@@ -287,7 +287,7 @@ export const fetchActiveSupply = async ({
 }): Promise<ActiveSupplyPromise> => {
   try {
     const response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
