@@ -249,7 +249,7 @@ export const TokenDistributionTable = ({
         <Button
           variant="ghost"
           className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting()}
         >
           Current value (UNI)
           <ArrowUpDown
@@ -297,7 +297,7 @@ export const TokenDistributionTable = ({
         <Button
           variant="ghost"
           className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting()}
         >
           Variation
           <ArrowUpDown
