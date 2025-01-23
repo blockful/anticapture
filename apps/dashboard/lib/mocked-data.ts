@@ -1,5 +1,6 @@
 import { User } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoMetricsDayBucket } from "./server/backend";
 
 export type DashboardDao = {
   dao: string;
@@ -12,7 +13,7 @@ export type TokenDistribution = {
   metric: string | null;
   currentValue?: string | null;
   variation?: string | null;
-  chartLastDays?: DaoMetricDayBucket[];
+  chartLastDays?: DaoMetricsDayBucket[];
 };
 
 export type GovernanceActivity = {
@@ -114,11 +115,11 @@ export const governanceActivityData: GovernanceActivity[] = [
     average: null,
     variation: null,
   },
-  // {
-  //   metric: "Active Supply",
-  //   average: null,
-  //   variation: null,
-  // },
+  {
+    metric: "Active Supply",
+    average: null,
+    variation: null,
+  },
   {
     metric: "Votes",
     average: null,
