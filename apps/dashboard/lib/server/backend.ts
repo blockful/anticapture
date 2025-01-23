@@ -52,11 +52,12 @@ export const fetchTimeSeriesDataFromGraphQL = async (
             query DaoMetricsDayBuckets {
               daoMetricsDayBucketss(
               where: {
-              metricType: ${metricType},
-              date_gte: "${String(BigInt(Date.now() - days * 86400000)).slice(0, 10)}"
+                metricType: ${metricType},
+                date_gte: "${String(BigInt(Date.now() - days * 86400000)).slice(0, 10)}"
               },
               orderBy: "date",
-              orderDirection: "asc"
+              orderDirection: "asc",
+              limit: ${days}
               ) {
               totalCount
               items {
