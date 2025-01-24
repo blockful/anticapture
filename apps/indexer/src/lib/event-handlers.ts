@@ -443,6 +443,7 @@ export const voteCast = async (
     })
     .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
+      lastVoteTimestamp: event.block.timestamp,
     }));
 
   // Create vote record
