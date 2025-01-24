@@ -14,7 +14,7 @@ export const ArrowLeftRight = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector"
           d="M17 11L21 7L17 3"
-          stroke="#A1A1AA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -22,7 +22,7 @@ export const ArrowLeftRight = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector_2"
           d="M21 7H9"
-          stroke="#A1A1AA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -30,7 +30,7 @@ export const ArrowLeftRight = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector_3"
           d="M7 21L3 17L7 13"
-          stroke="#A1A1AA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -38,7 +38,7 @@ export const ArrowLeftRight = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector_4"
           d="M15 17H3"
-          stroke="#A1A1AA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"

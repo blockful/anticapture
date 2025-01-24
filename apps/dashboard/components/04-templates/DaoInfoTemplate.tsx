@@ -7,10 +7,10 @@ import {
   TokenDistributionSection,
 } from "@/components/03-organisms";
 import { daoInfoSectionAnchorID } from "@/lib/client/constants";
-import { DaoId, daoIdToNameMap } from "@/lib/types/daos";
+import { DaoIdEnum, daoIdToNameMap } from "@/lib/types/daos";
 
 export const DaoInfoTemplate = ({ params }: { params: { daoId: string } }) => {
-  const daoName = daoIdToNameMap[params.daoId as DaoId];
+  const daoName = daoIdToNameMap[params.daoId as DaoIdEnum];
 
   return (
     <>

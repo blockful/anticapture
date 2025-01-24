@@ -1,12 +1,14 @@
-import { DaoId, TokenContract } from "@/lib/types/daos";
+import { DaoIdEnum, TokenContract } from "@/lib/types/daos";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
+import { MetricTypesEnum } from "../client/constants";
+import { Address } from "viem";
 
 export interface DAOVotingPower {
   dao: string;
   totalDelegatedVotingPower: number;
 }
 
-export const fetchDaoData = async (daoId: DaoId) => {
+export const fetchDaoData = async (daoId: DaoIdEnum) => {
   return new Promise(async (res, rej) => {
     try {
       const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoId}`);
@@ -18,12 +20,75 @@ export const fetchDaoData = async (daoId: DaoId) => {
   });
 };
 
-export enum ChainName {
+export enum ChainNameEnum {
   Ethereum = "ethereum",
 }
 
+export type DaoMetricsDayBucket = {
+  date: string;
+  daoId: DaoIdEnum;
+  tokenId: Address;
+  metricType: MetricTypesEnum;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  average: string;
+  volume: string;
+  count: number
+}
+
+export const fetchTimeSeriesDataFromGraphQL = async (
+  metricType: MetricTypesEnum,
+  days: number,
+): Promise<DaoMetricsDayBucket[]> => {
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+            query DaoMetricsDayBuckets {
+              daoMetricsDayBucketss(
+              where: {
+                metricType: ${metricType},
+                date_gte: "${String(BigInt(Date.now() - days * 86400000)).slice(0, 10)}"
+              },
+              orderBy: "date",
+              orderDirection: "asc",
+              limit: ${days}
+              ) {
+              totalCount
+              items {
+                date
+                daoId
+                tokenId
+                metricType
+                open
+                close
+                low
+                high
+                average
+                volume
+                count
+              }
+              }
+            }
+          `,
+    }),
+  });
+  const data = await response.json();
+  if (data?.data?.daoMetricsDayBucketss?.items) {
+    return data.data.daoMetricsDayBucketss.items as DaoMetricsDayBucket[];
+  } else {
+    //TODO: Improve this error treatment
+    throw new Error("invalid return type for Dao Metrics Day Bucket call")
+  }
+};
+
 /* Fetch Dao Token price from Defi Llama API */
-export const fetchTokenPrice = async (chainName: ChainName, daoId: DaoId) => {
+export const fetchTokenPrice = async (chainName: ChainNameEnum, daoId: DaoIdEnum) => {
   const daoToken = TokenContract[daoId];
 
   try {
@@ -53,7 +118,7 @@ export const fetchTotalSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }) => {
   return new Promise<TotalSupplyPromise>(async (res, rej) => {
@@ -81,7 +146,7 @@ export const fetchDelegatedSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }) => {
   return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
@@ -109,7 +174,7 @@ export const fetchCirculatingSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<CirculatingSupplyPromise> => {
   try {
@@ -134,7 +199,7 @@ export const fetchCexSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<CexSupplyPromise> => {
   try {
@@ -159,7 +224,7 @@ export const fetchDexSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<DexSupplyPromise> => {
   try {
@@ -185,7 +250,7 @@ export const fetchLendingSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<LendingSupplyPromise> => {
   try {
@@ -211,7 +276,7 @@ export const fetchTreasury = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<TreasuryPromise> => {
   try {
@@ -237,12 +302,12 @@ export const fetchActiveSupply = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<ActiveSupplyPromise> => {
   try {
     const response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply/compare?days=${days}`,
+      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
       { next: { revalidate: 3600 } },
     );
     return response.json();
@@ -262,7 +327,7 @@ export const fetchProposals = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<ProposalsResponse> => {
   try {
@@ -287,7 +352,7 @@ export const fetchVotes = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<VotesResponse> => {
   try {
@@ -312,7 +377,7 @@ export const fetchAverageTurnout = async ({
   daoId,
   days,
 }: {
-  daoId: DaoId;
+  daoId: DaoIdEnum;
   days: string;
 }): Promise<AverageTurnoutResponse> => {
   try {
