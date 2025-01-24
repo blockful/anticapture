@@ -11,8 +11,10 @@ export enum TimeInterval {
 
 export const SwitcherDate = ({
   setTimeInterval,
+  defaultValue
 }: {
   setTimeInterval: (timeInterval: TimeInterval) => void;
+  defaultValue: TimeInterval
 }) => {
   /**
    * This function is called when a new date is selected.
@@ -20,7 +22,7 @@ export const SwitcherDate = ({
    */
 
   return (
-    <Tabs defaultValue={TimeInterval.SEVEN_DAYS}>
+    <Tabs defaultValue={defaultValue}>
       <TabsList>
         <TabsTrigger
           value={TimeInterval.SEVEN_DAYS}

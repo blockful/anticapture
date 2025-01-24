@@ -18,7 +18,6 @@ const transformChartMetrics = (data: ChartMetrics[]) => {
 };
 
 const formattedChartMetrics = transformChartMetrics(chartMetrics);
-console.log("formattedChartMetrics", formattedChartMetrics);
 
 export const TheChart = () => {
   return (
