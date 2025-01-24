@@ -77,7 +77,6 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.UPDATE_METRIC:
-      console.log(action.payload.index);
       const data = [
         ...state.data.slice(0,action.payload.index), 
           {
@@ -87,7 +86,6 @@ function reducer(state: State, action: Action): State {
           },
        ...state.data.slice(action.payload.index+1, state.data.length)
       ];
-      console.log(data);
       return {
         ...state,
         data,
@@ -203,7 +201,7 @@ export const GovernanceActivityTable = ({
         <Button
           variant="ghost"
           className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting()}
         >
           Average
           <ArrowUpDown
@@ -251,7 +249,7 @@ export const GovernanceActivityTable = ({
         <Button
           variant="ghost"
           className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting()}
         >
           Variation
           <ArrowUpDown
