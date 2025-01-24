@@ -401,7 +401,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
         return (
-          <div className="flex w-full items-start justify-start px-4">
+          <div className="flex w-full">
             <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
           </div>
         );

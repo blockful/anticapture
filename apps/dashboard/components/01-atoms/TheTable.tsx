@@ -90,6 +90,7 @@ export const TheTable = <TData, TValue>({
         borderColor: "var(--color-lightDark)",
         borderWidth: "1px",
         overflow: "hidden",
+        tableLayout: "fixed"
       }}
       className="border-lightDark bg-dark text-foreground"
     >
