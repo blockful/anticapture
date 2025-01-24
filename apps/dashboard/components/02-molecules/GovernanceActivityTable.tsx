@@ -185,9 +185,9 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
             index: 2,
             metric: {
               average: String(
-                BigInt(result.currentActiveSupply) / BigInt(10 ** 18),
+                BigInt(result.activeSupply) / BigInt(10 ** 18),
               ),
-              variation: formatVariation(result.changeRate),
+              variation: null,
             },
           },
         });
@@ -260,7 +260,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         const average: number = row.getValue("average");
         return (
           <div className="flex items-center justify-center text-center">
-            {average && formatNumberUserReadble(average)}
+            {average ? formatNumberUserReadble(average) : "-"}
           </div>
         );
       },
