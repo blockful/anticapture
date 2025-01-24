@@ -187,7 +187,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
               average: String(
                 BigInt(result.activeSupply) / BigInt(10 ** 18),
               ),
-              variation: null,
+              variation: "-",
             },
           },
         });
@@ -260,7 +260,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         const average: number = row.getValue("average");
         return (
           <div className="flex items-center justify-center text-center">
-            {average ? formatNumberUserReadble(average) : "-"}
+            {average ?? formatNumberUserReadble(average)}
           </div>
         );
       },
@@ -292,7 +292,9 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
-
+        if(variation=="-"){
+          return (<p className="flex items-center justify-center gap-1 text-center">-</p>)
+        }
         return (
           <p
             className={`flex items-center justify-center gap-1 text-center ${
@@ -303,11 +305,13 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
                   : ""
             }`}
           >
-            {Number(variation) > 0 ? (
-              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
-            ) : Number(variation) < 0 ? (
-              <ChevronDown className="h-4 w-4 text-red-500" />
-            ) : null}
+            {
+               Number(variation) > 0 ? (
+                <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+              ) : Number(variation) < 0 ? (
+                <ChevronDown className="h-4 w-4 text-red-500" />
+              ) : null
+            }
             {variation}%
           </p>
         );
