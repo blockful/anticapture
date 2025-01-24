@@ -8,6 +8,7 @@ export * from "./ContractsCard";
 export * from "./HeaderDAOSidebarDropdown";
 export * from "./QuorumCard";
 export * from "./Skeleton";
+export * from "./Sparkline";
 export * from "./Switcher";
 export * from "./SwitcherDate";
 export * from "./TheSectionLayout";

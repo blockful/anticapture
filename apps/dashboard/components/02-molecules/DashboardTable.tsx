@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useReducer } from "react";
@@ -13,7 +14,7 @@ import {
   TimeInterval,
 } from "@/components/01-atoms";
 import { formatNumberUserReadble } from "@/lib/client/utils";
-import { DaoId } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
 
 interface State {
@@ -42,11 +43,8 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
-
-const daoDetails: Record<DaoId, { icon: React.ReactNode; tooltip: string }> = {
-  [DaoId.UNISWAP]: {
+const daoDetails: Record<DaoIdEnum, { icon: React.ReactNode; tooltip: string }> = {
+  [DaoIdEnum.UNISWAP]: {
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
   },
@@ -65,13 +63,16 @@ function reducer(state: State, action: Action): State {
     case ActionType.UPDATE_DELEGATED_SUPPLY:
       const index = action.payload.index;
       const data = [
-        ...state.data.slice(0, action.payload.index), 
-        {...state.data[index], delegatedSupply: action.payload.delegatedSupply},
-        ...state.data.slice(index+1, state.data.length)
-      ]
+        ...state.data.slice(0, action.payload.index),
+        {
+          ...state.data[index],
+          delegatedSupply: action.payload.delegatedSupply,
+        },
+        ...state.data.slice(index + 1, state.data.length),
+      ];
       return {
         ...state,
-        data
+        data,
       };
     default:
       return state;
@@ -84,21 +85,19 @@ export const DashboardTable = () => {
   const days = TimeInterval.THIRTY_DAYS;
 
   useEffect(() => {
-    Object.values(DaoId).map((daoId, index) => {
-      fetchDelegatedSupply({ daoId, days }).then(
-        (result) => {
-          result &&
-            dispatch({
-              type: ActionType.UPDATE_DELEGATED_SUPPLY,
-              payload: {
-                index: index,
-                delegatedSupply: String(
-                  BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-                )
-              },
-            });
-        },
-      );
+    Object.values(DaoIdEnum).map((daoId, index) => {
+      fetchDelegatedSupply({ daoId, days }).then((result) => {
+        result &&
+          dispatch({
+            type: ActionType.UPDATE_DELEGATED_SUPPLY,
+            payload: {
+              index: index,
+              delegatedSupply: String(
+                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
+              ),
+            },
+          });
+      });
     });
   }, [days]);
 
@@ -106,7 +105,7 @@ export const DashboardTable = () => {
     {
       accessorKey: "#",
       cell: ({ row }) => (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto text-[#fafafa]">
           {row.index + 1}
         </p>
       ),
@@ -119,7 +118,7 @@ export const DashboardTable = () => {
           #
           <ArrowUpDown
             props={{
-              className: "ml-2 h-4 w-4",
+              className: "h-4 w-4",
             }}
             activeState={
               column.getIsSorted() === "asc"

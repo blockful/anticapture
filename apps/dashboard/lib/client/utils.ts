@@ -70,3 +70,6 @@ export function formatTimestampUserReadable(num: number): string {
 
   return "0 sec";
 }
+
+export const formatVariation = (rateRaw: string): string =>
+  `${Number(Number(rateRaw) * 100).toFixed(2)}`;

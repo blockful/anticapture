@@ -1,4 +1,4 @@
-import { DaoId, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import { DaoDataProvider } from "@/components/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { HeaderDAOSidebar } from "@/components/02-molecules";
@@ -9,7 +9,7 @@ interface DaoLayoutProps {
 }
 
 export default function DaoLayout({ children, params }: DaoLayoutProps) {
-  const daoId = params.daoId.toUpperCase() as DaoId;
+  const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
   if (!SUPPORTED_DAO_NAMES.includes(daoId)) {
     return <NotFound />;

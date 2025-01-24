@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { DaoId, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { cn } from "@/lib/client/utils";
 import {
   daoInfoSectionAnchorID,
   governanceActivitySectionAnchorID,
@@ -31,7 +32,7 @@ export const HeaderDAOSidebar = () => {
   const isDefault = pathname === "/";
 
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoId);
+  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
   return (
     <BaseHeaderLayoutSidebar>
@@ -40,7 +41,7 @@ export const HeaderDAOSidebar = () => {
           <HeaderDAOSidebarDropdown />
           <div className="flex flex-col">
             <button
-              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.DAO_INFO && "bg-lightDark"}`}
+              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.DAO_INFO ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
               onClick={() => {
                 const daoInfoAnchorSection = document.getElementById(
                   daoInfoSectionAnchorID,
@@ -52,13 +53,17 @@ export const HeaderDAOSidebar = () => {
                 setIsNavSelected(HeaderNavItems.DAO_INFO);
               }}
             >
-              <PieChartIcon className="text-white" />
+              <PieChartIcon
+                className={cn("text-foreground", {
+                  "text-white": isNavSelected === HeaderNavItems.DAO_INFO,
+                })}
+              />
               <p className="text-sm font-medium text-white">
                 {HeaderNavItems.DAO_INFO}
               </p>
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION && "bg-lightDark"}`}
+              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
               onClick={() => {
                 const tokenDistributionAnchorSection = document.getElementById(
                   tokenDistributionSectionAnchorID,
@@ -70,13 +75,18 @@ export const HeaderDAOSidebar = () => {
                 setIsNavSelected(HeaderNavItems.TOKEN_DISTRIBUTION);
               }}
             >
-              <ArrowLeftRight className="text-white" />
+              <ArrowLeftRight
+                className={cn("text-foreground", {
+                  "text-white":
+                    isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION,
+                })}
+              />
               <p className="text-sm font-medium text-white">
                 {HeaderNavItems.TOKEN_DISTRIBUTION}
               </p>
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-md p-2 ${isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY && "bg-lightDark"}`}
+              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
               onClick={() => {
                 const governanceActivityAnchorSection = document.getElementById(
                   governanceActivitySectionAnchorID,
@@ -88,7 +98,12 @@ export const HeaderDAOSidebar = () => {
                 setIsNavSelected(HeaderNavItems.GOVERNANCE_ACTIVITY);
               }}
             >
-              <ActivityIcon className="text-white" />
+              <ActivityIcon
+                className={cn("text-foreground", {
+                  "text-white":
+                    isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY,
+                })}
+              />
               <p className="text-sm font-medium text-white">
                 {HeaderNavItems.GOVERNANCE_ACTIVITY}
               </p>
