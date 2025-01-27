@@ -1,7 +1,8 @@
-import { DaoIdEnum, TokenContract } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { MetricTypesEnum } from "../client/constants";
 import { Address } from "viem";
+import daoConstantsByDaoId from "../dao-constants";
 
 export interface DAOVotingPower {
   dao: string;
@@ -89,7 +90,7 @@ export const fetchTimeSeriesDataFromGraphQL = async (
 
 /* Fetch Dao Token price from Defi Llama API */
 export const fetchTokenPrice = async (chainName: ChainNameEnum, daoId: DaoIdEnum) => {
-  const daoToken = TokenContract[daoId];
+  const daoToken = daoConstantsByDaoId[daoId].contracts.token;
 
   try {
     const url = `https://coins.llama.fi/prices/current/${chainName}:${daoToken}`;
