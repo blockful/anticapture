@@ -292,9 +292,7 @@ export const fetchTreasury = async ({
 
 // TODO: Should have Promise in the name of the object, use "Response" Instead
 interface ActiveSupplyPromise {
-  oldActiveSupply: string;
-  currentActiveSupply: string;
-  changeRate: string;
+  activeSupply: string;
 }
 
 /* Fetch Active Supply */
