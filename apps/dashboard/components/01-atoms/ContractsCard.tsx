@@ -61,7 +61,7 @@ export const ContractsCard = ({ daoConstants }:{daoConstants: DaoConstants}) => 
             className="flex h-full w-full"
             onClick={() =>
               window.open(
-                daoInfo.snapshot,
+                daoConstants.snapshot,
                 "_blank",
                 "noopener,noreferrer",
               )
