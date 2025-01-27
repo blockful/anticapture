@@ -12,14 +12,14 @@ import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 
 export const TokenDistributionSection = () => {
   const [timeIntervalTokenDistribution, setTimeIntervalTokenDistribution] =
-    useState<TimeInterval>(TimeInterval.SEVEN_DAYS);
+    useState<TimeInterval>(TimeInterval.NINETY_DAYS);
 
   return (
     <TheSectionLayout
       title="Token Distribution"
       icon={<ArrowLeftRight className="text-foreground" />}
       switchDate={
-        <SwitcherDate setTimeInterval={setTimeIntervalTokenDistribution} />
+        <SwitcherDate defaultValue={TimeInterval.NINETY_DAYS} setTimeInterval={setTimeIntervalTokenDistribution} />
       }
       description="Token distribution metrics are based on Blockful's Governance
         Indexer and are updated after a new block is confirmed with new
