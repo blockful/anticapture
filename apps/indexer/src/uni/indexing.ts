@@ -10,15 +10,16 @@ import {
 } from "../lib/event-handlers";
 import viemClient from "../lib/viemClient";
 import { dao, daoToken, token } from "ponder:schema";
+import { DaoIdEnum } from "@/lib/enums";
 
-const daoId = "UNI";
+const daoId = DaoIdEnum.UNI;
 
 ponder.on("UNIToken:setup", async ({ context }) => {
-  const votingPeriod = await viemClient.getVotingPeriod();
-  const quorum = await viemClient.getQuorum();
-  const votingDelay = await viemClient.getVotingDelay();
-  const timelockDelay = await viemClient.getTimelockDelay();
-  const proposalThreshold = await viemClient.getProposalThreshold();
+  const votingPeriod = await viemClient.getVotingPeriod(DaoIdEnum.UNI);
+  const quorum = await viemClient.getQuorum(DaoIdEnum.UNI);
+  const votingDelay = await viemClient.getVotingDelay(DaoIdEnum.UNI);
+  const timelockDelay = await viemClient.getTimelockDelay(DaoIdEnum.UNI);
+  const proposalThreshold = await viemClient.getProposalThreshold(DaoIdEnum.UNI);
 
   await context.db.insert(dao).values({
     id: daoId,
@@ -28,7 +29,7 @@ ponder.on("UNIToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const decimals = await viemClient.getDecimals();
+  const decimals = await viemClient.getDecimals(DaoIdEnum.UNI);
   const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
   await context.db.insert(token).values({
     id: uniTokenAddress,
@@ -36,7 +37,6 @@ ponder.on("UNIToken:setup", async ({ context }) => {
     decimals,
     totalSupply: BigInt(0),
     delegatedSupply: BigInt(0),
-    activeSupply180d: BigInt(0),
     cexSupply: BigInt(0),
     dexSupply: BigInt(0),
     lendingSupply: BigInt(0),
