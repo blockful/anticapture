@@ -10,8 +10,10 @@ import {
   TooltipInfo,
   ExternalLinkIcon,
 } from "@/components/01-atoms";
+import { DaoConstants } from "@/lib/dao-constants/types";
+import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
-export const ContractsCard = () => {
+export const ContractsCard = ({ daoConstants }:{daoConstants: DaoConstants}) => {
   return (
     <BaseCard title="Contracts" icon={<NewspaperIcon />}>
       {/* Onchain Governance Section */}
@@ -24,11 +26,7 @@ export const ContractsCard = () => {
           <button
             className="flex h-full w-full"
             onClick={() =>
-              window.open(
-                "https://etherscan.io/address/0x408ED6354d4973f66138C91495F2f2FCbd8724C3#code",
-                "_blank",
-                "noopener,noreferrer",
-              )
+              openEtherscanAddress(daoConstants.contracts.governor)
             }
           >
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
@@ -40,11 +38,7 @@ export const ContractsCard = () => {
           <button
             className="flex h-full w-full"
             onClick={() =>
-              window.open(
-                "https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-                "_blank",
-                "noopener,noreferrer",
-              )
+              openEtherscanAddress(daoConstants.contracts.token)
             }
           >
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
@@ -67,7 +61,7 @@ export const ContractsCard = () => {
             className="flex h-full w-full"
             onClick={() =>
               window.open(
-                "https://snapshot.box/#/s:uniswapgovernance.eth",
+                daoConstants.snapshot,
                 "_blank",
                 "noopener,noreferrer",
               )
@@ -82,11 +76,7 @@ export const ContractsCard = () => {
           <button
             className="flex h-full w-full"
             onClick={() =>
-              window.open(
-                "https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-                "_blank",
-                "noopener,noreferrer",
-              )
+              openEtherscanAddress(daoConstants.contracts.token)
             }
           >
             <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">

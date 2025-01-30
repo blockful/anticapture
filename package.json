@@ -27,6 +27,7 @@
     "@defendao/indexer": "./apps/indexer",
     "@hono/swagger-ui": "^0.5.0",
     "@scalar/hono-api-reference": "^0.5.165",
+    "pino-pretty": "^13.0.0",
     "turbo": "^2.3.1"
   },
   "packageManager": "pnpm@9.14.2",
