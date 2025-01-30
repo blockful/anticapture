@@ -18,17 +18,15 @@ import {
   DEXAddresses,
   LendingAddresses,
   MetricTypesEnum,
-  UNITreasuryAddresses,
+  TREASURY_ADDRESSES,
 } from "./constants";
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
-import { and, eq } from "ponder";
+import { DaoIdEnum } from "./enums";
+import { DaoDelegateChangedEvent, DaoDelegateVotesChangedEvent, DaoProposalCanceledEvent, DaoProposalCreatedEvent, DaoProposalExecutedEvent, DaoTransferEvent, DaoVoteCastEvent } from "./types";
 
 export const delegateChanged = async (
-  event: // | Event<"ENSToken:DelegateChanged">
-  // | Event<"COMPToken:DelegateChanged">
-  // | Event<"SHUToken:DelegateChanged">
-  Event<"UNIToken:DelegateChanged">,
+  event: DaoDelegateChangedEvent,
   context: Context,
   daoId: string,
 ) => {
@@ -91,10 +89,7 @@ export const delegateChanged = async (
 };
 
 export const delegatedVotesChanged = async (
-  event: // | Event<"ENSToken:DelegateVotesChanged">
-  // | Event<"COMPToken:DelegateVotesChanged">
-  // | Event<"SHUToken:DelegateVotesChanged">
-  Event<"UNIToken:DelegateVotesChanged">,
+  event: DaoDelegateVotesChangedEvent,
   context: Context,
   daoId: string,
 ) => {
@@ -169,12 +164,9 @@ export const delegatedVotesChanged = async (
 };
 
 export const tokenTransfer = async (
-  event: // | Event<"ENSToken:Transfer">
-  // | Event<"COMPToken:Transfer">
-  // | Event<"SHUToken:Transfer">
-  Event<"UNIToken:Transfer">,
+  event: DaoTransferEvent,
   context: Context,
-  daoId: "UNI",
+  daoId: DaoIdEnum,
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -325,7 +317,7 @@ export const tokenTransfer = async (
     id: event.log.address,
   }))!.treasury;
 
-  const treasuryAddressList = Object.values(UNITreasuryAddresses);
+  const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
   const isTreasuryTransaction =
     treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
   const isInternalTreasuryTransfer =
@@ -405,8 +397,7 @@ export const tokenTransfer = async (
 };
 
 export const voteCast = async (
-  event: // | Event<"ENSGovernor:VoteCast">
-  Event<"UNIGovernor:VoteCast">,
+  event: DaoVoteCastEvent,
   context: Context,
   daoId: string,
 ) => {
@@ -474,8 +465,7 @@ export const voteCast = async (
 };
 
 export const proposalCreated = async (
-  event: // | Event<"ENSGovernor:ProposalCreated">
-  Event<"UNIGovernor:ProposalCreated">,
+  event: DaoProposalCreatedEvent,
   context: Context,
   daoId: string,
 ) => {
@@ -528,8 +518,7 @@ export const proposalCreated = async (
 };
 
 export const proposalCanceled = async (
-  event: // | Event<"ENSGovernor:ProposalCanceled">
-  Event<"UNIGovernor:ProposalCanceled">,
+  event: DaoProposalCanceledEvent,
   context: Context,
   daoId: string,
 ) => {
@@ -549,8 +538,7 @@ export const proposalCanceled = async (
 };
 
 export const proposalExecuted = async (
-  event: // | Event<"ENSGovernor:ProposalExecuted">
-  Event<"UNIGovernor:ProposalExecuted">,
+  event: DaoProposalExecutedEvent,
   context: Context,
   daoId: string,
 ) => {
@@ -578,14 +566,8 @@ const storeDailyBucket = async (
   newValue: bigint,
 ) => {
   const volume = delta(newValue, currentValue);
-  // day timestamp = any timestamp / (number of ms in a day)
   const dayStartTimestampInSeconds =
-    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(
-      0,
-      0,
-      0,
-      0,
-    ) / 1000;
+    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(0, 0, 0, 0) / 1000;
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({
