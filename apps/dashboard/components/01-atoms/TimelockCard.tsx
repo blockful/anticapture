@@ -8,8 +8,10 @@ import {
   ExternalLinkIcon,
   TooltipInfo,
 } from "@/components/01-atoms";
+import { DaoConstants } from "@/lib/dao-constants/types";
+import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
-export const TimelockCard = () => {
+export const TimelockCard = ({ daoConstants }:{daoConstants: DaoConstants}) => {
   return (
     <BaseCard title="Timelock" icon={<LockIcon />}>
       {/* Timelock Section */}
@@ -19,15 +21,11 @@ export const TimelockCard = () => {
           <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
         </div>
         <div className="flex h-full w-full justify-between gap-1.5">
-          <Switcher />
+          <Switcher switched={daoConstants.rules.timelock}/>
           <button
             className="flex h-full w-full"
             onClick={() =>
-              window.open(
-                "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
-                "_blank",
-                "noopener,noreferrer",
-              )
+              openEtherscanAddress(daoConstants.contracts.timelock)
             }
           >
             <Badge className="h-full w-full px-2.5 hover:border-lightDark hover:bg-transparent lg:w-fit xl4k:w-full">
@@ -46,7 +44,7 @@ export const TimelockCard = () => {
         </div>
         <div className="flex h-full">
           <div className="flex w-1/2">
-            <Switcher />
+            <Switcher switched={daoConstants.rules.cancelFunction}/>
           </div>
         </div>
       </div>

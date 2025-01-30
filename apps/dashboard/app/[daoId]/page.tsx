@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { DaoInfoTemplate } from "@/components/04-templates";
+import { DaoTemplate } from "@/components/04-templates";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 export const metadata: Metadata = {
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   keywords: ["governance", "dao", "data"],
 };
 
-export default function DaoIdInfoPage({
+export default function DaoPage({
   params,
 }: {
   params: { daoId: string };
@@ -16,7 +16,7 @@ export default function DaoIdInfoPage({
 
   return (
     <div className="mx-auto flex flex-col items-center gap-8 px-8 py-6 lg:gap-16 xl:overflow-auto">
-      <DaoInfoTemplate
+      <DaoTemplate
         params={{
           daoId: daoId,
         }}

@@ -48,10 +48,10 @@ const daoDetails: Record<DaoIdEnum, { icon: React.ReactNode; tooltip: string }> 
     icon: <AppleIcon className="h-5 w-5" />,
     tooltip: "Total current value of tokens in circulation",
   },
-  // [DaoId.ENS]: {
-  //   icon: undefined,
-  //   tooltip: "",
-  // },
+  [DaoIdEnum.ENS]: {
+    icon: undefined,
+    tooltip: "",
+  },
 };
 
 const initialState: State = {

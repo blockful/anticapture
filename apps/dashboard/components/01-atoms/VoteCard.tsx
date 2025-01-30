@@ -11,8 +11,9 @@ import {
 } from "@/components/01-atoms";
 import { formatTimestampUserReadable } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
+import { DaoConstants } from "@/lib/dao-constants/types";
 
-export const VoteCard = () => {
+export const VoteCard = ({daoConstants}: {daoConstants: DaoConstants}) => {
   const { daoData } = useDaoDataContext();
 
   if (!daoData) {
@@ -27,7 +28,7 @@ export const VoteCard = () => {
           <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
         </div>
         <div className="flex h-full w-full justify-between gap-1.5">
-          <Switcher />
+          <Switcher switched={daoConstants.rules.delay}/>
           <div className="flex h-full w-full">
             <Badge className="w-full">
               <BlocksIcon />
@@ -45,7 +46,7 @@ export const VoteCard = () => {
         </div>
         <div className="flex h-full">
           <div className="flex w-1/2">
-            <Switcher />
+            <Switcher switched={daoConstants.rules.changeVote} />
           </div>
         </div>
       </div>
