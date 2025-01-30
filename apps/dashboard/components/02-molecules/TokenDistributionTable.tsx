@@ -170,11 +170,11 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         results.forEach((result) => {
           if (result) {
             let changeRate;
-            const currentHigh = result.metric.chartLastDays[0].high;
+            const currentHigh = result.metric.chartLastDays[0]?.high ?? "0";
             const oldHigh =
               result.metric.chartLastDays[
                 result.metric.chartLastDays.length - 1
-              ].high;
+              ]?.high ?? "0";
             if (currentHigh === "0") {
               changeRate = "0";
             } else {
