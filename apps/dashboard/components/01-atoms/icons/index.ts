@@ -13,7 +13,6 @@ export * from "./DollarIcon";
 export * from "./EnsIcon";
 export * from "./ExternalLinkIcon";
 export * from "./HandIcon";
-export * from "./HeaderIcon";
 export * from "./HeartIcon";
 export * from "./InfoIcon";
 export * from "./LockIcon";

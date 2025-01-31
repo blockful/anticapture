@@ -36,13 +36,13 @@ export const BaseHeaderLayoutSidebar = ({
       </button>
 
       <header
-        className={`fixed left-0 top-0 z-40 flex h-screen w-[330px] flex-col items-start justify-start border border-middleDark bg-dark p-6 shadow-lg transition-transform xl:absolute xl:translate-x-0 ${
+        className={`fixed left-0 top-0 z-40 flex h-screen w-[330px] flex-col items-start justify-start border border-middleDark bg-dark shadow-lg transition-transform xl:absolute xl:translate-x-0 ${
           displaySidebar ? "translate-x-0" : "-translate-x-[354px]"
         }`}
       >
         <div className="flex h-full w-full flex-col justify-between">
           <div>{children}</div>
-          <div className="flex w-full">
+          <div className="flex w-full px-4 py-5">
             <ConnectWallet />
           </div>
         </div>
