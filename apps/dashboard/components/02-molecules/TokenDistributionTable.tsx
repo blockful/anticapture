@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  AppleIcon,
   ArrowState,
   ArrowUpDown,
   Sparkline,
@@ -44,27 +43,27 @@ const metricDetails: Record<
   { icon: React.ReactNode; tooltip: string }
 > = {
   "Total Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in circulation",
   },
   "Delegated Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens delegated",
   },
   "Circulating Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in circulation",
   },
   "CEX Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in CEX",
   },
   "DEX Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in DEX",
   },
   "Lending Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in lending",
   },
 };

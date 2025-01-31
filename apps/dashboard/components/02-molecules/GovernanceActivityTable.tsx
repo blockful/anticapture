@@ -3,14 +3,9 @@
 import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import {
-  chartMetrics,
-  GovernanceActivity,
-  governanceActivityData,
-} from "@/lib/mocked-data";
+import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  AppleIcon,
   ArrowUpDown,
   TimeInterval,
   TheTable,
@@ -47,23 +42,23 @@ const metricDetails: Record<
   { icon: React.ReactNode; tooltip: string }
 > = {
   Treasury: {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in circulation",
   },
   Proposals: {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in circulation",
   },
   "Active Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens delegated",
   },
   Votes: {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in circulation",
   },
   "Average Turnout": {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in CEX",
   },
 };
@@ -184,9 +179,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           payload: {
             index: 2,
             metric: {
-              average: String(
-                BigInt(result.activeSupply) / BigInt(10 ** 18),
-              ),
+              average: String(BigInt(result.activeSupply) / BigInt(10 ** 18)),
               variation: "-",
             },
           },
@@ -292,8 +285,12 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
-        if(variation=="-"){
-          return (<p className="flex items-center justify-center gap-1 text-center">-</p>)
+        if (variation == "-") {
+          return (
+            <p className="flex items-center justify-center gap-1 text-center">
+              -
+            </p>
+          );
         }
         return (
           <p
@@ -305,13 +302,11 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
                   : ""
             }`}
           >
-            {
-               Number(variation) > 0 ? (
-                <ChevronUp className="h-4 w-4 text-[#4ade80]" />
-              ) : Number(variation) < 0 ? (
-                <ChevronDown className="h-4 w-4 text-red-500" />
-              ) : null
-            }
+            {Number(variation) > 0 ? (
+              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+            ) : Number(variation) < 0 ? (
+              <ChevronDown className="h-4 w-4 text-red-500" />
+            ) : null}
             {variation}%
           </p>
         );

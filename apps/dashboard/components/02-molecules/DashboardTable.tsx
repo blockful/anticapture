@@ -7,7 +7,6 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  AppleIcon,
   ArrowUpDown,
   TheTable,
   ArrowState,
@@ -43,9 +42,12 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const daoDetails: Record<DaoIdEnum, { icon: React.ReactNode; tooltip: string }> = {
+const daoDetails: Record<
+  DaoIdEnum,
+  { icon: React.ReactNode; tooltip: string }
+> = {
   [DaoIdEnum.UNISWAP]: {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: undefined,
     tooltip: "Total current value of tokens in circulation",
   },
   [DaoIdEnum.ENS]: {
