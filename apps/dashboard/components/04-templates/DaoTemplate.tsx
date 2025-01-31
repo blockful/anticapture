@@ -11,16 +11,17 @@ import daoConstantsByDaoId from "@/lib/dao-constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 export const DaoTemplate = ({ params }: { params: { daoId: string } }) => {
-  const daoConstants = daoConstantsByDaoId[params.daoId.toUpperCase() as DaoIdEnum];
+  const daoConstants =
+    daoConstantsByDaoId[params.daoId.toUpperCase() as DaoIdEnum];
 
   return (
     <>
       <TheSectionLayout
-        title={`${daoConstants.name} DAO Info`}
+        title={`${daoConstants.name} DAO Information`}
         icon={<UniswapIcon className="text-foreground" />}
         anchorId={daoInfoSectionAnchorID}
       >
-        <DaoInfo daoConstants={daoConstants}/>
+        <DaoInfo daoConstants={daoConstants} />
       </TheSectionLayout>
       <TokenDistributionSection />
       <GovernanceActivitySection />
