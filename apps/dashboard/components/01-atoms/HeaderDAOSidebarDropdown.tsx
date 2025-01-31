@@ -67,7 +67,7 @@ export const HeaderDAOSidebarDropdown = () => {
   };
 
   return (
-    <div className="relative inline-block w-full" ref={dropdownRef}>
+    <div className="relative inline-block w-full p-3" ref={dropdownRef}>
       <button
         className="flex w-full items-center justify-between gap-2 rounded-lg p-2 hover:bg-[#333]"
         onClick={toggleDropdown}
