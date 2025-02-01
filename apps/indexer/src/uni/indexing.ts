@@ -19,7 +19,9 @@ ponder.on("UNIToken:setup", async ({ context }) => {
   const quorum = await viemClient.getQuorum(DaoIdEnum.UNI);
   const votingDelay = await viemClient.getVotingDelay(DaoIdEnum.UNI);
   const timelockDelay = await viemClient.getTimelockDelay(DaoIdEnum.UNI);
-  const proposalThreshold = await viemClient.getProposalThreshold(DaoIdEnum.UNI);
+  const proposalThreshold = await viemClient.getProposalThreshold(
+    DaoIdEnum.UNI,
+  );
 
   await context.db.insert(dao).values({
     id: daoId,

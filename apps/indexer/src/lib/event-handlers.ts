@@ -23,7 +23,15 @@ import {
 import { zeroAddress } from "viem";
 import viemClient from "./viemClient";
 import { DaoIdEnum } from "./enums";
-import { DaoDelegateChangedEvent, DaoDelegateVotesChangedEvent, DaoProposalCanceledEvent, DaoProposalCreatedEvent, DaoProposalExecutedEvent, DaoTransferEvent, DaoVoteCastEvent } from "./types";
+import {
+  DaoDelegateChangedEvent,
+  DaoDelegateVotesChangedEvent,
+  DaoProposalCanceledEvent,
+  DaoProposalCreatedEvent,
+  DaoProposalExecutedEvent,
+  DaoTransferEvent,
+  DaoVoteCastEvent,
+} from "./types";
 
 export const delegateChanged = async (
   event: DaoDelegateChangedEvent,
@@ -567,7 +575,12 @@ const storeDailyBucket = async (
 ) => {
   const volume = delta(newValue, currentValue);
   const dayStartTimestampInSeconds =
-    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(0, 0, 0, 0) / 1000;
+    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(
+      0,
+      0,
+      0,
+      0,
+    ) / 1000;
   await context.db
     .insert(daoMetricsDayBuckets)
     .values({

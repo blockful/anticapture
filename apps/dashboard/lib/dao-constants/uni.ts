@@ -1,10 +1,5 @@
 import { DaoConstants } from "./types";
 
-export enum DaoNameEnum {
-  UNI = "Uniswap",
-  ENS = "Ethereum Name Service",
-}
-
 export const UNI: DaoConstants = {
     name: "Uniswap",
     contracts: {

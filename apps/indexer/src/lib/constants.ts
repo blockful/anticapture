@@ -6,13 +6,13 @@ export const secondsInDay = 24 * 60 * 60;
 export const CONTRACT_ADDRESS_MAINNET = {
   [DaoIdEnum.UNI]: {
     token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-    governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3"
+    governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
   },
   [DaoIdEnum.ENS]: {
     token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-    governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3"
-  }
-}
+    governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+  },
+};
 
 export const TREASURY_ADDRESSES = {
   [DaoIdEnum.UNI]: {
@@ -25,9 +25,9 @@ export const TREASURY_ADDRESSES = {
   [DaoIdEnum.ENS]: {
     ENSTimelock: "0xd7A029Db2585553978190dB5E85eC724Aa4dF23f",
     ENSTokenTimelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
-    ENSPublicResolver: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41"
-  }
-}
+    ENSPublicResolver: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+  },
+};
 
 export const CEXAddresses = {
   BinanceHotWallet: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
@@ -74,7 +74,6 @@ export const CEXAddresses = {
   CoinbaseHotWallet: "0xA9D1e08C7793af67e9d92fe308d5697FB81d3E43",
   MEXCHotWallet3: "0x3CC936b795A188F0e246cBB2D74C5Bd190aeCF18",
   KuCoinColdWallet: "0x2933782B5A8d72f2754103D1489614F29bfA4625",
-
 };
 
 export const DEXAddresses = {
@@ -93,14 +92,14 @@ export const DEXAddresses = {
   BalancerCow_UNI_ETH: "0xa81b22966f1841e383e69393175e2cc65f0a8854",
   Uniswap_ENS_5: "0x92560C178cE069CC014138eD3C2F5221Ba71f58a",
   BCoW50WETH50UNI: "0xa81b22966f1841e383e69393175e2cc65f0a8854",
-  SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d"
+  SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d",
 };
 
 export const LendingAddresses = {
   Aave: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
   MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
   CompoundCUNI: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
-  AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e"
+  AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e",
 };
 
 export const BurningAddresses = {

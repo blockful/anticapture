@@ -38,7 +38,7 @@ ponder.on("ENSToken:setup", async ({ context }) => {
     proposalThreshold,
   });
   const decimals = await viemClient.getDecimals(daoId);
-  const tokenAddress = CONTRACT_ADDRESS_MAINNET[daoId].token
+  const tokenAddress = CONTRACT_ADDRESS_MAINNET[daoId].token;
   await context.db.insert(token).values({
     id: tokenAddress,
     name: daoId,

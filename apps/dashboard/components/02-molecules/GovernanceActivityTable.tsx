@@ -142,6 +142,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           .trim()
           .replace(/^"|"$/g, "") as MetricTypesEnum;
         const chartData = await fetchTimeSeriesDataFromGraphQL(
+          daoId,
           metricType,
           parseInt(days.split("d")[0]),
         );
