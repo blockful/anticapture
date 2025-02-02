@@ -1,2 +1,2 @@
-export * from "./DaoInfoTemplate";
+export * from "./DaoTemplate";
 export * from "./HomeTemplate";

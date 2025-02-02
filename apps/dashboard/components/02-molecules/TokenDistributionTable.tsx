@@ -157,6 +157,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
             .trim()
             .replace(/^"|"$/g, "") as MetricTypesEnum;
           const chartData = await fetchTimeSeriesDataFromGraphQL(
+            daoId,
             metricType,
             parsedDays,
           );
