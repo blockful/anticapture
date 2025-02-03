@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
@@ -15,19 +15,13 @@ import {
   TooltipInfo,
 } from "@/components/01-atoms";
 import {
-  fetchCexSupply,
-  fetchCirculatingSupply,
-  fetchDelegatedSupply,
-  fetchDexSupply,
   fetchTimeSeriesDataFromGraphQL,
-  fetchLendingSupply,
-  fetchTotalSupply,
   DaoMetricsDayBucket,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "@/lib/client/constants";
+import { formatUnits } from "viem";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -137,9 +131,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const daoId = (daoData && daoData.id) || DaoIdEnum.UNISWAP;
-
-    const fetchChartData = async (): Promise<void> => {
+    const fetchTokenDistributionTableData = async (): Promise<void> => {
       const metrics = [
         { type: MetricTypesEnum.TOTAL_SUPPLY, index: 0 },
         { type: MetricTypesEnum.DELEGATED_SUPPLY, index: 1 },
@@ -152,12 +144,14 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
       try {
         const parsedDays = parseInt(days.split("d")[0]);
 
+        if (!daoData) return;
+
         const chartDataPromises = metrics.map(async (metric) => {
           const metricType = metric.type
             .trim()
             .replace(/^"|"$/g, "") as MetricTypesEnum;
           const chartData = await fetchTimeSeriesDataFromGraphQL(
-            daoId,
+            daoData.id,
             metricType,
             parsedDays,
           );
@@ -178,9 +172,35 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
 
         results.forEach((result) => {
           if (result) {
+            let changeRate;
+            const oldHigh = result.metric.chartLastDays[0]?.high ?? "0";
+            const currentHigh =
+              result.metric.chartLastDays[
+                result.metric.chartLastDays.length - 1
+              ]?.high ?? "0";
+            if (currentHigh === "0") {
+              changeRate = "0";
+            } else {
+              changeRate = formatUnits(
+                (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
+                  BigInt(1e18),
+                18,
+              );
+            }
+
             dispatch({
               type: ActionType.UPDATE_CHART,
               payload: result,
+            });
+            dispatch({
+              type: ActionType.UPDATE_METRIC,
+              payload: {
+                index: result.index,
+                metric: {
+                  currentValue: String(BigInt(currentHigh) / BigInt(10 ** 18)),
+                  variation: formatVariation(changeRate),
+                },
+              },
             });
           }
         });
@@ -189,115 +209,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
       }
     };
 
-    fetchChartData();
-
-    fetchTotalSupply({ daoId, days }).then(async (result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 0,
-            metric: {
-              currentValue: String(
-                BigInt(result.currentTotalSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchDelegatedSupply({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 1,
-            metric: {
-              currentValue: String(
-                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchCirculatingSupply({
-      daoId,
-      days,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 2,
-            metric: {
-              currentValue: String(
-                BigInt(result.currentCirculatingSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchCexSupply({
-      daoId,
-      days,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 3,
-            metric: {
-              currentValue: String(
-                BigInt(result.currentCexSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchDexSupply({
-      daoId,
-      days,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 4,
-            metric: {
-              currentValue: String(
-                BigInt(result.currentDexSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchLendingSupply({
-      daoId,
-      days,
-    }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 5,
-            metric: {
-              currentValue: String(
-                BigInt(result.currentLendingSupply) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
+    fetchTokenDistributionTableData();
   }, [daoData, days]);
 
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
