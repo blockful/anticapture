@@ -22,7 +22,7 @@ export const TheSectionLayout = ({
       <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
         <div className="flex items-center gap-3">
           {icon}
-          <h1 className="text-left text-xl font-semibold text-white sm:text-3xl">
+          <h1 className="text-left text-xl font-medium tracking-[-0.05%] text-white sm:text-3xl">
             {title}
           </h1>
         </div>
