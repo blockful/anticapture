@@ -15,6 +15,7 @@
     "start:server": "dotenv -- turbo run serve --filter=@defendao/indexer",
     "serve:indexer": "dotenv -- turbo run serve --filter=@defendao/indexer",
     "start:indexer-metrics": "dotenv -- turbo run start --filter=@defendao/indexer-metrics",
+    "start-raw:indexer":"dotenv -- turbo run start-raw --filter=@defendao/indexer",
     "dump-database": "dotenv -- turbo run dump-database --filter=@defendao/indexer",
     "restore-database": "dotenv -- turbo run restore-database --filter=@defendao/indexer",
     "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'",

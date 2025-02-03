@@ -195,6 +195,7 @@ export const tokenTransfer = async (
       id: to,
     })
     .onConflictDoNothing();
+
   await context.db
     .insert(account)
     .values({
@@ -202,13 +203,13 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  const tokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
 
   // Create a new transfer record
   await context.db.insert(transfers).values({
     id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
-    tokenId: uniTokenAddress,
+    tokenId: tokenAddress,
     amount: value,
     fromAccountId: from,
     toAccountId: to,
@@ -219,8 +220,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [to, uniTokenAddress].join("-"),
-      tokenId: uniTokenAddress,
+      id: [to, tokenAddress].join("-"),
+      tokenId: tokenAddress,
       accountId: to,
       balance: value,
     })
@@ -232,8 +233,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [from, uniTokenAddress].join("-"),
-      tokenId: uniTokenAddress,
+      id: [from, tokenAddress].join("-"),
+      tokenId: tokenAddress,
       accountId: from,
       balance: -value,
     })
@@ -246,12 +247,8 @@ export const tokenTransfer = async (
   }))!.lendingSupply;
 
   const lendingAddressList = Object.values(LendingAddresses);
-  const isToLending = lendingAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(to.toUpperCase());
-  const isFromLending = lendingAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(from.toUpperCase());
+  const isToLending = lendingAddressList.includes(to);
+  const isFromLending = lendingAddressList.includes(from);
 
   if ((isToLending || isFromLending) && !(isToLending && isFromLending)) {
     const newLendingSupply = (
@@ -277,12 +274,8 @@ export const tokenTransfer = async (
   }))!.cexSupply;
 
   const cexAddressList = Object.values(CEXAddresses);
-  const isToCex = cexAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(to.toUpperCase());
-  const isFromCex = cexAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(from.toUpperCase());
+  const isToCex = cexAddressList.includes(to);
+  const isFromCex = cexAddressList.includes(from);
 
   if ((isToCex || isFromCex) && !(isToCex && isFromCex)) {
     const newCexSupply = (
@@ -306,12 +299,8 @@ export const tokenTransfer = async (
   }))!.dexSupply;
 
   const dexAddressList = Object.values(DEXAddresses);
-  const isToDex = dexAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(to.toUpperCase());
-  const isFromDex = dexAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(from.toUpperCase());
+  const isToDex = dexAddressList.includes(to);
+  const isFromDex = dexAddressList.includes(from);
 
   if ((isToDex || isFromDex) && !(isToDex && isFromDex)) {
     const newDexSupply = (
@@ -335,12 +324,8 @@ export const tokenTransfer = async (
   }))!.treasury;
 
   const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
-  const isToTreasury = treasuryAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(to.toUpperCase());
-  const isFromTreasury = treasuryAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(from.toUpperCase());
+  const isToTreasury = treasuryAddressList.includes(to);
+  const isFromTreasury = treasuryAddressList.includes(from);
 
   const isTreasuryTransaction =
     (isToTreasury || isFromTreasury) && !(isToTreasury && isFromTreasury);
@@ -367,12 +352,8 @@ export const tokenTransfer = async (
   }))!.totalSupply;
 
   const burningAddressesAddressList = Object.values(BurningAddresses);
-  const isToBurningAddress = burningAddressesAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(to.toUpperCase());
-  const isFromBurningAddress = burningAddressesAddressList
-    .map((addr) => addr.toUpperCase())
-    .includes(from.toUpperCase());
+  const isToBurningAddress = burningAddressesAddressList.includes(to);
+  const isFromBurningAddress = burningAddressesAddressList.includes(from);
   const isTotalSupplyTransaction =
     (isToBurningAddress || isFromBurningAddress) &&
     !(isToBurningAddress && isFromBurningAddress);
