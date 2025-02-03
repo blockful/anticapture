@@ -81,10 +81,9 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const DashboardTable = () => {
+export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
-  const days = TimeInterval.THIRTY_DAYS;
 
   useEffect(() => {
     Object.values(DaoIdEnum).map((daoId, index) => {
