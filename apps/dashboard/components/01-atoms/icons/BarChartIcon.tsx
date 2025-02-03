@@ -14,7 +14,7 @@ export const BarChartIcon = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector"
           d="M2 2.5V14.5H14"
-          stroke="#FAFAFA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -22,7 +22,7 @@ export const BarChartIcon = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector_2"
           d="M12 11.8333V6.5"
-          stroke="#FAFAFA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -30,7 +30,7 @@ export const BarChartIcon = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector_3"
           d="M8.66669 11.8335V3.8335"
-          stroke="#FAFAFA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -38,7 +38,7 @@ export const BarChartIcon = (props: SVGProps<SVGSVGElement>) => {
         <path
           id="Vector_4"
           d="M5.33331 11.8335V9.8335"
-          stroke="#FAFAFA"
+          stroke="currentColor"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
