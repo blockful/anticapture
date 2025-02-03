@@ -27,10 +27,10 @@ import {
   fetchAverageTurnout,
   fetchProposals,
   fetchTimeSeriesDataFromGraphQL,
-  fetchTreasury,
   fetchVotes,
 } from "@/lib/server/backend";
 import { MetricTypesEnum } from "@/lib/client/constants";
+import { formatUnits } from "viem";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -134,44 +134,60 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
   useEffect(() => {
     const daoId = (daoData && daoData.id) || DaoIdEnum.UNISWAP;
 
-    const fetchChartData = async (): Promise<void> => {
-      const metrics = [{ type: MetricTypesEnum.TREASURY, index: 0 }];
+    const fetchChartAndTreasuryData = async (): Promise<void> => {
+      const chartData = await fetchTimeSeriesDataFromGraphQL(
+        daoId,
+        MetricTypesEnum.TREASURY,
+        parseInt(days.split("d")[0]),
+      );
+      if (chartData) {
+        let changeRate;
+        const oldHigh = chartData[0]?.high ?? "0";
+        const currentHigh = chartData[chartData.length - 1]?.high ?? "0";
 
-      for (const metric of metrics) {
-        const metricType = metric.type
-          .trim()
-          .replace(/^"|"$/g, "") as MetricTypesEnum;
-        const chartData = await fetchTimeSeriesDataFromGraphQL(
-          daoId,
-          metricType,
-          parseInt(days.split("d")[0]),
-        );
-        if (chartData) {
-          dispatch({
-            type: ActionType.UPDATE_CHART,
-            payload: {
-              index: metric.index,
-              metric: {
-                chartLastDays: chartData,
-              },
-            },
-          });
+        if (currentHigh === "0") {
+          changeRate = "0";
+        } else {
+          changeRate = formatUnits(
+            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
+              BigInt(1e18),
+            18,
+          );
         }
-      }
-    };
 
-    fetchChartData();
+        dispatch({
+          type: ActionType.UPDATE_CHART,
+          payload: {
+            index: 0,
+            metric: {
+              chartLastDays: chartData,
+            },
+          },
+        });
 
-    fetchTreasury({ daoId, days: days }).then((result) => {
-      result &&
         dispatch({
           type: ActionType.UPDATE_METRIC,
           payload: {
             index: 0,
             metric: {
-              average: String(
-                BigInt(result.currentTreasury) / BigInt(10 ** 18),
-              ),
+              average: String(BigInt(currentHigh) / BigInt(10 ** 18)),
+              variation: formatVariation(changeRate),
+            },
+          },
+        });
+      }
+    };
+
+    fetchChartAndTreasuryData();
+
+    fetchProposals({ daoId, days }).then((result) => {
+      result &&
+        dispatch({
+          type: ActionType.UPDATE_METRIC,
+          payload: {
+            index: 1,
+            metric: {
+              average: result.currentProposalsLaunched,
               variation: formatVariation(result.changeRate),
             },
           },
@@ -185,24 +201,8 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
           payload: {
             index: 2,
             metric: {
-              average: String(
-                BigInt(result.activeSupply) / BigInt(10 ** 18),
-              ),
+              average: String(BigInt(result.activeSupply) / BigInt(10 ** 18)),
               variation: "-",
-            },
-          },
-        });
-    });
-
-    fetchProposals({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 1,
-            metric: {
-              average: result.currentProposalsLaunched,
-              variation: formatVariation(result.changeRate),
             },
           },
         });
@@ -293,8 +293,12 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
-        if(variation=="-"){
-          return (<p className="flex items-center justify-center gap-1 text-center">-</p>)
+        if (variation == "-") {
+          return (
+            <p className="flex items-center justify-center gap-1 text-center">
+              -
+            </p>
+          );
         }
         return (
           <p
@@ -306,13 +310,11 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
                   : ""
             }`}
           >
-            {
-               Number(variation) > 0 ? (
-                <ChevronUp className="h-4 w-4 text-[#4ade80]" />
-              ) : Number(variation) < 0 ? (
-                <ChevronDown className="h-4 w-4 text-red-500" />
-              ) : null
-            }
+            {Number(variation) > 0 ? (
+              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+            ) : Number(variation) < 0 ? (
+              <ChevronDown className="h-4 w-4 text-red-500" />
+            ) : null}
             {variation}%
           </p>
         );
