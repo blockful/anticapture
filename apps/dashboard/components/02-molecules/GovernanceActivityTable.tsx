@@ -142,14 +142,14 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
       );
       if (chartData) {
         let changeRate;
-        const currentHigh = chartData[0]?.high ?? "0";
-        const oldHigh = chartData[chartData.length - 1]?.high ?? "0";
+        const oldHigh = chartData[0]?.high ?? "0";
+        const currentHigh = chartData[chartData.length - 1]?.high ?? "0";
 
         if (currentHigh === "0") {
           changeRate = "0";
         } else {
           changeRate = formatUnits(
-            (BigInt(oldHigh) * BigInt(1e18)) / BigInt(currentHigh) -
+            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
               BigInt(1e18),
             18,
           );
