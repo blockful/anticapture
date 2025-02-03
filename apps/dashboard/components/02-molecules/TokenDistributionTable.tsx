@@ -144,12 +144,14 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
       try {
         const parsedDays = parseInt(days.split("d")[0]);
 
+        if (!daoData) return;
+
         const chartDataPromises = metrics.map(async (metric) => {
           const metricType = metric.type
             .trim()
             .replace(/^"|"$/g, "") as MetricTypesEnum;
           const chartData = await fetchTimeSeriesDataFromGraphQL(
-            daoId,
+            daoData.id,
             metricType,
             parsedDays,
           );
