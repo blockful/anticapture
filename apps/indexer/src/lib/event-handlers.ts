@@ -246,14 +246,17 @@ export const tokenTransfer = async (
   }))!.lendingSupply;
 
   const lendingAddressList = Object.values(LendingAddresses);
-  const isLendingTransaction =
-    lendingAddressList.includes(to) || lendingAddressList.includes(from);
+  const isToLending = lendingAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(to.toUpperCase());
+  const isFromLending = lendingAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(from.toUpperCase());
 
-  if (isLendingTransaction) {
-    const isToLendingPool = lendingAddressList.includes(to);
+  if ((isToLending || isFromLending) && !(isToLending && isFromLending)) {
     const newLendingSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
-        lendingSupply: isToLendingPool
+        lendingSupply: isToLending
           ? row.lendingSupply + value
           : row.lendingSupply - value,
       }))
@@ -274,11 +277,14 @@ export const tokenTransfer = async (
   }))!.cexSupply;
 
   const cexAddressList = Object.values(CEXAddresses);
-  const isCexTransaction =
-    cexAddressList.includes(to) || cexAddressList.includes(from);
+  const isToCex = cexAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(to.toUpperCase());
+  const isFromCex = cexAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(from.toUpperCase());
 
-  if (isCexTransaction) {
-    const isToCex = cexAddressList.includes(to);
+  if ((isToCex || isFromCex) && !(isToCex && isFromCex)) {
     const newCexSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         cexSupply: isToCex ? row.cexSupply + value : row.cexSupply - value,
@@ -300,11 +306,14 @@ export const tokenTransfer = async (
   }))!.dexSupply;
 
   const dexAddressList = Object.values(DEXAddresses);
-  const isDexTransaction =
-    dexAddressList.includes(to) || dexAddressList.includes(from);
+  const isToDex = dexAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(to.toUpperCase());
+  const isFromDex = dexAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(from.toUpperCase());
 
-  if (isDexTransaction) {
-    const isToDex = dexAddressList.includes(to);
+  if ((isToDex || isFromDex) && !(isToDex && isFromDex)) {
     const newDexSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         dexSupply: isToDex ? row.dexSupply + value : row.dexSupply - value,
@@ -326,14 +335,17 @@ export const tokenTransfer = async (
   }))!.treasury;
 
   const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
+  const isToTreasury = treasuryAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(to.toUpperCase());
+  const isFromTreasury = treasuryAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(from.toUpperCase());
+
   const isTreasuryTransaction =
-    treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
-  const isInternalTreasuryTransfer =
-    treasuryAddressList.includes(to) && treasuryAddressList.includes(from);
+    (isToTreasury || isFromTreasury) && !(isToTreasury && isFromTreasury);
 
-  if (isTreasuryTransaction && !isInternalTreasuryTransfer) {
-    const isToTreasury = treasuryAddressList.includes(to);
-
+  if (isTreasuryTransaction) {
     const newTreasury = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         treasury: isToTreasury ? row.treasury + value : row.treasury - value,
@@ -355,9 +367,15 @@ export const tokenTransfer = async (
   }))!.totalSupply;
 
   const burningAddressesAddressList = Object.values(BurningAddresses);
+  const isToBurningAddress = burningAddressesAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(to.toUpperCase());
+  const isFromBurningAddress = burningAddressesAddressList
+    .map((addr) => addr.toUpperCase())
+    .includes(from.toUpperCase());
   const isTotalSupplyTransaction =
-    burningAddressesAddressList.includes(to) ||
-    burningAddressesAddressList.includes(from);
+    (isToBurningAddress || isFromBurningAddress) &&
+    !(isToBurningAddress && isFromBurningAddress);
 
   if (isTotalSupplyTransaction) {
     const isBurningTokens = burningAddressesAddressList.includes(to);
