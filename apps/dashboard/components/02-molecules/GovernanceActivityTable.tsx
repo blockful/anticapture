@@ -136,6 +136,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
 
     const fetchChartAndTreasuryData = async (): Promise<void> => {
       const chartData = await fetchTimeSeriesDataFromGraphQL(
+        daoId,
         MetricTypesEnum.TREASURY,
         parseInt(days.split("d")[0]),
       );
