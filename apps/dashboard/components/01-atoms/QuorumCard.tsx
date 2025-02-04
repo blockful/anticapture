@@ -9,6 +9,7 @@ import {
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
+import { BaseCardDao, CardData } from "./BaseCardDao";
 
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
@@ -32,68 +33,55 @@ export const QuorumCard = () => {
         BigInt(daoData.totalSupply),
     );
 
-  return (
-    <BaseCard title="Quorum" icon={<UsersIcon />}>
-      <div className="flex h-full w-full gap-4">
-        {/* Quorum Logic Section */}
-        <div className="card-description-about">
-          <div className="card-description-title">
-            <h1 className="text-foreground">Logic</h1>
-            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
-          </div>
-          <div className="flex h-full w-full items-center justify-start gap-1.5">
-            <div className="flex w-full">
-              <p className="flex text-sm font-medium leading-tight">For</p>
-            </div>
-          </div>
-        </div>
+  const quorumValue = daoData.quorum
+    ? `${formatNumberUserReadble(Number(daoData.quorum) / 10 ** 18)} `
+    : "No Quorum";
 
-        {/* Quorum Section */}
-        <div className="card-description-about">
-          <div className="card-description-title">
-            <h1 className="text-foreground">Quorum</h1>
-            <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
-          </div>
-          <div className="flex h-full w-full items-center justify-start gap-1.5">
-            <div className="flex w-full">
-              <p className="flex text-sm font-medium leading-tight">
-                {daoData.quorum
-                  ? formatNumberUserReadble(
-                      Number(daoData.quorum) / Number(10 ** 18),
-                    ).toString()
-                  : "No Quorum"}{" "}
-                {daoData.id || "Unknown ID"}{" "}
-                {quorumMinPercentage
-                  ? `(${quorumMinPercentage.toString()}%)`
-                  : "(N/A)"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+  const quorumPercentage = quorumMinPercentage
+    ? `(${quorumMinPercentage.toString()}%)`
+    : "(N/A)";
 
-      {/* Proposal Threshold Section */}
-      <div className="card-description-about">
-        <div className="card-description-title">
-          <h1 className="text-foreground">Proposal threshold</h1>
-          <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
-        </div>
-        <div className="flex h-full w-full items-center justify-start gap-1.5">
-          <div className="flex w-1/2">
-            <p className="flex text-sm font-medium leading-tight">
-              {daoData.proposalThreshold
-                ? formatNumberUserReadble(
-                    Number(daoData.proposalThreshold) / Number(10 ** 18),
-                  ).toString()
-                : "No Threshold"}{" "}
-              {daoData.id || "Unknown ID"}{" "}
-              {proposalThresholdPercentage
-                ? `(${proposalThresholdPercentage.toString()}%)`
-                : "(N/A)"}
-            </p>
-          </div>
-        </div>
-      </div>
-    </BaseCard>
-  );
+  const proposalThresholdValue = daoData.proposalThreshold
+    ? `${formatNumberUserReadble(Number(daoData.proposalThreshold) / 10 ** 18)}`
+    : "No Threshold";
+
+  const proposalThresholdPercentageFormatted = proposalThresholdPercentage
+    ? `(${proposalThresholdPercentage.toString()}%)`
+    : "(N/A)";
+
+  const proposalThresholdText = `${proposalThresholdValue} ${daoData.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
+
+  const quorumData: CardData = {
+    title: "Quorum",
+    icon: <UsersIcon />,
+    sections: [
+      {
+        title: "Logic",
+        tooltip: "Direct liquid profit: Cost of direct capture",
+        items: [{ type: "text", label: "For", value: "" }],
+      },
+      {
+        title: "Quorum",
+        tooltip: "Direct liquid profit: Cost of direct capture",
+        items: [
+          {
+            type: "text",
+            value: `${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`,
+          },
+        ],
+      },
+      {
+        title: "Proposal Threshold",
+        tooltip: "Direct liquid profit: Cost of direct capture",
+        items: [
+          {
+            type: "text",
+            value: proposalThresholdText,
+          },
+        ],
+      },
+    ],
+  };
+
+  return <BaseCardDao data={quorumData} />;
 };
