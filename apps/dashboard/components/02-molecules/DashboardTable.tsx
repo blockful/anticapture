@@ -164,7 +164,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           className="w-full"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Delegated Supply (30d)
+          Delegated Supply ({days})
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
