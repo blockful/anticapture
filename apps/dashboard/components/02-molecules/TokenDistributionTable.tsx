@@ -18,7 +18,11 @@ import {
   DaoMetricsDayBucket,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
+import {
+  cn,
+  formatNumberUserReadble,
+  formatVariation,
+} from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 
@@ -310,11 +314,15 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
+        const variation: string = row.getValue("variation");
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full">
-            <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
+            <Sparkline
+              data={chartLastDays.map((item) => Number(item.high))}
+              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+            />
           </div>
         );
       },

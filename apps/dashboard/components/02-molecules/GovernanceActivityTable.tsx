@@ -14,7 +14,11 @@ import {
   Sparkline,
 } from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
+import {
+  cn,
+  formatNumberUserReadble,
+  formatVariation,
+} from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   DaoMetricsDayBucket,
@@ -339,11 +343,16 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
+        const variation: string = row.getValue("variation");
+
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full items-start justify-start px-4">
-            <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
+            <Sparkline
+              data={chartLastDays.map((item) => Number(item.high))}
+              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+            />
           </div>
         );
       },
