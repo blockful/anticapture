@@ -245,7 +245,7 @@ export const tokenTransfer = async (
     id: event.log.address,
   }))!.lendingSupply;
 
-  const lendingAddressList = Object.values(LendingAddresses);
+  const lendingAddressList = Object.values(LendingAddresses[daoId]);
   const isLendingTransaction =
     lendingAddressList.includes(to) || lendingAddressList.includes(from);
 
@@ -273,7 +273,7 @@ export const tokenTransfer = async (
     id: event.log.address,
   }))!.cexSupply;
 
-  const cexAddressList = Object.values(CEXAddresses);
+  const cexAddressList = Object.values(CEXAddresses[daoId]);
   const isCexTransaction =
     cexAddressList.includes(to) || cexAddressList.includes(from);
 
@@ -299,7 +299,7 @@ export const tokenTransfer = async (
     id: event.log.address,
   }))!.dexSupply;
 
-  const dexAddressList = Object.values(DEXAddresses);
+  const dexAddressList = Object.values(DEXAddresses[daoId]);
   const isDexTransaction =
     dexAddressList.includes(to) || dexAddressList.includes(from);
 
@@ -354,7 +354,7 @@ export const tokenTransfer = async (
     id: event.log.address,
   }))!.totalSupply;
 
-  const burningAddressesAddressList = Object.values(BurningAddresses);
+  const burningAddressesAddressList = Object.values(BurningAddresses[daoId]);
   const isTotalSupplyTransaction =
     burningAddressesAddressList.includes(to) ||
     burningAddressesAddressList.includes(from);
