@@ -195,6 +195,7 @@ export const tokenTransfer = async (
       id: to,
     })
     .onConflictDoNothing();
+
   await context.db
     .insert(account)
     .values({
@@ -202,13 +203,13 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  const uniTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  const tokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
 
   // Create a new transfer record
   await context.db.insert(transfers).values({
     id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
-    tokenId: uniTokenAddress,
+    tokenId: tokenAddress,
     amount: value,
     fromAccountId: from,
     toAccountId: to,
@@ -219,8 +220,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [to, uniTokenAddress].join("-"),
-      tokenId: uniTokenAddress,
+      id: [to, tokenAddress].join("-"),
+      tokenId: tokenAddress,
       accountId: to,
       balance: value,
     })
@@ -232,8 +233,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [from, uniTokenAddress].join("-"),
-      tokenId: uniTokenAddress,
+      id: [from, tokenAddress].join("-"),
+      tokenId: tokenAddress,
       accountId: from,
       balance: -value,
     })
@@ -246,14 +247,13 @@ export const tokenTransfer = async (
   }))!.lendingSupply;
 
   const lendingAddressList = Object.values(LendingAddresses[daoId]);
-  const isLendingTransaction =
-    lendingAddressList.includes(to) || lendingAddressList.includes(from);
+  const isToLending = lendingAddressList.includes(to);
+  const isFromLending = lendingAddressList.includes(from);
 
-  if (isLendingTransaction) {
-    const isToLendingPool = lendingAddressList.includes(to);
+  if ((isToLending || isFromLending) && !(isToLending && isFromLending)) {
     const newLendingSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
-        lendingSupply: isToLendingPool
+        lendingSupply: isToLending
           ? row.lendingSupply + value
           : row.lendingSupply - value,
       }))
@@ -274,11 +274,10 @@ export const tokenTransfer = async (
   }))!.cexSupply;
 
   const cexAddressList = Object.values(CEXAddresses[daoId]);
-  const isCexTransaction =
-    cexAddressList.includes(to) || cexAddressList.includes(from);
+  const isToCex = cexAddressList.includes(to);
+  const isFromCex = cexAddressList.includes(from);
 
-  if (isCexTransaction) {
-    const isToCex = cexAddressList.includes(to);
+  if ((isToCex || isFromCex) && !(isToCex && isFromCex)) {
     const newCexSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         cexSupply: isToCex ? row.cexSupply + value : row.cexSupply - value,
@@ -300,11 +299,10 @@ export const tokenTransfer = async (
   }))!.dexSupply;
 
   const dexAddressList = Object.values(DEXAddresses[daoId]);
-  const isDexTransaction =
-    dexAddressList.includes(to) || dexAddressList.includes(from);
+  const isToDex = dexAddressList.includes(to);
+  const isFromDex = dexAddressList.includes(from);
 
-  if (isDexTransaction) {
-    const isToDex = dexAddressList.includes(to);
+  if ((isToDex || isFromDex) && !(isToDex && isFromDex)) {
     const newDexSupply = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         dexSupply: isToDex ? row.dexSupply + value : row.dexSupply - value,
@@ -326,14 +324,13 @@ export const tokenTransfer = async (
   }))!.treasury;
 
   const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
+  const isToTreasury = treasuryAddressList.includes(to);
+  const isFromTreasury = treasuryAddressList.includes(from);
+
   const isTreasuryTransaction =
-    treasuryAddressList.includes(to) || treasuryAddressList.includes(from);
-  const isInternalTreasuryTransfer =
-    treasuryAddressList.includes(to) && treasuryAddressList.includes(from);
+    (isToTreasury || isFromTreasury) && !(isToTreasury && isFromTreasury);
 
-  if (isTreasuryTransaction && !isInternalTreasuryTransfer) {
-    const isToTreasury = treasuryAddressList.includes(to);
-
+  if (isTreasuryTransaction) {
     const newTreasury = (
       await context.db.update(token, { id: event.log.address }).set((row) => ({
         treasury: isToTreasury ? row.treasury + value : row.treasury - value,
@@ -355,9 +352,11 @@ export const tokenTransfer = async (
   }))!.totalSupply;
 
   const burningAddressesAddressList = Object.values(BurningAddresses[daoId]);
+  const isToBurningAddress = burningAddressesAddressList.includes(to);
+  const isFromBurningAddress = burningAddressesAddressList.includes(from);
   const isTotalSupplyTransaction =
-    burningAddressesAddressList.includes(to) ||
-    burningAddressesAddressList.includes(from);
+    (isToBurningAddress || isFromBurningAddress) &&
+    !(isToBurningAddress && isFromBurningAddress);
 
   if (isTotalSupplyTransaction) {
     const isBurningTokens = burningAddressesAddressList.includes(to);
