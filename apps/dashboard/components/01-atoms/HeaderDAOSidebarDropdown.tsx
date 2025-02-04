@@ -39,13 +39,13 @@ export const HeaderDAOSidebarDropdown = () => {
     () => [
       {
         id: 0,
-        label: "Uniswap GovRisk",
+        label: "Uniswap",
         icon: <UniswapIcon className="h-5 w-5 text-[#FC72FF]" />,
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
       },
       {
         id: 1,
-        label: "ENS GovRisk",
+        label: "ENS",
         icon: <EnsIcon className="h-5 w-5" />,
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
       },
