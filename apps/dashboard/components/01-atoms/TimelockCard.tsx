@@ -26,9 +26,14 @@ export const TimelockCard = ({
           {
             type: "button",
             label: "View",
-            icon: <ExternalLinkIcon />, //TODO: Add isIcon Right or left
+            icon: <ExternalLinkIcon className="text-[#EC762E]" />,
             onClick: () =>
-              openEtherscanAddress(daoConstants.contracts.timelock),
+              window.open(
+                `${daoConstants.snapshot}`,
+                "_blank",
+                "noopener,noreferrer",
+              ),
+            inverted: true,
           },
         ],
       },
@@ -40,6 +45,13 @@ export const TimelockCard = ({
             type: "switch",
             label: "Enabled",
             switched: daoConstants.rules.cancelFunction,
+          },
+          {
+            type: "button",
+            label: "View",
+            icon: <ExternalLinkIcon className="text-[#EC762E]" />,
+            onClick: () => openEtherscanAddress(daoConstants.contracts.token),
+            inverted: true,
           },
         ],
       },

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  BaseCard,
-  UsersIcon,
-  TooltipInfo,
-  Skeleton,
-} from "@/components/01-atoms";
+import { UsersIcon, Skeleton } from "@/components/01-atoms";
 import { formatNumberUserReadble } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
@@ -58,7 +53,7 @@ export const QuorumCard = () => {
       {
         title: "Logic",
         tooltip: "Direct liquid profit: Cost of direct capture",
-        items: [{ type: "text", label: "For", value: "" }],
+        items: [{ type: "text", label: "For + Abstain", value: "" }],
       },
       {
         title: "Quorum",

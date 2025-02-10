@@ -26,14 +26,14 @@ export const ContractsCard = ({
           {
             type: "button",
             label: "Governor",
-            icon: <CrownIcon />,
+            icon: <CrownIcon className="text-[#EC762E]" />,
             onClick: () =>
               openEtherscanAddress(daoConstants.contracts.governor),
           },
           {
             type: "button",
             label: "Token",
-            icon: <TokensIcon />,
+            icon: <TokensIcon className="text-[#EC762E]" />,
             onClick: () => openEtherscanAddress(daoConstants.contracts.token),
           },
         ],
@@ -45,13 +45,13 @@ export const ContractsCard = ({
           {
             type: "button",
             label: "Snapshot",
-            icon: <FocusIcon />,
+            icon: <FocusIcon className="text-[#EC762E]" />,
             externalLink: daoConstants.snapshot,
           },
           {
             type: "button",
             label: "Token",
-            icon: <TokensIcon />,
+            icon: <TokensIcon className="text-[#EC762E]" />,
             onClick: () => openEtherscanAddress(daoConstants.contracts.token),
           },
         ],

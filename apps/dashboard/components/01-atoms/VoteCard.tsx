@@ -23,12 +23,11 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         items: [
           {
             type: "switch",
-            label: "Enabled",
             switched: daoConstants.rules.delay,
           },
           {
             type: "badge",
-            label: `${formatTimestampUserReadable(daoData.votingDelay)}`,
+            label: formatTimestampUserReadable(daoData.votingDelay),
             icon: <BlocksIcon />,
           },
         ],
@@ -39,7 +38,6 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         items: [
           {
             type: "switch",
-            label: "Enabled",
             switched: daoConstants.rules.changeVote,
           },
         ],
