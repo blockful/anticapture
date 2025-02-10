@@ -2,7 +2,13 @@
 
 import { ReactNode } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
-import { TooltipInfo, Badge, Switcher } from "@/components/01-atoms";
+import {
+  Badge,
+  CircleCheckIcon,
+  CircleNotCheckedIcon,
+  TooltipInfo,
+} from "@/components/01-atoms";
+import { cn } from "@/lib/client/utils";
 
 interface CardItem {
   type: "button" | "text" | "badge" | "switch";
@@ -12,6 +18,7 @@ interface CardItem {
   onClick?: () => void;
   externalLink?: string;
   switched?: boolean;
+  inverted?: boolean;
 }
 
 interface CardSection {
@@ -40,7 +47,7 @@ export const BaseCardDao = ({ data }: BaseCardDaoProps) => {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex w-full flex-col gap-6 p-3 lg:flex-row">
+      <CardContent className="flex h-full w-full flex-col gap-6 p-3 lg:flex-row">
         {data.sections.map((section, index) => (
           <div key={index} className="flex flex-col gap-2">
             <div className="flex items-center gap-1.5">
@@ -58,11 +65,22 @@ export const BaseCardDao = ({ data }: BaseCardDaoProps) => {
                         className="flex h-full w-full"
                         onClick={item.onClick}
                       >
-                        <Badge className="h-full w-full hover:border-lightDark hover:bg-transparent">
-                          {item.icon}
-                          <p className="text-sm font-medium leading-tight">
-                            {item.label}
-                          </p>
+                        <Badge className="flex h-full w-full gap-1 hover:border-lightDark hover:bg-transparent">
+                          {item.inverted ? (
+                            <>
+                              <p className="text-sm font-medium leading-tight">
+                                {item.label}
+                              </p>
+                              {item.icon}
+                            </>
+                          ) : (
+                            <>
+                              {item.icon}
+                              <p className="text-sm font-medium leading-tight">
+                                {item.label}
+                              </p>
+                            </>
+                          )}
                         </Badge>
                       </button>
                     );
@@ -71,7 +89,7 @@ export const BaseCardDao = ({ data }: BaseCardDaoProps) => {
                     return (
                       <p
                         key={index}
-                        className="text-sm font-medium leading-tight"
+                        className="flex h-full w-full text-sm font-medium leading-tight"
                       >
                         {item.label} {item.value}
                       </p>
@@ -80,8 +98,8 @@ export const BaseCardDao = ({ data }: BaseCardDaoProps) => {
                   case "badge":
                     return (
                       <Badge key={index} className="flex h-full w-full">
-                        {item.icon}
-                        <p className="text-sm font-medium leading-tight">
+                        <div className="flex">{item.icon}</div>
+                        <p className="flex whitespace-nowrap text-sm font-medium leading-tight">
                           {item.label}
                         </p>
                       </Badge>
@@ -89,7 +107,26 @@ export const BaseCardDao = ({ data }: BaseCardDaoProps) => {
 
                   case "switch":
                     return (
-                      <Switcher key={index} switched={item.switched ?? false} />
+                      <Badge
+                        key={index}
+                        className={cn("flex h-full w-full bg-opacity-20", [
+                          item.switched ? "bg-[#4ADE80]" : "bg-[#F87171]",
+                        ])}
+                      >
+                        {item.switched ? (
+                          <CircleCheckIcon className="text-[#4ADE80]" />
+                        ) : (
+                          <CircleNotCheckedIcon className="text-[#F87171]" />
+                        )}
+                        <p
+                          className={cn([
+                            "text-sm font-medium leading-tight",
+                            item.switched ? "text-[#4ADE80]" : "text-[#F87171]",
+                          ])}
+                        >
+                          {item.switched ? "Yes" : "No"}
+                        </p>
+                      </Badge>
                     );
 
                   default:
