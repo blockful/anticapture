@@ -6,6 +6,8 @@ export * from "./ArrowUpDown";
 export * from "./AttacksIcon";
 export * from "./BarChartIcon";
 export * from "./BlocksIcon";
+export * from "./CircleCheckIcon";
+export * from "./CircleNotCheckedIcon";
 export * from "./ClickIcon";
 export * from "./CrownIcon";
 export * from "./DollarIcon";
