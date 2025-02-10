@@ -12,7 +12,7 @@ import {
   ArrowState,
   TimeInterval,
 } from "@/components/01-atoms";
-import { formatNumberUserReadble } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
 
@@ -154,7 +154,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         const delegatedSupply: number = row.getValue("delegatedSupply");
         return (
           <div className="flex items-center justify-center text-center">
-            {`${delegatedSupply && formatNumberUserReadble(delegatedSupply)}`}
+            {`${delegatedSupply && formatNumberUserReadable(delegatedSupply)}`}
           </div>
         );
       },
@@ -188,7 +188,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     //     const profitability: number = row.getValue("profitability");
     //     return (
     //       <div className="flex items-center justify-center text-center">
-    //         {profitability && formatNumberUserReadble(profitability)}
+    //         {profitability && formatNumberUserReadable(profitability)}
     //       </div>
     //     );
     //   },
@@ -222,7 +222,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     //     const delegatesToPass: number = row.getValue("delegatesToPass");
     //     return (
     //       <div className="flex items-center justify-center text-center">
-    //         {delegatesToPass && formatNumberUserReadble(delegatesToPass)}
+    //         {delegatesToPass && formatNumberUserReadable(delegatesToPass)}
     //       </div>
     //     );
     //   },

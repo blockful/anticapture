@@ -16,7 +16,7 @@ import {
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import {
   cn,
-  formatNumberUserReadble,
+  formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -263,7 +263,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         const average: number = row.getValue("average");
         return (
           <div className="flex items-center justify-center text-center">
-            {average && formatNumberUserReadble(average)}
+            {average && formatNumberUserReadable(average)}
           </div>
         );
       },

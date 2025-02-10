@@ -20,7 +20,7 @@ import {
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import {
   cn,
-  formatNumberUserReadble,
+  formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
@@ -240,7 +240,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         const currentValue: number = row.getValue("currentValue");
         return (
           <div className="flex items-center justify-center text-center">
-            {currentValue && formatNumberUserReadble(currentValue)}
+            {currentValue && formatNumberUserReadable(currentValue)}
           </div>
         );
       },

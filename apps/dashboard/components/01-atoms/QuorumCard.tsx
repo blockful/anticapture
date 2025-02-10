@@ -1,7 +1,7 @@
 "use client";
 
 import { UsersIcon, Skeleton } from "@/components/01-atoms";
-import { formatNumberUserReadble } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { BaseCardDao, CardData } from "./BaseCardDao";
@@ -29,7 +29,7 @@ export const QuorumCard = () => {
     );
 
   const quorumValue = daoData.quorum
-    ? `${formatNumberUserReadble(Number(daoData.quorum) / 10 ** 18)} `
+    ? `${formatNumberUserReadable(Number(daoData.quorum) / 10 ** 18)} `
     : "No Quorum";
 
   const quorumPercentage = quorumMinPercentage
@@ -37,7 +37,7 @@ export const QuorumCard = () => {
     : "(N/A)";
 
   const proposalThresholdValue = daoData.proposalThreshold
-    ? `${formatNumberUserReadble(Number(daoData.proposalThreshold) / 10 ** 18)}`
+    ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
     : "No Threshold";
 
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
