@@ -19,7 +19,8 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
     sections: [
       {
         title: "Delay",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "The voting delay is the number of blocks between an on-chain proposal’s submission and the start of its voting period. It gives DAO members time to discuss and review proposals before voting begins.",
         items: [
           {
             type: "switch",
@@ -34,7 +35,8 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
       },
       {
         title: "Change Vote",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "Allows voters to alter their vote after it has already been cast.",
         items: [
           {
             type: "switch",
