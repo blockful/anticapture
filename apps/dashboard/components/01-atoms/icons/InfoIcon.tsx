@@ -1,6 +1,9 @@
-export const InfoIcon = () => {
+import { SVGProps } from "react";
+
+export const InfoIcon = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
+      {...props}
       width="16"
       height="16"
       fill="none"
