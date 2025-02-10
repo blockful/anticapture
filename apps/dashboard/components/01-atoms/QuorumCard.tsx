@@ -52,12 +52,14 @@ export const QuorumCard = () => {
     sections: [
       {
         title: "Logic",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
         items: [{ type: "text", label: "For + Abstain", value: "" }],
       },
       {
         title: "Quorum",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn’t reach quorum.",
         items: [
           {
             type: "text",
@@ -67,7 +69,8 @@ export const QuorumCard = () => {
       },
       {
         title: "Proposal Threshold",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "The minimum voting power required to submit an on-chain proposal.",
         items: [
           {
             type: "text",
