@@ -42,27 +42,30 @@ const metricDetails: Record<
 > = {
   "Total Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens in circulation",
+    tooltip: "The total number of tokens in existence",
   },
   "Delegated Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens delegated",
+    tooltip:
+      "The total number of tokens delegated, representing the maximum possible voting power. Any address holding over 50% of this supply effectively controls the DAO.",
   },
   "Circulating Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens in circulation",
+    tooltip:
+      "The total number of tokens issued or distributed. Often calculated as the total supply minus tokens held in DAO-controlled issuing or vesting contracts.",
   },
   "CEX Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens in CEX",
+    tooltip: "The number of tokens available on centralized exchanges.",
   },
   "DEX Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens in DEX",
+    tooltip: "The number of tokens available on decentralized exchanges.",
   },
   "Lending Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens in lending",
+    tooltip:
+      "The number of tokens that can be borrowed through lending protocols.",
   },
 };
 
