@@ -263,7 +263,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         const average: number = row.getValue("average");
         return (
           <div className="flex items-center justify-center text-center">
-            {average ?? formatNumberUserReadble(average)}
+            {average && formatNumberUserReadble(average)}
           </div>
         );
       },
