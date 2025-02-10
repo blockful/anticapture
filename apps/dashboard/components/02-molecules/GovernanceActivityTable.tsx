@@ -47,23 +47,26 @@ const metricDetails: Record<
 > = {
   Treasury: {
     icon: undefined,
-    tooltip: "Total current value of tokens in circulation",
+    tooltip:
+      "The total number of governance tokens held in the DAO’s treasury.",
   },
   Proposals: {
     icon: undefined,
-    tooltip: "Total current value of tokens in circulation",
+    tooltip: "The number of proposals created in the selected period.",
   },
   "Active Supply": {
     icon: undefined,
-    tooltip: "Total current value of tokens delegated",
+    tooltip:
+      "The total voting power of delegates who voted in proposals during the selected period.",
   },
   Votes: {
     icon: undefined,
-    tooltip: "Total current value of tokens in circulation",
+    tooltip: "The total number of votes cast in the selected period.",
   },
   "Average Turnout": {
     icon: undefined,
-    tooltip: "Total current value of tokens in CEX",
+    tooltip:
+      "The average number of votes per proposal during the selected period.",
   },
 };
 
