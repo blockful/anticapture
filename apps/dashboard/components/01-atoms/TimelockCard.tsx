@@ -16,7 +16,8 @@ export const TimelockCard = ({
     sections: [
       {
         title: "Timelock",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "A Timelock contract holds the DAO’s assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           {
             type: "switch",
@@ -39,7 +40,8 @@ export const TimelockCard = ({
       },
       {
         title: "Cancel Function",
-        tooltip: "Direct liquid profit: Cost of direct capture",
+        tooltip:
+          "Allows a proposal’s execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           {
             type: "switch",
