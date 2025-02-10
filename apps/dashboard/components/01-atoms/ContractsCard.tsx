@@ -21,7 +21,8 @@ export const ContractsCard = ({
     sections: [
       {
         title: "Onchain Gov",
-        tooltip: "Governança descentralizada na blockchain",
+        tooltip:
+          "On-chain governance relies on smart contracts that only execute transactions approved by on-chain votes. Voting power is determined by delegated tokens, and the Governor contract oversees both the voting process and proposal approvals.",
         items: [
           {
             type: "button",
@@ -40,7 +41,8 @@ export const ContractsCard = ({
       },
       {
         title: "OffChain Gov",
-        tooltip: "Governança offchain via Snapshot",
+        tooltip:
+          "Off-chain governance—often done through Snapshot—allows token holders to vote without on-chain transactions. Voting power is calculated using token-based strategies, but any decisions require additional on-chain steps by DAO members to be enacted.",
         items: [
           {
             type: "button",
