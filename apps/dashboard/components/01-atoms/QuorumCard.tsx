@@ -54,7 +54,7 @@ export const QuorumCard = () => {
         title: "Logic",
         tooltip:
           "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
-        items: [{ type: "text", label: "For + Abstain", value: "" }],
+        items: [{ type: "text", label: "For", value: "" }],
       },
       {
         title: "Quorum",
