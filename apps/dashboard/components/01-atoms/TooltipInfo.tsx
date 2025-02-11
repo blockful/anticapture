@@ -1,55 +1,37 @@
 "use client";
 
-import React from "react";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@radix-ui/react-tooltip";
-import { cva, type VariantProps } from "class-variance-authority";
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "./icons/InfoIcon";
 import { cn } from "@/lib/client/utils";
-import { InfoIcon } from "@/components/01-atoms";
-
-const tooltipContentVariants = cva(
-  "m-1 border-foreground bg-dark p-2 rounded-lg shadow-md",
-  {
-    variants: {
-      variant: {
-        default: "text-white",
-        secondary: "text-secondary bg-secondary-light",
-        destructive: "text-red-600 bg-red-100",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-
-export interface TooltipInfoProps
-  extends React.HTMLAttributes<HTMLParagraphElement>,
-    VariantProps<typeof tooltipContentVariants> {
-  text: string;
-}
 
 export function TooltipInfo({
   text,
   className,
-  variant,
-  ...props
-}: TooltipInfoProps) {
+}: {
+  text: string;
+  className?: string;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <InfoIcon />
+        <InfoIcon className="cursor-pointer" />
       </TooltipTrigger>
       <TooltipContent
-        className={cn(tooltipContentVariants({ variant }), className)}
+        side="top"
+        align="center"
+        sideOffset={10}
+        avoidCollisions={false}
+        className={cn(
+          "z-50 min-w-[150px] max-w-md rounded-lg border border-lightDark bg-dark p-3 text-center text-white shadow",
+          className,
+        )}
       >
-        <p {...props}>{text}</p>
+        {text}
       </TooltipContent>
     </Tooltip>
   );
 }
-
-export { tooltipContentVariants };

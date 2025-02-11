@@ -3,14 +3,9 @@
 import React, { useEffect, useReducer } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import {
-  chartMetrics,
-  GovernanceActivity,
-  governanceActivityData,
-} from "@/lib/mocked-data";
+import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  AppleIcon,
   ArrowUpDown,
   TimeInterval,
   TheTable,
@@ -19,7 +14,11 @@ import {
   Sparkline,
 } from "@/components/01-atoms";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
+import {
+  cn,
+  formatNumberUserReadable,
+  formatVariation,
+} from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   DaoMetricsDayBucket,
@@ -47,24 +46,27 @@ const metricDetails: Record<
   { icon: React.ReactNode; tooltip: string }
 > = {
   Treasury: {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
+    icon: undefined,
+    tooltip:
+      "The total number of governance tokens held in the DAO’s treasury.",
   },
   Proposals: {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
+    icon: undefined,
+    tooltip: "The number of proposals created in the selected period.",
   },
   "Active Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens delegated",
+    icon: undefined,
+    tooltip:
+      "The total voting power of delegates who voted in proposals during the selected period.",
   },
   Votes: {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
+    icon: undefined,
+    tooltip: "The total number of votes cast in the selected period.",
   },
   "Average Turnout": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in CEX",
+    icon: undefined,
+    tooltip:
+      "The average number of votes per proposal during the selected period.",
   },
 };
 
@@ -261,7 +263,7 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
         const average: number = row.getValue("average");
         return (
           <div className="flex items-center justify-center text-center">
-            {average ?? formatNumberUserReadble(average)}
+            {average && formatNumberUserReadable(average)}
           </div>
         );
       },
@@ -344,11 +346,16 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
+        const variation: string = row.getValue("variation");
+
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full items-start justify-start px-4">
-            <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
+            <Sparkline
+              data={chartLastDays.map((item) => Number(item.high))}
+              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+            />
           </div>
         );
       },
