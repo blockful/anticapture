@@ -40,7 +40,7 @@ export const ContractsCard = ({
         ],
       },
       {
-        title: "OffChain Gov",
+        title: "Offchain Gov",
         tooltip:
           "Off-chain governance—often done through Snapshot—allows token holders to vote without on-chain transactions. Voting power is calculated using token-based strategies, but any decisions require additional on-chain steps by DAO members to be enacted.",
         items: [
