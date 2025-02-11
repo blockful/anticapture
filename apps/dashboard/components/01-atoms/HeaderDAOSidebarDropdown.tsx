@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeftIcon, EnsIcon, UniswapIcon } from "@/components/01-atoms";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 
@@ -12,6 +12,7 @@ export const HeaderDAOSidebarDropdown = () => {
     useState<number>(0);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { daoId }: { daoId: string } = useParams();
 
   useEffect(() => {
     const savedItem = sessionStorage.getItem("selectedHeaderSidebarItem");
@@ -42,19 +43,21 @@ export const HeaderDAOSidebarDropdown = () => {
         label: "Uniswap",
         icon: <UniswapIcon className="h-5 w-5 text-[#FC72FF]" />,
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
+        name: DaoIdEnum.UNISWAP,
       },
       {
         id: 1,
         label: "ENS",
         icon: <EnsIcon className="h-5 w-5" />,
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
+        name: DaoIdEnum.ENS,
       },
     ],
     [],
   );
 
   const currentItem = dropdownItems.find(
-    (item) => item.id === selectedHeaderSidebarItem,
+    (item) => item.name === daoId.toUpperCase(),
   );
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
