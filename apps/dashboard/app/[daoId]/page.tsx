@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : "http://localhost:3000";
 
   const ogImage: Record<DaoIdEnum, string> = {
-    ENS: `${baseUrl}/opengraph-images/ENS.png`,
-    UNI: `${baseUrl}/opengraph-images/UNI.png`,
+    ENS: `${baseUrl}/opengraph-images/ens.png`,
+    UNI: `${baseUrl}/opengraph-images/uni.png`,
   };
 
   const imageUrl = ogImage[daoId] || `${baseUrl}/opengraph-images/default.png`;
