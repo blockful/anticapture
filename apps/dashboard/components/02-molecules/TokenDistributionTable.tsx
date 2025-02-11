@@ -6,7 +6,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { TokenDistribution, tokenDistributionData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  AppleIcon,
   ArrowState,
   ArrowUpDown,
   Sparkline,
@@ -19,7 +18,11 @@ import {
   DaoMetricsDayBucket,
 } from "@/lib/server/backend";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { formatNumberUserReadble, formatVariation } from "@/lib/client/utils";
+import {
+  cn,
+  formatNumberUserReadable,
+  formatVariation,
+} from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 
@@ -38,28 +41,31 @@ const metricDetails: Record<
   { icon: React.ReactNode; tooltip: string }
 > = {
   "Total Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
+    icon: undefined,
+    tooltip: "The total number of tokens in existence",
   },
   "Delegated Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens delegated",
+    icon: undefined,
+    tooltip:
+      "The total number of tokens delegated, representing the maximum possible voting power. Any address holding over 50% of this supply effectively controls the DAO.",
   },
   "Circulating Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in circulation",
+    icon: undefined,
+    tooltip:
+      "The total number of tokens issued or distributed. Often calculated as the total supply minus tokens held in DAO-controlled issuing or vesting contracts.",
   },
   "CEX Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in CEX",
+    icon: undefined,
+    tooltip: "The number of tokens available on centralized exchanges.",
   },
   "DEX Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in DEX",
+    icon: undefined,
+    tooltip: "The number of tokens available on decentralized exchanges.",
   },
   "Lending Supply": {
-    icon: <AppleIcon className="h-5 w-5" />,
-    tooltip: "Total current value of tokens in lending",
+    icon: undefined,
+    tooltip:
+      "The number of tokens that can be borrowed through lending protocols.",
   },
 };
 
@@ -234,7 +240,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
         const currentValue: number = row.getValue("currentValue");
         return (
           <div className="flex items-center justify-center text-center">
-            {currentValue && formatNumberUserReadble(currentValue)}
+            {currentValue && formatNumberUserReadable(currentValue)}
           </div>
         );
       },
@@ -244,7 +250,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           className="w-full"
           onClick={() => column.toggleSorting()}
         >
-          Current value (UNI)
+          Current value ({daoData?.id})
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -311,11 +317,15 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
+        const variation: string = row.getValue("variation");
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
         return (
           <div className="flex w-full">
-            <Sparkline data={chartLastDays.map((item) => Number(item.high))} />
+            <Sparkline
+              data={chartLastDays.map((item) => Number(item.high))}
+              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+            />
           </div>
         );
       },

@@ -1,53 +1,64 @@
 "use client";
 
-import {
-  Badge,
-  BaseCard,
-  Switcher,
-  LockIcon,
-  ExternalLinkIcon,
-  TooltipInfo,
-} from "@/components/01-atoms";
+import { LockIcon, ExternalLinkIcon } from "@/components/01-atoms";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
+import { BaseCardDao, CardData } from "./BaseCardDao";
 
-export const TimelockCard = ({ daoConstants }:{daoConstants: DaoConstants}) => {
-  return (
-    <BaseCard title="Timelock" icon={<LockIcon />}>
-      {/* Timelock Section */}
-      <div className="card-description-about">
-        <div className="card-description-title">
-          <h1 className="text-foreground">Timelock</h1>
-          <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
-        </div>
-        <div className="flex h-full w-full justify-between gap-1.5">
-          <Switcher switched={daoConstants.rules.timelock}/>
-          <button
-            className="flex h-full w-full"
-            onClick={() =>
-              openEtherscanAddress(daoConstants.contracts.timelock)
-            }
-          >
-            <Badge className="h-full w-full px-2.5 hover:border-lightDark hover:bg-transparent lg:w-fit xl4k:w-full">
-              <p className="text-sm font-medium leading-tight">View</p>
-              <ExternalLinkIcon />
-            </Badge>
-          </button>
-        </div>
-      </div>
+export const TimelockCard = ({
+  daoConstants,
+}: {
+  daoConstants: DaoConstants;
+}) => {
+  const timelockData: CardData = {
+    title: "Timelock",
+    icon: <LockIcon />,
+    sections: [
+      {
+        title: "Timelock",
+        tooltip:
+          "A Timelock contract holds the DAO’s assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
+        items: [
+          {
+            type: "switch",
+            label: "Enabled",
+            switched: daoConstants.rules.timelock,
+          },
+          {
+            type: "button",
+            label: "View",
+            icon: <ExternalLinkIcon className="text-[#EC762E]" />,
+            onClick: () =>
+              window.open(
+                `${daoConstants.snapshot}`,
+                "_blank",
+                "noopener,noreferrer",
+              ),
+            inverted: true,
+          },
+        ],
+      },
+      {
+        title: "Cancel Function",
+        tooltip:
+          "Allows a proposal’s execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
+        items: [
+          {
+            type: "switch",
+            label: "Enabled",
+            switched: daoConstants.rules.cancelFunction,
+          },
+          {
+            type: "button",
+            label: "View",
+            icon: <ExternalLinkIcon className="text-[#EC762E]" />,
+            onClick: () => openEtherscanAddress(daoConstants.contracts.token),
+            inverted: true,
+          },
+        ],
+      },
+    ],
+  };
 
-      {/* Cancel Function Section */}
-      <div className="card-description-about">
-        <div className="card-description-title">
-          <h1 className="text-foreground">Cancel function</h1>
-          <TooltipInfo text="Direct liquid profit: Cost of direct capture" />
-        </div>
-        <div className="flex h-full">
-          <div className="flex w-1/2">
-            <Switcher switched={daoConstants.rules.cancelFunction}/>
-          </div>
-        </div>
-      </div>
-    </BaseCard>
-  );
+  return <BaseCardDao data={timelockData} />;
 };

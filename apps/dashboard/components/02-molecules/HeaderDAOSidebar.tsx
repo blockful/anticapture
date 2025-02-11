@@ -37,9 +37,9 @@ export const HeaderDAOSidebar = () => {
   return (
     <BaseHeaderLayoutSidebar>
       {isValidDao && (
-        <div className="flex w-full flex-col space-x-2 space-y-3">
+        <div className="flex w-full flex-col">
           <HeaderDAOSidebarDropdown />
-          <div className="flex flex-col">
+          <div className="flex flex-col px-4 pb-4 pt-1">
             <button
               className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.DAO_INFO ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
               onClick={() => {

@@ -7,15 +7,17 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  AppleIcon,
   ArrowUpDown,
   TheTable,
   ArrowState,
   TimeInterval,
 } from "@/components/01-atoms";
-import { formatNumberUserReadble } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
+import Image, { StaticImageData } from "next/image";
+import ENSLogo from "@/public/logo/ENS.png";
+import UNILogo from "@/public/logo/UNI.png";
 
 interface State {
   data: DashboardDao[];
@@ -43,13 +45,16 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const daoDetails: Record<DaoIdEnum, { icon: React.ReactNode; tooltip: string }> = {
+const daoDetails: Record<
+  DaoIdEnum,
+  { icon: StaticImageData; tooltip: string }
+> = {
   [DaoIdEnum.UNISWAP]: {
-    icon: <AppleIcon className="h-5 w-5" />,
+    icon: UNILogo,
     tooltip: "Total current value of tokens in circulation",
   },
   [DaoIdEnum.ENS]: {
-    icon: undefined,
+    icon: ENSLogo,
     tooltip: "",
   },
 };
@@ -79,10 +84,9 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const DashboardTable = () => {
+export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
-  const days = TimeInterval.THIRTY_DAYS;
 
   useEffect(() => {
     Object.values(DaoIdEnum).map((daoId, index) => {
@@ -105,7 +109,7 @@ export const DashboardTable = () => {
     {
       accessorKey: "#",
       cell: ({ row }) => (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto text-[#fafafa]">
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 text-[#fafafa]">
           {row.index + 1}
         </p>
       ),
@@ -137,10 +141,12 @@ export const DashboardTable = () => {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoDetails["UNI"] : null;
+        const details = dao ? daoDetails[dao as DaoIdEnum] : null;
         return (
           <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-            {details && details.icon}
+            {details && (
+              <Image src={details.icon} alt={"OK"} width={24} height={24} />
+            )}
             {dao}
           </p>
         );
@@ -153,7 +159,7 @@ export const DashboardTable = () => {
         const delegatedSupply: number = row.getValue("delegatedSupply");
         return (
           <div className="flex items-center justify-center text-center">
-            {`${delegatedSupply && formatNumberUserReadble(delegatedSupply)}`}
+            {`${delegatedSupply && formatNumberUserReadable(delegatedSupply)}`}
           </div>
         );
       },
@@ -163,7 +169,7 @@ export const DashboardTable = () => {
           className="w-full"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Delegated Supply (30d)
+          Delegated Supply ({days})
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -187,7 +193,7 @@ export const DashboardTable = () => {
     //     const profitability: number = row.getValue("profitability");
     //     return (
     //       <div className="flex items-center justify-center text-center">
-    //         {profitability && formatNumberUserReadble(profitability)}
+    //         {profitability && formatNumberUserReadable(profitability)}
     //       </div>
     //     );
     //   },
@@ -221,7 +227,7 @@ export const DashboardTable = () => {
     //     const delegatesToPass: number = row.getValue("delegatesToPass");
     //     return (
     //       <div className="flex items-center justify-center text-center">
-    //         {delegatesToPass && formatNumberUserReadble(delegatesToPass)}
+    //         {delegatesToPass && formatNumberUserReadable(delegatesToPass)}
     //       </div>
     //     );
     //   },
