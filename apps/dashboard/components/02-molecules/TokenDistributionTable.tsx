@@ -250,7 +250,7 @@ export const TokenDistributionTable = ({ days }: { days: TimeInterval }) => {
           className="w-full"
           onClick={() => column.toggleSorting()}
         >
-          Current value (UNI)
+          Current value ({daoData?.id})
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
