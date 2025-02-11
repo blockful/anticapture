@@ -6,7 +6,7 @@ const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-const imageUrl = `${baseUrl}/og-images/default.png`;
+const imageUrl = `${baseUrl}/opengraph-images/default.png`;
 
 export const metadata: Metadata = {
   title: "Anticapture",
