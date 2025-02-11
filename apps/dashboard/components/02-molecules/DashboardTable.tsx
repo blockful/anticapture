@@ -106,7 +106,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "#",
       cell: ({ row }) => (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto text-[#fafafa]">
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 text-[#fafafa]">
           {row.index + 1}
         </p>
       ),
