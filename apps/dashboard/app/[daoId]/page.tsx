@@ -1,17 +1,50 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { DaoTemplate } from "@/components/04-templates";
 import { DaoIdEnum } from "@/lib/types/daos";
 
-export const metadata: Metadata = {
-  title: "Governance dashboard",
-  keywords: ["governance", "dao", "data"],
+type Props = {
+  params: { daoId: string };
 };
 
-export default function DaoPage({
-  params,
-}: {
-  params: { daoId: string };
-}) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
+  const ogImage: Record<DaoIdEnum, string> = {
+    ENS: `${baseUrl}/og-images/ENS.png`,
+    UNI: `${baseUrl}/og-images/UNI.png`,
+  };
+
+  const imageUrl = ogImage[daoId] || `${baseUrl}/og-images/default.png`;
+
+  return {
+    title: `Anticapture - ${daoId} DAO`,
+    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    openGraph: {
+      title: `Anticapture - ${daoId} DAO`,
+      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${daoId} DAO Open Graph Image`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Anticapture - ${daoId} DAO`,
+      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      images: [imageUrl],
+    },
+  };
+}
+
+export default function DaoPage({ params }: { params: { daoId: string } }) {
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
   return (
