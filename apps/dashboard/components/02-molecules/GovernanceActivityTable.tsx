@@ -48,7 +48,7 @@ const metricDetails: Record<
   Treasury: {
     icon: undefined,
     tooltip:
-      "The total number of governance tokens held in the DAO’s treasury.",
+      "The total number of governance tokens held in the DAO’s treasury period.",
   },
   Proposals: {
     icon: undefined,

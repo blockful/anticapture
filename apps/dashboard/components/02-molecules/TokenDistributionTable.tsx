@@ -42,7 +42,7 @@ const metricDetails: Record<
 > = {
   "Total Supply": {
     icon: undefined,
-    tooltip: "The total number of tokens in existence",
+    tooltip: "The total number of tokens in existence.",
   },
   "Delegated Supply": {
     icon: undefined,

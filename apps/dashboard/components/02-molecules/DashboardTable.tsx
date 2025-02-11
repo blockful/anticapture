@@ -51,7 +51,7 @@ const daoDetails: Record<
 > = {
   [DaoIdEnum.UNISWAP]: {
     icon: UNILogo,
-    tooltip: "Total current value of tokens in circulation",
+    tooltip: "Total current value of tokens in circulation.",
   },
   [DaoIdEnum.ENS]: {
     icon: ENSLogo,
