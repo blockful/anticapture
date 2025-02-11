@@ -8,9 +8,9 @@ ponder.hono.get("/doc-json", (c) => {
   return c.json({
     openapi: "3.0.2",
     info: {
-      title: "Swagger DefenDAO Server",
+      title: "Swagger Anticapture Server",
       description:
-        "DefenDAO is an application with the purpose of analyze and warn the main governance risks of each DAO",
+        "Anticapture is an application with the purpose of analyze and warn the main governance risks of each DAO",
       termsOfService: "",
       contact: {
         email: "",
@@ -22,18 +22,18 @@ ponder.hono.get("/doc-json", (c) => {
       version: "",
     },
     externalDocs: {
-      description: "DefenDAO Monorepo",
-      url: "https://github.com/blockful-io/defendao",
+      description: "Anticapture Monorepo",
+      url: "https://github.com/blockful-io/anticapture",
     },
     servers: [
       {
         url: "http://localhost:42069",
       },
       {
-        url: "https://api.defendao.com",
+        url: "https://api.anticapture.com",
       },
       {
-        url: "https://staging.api.defendao.com",
+        url: "https://staging.api.anticapture.com",
       },
     ],
     tags: [

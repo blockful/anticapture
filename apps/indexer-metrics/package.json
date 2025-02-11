@@ -1,5 +1,5 @@
 {
-  "name": "@defendao/indexer-metrics",
+  "name": "@anticapture/indexer-metrics",
   "version": "0.0.1",
   "description": "Grafana and Prometheus for Indexer metrics",
   "scripts": {

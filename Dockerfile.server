@@ -5,7 +5,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 WORKDIR /app/
 COPY . .
 RUN pnpm add -g turbo
-RUN turbo prune --docker @defendao/indexer
+RUN turbo prune --docker @anticapture/indexer
 
 FROM node:20 AS release
 ARG DATABASE_URL
