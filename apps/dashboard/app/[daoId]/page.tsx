@@ -9,9 +9,11 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
 
   const ogImage: Record<DaoIdEnum, string> = {
     ENS: `${baseUrl}/opengraph-images/ens.png`,
