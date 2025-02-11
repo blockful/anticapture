@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DaoTemplate } from "@/components/04-templates";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 
 type Props = {
   params: { daoId: string };
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const imageUrl = ogImage[daoId] || `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
+    title: `${!SUPPORTED_DAO_NAMES.includes(daoId) ? "Anticapture - DAO Not Found" : `Anticapture - ${daoId} DAO`}`,
     description: `Explore and mitigate governance risks in ${daoId} DAO.`,
     openGraph: {
       title: `Anticapture - ${daoId} DAO`,
