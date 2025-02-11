@@ -48,7 +48,12 @@ export const ContractsCard = ({
             type: "button",
             label: "Snapshot",
             icon: <FocusIcon className="text-[#EC762E]" />,
-            externalLink: daoConstants.snapshot,
+            onClick: () =>
+              window.open(
+                `${daoConstants.snapshot}`,
+                "_blank",
+                "noopener,noreferrer",
+              ),
           },
           {
             type: "button",
