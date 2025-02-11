@@ -16,8 +16,8 @@ import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
 import Image, { StaticImageData } from "next/image";
-import EnsLogo from "@/public/EnsLogo.png";
-import UniswapLogo from "@/public/UniswapLogo.png";
+import ENSLogo from "@/public/logo/ENS.png";
+import UNILogo from "@/public/logo/UNI.png";
 
 interface State {
   data: DashboardDao[];
@@ -50,11 +50,11 @@ const daoDetails: Record<
   { icon: StaticImageData; tooltip: string }
 > = {
   [DaoIdEnum.UNISWAP]: {
-    icon: UniswapLogo,
+    icon: UNILogo,
     tooltip: "Total current value of tokens in circulation",
   },
   [DaoIdEnum.ENS]: {
-    icon: EnsLogo,
+    icon: ENSLogo,
     tooltip: "",
   },
 };
