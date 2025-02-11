@@ -15,6 +15,9 @@ import {
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
+import Image, { StaticImageData } from "next/image";
+import EnsLogo from "@/public/EnsLogo.png";
+import UniswapLogo from "@/public/UniswapLogo.png";
 
 interface State {
   data: DashboardDao[];
@@ -44,14 +47,14 @@ const sortingByAscendingOrDescendingNumber = (
 
 const daoDetails: Record<
   DaoIdEnum,
-  { icon: React.ReactNode; tooltip: string }
+  { icon: StaticImageData; tooltip: string }
 > = {
   [DaoIdEnum.UNISWAP]: {
-    icon: undefined,
+    icon: UniswapLogo,
     tooltip: "Total current value of tokens in circulation",
   },
   [DaoIdEnum.ENS]: {
-    icon: undefined,
+    icon: EnsLogo,
     tooltip: "",
   },
 };
@@ -138,10 +141,12 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoDetails["UNI"] : null;
+        const details = dao ? daoDetails[dao as DaoIdEnum] : null;
         return (
           <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-            {details && details.icon}
+            {details && (
+              <Image src={details.icon} alt={"OK"} width={24} height={24} />
+            )}
             {dao}
           </p>
         );
