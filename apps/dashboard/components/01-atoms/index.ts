@@ -1,7 +1,6 @@
 export * from "./icons";
 
 export * from "./Badge";
-export * from "./BaseCard";
 export * from "./BaseCardDao";
 export * from "./BaseHeaderLayoutSidebar";
 export * from "./ConnectWallet";
