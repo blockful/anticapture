@@ -59,7 +59,7 @@ export const QuorumCard = () => {
       {
         title: "Quorum",
         tooltip:
-          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn’t reach quorum.",
+          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn't reach quorum.",
         items: [
           {
             type: "text",
