@@ -1,10 +1,15 @@
 "use client";
 
-import { BlocksIcon, ClickIcon, Skeleton } from "@/components/01-atoms";
+import {
+  BaseCardDao,
+  BlocksIcon,
+  CardData,
+  ClickIcon,
+  Skeleton,
+} from "@/components/01-atoms";
 import { formatTimestampUserReadable } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
-import { BaseCardDao, CardData } from "./BaseCardDao";
 
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();
