@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  BaseCardDao,
+  CardData,
   CrownIcon,
   TokensIcon,
   NewspaperIcon,
@@ -8,7 +10,6 @@ import {
 } from "@/components/01-atoms";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
-import { BaseCardDao, CardData } from "./BaseCardDao";
 
 export const ContractsCard = ({
   daoConstants,
