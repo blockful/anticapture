@@ -33,11 +33,7 @@ export const TimelockCard = ({
             label: "View",
             icon: <ExternalLinkIcon className="text-[#EC762E]" />,
             onClick: () =>
-              window.open(
-                `${daoConstants.snapshot}`,
-                "_blank",
-                "noopener,noreferrer",
-              ),
+              openEtherscanAddress(daoConstants.contracts.timelock),
             inverted: true,
           },
         ],
