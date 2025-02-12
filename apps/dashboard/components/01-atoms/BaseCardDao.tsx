@@ -109,9 +109,10 @@ export const BaseCardDao = ({ data }: BaseCardDaoProps) => {
                     return (
                       <Badge
                         key={index}
-                        className={cn("flex h-full w-full bg-opacity-20", [
-                          item.switched ? "bg-[#4ADE80]" : "bg-[#F87171]",
-                        ])}
+                        className={cn(
+                          "flex h-full w-full bg-opacity-20 lg:w-fit",
+                          [item.switched ? "bg-[#4ADE80]" : "bg-[#F87171]"],
+                        )}
                       >
                         {item.switched ? (
                           <CircleCheckIcon className="text-[#4ADE80]" />
