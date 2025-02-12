@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { TooltipInfo } from "@/components/01-atoms";
 
 export const TheSectionLayout = ({
   anchorId,
@@ -25,14 +26,17 @@ export const TheSectionLayout = ({
           <h1 className="text-left text-xl font-medium tracking-[-0.05%] text-white sm:text-3xl">
             {title}
           </h1>
+          <div>
+            {description && (
+              <p className="flex w-full flex-col text-start text-xs text-[#a1a1aa] sm:w-[75%] lg:w-[50%]">
+                <TooltipInfo text={description} />
+              </p>
+            )}
+          </div>
         </div>
+
         <div className="flex">{switchDate}</div>
       </div>
-      {description && (
-        <p className="flex w-full flex-col text-start text-xs text-[#a1a1aa] sm:w-[75%] lg:w-[50%]">
-          {description}
-        </p>
-      )}
       {children}
     </div>
   );
