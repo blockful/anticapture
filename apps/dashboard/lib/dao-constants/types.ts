@@ -7,6 +7,7 @@ export type DaoConstants = {
     token: Address;
     timelock: Address;
   };
+  cancelFunction?: string;
   snapshot: string;
   rules: {
     delay: boolean;
