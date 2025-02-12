@@ -17,7 +17,7 @@ export function TooltipInfo({
 }) {
   return (
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger role="button" aria-label="tooltip-info">
         <InfoIcon className="cursor-pointer" />
       </TooltipTrigger>
       <TooltipContent
