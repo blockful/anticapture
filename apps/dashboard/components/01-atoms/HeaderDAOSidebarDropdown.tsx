@@ -5,6 +5,7 @@ import { ArrowLeftIcon, EnsIcon, UniswapIcon } from "@/components/01-atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
+import Link from "next/link";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -72,15 +73,13 @@ export const HeaderDAOSidebarDropdown = () => {
   return (
     <div className="relative inline-block w-full" ref={dropdownRef}>
       <div className="border-b border-b-lightDark p-3">
-        <button
+        <Link
           className="group flex gap-x-1.5 text-xs font-medium text-foreground hover:text-white"
-          onClick={() => {
-            router.back();
-          }}
+          href={"/"}
         >
           <ArrowLeftIcon className="group-[hover]:text-white" />
           Back to dashboard
-        </button>
+        </Link>
       </div>
       <div className="p-3">
         <button
