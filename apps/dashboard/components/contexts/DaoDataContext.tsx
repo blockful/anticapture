@@ -1,6 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { ChainNameEnum, fetchDaoData, fetchTokenPrice } from "@/lib/server/backend";
+import {
+  ChainNameEnum,
+  fetchDaoData,
+  fetchTokenPrice,
+} from "@/lib/server/backend";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 import { createContext, useContext, useEffect, useState } from "react";
 
