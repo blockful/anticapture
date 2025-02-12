@@ -1,9 +1,13 @@
 "use client";
 
-import { LockIcon, ExternalLinkIcon } from "@/components/01-atoms";
+import {
+  BaseCardDao,
+  CardData,
+  LockIcon,
+  ExternalLinkIcon,
+} from "@/components/01-atoms";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
-import { BaseCardDao, CardData } from "./BaseCardDao";
 
 export const TimelockCard = ({
   daoConstants,
@@ -17,7 +21,7 @@ export const TimelockCard = ({
       {
         title: "Timelock",
         tooltip:
-          "A Timelock contract holds the DAO’s assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
+          "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           {
             type: "switch",
@@ -41,7 +45,7 @@ export const TimelockCard = ({
       {
         title: "Cancel Function",
         tooltip:
-          "Allows a proposal’s execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
+          "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           {
             type: "switch",
