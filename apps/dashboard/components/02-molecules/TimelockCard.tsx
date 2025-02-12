@@ -2,14 +2,14 @@
 
 import {
   BaseCardDaoInfo,
+  ButtonCardDaoInfoItem,
   CardData,
   LockIcon,
+  SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/01-atoms";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
-import { SwitchCardDaoInfoItem } from "../01-atoms/SwitchCardDaoInfoItem";
-import { ButtonCardDaoInfoItem } from "../01-atoms/ButtonCardDaoInfoItem";
 
 export const TimelockCard = ({
   daoConstants,
