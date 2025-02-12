@@ -5,7 +5,7 @@ import {
   QuorumCard,
   TimelockCard,
   VoteCard,
-} from "@/components/01-atoms";
+} from "@/components/02-molecules";
 import { DaoConstants } from "@/lib/dao-constants/types";
 
 export const DaoInfo = ({ daoConstants }: { daoConstants: DaoConstants }) => {

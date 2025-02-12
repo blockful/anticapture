@@ -1,8 +1,8 @@
 "use client";
 
 import { GlobeIcon, TheSectionLayout } from "@/components/01-atoms";
-import { DaoInfo } from "@/components/02-molecules";
 import {
+  DaoInfo,
   GovernanceActivitySection,
   TokenDistributionSection,
 } from "@/components/03-organisms";

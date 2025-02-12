@@ -1,8 +1,9 @@
 "use client";
 
 import {
-  BaseCardDao,
+  BaseCardDaoInfo,
   CardData,
+  TextCardDaoInfoItem,
   UsersIcon,
   Skeleton,
 } from "@/components/01-atoms";
@@ -58,17 +59,17 @@ export const QuorumCard = () => {
         title: "Logic",
         tooltip:
           "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
-        items: [{ type: "text", label: "For", value: "" }],
+        items: [<TextCardDaoInfoItem label="For" key={"text-logic"} />],
       },
       {
         title: "Quorum",
         tooltip:
           "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn't reach quorum.",
         items: [
-          {
-            type: "text",
-            value: `${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`,
-          },
+          <TextCardDaoInfoItem
+            key={"text-quorum"}
+            value={`${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`}
+          />,
         ],
       },
       {
@@ -76,14 +77,14 @@ export const QuorumCard = () => {
         tooltip:
           "The minimum voting power required to submit an on-chain proposal.",
         items: [
-          {
-            type: "text",
-            value: proposalThresholdText,
-          },
+          <TextCardDaoInfoItem
+            value={proposalThresholdText}
+            key={"text-proposal-threshold"}
+          />,
         ],
       },
     ],
   };
 
-  return <BaseCardDao data={quorumData} />;
+  return <BaseCardDaoInfo data={quorumData} />;
 };
