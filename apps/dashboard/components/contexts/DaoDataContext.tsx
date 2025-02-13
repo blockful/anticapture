@@ -14,7 +14,7 @@ interface DaoDataContext {
   tokenPrice: null | number;
 }
 
-export const DaoDataContext = createContext<DaoDataContext>({
+export const DaoDataCtx = createContext<DaoDataContext>({
   daoData: null,
   tokenPrice: null,
 });
@@ -50,10 +50,10 @@ export const DaoDataProvider = ({
   }, []);
 
   return (
-    <DaoDataContext.Provider value={{ daoData, tokenPrice }}>
+    <DaoDataCtx.Provider value={{ daoData, tokenPrice }}>
       {children}
-    </DaoDataContext.Provider>
+    </DaoDataCtx.Provider>
   );
 };
 
-export const useDaoDataContext = () => useContext(DaoDataContext);
+export const useDaoDataContext = () => useContext(DaoDataCtx);

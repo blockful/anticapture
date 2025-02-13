@@ -1,13 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-export enum TimeInterval {
-  SEVEN_DAYS = "7d",
-  THIRTY_DAYS = "30d",
-  NINETY_DAYS = "90d",
-  ONE_YEAR = "365d",
-}
+import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 export const SwitcherDate = ({
   setTimeInterval,
