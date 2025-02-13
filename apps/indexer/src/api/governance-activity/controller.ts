@@ -26,6 +26,7 @@ ponder.get("/dao/:daoId/active-supply", async (context) => {
   const queryResult = await context.db.execute(sql`
     SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply" FROM "account_power" ap
     WHERE ap."last_vote_timestamp">CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
+    AND ap."dao_id"=${daoId}
   `);
 
   //Calculating Change Rate
