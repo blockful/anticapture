@@ -19,6 +19,7 @@ import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import {
   cn,
   formatNumberUserReadable,
+  formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "../contexts/TokenDistributionContext";
 
@@ -64,10 +65,6 @@ const metricDetails: Record<
       "The number of tokens that can be borrowed through lending protocols.",
   },
 };
-
-interface State {
-  data: TokenDistribution[];
-}
 
 export const TokenDistributionTable = () => {
   const { daoData } = useDaoDataContext();
@@ -212,38 +209,38 @@ export const TokenDistributionTable = () => {
         [
           {
             metric: "Total Supply",
-            currentValue: totalSupply.value,
-            variation: totalSupply.changeRate,
+            currentValue: totalSupply.value ? String(BigInt(totalSupply.value) / BigInt(10 ** 18)) : null,
+            variation: totalSupply.changeRate ? formatVariation(totalSupply.changeRate) : null,
             chartLastDays: totalSupplyChart,
           },
           {
             metric: "Delegated Supply",
-            currentValue: delegatedSupply.value,
-            variation: delegatedSupply.changeRate,
+            currentValue: delegatedSupply.value ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18)) : null,
+            variation: delegatedSupply.changeRate ? formatVariation(delegatedSupply.changeRate) : null,
             chartLastDays: delegatedSupplyChart,
           },
           {
             metric: "Circulating Supply",
-            currentValue: circulatingSupply.value,
-            variation: circulatingSupply.changeRate,
+            currentValue: circulatingSupply.value ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))  : null,
+            variation: circulatingSupply.changeRate ? formatVariation(circulatingSupply.changeRate) : null,
             chartLastDays: circulatingSupplyChart,
           },
           {
             metric: "CEX Supply",
-            currentValue: cexSupply.value,
-            variation: cexSupply.changeRate,
+            currentValue: cexSupply.value ? String(BigInt(cexSupply.value) / BigInt(10 ** 18)) : null,
+            variation: cexSupply.changeRate ? formatVariation(cexSupply.changeRate) : null,
             chartLastDays: cexSupplyChart,
           },
           {
             metric: "DEX Supply",
-            currentValue: dexSupply.value,
-            variation: dexSupply.changeRate,
+            currentValue: dexSupply.value ? String(BigInt(dexSupply.value) / BigInt(10 ** 18)) : null,
+            variation: dexSupply.changeRate ? formatVariation(dexSupply.changeRate) : null,  
             chartLastDays: dexSupplyChart,
           },
           {
             metric: "Lending Supply",
-            currentValue: lendingSupply.value,
-            variation: lendingSupply.changeRate,
+            currentValue: lendingSupply.value ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18)) : null,
+            variation: lendingSupply.changeRate ? formatVariation(lendingSupply.changeRate) : null,
             chartLastDays: lendingSupplyChart,
           },
         ]

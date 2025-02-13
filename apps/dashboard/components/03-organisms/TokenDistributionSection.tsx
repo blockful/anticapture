@@ -12,7 +12,7 @@ import { useTokenDistributionContext } from "../contexts/TokenDistributionContex
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 export const TokenDistributionSection = () => {
-  const {days, setDays} = useTokenDistributionContext();
+  const { setDays } = useTokenDistributionContext();
 
   return (
     <TheSectionLayout

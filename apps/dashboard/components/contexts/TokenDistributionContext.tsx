@@ -16,27 +16,27 @@ import { formatUnits } from "viem";
 export const TokenDistributionCtx = createContext<TokenDistributionContext>({
   days: TimeInterval.NINETY_DAYS,
   setDays: () => {},
-  totalSupply: { value: "0", changeRate: "0" },
+  totalSupply: { value: undefined, changeRate: undefined },
   setTotalSupply: () => {},
   totalSupplyChart: [],
   setTotalSupplyChart: () => {},
-  circulatingSupply: { value: "0", changeRate: "0" },
+  circulatingSupply: { value: undefined, changeRate: undefined },
   setCirculatingSupply: () => {},
   circulatingSupplyChart: [],
   setCirculatingSupplyChart: () => {},
-  delegatedSupply: { value: "0", changeRate: "0" },
+  delegatedSupply: { value: undefined, changeRate: undefined },
   setDelegatedSupply: () => {},
   delegatedSupplyChart: [],
   setDelegatedSupplyChart: () => {},
-  cexSupply: { value: "0", changeRate: "0" },
+  cexSupply: { value: undefined, changeRate: undefined },
   setCexSupply: () => {},
   cexSupplyChart: [],
   setCexSupplyChart: () => {},
-  dexSupply: { value: "0", changeRate: "0" },
+  dexSupply: { value: undefined, changeRate: undefined },
   setDexSupply: () => {},
   dexSupplyChart: [],
   setDexSupplyChart: () => {},
-  lendingSupply: { value: "0", changeRate: "0" },
+  lendingSupply: { value: undefined, changeRate: undefined },
   setLendingSupply: () => {},
   lendingSupplyChart: [],
   setLendingSupplyChart: () => {},
@@ -51,51 +51,51 @@ export const TokenDistributionProvider = ({
 }) => {
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
   const [totalSupply, setTotalSupply] = useState<{
-    value: string;
-    changeRate: string;
+    value: string | undefined;
+    changeRate: string | undefined;
   }>({
-    value: "0",
-    changeRate: "0",
+    value: undefined,
+    changeRate: undefined,
   });
   const [totalSupplyChart, setTotalSupplyChart] = useState<DaoMetricsDayBucket[]>([]);  
   const [circulatingSupply, setCirculatingSupply] = useState<{
-    value: string;
-    changeRate: string;
+    value: string | undefined;
+    changeRate: string | undefined;
   }>({
-    value: "0",
-    changeRate: "0",
+    value: undefined,
+    changeRate: undefined,
   });
   const [circulatingSupplyChart, setCirculatingSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
   const [delegatedSupply, setDelegatedSupply] = useState<{
-    value: string;
-    changeRate: string;
+    value: string | undefined;
+    changeRate: string | undefined;
   }>({
-    value: "0",
-    changeRate: "0",
+    value: undefined,
+    changeRate: undefined,
   });
   const [delegatedSupplyChart, setDelegatedSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
   const [cexSupply, setCexSupply] = useState<{
-    value: string;
-    changeRate: string;
+    value: string | undefined;
+    changeRate: string | undefined;
   }>({
-    value: "0",
-    changeRate: "0",
+    value: undefined,
+    changeRate: undefined,
   });
   const [cexSupplyChart, setCexSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
   const [dexSupply, setDexSupply] = useState<{
-    value: string;
-    changeRate: string;
+    value: string | undefined;
+    changeRate: string | undefined; 
   }>({
-    value: "0",
-    changeRate: "0",
+    value: undefined,
+    changeRate: undefined,
   });
   const [dexSupplyChart, setDexSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
   const [lendingSupply, setLendingSupply] = useState<{
-    value: string;
-    changeRate: string;
+    value: string | undefined;
+    changeRate: string | undefined;
   }>({
-    value: "0",
-    changeRate: "0",
+    value: undefined,
+    changeRate: undefined,
   });
   const [lendingSupplyChart, setLendingSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
 
@@ -134,9 +134,11 @@ export const TokenDistributionProvider = ({
         metric.setChart(data);
       }))
   }, [days, daoId]);
+
   useEffect(()=>{
       fetchTokenDistributionData()
   }, [fetchTokenDistributionData]);
+
   return (
     <TokenDistributionCtx.Provider value={
         {

@@ -7,7 +7,6 @@ import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpDown,
-  TimeInterval,
   TheTable,
   TooltipInfo,
   ArrowState,
@@ -30,6 +29,7 @@ import {
 } from "@/lib/server/backend";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
+import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

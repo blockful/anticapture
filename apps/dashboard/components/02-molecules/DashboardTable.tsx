@@ -10,7 +10,6 @@ import {
   ArrowUpDown,
   TheTable,
   ArrowState,
-  TimeInterval,
 } from "@/components/01-atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -18,6 +17,7 @@ import { fetchDelegatedSupply } from "@/lib/server/backend";
 import Image, { StaticImageData } from "next/image";
 import ENSLogo from "@/public/logo/ENS.png";
 import UNILogo from "@/public/logo/UNI.png";
+import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 interface State {
   data: DashboardDao[];

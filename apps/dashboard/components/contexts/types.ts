@@ -5,8 +5,8 @@ export interface TokenDistributionContext {
     days: TimeInterval;
     setDays: (days: TimeInterval) => void;
     totalSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     };
     setTotalSupply: (totalSupply: {
         value: string;
@@ -15,8 +15,8 @@ export interface TokenDistributionContext {
     totalSupplyChart: DaoMetricsDayBucket[];
     setTotalSupplyChart: (totalSupplyChart: DaoMetricsDayBucket[]) => void;
     circulatingSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     };
     setCirculatingSupply: (circulatingSupply: {
         value: string;
@@ -25,8 +25,8 @@ export interface TokenDistributionContext {
     circulatingSupplyChart: DaoMetricsDayBucket[];
     setCirculatingSupplyChart: (circulatingSupplyChart: DaoMetricsDayBucket[]) => void;
     delegatedSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     };
     setDelegatedSupply: (delegatedSupply: {
         value: string;
@@ -35,32 +35,32 @@ export interface TokenDistributionContext {
     delegatedSupplyChart: DaoMetricsDayBucket[];
     setDelegatedSupplyChart: (delegatedSupplyChart: DaoMetricsDayBucket[]) => void;
     cexSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     };
     setCexSupply: (cexSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     }) => void;
     cexSupplyChart: DaoMetricsDayBucket[];
     setCexSupplyChart: (cexSupplyChart: DaoMetricsDayBucket[]) => void;
     dexSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     };
     setDexSupply: (dexSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     }) => void;
     dexSupplyChart: DaoMetricsDayBucket[];
     setDexSupplyChart: (dexSupplyChart: DaoMetricsDayBucket[]) => void;
     lendingSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined;
+        changeRate: string | undefined;
     };
     setLendingSupply: (lendingSupply: {
-        value: string;
-        changeRate: string;
+        value: string | undefined   ;
+        changeRate: string | undefined;
     }) => void;
     lendingSupplyChart: DaoMetricsDayBucket[];
     setLendingSupplyChart: (lendingSupplyChart: DaoMetricsDayBucket[]) => void;
