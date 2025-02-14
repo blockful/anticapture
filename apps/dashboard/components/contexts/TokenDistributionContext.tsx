@@ -7,40 +7,50 @@ import {
   fetchTimeSeriesDataFromGraphQL,
 } from "@/lib/server/backend";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { TokenDistributionContext } from "./types";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { MetricData, TokenDistributionContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 
-
-export const TokenDistributionCtx = createContext<TokenDistributionContext>({
-  days: TimeInterval.NINETY_DAYS,
-  setDays: () => {},
-  totalSupply: { value: undefined, changeRate: undefined },
-  setTotalSupply: () => {},
-  totalSupplyChart: [],
-  setTotalSupplyChart: () => {},
-  circulatingSupply: { value: undefined, changeRate: undefined },
-  setCirculatingSupply: () => {},
-  circulatingSupplyChart: [],
-  setCirculatingSupplyChart: () => {},
-  delegatedSupply: { value: undefined, changeRate: undefined },
-  setDelegatedSupply: () => {},
-  delegatedSupplyChart: [],
-  setDelegatedSupplyChart: () => {},
-  cexSupply: { value: undefined, changeRate: undefined },
-  setCexSupply: () => {},
-  cexSupplyChart: [],
-  setCexSupplyChart: () => {},
-  dexSupply: { value: undefined, changeRate: undefined },
-  setDexSupply: () => {},
-  dexSupplyChart: [],
-  setDexSupplyChart: () => {},
-  lendingSupply: { value: undefined, changeRate: undefined },
-  setLendingSupply: () => {},
-  lendingSupplyChart: [],
-  setLendingSupplyChart: () => {},
-});
+const initialTokenDistributionMetricData = {
+  value: undefined,
+  changeRate: undefined,
+};
+export const TokenDistributionContext =
+  createContext<TokenDistributionContextProps>({
+    days: TimeInterval.NINETY_DAYS,
+    setDays: () => {},
+    totalSupply: initialTokenDistributionMetricData,
+    setTotalSupply: () => {},
+    totalSupplyChart: [],
+    setTotalSupplyChart: () => {},
+    circulatingSupply: initialTokenDistributionMetricData,
+    setCirculatingSupply: () => {},
+    circulatingSupplyChart: [],
+    setCirculatingSupplyChart: () => {},
+    delegatedSupply: initialTokenDistributionMetricData,
+    setDelegatedSupply: () => {},
+    delegatedSupplyChart: [],
+    setDelegatedSupplyChart: () => {},
+    cexSupply: initialTokenDistributionMetricData,
+    setCexSupply: () => {},
+    cexSupplyChart: [],
+    setCexSupplyChart: () => {},
+    dexSupply: initialTokenDistributionMetricData,
+    setDexSupply: () => {},
+    dexSupplyChart: [],
+    setDexSupplyChart: () => {},
+    lendingSupply: initialTokenDistributionMetricData,
+    setLendingSupply: () => {},
+    lendingSupplyChart: [],
+    setLendingSupplyChart: () => {},
+  });
 
 export const TokenDistributionProvider = ({
   children,
@@ -50,77 +60,91 @@ export const TokenDistributionProvider = ({
   daoId: DaoIdEnum;
 }) => {
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
-  const [totalSupply, setTotalSupply] = useState<{
-    value: string | undefined;
-    changeRate: string | undefined;
-  }>({
-    value: undefined,
-    changeRate: undefined,
-  });
-  const [totalSupplyChart, setTotalSupplyChart] = useState<DaoMetricsDayBucket[]>([]);  
-  const [circulatingSupply, setCirculatingSupply] = useState<{
-    value: string | undefined;
-    changeRate: string | undefined;
-  }>({
-    value: undefined,
-    changeRate: undefined,
-  });
-  const [circulatingSupplyChart, setCirculatingSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
-  const [delegatedSupply, setDelegatedSupply] = useState<{
-    value: string | undefined;
-    changeRate: string | undefined;
-  }>({
-    value: undefined,
-    changeRate: undefined,
-  });
-  const [delegatedSupplyChart, setDelegatedSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
-  const [cexSupply, setCexSupply] = useState<{
-    value: string | undefined;
-    changeRate: string | undefined;
-  }>({
-    value: undefined,
-    changeRate: undefined,
-  });
-  const [cexSupplyChart, setCexSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
-  const [dexSupply, setDexSupply] = useState<{
-    value: string | undefined;
-    changeRate: string | undefined; 
-  }>({
-    value: undefined,
-    changeRate: undefined,
-  });
-  const [dexSupplyChart, setDexSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
-  const [lendingSupply, setLendingSupply] = useState<{
-    value: string | undefined;
-    changeRate: string | undefined;
-  }>({
-    value: undefined,
-    changeRate: undefined,
-  });
-  const [lendingSupplyChart, setLendingSupplyChart] = useState<DaoMetricsDayBucket[]>([]);
+  const [totalSupply, setTotalSupply] = useState<MetricData>(
+    initialTokenDistributionMetricData,
+  );
+  const [totalSupplyChart, setTotalSupplyChart] = useState<
+    DaoMetricsDayBucket[]
+  >([]);
+  const [circulatingSupply, setCirculatingSupply] = useState<MetricData>(
+    initialTokenDistributionMetricData,
+  );
+  const [circulatingSupplyChart, setCirculatingSupplyChart] = useState<
+    DaoMetricsDayBucket[]
+  >([]);
+  const [delegatedSupply, setDelegatedSupply] = useState<MetricData>(
+    initialTokenDistributionMetricData,
+  );
+  const [delegatedSupplyChart, setDelegatedSupplyChart] = useState<
+    DaoMetricsDayBucket[]
+  >([]);
+  const [cexSupply, setCexSupply] = useState<MetricData>(
+    initialTokenDistributionMetricData,
+  );
+  const [cexSupplyChart, setCexSupplyChart] = useState<DaoMetricsDayBucket[]>(
+    [],
+  );
+  const [dexSupply, setDexSupply] = useState<MetricData>(
+    initialTokenDistributionMetricData,
+  );
+  const [dexSupplyChart, setDexSupplyChart] = useState<DaoMetricsDayBucket[]>(
+    [],
+  );
+  const [lendingSupply, setLendingSupply] = useState<MetricData>(
+    initialTokenDistributionMetricData,
+  );
+  const [lendingSupplyChart, setLendingSupplyChart] = useState<
+    DaoMetricsDayBucket[]
+  >([]);
 
   const metricsWithCallBacks = [
-    { type: MetricTypesEnum.TOTAL_SUPPLY, setState: setTotalSupply , setChart: setTotalSupplyChart },
-    { type: MetricTypesEnum.DELEGATED_SUPPLY, setState: setDelegatedSupply, setChart: setDelegatedSupplyChart },
-    { type: MetricTypesEnum.CIRCULATING_SUPPLY, setState: setCirculatingSupply, setChart: setCirculatingSupplyChart },
-    { type: MetricTypesEnum.CEX_SUPPLY, setState: setCexSupply, setChart: setCexSupplyChart },
-    { type: MetricTypesEnum.DEX_SUPPLY, setState: setDexSupply, setChart: setDexSupplyChart },
-    { type: MetricTypesEnum.LENDING_SUPPLY, setState: setLendingSupply, setChart: setLendingSupplyChart },
+    {
+      type: MetricTypesEnum.TOTAL_SUPPLY,
+      setState: setTotalSupply,
+      setChart: setTotalSupplyChart,
+    },
+    {
+      type: MetricTypesEnum.DELEGATED_SUPPLY,
+      setState: setDelegatedSupply,
+      setChart: setDelegatedSupplyChart,
+    },
+    {
+      type: MetricTypesEnum.CIRCULATING_SUPPLY,
+      setState: setCirculatingSupply,
+      setChart: setCirculatingSupplyChart,
+    },
+    {
+      type: MetricTypesEnum.CEX_SUPPLY,
+      setState: setCexSupply,
+      setChart: setCexSupplyChart,
+    },
+    {
+      type: MetricTypesEnum.DEX_SUPPLY,
+      setState: setDexSupply,
+      setChart: setDexSupplyChart,
+    },
+    {
+      type: MetricTypesEnum.LENDING_SUPPLY,
+      setState: setLendingSupply,
+      setChart: setLendingSupplyChart,
+    },
   ];
-
 
   const fetchTokenDistributionData = useCallback(async () => {
     await Promise.all(
-        metricsWithCallBacks.map(async(metric) => {
+      metricsWithCallBacks.map(async (metric) => {
         const metricType = metric.type
           .trim()
           .replace(/^"|"$/g, "") as MetricTypesEnum;
         const parsedDays = parseInt(days.split("d")[0]);
-        const data = await fetchTimeSeriesDataFromGraphQL(daoId, metricType, parsedDays);
+        const data = await fetchTimeSeriesDataFromGraphQL(
+          daoId,
+          metricType,
+          parsedDays,
+        );
         let changeRate;
         const oldHigh = data[0].high ?? "0";
-        const currentHigh =
-        data[data.length-1]?.high ?? "0";
+        const currentHigh = data[data.length - 1]?.high ?? "0";
         if (currentHigh === "0") {
           changeRate = "0";
         } else {
@@ -130,49 +154,51 @@ export const TokenDistributionProvider = ({
             18,
           );
         }
-        metric.setState({value: currentHigh, changeRate});
+        metric.setState({ value: currentHigh, changeRate });
         metric.setChart(data);
-      }))
+      }),
+    );
   }, [days, daoId]);
 
-  useEffect(()=>{
-      fetchTokenDistributionData()
+  useEffect(() => {
+    fetchTokenDistributionData();
   }, [fetchTokenDistributionData]);
 
   return (
-    <TokenDistributionCtx.Provider value={
-        {
-            days,
-            totalSupply,
-            totalSupplyChart,
-            circulatingSupply,
-            circulatingSupplyChart,
-            delegatedSupply,
-            delegatedSupplyChart,
-            cexSupply,
-            cexSupplyChart,
-            dexSupply,
-            dexSupplyChart,
-            lendingSupply,
-            lendingSupplyChart,
-            setDays,
-            setTotalSupply,
-            setTotalSupplyChart,
-            setCirculatingSupply,
-            setCirculatingSupplyChart,
-            setDelegatedSupply,
-            setDelegatedSupplyChart,    
-            setCexSupply,
-            setCexSupplyChart,
-            setDexSupply,
-            setDexSupplyChart,
-            setLendingSupply,
-            setLendingSupplyChart,
-        }
-    }>
+    <TokenDistributionContext.Provider
+      value={{
+        days,
+        totalSupply,
+        totalSupplyChart,
+        circulatingSupply,
+        circulatingSupplyChart,
+        delegatedSupply,
+        delegatedSupplyChart,
+        cexSupply,
+        cexSupplyChart,
+        dexSupply,
+        dexSupplyChart,
+        lendingSupply,
+        lendingSupplyChart,
+        setDays,
+        setTotalSupply,
+        setTotalSupplyChart,
+        setCirculatingSupply,
+        setCirculatingSupplyChart,
+        setDelegatedSupply,
+        setDelegatedSupplyChart,
+        setCexSupply,
+        setCexSupplyChart,
+        setDexSupply,
+        setDexSupplyChart,
+        setLendingSupply,
+        setLendingSupplyChart,
+      }}
+    >
       {children}
-    </TokenDistributionCtx.Provider>
+    </TokenDistributionContext.Provider>
   );
 };
 
-export const useTokenDistributionContext = () => useContext(TokenDistributionCtx);
+export const useTokenDistributionContext = () =>
+  useContext(TokenDistributionContext);
