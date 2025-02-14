@@ -1,20 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   ChainNameEnum,
   fetchDaoData,
   fetchTokenPrice,
 } from "@/lib/server/backend";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
-import { createContext, useContext, useEffect, useState } from "react";
 
-interface DaoDataContext {
+interface DaoDataContextProps {
   daoData: null | DAO;
   tokenPrice: null | number;
 }
 
-export const DaoDataCtx = createContext<DaoDataContext>({
+export const DaoDataContext = createContext<DaoDataContextProps>({
   daoData: null,
   tokenPrice: null,
 });
@@ -50,10 +50,10 @@ export const DaoDataProvider = ({
   }, []);
 
   return (
-    <DaoDataCtx.Provider value={{ daoData, tokenPrice }}>
+    <DaoDataContext.Provider value={{ daoData, tokenPrice }}>
       {children}
-    </DaoDataCtx.Provider>
+    </DaoDataContext.Provider>
   );
 };
 
-export const useDaoDataContext = () => useContext(DaoDataCtx);
+export const useDaoDataContext = () => useContext(DaoDataContext);

@@ -7,28 +7,31 @@ import {
   UsersIcon,
   Skeleton,
 } from "@/components/01-atoms";
-import { formatNumberUserReadable, formatVariation } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { useTokenDistributionContext } from "../contexts/TokenDistributionContext";
+import {
+  useDaoDataContext,
+  useTokenDistributionContext,
+} from "@/components/contexts";
 
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
-  const {totalSupply} = useTokenDistributionContext();
+  const { totalSupply } = useTokenDistributionContext();
   if (!daoData) {
     return <Skeleton />;
   }
 
   const quorumMinPercentage =
     daoData.quorum &&
-    totalSupply.value!==undefined &&
+    totalSupply.value !== undefined &&
     formatEther(
-      (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(totalSupply.value as string),
+      (BigInt(daoData.quorum) * BigInt(1e20)) /
+        BigInt(totalSupply.value as string),
     );
 
   const proposalThresholdPercentage =
     daoData.proposalThreshold &&
-    totalSupply.value!==undefined &&
+    totalSupply.value !== undefined &&
     formatEther(
       (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
         BigInt(totalSupply.value as string),
