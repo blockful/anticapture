@@ -3,12 +3,12 @@
 import { useState } from "react";
 import {
   ArrowLeftRight,
-  TimeInterval,
   TheSectionLayout,
   SwitcherDate,
 } from "@/components/01-atoms";
 import { GovernanceActivityTable } from "@/components/02-molecules";
 import { governanceActivitySectionAnchorID } from "@/lib/client/constants";
+import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 export const GovernanceActivitySection = () => {
   const [timeIntervalGovernanceActivity, setTimeIntervalGovernanceActivity] =
