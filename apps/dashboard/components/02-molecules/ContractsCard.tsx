@@ -53,8 +53,8 @@ export const ContractsCard = ({
             icon={<FocusIcon className="text-[#EC762E]" />}
             onClick={() =>
               window.open(
-                "_blank",
                 `${daoConstants.snapshot}`,
+                "_blank",
                 "noopener,noreferrer",
               )
             }
