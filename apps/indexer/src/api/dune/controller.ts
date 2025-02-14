@@ -1,6 +1,7 @@
 import { ponder } from "ponder:registry";
 import { DuneService } from "./service";
 import { DaoIdEnum } from "@/lib/enums";
+import { createClient } from "redis";
 
 ponder.get("/dao/:daoId/total-assets", async (context) => {
   const daoId = context.req.param("daoId") as DaoIdEnum;
