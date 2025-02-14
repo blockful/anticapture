@@ -49,6 +49,10 @@ ponder.hono.get("/doc-json", (c) => {
         name: "Governance Activity",
         description: "Gets the information about DAO governance activity",
       },
+      {
+        name: "Dune",
+        description: "Gets the information from external source Dune API",
+      },
     ],
     paths: {
       "/dao": {
@@ -585,6 +589,56 @@ ponder.hono.get("/doc-json", (c) => {
           },
         },
       },
+      "/dao/{daoId}/total-assets": {
+        get: {
+          tags: ["Dune"],
+          summary: "Get total assets",
+          description: "Get total assets of a DAO from Dune API",
+          operationId: "getTotalAssets",
+          parameters: [
+            {
+              name: "daoId",
+              in: "path",
+              description: "Dao ID",
+              required: true,
+              schema: {
+                type: "string",
+              },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Successful operation",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "array",
+                    items: {
+                      $ref: "#/components/schemas/TotalAssets",
+                    },
+                  },
+                },
+              },
+            },
+            "400": {
+              description: "Invalid Dao ID",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      error: {
+                        type: "string",
+                        example: "Not Supported for this DAO",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -840,6 +894,21 @@ ponder.hono.get("/doc-json", (c) => {
               type: "string",
               format: "string",
               example: "-0.010539968547382565",
+            },
+          },
+        },
+        TotalAssets: {
+          type: "object",
+          properties: {
+            totalAssets: {
+              type: "string",
+              format: "string",
+              example: "124483516.95437849",
+            },
+            date: {
+              type: "string",
+              format: "string",
+              example: "2025-02-12",
             },
           },
         },
