@@ -6,11 +6,7 @@ import { useRouter } from "next/navigation";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowUpDown,
-  TheTable,
-  ArrowState,
-} from "@/components/01-atoms";
+import { ArrowUpDown, TheTable, ArrowState } from "@/components/01-atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { fetchDelegatedSupply } from "@/lib/server/backend";
@@ -167,7 +163,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         <Button
           variant="ghost"
           className="w-full"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting()}
         >
           Delegated Supply ({days})
           <ArrowUpDown
