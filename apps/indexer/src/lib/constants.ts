@@ -25,7 +25,7 @@ export const TREASURY_ADDRESSES = {
   [DaoIdEnum.ENS]: {
     timelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
     endaoment: "0x4F2083f5fBede34C2714aFfb3105539775f7FE64",
-    ethRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
+    oldEthRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
     controllerENSEth: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
 };
