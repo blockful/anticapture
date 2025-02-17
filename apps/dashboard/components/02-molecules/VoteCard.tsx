@@ -9,7 +9,7 @@ import {
   Skeleton,
   SwitchCardDaoInfoItem,
 } from "@/components/01-atoms";
-import { formatTimestampUserReadable } from "@/lib/client/utils";
+import { formatBlocksToUserReadable } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
 
@@ -35,7 +35,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
           />,
           <BadgeCardDaoInfoItem
             icon={<BlocksIcon />}
-            label={formatTimestampUserReadable(daoData.votingDelay)}
+            label={formatBlocksToUserReadable(daoData.votingDelay)}
             key={"badge"}
           />,
         ],
