@@ -1,6 +1,6 @@
 {
   "name": "anticapture",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "Anticapture Monorepo",
   "scripts": {
     "start": "dotenv -- turbo start",
