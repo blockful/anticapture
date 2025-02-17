@@ -1,31 +1,40 @@
 "use client";
 
-import { UsersIcon, Skeleton } from "@/components/01-atoms";
+import {
+  BaseCardDaoInfo,
+  CardData,
+  TextCardDaoInfoItem,
+  UsersIcon,
+  Skeleton,
+} from "@/components/01-atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { BaseCardDao, CardData } from "./BaseCardDao";
+import {
+  useDaoDataContext,
+  useTokenDistributionContext,
+} from "@/components/contexts";
 
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
-
+  const { totalSupply } = useTokenDistributionContext();
   if (!daoData) {
     return <Skeleton />;
   }
 
   const quorumMinPercentage =
     daoData.quorum &&
-    daoData.totalSupply &&
+    totalSupply.value !== undefined &&
     formatEther(
-      (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(daoData.totalSupply),
+      (BigInt(daoData.quorum) * BigInt(1e20)) /
+        BigInt(totalSupply.value as string),
     );
 
   const proposalThresholdPercentage =
     daoData.proposalThreshold &&
-    daoData.totalSupply &&
+    totalSupply.value !== undefined &&
     formatEther(
       (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
-        BigInt(daoData.totalSupply),
+        BigInt(totalSupply.value as string),
     );
 
   const quorumValue = daoData.quorum
@@ -33,7 +42,7 @@ export const QuorumCard = () => {
     : "No Quorum";
 
   const quorumPercentage = quorumMinPercentage
-    ? `(${quorumMinPercentage.toString()}%)`
+    ? `(${parseFloat(quorumMinPercentage).toFixed(2)}%)`
     : "(N/A)";
 
   const proposalThresholdValue = daoData.proposalThreshold
@@ -41,7 +50,7 @@ export const QuorumCard = () => {
     : "No Threshold";
 
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
-    ? `(${proposalThresholdPercentage.toString()}%)`
+    ? `(${parseFloat(proposalThresholdPercentage).toFixed(2)}%)`
     : "(N/A)";
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
@@ -54,17 +63,17 @@ export const QuorumCard = () => {
         title: "Logic",
         tooltip:
           "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
-        items: [{ type: "text", label: "For", value: "" }],
+        items: [<TextCardDaoInfoItem label="For" key={"text-logic"} />],
       },
       {
         title: "Quorum",
         tooltip:
-          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn’t reach quorum.",
+          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn't reach quorum.",
         items: [
-          {
-            type: "text",
-            value: `${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`,
-          },
+          <TextCardDaoInfoItem
+            key={"text-quorum"}
+            value={`${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`}
+          />,
         ],
       },
       {
@@ -72,14 +81,14 @@ export const QuorumCard = () => {
         tooltip:
           "The minimum voting power required to submit an on-chain proposal.",
         items: [
-          {
-            type: "text",
-            value: proposalThresholdText,
-          },
+          <TextCardDaoInfoItem
+            value={proposalThresholdText}
+            key={"text-proposal-threshold"}
+          />,
         ],
       },
     ],
   };
 
-  return <BaseCardDao data={quorumData} />;
+  return <BaseCardDaoInfo data={quorumData} />;
 };

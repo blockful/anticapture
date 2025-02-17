@@ -1,15 +1,20 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { ChainNameEnum, fetchDaoData, fetchTokenPrice } from "@/lib/server/backend";
-import { DAO, DaoIdEnum } from "@/lib/types/daos";
 import { createContext, useContext, useEffect, useState } from "react";
+import {
+  ChainNameEnum,
+  fetchDaoData,
+  fetchTokenPrice,
+} from "@/lib/server/backend";
+import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
-interface DaoDataContext {
+interface DaoDataContextProps {
   daoData: null | DAO;
   tokenPrice: null | number;
 }
 
-export const DaoDataContext = createContext<DaoDataContext>({
+export const DaoDataContext = createContext<DaoDataContextProps>({
   daoData: null,
   tokenPrice: null,
 });

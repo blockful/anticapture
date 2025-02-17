@@ -5,11 +5,10 @@ import {
   BarChartIcon,
   SwitcherDate,
   TheSectionLayout,
-  TimeInterval,
 } from "@/components/01-atoms";
 import { DashboardTable } from "@/components/02-molecules";
 import { dashboardSectionAnchorID } from "@/lib/client/constants";
-
+import { TimeInterval } from "@/lib/enums/TimeInterval";
 export const HomeDashboardSection = () => {
   const [timeIntervalDashboard, setTimeIntervalDashboard] =
     useState<TimeInterval>(TimeInterval.NINETY_DAYS);

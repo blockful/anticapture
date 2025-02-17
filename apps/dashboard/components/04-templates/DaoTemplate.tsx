@@ -1,28 +1,15 @@
 "use client";
 
-import { GlobeIcon, TheSectionLayout } from "@/components/01-atoms";
-import { DaoInfo } from "@/components/02-molecules";
 import {
+  DaoInfoSection,
   GovernanceActivitySection,
   TokenDistributionSection,
 } from "@/components/03-organisms";
-import { daoInfoSectionAnchorID } from "@/lib/client/constants";
-import daoConstantsByDaoId from "@/lib/dao-constants";
-import { DaoIdEnum } from "@/lib/types/daos";
 
-export const DaoTemplate = ({ params }: { params: { daoId: string } }) => {
-  const daoConstants =
-    daoConstantsByDaoId[params.daoId.toUpperCase() as DaoIdEnum];
-
+export const DaoTemplate = () => {
   return (
     <>
-      <TheSectionLayout
-        title={`DAO Information`}
-        icon={<GlobeIcon />}
-        anchorId={daoInfoSectionAnchorID}
-      >
-        <DaoInfo daoConstants={daoConstants} />
-      </TheSectionLayout>
+      <DaoInfoSection />
       <TokenDistributionSection />
       <GovernanceActivitySection />
     </>

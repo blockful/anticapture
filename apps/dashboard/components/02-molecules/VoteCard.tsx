@@ -1,10 +1,17 @@
 "use client";
 
-import { BlocksIcon, ClickIcon, Skeleton } from "@/components/01-atoms";
+import {
+  BadgeCardDaoInfoItem,
+  BaseCardDaoInfo,
+  BlocksIcon,
+  CardData,
+  ClickIcon,
+  Skeleton,
+  SwitchCardDaoInfoItem,
+} from "@/components/01-atoms";
 import { formatTimestampUserReadable } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
-import { BaseCardDao, CardData } from "./BaseCardDao";
 
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();
@@ -22,15 +29,15 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         tooltip:
           "The voting delay is the number of blocks between an on-chain proposal’s submission and the start of its voting period. It gives DAO members time to discuss and review proposals before voting begins.",
         items: [
-          {
-            type: "switch",
-            switched: daoConstants.rules.delay,
-          },
-          {
-            type: "badge",
-            label: formatTimestampUserReadable(daoData.votingDelay),
-            icon: <BlocksIcon />,
-          },
+          <SwitchCardDaoInfoItem
+            key={"switch"}
+            switched={daoConstants.rules.delay}
+          />,
+          <BadgeCardDaoInfoItem
+            icon={<BlocksIcon />}
+            label={formatTimestampUserReadable(daoData.votingDelay)}
+            key={"badge"}
+          />,
         ],
       },
       {
@@ -38,14 +45,14 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         tooltip:
           "Allows voters to alter their vote after it has already been cast.",
         items: [
-          {
-            type: "switch",
-            switched: daoConstants.rules.changeVote,
-          },
+          <SwitchCardDaoInfoItem
+            key={"switch"}
+            switched={daoConstants.rules.changeVote}
+          />,
         ],
       },
     ],
   };
 
-  return <BaseCardDao data={voteData} />;
+  return <BaseCardDaoInfo data={voteData} />;
 };
