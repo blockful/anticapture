@@ -11,6 +11,10 @@ export enum MetricTypesEnum {
   LENDING_SUPPLY = "LENDING_SUPPLY",
   CIRCULATING_SUPPLY = "CIRCULATING_SUPPLY",
   TREASURY = "TREASURY",
+  PROPOSALS = "PROPOSALS",
+  ACTIVE_SUPPLY = "ACTIVE_SUPPLY",
+  VOTES = "VOTES",
+  AVERAGE_TURNOUT = "AVERAGE_TURNOUT",
 }
 
 export const metricTypeArray = Object.values(MetricTypesEnum);

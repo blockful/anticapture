@@ -38,3 +38,36 @@ export interface TokenDistributionContextProps {
   lendingSupplyChart: DaoMetricsDayBucket[];
   setLendingSupplyChart: (lendingSupplyChart: DaoMetricsDayBucket[]) => void;
 }
+
+export interface GovernanceActivityContextProps {
+  days: TimeInterval;
+  setDays: (days: TimeInterval) => void;
+  treasury: MetricData;
+  setTreasury: (treasury: MetricData) => void;
+  treasurySupplyChart: DaoMetricsDayBucket[];
+  setTreasurySupplyChart: (treasurySupplyChart: DaoMetricsDayBucket[]) => void;
+
+  proposals: MetricData;
+  setProposals: (proposals: MetricData) => void;
+  proposalsSupplyChart: DaoMetricsDayBucket[];
+  setProposalsSupplyChart: (
+    proposalsSupplyChart: DaoMetricsDayBucket[],
+  ) => void;
+
+  activeSupply: MetricData;
+  setActiveSupply: (activeSupply: MetricData) => void;
+  activeSupplyChart: DaoMetricsDayBucket[];
+  setActiveSupplyChart: (activeSupplyChart: DaoMetricsDayBucket[]) => void;
+
+  votes: MetricData;
+  setVotes: (votes: MetricData) => void;
+  votesSupplyChart: DaoMetricsDayBucket[];
+  setVotesSupplyChart: (votesSupplyChart: DaoMetricsDayBucket[]) => void;
+
+  averageTurnout: MetricData;
+  setAverageTurnout: (averageTurnout: MetricData) => void;
+  averageTurnoutSupplyChart: DaoMetricsDayBucket[];
+  setAverageTurnoutSupplyChart: (
+    averageTurnoutSupplyChart: DaoMetricsDayBucket[],
+  ) => void;
+}
