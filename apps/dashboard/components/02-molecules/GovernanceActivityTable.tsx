@@ -65,13 +65,9 @@ export const GovernanceActivityTable = () => {
     treasury,
     treasurySupplyChart,
     proposals,
-    proposalsSupplyChart,
     activeSupply,
-    activeSupplyChart,
     votes,
-    votesSupplyChart,
     averageTurnout,
-    averageTurnoutSupplyChart,
   } = useGovernanceActivityContext();
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
@@ -132,13 +128,6 @@ export const GovernanceActivityTable = () => {
           return (
             <p className="flex items-center justify-center gap-1 text-center">
               -
-            </p>
-          );
-        }
-        if (variation == "0") {
-          return (
-            <p className="flex items-center justify-center gap-1 text-center">
-              0.00%
             </p>
           );
         }
@@ -228,7 +217,6 @@ export const GovernanceActivityTable = () => {
               : proposals.changeRate
                 ? formatVariation(proposals.changeRate)
                 : null,
-          chartLastDays: proposalsSupplyChart,
         },
         {
           metric: "Active Supply",
@@ -238,7 +226,6 @@ export const GovernanceActivityTable = () => {
           variation: activeSupply.changeRate
             ? formatVariation(activeSupply.changeRate)
             : "-",
-          chartLastDays: activeSupplyChart,
         },
         {
           metric: "Votes",
@@ -249,7 +236,6 @@ export const GovernanceActivityTable = () => {
               : votes.changeRate
                 ? formatVariation(votes.changeRate)
                 : null,
-          chartLastDays: votesSupplyChart,
         },
         {
           metric: "Average Turnout",
@@ -260,7 +246,6 @@ export const GovernanceActivityTable = () => {
               : averageTurnout.changeRate
                 ? formatVariation(averageTurnout.changeRate)
                 : null,
-          chartLastDays: averageTurnoutSupplyChart,
         },
       ]}
       withPagination={true}

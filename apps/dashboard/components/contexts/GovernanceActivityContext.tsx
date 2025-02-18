@@ -34,26 +34,19 @@ export const GovernanceActivityContext =
     treasury: initialGovernanceActivityMetricData,
     setTreasury: () => {},
     treasurySupplyChart: [],
+
     setTreasurySupplyChart: () => {},
     proposals: initialGovernanceActivityMetricData,
     setProposals: () => {},
-    proposalsSupplyChart: [],
-    setProposalsSupplyChart: () => {},
 
     activeSupply: initialGovernanceActivityMetricData,
     setActiveSupply: () => {},
-    activeSupplyChart: [],
-    setActiveSupplyChart: () => {},
 
     votes: initialGovernanceActivityMetricData,
     setVotes: () => {},
-    votesSupplyChart: [],
-    setVotesSupplyChart: () => {},
 
     averageTurnout: initialGovernanceActivityMetricData,
     setAverageTurnout: () => {},
-    averageTurnoutSupplyChart: [],
-    setAverageTurnoutSupplyChart: () => {},
   });
 
 export const GovernanceActivityProvider = ({
@@ -73,27 +66,18 @@ export const GovernanceActivityProvider = ({
   const [proposals, setProposals] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-  const [proposalsSupplyChart, setProposalsSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
+
   const [activeSupply, setActiveSupply] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-  const [activeSupplyChart, setActiveSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
+
   const [votes, setVotes] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-  const [votesSupplyChart, setVotesSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
+
   const [averageTurnout, setAverageTurnout] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-  const [averageTurnoutSupplyChart, setAverageTurnoutSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
 
   const fetchGovernanceActivityData = useCallback(async () => {
     try {
@@ -138,7 +122,6 @@ export const GovernanceActivityProvider = ({
           value: String(proposalsData.currentProposalsLaunched),
           changeRate: proposalsData.changeRate,
         });
-        setProposalsSupplyChart([]);
       }
 
       if (activeSupplyData) {
@@ -146,7 +129,6 @@ export const GovernanceActivityProvider = ({
           value: activeSupplyData.activeSupply,
           changeRate: undefined,
         });
-        setActiveSupplyChart([]);
       }
 
       if (votesData) {
@@ -154,7 +136,6 @@ export const GovernanceActivityProvider = ({
           value: votesData.currentVotes,
           changeRate: votesData.changeRate,
         });
-        setVotesSupplyChart([]);
       }
 
       if (averageTurnoutData) {
@@ -164,10 +145,9 @@ export const GovernanceActivityProvider = ({
           ),
           changeRate: averageTurnoutData.changeRate,
         });
-        setAverageTurnoutSupplyChart([]);
       }
     } catch (error) {
-      console.error("Erro ao buscar métricas de governança:", error);
+      console.error("Error serching governance metrics", error);
     }
   }, [days, daoId]);
 
@@ -186,18 +166,10 @@ export const GovernanceActivityProvider = ({
         setTreasurySupplyChart,
         proposals,
         setProposals,
-        proposalsSupplyChart,
-        setProposalsSupplyChart,
         activeSupply,
         setActiveSupply,
-        activeSupplyChart,
-        setActiveSupplyChart,
         votes,
         setVotes,
-        votesSupplyChart,
-        setVotesSupplyChart,
-        averageTurnoutSupplyChart,
-        setAverageTurnoutSupplyChart,
         averageTurnout,
         setAverageTurnout,
       }}
