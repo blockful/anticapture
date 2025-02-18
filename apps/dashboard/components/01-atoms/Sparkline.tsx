@@ -15,16 +15,19 @@ export const Sparkline: React.FC<SparklineProps> = ({
   strokeColor = "#4ADE80",
   className = "",
 }) => {
+  // values = [1600, 1500, 1550, 1300]
   if (data.length === 0) return null;
 
   const maxValue = Math.max(...data);
   const minValue = Math.min(...data);
-  const range = maxValue - minValue || 1;
+  const range = maxValue - minValue + 1e22 || 1;
+  console.log(range);
 
   const points = data
     .map((value, index) => {
-      const x = (index / (data.length - 1)) * width;
-      const y = height - ((value - minValue) / range) * height;
+
+      const x = (index / (data.length - 1)) * width; 
+      const y = 0.5 * height - ((value - ((minValue) + range / 2)) / (range/2)) * 0.5 * height; 
       return `${x},${y}`;
     })
     .join(" ");
