@@ -3,6 +3,7 @@ import { DaoDataProvider } from "@/components/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { HeaderDAOSidebar } from "@/components/02-molecules";
 import { TokenDistributionProvider } from "@/components/contexts/TokenDistributionContext";
+import { GovernanceActivityProvider } from "@/components/contexts/GovernanceActivityContext";
 
 interface DaoLayoutProps {
   children: React.ReactNode;
@@ -19,8 +20,10 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
   return (
     <DaoDataProvider daoId={daoId}>
       <TokenDistributionProvider daoId={daoId}>
-        <HeaderDAOSidebar />
-        {children}
+        <GovernanceActivityProvider daoId={daoId}>
+          <HeaderDAOSidebar />
+          {children}
+        </GovernanceActivityProvider>
       </TokenDistributionProvider>
     </DaoDataProvider>
   );
