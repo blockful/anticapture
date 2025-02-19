@@ -9,6 +9,7 @@ import { TokenDistributionTable } from "@/components/02-molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/components/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { TheChart } from "../02-molecules/TheChart";
 
 export const TokenDistributionSection = () => {
   const { setDays } = useTokenDistributionContext();
@@ -28,6 +29,7 @@ export const TokenDistributionSection = () => {
         interaction with relevant contracts."
       anchorId={tokenDistributionSectionAnchorID}
     >
+      <TheChart />
       <TokenDistributionTable />
     </TheSectionLayout>
   );
