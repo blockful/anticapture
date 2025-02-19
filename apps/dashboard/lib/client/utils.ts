@@ -47,15 +47,15 @@ export function formatNumberUserReadable(num: number): string {
   return num.toString();
 }
 
-export function formatTimestampUserReadable(num: number): string {
+export function formatBlocksToUserReadable(num: number): string {
   const timestamp = [
-    { value: 1, symbol: "sec" },
-    { value: 60, symbol: "min" },
-    { value: 3600, symbol: "hour" },
-    { value: 86400, symbol: "day" },
-    { value: 604800, symbol: "week" },
-    { value: 2592000, symbol: "month" },
-    { value: 31536000, symbol: "year" },
+    { value: 1, symbol: "blocks" },
+    { value: 5, symbol: "min" },
+    { value: 300, symbol: "hour" },
+    { value: 7200, symbol: "day" },
+    { value: 50400, symbol: "week" },
+    { value: 216000, symbol: "month" },
+    { value: 2628000, symbol: "year" },
   ];
 
   const matchedUnit = timestamp
