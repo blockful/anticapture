@@ -1,7 +1,6 @@
 import { ponder } from "ponder:registry";
 import { DuneService } from "./service";
 import { DaoIdEnum } from "@/lib/enums";
-import { createClient } from "redis";
 import { RedisCacheService } from "@/lib/cache-service/redis-cache-service";
 
 ponder.get("/dao/:daoId/total-assets", async (context) => {

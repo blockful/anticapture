@@ -61,6 +61,6 @@ export class DuneService {
         "X-Dune-API-Key": this.apiKey,
       },
     });
-    return await attackProfitabilityFromApi.json() as DuneResponse;
+    return (await attackProfitabilityFromApi.json()) as DuneResponse;
   }
 }
