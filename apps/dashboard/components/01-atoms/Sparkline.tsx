@@ -19,7 +19,7 @@ export const Sparkline: React.FC<SparklineProps> = ({
 
   const maxValue = Math.max(...data);
   const minValue = Math.min(...data);
-  const range = maxValue - minValue + 1e22 || 1;
+  const range = maxValue - minValue + 1e24 || 1;
 
   const points = data
     .map((value, index) => {
