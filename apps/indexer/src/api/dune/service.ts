@@ -22,7 +22,6 @@ export class DuneService {
 
   async getTotalAssets() {
     if (!this.redis) {
-      console.log("Fetching new data from Dune");
       const duneResponse = await this.getTotalAssetsFromDune();
       return duneResponse.result.rows as TotalAssetsByDay[];
     }
@@ -39,7 +38,6 @@ export class DuneService {
         new Date().setHours(0, 0, 0, 0);
 
     if (fetchAndCache) {
-      console.log("Fetching new data from Dune and Caching");
       const duneResponse = await this.getTotalAssetsFromDune();
       const {
         result: { rows },
@@ -51,7 +49,6 @@ export class DuneService {
       await this.redis.disconnect();
       return rows as TotalAssetsByDay[];
     }
-    console.log("Using cached data from Dune");
     return formattedCachedData?.result.rows as TotalAssetsByDay[];
   }
 
