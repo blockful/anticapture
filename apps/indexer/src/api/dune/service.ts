@@ -1,55 +1,58 @@
 import { DaoIdEnum } from "@/lib/enums";
 import { DuneResponse, TotalAssetsByDay } from "./types";
-import { createClient } from "redis";
-import { RedisClientType } from "@redis/client";
+import { CacheServiceInterface } from "@/lib/cache-service/types";
 
 export class DuneService {
   private daoId: DaoIdEnum;
   private duneUrl: string;
   private apiKey: string;
-  private readonly redis?: RedisClientType;
+  private readonly cacheService: CacheServiceInterface | null;
 
-  constructor(daoId: DaoIdEnum, duneUrl: string, apiKey: string) {
+  constructor(
+    daoId: DaoIdEnum,
+    duneUrl: string,
+    apiKey: string,
+    cacheService: CacheServiceInterface | null,
+  ) {
     this.daoId = daoId;
     this.duneUrl = duneUrl;
     this.apiKey = apiKey;
-    if (!!process.env.REDIS_URL) {
-      this.redis = createClient({
-        url: process.env.REDIS_URL,
-      });
-    }
+    this.cacheService = cacheService;
   }
 
   async getTotalAssets() {
-    if (!this.redis) {
+    // if no cache service, fetch and return
+    if (!this.cacheService) {
       const duneResponse = await this.getTotalAssetsFromDune();
       return duneResponse.result.rows as TotalAssetsByDay[];
     }
     let cachedData: string | null = null;
     let formattedCachedData: DuneResponse | null = null;
-    await this.redis.connect();
-    cachedData = await this.redis.get(`dao:${this.daoId}:total-assets`);
+    cachedData = await this.cacheService.get(`dao:${this.daoId}:total-assets`);
+
     if (!!cachedData) {
       formattedCachedData = JSON.parse(cachedData || "") as DuneResponse;
     }
-    const fetchAndCache =
+
+    const needToFetch =
       formattedCachedData === null ||
       new Date(formattedCachedData.execution_ended_at).setHours(0, 0, 0, 0) <
         new Date().setHours(0, 0, 0, 0);
 
-    if (fetchAndCache) {
-      const duneResponse = await this.getTotalAssetsFromDune();
-      const {
-        result: { rows },
-      } = duneResponse;
-      await this.redis.set(
-        `dao:${this.daoId}:total-assets`,
-        JSON.stringify(duneResponse),
-      );
-      await this.redis.disconnect();
-      return rows as TotalAssetsByDay[];
+    // return cached data
+    if (!needToFetch) {
+      return formattedCachedData?.result.rows as TotalAssetsByDay[];
     }
-    return formattedCachedData?.result.rows as TotalAssetsByDay[];
+    // fetch and cache
+    const duneResponse = await this.getTotalAssetsFromDune();
+    const {
+      result: { rows },
+    } = duneResponse;
+    await this.cacheService.set(
+      `dao:${this.daoId}:total-assets`,
+      JSON.stringify(duneResponse),
+    );
+    return rows as TotalAssetsByDay[];
   }
 
   private async getTotalAssetsFromDune() {
