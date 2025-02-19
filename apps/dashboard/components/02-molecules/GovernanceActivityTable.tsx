@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useReducer } from "react";
+import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { GovernanceActivity, governanceActivityData } from "@/lib/mocked-data";
+import { GovernanceActivity } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpDown,
@@ -12,24 +12,13 @@ import {
   ArrowState,
   Sparkline,
 } from "@/components/01-atoms";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import {
   cn,
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
-import {
-  DaoMetricsDayBucket,
-  fetchActiveSupply,
-  fetchAverageTurnout,
-  fetchProposals,
-  fetchTimeSeriesDataFromGraphQL,
-  fetchVotes,
-} from "@/lib/server/backend";
-import { MetricTypesEnum } from "@/lib/client/constants";
-import { formatUnits } from "viem";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { DaoMetricsDayBucket } from "@/lib/server/backend";
+import { useGovernanceActivityContext } from "../contexts/GovernanceActivityContext";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -70,176 +59,16 @@ const metricDetails: Record<
   },
 };
 
-interface State {
-  data: GovernanceActivity[];
-}
-
-enum ActionType {
-  UPDATE_METRIC = "UPDATE_METRIC",
-  UPDATE_CHART = "UPDATE_CHART",
-}
-
-type MetricPayload = Pick<
-  GovernanceActivity,
-  "average" | "variation" | "chartLastDays"
->;
-
-type Action = {
-  type: ActionType;
-  payload: {
-    index: number;
-    metric: MetricPayload;
-  };
-};
-
-const initialState: State = {
-  data: governanceActivityData,
-};
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case ActionType.UPDATE_METRIC:
-      const data = [
-        ...state.data.slice(0, action.payload.index),
-        {
-          ...state.data[action.payload.index],
-          average: action.payload.metric.average,
-          variation: action.payload.metric.variation,
-        },
-        ...state.data.slice(action.payload.index + 1, state.data.length),
-      ];
-      return {
-        ...state,
-        data,
-      };
-    case ActionType.UPDATE_CHART:
-      const chartData = [
-        ...state.data.slice(0, action.payload.index),
-        {
-          ...state.data[action.payload.index],
-          chartLastDays: action.payload.metric.chartLastDays,
-        },
-        ...state.data.slice(action.payload.index + 1, state.data.length),
-      ];
-      return {
-        ...state,
-        data: chartData,
-      };
-    default:
-      return state;
-  }
-}
-
-export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
-  const { daoData } = useDaoDataContext();
-  const [state, dispatch] = useReducer(reducer, initialState);
-  useEffect(() => {
-    const daoId = (daoData && daoData.id) || DaoIdEnum.UNISWAP;
-
-    const fetchChartAndTreasuryData = async (): Promise<void> => {
-      const chartData = await fetchTimeSeriesDataFromGraphQL(
-        daoId,
-        MetricTypesEnum.TREASURY,
-        parseInt(days.split("d")[0]),
-      );
-      if (chartData) {
-        let changeRate;
-        const oldHigh = chartData[0]?.high ?? "0";
-        const currentHigh = chartData[chartData.length - 1]?.high ?? "0";
-
-        if (currentHigh === "0") {
-          changeRate = "0";
-        } else {
-          changeRate = formatUnits(
-            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
-              BigInt(1e18),
-            18,
-          );
-        }
-
-        dispatch({
-          type: ActionType.UPDATE_CHART,
-          payload: {
-            index: 0,
-            metric: {
-              chartLastDays: chartData,
-            },
-          },
-        });
-
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 0,
-            metric: {
-              average: String(BigInt(currentHigh) / BigInt(10 ** 18)),
-              variation: formatVariation(changeRate),
-            },
-          },
-        });
-      }
-    };
-
-    fetchChartAndTreasuryData();
-
-    fetchProposals({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 1,
-            metric: {
-              average: result.currentProposalsLaunched,
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchActiveSupply({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 2,
-            metric: {
-              average: String(BigInt(result.activeSupply) / BigInt(10 ** 18)),
-              variation: "-",
-            },
-          },
-        });
-    });
-
-    fetchVotes({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 3,
-            metric: {
-              average: result.currentVotes,
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-
-    fetchAverageTurnout({ daoId, days }).then((result) => {
-      result &&
-        dispatch({
-          type: ActionType.UPDATE_METRIC,
-          payload: {
-            index: 4,
-            metric: {
-              average: String(
-                BigInt(result.currentAverageTurnout) / BigInt(10 ** 18),
-              ),
-              variation: formatVariation(result.changeRate),
-            },
-          },
-        });
-    });
-  }, [daoData, days]);
+export const GovernanceActivityTable = () => {
+  const {
+    days,
+    treasury,
+    treasurySupplyChart,
+    proposals,
+    activeSupply,
+    votes,
+    averageTurnout,
+  } = useGovernanceActivityContext();
 
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
     {
@@ -370,7 +199,55 @@ export const GovernanceActivityTable = ({ days }: { days: TimeInterval }) => {
   return (
     <TheTable
       columns={governanceActivityColumns}
-      data={state.data}
+      data={[
+        {
+          metric: "Treasury",
+          average: treasury.value ? treasury.value : null,
+          variation: treasury.changeRate
+            ? formatVariation(treasury.changeRate)
+            : null,
+          chartLastDays: treasurySupplyChart,
+        },
+        {
+          metric: "Proposals",
+          average: proposals.value ?? null,
+          variation:
+            proposals.changeRate == "0"
+              ? "0.00"
+              : proposals.changeRate
+                ? formatVariation(proposals.changeRate)
+                : null,
+        },
+        {
+          metric: "Active Supply",
+          average: activeSupply.value
+            ? String(BigInt(activeSupply.value) / BigInt(10 ** 18))
+            : null,
+          variation: activeSupply.changeRate
+            ? formatVariation(activeSupply.changeRate)
+            : "-",
+        },
+        {
+          metric: "Votes",
+          average: votes.value ? votes.value : null,
+          variation:
+            votes.changeRate == "0"
+              ? "0.00"
+              : votes.changeRate
+                ? formatVariation(votes.changeRate)
+                : null,
+        },
+        {
+          metric: "Average Turnout",
+          average: averageTurnout.value ? averageTurnout.value : null,
+          variation:
+            averageTurnout.changeRate == "0"
+              ? "0.00"
+              : averageTurnout.changeRate
+                ? formatVariation(averageTurnout.changeRate)
+                : null,
+        },
+      ]}
       withPagination={true}
       withSorting={true}
     />
