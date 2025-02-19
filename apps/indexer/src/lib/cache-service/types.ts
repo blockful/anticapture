@@ -1,6 +1,6 @@
 import { RedisClientType } from "redis";
 
 export interface CacheServiceInterface {
-  get(key: string): Promise<any>;
+  get<T>(key: string): Promise<T | null>;
   set(key: string, value: any): Promise<void>;
 }
