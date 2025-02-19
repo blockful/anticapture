@@ -21,7 +21,7 @@ export class RedisCacheService implements CacheServiceInterface {
     }
   }
 
-  async set(key: string, value: any): Promise<void> {
+  async set<T>(key: string, value: T) {
     try {
       await this.redis.connect();
       await this.redis.set(key, value);
