@@ -104,7 +104,7 @@ export const TheChart = () => {
 
     return (
       <div className="rounded bg-white p-2 text-black shadow-md">
-        <p className="font-bold">{formatDate(Number(label))}</p>
+        <p className="font-bold">Date: {formatDate(Number(label))}</p>
         {payload.map((entry, index) => {
           const value = entry.value !== undefined ? entry.value : 0;
 
