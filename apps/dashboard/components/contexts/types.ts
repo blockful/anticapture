@@ -38,3 +38,25 @@ export interface TokenDistributionContextProps {
   lendingSupplyChart: DaoMetricsDayBucket[];
   setLendingSupplyChart: (lendingSupplyChart: DaoMetricsDayBucket[]) => void;
 }
+
+export interface GovernanceActivityContextProps {
+  days: TimeInterval;
+  setDays: (days: TimeInterval) => void;
+  treasury: MetricData;
+
+  setTreasury: (treasury: MetricData) => void;
+  treasurySupplyChart: DaoMetricsDayBucket[];
+  setTreasurySupplyChart: (treasurySupplyChart: DaoMetricsDayBucket[]) => void;
+
+  proposals: MetricData;
+  setProposals: (proposals: MetricData) => void;
+
+  activeSupply: MetricData;
+  setActiveSupply: (activeSupply: MetricData) => void;
+
+  votes: MetricData;
+  setVotes: (votes: MetricData) => void;
+
+  averageTurnout: MetricData;
+  setAverageTurnout: (averageTurnout: MetricData) => void;
+}

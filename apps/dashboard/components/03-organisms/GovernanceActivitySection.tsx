@@ -9,22 +9,25 @@ import {
 import { GovernanceActivityTable } from "@/components/02-molecules";
 import { governanceActivitySectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { useGovernanceActivityContext } from "../contexts/GovernanceActivityContext";
 
 export const GovernanceActivitySection = () => {
-  const [timeIntervalGovernanceActivity, setTimeIntervalGovernanceActivity] =
-    useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+  const { setDays } = useGovernanceActivityContext();
 
   return (
     <TheSectionLayout
       title="Governance activity"
       icon={<ArrowLeftRight className="text-foreground" />}
       switchDate={
-        <SwitcherDate defaultValue={TimeInterval.NINETY_DAYS} setTimeInterval={setTimeIntervalGovernanceActivity} />
+        <SwitcherDate
+          defaultValue={TimeInterval.NINETY_DAYS}
+          setTimeInterval={setDays}
+        />
       }
       description="Governance activity metrics are based on a 30 days average. Choosing the time frame buttons above will give you the variation based on the 30 days average prior to that date compared to the current"
       anchorId={governanceActivitySectionAnchorID}
     >
-      <GovernanceActivityTable days={timeIntervalGovernanceActivity} />
+      <GovernanceActivityTable />
     </TheSectionLayout>
   );
 };
