@@ -11,7 +11,6 @@ export class AssetsService {
   ) {}
 
   async getTotalAssets(size: number = 90): Promise<TotalAssetsByDay[]> {
-    console.log(size);
     if (!this.cacheService) {
       const response = await this.duneService.fetchTotalAssets(size);
       return response.result.rows;
