@@ -15,7 +15,7 @@ export class AssetsService {
       const response = await this.duneService.fetchTotalAssets();
       return response.result.rows;
     }
-
+    await this.cacheService.connect();
     const cachedData = await this.cacheService.get(
       `dao:${this.daoId}:total-assets`,
     );
@@ -31,6 +31,7 @@ export class AssetsService {
         new Date().setHours(0, 0, 0, 0);
 
     if (!needToFetch) {
+      await this.cacheService.disconnect();
       return formattedCachedData?.result.rows || [];
     }
 
@@ -39,7 +40,7 @@ export class AssetsService {
       `dao:${this.daoId}:total-assets`,
       JSON.stringify(duneResponse),
     );
-
+    await this.cacheService.disconnect();
     return duneResponse.result.rows;
   }
 }
