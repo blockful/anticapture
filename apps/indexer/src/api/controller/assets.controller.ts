@@ -13,7 +13,7 @@ const cacheService = config.redisUrl ? new RedisService(config.redisUrl) : null;
 ponder.get("/dao/:daoId/assets", async (context) => {
   const daoId = context.req.param("daoId") as DaoIdEnum;
   if (![DaoIdEnum.ENS].includes(daoId)) {
-    return context.json({ error: "Not supported for this DAO" }, 400);
+    return context.json({ error: "Not supported for this DAO" }, 404);
   }
 
   const assetsService = new AssetsService(daoId, duneClient, cacheService);
