@@ -7,7 +7,7 @@ export class AssetsService {
   constructor(
     private readonly daoId: DaoIdEnum,
     private readonly duneService: DuneServiceInterface,
-    private readonly cacheService: CacheServiceInterface<string> | null = null,
+    private readonly cacheService?: CacheServiceInterface<string>,
   ) {}
 
   async getTotalAssets(): Promise<TotalAssetsByDay[]> {
