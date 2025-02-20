@@ -128,7 +128,12 @@ export const TheChart = () => {
               }
             />
 
-            <Tooltip content={<ChartTooltipContent />} />
+            <Tooltip
+              labelFormatter={(value) => {
+                return `Day: ${formatDate(value)}`;
+              }}
+              content={<ChartTooltipContent />}
+            />
             <Line
               dataKey="totalSupply"
               type="monotone"
