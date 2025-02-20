@@ -47,8 +47,11 @@ export const TheChart = () => {
     lendingSupply: lendingSupplyChart,
   };
 
-  //TODO: Create a button to define a variable to filter correctly the-chart graph
-  const newDataSets = Object.keys(datasets).filter((item) => item !== "");
+  //TODO: Create a button to define a variable to filter correctly the-chart graph, example:
+  const dataSetKey = ""; // Add "totalSupply" to filter the chart making this value disappear
+  const newDataSets = Object.keys(datasets).filter(
+    (item) => item !== dataSetKey,
+  );
 
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
