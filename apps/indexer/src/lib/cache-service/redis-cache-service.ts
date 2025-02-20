@@ -1,7 +1,7 @@
 import { createClient, RedisClientType } from "redis";
 import { CacheServiceInterface } from "./types";
 
-export class RedisCacheService implements CacheServiceInterface {
+export class RedisCacheService implements CacheServiceInterface<string> {
   private redis: RedisClientType;
   constructor(redisUrl: string | undefined) {
     this.redis = createClient({
@@ -21,7 +21,7 @@ export class RedisCacheService implements CacheServiceInterface {
     }
   }
 
-  async set<T>(key: string, value: T) {
+  async set(key: string, value: string) {
     try {
       await this.redis.connect();
       await this.redis.set(key, value);
