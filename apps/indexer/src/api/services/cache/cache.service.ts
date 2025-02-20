@@ -1,19 +1,11 @@
-import { createClient, RedisClientType } from "redis";
+import Redis from "ioredis";
 import { CacheServiceInterface } from "./cache.service.interface";
 
 export class RedisService implements CacheServiceInterface<string> {
-  private redis: RedisClientType;
+  private redis: Redis;
 
   constructor(redisUrl: string) {
-    this.redis = createClient({ url: redisUrl });
-  }
-
-  async connect(): Promise<void> {
-    await this.redis.connect();
-  }
-
-  async disconnect(): Promise<void> {
-    await this.redis.disconnect();
+    this.redis = new Redis(redisUrl);
   }
 
   async get(key: string): Promise<string | null> {

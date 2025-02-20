@@ -15,7 +15,7 @@
     "start:server": "dotenv -- turbo run serve --filter=@anticapture/indexer",
     "serve:indexer": "dotenv -- turbo run serve --filter=@anticapture/indexer",
     "start:indexer-metrics": "dotenv -- turbo run start --filter=@anticapture/indexer-metrics",
-    "start-raw:indexer":"dotenv -- turbo run start-raw --filter=@anticapture/indexer",
+    "start-raw:indexer": "dotenv -- turbo run start-raw --filter=@anticapture/indexer",
     "dump-database": "dotenv -- turbo run dump-database --filter=@anticapture/indexer",
     "restore-database": "dotenv -- turbo run restore-database --filter=@anticapture/indexer",
     "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'",
@@ -26,9 +26,6 @@
   "dependencies": {
     "@anticapture/dashboard": "./apps/dashboard",
     "@anticapture/indexer": "./apps/indexer",
-    "@hono/swagger-ui": "^0.5.0",
-    "@scalar/hono-api-reference": "^0.5.165",
-    "pino-pretty": "^13.0.0",
     "turbo": "^2.3.1"
   },
   "packageManager": "pnpm@9.14.2",

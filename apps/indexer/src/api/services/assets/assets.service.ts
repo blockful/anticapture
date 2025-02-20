@@ -10,37 +10,31 @@ export class AssetsService {
     private readonly cacheService?: CacheServiceInterface<string>,
   ) {}
 
-  async getTotalAssets(): Promise<TotalAssetsByDay[]> {
+  async getTotalAssets(size: number): Promise<TotalAssetsByDay[]> {
     if (!this.cacheService) {
-      const response = await this.duneService.fetchTotalAssets();
+      const response = await this.duneService.fetchTotalAssets(size);
       return response.result.rows;
     }
-    await this.cacheService.connect();
     const cachedData = await this.cacheService.get(
       `dao:${this.daoId}:total-assets`,
     );
-    let formattedCachedData: DuneResponse | null = null;
+    let formattedCachedData = JSON.parse(cachedData || "") as DuneResponse;
 
-    if (cachedData) {
-      formattedCachedData = JSON.parse(cachedData);
-    }
-
-    const needToFetch =
-      !formattedCachedData ||
-      new Date(formattedCachedData.execution_ended_at).setHours(0, 0, 0, 0) <
+    if (formattedCachedData) {
+      const needToFetch =
+        // If the cache data is from the previous day, we need to fetch the data from the API
+        new Date(formattedCachedData.execution_ended_at).setHours(0, 0, 0, 0) <
         new Date().setHours(0, 0, 0, 0);
-
-    if (!needToFetch) {
-      await this.cacheService.disconnect();
-      return formattedCachedData?.result.rows || [];
+      if (!needToFetch) {
+        return formattedCachedData?.result.rows || [];
+      }
     }
 
-    const duneResponse = await this.duneService.fetchTotalAssets();
+    const duneResponse = await this.duneService.fetchTotalAssets(size);
     await this.cacheService.set(
       `dao:${this.daoId}:total-assets`,
-      JSON.stringify(duneResponse),
+      JSON.stringify(duneResponse)
     );
-    await this.cacheService.disconnect();
     return duneResponse.result.rows;
   }
 }
