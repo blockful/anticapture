@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { TooltipInfo } from "@/components/01-atoms";
+import { useInView } from "react-intersection-observer";
 
 export const TheSectionLayout = ({
   anchorId,
@@ -18,8 +19,20 @@ export const TheSectionLayout = ({
   switchDate?: React.JSX.Element;
   children: React.ReactNode;
 }) => {
+  const { ref, inView } = useInView({
+    threshold: 0.9,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      window.dispatchEvent(
+        new CustomEvent("sectionInView", { detail: anchorId }),
+      );
+    }
+  }, [inView, anchorId]);
+
   return (
-    <div className="flex h-full w-full flex-col gap-5" id={anchorId}>
+    <div className="flex h-full w-full flex-col gap-5" id={anchorId} ref={ref}>
       <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
         <div className="flex items-center gap-3">
           {icon}

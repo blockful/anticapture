@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import { cn } from "@/lib/client/utils";
@@ -16,6 +15,7 @@ import {
   PieChartIcon,
   HeaderDAOSidebarDropdown,
 } from "@/components/01-atoms";
+import { useSectionObserver } from "@/lib/hooks/useSectionObserver";
 
 const enum HeaderNavItems {
   DAO_INFO = "DAO Info",
@@ -24,15 +24,16 @@ const enum HeaderNavItems {
 }
 
 export const HeaderDAOSidebar = () => {
-  const [isNavSelected, setIsNavSelected] = useState<HeaderNavItems>(
-    HeaderNavItems.DAO_INFO,
-  );
+  const { activeSection, handleSectionClick } = useSectionObserver({
+    initialSection: daoInfoSectionAnchorID,
+  });
   const pathname = usePathname();
 
   const isDefault = pathname === "/";
-
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
+
+  const isActive = (sectionId: string) => activeSection === sectionId;
 
   return (
     <BaseHeaderLayoutSidebar>
@@ -41,21 +42,12 @@ export const HeaderDAOSidebar = () => {
           <HeaderDAOSidebarDropdown />
           <div className="flex flex-col px-4 pb-4 pt-1">
             <button
-              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.DAO_INFO ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
-              onClick={() => {
-                const daoInfoAnchorSection = document.getElementById(
-                  daoInfoSectionAnchorID,
-                );
-
-                daoInfoAnchorSection?.scrollIntoView({
-                  behavior: "smooth",
-                });
-                setIsNavSelected(HeaderNavItems.DAO_INFO);
-              }}
+              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(daoInfoSectionAnchorID) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
+              onClick={() => handleSectionClick(daoInfoSectionAnchorID)}
             >
               <PieChartIcon
                 className={cn("text-foreground", {
-                  "text-white": isNavSelected === HeaderNavItems.DAO_INFO,
+                  "text-white": isActive(daoInfoSectionAnchorID),
                 })}
               />
               <p className="text-sm font-medium text-white">
@@ -63,22 +55,14 @@ export const HeaderDAOSidebar = () => {
               </p>
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
-              onClick={() => {
-                const tokenDistributionAnchorSection = document.getElementById(
-                  tokenDistributionSectionAnchorID,
-                );
-
-                tokenDistributionAnchorSection?.scrollIntoView({
-                  behavior: "smooth",
-                });
-                setIsNavSelected(HeaderNavItems.TOKEN_DISTRIBUTION);
-              }}
+              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(tokenDistributionSectionAnchorID) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
+              onClick={() =>
+                handleSectionClick(tokenDistributionSectionAnchorID)
+              }
             >
               <ArrowLeftRight
                 className={cn("text-foreground", {
-                  "text-white":
-                    isNavSelected === HeaderNavItems.TOKEN_DISTRIBUTION,
+                  "text-white": isActive(tokenDistributionSectionAnchorID),
                 })}
               />
               <p className="text-sm font-medium text-white">
@@ -86,22 +70,14 @@ export const HeaderDAOSidebar = () => {
               </p>
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
-              onClick={() => {
-                const governanceActivityAnchorSection = document.getElementById(
-                  governanceActivitySectionAnchorID,
-                );
-
-                governanceActivityAnchorSection?.scrollIntoView({
-                  behavior: "smooth",
-                });
-                setIsNavSelected(HeaderNavItems.GOVERNANCE_ACTIVITY);
-              }}
+              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(governanceActivitySectionAnchorID) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
+              onClick={() =>
+                handleSectionClick(governanceActivitySectionAnchorID)
+              }
             >
               <ActivityIcon
                 className={cn("text-foreground", {
-                  "text-white":
-                    isNavSelected === HeaderNavItems.GOVERNANCE_ACTIVITY,
+                  "text-white": isActive(governanceActivitySectionAnchorID),
                 })}
               />
               <p className="text-sm font-medium text-white">
