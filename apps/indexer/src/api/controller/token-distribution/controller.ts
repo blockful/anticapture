@@ -13,7 +13,7 @@ import {
 } from "./types";
 import { MetricTypesEnum } from "@/lib/constants";
 
-ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
+app.get("/dao/:daoId/total-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");

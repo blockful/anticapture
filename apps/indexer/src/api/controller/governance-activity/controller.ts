@@ -8,8 +8,11 @@ import {
   VotesCompareQueryResult,
 } from "./types";
 import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
+import { Hono } from "hono";
 
-ponder.get("/dao/:daoId/active-supply", async (context) => {
+const app = new Hono();
+
+app.get("/dao/:daoId/active-supply", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -35,7 +38,7 @@ ponder.get("/dao/:daoId/active-supply", async (context) => {
   return context.json(activeSupply);
 });
 
-ponder.get("/dao/:daoId/proposals/compare", async (context) => {
+app.get("/dao/:daoId/proposals/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -86,7 +89,7 @@ ponder.get("/dao/:daoId/proposals/compare", async (context) => {
   return context.json({ ...proposalsCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/votes/compare", async (context) => {
+app.get("/dao/:daoId/votes/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -139,7 +142,7 @@ ponder.get("/dao/:daoId/votes/compare", async (context) => {
   return context.json({ ...votesCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/average-turnout/compare", async (context) => {
+app.get("/dao/:daoId/average-turnout/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");

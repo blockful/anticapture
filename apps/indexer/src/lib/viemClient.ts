@@ -7,12 +7,12 @@ import {
   webSocket,
 } from "viem";
 import { config, ViemConfig } from "../../config";
-import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
+import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
 import dotenv from "dotenv";
 import { anvil, mainnet } from "viem/chains";
-import { ENSGovernorAbi, ENSTokenAbi } from "@/ens/abi";
+import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 import { DaoIdEnum } from "./enums";
-import { GovernorAbiType, TokenAbiType } from "./types";
+import { GovernorAbiType, TokenAbiType } from "../indexer/types";
 dotenv.config();
 
 const ponderConfig =
