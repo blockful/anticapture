@@ -37,6 +37,7 @@ export const TheChart = () => {
     lendingSupplyChart,
   } = useTokenDistributionContext();
 
+  //TODO: Add this datasets into params to create a generic the-chart
   const datasets: Record<keyof typeof chartConfig, DaoMetricsDayBucket[]> = {
     totalSupply: totalSupplyChart,
     delegatedSupply: delegatedSupplyChart,
@@ -45,6 +46,9 @@ export const TheChart = () => {
     dexSupply: dexSupplyChart,
     lendingSupply: lendingSupplyChart,
   };
+
+  //TODO: Create a button to define a variable to filter correctly the-chart graph
+  const newDataSets = Object.keys(datasets).filter((item) => item !== "");
 
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
@@ -77,24 +81,6 @@ export const TheChart = () => {
     return dataPoint;
   });
 
-  const minDate = Math.min(...Array.from(allDates).map(Number));
-  const maxDate = Math.max(...Array.from(allDates).map(Number));
-
-  const minValue = Math.min(
-    ...chartData.flatMap((item) =>
-      Object.values(item).map((value) =>
-        typeof value === "number" ? value : Infinity,
-      ),
-    ),
-  );
-  const maxValue = Math.max(
-    ...chartData.flatMap((item) =>
-      Object.values(item).map((value) =>
-        typeof value === "number" ? value : -Infinity,
-      ),
-    ),
-  );
-
   const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
     active,
     payload,
@@ -126,7 +112,7 @@ export const TheChart = () => {
   };
 
   return (
-    <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-10 text-white">
+    <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
@@ -135,14 +121,14 @@ export const TheChart = () => {
               dataKey="date"
               scale="time"
               type="number"
-              domain={[minDate, maxDate]}
+              domain={["auto", "auto"]}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               tickFormatter={(date) => formatDate(date)}
             />
             <YAxis
-              domain={[minValue * 0.9, maxValue * 1.1]}
+              domain={["auto", "auto"]}
               tickFormatter={(value) =>
                 formatNumberUserReadable(
                   Number(BigInt(Number(value)) / BigInt(10 ** 18)),
@@ -150,15 +136,17 @@ export const TheChart = () => {
               }
             />
             <Tooltip content={<CustomTooltip />} />
-            {Object.keys(chartConfig).map((key) => (
-              <Line
-                key={key}
-                dataKey={key}
-                stroke={chartConfig[key as keyof typeof chartConfig].color}
-                strokeWidth={2}
-                dot={false}
-              />
-            ))}
+            {Object.keys(chartConfig)
+              .filter((item) => newDataSets.includes(item))
+              .map((key) => (
+                <Line
+                  key={key}
+                  dataKey={key}
+                  stroke={chartConfig[key as keyof typeof chartConfig].color}
+                  strokeWidth={2}
+                  dot={false}
+                />
+              ))}
           </LineChart>
         </ResponsiveContainer>
       </ChartContainer>
