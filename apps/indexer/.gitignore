@@ -17,4 +17,8 @@ yarn-error.log*
 /generated/
 /.ponder/
 
+# Dump
 dump
+
+# Migrations
+/src/offchain/migrations/
