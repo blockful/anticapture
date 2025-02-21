@@ -11,13 +11,11 @@ export const offchainSchema = pgSchema("offchain");
 export const petitionSignatures = offchainSchema.table(
   "petition_signatures",
   {
-    accountId: text().notNull(),
-    daoId: text().notNull(),
-    signature: text().notNull(),
-    message: text().notNull(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
+    accountId: text("account_id").notNull(),
+    daoId: text("dao_id").notNull(),
+    signature: text("signature").notNull(),
+    message: text("message").notNull(),
+    timestamp: bigint("timestamp", { mode: "bigint" }).notNull(),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.accountId, table.daoId] }),
-  }),
+  (table) => [primaryKey({ columns: [table.accountId, table.daoId] })],
 );
