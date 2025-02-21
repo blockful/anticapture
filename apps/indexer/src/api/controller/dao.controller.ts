@@ -1,7 +1,9 @@
 import { eq } from "ponder";
 import { dao } from "ponder:schema";
-import app from "..";
 import { db } from "ponder:api";
+import { Hono } from "hono";
+
+const app = new Hono();
 
 app.get("/dao/:daoId", async (context) => {
   const [selectedDao] = await db
@@ -15,3 +17,5 @@ app.get("/dao", async (context) => {
   const daos = await db.select().from(dao);
   return context.json(daos);
 });
+
+export default app;
