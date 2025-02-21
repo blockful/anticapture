@@ -38,7 +38,7 @@ export const offchainRelations = relations(
       fields: [offchainSchema.petitionSignatures.daoId],
       references: [ponderSchema.dao.id],
     }),
-  })
+  }),
 );
 
 export const schema = {
