@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm run drop-public && npm run setup-drizzle && ponder dev --schema public",
     "start": "npm run drop-public && npm run setup-drizzle && ponder start --schema public",
-    "start-raw": "npm run drop-all && npm run setup-drizzle && ponder start --schema public",
+    "start-raw": "npm run drop-all-schemas && npm run setup-drizzle && ponder start --schema public",
     "codegen": "ponder codegen",
     "serve": "ponder serve --schema public",
     "lint": "eslint . --ext .ts",
