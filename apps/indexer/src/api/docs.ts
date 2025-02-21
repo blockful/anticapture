@@ -1,10 +1,10 @@
 import { swaggerUI } from "@hono/swagger-ui";
-import { ponder } from "ponder:registry";
+import app from ".";
 
 // Use the middleware to serve Swagger UI at /ui
-ponder.hono.get("/docs", swaggerUI({ url: "/doc-json" }));
+app.get("/docs", swaggerUI({ url: "/doc-json" }));
 
-ponder.hono.get("/doc-json", (c) => {
+app.get("/doc-json", (c) => {
   return c.json({
     openapi: "3.0.2",
     info: {
