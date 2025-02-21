@@ -11,8 +11,10 @@ import {
   TreasuryQueryResult,
 } from "./types";
 import { MetricTypesEnum } from "@/lib/constants";
-import app from "@/api";
 import { db } from "ponder:api";
+import { Hono } from "hono";
+
+const app = new Hono();
 
 app.get("/dao/:daoId/total-supply/compare", async (context) => {
   //Handling req query and params
@@ -355,3 +357,5 @@ app.get("/dao/:daoId/lending-supply/compare", async (context) => {
   // Returning response
   return context.json({ ...lendingSupplyCompare, changeRate });
 });
+
+export default app;

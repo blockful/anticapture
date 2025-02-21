@@ -4,7 +4,10 @@ import { DuneService } from "../services/dune/dune.service";
 import { AssetsService } from "../services/assets/assets.service";
 import { RedisService } from "../services/cache/redis.service";
 import { DaysEnum } from "@/lib/daysEnum";
-import app from "@/api";
+import { Hono } from "hono";
+
+const app = new Hono();
+
 const config = getConfig();
 
 const duneClient = new DuneService(config.duneApiUrl, config.duneApiKey);
@@ -29,3 +32,5 @@ app.get("/dao/:daoId/assets", async (context) => {
 
   return context.json(data);
 });
+
+export default app;
