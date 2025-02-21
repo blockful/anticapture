@@ -7,8 +7,10 @@ import {
   VotesCompareQueryResult,
 } from "./types";
 import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
-import app from "@/api";
 import { db } from "ponder:api";
+import { Hono } from "hono";
+
+const app = new Hono();
 
 app.get("/dao/:daoId/active-supply", async (context) => {
   //Handling req query and params
@@ -200,3 +202,5 @@ app.get("/dao/:daoId/average-turnout/compare", async (context) => {
   // Returning response
   return context.json({ ...averageTurnoutCompare, changeRate });
 });
+
+export default app;
