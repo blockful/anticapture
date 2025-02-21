@@ -8,8 +8,6 @@ import {
   VotesCompareQueryResult,
 } from "./types";
 import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
-import { MetricTypesEnum } from "@/lib/constants";
-import { formatUnits } from "viem";
 
 ponder.get("/dao/:daoId/active-supply", async (context) => {
   //Handling req query and params

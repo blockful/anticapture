@@ -7,7 +7,8 @@
     "DUNE_API_URL",
     "DUNE_API_KEY",
     "START_BLOCK",
-    "STATUS"
+    "STATUS",
+    "REDIS_URL"
   ],
   "globalDependencies": [".env", "test.ts", "./migrations"],
   "tasks": {
