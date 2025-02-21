@@ -8,9 +8,7 @@ import {
   VotesCompareQueryResult,
 } from "./types";
 import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
-import { Hono } from "hono";
-
-const app = new Hono();
+import app from "@/api";
 
 app.get("/dao/:daoId/active-supply", async (context) => {
   //Handling req query and params

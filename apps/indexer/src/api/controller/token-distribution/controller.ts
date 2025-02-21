@@ -12,6 +12,7 @@ import {
   TreasuryQueryResult,
 } from "./types";
 import { MetricTypesEnum } from "@/lib/constants";
+import app from "@/api";
 
 app.get("/dao/:daoId/total-supply/compare", async (context) => {
   //Handling req query and params
