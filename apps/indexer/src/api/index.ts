@@ -7,6 +7,7 @@ import {
   tokenDistribution,
   assets,
   dao,
+  petition,
 } from "./controller";
 
 const app = new Hono();
@@ -18,5 +19,6 @@ app.route("/", governanceActivity);
 app.route("/", tokenDistribution);
 app.route("/", assets);
 app.route("/", dao);
+app.route("/", petition);
 
 export default app;

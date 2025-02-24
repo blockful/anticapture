@@ -1,7 +1,9 @@
+import { milisecondsInDay } from "./constants";
+
 export enum DaysEnum {
-  "7d" = 7 * 86400000,
-  "30d" = 30 * 86400000,
-  "90d" = 90 * 86400000,
-  "180d" = 180 * 86400000,
-  "365d" = 365 * 86400000,
+  "7d" = 7 * milisecondsInDay,
+  "30d" = 30 * milisecondsInDay,
+  "90d" = 90 * milisecondsInDay,
+  "180d" = 180 * milisecondsInDay,
+  "365d" = 365 * milisecondsInDay,
 }

@@ -4,7 +4,7 @@ export interface Config {
   redisUrl?: string;
 }
 
-export const getConfig = (): Config => {
+export const getApiConfig = (): Config => {
   const config: Config = {
     duneApiUrl: process.env.DUNE_API_URL || "",
     duneApiKey: process.env.DUNE_API_KEY || "",

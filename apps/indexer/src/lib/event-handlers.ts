@@ -31,7 +31,7 @@ import {
   DaoProposalExecutedEvent,
   DaoTransferEvent,
   DaoVoteCastEvent,
-} from "../indexer/types";
+} from "@/indexer/types";
 
 export const delegateChanged = async (
   event: DaoDelegateChangedEvent,

@@ -1,14 +1,14 @@
 import { DaoIdEnum } from "@/lib/enums";
-import { getConfig } from "../config/config";
-import { DuneService } from "../services/dune/dune.service";
-import { AssetsService } from "../services/assets/assets.service";
-import { RedisService } from "../services/cache/redis.service";
+import { getApiConfig } from "@/api/config/config";
+import { DuneService } from "@/api/services/dune/dune.service";
+import { AssetsService } from "@/api/services/assets/assets.service";
+import { RedisService } from "@/api/services/cache/redis.service";
 import { DaysEnum } from "@/lib/daysEnum";
 import { Hono } from "hono";
 
 const app = new Hono();
 
-const config = getConfig();
+const config = getApiConfig();
 
 const duneClient = new DuneService(config.duneApiUrl, config.duneApiKey);
 const cacheService = config.redisUrl
