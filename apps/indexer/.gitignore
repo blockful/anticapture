@@ -19,6 +19,3 @@ yarn-error.log*
 
 # Dump
 dump
-
-# Migrations
-/src/offchain/migrations/

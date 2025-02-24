@@ -1,37 +1,56 @@
 import { db, schema } from "@/offchain/db.schema";
-import { PetitionSignature } from "./types";
+import { isPetitionSignature, PetitionSignature } from "./types";
 import { Hono } from "hono";
 import { Hex, verifyMessage } from "viem";
-import { sql } from "drizzle-orm/sql";
+import { eq } from "drizzle-orm";
 
 const app = new Hono();
 
 app.get("/petition/:daoId", async (context) => {
+  // Getting the daoId from the url
   const daoId = context.req.param("daoId");
-  const queryResult = await db.execute(sql`
-    SELECT ps.*, COALESCE(ap."voting_power", 0) as "votingPower" FROM "offchain"."petition_signatures" ps
-    LEFT JOIN "public"."account" a ON a."id" = ps."account_id"
-    LEFT JOIN "public"."account_power" ap ON ap."account_id" = a."id"
-    WHERE ps."dao_id" = ${daoId}
-  `);
-  return context.json(queryResult.rows);
+  // Getting the petition signatures from the db
+  const petitionSignatures = await db
+    .select()
+    .from(schema.petitionSignatures)
+    .leftJoin(
+      schema.account,
+      eq(schema.petitionSignatures.accountId, schema.account.id),
+    )
+    .leftJoin(
+      schema.accountPower,
+      eq(schema.account.id, schema.accountPower.accountId),
+    )
+    .where(eq(schema.petitionSignatures.daoId, daoId));
+  // Returning the petition signatures
+  return context.json(petitionSignatures);
 });
 
 app.post("/petition", async (context) => {
-  const petitionSignature =
-    (await context.req.json()) as unknown as PetitionSignature;
+  // Getting the body and verifying if it's in the correct format
+  const body = (await context.req.json()) as any;
+
+  if (!isPetitionSignature(body)) {
+    return context.json({ error: "Invalid petition signature" }, 400);
+  }
+
+  // Verifying if the signature comes from the address, and the signed message is the same.
+  const petitionSignature = body as PetitionSignature;
   const verifiedSignature = await verifyMessage({
     message: petitionSignature.message,
     signature: petitionSignature.signature as Hex,
     address: petitionSignature.accountId as `0x${string}`,
   });
+
   if (verifiedSignature) {
+    // Inserts the message into the db
     await db.insert(schema.petitionSignatures).values({
       ...petitionSignature,
-      timestamp: BigInt(petitionSignature.timestamp),
+      timestamp: petitionSignature.timestamp,
     });
     return context.json({ message: "Success!" }, 200);
   }
+  // Returns error in case the signature is not valid
   return context.json({ error: "Invalid signature" }, 400);
 });
 

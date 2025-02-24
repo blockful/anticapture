@@ -1,7 +1,7 @@
 import { DaoIdEnum } from "@/lib/enums";
-import { TotalAssetsByDay, DuneResponse } from "../dune/types";
-import { CacheServiceInterface } from "../cache/cache.service.interface";
-import { DuneServiceInterface } from "../dune/dune.service.interface";
+import { TotalAssetsByDay, DuneResponse } from "@/api/services/dune/types";
+import { CacheServiceInterface } from "@/api/services/cache/cache.service.interface";
+import { DuneServiceInterface } from "@/api/services/dune/dune.service.interface";
 
 export class AssetsService {
   constructor(

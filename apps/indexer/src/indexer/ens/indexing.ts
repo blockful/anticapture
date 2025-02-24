@@ -14,7 +14,7 @@ import {
   proposalExecuted,
   tokenTransfer,
   voteCast,
-} from "../../lib/event-handlers";
+} from "@/lib/event-handlers";
 import viemClient from "@/lib/viemClient";
 import { DaoIdEnum } from "@/lib/enums";
 import { dao, daoToken, token } from "ponder:schema";
