@@ -1,9 +1,4 @@
-export type TotalAssetsByDay = {
-  totalAssets: string;
-  date: string;
-};
-
-export type DuneResponse = {
+export interface DuneResponse {
   execution_id: string;
   query_id: number;
   is_execution_finished: boolean;
@@ -17,4 +12,9 @@ export type DuneResponse = {
   };
   next_uri: string;
   next_offset: number;
-};
+}
+
+export interface TotalAssetsByDay {
+  totalAssets: string;
+  date: string;
+}

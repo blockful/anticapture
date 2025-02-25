@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE;\" && ponder dev --schema public",
-    "start": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE;\" && ponder start --schema public",
+    "dev": "ponder dev --schema public",
+    "start": "ponder start --schema public",
     "start-raw": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS ponder_sync CASCADE\" && ponder start --schema public",
     "codegen": "ponder codegen",
     "serve": "ponder serve --schema public",
@@ -22,6 +22,7 @@
     "@hono/swagger-ui": "^0.5.0",
     "@viem/anvil": "^0.0.10",
     "hono": "^4.5.0",
+    "ioredis": "^5.5.0",
     "ponder": "^0.8.5",
     "viem": "^2.21.9"
   },
