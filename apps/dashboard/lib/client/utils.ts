@@ -48,10 +48,11 @@ export function formatNumberUserReadable(num: number): string {
 }
 
 export function formatBlocksToUserReadable(num: number): string {
-  if (num < 1) return "0 sec";
-
   // Constants
   const SECONDS_PER_BLOCK = 12;
+
+  // Handle zero or negative blocks
+  if (num <= 0) return "0 sec";
 
   // Conversion table (in blocks)
   const units = [
@@ -65,7 +66,7 @@ export function formatBlocksToUserReadable(num: number): string {
 
   // For small block counts, just show seconds
   if (num < 5) {
-    const seconds = num * SECONDS_PER_BLOCK;
+    const seconds = Math.round(num * SECONDS_PER_BLOCK);
     return formatTimeUnit(seconds, "sec");
   }
 
@@ -91,8 +92,8 @@ export function formatBlocksToUserReadable(num: number): string {
 
   // Handle remaining seconds
   if (remaining > 0) {
-    const seconds = remaining * SECONDS_PER_BLOCK;
-    if (parts.length > 0) {
+    const seconds = Math.round(remaining * SECONDS_PER_BLOCK);
+    if (parts.length > 0 || seconds > 0) {
       parts.push(formatTimeUnit(seconds, "sec"));
     }
   }
