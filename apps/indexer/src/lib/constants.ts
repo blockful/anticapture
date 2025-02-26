@@ -88,7 +88,7 @@ export const CEXAddresses = {
     MEXCHotWallet3: "0x3CC936b795A188F0e246cBB2D74C5Bd190aeCF18",
     KuCoinColdWallet: "0x2933782B5A8d72f2754103D1489614F29bfA4625",
     UpbitColdWallet: "0x245445940B317E509002eb682E03f4429184059d",
-  }
+  },
 };
 
 export const DEXAddresses = {
@@ -110,7 +110,7 @@ export const DEXAddresses = {
   [DaoIdEnum.ENS]: {
     Uniswap_ENS_5: "0x92560C178cE069CC014138eD3C2F5221Ba71f58a",
     SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d",
-  }
+  },
 };
 
 export const LendingAddresses = {
@@ -118,12 +118,11 @@ export const LendingAddresses = {
     AaveEthUni: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
     MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
     CompoundCUNI: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
-
   },
   [DaoIdEnum.ENS]: {
     //After research using intel.arkm and defi llama token-usage page, I only found this lending address so far
     AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e",
-  }
+  },
 };
 
 export const BurningAddresses = {
@@ -137,8 +136,7 @@ export const BurningAddresses = {
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-
-  }
+  },
 };
 
 export enum MetricTypesEnum {

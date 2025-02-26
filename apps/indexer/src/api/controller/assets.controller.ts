@@ -2,7 +2,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { getApiConfig } from "@/api/config/config";
 import { DuneService } from "@/api/services/dune/dune.service";
 import { AssetsService } from "@/api/services/assets/assets.service";
-import { RedisService } from "@/api/services/cache/redis.service";
+import { redisService } from "@/api/services/cache/redis.service";
 import { DaysEnum } from "@/lib/daysEnum";
 import { Hono } from "hono";
 
@@ -11,9 +11,6 @@ const app = new Hono();
 const config = getApiConfig();
 
 const duneClient = new DuneService(config.duneApiUrl, config.duneApiKey);
-const cacheService = config.redisUrl
-  ? new RedisService(config.redisUrl)
-  : undefined;
 
 app.get("/dao/:daoId/assets", async (context) => {
   const daoId = context.req.param("daoId") as DaoIdEnum;
@@ -27,7 +24,7 @@ app.get("/dao/:daoId/assets", async (context) => {
   }
   const sizeNumber =
     days !== undefined ? parseInt(days.split("d")[0] as `${number}`) : 90;
-  const assetsService = new AssetsService(daoId, duneClient, cacheService);
+  const assetsService = new AssetsService(daoId, duneClient, redisService);
   const data = await assetsService.getTotalAssets(sizeNumber);
 
   return context.json(data);

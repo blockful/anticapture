@@ -3,7 +3,7 @@ import { DuneResponse } from "./types";
 export class DuneService {
   constructor(
     private readonly apiUrl: string,
-    private readonly apiKey: string
+    private readonly apiKey: string,
   ) {}
 
   async fetchTotalAssets(size: number): Promise<DuneResponse> {
