@@ -57,8 +57,8 @@ export const TimelockCard = ({
               inverted={true}
               onClick={() =>
                 window.open(
-                  "_blank",
                   `${daoConstants.cancelFunction}`,
+                  "_blank",
                   "noopener,noreferrer",
                 )
               }
