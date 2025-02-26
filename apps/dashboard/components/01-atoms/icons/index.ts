@@ -9,6 +9,7 @@ export * from "./BlocksIcon";
 export * from "./CircleCheckIcon";
 export * from "./CircleNotCheckedIcon";
 export * from "./ClickIcon";
+export * from "./CrossHairIcon";
 export * from "./CrownIcon";
 export * from "./DollarIcon";
 export * from "./EnsIcon";
