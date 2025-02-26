@@ -5,18 +5,18 @@ import { zeroAddress } from "viem";
 export const dao = onchainTable("dao", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   quorum: drizzle.bigint(),
-  proposalThreshold: drizzle.bigint(),
-  votingDelay: drizzle.bigint(),
-  votingPeriod: drizzle.bigint(),
-  timelockDelay: drizzle.bigint(),
+  proposalThreshold: drizzle.bigint("proposal_threshold"),
+  votingDelay: drizzle.bigint("voting_delay"),
+  votingPeriod: drizzle.bigint("voting_period"),
+  timelockDelay: drizzle.bigint("timelock_delay"),
 }));
 
 export const daoToken = onchainTable(
   "dao_token",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text().notNull(),
-    tokenId: drizzle.text().notNull(),
+    daoId: drizzle.text("dao_id").notNull(),
+    tokenId: drizzle.text("token_id").notNull(),
   }),
   (table) => ({
     daoTokenDaoIdx: index().on(table.daoId),
@@ -28,12 +28,12 @@ export const token = onchainTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
   decimals: drizzle.integer().notNull(),
-  totalSupply: drizzle.bigint().notNull(),
-  delegatedSupply: drizzle.bigint().notNull(),
-  cexSupply: drizzle.bigint().notNull(),
-  dexSupply: drizzle.bigint().notNull(),
-  lendingSupply: drizzle.bigint().notNull(),
-  circulatingSupply: drizzle.bigint().notNull(),
+  totalSupply: drizzle.bigint("total_supply").notNull(),
+  delegatedSupply: drizzle.bigint("delegated_supply").notNull(),
+  cexSupply: drizzle.bigint("cex_supply").notNull(),
+  dexSupply: drizzle.bigint("dex_supply").notNull(),
+  lendingSupply: drizzle.bigint("lending_supply").notNull(),
+  circulatingSupply: drizzle.bigint("circulating_supply").notNull(),
   treasury: drizzle.bigint().notNull(),
 }));
 
@@ -45,8 +45,8 @@ export const accountBalance = onchainTable(
   "account_balance",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    tokenId: drizzle.text(),
-    accountId: drizzle.text(),
+    tokenId: drizzle.text("token_id"),
+    accountId: drizzle.text("account_id"),
     balance: drizzle.bigint().notNull(),
   }),
   (table) => ({
@@ -59,14 +59,17 @@ export const accountPower = onchainTable(
   "account_power",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    accountId: drizzle.text(),
-    daoId: drizzle.text(),
-    votingPower: drizzle.bigint().default(BigInt(0)).notNull(),
-    votesCount: drizzle.integer().default(0).notNull(),
-    proposalsCount: drizzle.integer().default(0).notNull(),
-    delegationsCount: drizzle.integer().default(0).notNull(),
+    accountId: drizzle.text("account_id"),
+    daoId: drizzle.text("dao_id"),
+    votingPower: drizzle.bigint("voting_power").default(BigInt(0)).notNull(),
+    votesCount: drizzle.integer("votes_count").default(0).notNull(),
+    proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
+    delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
     delegate: drizzle.text().default(zeroAddress).notNull(),
-    lastVoteTimestamp: drizzle.bigint().default(BigInt(0)).notNull(),
+    lastVoteTimestamp: drizzle
+      .bigint("last_vote_timestamp")
+      .default(BigInt(0))
+      .notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
@@ -79,9 +82,9 @@ export const votingPowerHistory = onchainTable(
   "voting_power_history",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text(),
-    accountId: drizzle.text(),
-    votingPower: drizzle.bigint().notNull(),
+    daoId: drizzle.text("dao_id"),
+    accountId: drizzle.text("account_id"),
+    votingPower: drizzle.bigint("voting_power").notNull(),
     timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
@@ -94,9 +97,9 @@ export const delegations = onchainTable(
   "delegations",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text(),
-    delegateeAccountId: drizzle.text(),
-    delegatorAccountId: drizzle.text(),
+    daoId: drizzle.text("dao_id"),
+    delegateeAccountId: drizzle.text("delegatee_account_id"),
+    delegatorAccountId: drizzle.text("delegator_account_id"),
     timestamp: drizzle.bigint(),
   }),
   (table) => ({
@@ -110,11 +113,11 @@ export const transfers = onchainTable(
   "transfers",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text(),
-    tokenId: drizzle.text(),
+    daoId: drizzle.text("dao_id"),
+    tokenId: drizzle.text("token_id"),
     amount: drizzle.bigint(),
-    fromAccountId: drizzle.text(),
-    toAccountId: drizzle.text(),
+    fromAccountId: drizzle.text("from_account_id"),
+    toAccountId: drizzle.text("to_account_id"),
     timestamp: drizzle.bigint(),
   }),
   (table) => ({
@@ -127,9 +130,9 @@ export const votesOnchain = onchainTable(
   "votes_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text(),
-    voterAccountId: drizzle.text(),
-    proposalId: drizzle.text(),
+    daoId: drizzle.text("dao_id"),
+    voterAccountId: drizzle.text("voter_account_id"),
+    proposalId: drizzle.text("proposal_id"),
     support: drizzle.text(),
     weight: drizzle.text(),
     reason: drizzle.text(),
@@ -146,20 +149,20 @@ export const proposalsOnchain = onchainTable(
   "proposals_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text(),
-    proposerAccountId: drizzle.text(),
+    daoId: drizzle.text("dao_id"),
+    proposerAccountId: drizzle.text("proposer_account_id"),
     targets: drizzle.json(),
     values: drizzle.json(),
     signatures: drizzle.json(),
     calldatas: drizzle.json(),
-    startBlock: drizzle.text(),
-    endBlock: drizzle.text(),
+    startBlock: drizzle.text("start_block"),
+    endBlock: drizzle.text("end_block"),
     description: drizzle.text(),
     timestamp: drizzle.bigint(),
     status: drizzle.text(),
-    forVotes: drizzle.bigint(),
-    againstVotes: drizzle.bigint(),
-    abstainVotes: drizzle.bigint(),
+    forVotes: drizzle.bigint("for_votes"),
+    againstVotes: drizzle.bigint("against_votes"),
+    abstainVotes: drizzle.bigint("abstain_votes"),
   }),
   (table) => ({
     proposalsOnchainDaoIdx: index().on(table.daoId),
@@ -176,8 +179,8 @@ export const daoMetricsDayBuckets = onchainTable(
   "dao_metrics_day_buckets",
   (drizzle) => ({
     date: drizzle.bigint().notNull(),
-    daoId: drizzle.text().notNull(),
-    tokenId: drizzle.text().notNull(),
+    daoId: drizzle.text("dao_id").notNull(),
+    tokenId: drizzle.text("token_id").notNull(),
     metricType: metricType("metricType").notNull(),
     open: drizzle.bigint().notNull(),
     close: drizzle.bigint().notNull(),

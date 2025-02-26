@@ -73,3 +73,14 @@ export function formatBlocksToUserReadable(num: number): string {
 
 export const formatVariation = (rateRaw: string): string =>
   `${Number(Number(rateRaw) * 100).toFixed(2)}`;
+
+export const timestampToReadableDate = (date: number) => {
+  if (isNaN(date) || date === null || date === undefined) return "Invalid Date";
+
+  const timestamp = date * 1000;
+  const newDate = new Date(timestamp);
+
+  if (isNaN(newDate.getTime())) return "Invalid Date";
+
+  return newDate.toLocaleDateString("en-US");
+};
