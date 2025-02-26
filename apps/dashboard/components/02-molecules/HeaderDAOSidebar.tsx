@@ -2,9 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
-import { cn } from "@/lib/client/utils";
 import {
   daoInfoSectionAnchorID,
+  extractableValueSectionAnchorID,
   governanceActivitySectionAnchorID,
   tokenDistributionSectionAnchorID,
 } from "@/lib/client/constants";
@@ -14,26 +14,23 @@ import {
   BaseHeaderLayoutSidebar,
   PieChartIcon,
   HeaderDAOSidebarDropdown,
+  ButtonHeaderDAOSidebar,
+  CrossHairIcon,
 } from "@/components/01-atoms";
-import { useSectionObserver } from "@/lib/hooks/useSectionObserver";
 
 const enum HeaderNavItems {
   DAO_INFO = "DAO Info",
+  EXTRACTABLE_VALUE = "Extractable Value",
   TOKEN_DISTRIBUTION = "Token Distribution",
   GOVERNANCE_ACTIVITY = "Governance Activity",
 }
 
 export const HeaderDAOSidebar = () => {
-  const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: daoInfoSectionAnchorID,
-  });
   const pathname = usePathname();
 
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
-
-  const isActive = (sectionId: string) => activeSection === sectionId;
 
   return (
     <BaseHeaderLayoutSidebar>
@@ -41,49 +38,26 @@ export const HeaderDAOSidebar = () => {
         <div className="flex w-full flex-col">
           <HeaderDAOSidebarDropdown />
           <div className="flex flex-col px-4 pb-4 pt-1">
-            <button
-              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(daoInfoSectionAnchorID) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
-              onClick={() => handleSectionClick(daoInfoSectionAnchorID)}
-            >
-              <PieChartIcon
-                className={cn("text-foreground", {
-                  "text-white": isActive(daoInfoSectionAnchorID),
-                })}
-              />
-              <p className="text-sm font-medium text-white">
-                {HeaderNavItems.DAO_INFO}
-              </p>
-            </button>
-            <button
-              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(tokenDistributionSectionAnchorID) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
-              onClick={() =>
-                handleSectionClick(tokenDistributionSectionAnchorID)
-              }
-            >
-              <ArrowLeftRight
-                className={cn("text-foreground", {
-                  "text-white": isActive(tokenDistributionSectionAnchorID),
-                })}
-              />
-              <p className="text-sm font-medium text-white">
-                {HeaderNavItems.TOKEN_DISTRIBUTION}
-              </p>
-            </button>
-            <button
-              className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(governanceActivitySectionAnchorID) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
-              onClick={() =>
-                handleSectionClick(governanceActivitySectionAnchorID)
-              }
-            >
-              <ActivityIcon
-                className={cn("text-foreground", {
-                  "text-white": isActive(governanceActivitySectionAnchorID),
-                })}
-              />
-              <p className="text-sm font-medium text-white">
-                {HeaderNavItems.GOVERNANCE_ACTIVITY}
-              </p>
-            </button>
+            <ButtonHeaderDAOSidebar
+              anchorId={daoInfoSectionAnchorID}
+              icon={PieChartIcon}
+              label={HeaderNavItems.DAO_INFO}
+            />
+            <ButtonHeaderDAOSidebar
+              anchorId={extractableValueSectionAnchorID}
+              icon={CrossHairIcon}
+              label={HeaderNavItems.EXTRACTABLE_VALUE}
+            />
+            <ButtonHeaderDAOSidebar
+              anchorId={tokenDistributionSectionAnchorID}
+              icon={ArrowLeftRight}
+              label={HeaderNavItems.TOKEN_DISTRIBUTION}
+            />
+            <ButtonHeaderDAOSidebar
+              anchorId={governanceActivitySectionAnchorID}
+              icon={ActivityIcon}
+              label={HeaderNavItems.GOVERNANCE_ACTIVITY}
+            />
           </div>
         </div>
       )}
