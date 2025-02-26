@@ -84,3 +84,7 @@ export const timestampToReadableDate = (date: number) => {
 
   return newDate.toLocaleDateString("en-US");
 };
+
+export function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
