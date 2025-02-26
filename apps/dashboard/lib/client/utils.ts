@@ -74,9 +74,13 @@ export function formatBlocksToUserReadable(num: number): string {
 export const formatVariation = (rateRaw: string): string =>
   `${Number(Number(rateRaw) * 100).toFixed(2)}`;
 
-export const formatDate = (date: number) => {
-  if (!date) return "Invalid Date";
-  const timestamp = Number(date) * 1000;
+export const timestampToReadableDate = (date: number) => {
+  if (isNaN(date) || date === null || date === undefined) return "Invalid Date";
+
+  const timestamp = date * 1000;
   const newDate = new Date(timestamp);
-  return `${newDate.getMonth() + 1}/${newDate.getDate()}/${newDate.getFullYear()}`;
+
+  if (isNaN(newDate.getTime())) return "Invalid Date";
+
+  return newDate.toLocaleDateString("en-US");
 };

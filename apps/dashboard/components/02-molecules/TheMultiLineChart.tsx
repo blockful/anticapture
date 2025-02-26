@@ -12,7 +12,10 @@ import {
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { useTokenDistributionContext } from "@/components/contexts";
-import { formatDate, formatNumberUserReadable } from "@/lib/client/utils";
+import {
+  formatNumberUserReadable,
+  timestampToReadableDate,
+} from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/server/backend";
 
 const chartConfig = {
@@ -93,7 +96,9 @@ export const TheMultiLineChart = () => {
 
     return (
       <div className="rounded bg-white p-2 text-black shadow-md">
-        <p className="font-bold">Date: {formatDate(Number(label))}</p>
+        <p className="font-bold">
+          Date: {timestampToReadableDate(Number(label))}
+        </p>
         {payload.map((entry, index) => {
           const value = entry.value !== undefined ? entry.value : 0;
           const formattedName =
@@ -131,7 +136,7 @@ export const TheMultiLineChart = () => {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(date) => formatDate(date)}
+              tickFormatter={(date) => timestampToReadableDate(date)}
             />
             <YAxis
               domain={["auto", "auto"]}
