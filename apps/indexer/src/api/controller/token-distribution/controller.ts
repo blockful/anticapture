@@ -1,7 +1,6 @@
 import { DaysEnum } from "@/lib/daysEnum";
 import { sql } from "ponder";
-import { ponder } from "ponder:registry";
-import { formatUnits, zeroAddress } from "viem";
+import { formatUnits } from "viem";
 import {
   CexSupplyQueryResult,
   CirculatingSupplyQueryResult,
@@ -12,8 +11,12 @@ import {
   TreasuryQueryResult,
 } from "./types";
 import { MetricTypesEnum } from "@/lib/constants";
+import { db } from "ponder:api";
+import { Hono } from "hono";
 
-ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
+const app = new Hono();
+
+app.get("/dao/:daoId/total-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -25,7 +28,7 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`         
+  const queryResult = await db.execute(sql`         
   WITH  "old_total_supply" as (
     SELECT db.average as old_total_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -59,7 +62,7 @@ ponder.get("/dao/:daoId/total-supply/compare", async (context) => {
   return context.json({ ...totalSupplyCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
+app.get("/dao/:daoId/delegated-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -71,7 +74,7 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`
+  const queryResult = await db.execute(sql`
   WITH  "old_delegated_supply" as (
     SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -105,7 +108,7 @@ ponder.get("/dao/:daoId/delegated-supply/compare", async (context) => {
   return context.json({ ...delegatedSupplyCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
+app.get("/dao/:daoId/circulating-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -117,7 +120,7 @@ ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`
+  const queryResult = await db.execute(sql`
     WITH  "old_supply" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
@@ -153,7 +156,7 @@ ponder.get("/dao/:daoId/circulating-supply/compare", async (context) => {
   return context.json({ ...circulatingSupplyCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/treasury/compare", async (context) => {
+app.get("/dao/:daoId/treasury/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -165,7 +168,7 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`
+  const queryResult = await db.execute(sql`
     WITH  "old_treasury" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
@@ -203,7 +206,7 @@ ponder.get("/dao/:daoId/treasury/compare", async (context) => {
   return context.json({ ...treasuryCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
+app.get("/dao/:daoId/cex-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -215,7 +218,7 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`
+  const queryResult = await db.execute(sql`
   WITH  "old_cex_supply" as (
     SELECT db.average as old_cex_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -254,7 +257,7 @@ ponder.get("/dao/:daoId/cex-supply/compare", async (context) => {
   return context.json({ ...cexSupplyCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
+app.get("/dao/:daoId/dex-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -266,7 +269,7 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`
+  const queryResult = await db.execute(sql`
     WITH  "old_supply" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
@@ -305,7 +308,7 @@ ponder.get("/dao/:daoId/dex-supply/compare", async (context) => {
   return context.json({ ...dexSupplyCompare, changeRate });
 });
 
-ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
+app.get("/dao/:daoId/lending-supply/compare", async (context) => {
   //Handling req query and params
   const daoId = context.req.param("daoId");
   const days: string | undefined = context.req.query("days");
@@ -317,7 +320,7 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
     BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
 
   //Running Query
-  const queryResult = await context.db.execute(sql`
+  const queryResult = await db.execute(sql`
   WITH  "old_lending_supply" as (
     SELECT db.average as "old_lending_supply_amount" from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -354,3 +357,5 @@ ponder.get("/dao/:daoId/lending-supply/compare", async (context) => {
   // Returning response
   return context.json({ ...lendingSupplyCompare, changeRate });
 });
+
+export default app;

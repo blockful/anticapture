@@ -1,5 +1,5 @@
-import { ENSGovernorAbi, ENSTokenAbi } from "@/ens/abi";
-import { UNIGovernorAbi, UNITokenAbi } from "@/uni/abi";
+import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
+import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
 import { Event } from "ponder:registry";
 
 export type TokenAbiType = typeof UNITokenAbi | typeof ENSTokenAbi;
