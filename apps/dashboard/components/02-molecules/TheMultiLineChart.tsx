@@ -27,7 +27,7 @@ const chartConfig = {
   lendingSupply: { label: "Lending Supply", color: "hsl(var(--chart-7))" },
 } satisfies ChartConfig;
 
-export const TheChart = () => {
+export const TheMultiLineChart = () => {
   const {
     totalSupplyChart,
     delegatedSupplyChart,
