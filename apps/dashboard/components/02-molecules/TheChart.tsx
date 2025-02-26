@@ -11,7 +11,7 @@ import {
   TooltipProps,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { useTokenDistributionContext } from "../contexts";
+import { useTokenDistributionContext } from "@/components/contexts";
 import { formatDate, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/server/backend";
 
@@ -96,10 +96,13 @@ export const TheChart = () => {
         <p className="font-bold">Date: {formatDate(Number(label))}</p>
         {payload.map((entry, index) => {
           const value = entry.value !== undefined ? entry.value : 0;
+          const formattedName =
+            chartConfig[entry.name as keyof typeof chartConfig]?.label ??
+            entry.name;
 
           return (
             <p key={index} style={{ color: entry.color }}>
-              {entry.name}:{" "}
+              {formattedName}:{" "}
               <strong>
                 {value !== 0
                   ? formatNumberUserReadable(
