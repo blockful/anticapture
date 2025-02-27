@@ -48,27 +48,62 @@ export function formatNumberUserReadable(num: number): string {
 }
 
 export function formatBlocksToUserReadable(num: number): string {
-  const timestamp = [
-    { value: 1, symbol: "blocks" },
-    { value: 5, symbol: "min" },
-    { value: 300, symbol: "hour" },
-    { value: 7200, symbol: "day" },
-    { value: 50400, symbol: "week" },
-    { value: 216000, symbol: "month" },
+  // Constants
+  const SECONDS_PER_BLOCK = 12;
+
+  // Handle zero or negative blocks
+  if (num <= 0) return "0 sec";
+
+  // Conversion table (in blocks)
+  const units = [
     { value: 2628000, symbol: "year" },
+    { value: 216000, symbol: "month" },
+    { value: 50400, symbol: "week" },
+    { value: 7200, symbol: "day" },
+    { value: 300, symbol: "hour" },
+    { value: 5, symbol: "min" },
   ];
 
-  const matchedUnit = timestamp
-    .slice()
-    .reverse()
-    .find((item) => num >= item.value);
-
-  if (matchedUnit) {
-    const value = (num / matchedUnit.value).toFixed(1).replace(/\.0$/, "");
-    return `${value} ${matchedUnit.symbol}`;
+  // For small block counts, just show seconds
+  if (num < 5) {
+    const seconds = Math.round(num * SECONDS_PER_BLOCK);
+    return formatTimeUnit(seconds, "sec");
   }
 
-  return "0 sec";
+  // Process larger time units
+  let remaining = num;
+  const parts = [];
+
+  // Calculate each time unit
+  for (const unit of units) {
+    if (remaining >= unit.value) {
+      const count = Math.floor(remaining / unit.value);
+      remaining %= unit.value;
+      parts.push(formatTimeUnit(count, unit.symbol));
+    }
+  }
+
+  // Handle remaining minutes (if we have no parts yet)
+  if (parts.length === 0 && remaining >= 5) {
+    const minutes = Math.floor(remaining / 5);
+    remaining %= 5;
+    parts.push(formatTimeUnit(minutes, "min"));
+  }
+
+  // Handle remaining seconds
+  if (remaining > 0) {
+    const seconds = Math.round(remaining * SECONDS_PER_BLOCK);
+    if (parts.length > 0 || seconds > 0) {
+      parts.push(formatTimeUnit(seconds, "sec"));
+    }
+  }
+
+  return parts.join(", ");
+}
+
+// Helper function to format a time unit with proper pluralization
+export function formatTimeUnit(count: number, unit: string): string {
+  return `${count} ${count === 1 ? unit : unit + "s"}`;
 }
 
 export const formatVariation = (rateRaw: string): string =>
