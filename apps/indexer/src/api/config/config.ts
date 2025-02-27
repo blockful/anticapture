@@ -23,9 +23,7 @@ export const getApiConfig = (): Config => {
         !config.duneApiUrl ? "DUNE_API_URL" : "",
         !config.duneApiKey ? "DUNE_API_KEY" : "",
         !config.coingeckoApiKey ? "COINGECKO_API_KEY" : "",
-      ]
-        .filter(Boolean)
-        .join(", ")}`,
+      ].join(",")}`,
     );
   }
 
