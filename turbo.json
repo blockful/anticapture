@@ -8,7 +8,8 @@
     "DUNE_API_KEY",
     "START_BLOCK",
     "STATUS",
-    "REDIS_URL"
+    "REDIS_URL",
+    "COINGECKO_API_KEY"
   ],
   "globalDependencies": [".env", "test.ts", "./migrations"],
   "tasks": {
