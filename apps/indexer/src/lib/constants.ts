@@ -1,8 +1,9 @@
 import { zeroAddress } from "viem";
 import { DaoIdEnum } from "./enums";
 
-export const secondsInDay = 24 * 60 * 60;
-export const milisecondsInDay = secondsInDay * 1000;
+export const SECONDS_IN_DAY = 24 * 60 * 60;
+export const MILISECONDS_IN_DAY = SECONDS_IN_DAY * 1000;
+export const DAYS_IN_YEAR = 365;
 
 export const CONTRACT_ADDRESS_MAINNET = {
   [DaoIdEnum.UNI]: {

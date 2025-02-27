@@ -4,6 +4,7 @@ import {
   CoingeckoTokenIdEnum,
   isCoingeckoHistoricalMarketData,
 } from "./types";
+import { DAYS_IN_YEAR } from "@/lib/constants";
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
@@ -11,7 +12,7 @@ export class CoingeckoService {
 
   async getHistoricalTokenData(
     tokenId: CoingeckoTokenIdEnum,
-    days: number = 365,
+    days: number = DAYS_IN_YEAR,
   ): Promise<CoingeckoHistoricalMarketData> {
     const response = await fetch(
       `${this.coingeckoApiUrl}/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}`,

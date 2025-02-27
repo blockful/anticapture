@@ -17,15 +17,15 @@ export const getApiConfig = (): Config => {
     coingeckoApiKey: process.env.COINGECKO_API_KEY || "",
   };
 
-  if (!config.duneApiUrl || !config.duneApiKey) {
+  if (!config.duneApiUrl || !config.duneApiKey || !config.coingeckoApiKey) {
     throw new Error(
-      "Missing required environment variables: DUNE_API_URL or DUNE_API_KEY",
-    );
-  }
-
-  if (!config.coingeckoApiKey) {
-    throw new Error(
-      "Missing required environment variables: COINGECKO_API_KEY",
+      `Missing required environment variables: ${[
+        !config.duneApiUrl ? "DUNE_API_URL" : "",
+        !config.duneApiKey ? "DUNE_API_KEY" : "",
+        !config.coingeckoApiKey ? "COINGECKO_API_KEY" : "",
+      ]
+        .filter(Boolean)
+        .join(", ")}`,
     );
   }
 
