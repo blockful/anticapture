@@ -102,7 +102,7 @@ export function formatBlocksToUserReadable(num: number): string {
 }
 
 // Helper function to format a time unit with proper pluralization
-function formatTimeUnit(count: number, unit: string): string {
+export function formatTimeUnit(count: number, unit: string): string {
   return `${count} ${count === 1 ? unit : unit + "s"}`;
 }
 
