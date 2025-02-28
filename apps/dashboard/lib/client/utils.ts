@@ -54,48 +54,43 @@ export function formatBlocksToUserReadable(num: number): string {
   // Handle zero or negative blocks
   if (num <= 0) return "0 sec";
 
-  // Conversion table (in blocks)
-  const units = [
-    { value: 2628000, symbol: "year" },
-    { value: 216000, symbol: "month" },
-    { value: 50400, symbol: "week" },
-    { value: 7200, symbol: "day" },
-    { value: 300, symbol: "hour" },
-    { value: 5, symbol: "min" },
-  ];
+  // Convert blocks to seconds
+  const totalSeconds = num * SECONDS_PER_BLOCK;
 
   // For small block counts, just show seconds
   if (num < 5) {
-    const seconds = Math.round(num * SECONDS_PER_BLOCK);
-    return formatTimeUnit(seconds, "sec");
+    return formatTimeUnit(Math.round(totalSeconds), "sec");
   }
 
-  // Process larger time units
-  let remaining = num;
+  return formatSecondsToReadable(totalSeconds);
+}
+
+// Helper function to convert seconds to a readable time format
+function formatSecondsToReadable(totalSeconds: number): string {
+  const SECONDS_PER_MINUTE = 60;
+  const SECONDS_PER_HOUR = 3600; // 60 minutes * 60 seconds
+
+  const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+  const minutes = Math.floor(
+    (totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
+  );
+  const seconds = Math.round(totalSeconds % SECONDS_PER_MINUTE);
+
   const parts = [];
 
-  // Calculate each time unit
-  for (const unit of units) {
-    if (remaining >= unit.value) {
-      const count = Math.floor(remaining / unit.value);
-      remaining %= unit.value;
-      parts.push(formatTimeUnit(count, unit.symbol));
-    }
+  // Add hours if we have any
+  if (hours > 0) {
+    parts.push(formatTimeUnit(hours, "hour"));
   }
 
-  // Handle remaining minutes (if we have no parts yet)
-  if (parts.length === 0 && remaining >= 5) {
-    const minutes = Math.floor(remaining / 5);
-    remaining %= 5;
+  // Add minutes if we have any
+  if (minutes > 0) {
     parts.push(formatTimeUnit(minutes, "min"));
   }
 
-  // Handle remaining seconds
-  if (remaining > 0) {
-    const seconds = Math.round(remaining * SECONDS_PER_BLOCK);
-    if (parts.length > 0 || seconds > 0) {
-      parts.push(formatTimeUnit(seconds, "sec"));
-    }
+  // Add seconds only if we have no hours and minutes
+  if (parts.length === 0 && seconds > 0) {
+    parts.push(formatTimeUnit(seconds, "sec"));
   }
 
   return parts.join(", ");

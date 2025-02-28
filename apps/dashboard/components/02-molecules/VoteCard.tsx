@@ -37,11 +37,12 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
+                className="cursor-default"
                 icon={<BlocksIcon />}
                 label={formatBlocksToUserReadable(daoData.votingDelay)}
               />
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">
               {formatTimeUnit(Number(daoData.votingDelay), "block")}
             </TooltipContent>
           </Tooltip>,

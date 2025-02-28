@@ -4,14 +4,19 @@ import { Badge } from "./Badge";
 interface BadgeItemProps {
   label?: string;
   icon?: ReactNode;
+  className?: string;
 }
 
-export const BadgeCardDaoInfoItem = (item: BadgeItemProps) => {
+export const BadgeCardDaoInfoItem = ({
+  label,
+  icon,
+  className,
+}: BadgeItemProps) => {
   return (
-    <Badge className="flex h-full w-full">
-      <div className="flex">{item.icon}</div>
+    <Badge className={`flex h-full w-full ${className}`}>
+      <div className="flex">{icon}</div>
       <p className="flex whitespace-nowrap text-sm font-medium leading-tight">
-        {item.label}
+        {label}
       </p>
     </Badge>
   );
