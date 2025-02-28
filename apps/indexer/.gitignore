@@ -17,4 +17,5 @@ yarn-error.log*
 /generated/
 /.ponder/
 
+# Dump
 dump

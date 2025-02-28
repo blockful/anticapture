@@ -5,7 +5,10 @@ import {
   TheSectionLayout,
   SwitcherDate,
 } from "@/components/01-atoms";
-import { TokenDistributionTable } from "@/components/02-molecules";
+import {
+  TheMultiLineChart,
+  TokenDistributionTable,
+} from "@/components/02-molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/components/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
@@ -28,6 +31,7 @@ export const TokenDistributionSection = () => {
         interaction with relevant contracts."
       anchorId={tokenDistributionSectionAnchorID}
     >
+      <TheMultiLineChart />
       <TokenDistributionTable />
     </TheSectionLayout>
   );

@@ -9,9 +9,10 @@ import {
   Skeleton,
   SwitchCardDaoInfoItem,
 } from "@/components/01-atoms";
-import { formatBlocksToUserReadable } from "@/lib/client/utils";
+import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();
@@ -33,11 +34,18 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
             key={"switch"}
             switched={daoConstants.rules.delay}
           />,
-          <BadgeCardDaoInfoItem
-            icon={<BlocksIcon />}
-            label={formatBlocksToUserReadable(daoData.votingDelay)}
-            key={"badge"}
-          />,
+          <Tooltip key={"delay-tooltip"}>
+            <TooltipTrigger>
+              <BadgeCardDaoInfoItem
+                className="cursor-default"
+                icon={<BlocksIcon />}
+                label={formatBlocksToUserReadable(daoData.votingDelay)}
+              />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">
+              {formatTimeUnit(Number(daoData.votingDelay), "block")}
+            </TooltipContent>
+          </Tooltip>,
         ],
       },
       {

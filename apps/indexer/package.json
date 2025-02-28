@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE;\" && ponder dev --schema public",
-    "start": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE;\" && ponder start --schema public",
-    "start-raw": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS ponder_sync CASCADE\" && ponder start --schema public",
+    "dev": "ponder dev --schema public",
+    "start": "ponder start --schema public",
+    "start-raw": "npm run drop-public && ponder start --schema public",
     "codegen": "ponder codegen",
-    "serve": "ponder serve --schema public",
+    "serve": "npm run setup-drizzle && ponder serve --schema public",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc",
@@ -16,14 +16,19 @@
     "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens",
     "prepare": "husky",
     "dump-database": "rm -rf dump && pg_dump $DATABASE_URL -n ponder_sync > dump",
-    "restore-database": "psql -d $DATABASE_URL < dump"
+    "restore-database": "psql -d $DATABASE_URL < dump",
+    "drop-public": "psql -d $DATABASE_URL -c 'DROP SCHEMA public CASCADE;'",
+    "drop-all-schemas": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS ponder_sync CASCADE\"",
+    "setup-drizzle": "drizzle-kit migrate"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
     "@viem/anvil": "^0.0.10",
+    "drizzle-kit": "^0.30.4",
+    "drizzle-orm": "^0.39.3",
     "hono": "^4.5.0",
     "ioredis": "^5.5.0",
-    "ponder": "^0.8.5",
+    "ponder": "^0.9.19",
     "viem": "^2.21.9"
   },
   "devDependencies": {

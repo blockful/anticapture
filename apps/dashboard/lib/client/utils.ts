@@ -48,28 +48,69 @@ export function formatNumberUserReadable(num: number): string {
 }
 
 export function formatBlocksToUserReadable(num: number): string {
-  const timestamp = [
-    { value: 1, symbol: "blocks" },
-    { value: 5, symbol: "min" },
-    { value: 300, symbol: "hour" },
-    { value: 7200, symbol: "day" },
-    { value: 50400, symbol: "week" },
-    { value: 216000, symbol: "month" },
-    { value: 2628000, symbol: "year" },
-  ];
+  // Constants
+  const SECONDS_PER_BLOCK = 12;
 
-  const matchedUnit = timestamp
-    .slice()
-    .reverse()
-    .find((item) => num >= item.value);
+  // Handle zero or negative blocks
+  if (num <= 0) return "0 sec";
 
-  if (matchedUnit) {
-    const value = (num / matchedUnit.value).toFixed(1).replace(/\.0$/, "");
-    return `${value} ${matchedUnit.symbol}`;
+  // Convert blocks to seconds
+  const totalSeconds = num * SECONDS_PER_BLOCK;
+
+  // For small block counts, just show seconds
+  if (num < 5) {
+    return formatTimeUnit(Math.round(totalSeconds), "sec");
   }
 
-  return "0 sec";
+  return formatSecondsToReadable(totalSeconds);
+}
+
+// Helper function to convert seconds to a readable time format
+function formatSecondsToReadable(totalSeconds: number): string {
+  const SECONDS_PER_MINUTE = 60;
+  const SECONDS_PER_HOUR = 3600; // 60 minutes * 60 seconds
+
+  const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+  const minutes = Math.floor(
+    (totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
+  );
+  const seconds = Math.round(totalSeconds % SECONDS_PER_MINUTE);
+
+  const parts = [];
+
+  // Add hours if we have any
+  if (hours > 0) {
+    parts.push(formatTimeUnit(hours, "hour"));
+  }
+
+  // Add minutes if we have any
+  if (minutes > 0) {
+    parts.push(formatTimeUnit(minutes, "min"));
+  }
+
+  // Add seconds only if we have no hours and minutes
+  if (parts.length === 0 && seconds > 0) {
+    parts.push(formatTimeUnit(seconds, "sec"));
+  }
+
+  return parts.join(", ");
+}
+
+// Helper function to format a time unit with proper pluralization
+export function formatTimeUnit(count: number, unit: string): string {
+  return `${count} ${count === 1 ? unit : unit + "s"}`;
 }
 
 export const formatVariation = (rateRaw: string): string =>
   `${Number(Number(rateRaw) * 100).toFixed(2)}`;
+
+export const timestampToReadableDate = (date: number) => {
+  if (isNaN(date) || date === null || date === undefined) return "Invalid Date";
+
+  const timestamp = date * 1000;
+  const newDate = new Date(timestamp);
+
+  if (isNaN(newDate.getTime())) return "Invalid Date";
+
+  return newDate.toLocaleDateString("en-US");
+};
