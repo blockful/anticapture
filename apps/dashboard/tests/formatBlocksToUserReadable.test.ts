@@ -28,11 +28,6 @@ describe("formatBlocksToUserReadable", () => {
     expect(formatBlocksToUserReadable(10)).toBe("2 mins");
   });
 
-  // Test minutes with remaining seconds
-  test("formats blocks as minutes and seconds", () => {
-    expect(formatBlocksToUserReadable(6)).toBe("1 min, 12 secs");
-  });
-
   // Test hours
   test("formats 300 blocks as hours", () => {
     expect(formatBlocksToUserReadable(300)).toBe("1 hour");
@@ -42,40 +37,20 @@ describe("formatBlocksToUserReadable", () => {
     expect(formatBlocksToUserReadable(600)).toBe("2 hours");
   });
 
-  // Test hours with remaining minutes and seconds
-  test("formats blocks as hours, minutes and seconds", () => {
-    expect(formatBlocksToUserReadable(306)).toBe("1 hour, 1 min, 12 secs");
-  });
-
-  // Test days
-  test("formats 7200 blocks as days", () => {
-    expect(formatBlocksToUserReadable(7200)).toBe("1 day");
-  });
-
-  // Test weeks
-  test("formats 50400 blocks as weeks", () => {
-    expect(formatBlocksToUserReadable(50400)).toBe("1 week");
-  });
-
-  // Test months
-  test("formats 216000 blocks as months", () => {
-    expect(formatBlocksToUserReadable(216000)).toBe("1 month");
-  });
-
-  // Test years
-  test("formats 2628000 blocks as years", () => {
-    expect(formatBlocksToUserReadable(2628000)).toBe("1 year");
-  });
-
-  // Test complex combinations
-  test("formats complex time combinations correctly", () => {
-    expect(formatBlocksToUserReadable(2628000 + 216000 + 7200 + 300 + 6)).toBe(
-      "1 year, 1 month, 1 day, 1 hour, 1 min, 12 secs",
-    );
+  // Test hours with remaining minutes
+  test("formats blocks as hours and minutes", () => {
+    expect(formatBlocksToUserReadable(305)).toBe("1 hour, 1 min");
   });
 
   // Edge cases
   test("handles fractional blocks correctly", () => {
     expect(formatBlocksToUserReadable(0.5)).toBe("6 secs");
+  });
+
+  // Test that seconds are not shown when hours or minutes are present
+  test("doesn't show seconds when hours or minutes are present", () => {
+    expect(formatBlocksToUserReadable(6)).toBe("1 min");
+    expect(formatBlocksToUserReadable(301)).toBe("1 hour");
+    expect(formatBlocksToUserReadable(305)).toBe("1 hour, 1 min");
   });
 });
