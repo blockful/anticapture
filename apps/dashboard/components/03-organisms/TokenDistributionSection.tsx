@@ -1,20 +1,48 @@
-"use client";
-
 import {
   ArrowLeftRight,
   TheSectionLayout,
   SwitcherDate,
 } from "@/components/01-atoms";
 import {
-  TheMultiLineChart,
+  MultilineChartTokenDistribution,
   TokenDistributionTable,
 } from "@/components/02-molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/components/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { DaoMetricsDayBucket } from "@/lib/server/backend";
+
+const chartConfig: Record<string, { label: string; color: string }> = {
+  totalSupply: { label: "Total Supply", color: "hsl(var(--chart-1))" },
+  delegatedSupply: { label: "Delegated Supply", color: "hsl(var(--chart-2))" },
+  circulatingSupply: {
+    label: "Circulating Supply",
+    color: "hsl(var(--chart-3))",
+  },
+  cexSupply: { label: "CEX Supply", color: "hsl(var(--chart-4))" },
+  dexSupply: { label: "DEX Supply", color: "hsl(var(--chart-5))" },
+  lendingSupply: { label: "Lending Supply", color: "hsl(var(--chart-7))" },
+};
 
 export const TokenDistributionSection = () => {
-  const { setDays } = useTokenDistributionContext();
+  const {
+    totalSupplyChart,
+    delegatedSupplyChart,
+    circulatingSupplyChart,
+    cexSupplyChart,
+    dexSupplyChart,
+    lendingSupplyChart,
+    setDays,
+  } = useTokenDistributionContext();
+
+  const datasets: Record<string, DaoMetricsDayBucket[]> = {
+    totalSupply: totalSupplyChart,
+    delegatedSupply: delegatedSupplyChart,
+    circulatingSupply: circulatingSupplyChart,
+    cexSupply: cexSupplyChart,
+    dexSupply: dexSupplyChart,
+    lendingSupply: lendingSupplyChart,
+  };
 
   return (
     <TheSectionLayout
@@ -31,7 +59,10 @@ export const TokenDistributionSection = () => {
         interaction with relevant contracts."
       anchorId={tokenDistributionSectionAnchorID}
     >
-      <TheMultiLineChart />
+      <MultilineChartTokenDistribution
+        datasets={datasets}
+        chartConfig={chartConfig}
+      />
       <TokenDistributionTable />
     </TheSectionLayout>
   );

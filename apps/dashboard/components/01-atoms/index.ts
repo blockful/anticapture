@@ -15,4 +15,5 @@ export * from "./SwitcherDate";
 export * from "./TextCardDaoInfoItem";
 export * from "./TheSectionLayout";
 export * from "./TheTable";
+export * from "./TokenDistributionCustomTooltip";
 export * from "./TooltipInfo";
