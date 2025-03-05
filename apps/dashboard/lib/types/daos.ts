@@ -12,5 +12,5 @@ export interface DAO {
   votingDelay: number;
   votingPeriod: number;
   timelockDelay: number;
-  totalSupply: number;
+  totalSupply?: number;
 }
