@@ -4,23 +4,6 @@ import { MetricTypesEnum } from "../client/constants";
 import { Address } from "viem";
 import daoConstantsByDaoId from "../dao-constants";
 
-export interface DAOVotingPower {
-  dao: string;
-  totalDelegatedVotingPower: number;
-}
-
-export const fetchDaoData = async (daoId: DaoIdEnum) => {
-  return new Promise(async (res, rej) => {
-    try {
-      const daoData = await fetch(`${BACKEND_ENDPOINT}/dao/${daoId}`);
-
-      res(daoData);
-    } catch (e) {
-      rej(e);
-    }
-  });
-};
-
 export enum ChainNameEnum {
   Ethereum = "ethereum",
 }
@@ -36,8 +19,8 @@ export type DaoMetricsDayBucket = {
   high: string;
   average: string;
   volume: string;
-  count: number
-}
+  count: number;
+};
 
 export const fetchTimeSeriesDataFromGraphQL = async (
   daoId: DaoIdEnum,
@@ -86,12 +69,15 @@ export const fetchTimeSeriesDataFromGraphQL = async (
     return data.data.daoMetricsDayBucketss.items as DaoMetricsDayBucket[];
   } else {
     //TODO: Improve this error treatment
-    throw new Error("invalid return type for Dao Metrics Day Bucket call")
+    throw new Error("invalid return type for Dao Metrics Day Bucket call");
   }
 };
 
 /* Fetch Dao Token price from Defi Llama API */
-export const fetchTokenPrice = async (chainName: ChainNameEnum, daoId: DaoIdEnum) => {
+export const fetchTokenPrice = async (
+  chainName: ChainNameEnum,
+  daoId: DaoIdEnum,
+) => {
   const daoToken = daoConstantsByDaoId[daoId].contracts.token;
 
   try {
