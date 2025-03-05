@@ -11,14 +11,14 @@ import { UncertaintyIcon } from "@/components/01-atoms";
 export const UncertaintySection = () => {
   const { daoData } = useDaoDataContext();
 
-  const [totalSupply, setTotalSupply] = useState<number | null>(null);
+  const [totalSupply, setTotalSupply] = useState<number | undefined>(undefined);
   const [inactiveVotingPower, setInactiveVotingPower] = useState<number | null>(
     null,
   );
 
   useEffect(() => {
     if (daoData) {
-      setTotalSupply((daoData as DAO).totalSupply);
+      setTotalSupply(daoData.totalSupply ?? undefined);
       // setInactiveVotingPower(
       //   (daoData as DAO).totalVotingPower - (daoData as DAO).activeVotingPower
       // );
