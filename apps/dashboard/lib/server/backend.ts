@@ -36,8 +36,8 @@ export type DaoMetricsDayBucket = {
   high: string;
   average: string;
   volume: string;
-  count: number
-}
+  count: number;
+};
 
 export const fetchTimeSeriesDataFromGraphQL = async (
   daoId: DaoIdEnum,
@@ -86,12 +86,15 @@ export const fetchTimeSeriesDataFromGraphQL = async (
     return data.data.daoMetricsDayBucketss.items as DaoMetricsDayBucket[];
   } else {
     //TODO: Improve this error treatment
-    throw new Error("invalid return type for Dao Metrics Day Bucket call")
+    throw new Error("invalid return type for Dao Metrics Day Bucket call");
   }
 };
 
 /* Fetch Dao Token price from Defi Llama API */
-export const fetchTokenPrice = async (chainName: ChainNameEnum, daoId: DaoIdEnum) => {
+export const fetchTokenPrice = async (
+  chainName: ChainNameEnum,
+  daoId: DaoIdEnum,
+) => {
   const daoToken = daoConstantsByDaoId[daoId].contracts.token;
 
   try {
@@ -136,6 +139,37 @@ export const fetchTotalSupply = async ({
       rej(e);
     }
   });
+};
+
+export interface TreasuryAssetNonDaoToken {
+  date: string;
+  totalAssets: string;
+}
+
+export const fetchTreasuryAssetNonDaoToken = async ({
+  daoId,
+  days,
+}: {
+  daoId: DaoIdEnum;
+  days: string;
+}): Promise<TreasuryAssetNonDaoToken[]> => {
+  try {
+    const response = await fetch(
+      `${BACKEND_ENDPOINT}/dao/${daoId}/assets?days=${days}`,
+      {
+        next: { revalidate: 3600 },
+      },
+    );
+    const chartData = await response.json();
+
+    return chartData.map((entry: any) => ({
+      date: new Date(entry.date).getTime(),
+      totalAssets: entry.totalAssets,
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar dados do gráfico:", error);
+    return [];
+  }
 };
 
 interface DelegatedSupplyPromise {
