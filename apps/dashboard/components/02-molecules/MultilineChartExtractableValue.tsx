@@ -20,8 +20,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getMultilineChartDatasets, PriceDataArray } from "@/lib/mocked-data";
 import { useGovernanceActivityContext } from "../contexts/GovernanceActivityContext";
+import { useDaoDataContext, useTokenDistributionContext } from "../contexts";
 
-interface ChartProps {
+interface MultilineChartExtractableValueProps {
   days: string;
   filterData?: string[];
 }
@@ -31,13 +32,19 @@ type DatasetType = TreasuryAssetNonDaoToken[] | PriceDataArray;
 export const MultilineChartExtractableValue = ({
   filterData,
   days,
-}: ChartProps) => {
+}: MultilineChartExtractableValueProps) => {
   const { daoId }: { daoId: string } = useParams();
   const [treasuryAssetNonDAOToken, setTreasuryAssetNonDAOToken] = useState<
     TreasuryAssetNonDaoToken[]
   >([]);
 
   const { treasurySupplyChart } = useGovernanceActivityContext();
+  const { delegatedSupplyChart } = useTokenDistributionContext();
+  const { daoData } = useDaoDataContext();
+
+  const quorumValue = daoData?.quorum
+    ? Number(daoData.quorum) / 10 ** 18
+    : null;
 
   useEffect(() => {
     fetchTreasuryAssetNonDaoToken({
@@ -46,57 +53,82 @@ export const MultilineChartExtractableValue = ({
     }).then((data: TreasuryAssetNonDaoToken[]) => {
       setTreasuryAssetNonDAOToken(data);
     });
-  }, [days]);
+  }, [days, daoId]);
 
   const chartConfig = {
     treasuryNonDAO: {
       label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
-      color: "hsl(var(--chart-1))",
+      color: "#22c55e",
     },
-    all: { label: "All", color: "hsl(var(--chart-2))" },
+    all: { label: "All", color: "#22c55e" },
+    quorum: { label: "Quorum", color: "#f87171" },
+    delegated: { label: "Delegated", color: "#f87171" },
   } satisfies ChartConfig;
 
-  const normalizeDataset = (dataset: DatasetType, key: string) => {
-    return dataset.map((item) => {
-      if (Array.isArray(item)) {
-        return { date: item[0], [key]: item[1] };
-      } else {
-        return {
-          date: new Date(item.date).getTime(),
-          [key]: Number(item.totalAssets),
-        };
-      }
-    });
-  };
-
   const multilineChartDatasets = getMultilineChartDatasets();
-
   const selectedMultilineChart =
     multilineChartDatasets[days as keyof typeof multilineChartDatasets] ??
     multilineChartDatasets.full ??
     [];
 
-  const datasets: Record<keyof typeof chartConfig, any[]> = {
+  const normalizeDataset = (
+    dataset: DatasetType,
+    key: string,
+    multiplier: number | null = null,
+  ) => {
+    return dataset.map((item) => {
+      if (Array.isArray(item)) {
+        return {
+          date: item[0],
+          [key]: multiplier ? item[1] * multiplier : item[1],
+        };
+      } else {
+        return {
+          date: new Date(item.date).getTime(),
+          [key]: multiplier
+            ? Number(item.totalAssets) * multiplier
+            : Number(item.totalAssets),
+        };
+      }
+    });
+  };
+
+  const datasets: Record<string, any[]> = {
     treasuryNonDAO: normalizeDataset(
       treasuryAssetNonDAOToken,
       "treasuryNonDAO",
     ),
     all: normalizeDataset(selectedMultilineChart, "all"),
+    quorum: quorumValue
+      ? normalizeDataset(selectedMultilineChart, "quorum", quorumValue)
+      : [],
+    delegated: delegatedSupplyChart
+      ? normalizeDataset(selectedMultilineChart, "delegated")
+      : [],
   };
+
+  // datasets.delegated = selectedMultilineChart.map((item) => {
+  //   const delegatedEntry = delegatedSupplyChart.find(
+  //     (delegated) => new Date(delegated.date).getTime() === item[0],
+  //   );
+
+  //   return {
+  //     date: item[0],
+  //     delegated: delegatedEntry ? Number(delegatedEntry.high) : null,
+  //   };
+  // });
 
   datasets.all = datasets.all.map((item) => {
     const treasuryEntry = treasurySupplyChart.find(
       (treasury) => new Date(treasury.date).getTime() === item.date,
     );
 
-    if (treasuryEntry) {
-      return {
-        ...item,
-        all: Number(treasuryEntry.high) * item.all,
-      };
-    }
-
-    return item;
+    return treasuryEntry
+      ? {
+          ...item,
+          all: Number(treasuryEntry.high) * item.all,
+        }
+      : item;
   });
 
   const allDates = new Set(
@@ -113,19 +145,12 @@ export const MultilineChartExtractableValue = ({
       const dataPoint: Record<string, any> = { date };
 
       Object.entries(datasets).forEach(([key, dataset]) => {
-        console.log("🔍 Checando filtro:", {
-          key,
-          filterData,
-          label: chartConfig[key as keyof typeof chartConfig]?.label,
-        });
-
         if (
           filterData?.includes(key) ||
           filterData?.includes(
             chartConfig[key as keyof typeof chartConfig]?.label,
           )
         ) {
-          console.log(`🚫 Removendo ${key} do gráfico`);
           return;
         }
 
