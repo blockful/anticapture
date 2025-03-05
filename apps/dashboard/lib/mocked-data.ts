@@ -474,10 +474,8 @@ export const multilineChart: PriceDataArray = [
 export const getMultilineChartDatasets = () => {
   if (multilineChart.length === 0) return {};
 
-  // 🕒 Pegando a última data do dataset (último item do array)
   const lastTimestamp = multilineChart[multilineChart.length - 1][0];
 
-  // 🔍 Criando diferentes timestamps de corte
   const cutoffTimestamps = {
     "7d": lastTimestamp - 7 * 24 * 60 * 60 * 1000,
     "30d": lastTimestamp - 30 * 24 * 60 * 60 * 1000,
