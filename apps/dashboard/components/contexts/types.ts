@@ -49,7 +49,6 @@ export interface GovernanceActivityContextProps {
   setTreasurySupplyChart: (treasurySupplyChart: DaoMetricsDayBucket[]) => void;
 
   proposals: MetricData;
-  setProposals: (proposals: MetricData) => void;
 
   activeSupply: MetricData;
 

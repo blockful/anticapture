@@ -15,6 +15,7 @@ import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 import { useActiveSupply } from "@/hooks/useActiveSupply";
+import { useProposals } from "@/hooks/useProposals";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,
@@ -30,7 +31,6 @@ export const GovernanceActivityContext =
     treasurySupplyChart: [],
     setTreasurySupplyChart: () => {},
     proposals: initialGovernanceActivityMetricData,
-    setProposals: () => {},
     activeSupply: initialGovernanceActivityMetricData,
     votes: initialGovernanceActivityMetricData,
     setVotes: () => {},
@@ -52,9 +52,6 @@ export const GovernanceActivityProvider = ({
   const [treasurySupplyChart, setTreasurySupplyChart] = useState<
     DaoMetricsDayBucket[]
   >([]);
-  const [proposals, setProposals] = useState<MetricData>(
-    initialGovernanceActivityMetricData,
-  );
 
   const [votes, setVotes] = useState<MetricData>(
     initialGovernanceActivityMetricData,
@@ -82,16 +79,20 @@ export const GovernanceActivityProvider = ({
     revalidateOnFocus: false,
   });
 
-  // Fetch all governance data
+  // Use SWR hook for proposals data
+  const { data: proposalsData } = useProposals(daoId, days, {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: false,
+  });
+
+  // Fetch remaining governance data
   useEffect(() => {
     const fetchGovernanceData = async () => {
       try {
-        const [proposalsData, votesData, averageTurnoutData] =
-          await Promise.all([
-            fetchProposals({ daoId, days }),
-            fetchVotes({ daoId, days }),
-            fetchAverageTurnout({ daoId, days }),
-          ]);
+        const [votesData, averageTurnoutData] = await Promise.all([
+          fetchVotes({ daoId, days }),
+          fetchAverageTurnout({ daoId, days }),
+        ]);
 
         // Process treasury data from SWR
         if (treasuryData) {
@@ -111,13 +112,6 @@ export const GovernanceActivityProvider = ({
             changeRate: changeRate,
           });
           setTreasurySupplyChart(data);
-        }
-
-        if (proposalsData) {
-          setProposals({
-            value: String(proposalsData.currentProposalsLaunched),
-            changeRate: proposalsData.changeRate,
-          });
         }
 
         if (votesData) {
@@ -153,8 +147,10 @@ export const GovernanceActivityProvider = ({
         setTreasury,
         treasurySupplyChart,
         setTreasurySupplyChart,
-        proposals,
-        setProposals,
+        proposals: {
+          value: String(proposalsData?.currentProposalsLaunched),
+          changeRate: proposalsData?.changeRate,
+        },
         activeSupply: {
           value: activeSupplyData?.activeSupply,
           changeRate: undefined,
