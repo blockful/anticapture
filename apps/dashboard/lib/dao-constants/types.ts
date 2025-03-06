@@ -1,4 +1,6 @@
 import { Address } from "viem";
+import { DaoIdEnum } from "@/lib/types/daos";
+import { MetricTypesEnum } from "../client/constants";
 
 export type DaoConstants = {
   name: string;
@@ -16,3 +18,29 @@ export type DaoConstants = {
     cancelFunction: boolean;
   };
 };
+
+export enum ChainNameEnum {
+  Ethereum = "ethereum",
+}
+
+export type DaoMetricsDayBucket = {
+  date: string;
+  daoId: DaoIdEnum;
+  tokenId: Address;
+  metricType: MetricTypesEnum;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  average: string;
+  volume: string;
+  count: number;
+};
+
+export type PriceEntry = [timestamp: number, value: number];
+
+export interface TokenHistoricalDataMetrics {
+  prices: PriceEntry[];
+  market_caps: PriceEntry[];
+  total_volumes: PriceEntry[];
+}

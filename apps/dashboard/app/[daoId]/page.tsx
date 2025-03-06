@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DaoTemplate } from "@/components/04-templates";
+import { DaoTemplate } from "@/components/templates";
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 
 type Props = {

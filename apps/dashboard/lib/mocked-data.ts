@@ -2,9 +2,9 @@ import { User } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   DaoMetricsDayBucket,
-  TokenHistoricalDataMetrics,
   PriceEntry,
-} from "./server/backend";
+  TokenHistoricalDataMetrics,
+} from "@/lib/dao-constants/types";
 import { DAYS_IN_MILLISECONDS, TimeInterval } from "./enums/TimeInterval";
 
 export type DashboardDao = {

@@ -1,5 +1,5 @@
-import { HeaderSidebar } from "@/components/02-molecules";
-import { HomeTemplate } from "@/components/04-templates";
+import { HeaderSidebar } from "@/components/molecules";
+import { HomeTemplate } from "@/components/templates";
 
 export default function Home() {
   return (

@@ -1,5 +1,6 @@
 import Redis from "ioredis";
 import { CacheServiceInterface } from "./cache.service.interface";
+import { getApiConfig } from "@/api/config/config";
 
 export class RedisService implements CacheServiceInterface<string> {
   private redis: Redis;
@@ -22,3 +23,7 @@ export class RedisService implements CacheServiceInterface<string> {
     await this.redis.set(key, value, "EX", secondsToExpire);
   }
 }
+const config = getApiConfig();
+export const redisService = config.redisUrl
+  ? new RedisService(config.redisUrl)
+  : undefined;
