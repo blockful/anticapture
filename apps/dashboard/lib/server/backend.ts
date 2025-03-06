@@ -21,31 +21,6 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-interface ProposalsResponse {
-  currentProposalsLaunched: string;
-  oldProposalsLaunched: string;
-  changeRate: string;
-}
-
-/* Fetch Proposals */
-export const fetchProposals = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<ProposalsResponse> => {
-  try {
-    const response: Response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/proposals/compare?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
-};
-
 interface VotesResponse {
   currentVotes: string;
   oldVotes: string;
