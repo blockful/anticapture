@@ -19,7 +19,7 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
-import { SkeletonRow } from "../atoms/SkeletonRow";
+import { SkeletonRow } from "@/components/atoms";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

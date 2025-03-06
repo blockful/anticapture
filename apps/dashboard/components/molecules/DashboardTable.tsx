@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { DashboardDao } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, TheTable, ArrowState } from "@/components/atoms";
+import {
+  ArrowUpDown,
+  TheTable,
+  ArrowState,
+  SkeletonRow,
+} from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import Image, { StaticImageData } from "next/image";
@@ -14,7 +19,6 @@ import ENSLogo from "@/public/logo/ENS.png";
 import UNILogo from "@/public/logo/UNI.png";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
-import { SkeletonRow } from "../atoms/SkeletonRow";
 
 const daoDetails: Record<
   DaoIdEnum,

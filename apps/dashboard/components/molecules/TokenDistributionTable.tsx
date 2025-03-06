@@ -20,7 +20,7 @@ import {
   formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
-import { SkeletonRow } from "../atoms/SkeletonRow";
+import { SkeletonRow } from "@/components/atoms";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
