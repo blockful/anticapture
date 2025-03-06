@@ -1,6 +1,7 @@
+import { Hono } from "hono";
 import { swaggerUI } from "@hono/swagger-ui";
-import app from ".";
 
+const app = new Hono();
 // Use the middleware to serve Swagger UI at /ui
 app.get("/docs", swaggerUI({ url: "/doc-json" }));
 
@@ -916,3 +917,5 @@ app.get("/doc-json", (c) => {
     },
   });
 });
+
+export default app;
