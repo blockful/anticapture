@@ -21,34 +21,6 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-interface DelegatedSupplyPromise {
-  oldDelegatedSupply: string;
-  currentDelegatedSupply: string;
-  changeRate: string;
-}
-
-/* Fetch Dao Total Supply */
-export const fetchDelegatedSupply = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}) => {
-  return new Promise<DelegatedSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
-        { next: { revalidate: 3600 } },
-      );
-      const delegatedSupplyData = await response.json();
-      res(delegatedSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
-};
-
 // TODO: Should have Promise in the name of the object, use "Response" Instead
 interface ActiveSupplyPromise {
   activeSupply: string;
