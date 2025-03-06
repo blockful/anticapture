@@ -21,30 +21,6 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-// TODO: Should have Promise in the name of the object, use "Response" Instead
-interface ActiveSupplyPromise {
-  activeSupply: string;
-}
-
-/* Fetch Active Supply */
-export const fetchActiveSupply = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<ActiveSupplyPromise> => {
-  try {
-    const response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
-};
-
 interface ProposalsResponse {
   currentProposalsLaunched: string;
   oldProposalsLaunched: string;

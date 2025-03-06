@@ -4,7 +4,6 @@
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import {
   DaoMetricsDayBucket,
-  fetchActiveSupply,
   fetchAverageTurnout,
   fetchProposals,
   fetchVotes,
