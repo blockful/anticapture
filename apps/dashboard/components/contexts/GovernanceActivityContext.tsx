@@ -2,11 +2,7 @@
 "use client";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import {
-  DaoMetricsDayBucket,
-  fetchAverageTurnout,
-  fetchVotes,
-} from "@/lib/server/backend";
+import { DaoMetricsDayBucket, fetchAverageTurnout } from "@/lib/server/backend";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MetricData, GovernanceActivityContextProps } from "./types";
@@ -15,6 +11,7 @@ import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 import { useActiveSupply } from "@/hooks/useActiveSupply";
 import { useProposals } from "@/hooks/useProposals";
+import { useVotes } from "@/hooks/useVotes";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,
@@ -32,7 +29,6 @@ export const GovernanceActivityContext =
     proposals: initialGovernanceActivityMetricData,
     activeSupply: initialGovernanceActivityMetricData,
     votes: initialGovernanceActivityMetricData,
-    setVotes: () => {},
     averageTurnout: initialGovernanceActivityMetricData,
     setAverageTurnout: () => {},
   });
@@ -52,9 +48,6 @@ export const GovernanceActivityProvider = ({
     DaoMetricsDayBucket[]
   >([]);
 
-  const [votes, setVotes] = useState<MetricData>(
-    initialGovernanceActivityMetricData,
-  );
   const [averageTurnout, setAverageTurnout] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
@@ -84,12 +77,17 @@ export const GovernanceActivityProvider = ({
     revalidateOnFocus: false,
   });
 
+  // Use SWR hook for votes data
+  const { data: votesData } = useVotes(daoId, days, {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: false,
+  });
+
   // Fetch remaining governance data
   useEffect(() => {
     const fetchGovernanceData = async () => {
       try {
-        const [votesData, averageTurnoutData] = await Promise.all([
-          fetchVotes({ daoId, days }),
+        const [averageTurnoutData] = await Promise.all([
           fetchAverageTurnout({ daoId, days }),
         ]);
 
@@ -113,13 +111,6 @@ export const GovernanceActivityProvider = ({
           setTreasurySupplyChart(data);
         }
 
-        if (votesData) {
-          setVotes({
-            value: votesData.currentVotes,
-            changeRate: votesData.changeRate,
-          });
-        }
-
         if (averageTurnoutData) {
           setAverageTurnout({
             value: String(
@@ -135,7 +126,7 @@ export const GovernanceActivityProvider = ({
     };
 
     fetchGovernanceData();
-  }, [daoId, days, treasuryData, treasuryError]);
+  }, [daoId, days, treasuryData, treasuryError, proposalsData]);
 
   return (
     <GovernanceActivityContext.Provider
@@ -154,8 +145,10 @@ export const GovernanceActivityProvider = ({
           value: activeSupplyData?.activeSupply,
           changeRate: undefined,
         },
-        votes,
-        setVotes,
+        votes: {
+          value: votesData?.currentVotes,
+          changeRate: votesData?.changeRate,
+        },
         averageTurnout,
         setAverageTurnout,
       }}

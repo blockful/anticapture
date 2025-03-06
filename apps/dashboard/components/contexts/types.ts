@@ -53,7 +53,6 @@ export interface GovernanceActivityContextProps {
   activeSupply: MetricData;
 
   votes: MetricData;
-  setVotes: (votes: MetricData) => void;
 
   averageTurnout: MetricData;
   setAverageTurnout: (averageTurnout: MetricData) => void;
