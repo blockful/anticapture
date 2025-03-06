@@ -2,7 +2,6 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { MetricTypesEnum } from "../client/constants";
 import { Address } from "viem";
-import daoConstantsByDaoId from "../dao-constants";
 
 export enum ChainNameEnum {
   Ethereum = "ethereum",
@@ -20,34 +19,6 @@ export type DaoMetricsDayBucket = {
   average: string;
   volume: string;
   count: number;
-};
-
-interface TotalSupplyPromise {
-  oldTotalSupply: string;
-  currentTotalSupply: string;
-  changeRate: string;
-}
-
-/* Fetch Dao Total Supply */
-export const fetchTotalSupply = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}) => {
-  return new Promise<TotalSupplyPromise>(async (res, rej) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_ENDPOINT}/dao/${daoId}/total-supply/compare?days=${days}`,
-        { next: { revalidate: 3600 } },
-      );
-      const totalSupplyData = await response.json();
-      res(totalSupplyData);
-    } catch (e) {
-      rej(e);
-    }
-  });
 };
 
 interface DelegatedSupplyPromise {

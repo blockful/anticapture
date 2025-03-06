@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDaoData } from "@/hooks/useDaoData";
-import { useFetchTokenPrice } from "@/hooks/useFetchTokenPrice";
+import { useFetchTokenPrice } from "@/hooks/useTokenPrice";
 import { ChainNameEnum } from "@/lib/server/backend";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
