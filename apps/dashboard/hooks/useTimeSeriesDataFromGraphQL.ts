@@ -2,6 +2,7 @@ import { MetricTypesEnum } from "@/lib/client/constants";
 import { DaoMetricsDayBucket } from "@/lib/server/backend";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
+import useSWR from "swr";
 
 export const fetchTimeSeriesDataFromGraphQL = async (
   daoId: DaoIdEnum,
@@ -57,7 +58,6 @@ export const fetchTimeSeriesDataFromGraphQL = async (
   });
 
   const data = await response.json();
-  console.log("data", data);
 
   // Process the results for each metric type
   const results: Record<MetricTypesEnum, DaoMetricsDayBucket[]> = {} as Record<
@@ -75,4 +75,38 @@ export const fetchTimeSeriesDataFromGraphQL = async (
   }
 
   return results;
+};
+
+/**
+ * SWR hook for fetching time series data for multiple metrics
+ * @param daoId The DAO ID to fetch data for
+ * @param metricTypes Array of metric types to fetch
+ * @param days Number of days of data to fetch
+ * @param options Additional SWR options
+ */
+export const useTimeSeriesData = (
+  daoId: DaoIdEnum,
+  metricTypes: MetricTypesEnum[],
+  days: number,
+  options?: {
+    refreshInterval?: number;
+    revalidateOnFocus?: boolean;
+    revalidateOnReconnect?: boolean;
+  },
+) => {
+  const fetcher = () =>
+    fetchTimeSeriesDataFromGraphQL(daoId, metricTypes, days);
+
+  // Create a unique key for this data request
+  const swrKey =
+    daoId && metricTypes.length > 0 && days > 0
+      ? [`timeSeriesData`, daoId, metricTypes.join(","), days]
+      : null;
+
+  return useSWR(swrKey, fetcher, {
+    refreshInterval: options?.refreshInterval || 0, // Default to no auto-refresh
+    revalidateOnFocus: options?.revalidateOnFocus ?? false, // Default to false
+    revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
+    dedupingInterval: 10000, // Dedupe identical requests within 10 seconds
+  });
 };

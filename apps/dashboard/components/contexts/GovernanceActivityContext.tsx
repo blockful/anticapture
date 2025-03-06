@@ -7,25 +7,20 @@ import {
   fetchActiveSupply,
   fetchAverageTurnout,
   fetchProposals,
-  fetchTimeSeriesDataFromGraphQL,
   fetchVotes,
 } from "@/lib/server/backend";
 import { DaoIdEnum } from "@/lib/types/daos";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MetricData, GovernanceActivityContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
+import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,
   changeRate: undefined,
 };
+
 export const GovernanceActivityContext =
   createContext<GovernanceActivityContextProps>({
     days: TimeInterval.NINETY_DAYS,
@@ -33,17 +28,13 @@ export const GovernanceActivityContext =
     treasury: initialGovernanceActivityMetricData,
     setTreasury: () => {},
     treasurySupplyChart: [],
-
     setTreasurySupplyChart: () => {},
     proposals: initialGovernanceActivityMetricData,
     setProposals: () => {},
-
     activeSupply: initialGovernanceActivityMetricData,
     setActiveSupply: () => {},
-
     votes: initialGovernanceActivityMetricData,
     setVotes: () => {},
-
     averageTurnout: initialGovernanceActivityMetricData,
     setAverageTurnout: () => {},
   });
@@ -65,94 +56,98 @@ export const GovernanceActivityProvider = ({
   const [proposals, setProposals] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-
   const [activeSupply, setActiveSupply] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-
   const [votes, setVotes] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-
   const [averageTurnout, setAverageTurnout] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
 
-  const fetchGovernanceActivityData = useCallback(async () => {
-    try {
-      const [
-        treasuryData,
-        proposalsData,
-        activeSupplyData,
-        votesData,
-        averageTurnoutData,
-      ] = await Promise.all([
-        fetchTimeSeriesDataFromGraphQL(
-          daoId,
-          MetricTypesEnum.TREASURY,
-          parseInt(days.split("d")[0]),
-        ),
-        fetchProposals({ daoId, days }),
-        fetchActiveSupply({ daoId, days }),
-        fetchVotes({ daoId, days }),
-        fetchAverageTurnout({ daoId, days }),
-      ]);
+  const parsedDays = useMemo(() => parseInt(days.split("d")[0]), [days]);
 
-      if (treasuryData) {
-        const currentHigh = treasuryData[treasuryData.length - 1]?.high ?? "0";
-        const oldHigh = treasuryData[0]?.high ?? "0";
-        const changeRate =
-          currentHigh === "0"
-            ? "0"
-            : formatUnits(
-                (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
-                  BigInt(1e18),
-                18,
-              );
-        setTreasury({
-          value: String(BigInt(currentHigh) / BigInt(10 ** 18)),
-          changeRate: changeRate,
-        });
-        setTreasurySupplyChart(treasuryData);
-      }
+  // Use SWR hook for treasury data
+  const { data: treasuryData, error: treasuryError } = useTimeSeriesData(
+    daoId,
+    [MetricTypesEnum.TREASURY],
+    parsedDays,
+    {
+      refreshInterval: 300000, // Refresh every 5 minutes
+      revalidateOnFocus: false,
+    },
+  );
 
-      if (proposalsData) {
-        setProposals({
-          value: String(proposalsData.currentProposalsLaunched),
-          changeRate: proposalsData.changeRate,
-        });
-      }
-
-      if (activeSupplyData) {
-        setActiveSupply({
-          value: activeSupplyData.activeSupply,
-          changeRate: undefined,
-        });
-      }
-
-      if (votesData) {
-        setVotes({
-          value: votesData.currentVotes,
-          changeRate: votesData.changeRate,
-        });
-      }
-
-      if (averageTurnoutData) {
-        setAverageTurnout({
-          value: String(
-            BigInt(averageTurnoutData.currentAverageTurnout) / BigInt(10 ** 18),
-          ),
-          changeRate: averageTurnoutData.changeRate,
-        });
-      }
-    } catch (error) {
-      console.error("Error serching governance metrics", error);
-    }
-  }, [days, daoId]);
-
+  // Fetch all governance data
   useEffect(() => {
-    fetchGovernanceActivityData();
-  }, [fetchGovernanceActivityData]);
+    const fetchGovernanceData = async () => {
+      try {
+        const [proposalsData, activeSupplyData, votesData, averageTurnoutData] =
+          await Promise.all([
+            fetchProposals({ daoId, days }),
+            fetchActiveSupply({ daoId, days }),
+            fetchVotes({ daoId, days }),
+            fetchAverageTurnout({ daoId, days }),
+          ]);
+
+        // Process treasury data from SWR
+        if (treasuryData) {
+          const data = treasuryData[MetricTypesEnum.TREASURY];
+          const currentHigh = data[data.length - 1]?.high ?? "0";
+          const oldHigh = data[0]?.high ?? "0";
+          const changeRate =
+            currentHigh === "0"
+              ? "0"
+              : formatUnits(
+                  (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
+                    BigInt(1e18),
+                  18,
+                );
+          setTreasury({
+            value: String(BigInt(currentHigh) / BigInt(10 ** 18)),
+            changeRate: changeRate,
+          });
+          setTreasurySupplyChart(data);
+        }
+
+        if (proposalsData) {
+          setProposals({
+            value: String(proposalsData.currentProposalsLaunched),
+            changeRate: proposalsData.changeRate,
+          });
+        }
+
+        if (activeSupplyData) {
+          setActiveSupply({
+            value: activeSupplyData.activeSupply,
+            changeRate: undefined,
+          });
+        }
+
+        if (votesData) {
+          setVotes({
+            value: votesData.currentVotes,
+            changeRate: votesData.changeRate,
+          });
+        }
+
+        if (averageTurnoutData) {
+          setAverageTurnout({
+            value: String(
+              BigInt(averageTurnoutData.currentAverageTurnout) /
+                BigInt(10 ** 18),
+            ),
+            changeRate: averageTurnoutData.changeRate,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching governance metrics", error);
+      }
+    };
+
+    fetchGovernanceData();
+  }, [daoId, days, treasuryData, treasuryError]);
 
   return (
     <GovernanceActivityContext.Provider

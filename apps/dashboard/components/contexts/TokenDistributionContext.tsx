@@ -4,22 +4,17 @@
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/lib/server/backend";
 import { DaoIdEnum } from "@/lib/types/daos";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MetricData, TokenDistributionContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
-import { fetchTimeSeriesDataFromGraphQL } from "@/hooks/useTimeSeriesDataFromGraphQL";
+import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 
 const initialTokenDistributionMetricData = {
   value: undefined,
   changeRate: undefined,
 };
+
 export const TokenDistributionContext =
   createContext<TokenDistributionContextProps>({
     days: TimeInterval.NINETY_DAYS,
@@ -95,93 +90,105 @@ export const TokenDistributionProvider = ({
     DaoMetricsDayBucket[]
   >([]);
 
-  const metricsWithCallBacks = [
-    {
-      type: MetricTypesEnum.TOTAL_SUPPLY,
-      setState: setTotalSupply,
-      setChart: setTotalSupplyChart,
-    },
-    {
-      type: MetricTypesEnum.DELEGATED_SUPPLY,
-      setState: setDelegatedSupply,
-      setChart: setDelegatedSupplyChart,
-    },
-    {
-      type: MetricTypesEnum.CIRCULATING_SUPPLY,
-      setState: setCirculatingSupply,
-      setChart: setCirculatingSupplyChart,
-    },
-    {
-      type: MetricTypesEnum.CEX_SUPPLY,
-      setState: setCexSupply,
-      setChart: setCexSupplyChart,
-    },
-    {
-      type: MetricTypesEnum.DEX_SUPPLY,
-      setState: setDexSupply,
-      setChart: setDexSupplyChart,
-    },
-    {
-      type: MetricTypesEnum.LENDING_SUPPLY,
-      setState: setLendingSupply,
-      setChart: setLendingSupplyChart,
-    },
-  ];
+  const metricsWithCallBacks = useMemo(
+    () => [
+      {
+        type: MetricTypesEnum.TOTAL_SUPPLY,
+        setState: setTotalSupply,
+        setChart: setTotalSupplyChart,
+      },
+      {
+        type: MetricTypesEnum.DELEGATED_SUPPLY,
+        setState: setDelegatedSupply,
+        setChart: setDelegatedSupplyChart,
+      },
+      {
+        type: MetricTypesEnum.CIRCULATING_SUPPLY,
+        setState: setCirculatingSupply,
+        setChart: setCirculatingSupplyChart,
+      },
+      {
+        type: MetricTypesEnum.CEX_SUPPLY,
+        setState: setCexSupply,
+        setChart: setCexSupplyChart,
+      },
+      {
+        type: MetricTypesEnum.DEX_SUPPLY,
+        setState: setDexSupply,
+        setChart: setDexSupplyChart,
+      },
+      {
+        type: MetricTypesEnum.LENDING_SUPPLY,
+        setState: setLendingSupply,
+        setChart: setLendingSupplyChart,
+      },
+    ],
+    [],
+  );
 
-  const fetchTokenDistributionData = useCallback(async () => {
-    const parsedDays = parseInt(days.split("d")[0]);
-    const metricTypes = metricsWithCallBacks.map(
-      (metric) => metric.type.trim().replace(/^"|"$/g, "") as MetricTypesEnum,
-    );
+  const metricTypes = useMemo(
+    () =>
+      metricsWithCallBacks.map(
+        (metric) => metric.type.trim().replace(/^"|"$/g, "") as MetricTypesEnum,
+      ),
+    [metricsWithCallBacks],
+  );
 
-    try {
-      // Make a single API call for all metrics
-      const allData = await fetchTimeSeriesDataFromGraphQL(
-        daoId,
-        metricTypes,
-        parsedDays,
-      );
+  const parsedDays = parseInt(days.split("d")[0]);
 
-      // Process each metric with its data
-      metricsWithCallBacks.forEach((metric) => {
-        const metricType = metric.type
-          .trim()
-          .replace(/^"|"$/g, "") as MetricTypesEnum;
-        const data = allData[metricType] || [];
+  // Use the SWR hook to fetch data
+  const { data: allData, error } = useTimeSeriesData(
+    daoId,
+    metricTypes,
+    parsedDays,
+    {
+      refreshInterval: 300000, // Refresh every 5 minutes
+      revalidateOnFocus: false,
+    },
+  );
 
-        if (data.length > 0) {
-          let changeRate;
-          const oldHigh = data[0].high ?? "0";
-          const currentHigh = data[data.length - 1]?.high ?? "0";
-          if (currentHigh === "0") {
-            changeRate = "0";
-          } else {
-            changeRate = formatUnits(
-              (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
-                BigInt(1e18),
-              18,
-            );
-          }
-          metric.setState({ value: currentHigh, changeRate });
-          metric.setChart(data);
-        } else {
-          metric.setState(initialTokenDistributionMetricData);
-          metric.setChart([]);
-        }
-      });
-    } catch (error) {
+  // Process the data when it changes
+  useEffect(() => {
+    if (error) {
       console.error("Error fetching token distribution data:", error);
       // Set default states on error
       metricsWithCallBacks.forEach((metric) => {
         metric.setState(initialTokenDistributionMetricData);
         metric.setChart([]);
       });
+      return;
     }
-  }, [days, daoId]);
 
-  useEffect(() => {
-    fetchTokenDistributionData();
-  }, [fetchTokenDistributionData]);
+    if (!allData) return; // Skip if data is not loaded yet
+
+    // Process each metric with its data
+    metricsWithCallBacks.forEach((metric) => {
+      const metricType = metric.type
+        .trim()
+        .replace(/^"|"$/g, "") as MetricTypesEnum;
+      const data = allData[metricType] || [];
+
+      if (data.length > 0) {
+        let changeRate;
+        const oldHigh = data[0].high ?? "0";
+        const currentHigh = data[data.length - 1]?.high ?? "0";
+        if (currentHigh === "0") {
+          changeRate = "0";
+        } else {
+          changeRate = formatUnits(
+            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
+              BigInt(1e18),
+            18,
+          );
+        }
+        metric.setState({ value: currentHigh, changeRate });
+        metric.setChart(data);
+      } else {
+        metric.setState(initialTokenDistributionMetricData);
+        metric.setChart([]);
+      }
+    });
+  }, [allData, error, metricsWithCallBacks]);
 
   return (
     <TokenDistributionContext.Provider
