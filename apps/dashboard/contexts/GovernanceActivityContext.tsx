@@ -134,7 +134,9 @@ export const GovernanceActivityProvider = ({
         treasurySupplyChart,
         setTreasurySupplyChart,
         proposals: {
-          value: String(proposalsData?.currentProposalsLaunched),
+          value: proposalsData?.currentProposalsLaunched
+            ? String(proposalsData?.currentProposalsLaunched)
+            : undefined,
           changeRate: proposalsData?.changeRate,
         },
         activeSupply: {
@@ -146,10 +148,12 @@ export const GovernanceActivityProvider = ({
           changeRate: votesData?.changeRate,
         },
         averageTurnout: {
-          value: String(
-            BigInt(averageTurnoutData?.currentAverageTurnout ?? "0") /
-              BigInt(10 ** 18),
-          ),
+          value: averageTurnoutData
+            ? String(
+                BigInt(averageTurnoutData?.currentAverageTurnout ?? "0") /
+                  BigInt(10 ** 18),
+              )
+            : undefined,
           changeRate: averageTurnoutData?.changeRate,
         },
       }}
