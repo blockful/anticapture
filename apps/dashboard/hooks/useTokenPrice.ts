@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import daoConstantsByDaoId from "@/lib/dao-constants";
-import { ChainNameEnum } from "@/lib/server/backend";
+import { ChainNameEnum } from "@/lib/dao-constants/types";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 /* Fetch Dao Token price from Defi Llama API */

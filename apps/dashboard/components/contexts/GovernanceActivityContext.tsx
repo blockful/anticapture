@@ -2,7 +2,7 @@
 "use client";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/lib/server/backend";
+import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MetricData, GovernanceActivityContextProps } from "./types";

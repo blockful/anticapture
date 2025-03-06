@@ -1,5 +1,5 @@
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/lib/server/backend";
+import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 
 export interface MetricData {
   value: string | undefined;

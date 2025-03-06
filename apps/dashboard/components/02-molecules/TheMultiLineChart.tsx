@@ -16,7 +16,7 @@ import {
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/lib/client/utils";
-import { DaoMetricsDayBucket } from "@/lib/server/backend";
+import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 
 const chartConfig = {
   totalSupply: { label: "Total Supply", color: "hsl(var(--chart-1))" },

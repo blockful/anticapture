@@ -4,7 +4,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDaoData } from "@/hooks/useDaoData";
 import { useFetchTokenPrice } from "@/hooks/useTokenPrice";
-import { ChainNameEnum } from "@/lib/server/backend";
+import { ChainNameEnum } from "@/lib/dao-constants/types";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
 interface DaoDataContextProps {
