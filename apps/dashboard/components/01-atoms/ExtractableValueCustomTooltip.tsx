@@ -13,10 +13,15 @@ export const ExtractableValueCustomTooltip: React.FC<
 > = ({ active, payload, label, chartConfig }) => {
   if (!active || !payload || payload.length === 0) return null;
 
+  const date = new Date(label).toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+  });
+
   return (
-    <div className="rounded bg-white p-2 text-black shadow-md">
-      <p className="font-bold">
-        Date: {timestampToReadableDate(Number(label))}
+    <div className="gap-2 rounded bg-[#09090b] p-3 text-black shadow-md">
+      <p className="text-xs font-medium leading-[14px] text-neutral-50">
+        {date}
       </p>
       {payload.map((entry, index) => {
         const value = entry.value !== undefined ? entry.value : 0;
