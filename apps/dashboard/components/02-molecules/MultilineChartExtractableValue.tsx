@@ -10,8 +10,10 @@ import {
   Tooltip,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { ExtractableValueCustomTooltip } from "../01-atoms/ExtractableValueCustomTooltip";
+import { ExtractableValueCustomTooltip } from "@/components/01-atoms";
 import {
+  TokenHistoricalDataMetrics,
+  PriceEntry,
   TreasuryAssetNonDaoToken,
   fetchDaoTokenHistoricalData,
   fetchTreasuryAssetNonDaoToken,
@@ -19,16 +21,23 @@ import {
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getMultilineChartDatasets, PriceDataArray } from "@/lib/mocked-data";
-import { useGovernanceActivityContext } from "../contexts/GovernanceActivityContext";
-import { useDaoDataContext, useTokenDistributionContext } from "../contexts";
+import {
+  filterPriceHistoryByTimeInterval,
+  multilineChart,
+} from "@/lib/mocked-data";
+import { useGovernanceActivityContext } from "@/components/contexts/GovernanceActivityContext";
+import {
+  useDaoDataContext,
+  useTokenDistributionContext,
+} from "@/components/contexts";
+import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 interface MultilineChartExtractableValueProps {
   days: string;
   filterData?: string[];
 }
 
-type DatasetType = TreasuryAssetNonDaoToken[] | PriceDataArray;
+type DatasetType = TreasuryAssetNonDaoToken[] | PriceEntry[];
 
 export const MultilineChartExtractableValue = ({
   filterData,
@@ -38,6 +47,8 @@ export const MultilineChartExtractableValue = ({
   const [treasuryAssetNonDAOToken, setTreasuryAssetNonDAOToken] = useState<
     TreasuryAssetNonDaoToken[]
   >([]);
+  const [daoTokenPriceHistoricalData, setDaoTokenPriceHistoricalData] =
+    useState<PriceEntry[]>(multilineChart.prices);
 
   const { treasurySupplyChart } = useGovernanceActivityContext();
   const { delegatedSupplyChart } = useTokenDistributionContext();
@@ -58,7 +69,7 @@ export const MultilineChartExtractableValue = ({
     fetchDaoTokenHistoricalData({
       daoId: daoId.toUpperCase() as DaoIdEnum,
     }).then((data) => {
-      console.log("data fetchDaoTokenHistoricalData = ", data);
+      setDaoTokenPriceHistoricalData(data.prices);
     });
   }, [days, daoId]);
 
@@ -72,11 +83,15 @@ export const MultilineChartExtractableValue = ({
     delegated: { label: "Delegated", color: "#f87171" },
   } satisfies ChartConfig;
 
-  const multilineChartDatasets = getMultilineChartDatasets();
-  const selectedMultilineChart =
-    multilineChartDatasets[days as keyof typeof multilineChartDatasets] ??
-    multilineChartDatasets.full ??
-    [];
+  const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
+    daoTokenPriceHistoricalData,
+  );
+
+  const selectedPriceHistory =
+    priceHistoryByTimeInterval[days as TimeInterval] ??
+    priceHistoryByTimeInterval.full ??
+    priceHistoryByTimeInterval;
+  console.log("selectedPriceHistory ", selectedPriceHistory);
 
   const normalizeDataset = (
     dataset: DatasetType,
@@ -105,16 +120,18 @@ export const MultilineChartExtractableValue = ({
       treasuryAssetNonDAOToken,
       "treasuryNonDAO",
     ),
-    all: normalizeDataset(selectedMultilineChart, "all"),
+    all: normalizeDataset(selectedPriceHistory, "all"),
     quorum: quorumValue
-      ? normalizeDataset(selectedMultilineChart, "quorum", quorumValue)
+      ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue)
       : [],
     delegated: delegatedSupplyChart
-      ? normalizeDataset(selectedMultilineChart, "delegated")
+      ? normalizeDataset(selectedPriceHistory, "delegated")
       : [],
   };
 
-  datasets.delegated = selectedMultilineChart.map((item) => {
+  console.log("datasets", datasets);
+
+  datasets.delegated = selectedPriceHistory.map((item) => {
     const normalizedDate = new Date(item[0]).getTime();
 
     const delegatedEntry = (delegatedSupplyChart || []).find(

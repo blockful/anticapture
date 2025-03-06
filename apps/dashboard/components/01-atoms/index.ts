@@ -7,6 +7,7 @@ export * from "./BaseHeaderLayoutSidebar";
 export * from "./ButtonCardDaoInfoItem";
 export * from "./ButtonHeaderDAOSidebar";
 export * from "./ConnectWallet";
+export * from "./ExtractableValueCustomTooltip";
 export * from "./HeaderDAOSidebarDropdown";
 export * from "./Skeleton";
 export * from "./Sparkline";

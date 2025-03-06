@@ -1,8 +1,9 @@
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
-import { MetricTypesEnum } from "../client/constants";
+import { MetricTypesEnum, MILLISECONDS_PER_DAY } from "../client/constants";
 import { Address } from "viem";
 import daoConstantsByDaoId from "../dao-constants";
+import api from "./api";
 
 export interface DAOVotingPower {
   dao: string;
@@ -55,7 +56,7 @@ export const fetchTimeSeriesDataFromGraphQL = async (
               daoMetricsDayBucketss(
               where: {
                 metricType: ${metricType},
-                date_gte: "${String(BigInt(Date.now() - days * 86400000)).slice(0, 10)}",
+                date_gte: "${String(BigInt(Date.now() - days * MILLISECONDS_PER_DAY)).slice(0, 10)}",
                 daoId: "${daoId}"
               },
               orderBy: "date",
@@ -160,9 +161,9 @@ export const fetchTreasuryAssetNonDaoToken = async ({
         next: { revalidate: 3600 },
       },
     );
-    const chartData = await response.json();
+    const dataset = await response.json();
 
-    return chartData.map((entry: any) => ({
+    return dataset.map((entry: TreasuryAssetNonDaoToken) => ({
       date: new Date(entry.date).getTime(),
       totalAssets: entry.totalAssets,
     }));
@@ -428,7 +429,7 @@ export const fetchAverageTurnout = async ({
 
 export type PriceEntry = [timestamp: number, value: number];
 
-export interface DaoTokenHistoricalDataResponse {
+export interface TokenHistoricalDataMetrics {
   prices: PriceEntry[];
   market_caps: PriceEntry[];
   total_volumes: PriceEntry[];
@@ -438,16 +439,14 @@ export const fetchDaoTokenHistoricalData = async ({
   daoId,
 }: {
   daoId: DaoIdEnum;
-}): Promise<DaoTokenHistoricalDataResponse> => {
+}): Promise<TokenHistoricalDataMetrics> => {
   try {
-    const response: Response = await fetch(
-      `${BACKEND_ENDPOINT}/token/${daoId}/historical-data`,
-
-      { next: { revalidate: 3600 } },
+    const response = await api.get<TokenHistoricalDataMetrics>(
+      `/token/${daoId}/historical-data`,
     );
-    console.log("response", response);
-    return response.json();
-  } catch (e) {
-    throw e;
+    return response.data;
+  } catch (error) {
+    console.error("Error getting historical token metrics:", error);
+    throw error;
   }
 };
