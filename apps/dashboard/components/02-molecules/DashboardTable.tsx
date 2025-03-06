@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown, TheTable, ArrowState } from "@/components/01-atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { fetchDelegatedSupply } from "@/lib/server/backend";
 import Image, { StaticImageData } from "next/image";
 import ENSLogo from "@/public/logo/ENS.png";
 import UNILogo from "@/public/logo/UNI.png";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
 
 interface State {
   data: DashboardDao[];
@@ -84,22 +84,38 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
 
+  // Use SWR hooks for each DAO at the top level
+  const uniswapData = useDelegatedSupply(DaoIdEnum.UNISWAP, String(days));
+  const ensData = useDelegatedSupply(DaoIdEnum.ENS, String(days));
+
+  // Update state when data changes
   useEffect(() => {
-    Object.values(DaoIdEnum).map((daoId, index) => {
-      fetchDelegatedSupply({ daoId, days }).then((result) => {
-        result &&
-          dispatch({
-            type: ActionType.UPDATE_DELEGATED_SUPPLY,
-            payload: {
-              index: index,
-              delegatedSupply: String(
-                BigInt(result.currentDelegatedSupply) / BigInt(10 ** 18),
-              ),
-            },
-          });
+    // Process UNISWAP data (index 0)
+    if (uniswapData.data) {
+      dispatch({
+        type: ActionType.UPDATE_DELEGATED_SUPPLY,
+        payload: {
+          index: 0,
+          delegatedSupply: String(
+            BigInt(uniswapData.data.currentDelegatedSupply) / BigInt(10 ** 18),
+          ),
+        },
       });
-    });
-  }, [days]);
+    }
+
+    // Process ENS data (index 1)
+    if (ensData.data) {
+      dispatch({
+        type: ActionType.UPDATE_DELEGATED_SUPPLY,
+        payload: {
+          index: 1,
+          delegatedSupply: String(
+            BigInt(ensData.data.currentDelegatedSupply) / BigInt(10 ** 18),
+          ),
+        },
+      });
+    }
+  }, [uniswapData.data, ensData.data]);
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
