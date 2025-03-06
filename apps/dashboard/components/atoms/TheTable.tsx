@@ -75,14 +75,6 @@ export const TheTable = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const SkeletonRow = ({ width = "w-32", height = "h-5" }) => {
-    return (
-      <div className={`flex animate-pulse justify-center space-x-2`}>
-        <div className={`${width} ${height} rounded bg-gray-300`} />
-      </div>
-    );
-  };
-
   return (
     <Table
       style={{
@@ -123,13 +115,9 @@ export const TheTable = <TData, TValue>({
                   const isCellLoading = cellValue === null;
                   return (
                     <TableCell key={cell.id}>
-                      {isCellLoading ? (
-                        <SkeletonRow />
-                      ) : (
-                        flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
                       )}
                     </TableCell>
                   );

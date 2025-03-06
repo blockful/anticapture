@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DashboardDao, dashboardData } from "@/lib/mocked-data";
@@ -14,32 +14,6 @@ import ENSLogo from "@/public/logo/ENS.png";
 import UNILogo from "@/public/logo/UNI.png";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
-
-interface State {
-  data: DashboardDao[];
-}
-
-enum ActionType {
-  UPDATE_DELEGATED_SUPPLY = "DELEGATED SUPPLY",
-}
-
-type Action = {
-  type: ActionType.UPDATE_DELEGATED_SUPPLY;
-  payload: {
-    index: number;
-    delegatedSupply: string;
-  };
-};
-
-const sortingByAscendingOrDescendingNumber = (
-  rowA: Row<DashboardDao>,
-  rowB: Row<DashboardDao>,
-  columnId: string,
-) => {
-  const a = Number(rowA.getValue(columnId)) ?? 0;
-  const b = Number(rowB.getValue(columnId)) ?? 0;
-  return a - b;
-};
 
 const daoDetails: Record<
   DaoIdEnum,
@@ -55,67 +29,65 @@ const daoDetails: Record<
   },
 };
 
-const initialState: State = {
-  data: dashboardData,
+export const SkeletonRow = ({ width = "w-32", height = "h-5" }) => {
+  return (
+    <div className={`flex animate-pulse justify-center space-x-2`}>
+      <div className={`${width} ${height} rounded bg-gray-300`} />
+    </div>
+  );
 };
 
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case ActionType.UPDATE_DELEGATED_SUPPLY:
-      const index = action.payload.index;
-      const data = [
-        ...state.data.slice(0, action.payload.index),
-        {
-          ...state.data[index],
-          delegatedSupply: action.payload.delegatedSupply,
-        },
-        ...state.data.slice(index + 1, state.data.length),
-      ];
-      return {
-        ...state,
-        data,
-      };
-    default:
-      return state;
-  }
-}
-
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
 
-  // Use SWR hooks for each DAO at the top level
-  const uniswapData = useDelegatedSupply(DaoIdEnum.UNISWAP, String(days));
-  const ensData = useDelegatedSupply(DaoIdEnum.ENS, String(days));
+  // Create a ref to store the actual delegated supply values
+  const delegatedSupplyValues = useRef<Record<number, number>>({});
 
-  // Update state when data changes
-  useEffect(() => {
-    // Process UNISWAP data (index 0)
-    if (uniswapData.data) {
-      dispatch({
-        type: ActionType.UPDATE_DELEGATED_SUPPLY,
-        payload: {
-          index: 0,
-          delegatedSupply: String(
-            BigInt(uniswapData.data.currentDelegatedSupply) / BigInt(10 ** 18),
-          ),
-        },
-      });
+  // Create initial data
+  const data = Object.values(DaoIdEnum).map((daoId, index) => ({
+    id: index,
+    dao: daoId,
+    delegatedSupply: null as null | string,
+    profitability: null,
+    delegatesToPass: null,
+  }));
+
+  // Create a cell component that stores its value in the ref
+  const DelegatedSupplyCell = ({
+    daoId,
+    rowIndex,
+    days,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+    days: TimeInterval;
+  }) => {
+    const { data: supplyData } = useDelegatedSupply(daoId, String(days));
+
+    // Store the numeric value in the ref when data changes
+    useEffect(() => {
+      if (supplyData) {
+        const numericValue = Number(
+          BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18),
+        );
+        delegatedSupplyValues.current[rowIndex] = numericValue;
+      }
+    }, [supplyData, rowIndex]);
+
+    if (!supplyData) {
+      return <SkeletonRow />;
     }
 
-    // Process ENS data (index 1)
-    if (ensData.data) {
-      dispatch({
-        type: ActionType.UPDATE_DELEGATED_SUPPLY,
-        payload: {
-          index: 1,
-          delegatedSupply: String(
-            BigInt(ensData.data.currentDelegatedSupply) / BigInt(10 ** 18),
-          ),
-        },
-      });
-    }
-  }, [uniswapData.data, ensData.data]);
+    const formattedSupply = formatNumberUserReadable(
+      Number(BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18)),
+    );
+
+    return (
+      <div className="flex items-center justify-center text-center">
+        {formattedSupply}
+      </div>
+    );
+  };
 
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
@@ -168,11 +140,11 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "delegatedSupply",
       cell: ({ row }) => {
-        const delegatedSupply: number = row.getValue("delegatedSupply");
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const rowIndex = row.index;
+
         return (
-          <div className="flex items-center justify-center text-center">
-            {`${delegatedSupply && formatNumberUserReadable(delegatedSupply)}`}
-          </div>
+          <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
         );
       },
       header: ({ column }) => (
@@ -197,76 +169,14 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         </Button>
       ),
       enableSorting: true,
-      sortingFn: sortingByAscendingOrDescendingNumber,
+      sortingFn: (rowA, rowB) => {
+        const indexA = rowA.index;
+        const indexB = rowB.index;
+        const valueA = delegatedSupplyValues.current[indexA] || 0;
+        const valueB = delegatedSupplyValues.current[indexB] || 0;
+        return valueA - valueB;
+      },
     },
-    // {
-    //   accessorKey: "profitability",
-    //   cell: ({ row }) => {
-    //     const profitability: number = row.getValue("profitability");
-    //     return (
-    //       <div className="flex items-center justify-center text-center">
-    //         {profitability && formatNumberUserReadable(profitability)}
-    //       </div>
-    //     );
-    //   },
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       className="w-full"
-    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //     >
-    //       Profitability
-    //       <ArrowUpDown
-    //         props={{
-    //           className: "ml-2 h-4 w-4",
-    //         }}
-    //         activeState={
-    //           column.getIsSorted() === "asc"
-    //             ? ArrowState.UP
-    //             : column.getIsSorted() === "desc"
-    //               ? ArrowState.DOWN
-    //               : ArrowState.DEFAULT
-    //         }
-    //       />
-    //     </Button>
-    //   ),
-    //   enableSorting: true,
-    //   sortingFn: sortingByAscendingOrDescendingNumber,
-    // },
-    // {
-    //   accessorKey: "delegatesToPass",
-    //   cell: ({ row }) => {
-    //     const delegatesToPass: number = row.getValue("delegatesToPass");
-    //     return (
-    //       <div className="flex items-center justify-center text-center">
-    //         {delegatesToPass && formatNumberUserReadable(delegatesToPass)}
-    //       </div>
-    //     );
-    //   },
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       className="w-full"
-    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //     >
-    //       Delegates to pass
-    //       <ArrowUpDown
-    //         props={{
-    //           className: "ml-2 h-4 w-4",
-    //         }}
-    //         activeState={
-    //           column.getIsSorted() === "asc"
-    //             ? ArrowState.UP
-    //             : column.getIsSorted() === "desc"
-    //               ? ArrowState.DOWN
-    //               : ArrowState.DEFAULT
-    //         }
-    //       />
-    //     </Button>
-    //   ),
-    //   enableSorting: true,
-    //   sortingFn: sortingByAscendingOrDescendingNumber,
-    // },
   ];
 
   const handleRowClick = (row: DashboardDao) => {
@@ -276,7 +186,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   return (
     <TheTable
       columns={dashboardColumns}
-      data={state.data}
+      data={data}
       withPagination={true}
       withSorting={true}
       onRowClick={handleRowClick}
