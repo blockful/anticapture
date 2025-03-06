@@ -1,6 +1,6 @@
 import { User } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { DaoMetricsDayBucket } from "./server/backend";
+import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 
 export type DashboardDao = {
   dao: string;
