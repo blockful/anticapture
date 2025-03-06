@@ -22,29 +22,6 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-/* Fetch Dao Token price from Defi Llama API */
-export const fetchTokenPrice = async (
-  chainName: ChainNameEnum,
-  daoId: DaoIdEnum,
-) => {
-  const daoToken = daoConstantsByDaoId[daoId].contracts.token;
-
-  try {
-    const url = `https://coins.llama.fi/prices/current/${chainName}:${daoToken}`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.coins) {
-      const tokenData = data.coins[`${chainName}:${daoToken}`];
-      return tokenData.price;
-    } else {
-      throw new Error("Token price not found");
-    }
-  } catch (error) {
-    throw new Error("Error fetching token price:");
-  }
-};
-
 interface TotalSupplyPromise {
   oldTotalSupply: string;
   currentTotalSupply: string;

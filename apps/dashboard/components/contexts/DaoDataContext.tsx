@@ -3,17 +3,22 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDaoData } from "@/hooks/useDaoData";
-import { ChainNameEnum, fetchTokenPrice } from "@/lib/server/backend";
+import { useFetchTokenPrice } from "@/hooks/useFetchTokenPrice";
+import { ChainNameEnum } from "@/lib/server/backend";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
 interface DaoDataContextProps {
   daoData: null | DAO;
   tokenPrice: null | number;
+  isLoadingTokenPrice: boolean;
+  tokenPriceError: Error | null;
 }
 
 export const DaoDataContext = createContext<DaoDataContextProps>({
   daoData: null,
   tokenPrice: null,
+  isLoadingTokenPrice: false,
+  tokenPriceError: null,
 });
 
 export const DaoDataProvider = ({
@@ -24,16 +29,21 @@ export const DaoDataProvider = ({
   daoId: DaoIdEnum;
 }) => {
   const { data: daoData } = useDaoData(daoId);
-  const [tokenPrice, setTokenPrice] = useState<null | number>(null);
-
-  useEffect(() => {
-    fetchTokenPrice(ChainNameEnum.Ethereum, daoId).then((tokenPrice) =>
-      setTokenPrice(tokenPrice),
-    );
-  }, []);
+  const {
+    price: tokenPrice,
+    loading: isLoadingTokenPrice,
+    error: tokenPriceError,
+  } = useFetchTokenPrice(ChainNameEnum.Ethereum, daoId);
 
   return (
-    <DaoDataContext.Provider value={{ daoData, tokenPrice }}>
+    <DaoDataContext.Provider
+      value={{
+        daoData,
+        tokenPrice,
+        isLoadingTokenPrice,
+        tokenPriceError,
+      }}
+    >
       {children}
     </DaoDataContext.Provider>
   );
