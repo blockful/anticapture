@@ -18,7 +18,7 @@ import {
   formatVariation,
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
-import { useGovernanceActivityContext } from "../contexts/GovernanceActivityContext";
+import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

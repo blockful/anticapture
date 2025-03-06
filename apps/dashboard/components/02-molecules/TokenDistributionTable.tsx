@@ -13,13 +13,13 @@ import {
   TooltipInfo,
 } from "@/components/01-atoms";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
+import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import {
   cn,
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
-import { useTokenDistributionContext } from "@/components/contexts/TokenDistributionContext";
+import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,

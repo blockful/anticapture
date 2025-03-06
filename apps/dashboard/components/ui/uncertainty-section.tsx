@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { DAO } from "@/lib/types/daos";
 
 import { AnimatedNumber } from "./animated-number";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
+import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { UncertaintyIcon } from "@/components/01-atoms";
 
 export const UncertaintySection = () => {

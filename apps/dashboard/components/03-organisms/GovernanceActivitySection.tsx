@@ -9,7 +9,7 @@ import {
 import { GovernanceActivityTable } from "@/components/02-molecules";
 import { governanceActivitySectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useGovernanceActivityContext } from "../contexts/GovernanceActivityContext";
+import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 
 export const GovernanceActivitySection = () => {
   const { setDays } = useGovernanceActivityContext();

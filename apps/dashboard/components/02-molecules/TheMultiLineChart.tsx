@@ -11,7 +11,7 @@ import {
   TooltipProps,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { useTokenDistributionContext } from "@/components/contexts";
+import { useTokenDistributionContext } from "@/contexts";
 import {
   formatNumberUserReadable,
   timestampToReadableDate,

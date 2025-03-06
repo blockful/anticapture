@@ -9,10 +9,7 @@ import {
 } from "@/components/01-atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
-import {
-  useDaoDataContext,
-  useTokenDistributionContext,
-} from "@/components/contexts";
+import { useDaoDataContext, useTokenDistributionContext } from "@/contexts";
 
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();

@@ -10,7 +10,7 @@ import {
   SwitchCardDaoInfoItem,
 } from "@/components/01-atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
+import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 

@@ -1,9 +1,9 @@
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
-import { DaoDataProvider } from "@/components/contexts/DaoDataContext";
+import { DaoDataProvider } from "@/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { HeaderDAOSidebar } from "@/components/02-molecules";
-import { TokenDistributionProvider } from "@/components/contexts/TokenDistributionContext";
-import { GovernanceActivityProvider } from "@/components/contexts/GovernanceActivityContext";
+import { TokenDistributionProvider } from "@/contexts/TokenDistributionContext";
+import { GovernanceActivityProvider } from "@/contexts/GovernanceActivityContext";
 
 interface DaoLayoutProps {
   children: React.ReactNode;

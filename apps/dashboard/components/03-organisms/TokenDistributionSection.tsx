@@ -10,7 +10,7 @@ import {
   TokenDistributionTable,
 } from "@/components/02-molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
-import { useTokenDistributionContext } from "@/components/contexts";
+import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 
 export const TokenDistributionSection = () => {
