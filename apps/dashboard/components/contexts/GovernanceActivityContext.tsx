@@ -12,6 +12,7 @@ import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 import { useActiveSupply } from "@/hooks/useActiveSupply";
 import { useProposals } from "@/hooks/useProposals";
 import { useVotes } from "@/hooks/useVotes";
+import { useAverageTurnout } from "@/hooks/useAverageTurnout";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,
@@ -30,7 +31,6 @@ export const GovernanceActivityContext =
     activeSupply: initialGovernanceActivityMetricData,
     votes: initialGovernanceActivityMetricData,
     averageTurnout: initialGovernanceActivityMetricData,
-    setAverageTurnout: () => {},
   });
 
 export const GovernanceActivityProvider = ({
@@ -47,10 +47,6 @@ export const GovernanceActivityProvider = ({
   const [treasurySupplyChart, setTreasurySupplyChart] = useState<
     DaoMetricsDayBucket[]
   >([]);
-
-  const [averageTurnout, setAverageTurnout] = useState<MetricData>(
-    initialGovernanceActivityMetricData,
-  );
 
   const parsedDays = useMemo(() => parseInt(days.split("d")[0]), [days]);
 
@@ -83,14 +79,16 @@ export const GovernanceActivityProvider = ({
     revalidateOnFocus: false,
   });
 
+  // Use SWR hook for average turnout data
+  const { data: averageTurnoutData } = useAverageTurnout(daoId, days, {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: false,
+  });
+
   // Fetch remaining governance data
   useEffect(() => {
     const fetchGovernanceData = async () => {
       try {
-        const [averageTurnoutData] = await Promise.all([
-          fetchAverageTurnout({ daoId, days }),
-        ]);
-
         // Process treasury data from SWR
         if (treasuryData) {
           const data = treasuryData[MetricTypesEnum.TREASURY];
@@ -110,23 +108,21 @@ export const GovernanceActivityProvider = ({
           });
           setTreasurySupplyChart(data);
         }
-
-        if (averageTurnoutData) {
-          setAverageTurnout({
-            value: String(
-              BigInt(averageTurnoutData.currentAverageTurnout) /
-                BigInt(10 ** 18),
-            ),
-            changeRate: averageTurnoutData.changeRate,
-          });
-        }
       } catch (error) {
         console.error("Error fetching governance metrics", error);
       }
     };
 
     fetchGovernanceData();
-  }, [daoId, days, treasuryData, treasuryError, proposalsData]);
+  }, [
+    daoId,
+    days,
+    treasuryData,
+    treasuryError,
+    proposalsData,
+    votesData,
+    averageTurnoutData,
+  ]);
 
   return (
     <GovernanceActivityContext.Provider
@@ -149,8 +145,13 @@ export const GovernanceActivityProvider = ({
           value: votesData?.currentVotes,
           changeRate: votesData?.changeRate,
         },
-        averageTurnout,
-        setAverageTurnout,
+        averageTurnout: {
+          value: String(
+            BigInt(averageTurnoutData?.currentAverageTurnout ?? "0") /
+              BigInt(10 ** 18),
+          ),
+          changeRate: averageTurnoutData?.changeRate,
+        },
       }}
     >
       {children}
