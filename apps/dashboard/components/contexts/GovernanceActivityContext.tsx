@@ -21,7 +21,6 @@ import {
 import { MetricData, GovernanceActivityContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
-import { formatVariation } from "@/lib/client/utils";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,

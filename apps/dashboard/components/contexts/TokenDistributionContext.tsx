@@ -2,10 +2,7 @@
 "use client";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import {
-  DaoMetricsDayBucket,
-  fetchTimeSeriesDataFromGraphQL,
-} from "@/lib/server/backend";
+import { DaoMetricsDayBucket } from "@/lib/server/backend";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   createContext,
@@ -17,6 +14,7 @@ import {
 import { MetricData, TokenDistributionContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
+import { fetchTimeSeriesDataFromGraphQL } from "@/hooks/useTimeSeriesDataFromGraphQL";
 
 const initialTokenDistributionMetricData = {
   value: undefined,
@@ -131,33 +129,54 @@ export const TokenDistributionProvider = ({
   ];
 
   const fetchTokenDistributionData = useCallback(async () => {
-    await Promise.all(
-      metricsWithCallBacks.map(async (metric) => {
+    const parsedDays = parseInt(days.split("d")[0]);
+    const metricTypes = metricsWithCallBacks.map(
+      (metric) => metric.type.trim().replace(/^"|"$/g, "") as MetricTypesEnum,
+    );
+
+    try {
+      // Make a single API call for all metrics
+      const allData = await fetchTimeSeriesDataFromGraphQL(
+        daoId,
+        metricTypes,
+        parsedDays,
+      );
+
+      // Process each metric with its data
+      metricsWithCallBacks.forEach((metric) => {
         const metricType = metric.type
           .trim()
           .replace(/^"|"$/g, "") as MetricTypesEnum;
-        const parsedDays = parseInt(days.split("d")[0]);
-        const data = await fetchTimeSeriesDataFromGraphQL(
-          daoId,
-          metricType,
-          parsedDays,
-        );
-        let changeRate;
-        const oldHigh = data[0].high ?? "0";
-        const currentHigh = data[data.length - 1]?.high ?? "0";
-        if (currentHigh === "0") {
-          changeRate = "0";
+        const data = allData[metricType] || [];
+
+        if (data.length > 0) {
+          let changeRate;
+          const oldHigh = data[0].high ?? "0";
+          const currentHigh = data[data.length - 1]?.high ?? "0";
+          if (currentHigh === "0") {
+            changeRate = "0";
+          } else {
+            changeRate = formatUnits(
+              (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
+                BigInt(1e18),
+              18,
+            );
+          }
+          metric.setState({ value: currentHigh, changeRate });
+          metric.setChart(data);
         } else {
-          changeRate = formatUnits(
-            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
-              BigInt(1e18),
-            18,
-          );
+          metric.setState(initialTokenDistributionMetricData);
+          metric.setChart([]);
         }
-        metric.setState({ value: currentHigh, changeRate });
-        metric.setChart(data);
-      }),
-    );
+      });
+    } catch (error) {
+      console.error("Error fetching token distribution data:", error);
+      // Set default states on error
+      metricsWithCallBacks.forEach((metric) => {
+        metric.setState(initialTokenDistributionMetricData);
+        metric.setChart([]);
+      });
+    }
   }, [days, daoId]);
 
   useEffect(() => {
