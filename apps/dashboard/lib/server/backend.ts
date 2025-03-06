@@ -425,3 +425,29 @@ export const fetchAverageTurnout = async ({
     throw e;
   }
 };
+
+export type PriceEntry = [timestamp: number, value: number];
+
+export interface DaoTokenHistoricalDataResponse {
+  prices: PriceEntry[];
+  market_caps: PriceEntry[];
+  total_volumes: PriceEntry[];
+}
+
+export const fetchDaoTokenHistoricalData = async ({
+  daoId,
+}: {
+  daoId: DaoIdEnum;
+}): Promise<DaoTokenHistoricalDataResponse> => {
+  try {
+    const response: Response = await fetch(
+      `${BACKEND_ENDPOINT}/token/${daoId}/historical-data`,
+
+      { next: { revalidate: 3600 } },
+    );
+    console.log("response", response);
+    return response.json();
+  } catch (e) {
+    throw e;
+  }
+};
