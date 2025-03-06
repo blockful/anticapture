@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { WalletIcon } from "@/components/01-atoms";
+import { WalletIcon } from "@/components/atoms";
 
 export const ConnectWallet = () => {
   return (

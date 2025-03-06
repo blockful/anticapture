@@ -8,7 +8,7 @@ import {
   ClickIcon,
   Skeleton,
   SwitchCardDaoInfoItem,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";

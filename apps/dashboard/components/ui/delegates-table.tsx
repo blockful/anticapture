@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { sanitizeNumber } from "@/lib/client/utils";
 import { Delegates, delegatesData } from "@/lib/mocked-data";
-import { HeartIcon } from "@/components/01-atoms";
+import { HeartIcon } from "@/components/atoms";
 
 export const delegatesColumns: ColumnDef<Delegates>[] = [
   {
@@ -23,7 +23,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
       const ensDomainsAccountURL: string = `https://app.ens.domains/${ensName}`;
 
       return (
-        <p className="max-w-40 overflow-auto flex items-center space-x-1 scrollbar-none">
+        <p className="scrollbar-none flex max-w-40 items-center space-x-1 overflow-auto">
           {ensName ? (
             <>
               <a className="hover:underline" href={ensDomainsAccountURL}>
@@ -49,8 +49,8 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
       const amountInPercentage = ((amount / totalAmount) * 100).toFixed(2);
 
       return (
-        <div className="text-center flex justify-center items-center ml-5 space-x-1">
-          <p className="w-12 truncate flex justify-end text-right">
+        <div className="ml-5 flex items-center justify-center space-x-1 text-center">
+          <p className="flex w-12 justify-end truncate text-right">
             {sanitizeNumber(amount)}
           </p>
           <p>|</p>
@@ -74,7 +74,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
     accessorKey: "delegators",
     cell: ({ row }) => {
       const delegators: number = row.getValue("delegators");
-      return <p className="text-center mr-4">{sanitizeNumber(delegators)}</p>;
+      return <p className="mr-4 text-center">{sanitizeNumber(delegators)}</p>;
     },
     header: ({ column }) => {
       return (
@@ -92,7 +92,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
     accessorKey: "voted",
     cell: ({ row }) => {
       const delegators: number = row.getValue("voted");
-      return <div className="text-center mr-8">{delegators * 100}%</div>;
+      return <div className="mr-8 text-center">{delegators * 100}%</div>;
     },
     header: ({ column }) => {
       return (
@@ -156,7 +156,7 @@ const VotedProposalsPercentageInfoIcon = () => {
   return (
     <div className="relative z-40">
       <div
-        className={`w-[220px] text-center bg-black text-white p-3 rounded-md absolute right-0 top-5 ${
+        className={`absolute right-0 top-5 w-[220px] rounded-md bg-black p-3 text-center text-white ${
           showInfo ? "block" : "hidden"
         }`}
       >

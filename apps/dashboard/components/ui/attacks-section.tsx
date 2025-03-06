@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { AttacksIcon, InfoIcon } from "@/components/01-atoms";
+import { AttacksIcon, InfoIcon } from "@/components/atoms";
 import { sanitizeNumber } from "@/lib/client/utils";
 import { approxScaleBigInt } from "@namehash/ens-utils";
 import {

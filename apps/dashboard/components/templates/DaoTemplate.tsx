@@ -4,7 +4,7 @@ import {
   DaoInfoSection,
   GovernanceActivitySection,
   TokenDistributionSection,
-} from "@/components/03-organisms";
+} from "@/components/organisms";
 
 export const DaoTemplate = () => {
   return (

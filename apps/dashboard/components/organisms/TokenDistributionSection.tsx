@@ -4,11 +4,11 @@ import {
   ArrowLeftRight,
   TheSectionLayout,
   SwitcherDate,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import {
   TheMultiLineChart,
   TokenDistributionTable,
-} from "@/components/02-molecules";
+} from "@/components/molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";

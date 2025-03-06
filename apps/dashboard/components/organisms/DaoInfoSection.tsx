@@ -1,12 +1,12 @@
 "use client";
 
-import { GlobeIcon, TheSectionLayout } from "@/components/01-atoms";
+import { GlobeIcon, TheSectionLayout } from "@/components/atoms";
 import {
   ContractsCard,
   QuorumCard,
   TimelockCard,
   VoteCard,
-} from "@/components/02-molecules";
+} from "@/components/molecules";
 import { daoInfoSectionAnchorID } from "@/lib/client/constants";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { DaoIdEnum } from "@/lib/types/daos";

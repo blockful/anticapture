@@ -6,7 +6,7 @@ import {
   TextCardDaoInfoItem,
   UsersIcon,
   Skeleton,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext, useTokenDistributionContext } from "@/contexts";

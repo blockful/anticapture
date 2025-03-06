@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toggleScreenScroll } from "@/lib/client/utils";
-import { ConnectWallet } from "@/components/01-atoms";
+import { ConnectWallet } from "@/components/atoms";
 
 export const BaseHeaderLayoutSidebar = ({
   children,

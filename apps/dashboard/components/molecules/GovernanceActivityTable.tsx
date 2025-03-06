@@ -11,7 +11,7 @@ import {
   TooltipInfo,
   ArrowState,
   Sparkline,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import {
   cn,
   formatNumberUserReadable,

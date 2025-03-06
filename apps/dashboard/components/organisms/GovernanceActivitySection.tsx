@@ -5,8 +5,8 @@ import {
   ArrowLeftRight,
   TheSectionLayout,
   SwitcherDate,
-} from "@/components/01-atoms";
-import { GovernanceActivityTable } from "@/components/02-molecules";
+} from "@/components/atoms";
+import { GovernanceActivityTable } from "@/components/molecules";
 import { governanceActivitySectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";

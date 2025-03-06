@@ -7,7 +7,7 @@ import {
   LockIcon,
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 

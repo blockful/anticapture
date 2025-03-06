@@ -14,7 +14,7 @@ import {
   BaseHeaderLayoutSidebar,
   PieChartIcon,
   HeaderDAOSidebarDropdown,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import { useSectionObserver } from "@/lib/hooks/useSectionObserver";
 
 const enum HeaderNavItems {

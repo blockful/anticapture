@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { DAO } from "@/lib/types/daos";
-
 import { AnimatedNumber } from "./animated-number";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
-import { UncertaintyIcon } from "@/components/01-atoms";
+import { UncertaintyIcon } from "@/components/atoms";
 
 export const UncertaintySection = () => {
   const { daoData } = useDaoDataContext();

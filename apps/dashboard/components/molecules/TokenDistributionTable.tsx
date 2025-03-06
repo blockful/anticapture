@@ -11,7 +11,7 @@ import {
   Sparkline,
   TheTable,
   TooltipInfo,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import {

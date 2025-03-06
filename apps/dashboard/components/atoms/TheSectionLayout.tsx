@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { TooltipInfo } from "@/components/01-atoms";
+import { TooltipInfo } from "@/components/atoms";
 import { useInView } from "react-intersection-observer";
 
 export const TheSectionLayout = ({

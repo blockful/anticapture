@@ -8,7 +8,7 @@ import { ArrowUpDown } from "lucide-react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { RED_COLOR, GREEN_COLOR, sanitizeNumber } from "@/lib/client/utils";
 import { Holders, holdersData, IsDelegated } from "@/lib/mocked-data";
-import { HandIcon } from "@/components/01-atoms";
+import { HandIcon } from "@/components/atoms";
 
 export const holdersColumns: ColumnDef<Holders>[] = [
   {
@@ -23,7 +23,7 @@ export const holdersColumns: ColumnDef<Holders>[] = [
       const ensDomainsAccountURL = `https://app.ens.domains/${ensName}`;
 
       return (
-        <p className="text-white max-w-40 overflow-auto flex items-center space-x-1 scrollbar-none">
+        <p className="scrollbar-none flex max-w-40 items-center space-x-1 overflow-auto text-white">
           {ensName ? (
             <>
               <a className="hover:underline" href={ensDomainsAccountURL}>
@@ -49,8 +49,8 @@ export const holdersColumns: ColumnDef<Holders>[] = [
       const amountInPercentage = ((amount / totalAmount) * 100).toFixed(2);
 
       return (
-        <div className="text-center flex justify-center items-center ml-5 space-x-1">
-          <p className="w-12 truncate flex justify-end text-right">
+        <div className="ml-5 flex items-center justify-center space-x-1 text-center">
+          <p className="flex w-12 justify-end truncate text-right">
             {sanitizeNumber(amount)}
           </p>
           <p>|</p>
@@ -86,7 +86,7 @@ export const holdersColumns: ColumnDef<Holders>[] = [
     cell: ({ row }) => {
       return (
         <div
-          className="flex justify-center items-center"
+          className="flex items-center justify-center"
           style={{
             color:
               row.getValue("delegated") === IsDelegated.No

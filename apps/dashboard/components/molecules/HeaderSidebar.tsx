@@ -4,7 +4,7 @@ import {
   AnticaptureIcon,
   BarChartIcon,
   BaseHeaderLayoutSidebar,
-} from "@/components/01-atoms";
+} from "@/components/atoms";
 import { dashboardSectionAnchorID } from "@/lib/client/constants";
 
 export const HeaderSidebar = () => {

@@ -5,8 +5,8 @@ import {
   BarChartIcon,
   SwitcherDate,
   TheSectionLayout,
-} from "@/components/01-atoms";
-import { DashboardTable } from "@/components/02-molecules";
+} from "@/components/atoms";
+import { DashboardTable } from "@/components/molecules";
 import { dashboardSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 export const HomeDashboardSection = () => {
