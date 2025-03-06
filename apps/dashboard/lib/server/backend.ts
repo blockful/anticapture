@@ -20,28 +20,3 @@ export type DaoMetricsDayBucket = {
   volume: string;
   count: number;
 };
-
-interface AverageTurnoutResponse {
-  currentAverageTurnout: string;
-  oldAverageTurnout: string;
-  changeRate: string;
-}
-
-/* Fetch Proposals */
-export const fetchAverageTurnout = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<AverageTurnoutResponse> => {
-  try {
-    const response: Response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
-};
