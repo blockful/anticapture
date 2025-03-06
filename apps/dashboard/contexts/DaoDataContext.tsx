@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDaoData } from "@/hooks/useDaoData";
-import { useFetchTokenPrice } from "@/hooks/useTokenPrice";
+import { useTokenPrice } from "@/hooks/useTokenPrice";
 import { ChainNameEnum } from "@/lib/dao-constants/types";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
@@ -33,7 +33,7 @@ export const DaoDataProvider = ({
     price: tokenPrice,
     loading: isLoadingTokenPrice,
     error: tokenPriceError,
-  } = useFetchTokenPrice(ChainNameEnum.Ethereum, daoId);
+  } = useTokenPrice(ChainNameEnum.Ethereum, daoId);
 
   return (
     <DaoDataContext.Provider

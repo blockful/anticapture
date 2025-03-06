@@ -32,10 +32,7 @@ export const fetchTokenPrice = async (
  * @param daoId - The DAO identifier
  * @returns Object containing price data, loading state, and error state
  */
-export const useFetchTokenPrice = (
-  chainName: ChainNameEnum,
-  daoId: DaoIdEnum,
-) => {
+export const useTokenPrice = (chainName: ChainNameEnum, daoId: DaoIdEnum) => {
   const fetcher = () => fetchTokenPrice(chainName, daoId);
 
   const { data, error, isLoading } = useSWR(
