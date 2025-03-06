@@ -15,6 +15,7 @@ import { MetricData, GovernanceActivityContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
+import { useActiveSupply } from "@/hooks/useActiveSupply";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,
@@ -32,7 +33,6 @@ export const GovernanceActivityContext =
     proposals: initialGovernanceActivityMetricData,
     setProposals: () => {},
     activeSupply: initialGovernanceActivityMetricData,
-    setActiveSupply: () => {},
     votes: initialGovernanceActivityMetricData,
     setVotes: () => {},
     averageTurnout: initialGovernanceActivityMetricData,
@@ -56,9 +56,7 @@ export const GovernanceActivityProvider = ({
   const [proposals, setProposals] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
-  const [activeSupply, setActiveSupply] = useState<MetricData>(
-    initialGovernanceActivityMetricData,
-  );
+
   const [votes, setVotes] = useState<MetricData>(
     initialGovernanceActivityMetricData,
   );
@@ -79,14 +77,19 @@ export const GovernanceActivityProvider = ({
     },
   );
 
+  // Use SWR hook for active supply data
+  const { data: activeSupplyData } = useActiveSupply(daoId, days, {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: false,
+  });
+
   // Fetch all governance data
   useEffect(() => {
     const fetchGovernanceData = async () => {
       try {
-        const [proposalsData, activeSupplyData, votesData, averageTurnoutData] =
+        const [proposalsData, votesData, averageTurnoutData] =
           await Promise.all([
             fetchProposals({ daoId, days }),
-            fetchActiveSupply({ daoId, days }),
             fetchVotes({ daoId, days }),
             fetchAverageTurnout({ daoId, days }),
           ]);
@@ -115,13 +118,6 @@ export const GovernanceActivityProvider = ({
           setProposals({
             value: String(proposalsData.currentProposalsLaunched),
             changeRate: proposalsData.changeRate,
-          });
-        }
-
-        if (activeSupplyData) {
-          setActiveSupply({
-            value: activeSupplyData.activeSupply,
-            changeRate: undefined,
           });
         }
 
@@ -160,8 +156,10 @@ export const GovernanceActivityProvider = ({
         setTreasurySupplyChart,
         proposals,
         setProposals,
-        activeSupply,
-        setActiveSupply,
+        activeSupply: {
+          value: activeSupplyData?.activeSupply,
+          changeRate: undefined,
+        },
         votes,
         setVotes,
         averageTurnout,

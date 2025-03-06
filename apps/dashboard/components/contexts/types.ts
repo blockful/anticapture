@@ -52,7 +52,6 @@ export interface GovernanceActivityContextProps {
   setProposals: (proposals: MetricData) => void;
 
   activeSupply: MetricData;
-  setActiveSupply: (activeSupply: MetricData) => void;
 
   votes: MetricData;
   setVotes: (votes: MetricData) => void;
