@@ -107,16 +107,18 @@ export const MultilineChartExtractableValue = ({
       : [],
   };
 
-  // datasets.delegated = selectedMultilineChart.map((item) => {
-  //   const delegatedEntry = delegatedSupplyChart.find(
-  //     (delegated) => new Date(delegated.date).getTime() === item[0],
-  //   );
+  datasets.delegated = selectedMultilineChart.map((item) => {
+    const normalizedDate = new Date(item[0]).getTime();
 
-  //   return {
-  //     date: item[0],
-  //     delegated: delegatedEntry ? Number(delegatedEntry.high) : null,
-  //   };
-  // });
+    const delegatedEntry = (delegatedSupplyChart || []).find(
+      (delegated) => Number(delegated.date) * 1000 === normalizedDate,
+    );
+
+    return {
+      date: normalizedDate,
+      delegated: delegatedEntry ? Number(delegatedEntry.high) : null,
+    };
+  });
 
   datasets.all = datasets.all.map((item) => {
     const treasuryEntry = treasurySupplyChart.find(
