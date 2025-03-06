@@ -1,12 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ColumnDef, Row } from "@tanstack/react-table";
-import { DashboardDao, dashboardData } from "@/lib/mocked-data";
+import { ColumnDef } from "@tanstack/react-table";
+import { DashboardDao } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, TheTable, ArrowState } from "@/components/atoms";
+import {
+  ArrowUpDown,
+  TheTable,
+  ArrowState,
+  SkeletonRow,
+} from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import Image, { StaticImageData } from "next/image";
@@ -27,14 +32,6 @@ const daoDetails: Record<
     icon: ENSLogo,
     tooltip: "",
   },
-};
-
-export const SkeletonRow = ({ width = "w-32", height = "h-5" }) => {
-  return (
-    <div className={`flex animate-pulse justify-center space-x-2`}>
-      <div className={`${width} ${height} rounded bg-gray-300`} />
-    </div>
-  );
 };
 
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {

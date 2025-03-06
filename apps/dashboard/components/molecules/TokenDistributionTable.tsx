@@ -20,6 +20,7 @@ import {
   formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
+import { SkeletonRow } from "@/components/atoms";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -102,6 +103,11 @@ export const TokenDistributionTable = () => {
       accessorKey: "currentValue",
       cell: ({ row }) => {
         const currentValue: number = row.getValue("currentValue");
+
+        if (currentValue === null) {
+          return <SkeletonRow />;
+        }
+
         return (
           <div className="flex items-center justify-center text-center">
             {currentValue && formatNumberUserReadable(currentValue)}
@@ -136,6 +142,10 @@ export const TokenDistributionTable = () => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
+
+        if (variation === null) {
+          return <SkeletonRow />;
+        }
 
         return (
           <p
@@ -184,6 +194,13 @@ export const TokenDistributionTable = () => {
         const variation: string = row.getValue("variation");
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
+        if (chartLastDays.length === 0) {
+          return (
+            <div className="flex w-full">
+              <SkeletonRow width="w-[340px]" height="h-[45px]" />
+            </div>
+          );
+        }
         return (
           <div className="flex w-full">
             <Sparkline

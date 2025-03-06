@@ -19,6 +19,7 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
+import { SkeletonRow } from "@/components/atoms";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -76,6 +77,7 @@ export const GovernanceActivityTable = () => {
       cell: ({ row }) => {
         const metric: string = row.getValue("metric");
         const details = metric ? metricDetails[metric] : null;
+
         return (
           <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
             {details && details.icon}
@@ -90,6 +92,11 @@ export const GovernanceActivityTable = () => {
       accessorKey: "average",
       cell: ({ row }) => {
         const average: number = row.getValue("average");
+
+        if (!average) {
+          return <SkeletonRow />;
+        }
+
         return (
           <div className="flex items-center justify-center text-center">
             {average && formatNumberUserReadable(average)}
@@ -124,6 +131,9 @@ export const GovernanceActivityTable = () => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
+        if (!variation) {
+          return <SkeletonRow />;
+        }
         if (variation == "-") {
           return (
             <p className="flex items-center justify-center gap-1 text-center">
@@ -179,8 +189,17 @@ export const GovernanceActivityTable = () => {
 
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
+
+        if (variation === null) {
+          return (
+            <div className="flex w-full">
+              <SkeletonRow width="w-[340px]" height="h-[45px]" />
+            </div>
+          );
+        }
+
         return (
-          <div className="flex w-full items-start justify-start px-4">
+          <div className="flex h-[45px] w-full items-start justify-start px-4">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
               strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
