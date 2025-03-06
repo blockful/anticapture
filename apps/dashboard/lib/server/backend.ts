@@ -22,57 +22,6 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-export const fetchTimeSeriesDataFromGraphQL = async (
-  daoId: DaoIdEnum,
-  metricType: MetricTypesEnum,
-  days: number,
-): Promise<DaoMetricsDayBucket[]> => {
-  const response = await fetch(`${BACKEND_ENDPOINT}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `
-            query DaoMetricsDayBuckets {
-              daoMetricsDayBucketss(
-              where: {
-                metricType: ${metricType},
-                date_gte: "${String(BigInt(Date.now() - days * 86400000)).slice(0, 10)}",
-                daoId: "${daoId}"
-              },
-              orderBy: "date",
-              orderDirection: "asc",
-              limit: ${days}
-              ) {
-              totalCount
-              items {
-                date
-                daoId
-                tokenId
-                metricType
-                open
-                close
-                low
-                high
-                average
-                volume
-                count
-              }
-              }
-            }
-          `,
-    }),
-  });
-  const data = await response.json();
-  if (data?.data?.daoMetricsDayBucketss?.items) {
-    return data.data.daoMetricsDayBucketss.items as DaoMetricsDayBucket[];
-  } else {
-    //TODO: Improve this error treatment
-    throw new Error("invalid return type for Dao Metrics Day Bucket call");
-  }
-};
-
 /* Fetch Dao Token price from Defi Llama API */
 export const fetchTokenPrice = async (
   chainName: ChainNameEnum,
