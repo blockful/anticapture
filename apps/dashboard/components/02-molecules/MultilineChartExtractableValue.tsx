@@ -13,6 +13,7 @@ import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { ExtractableValueCustomTooltip } from "../01-atoms/ExtractableValueCustomTooltip";
 import {
   TreasuryAssetNonDaoToken,
+  fetchDaoTokenHistoricalData,
   fetchTreasuryAssetNonDaoToken,
 } from "@/lib/server/backend";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -52,6 +53,12 @@ export const MultilineChartExtractableValue = ({
       days: days,
     }).then((data: TreasuryAssetNonDaoToken[]) => {
       setTreasuryAssetNonDAOToken(data);
+    });
+
+    fetchDaoTokenHistoricalData({
+      daoId: daoId.toUpperCase() as DaoIdEnum,
+    }).then((data) => {
+      console.log("data fetchDaoTokenHistoricalData = ", data);
     });
   }, [days, daoId]);
 
