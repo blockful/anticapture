@@ -159,38 +159,18 @@ export function normalizeDataset(
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  // Use a map for quick access to the last valid multiplier for each timestamp
-  const multiplierMap = new Map<number, number>();
-  let currentHighValue = sortedMultipliers[0].high;
-
-  sortedMultipliers.forEach(({ timestamp, high }) => {
-    currentHighValue = high;
-    multiplierMap.set(timestamp, currentHighValue);
-  });
-
   // Sort token prices by timestamp
   const sortedTokenPrices = [...tokenPrices].sort((a, b) => a[0] - b[0]);
-
-  // Helper function to find the most recent multiplier for a timestamp
-  const findLatestMultiplier = (timestamp: number): number => {
-    // If we have a fixed multiplier, use it
-    if (multiplier != null) return multiplier;
-
-    // Find the most recent timestamp that is <= current timestamp
-    const validTimestamps = Array.from(multiplierMap.keys())
-      .filter((t) => t <= timestamp)
-      .sort((a, b) => b - a);
-
-    // Return the corresponding multiplier or the first available one
-    return validTimestamps.length > 0
-      ? multiplierMap.get(validTimestamps[0])!
-      : sortedMultipliers[0].high;
-  };
 
   // Transform price data with appropriate multipliers
   return sortedTokenPrices.map(([timestamp, price]) => ({
     date: timestamp,
-    [key]: price * findLatestMultiplier(timestamp),
+    [key]: price * findMostRecentValue(
+      sortedMultipliers,
+      timestamp,
+      'high',
+      multiplier != null ? multiplier : (sortedMultipliers.length > 0 ? sortedMultipliers[0].high : 1)
+    ),
   }));
 }
 
@@ -206,12 +186,16 @@ export function normalizeDatasetTreasuryNonDaoToken(
   });
 }
 
+// The idea of this function is to have a value per day of the governance token treasury * token price + assets
+// The problem is that the governance token treasury is not updated every day, so we need to normalize it
+// The solution is to use the last value available for the governance token treasury
 export function normalizeDatasetAllTreasury(
   tokenPrices: PriceEntry[],
   key: string,
   assetTreasuries: TreasuryAssetNonDaoToken[],
   governanceTokenTreasuries?: DaoMetricsDayBucket[],
 ): MultilineChartDataSetPoint[] {
+  // Sort all datasets by timestamp for efficient processing
   const sortedAssets = [...assetTreasuries]
     .map((item) => ({
       timestamp: new Date(item.date).getTime(),
@@ -228,51 +212,60 @@ export function normalizeDatasetAllTreasury(
 
   const sortedDataset = [...tokenPrices].sort((a, b) => a[0] - b[0]);
 
-  let pointerAssets = 0;
-  let pointerMultis = 0;
+  // Map each token price point to a normalized data point
+  return sortedDataset.map(([timestamp, price]) => {
+    // Find the most recent asset value at or before this timestamp
+    const lastAssetValue = findMostRecentValue(
+      sortedAssets,
+      timestamp,
+      "totalAssets",
+      sortedAssets.length > 0 ? sortedAssets[0].totalAssets : 0,
+    );
 
-  let lastAssetValue =
-    sortedAssets.length > 0 ? sortedAssets[0].totalAssets : 0;
+    // Find the most recent governance token treasury value at or before this timestamp
+    const lastHighValue = findMostRecentValue(
+      sortedGovernanceTokenTreasuries,
+      timestamp,
+      "high",
+      sortedGovernanceTokenTreasuries.length > 0
+        ? sortedGovernanceTokenTreasuries[0].high
+        : 1,
+    );
 
-  let lastHighValue =
-    sortedGovernanceTokenTreasuries.length > 0
-      ? sortedGovernanceTokenTreasuries[0].high
-      : 1;
-
-  const result: MultilineChartDataSetPoint[] = [];
-
-  for (const [timestamp, price] of sortedDataset) {
-    while (
-      pointerAssets < sortedAssets.length - 1 &&
-      sortedAssets[pointerAssets + 1].timestamp <= timestamp
-    ) {
-      pointerAssets++;
-    }
-
-    if (sortedAssets[pointerAssets]?.timestamp <= timestamp) {
-      lastAssetValue = sortedAssets[pointerAssets].totalAssets;
-    }
-
-    while (
-      pointerMultis < sortedGovernanceTokenTreasuries.length - 1 &&
-      sortedGovernanceTokenTreasuries[pointerMultis + 1].timestamp <= timestamp
-    ) {
-      pointerMultis++;
-    }
-
-    if (
-      sortedGovernanceTokenTreasuries[pointerMultis]?.timestamp <= timestamp
-    ) {
-      lastHighValue = sortedGovernanceTokenTreasuries[pointerMultis].high;
-    }
-
+    // Calculate the final value
     const finalValue = price * lastHighValue + lastAssetValue;
 
-    result.push({
+    return {
       date: timestamp,
       [key]: finalValue,
-    });
+    };
+  });
+}
+
+// Generic helper function to find the most recent value at or before a given timestamp
+export const findMostRecentValue = <
+  T extends { timestamp: number },
+  K extends keyof T,
+>(
+  items: T[],
+  targetTimestamp: number,
+  valueKey: K,
+  defaultValue: T[K],
+): T[K] => {
+  if (items.length === 0) return defaultValue;
+
+  // Find the index of the last item with timestamp <= targetTimestamp
+  const index = items.findLastIndex(
+    (item) => item.timestamp <= targetTimestamp,
+  );
+
+  // If no item found, return the first item's value or default
+  if (index === -1) {
+    return items[0]?.timestamp <= targetTimestamp
+      ? items[0][valueKey]
+      : defaultValue;
   }
 
-  return result;
-}
+  // Return the found item's value
+  return items[index][valueKey];
+};
