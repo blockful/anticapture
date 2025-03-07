@@ -18,8 +18,7 @@ import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-constants/types";
-import { useTokenDistributionContext, useDaoDataContext } from "@/contexts";
-import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
+import { useDaoDataContext } from "@/contexts";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
 import {
@@ -27,6 +26,8 @@ import {
   normalizeDatasetAllTreasury,
   normalizeDataset,
 } from "@/lib/client/utils";
+import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
+import { MetricTypesEnum } from "@/lib/client/constants";
 
 interface MultilineChartExtractableValueProps {
   days: string;
@@ -37,6 +38,7 @@ export const MultilineChartExtractableValue = ({
   filterData,
   days,
 }: MultilineChartExtractableValueProps) => {
+  const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
@@ -45,9 +47,34 @@ export const MultilineChartExtractableValue = ({
   const { data: daoTokenPriceHistoricalData = { prices: [] } } =
     useDaoTokenHistoricalData(daoId.toUpperCase() as DaoIdEnum);
 
-  const { treasurySupplyChart } = useGovernanceActivityContext();
-  const { delegatedSupplyChart } = useTokenDistributionContext();
-  const { daoData } = useDaoDataContext();
+  const { data: treasuryData } = useTimeSeriesData(
+    daoId.toUpperCase() as DaoIdEnum,
+    [MetricTypesEnum.TREASURY],
+    parseInt(days.split("d")[0]),
+    {
+      refreshInterval: 300000,
+      revalidateOnFocus: false,
+    },
+  );
+
+  const { data: delegatedData } = useTimeSeriesData(
+    daoId.toUpperCase() as DaoIdEnum,
+    [MetricTypesEnum.DELEGATED_SUPPLY],
+    parseInt(days.split("d")[0]),
+    {
+      refreshInterval: 300000,
+      revalidateOnFocus: false,
+    },
+  );
+
+  let delegatedSupplyChart;
+  let treasurySupplyChart;
+  if (treasuryData) {
+    treasurySupplyChart = treasuryData[MetricTypesEnum.TREASURY];
+  }
+  if (delegatedData) {
+    delegatedSupplyChart = delegatedData[MetricTypesEnum.DELEGATED_SUPPLY];
+  }
 
   const quorumValue = daoData?.quorum
     ? Number(daoData.quorum) / 10 ** 18
