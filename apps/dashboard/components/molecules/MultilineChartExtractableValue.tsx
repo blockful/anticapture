@@ -17,7 +17,7 @@ import { useParams } from "next/navigation";
 import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { PriceEntry } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket, PriceEntry } from "@/lib/dao-constants/types";
 import { useTokenDistributionContext, useDaoDataContext } from "@/contexts";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
@@ -30,8 +30,6 @@ interface MultilineChartExtractableValueProps {
   days: string;
   filterData?: string[];
 }
-
-type DatasetType = TreasuryAssetNonDaoToken[] | PriceEntry[];
 
 interface ChartDataPoint {
   date: number;
@@ -78,24 +76,15 @@ export const MultilineChartExtractableValue = ({
     priceHistoryByTimeInterval;
 
   const normalizeDataset = (
-    dataset: DatasetType,
+    dataset: PriceEntry[],
     key: string,
     multiplier: number | null = null,
-  ) => {
+  ): ChartDataPoint[] => {
     return dataset.map((item) => {
-      if (Array.isArray(item)) {
-        return {
-          date: item[0],
-          [key]: multiplier ? item[1] * multiplier : item[1],
-        };
-      } else {
-        return {
-          date: new Date(item.date).getTime(),
-          [key]: multiplier
-            ? Number(item.totalAssets) * multiplier
-            : Number(item.totalAssets),
-        };
-      }
+      return {
+        date: item[0],
+        [key]: multiplier ? item[1] * multiplier : item[1],
+      };
     });
   };
 
