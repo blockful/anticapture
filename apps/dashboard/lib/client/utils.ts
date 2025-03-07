@@ -1,5 +1,11 @@
+import { TreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+  PriceEntry,
+  DaoMetricsDayBucket,
+  MultilineChartDataSetPoint,
+} from "../dao-constants/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -127,4 +133,133 @@ export const timestampToReadableDate = (date: number) => {
 
 export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function normalizeDataset(
+  dataset: PriceEntry[],
+  key: string,
+  multiplier?: number | null,
+  multiplierDataSet?: DaoMetricsDayBucket[],
+): MultilineChartDataSetPoint[] {
+  const sortedMultipliers = [...(multiplierDataSet ?? [])]
+    .map((item) => ({
+      timestamp: Number(item.date),
+      high: Number(item.high) / 1e18,
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+
+  const sortedDataset = [...dataset].sort((a, b) => a[0] - b[0]);
+
+  let pointer = 0;
+
+  let lastHighValue =
+    sortedMultipliers.length > 0 ? sortedMultipliers[0].high : 1;
+
+  const result: MultilineChartDataSetPoint[] = [];
+
+  for (const [timestamp, price] of sortedDataset) {
+    while (
+      pointer < sortedMultipliers.length - 1 &&
+      sortedMultipliers[pointer + 1].timestamp <= timestamp
+    ) {
+      pointer++;
+    }
+
+    if (sortedMultipliers[pointer]?.timestamp <= timestamp) {
+      lastHighValue = sortedMultipliers[pointer].high;
+    }
+
+    let finalValue = price;
+    if (multiplier != null) {
+      finalValue *= multiplier;
+    } else {
+      finalValue *= lastHighValue;
+    }
+
+    result.push({
+      date: timestamp,
+      [key]: finalValue,
+    });
+  }
+
+  return result;
+}
+
+export function normalizeDatasetTreasuryNonDaoToken(
+  dataset: TreasuryAssetNonDaoToken[],
+  key: string,
+): MultilineChartDataSetPoint[] {
+  return dataset.map((item) => {
+    return {
+      date: new Date(item.date).getTime(),
+      [key]: Number(item.totalAssets),
+    };
+  });
+}
+
+export function normalizeDatasetAllTreasury(
+  dataset: PriceEntry[],
+  key: string,
+  sumWithAllOtherAssets: TreasuryAssetNonDaoToken[],
+  multiplierDataSet?: DaoMetricsDayBucket[],
+): MultilineChartDataSetPoint[] {
+  const sortedAssets = [...sumWithAllOtherAssets]
+    .map((item) => ({
+      timestamp: new Date(item.date).getTime(),
+      totalAssets: Number(item.totalAssets),
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+
+  const sortedMultipliers = [...(multiplierDataSet ?? [])]
+    .map((item) => ({
+      timestamp: Number(item.date),
+      high: Number(item.high) / 1e18,
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+
+  const sortedDataset = [...dataset].sort((a, b) => a[0] - b[0]);
+
+  let pointerAssets = 0;
+  let pointerMultis = 0;
+
+  let lastAssetValue =
+    sortedAssets.length > 0 ? sortedAssets[0].totalAssets : 0;
+
+  let lastHighValue =
+    sortedMultipliers.length > 0 ? sortedMultipliers[0].high : 1;
+
+  const result: MultilineChartDataSetPoint[] = [];
+
+  for (const [timestamp, price] of sortedDataset) {
+    while (
+      pointerAssets < sortedAssets.length - 1 &&
+      sortedAssets[pointerAssets + 1].timestamp <= timestamp
+    ) {
+      pointerAssets++;
+    }
+
+    if (sortedAssets[pointerAssets]?.timestamp <= timestamp) {
+      lastAssetValue = sortedAssets[pointerAssets].totalAssets;
+    }
+
+    while (
+      pointerMultis < sortedMultipliers.length - 1 &&
+      sortedMultipliers[pointerMultis + 1].timestamp <= timestamp
+    ) {
+      pointerMultis++;
+    }
+
+    if (sortedMultipliers[pointerMultis]?.timestamp <= timestamp) {
+      lastHighValue = sortedMultipliers[pointerMultis].high;
+    }
+
+    const finalValue = price * lastHighValue + lastAssetValue;
+
+    result.push({
+      date: timestamp,
+      [key]: finalValue,
+    });
+  }
+
+  return result;
 }

@@ -44,3 +44,8 @@ export interface TokenHistoricalDataMetrics {
   market_caps: PriceEntry[];
   total_volumes: PriceEntry[];
 }
+
+export interface MultilineChartDataSetPoint {
+  date: number;
+  [key: string]: number;
+}

@@ -17,23 +17,20 @@ import { useParams } from "next/navigation";
 import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { DaoMetricsDayBucket, PriceEntry } from "@/lib/dao-constants/types";
+import { MultilineChartDataSetPoint } from "@/lib/dao-constants/types";
 import { useTokenDistributionContext, useDaoDataContext } from "@/contexts";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
+import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
 import {
-  TreasuryAssetNonDaoToken,
-  useTreasuryAssetNonDaoToken,
-} from "@/hooks/useTreasuryAssetNonDaoToken";
+  normalizeDatasetTreasuryNonDaoToken,
+  normalizeDatasetAllTreasury,
+  normalizeDataset,
+} from "@/lib/client/utils";
 
 interface MultilineChartExtractableValueProps {
   days: string;
   filterData?: string[];
-}
-
-interface ChartDataPoint {
-  date: number;
-  [key: string]: number;
 }
 
 export const MultilineChartExtractableValue = ({
@@ -75,42 +72,27 @@ export const MultilineChartExtractableValue = ({
     priceHistoryByTimeInterval.full ??
     priceHistoryByTimeInterval;
 
-  const normalizeDataset = (
-    dataset: PriceEntry[],
-    key: string,
-    multiplier: number | null = null,
-  ): ChartDataPoint[] => {
-    return dataset.map((item) => {
-      return {
-        date: item[0],
-        [key]: multiplier ? item[1] * multiplier : item[1],
-      };
-    });
-  };
-
-  const normalizeDatasetTreasuryNonDaoToken = (
-    dataset: TreasuryAssetNonDaoToken[],
-    key: string,
-  ): ChartDataPoint[] => {
-    return dataset.map((item) => {
-      return {
-        date: new Date(item.date).getTime(),
-        [key]: Number(item.totalAssets),
-      };
-    });
-  };
-
-  const datasets: Record<string, ChartDataPoint[]> = {
+  const datasets: Record<string, MultilineChartDataSetPoint[]> = {
     treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
       treasuryAssetNonDAOToken,
       "treasuryNonDAO",
     ),
-    all: normalizeDataset(selectedPriceHistory, "all"),
+    all: normalizeDatasetAllTreasury(
+      selectedPriceHistory,
+      "all",
+      treasuryAssetNonDAOToken,
+      treasurySupplyChart,
+    ),
     quorum: quorumValue
       ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue)
       : [],
     delegated: delegatedSupplyChart
-      ? normalizeDataset(selectedPriceHistory, "delegated")
+      ? normalizeDataset(
+          selectedPriceHistory,
+          "delegated",
+          null,
+          delegatedSupplyChart,
+        )
       : [],
   };
 
