@@ -5,7 +5,7 @@ import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
-} from "../dao-constants/types";
+} from "@/lib/dao-constants/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -165,12 +165,18 @@ export function normalizeDataset(
   // Transform price data with appropriate multipliers
   return sortedTokenPrices.map(([timestamp, price]) => ({
     date: timestamp,
-    [key]: price * findMostRecentValue(
-      sortedMultipliers,
-      timestamp,
-      'high',
-      multiplier != null ? multiplier : (sortedMultipliers.length > 0 ? sortedMultipliers[0].high : 1)
-    ),
+    [key]:
+      price *
+      findMostRecentValue(
+        sortedMultipliers,
+        timestamp,
+        "high",
+        multiplier != null
+          ? multiplier
+          : sortedMultipliers.length > 0
+            ? sortedMultipliers[0].high
+            : 1,
+      ),
   }));
 }
 

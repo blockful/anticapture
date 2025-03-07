@@ -4,6 +4,7 @@ export * from "./GovernanceActivityTable";
 export * from "./HeaderDAOSidebar";
 export * from "./HeaderSidebar";
 export * from "./QuorumCard";
+export * from "./MultilineChartExtractableValue";
 export * from "./MultilineChartTokenDistribution";
 export * from "./TimelockCard";
 export * from "./TokenDistributionTable";

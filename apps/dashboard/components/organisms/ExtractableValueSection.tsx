@@ -1,16 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import {
-  TheSectionLayout,
-  SwitcherDate,
   CrossHairIcon,
+  ExtractableValueToggleHeader,
+  TheSectionLayout,
+  TheCardChartLayout,
+  SwitcherDate,
 } from "@/components/atoms";
+import { MultilineChartExtractableValue } from "@/components/molecules";
 import { extractableValueSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useState } from "react";
-import { ExtractableValueToggleHeader } from "../atoms/ExtractableValueToggleHeader";
-import { TheCardChartLayout } from "../atoms/TheCardChartLayout";
-import { MultilineChartExtractableValue } from "../molecules/MultilineChartExtractableValue";
 
 export const ExtractableValueSection = () => {
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);

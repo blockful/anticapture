@@ -1,7 +1,7 @@
 "use client";
 
 import { DaoIdEnum } from "@/lib/types/daos";
-import { SwitcherChart } from "./SwitcherChart";
+import { SwitcherChart } from "@/components/atoms";
 import { Dispatch, SetStateAction } from "react";
 import { useParams } from "next/navigation";
 
