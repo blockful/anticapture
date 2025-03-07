@@ -10,7 +10,7 @@ import {
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/lib/server/backend";
+import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   totalSupply: { label: "Total Supply", color: "hsl(var(--chart-1))" },

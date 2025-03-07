@@ -9,22 +9,13 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-<<<<<<<< HEAD:apps/dashboard/components/molecules/MultilineChartTokenDistribution.tsx
 import { ChartContainer } from "@/components/ui/chart";
-========
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { useTokenDistributionContext } from "@/contexts";
->>>>>>>> origin/dev:apps/dashboard/components/molecules/TheMultiLineChart.tsx
 import {
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/lib/client/utils";
-<<<<<<<< HEAD:apps/dashboard/components/molecules/MultilineChartTokenDistribution.tsx
-import { TokenDistributionCustomTooltip } from "@/components/01-atoms";
-import { DaoMetricsDayBucket } from "@/lib/server/backend";
-========
+import { TokenDistributionCustomTooltip } from "@/components/atoms";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
->>>>>>>> origin/dev:apps/dashboard/components/molecules/TheMultiLineChart.tsx
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[]>;
