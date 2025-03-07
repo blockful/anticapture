@@ -14,7 +14,7 @@ export const TheCardChartLayout = ({
 }) => {
   return (
     <Card className="flex flex-col rounded-lg border border-lightDark bg-dark shadow sm:max-w-full xl4k:max-w-full">
-      <CardHeader className="flex flex-row justify-between rounded-t-lg px-4 py-3">
+      <CardHeader className="flex flex-col justify-between rounded-t-lg px-4 py-3 md:flex-row">
         <CardTitle className="flex items-center gap-2.5 text-sm font-medium leading-normal text-[#fafafa]">
           {title}
         </CardTitle>

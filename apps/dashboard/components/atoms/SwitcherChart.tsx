@@ -14,7 +14,7 @@ export const SwitcherChart = ({
   options,
 }: SwitcherChartProps) => {
   return (
-    <Tabs defaultValue={defaultValue} className="gap-1 rounded-md">
+    <Tabs defaultValue={defaultValue} className="flex gap-1 rounded-md">
       <TabsList>
         {options.map((option) => (
           <TabsTrigger
