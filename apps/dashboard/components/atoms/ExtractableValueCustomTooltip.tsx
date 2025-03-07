@@ -19,8 +19,8 @@ export const ExtractableValueCustomTooltip: React.FC<
   });
 
   return (
-    <div className="gap-2 rounded bg-[#09090b] p-3 text-black shadow-md">
-      <p className="text-xs font-medium leading-[14px] text-neutral-50">
+    <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
+      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
         {date}
       </p>
       {payload.map((entry, index) => {
@@ -30,7 +30,11 @@ export const ExtractableValueCustomTooltip: React.FC<
           entry.name;
 
         return (
-          <p key={index} style={{ color: entry.color }}>
+          <p
+            key={index}
+            style={{ color: entry.color }}
+            className="flex gap-1.5"
+          >
             {formattedName}:{" "}
             <strong>
               {value !== 0 ? formatNumberUserReadable(value) : "No Data"}
