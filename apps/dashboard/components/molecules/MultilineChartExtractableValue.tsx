@@ -33,6 +33,11 @@ interface MultilineChartExtractableValueProps {
 
 type DatasetType = TreasuryAssetNonDaoToken[] | PriceEntry[];
 
+interface ChartDataPoint {
+  date: number;
+  [key: string]: number;
+}
+
 export const MultilineChartExtractableValue = ({
   filterData,
   days,
@@ -71,7 +76,6 @@ export const MultilineChartExtractableValue = ({
     priceHistoryByTimeInterval[days as TimeInterval] ??
     priceHistoryByTimeInterval.full ??
     priceHistoryByTimeInterval;
-  console.log("selectedPriceHistory ", selectedPriceHistory);
 
   const normalizeDataset = (
     dataset: DatasetType,
@@ -95,8 +99,20 @@ export const MultilineChartExtractableValue = ({
     });
   };
 
-  const datasets: Record<string, any[]> = {
-    treasuryNonDAO: normalizeDataset(
+  const normalizeDatasetTreasuryNonDaoToken = (
+    dataset: TreasuryAssetNonDaoToken[],
+    key: string,
+  ): ChartDataPoint[] => {
+    return dataset.map((item) => {
+      return {
+        date: new Date(item.date).getTime(),
+        [key]: Number(item.totalAssets),
+      };
+    });
+  };
+
+  const datasets: Record<string, ChartDataPoint[]> = {
+    treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
       treasuryAssetNonDAOToken,
       "treasuryNonDAO",
     ),
@@ -109,34 +125,6 @@ export const MultilineChartExtractableValue = ({
       : [],
   };
 
-  console.log("datasets", datasets);
-
-  datasets.delegated = selectedPriceHistory.map((item) => {
-    const normalizedDate = new Date(item[0]).getTime();
-
-    const delegatedEntry = (delegatedSupplyChart || []).find(
-      (delegated) => Number(delegated.date) * 1000 === normalizedDate,
-    );
-
-    return {
-      date: normalizedDate,
-      delegated: delegatedEntry ? Number(delegatedEntry.high) : null,
-    };
-  });
-
-  datasets.all = datasets.all.map((item) => {
-    const treasuryEntry = treasurySupplyChart.find(
-      (treasury) => new Date(treasury.date).getTime() === item.date,
-    );
-
-    return treasuryEntry
-      ? {
-          ...item,
-          all: Number(treasuryEntry.high) * item.all,
-        }
-      : item;
-  });
-
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
       dataset.map((item) => item.date),
@@ -148,21 +136,18 @@ export const MultilineChartExtractableValue = ({
   const chartData = Array.from(allDates)
     .sort((a, b) => a - b)
     .map((date) => {
-      const dataPoint: Record<string, any> = { date };
+      const dataPoint: Record<string, number | null> = { date };
 
       Object.entries(datasets).forEach(([key, dataset]) => {
-        if (
-          filterData?.includes(key) ||
-          filterData?.includes(
-            chartConfig[key as keyof typeof chartConfig]?.label,
-          )
-        ) {
-          return;
-        }
+        const chartLabel = chartConfig[key as keyof typeof chartConfig]?.label;
+        const isKeySelected = filterData?.includes(key);
+        const isLabelSelected = filterData?.includes(chartLabel);
 
-        const value = dataset.find((d) => d.date === date)?.[key] ?? null;
-        if (value !== null) lastKnownValues[key] = value;
-        dataPoint[key] = lastKnownValues[key] ?? null;
+        if (isKeySelected || isLabelSelected) {
+          const value = dataset.find((d) => d.date === date)?.[key] ?? null;
+          if (value !== null) lastKnownValues[key] = value;
+          dataPoint[key] = lastKnownValues[key] ?? null;
+        }
       });
 
       return dataPoint;
