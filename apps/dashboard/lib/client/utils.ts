@@ -136,60 +136,69 @@ export function capitalizeFirstLetter(str: string) {
 }
 
 export function normalizeDataset(
-  dataset: PriceEntry[],
+  tokenPrices: PriceEntry[],
   key: string,
   multiplier?: number | null,
   multiplierDataSet?: DaoMetricsDayBucket[],
 ): MultilineChartDataSetPoint[] {
-  const sortedMultipliers = [...(multiplierDataSet ?? [])]
+  // If there's no multiplier data, use the fixed value or 1 as default
+  if (!multiplierDataSet?.length) {
+    return tokenPrices
+      .sort((a, b) => a[0] - b[0])
+      .map(([timestamp, price]) => ({
+        date: timestamp,
+        [key]: price * (multiplier ?? 1),
+      }));
+  }
+
+  // Prepare multipliers sorted by timestamp
+  const sortedMultipliers = multiplierDataSet
     .map((item) => ({
       timestamp: Number(item.date),
       high: Number(item.high) / 1e18,
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const sortedDataset = [...dataset].sort((a, b) => a[0] - b[0]);
+  // Use a map for quick access to the last valid multiplier for each timestamp
+  const multiplierMap = new Map<number, number>();
+  let currentHighValue = sortedMultipliers[0].high;
 
-  let pointer = 0;
+  sortedMultipliers.forEach(({ timestamp, high }) => {
+    currentHighValue = high;
+    multiplierMap.set(timestamp, currentHighValue);
+  });
 
-  let lastHighValue =
-    sortedMultipliers.length > 0 ? sortedMultipliers[0].high : 1;
+  // Sort token prices by timestamp
+  const sortedTokenPrices = [...tokenPrices].sort((a, b) => a[0] - b[0]);
 
-  const result: MultilineChartDataSetPoint[] = [];
+  // Helper function to find the most recent multiplier for a timestamp
+  const findLatestMultiplier = (timestamp: number): number => {
+    // If we have a fixed multiplier, use it
+    if (multiplier != null) return multiplier;
 
-  for (const [timestamp, price] of sortedDataset) {
-    while (
-      pointer < sortedMultipliers.length - 1 &&
-      sortedMultipliers[pointer + 1].timestamp <= timestamp
-    ) {
-      pointer++;
-    }
+    // Find the most recent timestamp that is <= current timestamp
+    const validTimestamps = Array.from(multiplierMap.keys())
+      .filter((t) => t <= timestamp)
+      .sort((a, b) => b - a);
 
-    if (sortedMultipliers[pointer]?.timestamp <= timestamp) {
-      lastHighValue = sortedMultipliers[pointer].high;
-    }
+    // Return the corresponding multiplier or the first available one
+    return validTimestamps.length > 0
+      ? multiplierMap.get(validTimestamps[0])!
+      : sortedMultipliers[0].high;
+  };
 
-    let finalValue = price;
-    if (multiplier != null) {
-      finalValue *= multiplier;
-    } else {
-      finalValue *= lastHighValue;
-    }
-
-    result.push({
-      date: timestamp,
-      [key]: finalValue,
-    });
-  }
-
-  return result;
+  // Transform price data with appropriate multipliers
+  return sortedTokenPrices.map(([timestamp, price]) => ({
+    date: timestamp,
+    [key]: price * findLatestMultiplier(timestamp),
+  }));
 }
 
 export function normalizeDatasetTreasuryNonDaoToken(
-  dataset: TreasuryAssetNonDaoToken[],
+  tokenPrices: TreasuryAssetNonDaoToken[],
   key: string,
 ): MultilineChartDataSetPoint[] {
-  return dataset.map((item) => {
+  return tokenPrices.map((item) => {
     return {
       date: new Date(item.date).getTime(),
       [key]: Number(item.totalAssets),
@@ -198,26 +207,26 @@ export function normalizeDatasetTreasuryNonDaoToken(
 }
 
 export function normalizeDatasetAllTreasury(
-  dataset: PriceEntry[],
+  tokenPrices: PriceEntry[],
   key: string,
-  sumWithAllOtherAssets: TreasuryAssetNonDaoToken[],
-  multiplierDataSet?: DaoMetricsDayBucket[],
+  assetTreasuries: TreasuryAssetNonDaoToken[],
+  governanceTokenTreasuries?: DaoMetricsDayBucket[],
 ): MultilineChartDataSetPoint[] {
-  const sortedAssets = [...sumWithAllOtherAssets]
+  const sortedAssets = [...assetTreasuries]
     .map((item) => ({
       timestamp: new Date(item.date).getTime(),
       totalAssets: Number(item.totalAssets),
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const sortedMultipliers = [...(multiplierDataSet ?? [])]
+  const sortedGovernanceTokenTreasuries = [...(governanceTokenTreasuries ?? [])]
     .map((item) => ({
       timestamp: Number(item.date),
       high: Number(item.high) / 1e18,
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const sortedDataset = [...dataset].sort((a, b) => a[0] - b[0]);
+  const sortedDataset = [...tokenPrices].sort((a, b) => a[0] - b[0]);
 
   let pointerAssets = 0;
   let pointerMultis = 0;
@@ -226,7 +235,9 @@ export function normalizeDatasetAllTreasury(
     sortedAssets.length > 0 ? sortedAssets[0].totalAssets : 0;
 
   let lastHighValue =
-    sortedMultipliers.length > 0 ? sortedMultipliers[0].high : 1;
+    sortedGovernanceTokenTreasuries.length > 0
+      ? sortedGovernanceTokenTreasuries[0].high
+      : 1;
 
   const result: MultilineChartDataSetPoint[] = [];
 
@@ -243,14 +254,16 @@ export function normalizeDatasetAllTreasury(
     }
 
     while (
-      pointerMultis < sortedMultipliers.length - 1 &&
-      sortedMultipliers[pointerMultis + 1].timestamp <= timestamp
+      pointerMultis < sortedGovernanceTokenTreasuries.length - 1 &&
+      sortedGovernanceTokenTreasuries[pointerMultis + 1].timestamp <= timestamp
     ) {
       pointerMultis++;
     }
 
-    if (sortedMultipliers[pointerMultis]?.timestamp <= timestamp) {
-      lastHighValue = sortedMultipliers[pointerMultis].high;
+    if (
+      sortedGovernanceTokenTreasuries[pointerMultis]?.timestamp <= timestamp
+    ) {
+      lastHighValue = sortedGovernanceTokenTreasuries[pointerMultis].high;
     }
 
     const finalValue = price * lastHighValue + lastAssetValue;
