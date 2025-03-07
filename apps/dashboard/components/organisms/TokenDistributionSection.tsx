@@ -1,20 +1,51 @@
-"use client";
-
 import {
   ArrowLeftRight,
   TheSectionLayout,
   SwitcherDate,
 } from "@/components/atoms";
 import {
-  TheMultiLineChart,
+  MultilineChartTokenDistribution,
   TokenDistributionTable,
 } from "@/components/molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+
+const chartConfig: Record<string, { label: string; color: string }> = {
+  delegatedSupply: {
+    label: "Delegated Supply",
+    color: "#1E88E5",
+  },
+  cexSupply: {
+    label: "CEX Supply",
+    color: "#FF9800",
+  },
+  dexSupply: {
+    label: "DEX Supply",
+    color: "#43A047",
+  },
+  lendingSupply: {
+    label: "Lending Supply",
+    color: "#9C27B0",
+  },
+};
 
 export const TokenDistributionSection = () => {
-  const { setDays } = useTokenDistributionContext();
+  const {
+    delegatedSupplyChart,
+    cexSupplyChart,
+    dexSupplyChart,
+    lendingSupplyChart,
+    setDays,
+  } = useTokenDistributionContext();
+
+  const datasets: Record<string, DaoMetricsDayBucket[]> = {
+    delegatedSupply: delegatedSupplyChart,
+    cexSupply: cexSupplyChart,
+    dexSupply: dexSupplyChart,
+    lendingSupply: lendingSupplyChart,
+  };
 
   return (
     <TheSectionLayout
@@ -31,7 +62,10 @@ export const TokenDistributionSection = () => {
         interaction with relevant contracts."
       anchorId={tokenDistributionSectionAnchorID}
     >
-      <TheMultiLineChart />
+      <MultilineChartTokenDistribution
+        datasets={datasets}
+        chartConfig={chartConfig}
+      />
       <TokenDistributionTable />
     </TheSectionLayout>
   );
