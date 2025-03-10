@@ -14,17 +14,24 @@ import {
 } from "@/components/atoms";
 import { useCountdown } from "@/hooks/useCountdown";
 import { DaoConstants } from "@/lib/dao-constants/types";
+import { formatCountdown } from "@/lib/client/utils/time";
+import { useMemo } from "react";
 
 export const SecurityCouncilCard = ({
   daoConstants,
 }: {
   daoConstants: DaoConstants;
 }) => {
-  const targetTimestamp =
-    daoConstants.securityCouncil?.expiration.timestamp ?? 0;
-
+  const { securityCouncil } = daoConstants;
+  const targetTimestamp = securityCouncil?.expiration.timestamp;
   const countdown = useCountdown(targetTimestamp);
-  if (!daoConstants.securityCouncil) return null;
+
+  const formattedCountdown = useMemo(
+    () => formatCountdown(countdown),
+    [countdown],
+  );
+
+  if (!securityCouncil) return null;
 
   const securityCouncilData: CardData = {
     title: "Security Council",
@@ -36,15 +43,15 @@ export const SecurityCouncilCard = ({
           "On-chain governance relies on smart contracts that only execute transactions approved by on-chain votes.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoConstants.securityCouncil?.isActive}
-            key={"switch"}
+            switched={securityCouncil.isActive}
+            key="switch"
           />,
-          <button className="flex h-full w-full" key={"multisig"}>
+          <button className="flex h-full w-full" key="multisig">
             <Badge className="flex h-full w-full gap-1 hover:border-lightDark hover:bg-transparent">
               <GlassesIcon />
               <p className="text-sm font-medium leading-tight">
-                {daoConstants.securityCouncil?.multisig.signers} /{" "}
-                {daoConstants.securityCouncil?.multisig.threshold}
+                {securityCouncil.multisig.signers} /{" "}
+                {securityCouncil.multisig.threshold}
               </p>
               <ExternalLinkIcon className="text-[#EC762E]" />
             </Badge>
@@ -58,16 +65,12 @@ export const SecurityCouncilCard = ({
         items: [
           <ButtonCardDaoInfoItem
             key="Expiration"
-            label={daoConstants.securityCouncil?.expiration.date}
+            label={securityCouncil.expiration.date}
             icon={<FocusIcon className="text-[#EC762E]" />}
           />,
           <ButtonCardDaoInfoItem
             key="Expiration Countdown"
-            label={
-              countdown.expired
-                ? "Expired"
-                : `${countdown.days}d ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`
-            }
+            label={formattedCountdown}
             icon={<TokensIcon className="text-[#EC762E]" />}
           />,
         ],

@@ -1,4 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  MILLISECONDS_PER_SECOND,
+  MILLISECONDS_PER_MINUTE,
+  MILLISECONDS_PER_HOUR,
+  MILLISECONDS_PER_DAY,
+} from "@/lib/client/constants";
 
 type CountdownTime = {
   days: number;
@@ -6,55 +12,93 @@ type CountdownTime = {
   minutes: number;
   seconds: number;
   expired: boolean;
+  isLoading: boolean;
 };
 
 export function useCountdown(targetTimestamp?: number): CountdownTime {
-  const [timeLeft, setTimeLeft] = useState<CountdownTime>(
-    calculateTimeLeft(targetTimestamp ?? 0),
-  );
+  const [isClient, setIsClient] = useState<boolean>(false);
+  const [timeLeft, setTimeLeft] = useState<CountdownTime>(() => ({
+    ...calculateTimeLeft(targetTimestamp ?? 0),
+    isLoading: true,
+  }));
+
+  const updateCountdown = useCallback(() => {
+    setTimeLeft({
+      ...calculateTimeLeft(targetTimestamp ?? 0),
+      isLoading: false,
+    });
+  }, [targetTimestamp]);
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (!targetTimestamp || targetTimestamp <= 0) {
-      setTimeLeft({ expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 });
+      setTimeLeft({
+        expired: true,
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        isLoading: false,
+      });
       return;
     }
 
-    const interval = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(targetTimestamp));
-    }, 1000);
+    // Only start the countdown on the client side
+    if (!isClient) return;
+
+    // Initial calculation
+    updateCountdown();
+
+    // Update every second
+    const interval = setInterval(updateCountdown, MILLISECONDS_PER_SECOND);
 
     return () => clearInterval(interval);
-  }, [targetTimestamp]);
+  }, [targetTimestamp, updateCountdown, isClient]);
 
   return timeLeft;
 }
 
 function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
   if (!targetTimestamp) {
-    return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    return {
+      expired: true,
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      isLoading: false,
+    };
   }
 
-  const now = Math.floor(Date.now() / 1000);
-  const diff = targetTimestamp - now;
+  const targetMs = targetTimestamp * MILLISECONDS_PER_SECOND;
+  const now = Date.now();
+  const diffMs = targetMs - now;
 
-  console.log("Debug countdown:", {
-    targetTimestamp,
-    now,
-    diff,
-    targetDate: new Date(targetTimestamp * 1000).toISOString(),
-    currentDate: new Date(now * 1000).toISOString(),
-    calculatedDays: Math.floor(diff / (60 * 60 * 24)),
-    expectedDays: 420,
-  });
-
-  if (diff <= 0) {
-    return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
+  if (diffMs <= 0) {
+    return {
+      expired: true,
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      isLoading: false,
+    };
   }
 
-  const days = Math.floor(diff / (60 * 60 * 24));
-  const hours = Math.floor((diff % (60 * 60 * 24)) / (60 * 60));
-  const minutes = Math.floor((diff % (60 * 60)) / 60);
-  const seconds = diff % 60;
+  const days = Math.floor(diffMs / MILLISECONDS_PER_DAY);
+  const hours = Math.floor(
+    (diffMs % MILLISECONDS_PER_DAY) / MILLISECONDS_PER_HOUR,
+  );
+  const minutes = Math.floor(
+    (diffMs % MILLISECONDS_PER_HOUR) / MILLISECONDS_PER_MINUTE,
+  );
+  const seconds = Math.floor(
+    (diffMs % MILLISECONDS_PER_MINUTE) / MILLISECONDS_PER_SECOND,
+  );
 
   return {
     expired: false,
@@ -62,5 +106,6 @@ function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
     hours,
     minutes,
     seconds,
+    isLoading: false,
   };
 }
