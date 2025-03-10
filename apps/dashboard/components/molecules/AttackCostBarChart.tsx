@@ -19,6 +19,7 @@ import { SkeletonRow } from "../atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
+import { useParams } from "next/navigation";
 
 // Sample data - replace with your actual data
 const data = [
@@ -45,25 +46,28 @@ interface AttackCostBarChartProps {
 }
 
 const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
-  // Already is in USD
+  const { daoId }: { daoId: string } = useParams();
+
+  const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
+
   const liquidTreasury = useTreasuryAssetNonDaoToken(
-    DaoIdEnum.ENS,
+    selectedDaoId,
     TimeInterval.NINETY_DAYS,
   );
   const delegatedSupply = useDelegatedSupply(
-    DaoIdEnum.ENS,
+    selectedDaoId,
     TimeInterval.NINETY_DAYS,
   );
-  const activeSupply = useActiveSupply(DaoIdEnum.ENS, TimeInterval.NINETY_DAYS);
+  const activeSupply = useActiveSupply(selectedDaoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(
-    DaoIdEnum.ENS,
+    selectedDaoId,
     TimeInterval.NINETY_DAYS,
   );
 
   const {
     data: daoTokenPriceHistoricalData,
     loading: daoTokenPriceHistoricalDataLoading,
-  } = useDaoTokenHistoricalData(DaoIdEnum.ENS);
+  } = useDaoTokenHistoricalData(selectedDaoId);
 
   const lastPrice =
     daoTokenPriceHistoricalData.prices.length > 0
@@ -86,10 +90,10 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     );
   }
 
-  data[0].value = Number(liquidTreasury.data?.[0]?.totalAssets || 0);
+  data[0].value = Number(liquidTreasury.data?.[0]?.totalAssets || 0); // Already in USD
   data[1].value =
     Number(
-      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || "0")), // useUSD
+      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || "0")),
     ) * lastPrice;
   data[2].value =
     Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
