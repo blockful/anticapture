@@ -21,25 +21,11 @@ import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 
-// Sample data - replace with your actual data
-const data = [
-  {
-    name: "Liquid Treasury",
-    value: 0,
-  },
-  {
-    name: "Delegated Supply",
-    value: 0,
-  },
-  {
-    name: "Active Supply",
-    value: 0,
-  },
-  {
-    name: "Average Turnout",
-    value: 0,
-  },
-];
+interface ChartDataItem {
+  name: string;
+  value: number;
+  id: string;
+}
 
 interface AttackCostBarChartProps {
   className?: string;
@@ -47,42 +33,38 @@ interface AttackCostBarChartProps {
 
 const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
-
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
+  const timeInterval = TimeInterval.NINETY_DAYS;
 
+  // Hooks
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
-    TimeInterval.NINETY_DAYS,
+    timeInterval,
   );
-  const delegatedSupply = useDelegatedSupply(
-    selectedDaoId,
-    TimeInterval.NINETY_DAYS,
-  );
-  const activeSupply = useActiveSupply(selectedDaoId, TimeInterval.NINETY_DAYS);
-  const averageTurnout = useAverageTurnout(
-    selectedDaoId,
-    TimeInterval.NINETY_DAYS,
-  );
-
+  const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
+  const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
+  const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
   const {
     data: daoTokenPriceHistoricalData,
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData(selectedDaoId);
 
-  const lastPrice =
-    daoTokenPriceHistoricalData.prices.length > 0
-      ? daoTokenPriceHistoricalData.prices[
-          daoTokenPriceHistoricalData.prices.length - 1
-        ][1]
-      : 0;
+  // Extract price calculation
+  const lastPrice = React.useMemo(() => {
+    const prices = daoTokenPriceHistoricalData.prices;
+    return prices.length > 0 ? prices[prices.length - 1][1] : 0;
+  }, [daoTokenPriceHistoricalData]);
 
-  if (
+  // Check for loading state
+  const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
-    daoTokenPriceHistoricalDataLoading
-  ) {
+    daoTokenPriceHistoricalDataLoading;
+
+  // Show skeleton while loading
+  if (isLoading) {
     return (
       <div className={`h-80 w-full ${className || ""}`}>
         <SkeletonRow width="w-full" height="h-80" />
@@ -90,24 +72,47 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     );
   }
 
-  data[0].value = Number(liquidTreasury.data?.[0]?.totalAssets || 0); // Already in USD
-  data[1].value =
-    Number(
-      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || "0")),
-    ) * lastPrice;
-  data[2].value =
-    Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
-    lastPrice;
-  data[3].value =
-    Number(
-      formatEther(BigInt(averageTurnout.data?.currentAverageTurnout || "0")),
-    ) * lastPrice;
+  // Prepare chart data
+  const chartData: ChartDataItem[] = [
+    {
+      id: "liquidTreasury",
+      name: "Liquid Treasury",
+      value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+    },
+    {
+      id: "delegatedSupply",
+      name: "Delegated Supply",
+      value:
+        Number(
+          formatEther(
+            BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+          ),
+        ) * lastPrice,
+    },
+    {
+      id: "activeSupply",
+      name: "Active Supply",
+      value:
+        Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
+        lastPrice,
+    },
+    {
+      id: "averageTurnout",
+      name: "Average Turnout",
+      value:
+        Number(
+          formatEther(
+            BigInt(averageTurnout.data?.currentAverageTurnout || "0"),
+          ),
+        ) * lastPrice,
+    },
+  ];
 
   return (
     <div className={`h-80 w-full ${className || ""}`}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={data}
+          data={chartData}
           margin={{
             top: 20,
             right: 30,
@@ -117,10 +122,10 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           <XAxis
             dataKey="name"
             height={60}
-            tick={<CustomXAxisTick />}
+            tick={(props) => <CustomXAxisTick {...props} />}
             interval={0}
           />
-          <YAxis tick={<CustomYAxisTick />} />
+          <YAxis tick={(props) => <CustomYAxisTick {...props} />} />
           <Tooltip content={<CustomTooltip />} cursor={false} />
           <Bar
             dataKey="value"
@@ -135,23 +140,32 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   );
 };
 
-export default AttackCostBarChart;
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{ value: number; name: string }>;
+  label?: string;
+}
 
-// Custom tooltip component to avoid inheritance issues
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded border border-gray-200 bg-white p-2 shadow-md">
-        <p className="font-medium">{label}</p>
-        <p className="text-blue-600">{`Cost: $${payload[0].value.toLocaleString()}`}</p>
-      </div>
-    );
-  }
-  return null;
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (!(active && payload && payload.length)) return null;
+
+  return (
+    <div className="rounded border border-gray-200 bg-white p-2 shadow-md">
+      <p className="font-medium">{label}</p>
+      <p className="text-blue-600">{`Cost: $${payload[0].value.toLocaleString()}`}</p>
+    </div>
+  );
 };
 
-// Custom Y-axis label component
-const CustomYAxisTick = (props: any) => {
+interface AxisTickProps {
+  x: number;
+  y: number;
+  payload: {
+    value: string | number;
+  };
+}
+
+const CustomYAxisTick = (props: AxisTickProps) => {
   const { x, y, payload } = props;
   return (
     <g transform={`translate(${x},${y})`}>
@@ -164,19 +178,15 @@ const CustomYAxisTick = (props: any) => {
         fontSize={10}
         className="font-medium"
       >
-        {formatCurrencyValue(payload.value)}
+        {formatCurrencyValue(Number(payload.value))}
       </text>
     </g>
   );
 };
 
-// Custom X-axis label component
-const CustomXAxisTick = (props: any) => {
-  const { x, y, payload } = props;
-
-  // Split the text at whitespace and create lines with max length
+const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
   const MAX_CHARS_PER_LINE = 10;
-  const words = payload.value.split(" ");
+  const words = String(payload.value).split(" ");
   const lines = [];
   let currentLine = "";
 
@@ -214,3 +224,5 @@ const CustomXAxisTick = (props: any) => {
     </g>
   );
 };
+
+export default AttackCostBarChart;
