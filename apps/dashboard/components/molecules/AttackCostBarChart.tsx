@@ -4,7 +4,6 @@ import { useActiveSupply } from "@/hooks/useActiveSupply";
 import { useAverageTurnout } from "@/hooks/useAverageTurnout";
 import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
 import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
-import { formatCurrencyValue } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import React from "react";
 import {
@@ -20,6 +19,7 @@ import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
+import { formatNumberUserReadable } from "@/lib/client/utils";
 
 interface ChartDataItem {
   name: string;
@@ -188,7 +188,7 @@ const CustomYAxisTick = (props: AxisTickProps) => {
         fontSize={10}
         className="font-medium"
       >
-        {formatCurrencyValue(Number(payload.value))}
+        {formatNumberUserReadable(Number(payload.value))}
       </text>
     </g>
   );
