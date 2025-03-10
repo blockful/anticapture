@@ -15,6 +15,7 @@ export * from "./DollarIcon";
 export * from "./EnsIcon";
 export * from "./ExternalLinkIcon";
 export * from "./FocusIcon";
+export * from "./GlassesIcon";
 export * from "./GlobeIcon";
 export * from "./HandIcon";
 export * from "./HeartIcon";
