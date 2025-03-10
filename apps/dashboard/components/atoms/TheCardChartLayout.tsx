@@ -9,7 +9,7 @@ export const TheCardChartLayout = ({
   children,
 }: {
   title: string;
-  headerComponent: React.ReactNode;
+  headerComponent?: React.ReactNode;
   children: React.ReactNode;
 }) => {
   return (
@@ -21,7 +21,7 @@ export const TheCardChartLayout = ({
         {headerComponent}
       </CardHeader>
 
-      <CardContent className="flex h-full w-full flex-col px-4 pb-4 lg:flex-row">
+      <CardContent className="flex h-full w-full flex-col px-4 py-4 lg:flex-row">
         {children}
       </CardContent>
     </Card>
