@@ -1,6 +1,11 @@
 "use client";
 
+import { useActiveSupply } from "@/hooks/useActiveSupply";
+import { useAverageTurnout } from "@/hooks/useAverageTurnout";
+import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
+import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
 import { formatCurrencyValue } from "@/lib/client/utils";
+import { DaoIdEnum } from "@/lib/types/daos";
 import React from "react";
 import {
   BarChart,
@@ -10,28 +15,27 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { SkeletonRow } from "../atoms";
+import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 
 // Sample data - replace with your actual data
 const data = [
   {
     name: "Liquid Treasury",
-    value: 4000,
+    value: 0,
   },
   {
     name: "Delegated Supply",
-    value: 3000,
+    value: 0,
   },
   {
     name: "Active Supply",
-    value: 2000,
+    value: 0,
   },
   {
     name: "Average Turnout",
-    value: 2780,
-  },
-  {
-    name: "Total Supply",
-    value: 1890,
+    value: 0,
   },
 ];
 
@@ -40,83 +44,63 @@ interface AttackCostBarChartProps {
 }
 
 const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
-  // Custom tooltip component to avoid inheritance issues
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="rounded border border-gray-200 bg-white p-2 shadow-md">
-          <p className="font-medium">{label}</p>
-          <p className="text-blue-600">{`Cost: $${payload[0].value.toLocaleString()}`}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  // Already is in USD
+  const liquidTreasury = useTreasuryAssetNonDaoToken(
+    DaoIdEnum.ENS,
+    TimeInterval.NINETY_DAYS,
+  );
+  const delegatedSupply = useDelegatedSupply(
+    DaoIdEnum.ENS,
+    TimeInterval.NINETY_DAYS,
+  );
+  const activeSupply = useActiveSupply(DaoIdEnum.ENS, TimeInterval.NINETY_DAYS);
+  const averageTurnout = useAverageTurnout(
+    DaoIdEnum.ENS,
+    TimeInterval.NINETY_DAYS,
+  );
 
-  // Custom X-axis label component
-  const CustomXAxisTick = (props: any) => {
-    const { x, y, payload } = props;
+  const {
+    data: daoTokenPriceHistoricalData,
+    loading: daoTokenPriceHistoricalDataLoading,
+  } = useDaoTokenHistoricalData(DaoIdEnum.ENS);
 
-    // Split the text at whitespace and create lines with max length
-    const MAX_CHARS_PER_LINE = 10;
-    const words = payload.value.split(" ");
-    const lines = [];
-    let currentLine = "";
+  const lastPrice =
+    daoTokenPriceHistoricalData.prices.length > 0
+      ? daoTokenPriceHistoricalData.prices[
+          daoTokenPriceHistoricalData.prices.length - 1
+        ][1]
+      : 0;
 
-    // Group words into lines without exceeding max length
-    words.forEach((word: string) => {
-      if (currentLine.length + word.length <= MAX_CHARS_PER_LINE) {
-        currentLine += (currentLine ? " " : "") + word;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    });
-
-    // Add the last line if it's not empty
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
+  if (
+    liquidTreasury.loading ||
+    delegatedSupply.isLoading ||
+    activeSupply.isLoading ||
+    averageTurnout.isLoading ||
+    daoTokenPriceHistoricalDataLoading
+  ) {
     return (
-      <g transform={`translate(${x},${y})`}>
-        {lines.map((line, index) => (
-          <text
-            key={index}
-            x={0}
-            y={0}
-            dy={16 + index * 12} // Increase dy for each line
-            textAnchor="middle"
-            fill="gray"
-            fontSize={10}
-            className="font-medium"
-          >
-            {line}
-          </text>
-        ))}
-      </g>
+      <div className={`h-80 w-full ${className || ""}`}>
+        <SkeletonRow width="w-full" height="h-80" />
+      </div>
     );
-  };
+  }
 
-  // Custom Y-axis label component
-  const CustomYAxisTick = (props: any) => {
-    const { x, y, payload } = props;
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text
-          x={0}
-          y={0}
-          dx={-10}
-          textAnchor="end"
-          fill="#666"
-          fontSize={10}
-          className="font-medium"
-        >
-          {formatCurrencyValue(payload.value)}
-        </text>
-      </g>
-    );
-  };
+  data[0].value = Number(liquidTreasury.data?.[0]?.totalAssets || 0);
+  data[1].value =
+    Number(
+      // Fazer isso para todos os dados que vem em BigInt - formatEther
+      // Fazer com graphQL
+      BigInt(delegatedSupply.data?.currentDelegatedSupply || "0") /
+        BigInt(10 ** 18), // useUSD
+    ) * lastPrice;
+  data[2].value =
+    Number(BigInt(activeSupply.data?.activeSupply || "0") / BigInt(10 ** 18)) *
+    lastPrice;
+  data[3].value =
+    Number(
+      BigInt(averageTurnout.data?.currentAverageTurnout || "0") /
+        BigInt(10 ** 18),
+    ) * lastPrice;
 
   return (
     <div className={`h-80 w-full ${className || ""}`}>
@@ -151,3 +135,81 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 };
 
 export default AttackCostBarChart;
+
+// Custom tooltip component to avoid inheritance issues
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded border border-gray-200 bg-white p-2 shadow-md">
+        <p className="font-medium">{label}</p>
+        <p className="text-blue-600">{`Cost: $${payload[0].value.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom Y-axis label component
+const CustomYAxisTick = (props: any) => {
+  const { x, y, payload } = props;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dx={-10}
+        textAnchor="end"
+        fill="#777"
+        fontSize={10}
+        className="font-medium"
+      >
+        {formatCurrencyValue(payload.value)}
+      </text>
+    </g>
+  );
+};
+
+// Custom X-axis label component
+const CustomXAxisTick = (props: any) => {
+  const { x, y, payload } = props;
+
+  // Split the text at whitespace and create lines with max length
+  const MAX_CHARS_PER_LINE = 10;
+  const words = payload.value.split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  // Group words into lines without exceeding max length
+  words.forEach((word: string) => {
+    if (currentLine.length + word.length <= MAX_CHARS_PER_LINE) {
+      currentLine += (currentLine ? " " : "") + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  });
+
+  // Add the last line if it's not empty
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {lines.map((line, index) => (
+        <text
+          key={index}
+          x={0}
+          y={0}
+          dy={16 + index * 12} // Increase dy for each line
+          textAnchor="middle"
+          fill="gray"
+          fontSize={10}
+          className="font-medium"
+        >
+          {line}
+        </text>
+      ))}
+    </g>
+  );
+};
