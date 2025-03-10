@@ -20,6 +20,6 @@ export enum MetricTypesEnum {
 
 export const metricTypeArray = Object.values(MetricTypesEnum);
 
-const SECONDS_PER_DAY = 86400;
+export const SECONDS_PER_DAY = 86400;
 export const MILLISECONDS_PER_SECOND = 1000;
 export const MILLISECONDS_PER_DAY = SECONDS_PER_DAY * MILLISECONDS_PER_SECOND;
