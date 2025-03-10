@@ -275,3 +275,13 @@ export const findMostRecentValue = <
   // Return the found item's value
   return items[index][valueKey];
 };
+
+// Format large numbers for display
+export const formatCurrencyValue = (value: number) => {
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `$${(value / 1000).toFixed(1)}K`;
+  }
+  return `$${value}`;
+};
