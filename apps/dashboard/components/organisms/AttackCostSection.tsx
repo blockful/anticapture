@@ -14,14 +14,9 @@ export const AttackCostSection = () => {
       anchorId={attackCostSectionAnchorID}
     >
       <div className="grid grid-cols-2 flex-col gap-4">
-        <div className="flex flex-col gap-4">
-          <TheCardChartLayout
-            headerComponent={<div>Cost of Attack by Category</div>}
-            title="Cost of Attack by Category"
-          >
-            <AttackCostBarChart />
-          </TheCardChartLayout>
-        </div>
+        <TheCardChartLayout title="Cost of Attack by Category">
+          <AttackCostBarChart />
+        </TheCardChartLayout>
         <TheCardChartLayout title="Cost of Attack by Category">
           <AttackCostBarChart />
         </TheCardChartLayout>
