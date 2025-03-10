@@ -18,6 +18,7 @@ import {
 import { SkeletonRow } from "../atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
+import { formatEther } from "viem";
 
 // Sample data - replace with your actual data
 const data = [
@@ -88,18 +89,14 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   data[0].value = Number(liquidTreasury.data?.[0]?.totalAssets || 0);
   data[1].value =
     Number(
-      // Fazer isso para todos os dados que vem em BigInt - formatEther
-      // Fazer com graphQL
-      BigInt(delegatedSupply.data?.currentDelegatedSupply || "0") /
-        BigInt(10 ** 18), // useUSD
+      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || "0")), // useUSD
     ) * lastPrice;
   data[2].value =
-    Number(BigInt(activeSupply.data?.activeSupply || "0") / BigInt(10 ** 18)) *
+    Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
     lastPrice;
   data[3].value =
     Number(
-      BigInt(averageTurnout.data?.currentAverageTurnout || "0") /
-        BigInt(10 ** 18),
+      formatEther(BigInt(averageTurnout.data?.currentAverageTurnout || "0")),
     ) * lastPrice;
 
   return (
