@@ -17,6 +17,17 @@ export type DaoConstants = {
     timelock: boolean;
     cancelFunction: boolean;
   };
+  securityCouncil?: {
+    isActive: boolean;
+    multisig: {
+      threshold: number;
+      signers: number;
+    };
+    expiration: {
+      date: string;
+      timestamp: number;
+    };
+  };
 };
 
 export enum ChainNameEnum {
