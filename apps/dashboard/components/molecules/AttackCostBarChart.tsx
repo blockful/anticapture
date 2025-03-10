@@ -142,7 +142,7 @@ const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ value: number; name: string }>;
+  payload?: Array<{ value: number; name: string; color: string }>;
   label?: string;
 }
 
@@ -150,9 +150,19 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (!(active && payload && payload.length)) return null;
 
   return (
-    <div className="rounded border border-gray-200 bg-white p-2 shadow-md">
-      <p className="font-medium">{label}</p>
-      <p className="text-blue-600">{`Cost: $${payload[0].value.toLocaleString()}`}</p>
+    <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
+      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
+        {label}
+      </p>
+      {payload.map((entry, index) => (
+        <p
+          key={index}
+          style={{ color: entry.color }}
+          className="flex gap-1.5 text-neutral-50"
+        >
+          <strong>${entry.value.toLocaleString()}</strong>
+        </p>
+      ))}
     </div>
   );
 };
