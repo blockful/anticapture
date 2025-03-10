@@ -31,7 +31,7 @@ interface AttackCostBarChartProps {
   className?: string;
 }
 
-const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
+export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
@@ -234,5 +234,3 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
     </g>
   );
 };
-
-export default AttackCostBarChart;

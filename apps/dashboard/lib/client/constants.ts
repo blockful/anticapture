@@ -3,7 +3,6 @@ export const daoInfoSectionAnchorID = "daoInfoSection";
 export const tokenDistributionSectionAnchorID = "tokenDistributionSection";
 export const governanceActivitySectionAnchorID = "governanceActivitySection";
 export const extractableValueSectionAnchorID = "extractableValueSection";
-export const attackCostSectionAnchorID = "attackCostSection";
 
 export enum MetricTypesEnum {
   TOTAL_SUPPLY = "TOTAL_SUPPLY",

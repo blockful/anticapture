@@ -8,7 +8,10 @@ import {
   TheCardChartLayout,
   SwitcherDate,
 } from "@/components/atoms";
-import { MultilineChartExtractableValue } from "@/components/molecules";
+import {
+  MultilineChartExtractableValue,
+  AttackCostBarChart,
+} from "@/components/molecules";
 import { extractableValueSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 
@@ -46,6 +49,15 @@ export const ExtractableValueSection = () => {
           filterData={[treasuryMetric, costMetric]}
         />
       </TheCardChartLayout>
+
+      <div className="grid w-full grid-cols-2 flex-col gap-4">
+        <TheCardChartLayout title="Cost of Attack by Category">
+          <AttackCostBarChart />
+        </TheCardChartLayout>
+        <TheCardChartLayout title="Cost of Attack by Category">
+          <AttackCostBarChart />
+        </TheCardChartLayout>
+      </div>
     </TheSectionLayout>
   );
 };
