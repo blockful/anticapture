@@ -1,10 +1,10 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Badge } from "./Badge";
+import { Badge } from "@/components/atoms";
 
 interface ButtonCardDaoInfoItemProps {
-  label: string;
+  label?: string;
   icon?: ReactNode;
   inverted?: boolean;
   onClick?: () => void;
