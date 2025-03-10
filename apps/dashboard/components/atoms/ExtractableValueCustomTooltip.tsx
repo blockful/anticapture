@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  timestampToReadableDate,
-  formatNumberUserReadable,
-} from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/lib/client/utils";
 import { TooltipProps } from "recharts";
 
 export const ExtractableValueCustomTooltip: React.FC<
