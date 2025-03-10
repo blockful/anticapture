@@ -20,11 +20,13 @@ import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
+import daoConstantsByDaoId from "@/lib/dao-constants";
 
 interface ChartDataItem {
   name: string;
   value: number;
   id: string;
+  displayValue?: string;
 }
 
 interface AttackCostBarChartProps {
@@ -35,6 +37,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
+  const daoConstants = daoConstantsByDaoId[selectedDaoId];
+  const supportsLiquidTreasuryCall =
+    daoConstants.supportsLiquidTreasuryCall !== false;
 
   // Hooks
   const liquidTreasury = useTreasuryAssetNonDaoToken(
@@ -77,7 +82,10 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "liquidTreasury",
       name: "Liquid Treasury",
-      value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+      value: supportsLiquidTreasuryCall
+        ? Number(liquidTreasury.data?.[0]?.totalAssets || 0)
+        : 10000,
+      displayValue: supportsLiquidTreasuryCall ? undefined : "<$10,000",
     },
     {
       id: "delegatedSupply",
@@ -142,7 +150,12 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ value: number; name: string; color: string }>;
+  payload?: Array<{
+    value: number;
+    name: string;
+    color: string;
+    payload: ChartDataItem;
+  }>;
   label?: string;
 }
 
@@ -160,7 +173,9 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           style={{ color: entry.color }}
           className="flex gap-1.5 text-neutral-50"
         >
-          <strong>${entry.value.toLocaleString()}</strong>
+          <strong>
+            {entry.payload?.displayValue || `$${entry.value.toLocaleString()}`}
+          </strong>
         </p>
       ))}
     </div>

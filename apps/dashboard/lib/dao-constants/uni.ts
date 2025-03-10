@@ -16,4 +16,5 @@ export const UNI: DaoConstants = {
     timelock: true,
     cancelFunction: true,
   },
+  supportsLiquidTreasuryCall: false,
 };

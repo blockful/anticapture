@@ -15,4 +15,5 @@ export const ENS: DaoConstants = {
     timelock: true,
     cancelFunction: false,
   },
+  supportsLiquidTreasuryCall: true,
 };
