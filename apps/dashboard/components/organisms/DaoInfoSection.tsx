@@ -4,6 +4,7 @@ import { GlobeIcon, TheSectionLayout } from "@/components/atoms";
 import {
   ContractsCard,
   QuorumCard,
+  SecurityCouncilCard,
   TimelockCard,
   VoteCard,
 } from "@/components/molecules";
@@ -24,6 +25,7 @@ export const DaoInfoSection = () => {
         <VoteCard daoConstants={daoConstants} />
         <TimelockCard daoConstants={daoConstants} />
         <QuorumCard />
+        <SecurityCouncilCard daoConstants={daoConstants} />
       </div>
     );
   };
