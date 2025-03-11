@@ -38,6 +38,7 @@ export const useTreasuryAssetNonDaoToken = (
     TreasuryAssetNonDaoToken[]
   >(key, () => fetchTreasuryAssetNonDaoToken({ daoId, days }), {
     revalidateOnFocus: false,
+    shouldRetryOnError: false,
     ...config,
   });
 
