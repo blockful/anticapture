@@ -46,12 +46,22 @@ export const SecurityCouncilCard = ({
             switched={securityCouncil.isActive}
             key="switch"
           />,
-          <button className="flex h-full w-full" key="multisig">
+          <button
+            className="flex h-full w-full"
+            key="multisig"
+            onClick={() =>
+              window.open(
+                `${daoConstants.securityCouncil?.multisig.externalLink}`,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
+          >
             <Badge className="flex h-full w-full gap-1 hover:border-lightDark hover:bg-transparent">
               <GlassesIcon />
               <p className="text-sm font-medium leading-tight">
-                {securityCouncil.multisig.signers} /{" "}
-                {securityCouncil.multisig.threshold}
+                {securityCouncil.multisig.threshold} /{" "}
+                {securityCouncil.multisig.signers}
               </p>
               <ExternalLinkIcon className="text-[#EC762E]" />
             </Badge>

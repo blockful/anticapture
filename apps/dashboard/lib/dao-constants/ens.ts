@@ -21,6 +21,8 @@ export const ENS: DaoConstants = {
     multisig: {
       threshold: 4,
       signers: 8,
+      externalLink:
+        "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
     },
     expiration: {
       date: "26 July 2026",
