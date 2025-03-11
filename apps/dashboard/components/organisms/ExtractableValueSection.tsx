@@ -21,7 +21,7 @@ export const ExtractableValueSection = () => {
   const { daoId }: { daoId: DaoIdEnum } = useParams();
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(
-    `Non-${daoId.toUpperCase() as DaoIdEnum}`,
+    `Non-${daoId.toUpperCase()}`,
   );
   const [costMetric, setCostMetric] = useState<string>("Delegated");
 
