@@ -1,3 +1,4 @@
+import daoConstantsByDaoId from "@/lib/dao-constants";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
@@ -34,15 +35,26 @@ export const useTreasuryAssetNonDaoToken = (
 ) => {
   const key = daoId && days ? [`treasury-assets`, daoId, days] : null;
 
+  const { supportsLiquidTreasuryCall } = daoConstantsByDaoId[daoId];
+
+  // Only create a valid key if the DAO supports liquid treasury calls
+  const fetchKey = supportsLiquidTreasuryCall ? key : null;
+
   const { data, error, isValidating, mutate } = useSWR<
     TreasuryAssetNonDaoToken[]
-  >(key, () => fetchTreasuryAssetNonDaoToken({ daoId, days }), {
+  >(fetchKey, () => fetchTreasuryAssetNonDaoToken({ daoId, days }), {
     revalidateOnFocus: false,
+    shouldRetryOnError: false,
     ...config,
   });
 
+  // Return default data (empty array) when liquid treasury is not supported
+  const finalData = supportsLiquidTreasuryCall
+    ? data
+    : [{ date: new Date().toISOString(), totalAssets: "0" }];
+
   return {
-    data,
+    data: finalData,
     loading: isValidating,
     error,
     refetch: mutate,
