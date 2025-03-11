@@ -203,7 +203,7 @@ const CustomYAxisTick = (props: AxisTickProps) => {
         fontSize={10}
         className="font-medium"
       >
-        {formatNumberUserReadable(Number(payload.value))}
+        ${formatNumberUserReadable(Number(payload.value))}
       </text>
     </g>
   );
