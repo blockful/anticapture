@@ -23,6 +23,7 @@ export type DaoConstants = {
     multisig: {
       threshold: number;
       signers: number;
+      externalLink: string;
     };
     expiration: {
       date: string;
