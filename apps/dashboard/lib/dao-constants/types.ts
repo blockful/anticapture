@@ -1,9 +1,11 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
-
+import { StaticImageData } from "next/image";
 export type DaoConstants = {
+  id: DaoIdEnum;
   name: string;
+  icon: StaticImageData;
   contracts: {
     governor: Address;
     token: Address;
@@ -30,6 +32,7 @@ export type DaoConstants = {
       timestamp: number;
     };
   };
+  fullySupported: boolean;
 };
 
 export enum ChainNameEnum {

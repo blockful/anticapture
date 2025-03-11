@@ -1,7 +1,11 @@
+import { DaoIdEnum } from "../types/daos";
 import { DaoConstants } from "./types";
+import UNILogo from "@/public/logo/UNI.png";
 
 export const UNI: DaoConstants = {
+  id: DaoIdEnum.UNISWAP,
   name: "Uniswap",
+  icon: UNILogo,
   contracts: {
     governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
     token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -17,4 +21,5 @@ export const UNI: DaoConstants = {
     cancelFunction: true,
   },
   supportsLiquidTreasuryCall: false,
+  fullySupported: true,
 };
