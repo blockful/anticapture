@@ -14,11 +14,16 @@ import {
 } from "@/components/molecules";
 import { extractableValueSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/lib/types/daos";
 
 export const ExtractableValueSection = () => {
+  const { daoId }: { daoId: DaoIdEnum } = useParams();
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
-  const [treasuryMetric, setTreasuryMetric] = useState<string>("All");
-  const [costMetric, setCostMetric] = useState<string>("Quorum");
+  const [treasuryMetric, setTreasuryMetric] = useState<string>(
+    `Non-${daoId.toUpperCase()}`,
+  );
+  const [costMetric, setCostMetric] = useState<string>("Delegated");
 
   return (
     <TheSectionLayout
