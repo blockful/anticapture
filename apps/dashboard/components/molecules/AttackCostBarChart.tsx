@@ -14,13 +14,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { SkeletonRow } from "../atoms";
+import { SkeletonRow } from "@/components/atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import daoConstantsByDaoId from "@/lib/dao-constants";
+import { useTopTokenHolderNonDao } from "@/hooks/useTopTokenHolderNonDao";
 
 interface ChartDataItem {
   name: string;
@@ -51,6 +52,11 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData(selectedDaoId);
 
+  const {
+    data: daoTopTokenHolderExcludingTheDao,
+    isLoading: daoTopTokenHolderExcludingTheDaoLoading,
+  } = useTopTokenHolderNonDao(selectedDaoId);
+
   // Extract price calculation
   const lastPrice = React.useMemo(() => {
     const prices = daoTokenPriceHistoricalData.prices;
@@ -63,7 +69,8 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     delegatedSupply.isLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
-    daoTokenPriceHistoricalDataLoading;
+    daoTokenPriceHistoricalDataLoading ||
+    daoTopTokenHolderExcludingTheDaoLoading;
 
   // Show skeleton while loading
   if (isLoading) {
@@ -110,6 +117,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           formatEther(
             BigInt(averageTurnout.data?.currentAverageTurnout || "0"),
           ),
+        ) * lastPrice,
+    },
+    {
+      id: "topTokenHolder",
+      name: "Top Token Holder",
+      value:
+        Number(
+          formatEther(BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
         ) * lastPrice,
     },
   ];
