@@ -18,6 +18,17 @@ export type DaoConstants = {
     cancelFunction: boolean;
   };
   supportsLiquidTreasuryCall: boolean;
+  securityCouncil?: {
+    isActive: boolean;
+    multisig: {
+      threshold: number;
+      signers: number;
+    };
+    expiration: {
+      date: string;
+      timestamp: number;
+    };
+  };
 };
 
 export enum ChainNameEnum {

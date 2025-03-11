@@ -1,4 +1,4 @@
-import { DaoConstants } from "./types";
+import { DaoConstants } from "@/lib/dao-constants/types";
 
 export const ENS: DaoConstants = {
   name: "Ethereum Name Service",
@@ -16,4 +16,15 @@ export const ENS: DaoConstants = {
     cancelFunction: false,
   },
   supportsLiquidTreasuryCall: true,
+  securityCouncil: {
+    isActive: true,
+    multisig: {
+      threshold: 4,
+      signers: 8,
+    },
+    expiration: {
+      date: "26 July 2026",
+      timestamp: 1784919179,
+    },
+  },
 };
