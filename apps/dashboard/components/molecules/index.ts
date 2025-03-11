@@ -10,3 +10,4 @@ export * from "./MultilineChartTokenDistribution";
 export * from "./TimelockCard";
 export * from "./TokenDistributionTable";
 export * from "./VoteCard";
+export * from "./AttackCostBarChart";

@@ -17,6 +17,7 @@ export type DaoConstants = {
     timelock: boolean;
     cancelFunction: boolean;
   };
+  supportsLiquidTreasuryCall: boolean;
   securityCouncil?: {
     isActive: boolean;
     multisig: {
