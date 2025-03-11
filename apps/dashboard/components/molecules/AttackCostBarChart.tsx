@@ -37,9 +37,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
-  const daoConstants = daoConstantsByDaoId[selectedDaoId];
-  const supportsLiquidTreasuryCall =
-    daoConstants.supportsLiquidTreasuryCall !== false;
 
   // Hooks
   const liquidTreasury = useTreasuryAssetNonDaoToken(
@@ -82,10 +79,11 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "liquidTreasury",
       name: "Liquid Treasury",
-      value: supportsLiquidTreasuryCall
-        ? Number(liquidTreasury.data?.[0]?.totalAssets || 0)
-        : 10000,
-      displayValue: supportsLiquidTreasuryCall ? undefined : "<$10,000",
+      value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+      displayValue:
+        Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+          ? undefined
+          : "<$10,000",
     },
     {
       id: "delegatedSupply",
