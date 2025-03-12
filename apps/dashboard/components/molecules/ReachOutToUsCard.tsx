@@ -5,7 +5,7 @@ import { Card } from "../ui/card";
 export const ReachOutToUsCard = ({}: {}) => {
   return (
     <Card
-      className="flex w-[calc(50%-10px)] flex-row rounded-lg border border-lightDark bg-dark px-4 py-5 shadow hover:cursor-pointer hover:bg-lightDark sm:max-w-full xl4k:max-w-full"
+      className="flex w-full sm:w-[calc(50%-10px)] flex-row rounded-lg border border-lightDark bg-dark px-4 py-5 shadow hover:cursor-pointer hover:bg-lightDark xl4k:max-w-full"
       onClick={() => {
         window.open("", "_blank");
       }}
