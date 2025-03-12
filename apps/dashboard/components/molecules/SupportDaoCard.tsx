@@ -3,8 +3,7 @@ import { Card } from "../ui/card";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TrendingUpIcon } from "../atoms/icons/TrendingUpIcon";
-import { ArrowLeftRight } from "../atoms";
-import { ChevronRight } from "../atoms/icons/ChevronRight";
+import { ChevronRight } from "lucide-react";
 
 export const SupportDaoCard = ({
   daoIcon,
@@ -86,7 +85,7 @@ export const SupportDaoCard = ({
             </div>
           </div>
           <div className="h-6 w-6">
-            <ChevronRight color="rgba(255, 255, 255, 0.6)" />
+            <ChevronRight color="rgba(255, 255, 255, 0.6)" className="h-full w-full" />
           </div>
         </div>
       </div>
