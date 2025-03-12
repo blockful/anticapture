@@ -8,6 +8,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { usePetition } from "@/hooks/usePetition";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
+import { ReachOutToUsCard } from "../molecules/ReachOutToUsCard";
 export const ShowSupportSection = () => {
   const router = useRouter();
 
@@ -42,6 +43,7 @@ export const ShowSupportSection = () => {
             }}
           />
         ))}
+        <ReachOutToUsCard />
       </div>
     </TheSectionLayout>
   );
