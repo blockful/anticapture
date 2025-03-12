@@ -25,3 +25,13 @@ export const DAO_ADDRESSES: DaoAddresses = {
     ENSColdWallet: "0x690F0581eCecCf8389c223170778cD9D029606F2",
   },
 };
+
+interface DaoVetoCouncilAddresses {
+  [DaoIdEnum.UNISWAP]: string | undefined;
+  [DaoIdEnum.ENS]: string;
+}
+
+export const DAO_VETO_COUNCIL_ADDRESSES: DaoVetoCouncilAddresses = {
+  [DaoIdEnum.UNISWAP]: undefined,
+  [DaoIdEnum.ENS]: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
+};

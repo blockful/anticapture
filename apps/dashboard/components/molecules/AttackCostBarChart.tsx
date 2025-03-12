@@ -1,11 +1,12 @@
+/* eslint-disable react/jsx-key */
 "use client";
 
+import React from "react";
 import { useActiveSupply } from "@/hooks/useActiveSupply";
 import { useAverageTurnout } from "@/hooks/useAverageTurnout";
 import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
 import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
 import { DaoIdEnum } from "@/lib/types/daos";
-import React from "react";
 import {
   BarChart,
   Bar,
@@ -20,14 +21,16 @@ import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
-import daoConstantsByDaoId from "@/lib/dao-constants";
 import { useTopTokenHolderNonDao } from "@/hooks/useTopTokenHolderNonDao";
+import { useVetoCouncilVotingPower } from "@/hooks/useVetoCouncilVotingPower";
+import type { Props as BarProps } from "recharts/types/cartesian/Bar";
 
 interface ChartDataItem {
   name: string;
   value: number;
   id: string;
   displayValue?: string;
+  secondaryValue?: number;
 }
 
 interface AttackCostBarChartProps {
@@ -39,7 +42,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
 
-  // Hooks
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -57,22 +59,23 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     isLoading: daoTopTokenHolderExcludingTheDaoLoading,
   } = useTopTokenHolderNonDao(selectedDaoId);
 
-  // Extract price calculation
+  const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
+    useVetoCouncilVotingPower(selectedDaoId);
+
   const lastPrice = React.useMemo(() => {
     const prices = daoTokenPriceHistoricalData.prices;
     return prices.length > 0 ? prices[prices.length - 1][1] : 0;
   }, [daoTokenPriceHistoricalData]);
 
-  // Check for loading state
   const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
     daoTokenPriceHistoricalDataLoading ||
-    daoTopTokenHolderExcludingTheDaoLoading;
+    daoTopTokenHolderExcludingTheDaoLoading ||
+    isVetoCouncilLoading;
 
-  // Show skeleton while loading
   if (isLoading) {
     return (
       <div className={`h-80 w-full ${className || ""}`}>
@@ -81,7 +84,29 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     );
   }
 
-  // Prepare chart data
+  type CustomBarConfig = Omit<BarProps, "ref"> & {
+    dataKey: string;
+  };
+
+  const stackKeys: CustomBarConfig[] = [
+    {
+      dataKey: "value",
+      fill: "#22c55e",
+      name: "Attack Cost",
+      stackId: "delegatedStack",
+      radius: [4, 4, 0, 0],
+      barSize: 40,
+    },
+    {
+      dataKey: "secondaryValue",
+      fill: "#35dc72",
+      name: "Attack Cost (Veto Council)",
+      stackId: "delegatedStack",
+      radius: [0, 0, 4, 4],
+      barSize: 40,
+    },
+  ];
+
   const chartData: ChartDataItem[] = [
     {
       id: "liquidTreasury",
@@ -101,6 +126,8 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
           ),
         ) * lastPrice,
+      secondaryValue:
+        Number(formatEther(BigInt(vetoCouncilVotingPower || "0"))) * lastPrice,
     },
     {
       id: "activeSupply",
@@ -148,13 +175,17 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           />
           <YAxis tick={(props) => <CustomYAxisTick {...props} />} />
           <Tooltip content={<CustomTooltip />} cursor={false} />
-          <Bar
-            dataKey="value"
-            fill="#22c55e"
-            name="Attack Cost"
-            radius={[8, 8, 0, 0]}
-            barSize={40}
-          />
+          {stackKeys.map((config) => (
+            <Bar
+              key={config.dataKey}
+              dataKey={config.dataKey}
+              fill={config.fill}
+              name={config.name}
+              stackId={config.stackId}
+              radius={config.radius}
+              barSize={config.barSize}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </div>
