@@ -35,17 +35,17 @@ app.get("/petition/:daoId", async (context) => {
     petitionSignatures,
     totalSignatures: petitionSignatures.length,
     totalSignaturesPower: petitionSignatures.reduce(
-      (acc, curr) => acc + (curr.votingPower ?? 0n),
-      0n,
+      (acc, curr) => (curr.votingPower ? acc + curr.votingPower : acc),
+      0n
     ),
     latestVoters: petitionSignatures
-      .map(({ accountId }) => accountId)
-      .slice(0, 10),
-    userSigned: !!userAddress
-      ? petitionSignatures.find(
-          (signature) => signature.accountId === userAddress
-        ) !== undefined
-      : undefined,
+      .slice(0, 10)
+      .map(({ accountId }) => accountId),
+
+    userSigned: petitionSignatures.some(
+      (signature) =>
+        signature.accountId.toLowerCase() === userAddress?.toLowerCase()
+    ),
   };
   // Returning the petition signatures
   return context.json(petetionSignaturesResponse);
