@@ -26,7 +26,6 @@ export const ShowSupportSection = () => {
       description="Show support for your favorite DAOs, so it can be fully supported by Anticapture! It's free and easy!"
       anchorId={showSupportSectionAnchorID}
     >
-
       <div className="flex flex-wrap gap-4">
         {Object.values(daoConstants).map((dao) => (
           <SupportDaoCard
@@ -36,8 +35,7 @@ export const ShowSupportSection = () => {
             daoId={dao.id}
             totalCountSupport={petitions[dao.id]?.totalSignatures || 0}
             votingPowerSupport={Number(
-              // formatEther(BigInt(petitions[dao.id]?.totalSignaturesPower || 0)),
-              1000000
+              formatEther(BigInt(petitions[dao.id]?.totalSignaturesPower || 0)),
             )}
             userSupport={petitions[dao.id]?.userSigned || false}
             onClick={() => {
