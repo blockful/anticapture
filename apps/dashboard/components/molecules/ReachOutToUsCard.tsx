@@ -7,7 +7,7 @@ export const ReachOutToUsCard = ({}: {}) => {
     <Card
       className="flex w-full flex-row rounded-lg border border-lightDark bg-dark px-4 py-5 shadow hover:cursor-pointer hover:bg-lightDark sm:w-[calc(50%-10px)] xl4k:max-w-full"
       onClick={() => {
-        window.open("", "_blank");
+        window.open("https://tally.so/r/nrvGbv", "_blank");
       }}
     >
       <div className="flex w-full flex-row justify-between">
