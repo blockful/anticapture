@@ -126,8 +126,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
           ),
         ) * lastPrice,
-      secondaryValue:
-        Number(formatEther(BigInt(vetoCouncilVotingPower || "0"))) * lastPrice,
+      secondaryValue: vetoCouncilVotingPower
+        ? Number(formatEther(BigInt(vetoCouncilVotingPower || "0"))) * lastPrice
+        : undefined,
     },
     {
       id: "activeSupply",
@@ -218,7 +219,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           className="flex gap-1.5 text-neutral-50"
         >
           <strong>
-            {entry.payload?.displayValue || `$${entry.value.toLocaleString()}`}
+            {entry.payload?.displayValue ||
+              `$${entry.value && entry.value.toLocaleString()}`}
           </strong>
         </p>
       ))}
