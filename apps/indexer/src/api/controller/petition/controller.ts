@@ -31,7 +31,7 @@ app.get("/petition/:daoId", async (context) => {
     )
     .where(eq(schema.petitionSignatures.daoId, daoId))
     .orderBy(desc(schema.petitionSignatures.timestamp));
-  const petetionSignaturesResponse = {
+  const petitionSignaturesResponse = {
     petitionSignatures,
     totalSignatures: petitionSignatures.length,
     totalSignaturesPower: petitionSignatures.reduce(
@@ -48,7 +48,7 @@ app.get("/petition/:daoId", async (context) => {
     ),
   };
   // Returning the petition signatures
-  return context.json(petetionSignaturesResponse);
+  return context.json(petitionSignaturesResponse);
 });
 
 app.post("/petition", async (context) => {
