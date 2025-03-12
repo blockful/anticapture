@@ -35,7 +35,7 @@ app.get("/petition/:daoId", async (context) => {
     petitionSignatures,
     totalSignatures: petitionSignatures.length,
     totalSignaturesPower: petitionSignatures.reduce(
-      (acc, curr) => acc + (curr.votingPower ?? 0n),
+      (acc, curr) => curr.votingPower ? acc + curr.votingPower : acc,
       0n,
     ),
     latestVoters: petitionSignatures
