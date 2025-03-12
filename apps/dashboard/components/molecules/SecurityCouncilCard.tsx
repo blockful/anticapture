@@ -77,11 +77,13 @@ export const SecurityCouncilCard = ({
             key="Expiration"
             label={securityCouncil.expiration.date}
             icon={<FocusIcon className="text-[#EC762E]" />}
+            className="cursor-default"
           />,
           <ButtonCardDaoInfoItem
             key="Expiration Countdown"
             label={formattedCountdown}
             icon={<TokensIcon className="text-[#EC762E]" />}
+            className="cursor-default"
           />,
         ],
       },
