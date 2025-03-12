@@ -24,7 +24,10 @@ export const SupportDaoCard = ({
   totalCountSupport: number;
 }) => {
   return (
-    <Card className="flex w-[calc(50%-10px)] flex-row rounded-lg border border-lightDark bg-dark px-4 py-6 shadow sm:max-w-full xl4k:max-w-full hover:cursor-pointer hover:bg-lightDark" onClick={onClick}>
+    <Card
+      className="flex w-[calc(50%-10px)] flex-row rounded-lg border border-lightDark bg-dark px-4 py-5 shadow hover:cursor-pointer hover:bg-lightDark sm:max-w-full xl4k:max-w-full"
+      onClick={onClick}
+    >
       <div className="flex w-full flex-row justify-between">
         <div className="flex flex-row items-center">
           <div className="flex items-center gap-2">
@@ -33,7 +36,7 @@ export const SupportDaoCard = ({
           </div>
           {
             <div
-              className={`ml-5 w-fit rounded-full bg-lightDark px-2 py-1 ${userSupport && "hidden"}`}
+              className={`ml-5 w-fit rounded-full bg-lightDark px-2 py-1 ${!userSupport && "hidden"}`}
             >
               <p className="text-xs text-white">Supported</p>
             </div>
@@ -42,7 +45,7 @@ export const SupportDaoCard = ({
         <div className="flex flex-row items-center gap-2">
           <div className="text-sm text-gray-400">
             <div className="flex flex-row items-center gap-2">
-              {votingPowerSupport && votingPowerSupport > 0 && (
+              {votingPowerSupport && votingPowerSupport > 0 ? (
                 <div className="flex flex-row items-center gap-2">
                   <div className="h-6 w-6">
                     <TrendingUpIcon color="#86EFAC" />
@@ -51,16 +54,25 @@ export const SupportDaoCard = ({
                     {formatNumberUserReadable(votingPowerSupport)} {daoId}
                   </div>
                 </div>
+              ) : (
+                ""
               )}
               {votingPowerSupport &&
-                votingPowerSupport > 0 &&
-                totalCountSupport &&
-                totalCountSupport > 0 ?
-                "|" : ""}
+              votingPowerSupport > 0 &&
+              totalCountSupport &&
+              totalCountSupport > 0
+                ? "|"
+                : ""}
               {totalCountSupport && totalCountSupport > 0 ? (
-                <div className="text-gray-400">{totalCountSupport}{" "}</div>
-              ) : ""}
-              {!totalCountSupport || totalCountSupport > 1 ? "supporters" : "supporter"}
+                <div className="text-gray-400">{totalCountSupport} </div>
+              ) : (
+                ""
+              )}
+              {!votingPowerSupport && !totalCountSupport
+                ? ""
+                : totalCountSupport === 1
+                  ? "supporter"
+                  : "supporters"}
             </div>
           </div>
           <div className="h-6 w-6">
