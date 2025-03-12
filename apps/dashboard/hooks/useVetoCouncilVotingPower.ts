@@ -6,9 +6,9 @@ import useSWR from "swr";
 interface VotingPowerResponse {
   data: {
     accountPowers: {
-      items: Array<{
+      items: {
         votingPower: string;
-      }>;
+      }[];
     };
   };
 }
