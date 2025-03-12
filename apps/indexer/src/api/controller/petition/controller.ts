@@ -41,11 +41,7 @@ app.get("/petition/:daoId", async (context) => {
     latestVoters: petitionSignatures
       .map(({ accountId }) => accountId)
       .slice(0, 10),
-    userSigned: !!userAddress
-      ? petitionSignatures.find(
-          (signature) => signature.accountId === userAddress
-        ) !== undefined
-      : undefined,
+    userSigned: petitionSignatures.some(signature => signature.accountId === userAddress),
   };
   // Returning the petition signatures
   return context.json(petetionSignaturesResponse);
