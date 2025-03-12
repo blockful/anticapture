@@ -39,8 +39,9 @@ app.get("/petition/:daoId", async (context) => {
       0n,
     ),
     latestVoters: petitionSignatures
-      .map(({ accountId }) => accountId)
-      .slice(0, 10),
+      .slice(0, 10)
+      .map(({ accountId }) => accountId),
+
     userSigned: petitionSignatures.some(signature => signature.accountId === userAddress),
   };
   // Returning the petition signatures
