@@ -17,7 +17,7 @@ import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
-export const ExtractableValueSection = () => {
+export const AttackProfitabilitySection = () => {
   const { daoId }: { daoId: DaoIdEnum } = useParams();
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(

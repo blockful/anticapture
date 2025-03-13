@@ -2,7 +2,7 @@
 
 import {
   DaoInfoSection,
-  ExtractableValueSection,
+  AttackProfitabilitySection,
   GovernanceActivitySection,
   TokenDistributionSection,
 } from "@/components/organisms";
@@ -12,7 +12,7 @@ export const DaoTemplate = () => {
   return (
     <>
       <DaoInfoSection />
-      <ExtractableValueSection />
+      <AttackProfitabilitySection />
       <GovernanceImplementationSection />
       <TokenDistributionSection />
       <GovernanceActivitySection />
