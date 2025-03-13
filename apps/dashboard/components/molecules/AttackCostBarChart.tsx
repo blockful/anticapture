@@ -1,10 +1,15 @@
 "use client";
 
 import React from "react";
-import { useActiveSupply } from "@/hooks/useActiveSupply";
-import { useAverageTurnout } from "@/hooks/useAverageTurnout";
-import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
-import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
+import {
+  useActiveSupply,
+  useAverageTurnout,
+  useDaoTokenHistoricalData,
+  useDelegatedSupply,
+  useTopTokenHolderNonDao,
+  useTreasuryAssetNonDaoToken,
+  useVetoCouncilVotingPower,
+} from "@/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   BarChart,
@@ -16,12 +21,9 @@ import {
 } from "recharts";
 import { SkeletonRow } from "@/components/atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
-import { useTopTokenHolderNonDao } from "@/hooks/useTopTokenHolderNonDao";
-import { useVetoCouncilVotingPower } from "@/hooks/useVetoCouncilVotingPower";
 import type { Props as BarProps } from "recharts/types/cartesian/Bar";
 
 interface ChartDataItem {

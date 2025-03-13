@@ -8,11 +8,13 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MetricData, GovernanceActivityContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
-import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
-import { useActiveSupply } from "@/hooks/useActiveSupply";
-import { useProposals } from "@/hooks/useProposals";
-import { useVotes } from "@/hooks/useVotes";
-import { useAverageTurnout } from "@/hooks/useAverageTurnout";
+import {
+  useActiveSupply,
+  useAverageTurnout,
+  useTimeSeriesData,
+  useProposals,
+  useVotes,
+} from "@/hooks";
 
 const initialGovernanceActivityMetricData = {
   value: undefined,

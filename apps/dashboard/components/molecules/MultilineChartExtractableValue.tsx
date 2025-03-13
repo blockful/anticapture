@@ -19,14 +19,16 @@ import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-constants/types";
 import { useDaoDataContext } from "@/contexts";
-import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
-import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
+import {
+  useDaoTokenHistoricalData,
+  useTimeSeriesData,
+  useTreasuryAssetNonDaoToken,
+} from "@/hooks";
 import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
   normalizeDataset,
 } from "@/lib/client/utils";
-import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 import { MetricTypesEnum } from "@/lib/client/constants";
 
 interface MultilineChartExtractableValueProps {

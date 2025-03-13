@@ -1,4 +1,4 @@
-import { TreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
+import { TreasuryAssetNonDaoToken } from "@/hooks";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
