@@ -1,7 +1,6 @@
 "use client";
 
-import { HomeDashboardSection } from "@/components/organisms";
-import { ShowSupportSection } from "@/components/organisms/ShowSupportSection";
+import { HomeDashboardSection, ShowSupportSection } from "@/components/organisms";
 
 export const HomeTemplate = () => {
   return (
