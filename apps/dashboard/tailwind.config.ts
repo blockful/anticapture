@@ -22,6 +22,8 @@ const config: Config = {
         white: "#FFFFFF",
         colored: "#E66AE9",
         accentColored: "#332433",
+        brandOrange: "#EC762E",
+        brandLightGreen: "#86EFAC",
       },
     },
   },

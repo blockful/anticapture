@@ -11,3 +11,5 @@ export * from "./TimelockCard";
 export * from "./TokenDistributionTable";
 export * from "./VoteCard";
 export * from "./AttackCostBarChart";
+export * from "./ReachOutToUsCard";
+export * from "./SupportDaoCard";
