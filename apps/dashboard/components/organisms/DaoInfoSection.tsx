@@ -8,7 +8,7 @@ import {
   TimelockCard,
   VoteCard,
 } from "@/components/molecules";
-import { daoInfoSectionAnchorID } from "@/lib/client/constants";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useParams } from "next/navigation";
@@ -32,9 +32,8 @@ export const DaoInfoSection = () => {
 
   return (
     <TheSectionLayout
-      title={`DAO Information`}
+      title={SECTIONS_CONSTANTS.daoInfo.title}
       icon={<GlobeIcon />}
-      anchorId={daoInfoSectionAnchorID}
     >
       <DaoInfo />
     </TheSectionLayout>

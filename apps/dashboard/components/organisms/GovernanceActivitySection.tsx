@@ -7,16 +7,16 @@ import {
   SwitcherDate,
 } from "@/components/atoms";
 import { GovernanceActivityTable } from "@/components/molecules";
-import { governanceActivitySectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const GovernanceActivitySection = () => {
   const { setDays } = useGovernanceActivityContext();
 
   return (
     <TheSectionLayout
-      title="Governance activity"
+      title={SECTIONS_CONSTANTS.governanceActivity.title}
       icon={<ArrowLeftRight className="text-foreground" />}
       switchDate={
         <SwitcherDate
@@ -24,8 +24,7 @@ export const GovernanceActivitySection = () => {
           setTimeInterval={setDays}
         />
       }
-      description="Governance activity metrics are based on a 30 days average. Choosing the time frame buttons above will give you the variation based on the 30 days average prior to that date compared to the current"
-      anchorId={governanceActivitySectionAnchorID}
+      description={SECTIONS_CONSTANTS.governanceActivity.description}
     >
       <GovernanceActivityTable />
     </TheSectionLayout>

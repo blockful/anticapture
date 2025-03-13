@@ -7,17 +7,16 @@ import {
   TheSectionLayout,
 } from "@/components/atoms";
 import { DashboardTable } from "@/components/molecules";
-import { dashboardSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 export const HomeDashboardSection = () => {
   const [timeIntervalDashboard, setTimeIntervalDashboard] =
     useState<TimeInterval>(TimeInterval.NINETY_DAYS);
 
   return (
     <TheSectionLayout
-      title="Dashboard"
+      title={SECTIONS_CONSTANTS.dashboard.title}
       icon={<BarChartIcon className="h-6 w-6 text-foreground" />}
-      anchorId={dashboardSectionAnchorID}
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}

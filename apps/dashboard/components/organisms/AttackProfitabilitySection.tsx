@@ -12,10 +12,10 @@ import {
   MultilineChartExtractableValue,
   AttackCostBarChart,
 } from "@/components/molecules";
-import { extractableValueSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const ExtractableValueSection = () => {
   const { daoId }: { daoId: DaoIdEnum } = useParams();
@@ -27,16 +27,17 @@ export const ExtractableValueSection = () => {
 
   return (
     <TheSectionLayout
-      title="Extractable Value"
-      icon={<CrossHairIcon className="text-foreground" />}
+      title={SECTIONS_CONSTANTS.attackProfitability.title}
+      icon={
+        <CrossHairIcon className="text-foreground" />
+      }
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
         />
       }
-      description="Governance activity metrics are based on a 30 days average. Choosing the time frame buttons above will give you the variation based on the 30 days average prior to that date compared to the current"
-      anchorId={extractableValueSectionAnchorID}
+      description={SECTIONS_CONSTANTS.attackProfitability.description}
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"

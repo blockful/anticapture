@@ -1,4 +1,5 @@
 import { DaoConstants } from "@/lib/dao-constants/types";
+import { RiskLevel } from "../enums";
 
 export const ENS: DaoConstants = {
   name: "Ethereum Name Service",
@@ -28,5 +29,51 @@ export const ENS: DaoConstants = {
       date: "26 July 2026",
       timestamp: 1784919179,
     },
+  },
+  governanceImplementation: {
+    fields: [
+      {
+        name: "Vote Mutability",
+        value: "No",
+        riskLevel: RiskLevel.HIGH,
+        description:
+          "Votes cannot be changed after being cast. The risk it implies is that a malicious actor will have the votes he acquired counted as valid for a proposal without the victims being able to change their votes.",
+      },
+      {
+        name: "Proposal Threshold",
+        value: "100k ENS",
+        riskLevel: RiskLevel.LOW,
+        description:
+          "Proposal Threshold is the minimum amount of voting power required to launch a proposal.",
+      },
+      {
+        name: "Voting Delay",
+        value: "1 block",
+        riskLevel: RiskLevel.LOW,
+        description:
+          "The voting delay is the number of blocks between an on-chain proposal’s submission and the start of its voting period. It gives DAO members time to discuss and review proposals before voting begins.The voting delay is the number of blocks between an on-chain proposal’s submission and the start of its voting period. It gives DAO members time to discuss and review proposals before voting begins.",
+      },
+      {
+        name: "Voting Period",
+        value: "7 days",
+        riskLevel: RiskLevel.MEDIUM,
+        description:  
+          "Time it takes for a user to vote on a proposal. It can affects the time ",
+      },
+      {
+        name: "Timelock Delay",
+        value: "2 days",
+        riskLevel: RiskLevel.LOW,
+        description:
+          "Proposals can be executed immediately after being passed.",
+      },
+      {
+        name: "Cancel Function",
+        value: "No",
+        riskLevel: RiskLevel.LOW,
+        description:
+          "Proposals can be executed immediately after being passed.",
+      },
+    ],
   },
 };
