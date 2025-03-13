@@ -2,13 +2,15 @@ import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/components/atoms";
 import { showSupportSectionAnchorID } from "@/lib/client/constants";
 import daoConstants from "@/lib/dao-constants";
-import { SupportDaoCard } from "../molecules/SupportDaoCard";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { usePetition } from "@/hooks/usePetition";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
-import { ReachOutToUsCard } from "../molecules/ReachOutToUsCard";
+import {
+  ReachOutToUsCard,
+  SupportDaoCard,
+} from "@/components/molecules";
 export const ShowSupportSection = () => {
   const router = useRouter();
 

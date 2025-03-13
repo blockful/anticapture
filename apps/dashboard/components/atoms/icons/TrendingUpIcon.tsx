@@ -12,14 +12,14 @@ export const TrendingUpIcon = (props: SVGProps<SVGSVGElement>) => {
     >
       <path
         d="M14.6663 4.66675L8.99967 10.3334L5.66634 7.00008L1.33301 11.3334"
-        stroke={props.color || "#86EFAC"}
+        stroke="currentColor"
         strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M10.667 4.66675H14.667V8.66675"
-        stroke={props.color || "#86EFAC"}
+        stroke="currentColor"
         strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"

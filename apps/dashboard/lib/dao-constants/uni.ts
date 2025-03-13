@@ -1,5 +1,5 @@
-import { DaoIdEnum } from "../types/daos";
-import { DaoConstants } from "./types";
+import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoConstants } from "@/lib/dao-constants/types";
 import UNILogo from "@/public/logo/UNI.png";
 
 export const UNI: DaoConstants = {

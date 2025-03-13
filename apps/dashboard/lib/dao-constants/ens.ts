@@ -1,6 +1,6 @@
 import { DaoConstants } from "@/lib/dao-constants/types";
 import ENSLogo from "@/public/logo/ENS.png";
-import { DaoIdEnum } from "../types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 export const ENS: DaoConstants = {
   id: DaoIdEnum.ENS,
   name: "Ethereum Name Service",

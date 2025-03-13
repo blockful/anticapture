@@ -1,8 +1,10 @@
+"use client";
+
 import Image, { StaticImageData } from "next/image";
-import { Card } from "../ui/card";
+import { Card } from "@/components/ui/card";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { TrendingUpIcon } from "../atoms/icons/TrendingUpIcon";
+import { TrendingUpIcon } from "@/components/atoms";
 import { ChevronRight } from "lucide-react";
 
 export const SupportDaoCard = ({
@@ -28,7 +30,7 @@ export const SupportDaoCard = ({
       onClick={onClick}
     >
       <div className="flex w-full flex-row justify-between">
-        <div className="flex flex-col md:flex-row items-center">
+        <div className="flex flex-col items-center md:flex-row">
           <div className="flex items-center gap-2">
             <Image
               src={daoIcon}
@@ -52,17 +54,15 @@ export const SupportDaoCard = ({
             <div className="flex flex-col items-center gap-1 md:flex-row">
               {votingPowerSupport && votingPowerSupport > 0 ? (
                 <div className="flex flex-row items-center gap-2">
-                  <div className="h-4 w-4">
-                    <TrendingUpIcon color="#86EFAC" />
-                  </div>
-                  <div className="text-[#86EFAC]">
+                  <TrendingUpIcon className="h-4 w-4 text-[var(--brand-light-green)]" />
+                  <div className="text-[var(--brand-light-green)]">
                     {formatNumberUserReadable(votingPowerSupport)} {daoId}
                   </div>
                 </div>
               ) : (
                 ""
               )}
-              <div className="md:inline hidden">
+              <div className="hidden md:inline">
                 {votingPowerSupport &&
                 votingPowerSupport > 0 &&
                 totalCountSupport &&
@@ -84,9 +84,7 @@ export const SupportDaoCard = ({
               </div>
             </div>
           </div>
-          <div className="h-6 w-6">
-            <ChevronRight color="rgba(255, 255, 255, 0.6)" className="h-full w-full" />
-          </div>
+          <ChevronRight color="var(--white-o60)" className="h-6 w-6" />
         </div>
       </div>
     </Card>

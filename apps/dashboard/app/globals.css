@@ -17,6 +17,13 @@
   overflow: hidden;
 }
 
+:root {
+  --brand-orange: #EC762E;
+  --brand-orange-o15: rgba(236, 118, 46, 0.15);
+  --brand-light-green: #86EFAC;
+  --white-o60: rgba(255, 255, 255, 0.6);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
