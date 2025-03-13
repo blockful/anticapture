@@ -1,3 +1,5 @@
+"use client";
+
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/components/atoms";
 import { showSupportSectionAnchorID } from "@/lib/client/constants";

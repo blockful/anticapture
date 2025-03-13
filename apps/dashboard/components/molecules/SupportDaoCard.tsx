@@ -54,8 +54,8 @@ export const SupportDaoCard = ({
             <div className="flex flex-col items-center gap-1 md:flex-row">
               {votingPowerSupport && votingPowerSupport > 0 ? (
                 <div className="flex flex-row items-center gap-2">
-                  <TrendingUpIcon className="h-4 w-4 text-[var(--brand-light-green)]" />
-                  <div className="text-[var(--brand-light-green)]">
+                  <TrendingUpIcon className="h-4 w-4 text-brandLightGreen" />
+                  <div className="text-brandLightGreen">
                     {formatNumberUserReadable(votingPowerSupport)} {daoId}
                   </div>
                 </div>
@@ -84,7 +84,7 @@ export const SupportDaoCard = ({
               </div>
             </div>
           </div>
-          <ChevronRight color="var(--white-o60)" className="h-6 w-6" />
+          <ChevronRight className="h-6 w-6 text-white/60" />
         </div>
       </div>
     </Card>
