@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Badge,
   BaseCardDaoInfo,
@@ -15,7 +16,6 @@ import {
 import { useCountdown } from "@/hooks/useCountdown";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { formatCountdown } from "@/lib/client/utils/time";
-import { useMemo } from "react";
 
 export const SecurityCouncilCard = ({
   daoConstants,
@@ -83,7 +83,7 @@ export const SecurityCouncilCard = ({
             key="Expiration Countdown"
             label={formattedCountdown}
             icon={<TokensIcon className="text-[#EC762E]" />}
-            className="cursor-default"
+            className={`${countdown.isLoading ? "flex animate-pulse justify-center space-x-2" : "cursor-default"}`}
           />,
         ],
       },
