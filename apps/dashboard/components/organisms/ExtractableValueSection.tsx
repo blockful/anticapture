@@ -60,7 +60,9 @@ export const ExtractableValueSection = () => {
         <TheCardChartLayout title="Cost of Attack by Category">
           <AttackCostBarChart />
         </TheCardChartLayout>
-        <ExtractableValueAccordion />
+        <div className="flex flex-col">
+          <ExtractableValueAccordion />
+        </div>
       </div>
     </TheSectionLayout>
   );
