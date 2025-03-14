@@ -6,7 +6,12 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import { CalculatorIcon } from "@/components/atoms";
+import {
+  CalculatorIcon,
+  DollarIcon,
+  PieChartIcon,
+  UsersIcon,
+} from "@/components/atoms";
 import { PlusIcon } from "lucide-react";
 
 interface AccordionDataProps {
@@ -24,11 +29,39 @@ const AccordionData: AccordionDataProps[] = [
     content:
       "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
   },
+  {
+    icon: (
+      <PieChartIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+    ),
+    title: "Delegated Cap",
+    content:
+      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+  },
+  {
+    icon: (
+      <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+    ),
+    title: "Average Quorum",
+    content:
+      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+  },
+  {
+    icon: (
+      <DollarIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+    ),
+    title: "Comparison to Treasury Funds",
+    content:
+      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+  },
 ];
 
 export const ExtractableValueAccordion = () => {
   return (
-    <Accordion type="single" collapsible className="w-full text-white">
+    <Accordion
+      type="single"
+      collapsible
+      className="flex w-full flex-col gap-3 text-white"
+    >
       {AccordionData.map((item, index) => (
         <AccordionItem
           key={index}
