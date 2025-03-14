@@ -7,6 +7,7 @@ import {
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
+  ExtractableValueAccordion,
 } from "@/components/atoms";
 import {
   MultilineChartExtractableValue,
@@ -59,9 +60,7 @@ export const ExtractableValueSection = () => {
         <TheCardChartLayout title="Cost of Attack by Category">
           <AttackCostBarChart />
         </TheCardChartLayout>
-        <TheCardChartLayout title="Cost of Attack by Category">
-          <AttackCostBarChart />
-        </TheCardChartLayout>
+        <ExtractableValueAccordion />
       </div>
     </TheSectionLayout>
   );
