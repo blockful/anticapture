@@ -15,41 +15,41 @@ import {
 import { PlusIcon } from "lucide-react";
 
 interface AccordionDataProps {
-  icon: React.ReactNode;
   title: string;
+  icon: React.ReactNode;
   content: string;
 }
 
 const AccordionData: AccordionDataProps[] = [
   {
+    title: "How Governance Risk is Calculated",
     icon: (
       <CalculatorIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    title: "How Governance Risk is Calculated",
     content:
       "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
   },
   {
+    title: "Delegated Cap",
     icon: (
       <PieChartIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    title: "Delegated Cap",
     content:
       "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
   },
   {
+    title: "Average Quorum",
     icon: (
       <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    title: "Average Quorum",
     content:
       "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
   },
   {
+    title: "Comparison to Treasury Funds",
     icon: (
       <DollarIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    title: "Comparison to Treasury Funds",
     content:
       "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
   },
