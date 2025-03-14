@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import Image, { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { DashboardDao } from "@/lib/mocked-data";
@@ -14,11 +15,10 @@ import {
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import Image, { StaticImageData } from "next/image";
 import ENSLogo from "@/public/logo/ENS.png";
 import UNILogo from "@/public/logo/UNI.png";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useDelegatedSupply } from "@/hooks/useDelegatedSupply";
+import { useDelegatedSupply } from "@/hooks";
 
 const daoDetails: Record<
   DaoIdEnum,

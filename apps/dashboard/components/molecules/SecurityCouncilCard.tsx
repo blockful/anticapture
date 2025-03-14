@@ -12,7 +12,7 @@ import {
   SwitchCardDaoInfoItem,
   TokensIcon,
 } from "@/components/atoms";
-import { useCountdown } from "@/hooks/useCountdown";
+import { useCountdown } from "@/hooks";
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { formatCountdown } from "@/lib/client/utils/time";
 import { useMemo } from "react";
