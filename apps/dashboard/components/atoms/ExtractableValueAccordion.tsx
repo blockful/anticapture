@@ -28,13 +28,35 @@ const AccordionData: AccordionDataProps[] = [
       <CalculatorIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
     content: (
-      <div className="flex flex-col gap-2">
-        {" "}
-        Ideal Scenario (Full Delegation Considered): This assumes that every
-        delegated governance token is used in voting, which represents the
-        maximum possible participation. Realistic Scenario (Average
-        Participation): This takes into account how many tokens are typically
-        used in governance votes, giving a more practical risk assessment.
+      <div className="flex flex-col gap-3">
+        <div className="flex gap-2">
+          <div className="flex">
+            <ChevronRight className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
+          </div>
+          <div className="flex flex-col">
+            <p className="flex text-xs font-semibold uppercase text-foreground">
+              Ideal Scenario (Full Delegation Considered):
+            </p>
+            <p className="text-sm font-normal leading-tight text-foreground">
+              Assumes that every delegated governance token is used in voting,
+              which represents the maximum possible participation.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="flex">
+            <ChevronRight className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
+          </div>
+          <div className="flex flex-col">
+            <p className="flex text-xs font-semibold uppercase text-foreground">
+              Realistic Scenario (Average Participation)
+            </p>
+            <p className="text-sm font-normal leading-tight text-foreground">
+              This takes into account how many tokens are typically used in
+              governance votes, giving a more practical risk assessment.
+            </p>
+          </div>
+        </div>
       </div>
     ),
   },
