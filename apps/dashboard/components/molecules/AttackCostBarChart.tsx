@@ -96,7 +96,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       fill: "#EC762E",
       name: "Attack Cost",
       stackId: "delegatedStack",
-      radius: [0, 0, 4, 4],
+      radius: [4, 4, 4, 4],
       barSize: 40,
     },
     {
@@ -104,7 +104,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       fill: "#EC762E50",
       name: "Attack Cost (Veto Council)",
       stackId: "delegatedStack",
-      radius: [4, 4, 4, 4],
+      radius: [4, 4, 0, 0],
       barSize: 40,
     },
   ];
@@ -175,8 +175,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             height={60}
             tick={(props) => <CustomXAxisTick {...props} />}
             interval={0}
+            hide
           />
-          <YAxis tick={(props) => <CustomYAxisTick {...props} />} />
+          <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
           <Tooltip content={<CustomTooltip />} cursor={false} />
           {stackKeys.map((config) => (
             <Bar
@@ -233,7 +234,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
         >
           <strong>
             {entry.payload?.displayValue ||
-              `$${entry.value && entry.value.toLocaleString()}`}
+              `$${Math.round(entry.value).toLocaleString()}`}
           </strong>
         </p>
       ))}
