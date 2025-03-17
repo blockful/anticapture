@@ -188,7 +188,6 @@ export const ExtractableValueAccordion = () => {
   return (
     <Accordion
       type="single"
-      collapsible
       defaultValue="item-0"
       className="flex h-full w-full flex-col gap-3 text-white"
     >
