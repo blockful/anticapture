@@ -18,6 +18,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  LabelList,
 } from "recharts";
 import { SkeletonRow } from "@/components/atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
@@ -92,18 +93,18 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const stackKeys: CustomBarConfig[] = [
     {
       dataKey: "value",
-      fill: "#22c55e",
+      fill: "#EC762E",
       name: "Attack Cost",
       stackId: "delegatedStack",
-      radius: [4, 4, 0, 0],
+      radius: [0, 0, 4, 4],
       barSize: 40,
     },
     {
       dataKey: "secondaryValue",
-      fill: "#35dc72",
+      fill: "#EC762E50",
       name: "Attack Cost (Veto Council)",
       stackId: "delegatedStack",
-      radius: [0, 0, 4, 4],
+      radius: [4, 4, 4, 4],
       barSize: 40,
     },
   ];
@@ -186,7 +187,18 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
               stackId={config.stackId}
               radius={config.radius}
               barSize={config.barSize}
-            />
+            >
+              <LabelList
+                dataKey={config.dataKey}
+                position="top"
+                offset={6}
+                formatter={(value: number) =>
+                  `$${formatNumberUserReadable(value)}`
+                }
+                fill="#FAFAFA"
+                className="text-xs font-medium"
+              />
+            </Bar>
           ))}
         </BarChart>
       </ResponsiveContainer>
