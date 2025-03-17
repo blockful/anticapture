@@ -93,7 +93,7 @@ const AccordionData: AccordionDataProps[] = [
             highest possible governance participation level.
           </p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
             <TokensIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
@@ -129,7 +129,7 @@ const AccordionData: AccordionDataProps[] = [
             easier for an attacker to take control.
           </p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
             <ArrowIcon variant={ArrowIconVariant.DOWN} />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
@@ -161,7 +161,7 @@ const AccordionData: AccordionDataProps[] = [
           2. Excluding governance tokens: This gives a clearer picture of the
           real financial security of the DAO.
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
