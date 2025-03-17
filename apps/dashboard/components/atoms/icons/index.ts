@@ -1,6 +1,6 @@
 export * from "./ActivityIcon";
 export * from "./AnticaptureIcon";
-export * from "./ArrowLeftIcon";
+export * from "./ArrowIcon";
 export * from "./ArrowLeftRight";
 export * from "./ArrowUpDown";
 export * from "./AttacksIcon";
