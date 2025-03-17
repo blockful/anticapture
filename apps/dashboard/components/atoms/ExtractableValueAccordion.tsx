@@ -8,24 +8,22 @@ import {
   AccordionContent,
 } from "@radix-ui/react-accordion";
 import {
+  AlertTriangleIcon,
   ArrowIcon,
   ArrowIconVariant,
   Badge,
   BarChartIcon,
   BarChatIconVariant,
   CalculatorIcon,
+  ChevronIcon,
+  ChevronIconVariant,
   DollarIcon,
   EqualsIcon,
   PieChartIcon,
+  PlusIcon,
   TokensIcon,
   UsersIcon,
 } from "@/components/atoms";
-import {
-  AlertTriangleIcon,
-  ChevronLeft,
-  ChevronRight,
-  PlusIcon,
-} from "lucide-react";
 
 interface AccordionDataProps {
   title: string;
@@ -43,7 +41,10 @@ const AccordionData: AccordionDataProps[] = [
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRight className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
+            <ChevronIcon
+              variant={ChevronIconVariant.RIGHT}
+              className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]"
+            />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -57,7 +58,10 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRight className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
+            <ChevronIcon
+              variant={ChevronIconVariant.RIGHT}
+              className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]"
+            />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -90,14 +94,14 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex items-center gap-1">
-          <Badge>
+          <Badge className="group-hover:bg-dark">
             <TokensIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               ALL TOKENS IN A VOTE
             </p>
           </Badge>
           <EqualsIcon />
-          <Badge>
+          <Badge className="group-hover:bg-dark">
             <BarChartIcon variant={BarChatIconVariant.SECONDARY} />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               highest gov participation
@@ -126,14 +130,14 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex items-center gap-1">
-          <Badge>
+          <Badge className="group-hover:bg-dark">
             <ArrowIcon variant={ArrowIconVariant.DOWN} />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Lower quorum
             </p>
           </Badge>
           <EqualsIcon />
-          <Badge>
+          <Badge className="group-hover:bg-dark">
             <ArrowIcon variant={ArrowIconVariant.UP} />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Easier to attack
@@ -158,17 +162,17 @@ const AccordionData: AccordionDataProps[] = [
           real financial security of the DAO.
         </div>
         <div className="flex items-center gap-1">
-          <Badge>
+          <Badge className="group-hover:bg-dark">
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
             </p>
-            <ChevronLeft />
+            <ChevronIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               treasury funds
             </p>
           </Badge>
           <EqualsIcon />
-          <Badge>
+          <Badge className="group-hover:bg-dark">
             <AlertTriangleIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               DAO AT RISK
