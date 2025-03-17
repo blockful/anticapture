@@ -3,12 +3,6 @@
 import { usePathname } from "next/navigation";
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import {
-  daoInfoSectionAnchorID,
-  extractableValueSectionAnchorID,
-  governanceActivitySectionAnchorID,
-  tokenDistributionSectionAnchorID,
-} from "@/lib/client/constants";
-import {
   ActivityIcon,
   ArrowLeftRight,
   BaseHeaderLayoutSidebar,
@@ -17,12 +11,15 @@ import {
   ButtonHeaderDAOSidebar,
   CrossHairIcon,
 } from "@/components/atoms";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { Lightbulb } from "lucide-react";
 
 const enum HeaderNavItems {
   DAO_INFO = "DAO Info",
-  EXTRACTABLE_VALUE = "Extractable Value",
+  ATTACK_PROFITABILITY = "Attack Profitability",
   TOKEN_DISTRIBUTION = "Token Distribution",
   GOVERNANCE_ACTIVITY = "Governance Activity",
+  GOVERNANCE_IMPLEMENTATION = "Governance Implementation",
 }
 
 export const HeaderDAOSidebar = () => {
@@ -39,24 +36,29 @@ export const HeaderDAOSidebar = () => {
           <HeaderDAOSidebarDropdown />
           <div className="flex flex-col px-4 pb-4 pt-1">
             <ButtonHeaderDAOSidebar
-              anchorId={daoInfoSectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
               icon={PieChartIcon}
-              label={HeaderNavItems.DAO_INFO}
+              label={SECTIONS_CONSTANTS.daoInfo.title}
             />
             <ButtonHeaderDAOSidebar
-              anchorId={extractableValueSectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
               icon={CrossHairIcon}
-              label={HeaderNavItems.EXTRACTABLE_VALUE}
+              label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
             <ButtonHeaderDAOSidebar
-              anchorId={tokenDistributionSectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               icon={ArrowLeftRight}
-              label={HeaderNavItems.TOKEN_DISTRIBUTION}
+              label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
             <ButtonHeaderDAOSidebar
-              anchorId={governanceActivitySectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
               icon={ActivityIcon}
-              label={HeaderNavItems.GOVERNANCE_ACTIVITY}
+              label={SECTIONS_CONSTANTS.governanceActivity.title}
+            />
+            <ButtonHeaderDAOSidebar
+              anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+              icon={Lightbulb}
+              label={SECTIONS_CONSTANTS.governanceImplementation.title}
             />
           </div>
         </div>

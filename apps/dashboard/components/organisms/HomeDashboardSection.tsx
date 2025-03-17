@@ -23,6 +23,7 @@ export const HomeDashboardSection = () => {
           setTimeInterval={setTimeIntervalDashboard}
         />
       }
+      anchorId={SECTIONS_CONSTANTS.dashboard.anchorId}
     >
       <DashboardTable days={timeIntervalDashboard} />
     </TheSectionLayout>

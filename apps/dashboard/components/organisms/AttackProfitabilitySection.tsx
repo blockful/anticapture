@@ -13,15 +13,14 @@ import {
   AttackCostBarChart,
 } from "@/components/molecules";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
-export const AttackProfitabilitySection = () => {
-  const { daoId }: { daoId: DaoIdEnum } = useParams();
+export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
+
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(
-    `Non-${daoId.toUpperCase()}`,
+    `Non-${daoId}`,
   );
   const [costMetric, setCostMetric] = useState<string>("Delegated");
 
@@ -37,7 +36,8 @@ export const AttackProfitabilitySection = () => {
           setTimeInterval={setDays}
         />
       }
-      description={SECTIONS_CONSTANTS.attackProfitability.description}
+      description={SECTIONS_CONSTANTS.attackProfitability.description}  
+      anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"

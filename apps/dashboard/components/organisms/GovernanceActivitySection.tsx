@@ -25,6 +25,7 @@ export const GovernanceActivitySection = () => {
         />
       }
       description={SECTIONS_CONSTANTS.governanceActivity.description}
+      anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
     >
       <GovernanceActivityTable />
     </TheSectionLayout>

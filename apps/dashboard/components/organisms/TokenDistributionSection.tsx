@@ -58,6 +58,7 @@ export const TokenDistributionSection = () => {
         />
       }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
+      anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
     >
       <MultilineChartTokenDistribution
         datasets={datasets}

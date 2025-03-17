@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { TooltipInfo } from "@/components/atoms";
 import { useInView } from "react-intersection-observer";
 
 export const TheSectionLayout = ({
@@ -10,18 +9,18 @@ export const TheSectionLayout = ({
   description,
   switchDate,
   children,
+  anchorId,
 }: {
   icon?: React.JSX.Element;
   title: string;
   description?: string;
   switchDate?: React.JSX.Element;
   children: React.ReactNode;
+  anchorId: string;
 }) => {
   const { ref, inView } = useInView({
     threshold: 0.9,
   });
-
-  const anchorId = title.toLowerCase().replace(/ /g, "-");
 
   useEffect(() => {
     if (inView) {

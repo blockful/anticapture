@@ -19,7 +19,7 @@ export type DaoConstants = {
     cancelFunction: boolean;
   };
   supportsLiquidTreasuryCall: boolean;
-  governanceImplementation: GovernanceImplementation;
+  governanceImplementation?: GovernanceImplementation;
   securityCouncil?: {
     isActive: boolean;
     multisig: {
@@ -65,14 +65,13 @@ export interface MultilineChartDataSetPoint {
   [key: string]: number;
 }
 
-
 export type GovernanceImplementation = {
   fields: GovernanceImplementationField[];
-}
+};
 
 export type GovernanceImplementationField = {
   name: string;
   value: string;
   description: string;
   riskLevel: RiskLevel;
-}
+};

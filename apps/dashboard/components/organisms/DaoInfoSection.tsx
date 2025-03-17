@@ -11,12 +11,10 @@ import {
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { useParams } from "next/navigation";
 
-export const DaoInfoSection = () => {
-  const { daoId }: { daoId: string } = useParams();
+export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
-  const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
+  const daoConstants = daoConstantsByDaoId[daoId];
 
   const DaoInfo = () => {
     return (
@@ -34,6 +32,7 @@ export const DaoInfoSection = () => {
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.daoInfo.title}
       icon={<GlobeIcon />}
+      anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
     >
       <DaoInfo />
     </TheSectionLayout>
