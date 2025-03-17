@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
-import { RiskLevel } from "../enums";
+import { RiskLevel } from "../enums/RiskLevel";
 
 export type DaoConstants = {
   name: string;

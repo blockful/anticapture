@@ -1,5 +1,5 @@
 import { DaoConstants } from "@/lib/dao-constants/types";
-import { RiskLevel, sortByRiskLevel } from "../enums";
+import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
 
 export const ENS: DaoConstants = {
   name: "Ethereum Name Service",
