@@ -61,7 +61,7 @@ export const GovernanceImplementationCard = ({
           <div className="relative flex h-6 w-6 items-center justify-center">
             <span
               className={cn(
-                "absolute text-3xl mb-1 font-thin text-foreground transition-all duration-300",
+                "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
                 isOpen ? "rotate-90 opacity-0" : "opacity-100",
               )}
             >
@@ -69,7 +69,7 @@ export const GovernanceImplementationCard = ({
             </span>
             <span
               className={cn(
-                "absolute text-3xl mb-1 font-thin text-foreground transition-all duration-300",
+                "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
                 isOpen ? "opacity-100" : "rotate-90 opacity-0",
               )}
             >
