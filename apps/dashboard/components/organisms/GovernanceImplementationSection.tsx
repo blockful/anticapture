@@ -1,7 +1,7 @@
 import daoConstantsByDaoId from "@/lib/dao-constants";
-import { ArrowLeftRight, TheSectionLayout } from "../atoms";
+import { TheSectionLayout } from "@/components/atoms";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { GovernanceImplementationCard } from "../molecules/GovernanceImplementationCard";
+import { GovernanceImplementationCard } from "@/components/molecules/GovernanceImplementationCard";
 import { useState } from "react";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

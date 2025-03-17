@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { RiskLevel } from "@/lib/enums";
 import { cn } from "@/lib/client/utils";
-import { Card } from "../ui/card";
+import { Card } from "@/components/ui/card";
 
 export const GovernanceImplementationCard = ({
   title,
@@ -18,25 +17,6 @@ export const GovernanceImplementationCard = ({
   isOpen: boolean;
   onToggle: (e: React.MouseEvent) => void;
 }) => {
-  const [cardWidth, setCardWidth] = useState(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // Update width measurement when card is opened/closed
-  useEffect(() => {
-    if (cardRef.current) {
-      setCardWidth(cardRef.current.offsetWidth);
-    }
-
-    // Also add resize listener
-    const handleResize = () => {
-      if (cardRef.current) {
-        setCardWidth(cardRef.current.offsetWidth);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isOpen]);
 
   const riskStyles = {
     [RiskLevel.HIGH]: "bg-white/15 text-red-500 rounded-full",
@@ -46,7 +26,6 @@ export const GovernanceImplementationCard = ({
 
   return (
     <Card
-      ref={cardRef}
       className={cn(
         "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-4 py-5 shadow transition-all duration-200 hover:cursor-pointer sm:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
@@ -95,7 +74,7 @@ export const GovernanceImplementationCard = ({
               <span
                 className={cn(
                   "text-xs",
-                  riskLevel === RiskLevel.LOW ? "text-foreground" : "",
+                  riskLevel === RiskLevel.LOW && "text-foreground",
                 )}
               >
                 •
@@ -103,9 +82,8 @@ export const GovernanceImplementationCard = ({
               <span
                 className={cn(
                   "text-xs",
-                  riskLevel === RiskLevel.LOW || riskLevel === RiskLevel.MEDIUM
-                    ? "text-foreground"
-                    : "",
+                  (riskLevel === RiskLevel.LOW ||
+                    riskLevel === RiskLevel.MEDIUM) && "text-foreground",
                 )}
               >
                 •
@@ -114,20 +92,19 @@ export const GovernanceImplementationCard = ({
           </span>
         </div>
       </div>
-
       <div
         className={cn(
-          "absolute z-20 rounded-b-lg border border-t-0 border-lightDark bg-lightDark px-4 pb-5 transition-transform duration-200 ease-in-out",
-          isOpen ? "visible opacity-100" : "invisible h-0 opacity-0",
+          "absolute z-20 rounded-b-lg border border-t-0 border-lightDark bg-lightDark px-4",
+          "top-full -left-px w-[calc(100%+2px)] overflow-hidden",
+          isOpen 
+            ? "visible max-h-[1000px] transform-gpu transition-all duration-500 ease-in-out pb-5" 
+            : "invisible max-h-0 transform-gpu transition-all duration-200 ease-in-out pb-0"
         )}
-        style={{
-          top: "100%",
-          left: "-1px", // Adjust for border
-          width: cardWidth ? `${cardWidth}px` : "100%",
-        }}
         onClick={(e) => e.stopPropagation()} // Prevent clicks on description from closing
       >
-        <p className="text-sm text-foreground">{description}</p>
+        <div className="pt-5">
+          <p className="text-sm text-foreground">{description}</p>
+        </div>
       </div>
     </Card>
   );

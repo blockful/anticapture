@@ -22,10 +22,8 @@ export const DaoTemplate = () => {
 
       <TokenDistributionSection />
       <GovernanceActivitySection />
-      {!!daoConstants.governanceImplementation ? (
+      {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
-      ) : (
-        <></>
       )}
     </>
   );
