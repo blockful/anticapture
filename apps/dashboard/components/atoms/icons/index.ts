@@ -14,6 +14,7 @@ export * from "./CrossHairIcon";
 export * from "./CrownIcon";
 export * from "./DollarIcon";
 export * from "./EnsIcon";
+export * from "./EqualsIcon";
 export * from "./ExternalLinkIcon";
 export * from "./FocusIcon";
 export * from "./GlassesIcon";
