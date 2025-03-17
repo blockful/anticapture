@@ -27,6 +27,7 @@ export * from "./InfoIcon";
 export * from "./LockIcon";
 export * from "./NewspaperIcon";
 export * from "./PieChartIcon";
+export * from "./PlusIcon";
 export * from "./SupplyIcon";
 export * from "./TokensIcon";
 export * from "./UncertaintyIcon";
