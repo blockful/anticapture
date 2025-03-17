@@ -175,7 +175,8 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             height={60}
             tick={(props) => <CustomXAxisTick {...props} />}
             interval={0}
-            hide
+            axisLine={false}
+            tickLine={false}
           />
           <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
           <Tooltip content={<CustomTooltip />} cursor={false} />
