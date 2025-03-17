@@ -12,12 +12,13 @@ import {
   PieChartIcon,
   UsersIcon,
 } from "@/components/atoms";
-import { PlusIcon } from "lucide-react";
+import { ChevronRight, PlusIcon } from "lucide-react";
+import React from "react";
 
 interface AccordionDataProps {
   title: string;
   icon: React.ReactNode;
-  content: string;
+  content: React.ReactNode;
 }
 
 const AccordionData: AccordionDataProps[] = [
@@ -26,8 +27,16 @@ const AccordionData: AccordionDataProps[] = [
     icon: (
       <CalculatorIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    content:
-      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+    content: (
+      <div className="flex flex-col gap-2">
+        {" "}
+        Ideal Scenario (Full Delegation Considered): This assumes that every
+        delegated governance token is used in voting, which represents the
+        maximum possible participation. Realistic Scenario (Average
+        Participation): This takes into account how many tokens are typically
+        used in governance votes, giving a more practical risk assessment.
+      </div>
+    ),
   },
   {
     title: "Delegated Cap",
