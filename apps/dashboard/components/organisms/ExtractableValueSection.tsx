@@ -56,7 +56,16 @@ export const ExtractableValueSection = () => {
       </TheCardChartLayout>
 
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-        <TheCardChartLayout title="Cost of Attack by Category">
+        <TheCardChartLayout
+          title={
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Cost Comparison</span>
+              <span className="text-sm font-normal text-foreground">
+                Dollar value comparison of key security indicators.
+              </span>
+            </div>
+          }
+        >
           <AttackCostBarChart />
         </TheCardChartLayout>
         <TheCardChartLayout title="Cost of Attack by Category">
