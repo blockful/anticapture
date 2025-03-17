@@ -151,7 +151,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     },
     {
       id: "topTokenHolder",
-      name: "Top Token Holder",
+      name: "Top Holder",
       value:
         Number(
           formatEther(BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
@@ -271,42 +271,34 @@ const CustomYAxisTick = (props: AxisTickProps) => {
 };
 
 const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
-  const MAX_CHARS_PER_LINE = 10;
   const words = String(payload.value).split(" ");
-  const lines = [];
-  let currentLine = "";
-
-  // Group words into lines without exceeding max length
-  words.forEach((word: string) => {
-    if (currentLine.length + word.length <= MAX_CHARS_PER_LINE) {
-      currentLine += (currentLine ? " " : "") + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  });
-
-  // Add the last line if it's not empty
-  if (currentLine) {
-    lines.push(currentLine);
-  }
+  const firstLine = words[0];
+  const secondLine = words.slice(1).join(" ");
 
   return (
     <g transform={`translate(${x},${y})`}>
-      {lines.map((line, index) => (
+      <text
+        x={0}
+        y={0}
+        dy={10}
+        textAnchor="middle"
+        fill="#A1A1AA"
+        className="text-[8px] font-light sm:text-xs sm:font-medium"
+      >
+        {firstLine}
+      </text>
+      {secondLine && (
         <text
-          key={index}
           x={0}
           y={0}
-          dy={16 + index * 12} // Increase dy for each line
+          dy={28}
           textAnchor="middle"
-          fill="gray"
-          fontSize={10}
-          className="font-medium"
+          fill="#A1A1AA"
+          className="text-[8px] font-light sm:text-xs sm:font-medium"
         >
-          {line}
+          {secondLine}
         </text>
-      ))}
+      )}
     </g>
   );
 };
