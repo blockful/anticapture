@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   Accordion,
   AccordionItem,
@@ -7,13 +8,24 @@ import {
   AccordionContent,
 } from "@radix-ui/react-accordion";
 import {
+  ArrowIcon,
+  ArrowIconVariant,
+  Badge,
+  BarChartIcon,
+  BarChatIconVariant,
   CalculatorIcon,
   DollarIcon,
+  EqualsIcon,
   PieChartIcon,
+  TokensIcon,
   UsersIcon,
 } from "@/components/atoms";
-import { ChevronRight, PlusIcon } from "lucide-react";
-import React from "react";
+import {
+  AlertTriangleIcon,
+  ChevronLeft,
+  ChevronRight,
+  PlusIcon,
+} from "lucide-react";
 
 interface AccordionDataProps {
   title: string;
@@ -37,7 +49,7 @@ const AccordionData: AccordionDataProps[] = [
             <p className="flex text-xs font-semibold uppercase text-foreground">
               Ideal Scenario (Full Delegation Considered):
             </p>
-            <p className="text-sm font-normal leading-tight text-foreground">
+            <p className="card-text-accordion">
               Assumes that every delegated governance token is used in voting,
               which represents the maximum possible participation.
             </p>
@@ -51,7 +63,7 @@ const AccordionData: AccordionDataProps[] = [
             <p className="flex text-xs font-semibold uppercase text-foreground">
               Realistic Scenario (Average Participation)
             </p>
-            <p className="text-sm font-normal leading-tight text-foreground">
+            <p className="card-text-accordion">
               This takes into account how many tokens are typically used in
               governance votes, giving a more practical risk assessment.
             </p>
@@ -65,24 +77,106 @@ const AccordionData: AccordionDataProps[] = [
     icon: (
       <PieChartIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    content:
-      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+    content: (
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <p className="card-text-accordion">
+            This represents the total value of governance tokens that have been
+            delegated to others for voting.
+          </p>
+          <p className="card-text-accordion">
+            If all delegated tokens were used in a vote, this would be the
+            highest possible governance participation level.
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Badge>
+            <TokensIcon />
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              ALL TOKENS IN A VOTE
+            </p>
+          </Badge>
+          <EqualsIcon />
+          <Badge>
+            <BarChartIcon variant={BarChatIconVariant.SECONDARY} />
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              highest gov participation
+            </p>
+          </Badge>
+        </div>
+      </div>
+    ),
   },
   {
     title: "Average Quorum",
     icon: (
       <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    content:
-      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+    content: (
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <p className="card-text-accordion">
+            This measures how much voting power is actually used in decisions on
+            average. It&apos;s calculated by adding up all tokens used in past
+            governance votes and dividing by the number of proposals.
+          </p>
+          <p className="card-text-accordion">
+            A lower quorum means fewer people participate in voting, making it
+            easier for an attacker to take control.
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Badge>
+            <ArrowIcon variant={ArrowIconVariant.DOWN} />
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              Lower quorum
+            </p>
+          </Badge>
+          <EqualsIcon />
+          <Badge>
+            <ArrowIcon variant={ArrowIconVariant.UP} />
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              Easier to attack
+            </p>
+          </Badge>
+        </div>
+      </div>
+    ),
   },
   {
     title: "Comparison to Treasury Funds",
     icon: (
       <DollarIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
     ),
-    content:
-      "Ideal Scenario (Full Delegation Considered): This assumes that every delegated governance token is used in voting, which represents the maximum possible participation. Realistic Scenario (Average Participation): This takes into account how many tokens are typically used in governance votes, giving a more practical risk assessment.",
+    content: (
+      <div className="flex flex-col gap-3">
+        <div className="card-text-accordion flex">
+          Attack cost is compared to the DAO&apos;s total treasury assets. There
+          are two ways to do this: 1. Including governance tokens: But this is
+          risky because an attack could cause the price of these tokens to drop.
+          2. Excluding governance tokens: This gives a clearer picture of the
+          real financial security of the DAO.
+        </div>
+        <div className="flex items-center gap-1">
+          <Badge>
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              Cost to attack
+            </p>
+            <ChevronLeft />
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              treasury funds
+            </p>
+          </Badge>
+          <EqualsIcon />
+          <Badge>
+            <AlertTriangleIcon />
+            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+              DAO AT RISK
+            </p>
+          </Badge>
+        </div>
+      </div>
+    ),
   },
 ];
 
@@ -107,7 +201,7 @@ export const ExtractableValueAccordion = () => {
             </div>
             <PlusIcon className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]/trigger:rotate-45" />
           </AccordionTrigger>
-          <AccordionContent className="flex flex-1 flex-col gap-2 text-sm font-normal text-foreground">
+          <AccordionContent className="flex flex-1 flex-col gap-2">
             {item.content}
           </AccordionContent>
         </AccordionItem>
