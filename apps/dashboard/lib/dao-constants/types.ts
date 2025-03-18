@@ -1,6 +1,7 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
+import { RiskLevel } from "@/lib/enums";
 
 export type DaoConstants = {
   name: string;
@@ -29,6 +30,9 @@ export type DaoConstants = {
       date: string;
       timestamp: number;
     };
+  };
+  attackProfitability: {
+    riskLevel: RiskLevel;
   };
 };
 

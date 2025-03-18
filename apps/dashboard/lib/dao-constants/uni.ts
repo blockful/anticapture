@@ -1,3 +1,4 @@
+import { RiskLevel } from "../enums";
 import { DaoConstants } from "./types";
 
 export const UNI: DaoConstants = {
@@ -17,4 +18,7 @@ export const UNI: DaoConstants = {
     cancelFunction: true,
   },
   supportsLiquidTreasuryCall: false,
+  attackProfitability: {
+    riskLevel: RiskLevel.LOW,
+  },
 };

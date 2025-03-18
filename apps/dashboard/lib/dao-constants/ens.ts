@@ -1,4 +1,5 @@
 import { DaoConstants } from "@/lib/dao-constants/types";
+import { RiskLevel } from "../enums";
 
 export const ENS: DaoConstants = {
   name: "Ethereum Name Service",
@@ -28,5 +29,8 @@ export const ENS: DaoConstants = {
       date: "26 July 2026",
       timestamp: 1784919179,
     },
+  },
+  attackProfitability: {
+    riskLevel: RiskLevel.HIGH,
   },
 };
