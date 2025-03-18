@@ -13,6 +13,7 @@ import {
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
+import daoConstantsByDaoId from "@/lib/dao-constants";
 
 const enum HeaderNavItems {
   DAO_INFO = "DAO Info",
@@ -55,11 +56,14 @@ export const HeaderDAOSidebar = () => {
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
             />
-            <ButtonHeaderDAOSidebar
-              anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
-              icon={Lightbulb}
-              label={SECTIONS_CONSTANTS.governanceImplementation.title}
-            />
+            {!!daoConstantsByDaoId[daoId as DaoIdEnum]
+              .governanceImplementation && (
+              <ButtonHeaderDAOSidebar
+                anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+                icon={Lightbulb}
+                label={SECTIONS_CONSTANTS.governanceImplementation.title}
+              />
+            )}
           </div>
         </div>
       )}
