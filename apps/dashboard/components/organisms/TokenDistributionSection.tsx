@@ -1,7 +1,6 @@
 import {
   ArrowLeftRight,
   TheSectionLayout,
-  RiskLevelCard,
   SwitcherDate,
 } from "@/components/atoms";
 import {
@@ -67,7 +66,6 @@ export const TokenDistributionSection = () => {
         datasets={datasets}
         chartConfig={chartConfig}
       />
-      <RiskLevelCard status={RiskLevel.HIGH} />
       <TokenDistributionTable />
     </TheSectionLayout>
   );
