@@ -14,8 +14,8 @@ import {
   Badge,
   BarChartSecondaryIcon,
   CalculatorIcon,
-  ChevronIcon,
-  ChevronIconVariant,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   DollarIcon,
   EqualsIcon,
   PieChartIcon,
@@ -40,10 +40,7 @@ const AccordionData: AccordionDataProps[] = [
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronIcon
-              variant={ChevronIconVariant.RIGHT}
-              className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]"
-            />
+            <ChevronRightIcon className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -57,10 +54,7 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronIcon
-              variant={ChevronIconVariant.RIGHT}
-              className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]"
-            />
+            <ChevronRightIcon className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -165,7 +159,7 @@ const AccordionData: AccordionDataProps[] = [
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
             </p>
-            <ChevronIcon />
+            <ChevronLeftIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               treasury funds
             </p>
