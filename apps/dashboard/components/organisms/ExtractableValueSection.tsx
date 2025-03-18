@@ -7,6 +7,7 @@ import {
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
+  RiskLevelCard,
 } from "@/components/atoms";
 import {
   MultilineChartExtractableValue,
@@ -16,6 +17,7 @@ import { extractableValueSectionAnchorID } from "@/lib/client/constants";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
+import daoConstantsByDaoId from "@/lib/dao-constants";
 
 export const ExtractableValueSection = () => {
   const { daoId }: { daoId: DaoIdEnum } = useParams();
@@ -24,6 +26,8 @@ export const ExtractableValueSection = () => {
     `Non-${daoId.toUpperCase()}`,
   );
   const [costMetric, setCostMetric] = useState<string>("Delegated");
+
+  const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
 
   return (
     <TheSectionLayout
@@ -38,6 +42,7 @@ export const ExtractableValueSection = () => {
       description="Governance activity metrics are based on a 30 days average. Choosing the time frame buttons above will give you the variation based on the 30 days average prior to that date compared to the current"
       anchorId={extractableValueSectionAnchorID}
     >
+      <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
         headerComponent={
