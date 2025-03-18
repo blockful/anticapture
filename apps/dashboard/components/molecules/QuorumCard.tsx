@@ -54,7 +54,7 @@ export const QuorumCard = () => {
 
   const quorumData: CardData = {
     title: "Quorum",
-    icon: <UsersIcon />,
+    icon: <UsersIcon className="text-[#FAFAFA]" />,
     sections: [
       {
         title: "Logic",
