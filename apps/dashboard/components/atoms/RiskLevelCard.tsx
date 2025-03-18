@@ -38,7 +38,7 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="flex h-full gap-1.5 rounded-l-full border-r border-lightDark bg-white/10 px-3">
+  <div className="flex h-full flex-col gap-1.5 rounded-l-full border-r border-lightDark bg-white/10 px-3 sm:flex-row">
     <p className="flex items-center text-sm font-medium text-white">
       Risk level:
     </p>
@@ -69,14 +69,16 @@ export const RiskLevelCard = ({ status, className }: RiskLevelCardProps) => {
   const config = riskConfigs[status];
 
   return (
-    <div
-      className={cn(
-        "flex h-7 w-fit rounded-full border border-white/10",
-        className,
-      )}
-    >
-      <RiskLabel status={status} color={config.color} icon={config.icon} />
-      <RiskBar pattern={config.pattern} />
+    <div className="flex h-full w-full flex-col items-start">
+      <div
+        className={cn(
+          "flex h-7 w-fit flex-1 rounded-full border border-white/10 sm:flex-auto",
+          className,
+        )}
+      >
+        <RiskLabel status={status} color={config.color} icon={config.icon} />
+        <RiskBar pattern={config.pattern} />
+      </div>
     </div>
   );
 };
