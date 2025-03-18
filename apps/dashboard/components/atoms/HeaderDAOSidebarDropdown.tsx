@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import {
-  ArrowIcon,
-  ArrowIconVariant,
-  EnsIcon,
-  UniswapIcon,
-} from "@/components/atoms";
+import { ArrowLeftIcon, EnsIcon, UniswapIcon } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
@@ -82,10 +77,7 @@ export const HeaderDAOSidebarDropdown = () => {
           className="group flex gap-x-1.5 text-xs font-medium text-foreground hover:text-white"
           href={"/"}
         >
-          <ArrowIcon
-            variant={ArrowIconVariant.LEFT}
-            className="group-[hover]:text-white"
-          />
+          <ArrowLeftIcon className="group-[hover]:text-white" />
           Back to dashboard
         </Link>
       </div>
