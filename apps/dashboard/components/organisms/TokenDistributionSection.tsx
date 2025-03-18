@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   TheSectionLayout,
+  RiskLevelCard,
   SwitcherDate,
 } from "@/components/atoms";
 import {
@@ -9,7 +10,7 @@ import {
 } from "@/components/molecules";
 import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/contexts";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { RiskLevel, TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
@@ -66,6 +67,7 @@ export const TokenDistributionSection = () => {
         datasets={datasets}
         chartConfig={chartConfig}
       />
+      <RiskLevelCard status={RiskLevel.HIGH} />
       <TokenDistributionTable />
     </TheSectionLayout>
   );
