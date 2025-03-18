@@ -32,7 +32,7 @@ export const TimelockCard = ({
           <ButtonCardDaoInfoItem
             key={"button-card"}
             label="View"
-            icon={<ExternalLinkIcon className="text-[#EC762E]" />}
+            icon={<ExternalLinkIcon className="text-tangerine" />}
             onClick={() =>
               openEtherscanAddress(daoConstants.contracts.timelock)
             }
@@ -53,7 +53,7 @@ export const TimelockCard = ({
             <ButtonCardDaoInfoItem
               key={"button-card"}
               label="View"
-              icon={<ExternalLinkIcon className="text-[#EC762E]" />}
+              icon={<ExternalLinkIcon className="text-tangerine" />}
               inverted={true}
               onClick={() =>
                 window.open(

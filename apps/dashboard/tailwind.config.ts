@@ -22,6 +22,7 @@ const config: Config = {
         white: "#FFFFFF",
         colored: "#E66AE9",
         accentColored: "#332433",
+        tangerine: "#EC762E",
       },
       keyframes: {
         "accordion-down": {

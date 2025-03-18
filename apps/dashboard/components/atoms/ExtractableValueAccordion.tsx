@@ -35,7 +35,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <CalculatorIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+      <CalculatorIcon className="group-data-[state=open]/trigger:text-tangerine h-4 w-4 text-[#71717A]" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -79,7 +79,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChartIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+      <PieChartIcon className="group-data-[state=open]/trigger:text-tangerine h-4 w-4 text-[#71717A]" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -114,7 +114,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Quorum",
     icon: (
-      <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+      <UsersIcon className="group-data-[state=open]/trigger:text-tangerine h-4 w-4 text-[#71717A]" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -150,7 +150,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-[#EC762E]" />
+      <DollarIcon className="group-data-[state=open]/trigger:text-tangerine h-4 w-4 text-[#71717A]" />
     ),
     content: (
       <div className="flex flex-col gap-3">

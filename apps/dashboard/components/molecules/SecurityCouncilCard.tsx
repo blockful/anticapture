@@ -63,7 +63,7 @@ export const SecurityCouncilCard = ({
                 {securityCouncil.multisig.threshold} /{" "}
                 {securityCouncil.multisig.signers}
               </p>
-              <ExternalLinkIcon className="text-[#EC762E]" />
+              <ExternalLinkIcon className="text-tangerine" />
             </Badge>
           </button>,
         ],
@@ -76,13 +76,13 @@ export const SecurityCouncilCard = ({
           <ButtonCardDaoInfoItem
             key="Expiration"
             label={securityCouncil.expiration.date}
-            icon={<FocusIcon className="text-[#EC762E]" />}
+            icon={<FocusIcon className="text-tangerine" />}
             className="cursor-default"
           />,
           <ButtonCardDaoInfoItem
             key="Expiration Countdown"
             label={formattedCountdown}
-            icon={<TokensIcon className="text-[#EC762E]" />}
+            icon={<TokensIcon className="text-tangerine" />}
             className="cursor-default"
           />,
         ],
