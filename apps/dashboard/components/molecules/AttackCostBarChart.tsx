@@ -199,6 +199,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                 }
                 fill="#FAFAFA"
                 className="text-xs font-medium"
+                z={40}
               />
             </Bar>
           ))}
