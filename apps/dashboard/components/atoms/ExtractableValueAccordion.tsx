@@ -12,8 +12,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   Badge,
-  BarChartIcon,
-  BarChatIconVariant,
+  BarChartSecondaryIcon,
   CalculatorIcon,
   ChevronIcon,
   ChevronIconVariant,
@@ -102,7 +101,7 @@ const AccordionData: AccordionDataProps[] = [
           </Badge>
           <EqualsIcon />
           <Badge className="group-hover:bg-dark">
-            <BarChartIcon variant={BarChatIconVariant.SECONDARY} />
+            <BarChartSecondaryIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               highest gov participation
             </p>

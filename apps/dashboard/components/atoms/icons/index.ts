@@ -8,6 +8,7 @@ export * from "./ArrowUpDown";
 export * from "./ArrowUpIcon";
 export * from "./AttacksIcon";
 export * from "./BarChartIcon";
+export * from "./BarChartSecondaryIcon";
 export * from "./BlocksIcon";
 export * from "./CalculatorIcon";
 export * from "./ChevronIcon";
