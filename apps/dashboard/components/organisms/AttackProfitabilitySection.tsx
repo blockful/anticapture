@@ -14,7 +14,7 @@ import {
   MultilineChartExtractableValue,
   AttackCostBarChart,
 } from "@/components/molecules";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -38,8 +38,10 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
       }
       description={SECTIONS_CONSTANTS.attackProfitability.description}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+      riskLevel={
+        <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
+      }
     >
-      <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
         headerComponent={
