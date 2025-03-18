@@ -1,6 +1,7 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
+import { RiskLevel } from "../enums/RiskLevel";
 
 export type DaoConstants = {
   name: string;
@@ -18,6 +19,7 @@ export type DaoConstants = {
     cancelFunction: boolean;
   };
   supportsLiquidTreasuryCall: boolean;
+  governanceImplementation?: GovernanceImplementation;
   securityCouncil?: {
     isActive: boolean;
     multisig: {
@@ -62,3 +64,14 @@ export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number;
 }
+
+export type GovernanceImplementation = {
+  fields: GovernanceImplementationField[];
+};
+
+export type GovernanceImplementationField = {
+  name: string;
+  value: string;
+  description: string;
+  riskLevel: RiskLevel;
+};
