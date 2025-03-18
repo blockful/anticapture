@@ -1,18 +1,18 @@
 import { SVGProps } from "react";
 
-export const ArrowLeftIcon = (props: SVGProps<SVGSVGElement>) => (
+export const ArrowUpIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g id="arrow-left">
+    <g id="arrow-up">
       <path
         id="Vector"
-        d="M11.0834 7H2.91669"
+        d="M8 13.3337V2.66699"
         stroke="currentColor"
         strokeWidth="1.25"
         strokeLinecap="round"
@@ -20,11 +20,12 @@ export const ArrowLeftIcon = (props: SVGProps<SVGSVGElement>) => (
       />
       <path
         id="Vector_2"
-        d="M7.00002 11.0832L2.91669 6.99984L7.00002 2.9165"
+        d="M4 6.66699L8 2.66699L12 6.66699"
         stroke="currentColor"
         strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeMiterlimit="10"
       />
     </g>
   </svg>

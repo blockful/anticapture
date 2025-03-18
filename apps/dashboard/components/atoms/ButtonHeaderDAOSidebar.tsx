@@ -1,7 +1,7 @@
 "use client";
 
-import { daoInfoSectionAnchorID } from "@/lib/client/constants";
 import { cn } from "@/lib/client/utils";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { useSectionObserver } from "@/lib/hooks/useSectionObserver";
 
 export const ButtonHeaderDAOSidebar = ({
@@ -14,7 +14,7 @@ export const ButtonHeaderDAOSidebar = ({
   label: string;
 }) => {
   const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: daoInfoSectionAnchorID,
+    initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
   });
   const isActive = (sectionId: string) => activeSection === sectionId;
 

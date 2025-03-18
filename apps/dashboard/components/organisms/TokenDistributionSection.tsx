@@ -7,10 +7,10 @@ import {
   MultilineChartTokenDistribution,
   TokenDistributionTable,
 } from "@/components/molecules";
-import { tokenDistributionSectionAnchorID } from "@/lib/client/constants";
 import { useTokenDistributionContext } from "@/contexts";
 import { RiskLevel, TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -49,7 +49,7 @@ export const TokenDistributionSection = () => {
 
   return (
     <TheSectionLayout
-      title="Token Distribution"
+      title={SECTIONS_CONSTANTS.tokenDistribution.title}
       icon={<ArrowLeftRight className="text-foreground" />}
       switchDate={
         <SwitcherDate
@@ -57,10 +57,8 @@ export const TokenDistributionSection = () => {
           setTimeInterval={setDays}
         />
       }
-      description="Token distribution metrics are based on Blockful's Governance
-        Indexer and are updated after a new block is confirmed with new
-        interaction with relevant contracts."
-      anchorId={tokenDistributionSectionAnchorID}
+      description={SECTIONS_CONSTANTS.tokenDistribution.description}
+      anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
     >
       <MultilineChartTokenDistribution
         datasets={datasets}
