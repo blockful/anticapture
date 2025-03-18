@@ -27,7 +27,7 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-4 py-5 shadow transition-all duration-200 hover:cursor-pointer sm:w-[calc(50%-10px)] xl4k:max-w-full",
+        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-4 py-5 shadow transition-all duration-200 hover:cursor-pointer md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
           ? "z-20 rounded-b-none bg-lightDark"
           : "rounded-b-lg hover:bg-lightDark",
