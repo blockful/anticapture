@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/client/utils";
 import React, { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
@@ -49,7 +50,14 @@ export const TheSectionLayout = ({
           </p>
         </div>
       </div>
-      <div className="flex w-full flex-col justify-between gap-4 sm:flex-row">
+      <div
+        className={cn(
+          "flex w-full flex-col justify-between gap-4 sm:flex-row",
+          riskLevel && switchDate
+            ? "justify-between"
+            : !riskLevel && switchDate && "w-full justify-end",
+        )}
+      >
         {riskLevel}
         {switchDate}
       </div>
