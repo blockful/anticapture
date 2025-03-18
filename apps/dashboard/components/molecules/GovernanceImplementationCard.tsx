@@ -34,10 +34,9 @@ export const GovernanceImplementationCard = ({
       )}
       onClick={onToggle}
     >
-      {/* Rest of the component remains the same */}
       <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="relative flex h-6 w-6 items-center justify-center">
+        <div className="flex items-center gap-2 min-w-0"> {/* Added min-w-0 to allow truncation */}
+          <div className="relative flex h-6 w-6 shrink-0 items-center justify-center"> {/* Added shrink-0 */}
             <span
               className={cn(
                 "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
@@ -55,13 +54,13 @@ export const GovernanceImplementationCard = ({
               -
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-white">{title}</h3>
-            <span className="text-xl font-thin text-foreground">•</span>
-            <span className="text-foreground">{value}</span>
+          <div className="flex md:flex-row flex-col md:items-center md:text-center text-left md:gap-2 gap-0 min-w-0"> {/* Added min-w-0 */}
+            <h3 className="text-white truncate">{title}</h3>
+            <span className="text-xl hidden md:inline font-thin text-foreground shrink-0">•</span>
+            <span className="text-foreground truncate shrink-0">{value}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-2 shrink-0"> {/* Added ml-2 and shrink-0 */}
           <span
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-0.5",
