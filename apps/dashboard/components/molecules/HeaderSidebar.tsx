@@ -5,7 +5,7 @@ import {
   BarChartIcon,
   BaseHeaderLayoutSidebar,
 } from "@/components/atoms";
-import { dashboardSectionAnchorID } from "@/lib/client/constants";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const HeaderSidebar = () => {
   return (
@@ -24,7 +24,7 @@ export const HeaderSidebar = () => {
             className="flex w-full items-center gap-3 rounded-md bg-lightDark p-2"
             onClick={() => {
               const dashboardAnchorSection = document.getElementById(
-                dashboardSectionAnchorID,
+                SECTIONS_CONSTANTS.dashboard.anchorId,
               );
 
               dashboardAnchorSection?.scrollIntoView({
