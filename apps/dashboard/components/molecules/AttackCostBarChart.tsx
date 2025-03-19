@@ -187,7 +187,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         textAnchor="middle"
         className="text-xs font-medium"
       >
-        ${formatNumberUserReadable(value)}
+        {item.displayValue || `$${formatNumberUserReadable(value)}`}
       </text>
     );
   };
