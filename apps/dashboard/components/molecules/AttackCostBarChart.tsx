@@ -162,101 +162,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     },
   ];
 
-  const getStackedTotal = (item: ChartDataItem) => {
-    if (item.type === "stacked" && item.stackedValues?.length) {
-      return item.stackedValues.reduce((sum, sv) => sum + sv.value, 0);
-    }
-    return item.value || 0;
-  };
-
-  type CustomBarLabelConfig = Omit<LabelProps, "ref"> & {
-    data: ChartDataItem[];
-  };
-
-  const RegularLabel = (props: CustomBarLabelConfig) => {
-    const { x, y, value, data, index = 0, width } = props;
-    const item = data[index];
-
-    if (item.type === "stacked") return null;
-
-    const centerX = Number(x) + Number(width) / 2;
-
-    return (
-      <text
-        x={centerX}
-        y={Number(y)}
-        dy={-6}
-        fill="#FAFAFA"
-        fontSize={12}
-        fontWeight={500}
-        textAnchor="middle"
-        className="text-xs font-medium"
-      >
-        {item?.displayValue || `$${formatNumberUserReadable(Number(value))}`}
-      </text>
-    );
-  };
-
-  const StackedLabel = (props: CustomBarLabelConfig) => {
-    const { x, y, data, index = 0, width } = props;
-    const item = data[index];
-
-    if (item.type !== "stacked" || !item.stackedValues?.length) return null;
-
-    const centerX = Number(x) + Number(width) / 2;
-    const total = getStackedTotal(item);
-
-    return (
-      <text
-        x={centerX}
-        y={Number(y)}
-        dy={-6}
-        fill="#FAFAFA"
-        fontSize={12}
-        fontWeight={500}
-        textAnchor="middle"
-        className="text-xs font-medium"
-      >
-        ${formatNumberUserReadable(total)}
-      </text>
-    );
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (!(active && payload && payload.length)) return null;
-
-    const item = payload[0].payload as ChartDataItem;
-
-    return (
-      <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
-        <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
-          {label}
-        </p>
-        {item.type === "stacked" && item.stackedValues ? (
-          <>
-            {item.stackedValues
-              .filter((item) => item.value !== 0)
-              .map((barStacked, index) => (
-                <p key={index} className="flex gap-1.5 text-neutral-50">
-                  <strong>
-                    {barStacked.label}: $
-                    {Math.round(barStacked.value).toLocaleString()}
-                  </strong>
-                </p>
-              ))}
-          </>
-        ) : (
-          <p className="flex gap-1.5 text-neutral-50">
-            <strong>
-              {item.displayValue ||
-                `$${item.value && Math.round(item.value).toLocaleString()}`}
-            </strong>
-          </p>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className={`h-80 w-full ${className || ""}`}>
       <ResponsiveContainer width="100%" height="100%">
@@ -334,6 +239,66 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   );
 };
 
+const getStackedTotal = (item: ChartDataItem) => {
+  if (item.type === "stacked" && item.stackedValues?.length) {
+    return item.stackedValues.reduce((sum, sv) => sum + sv.value, 0);
+  }
+  return item.value || 0;
+};
+
+type CustomBarLabelConfig = Omit<LabelProps, "ref"> & {
+  data: ChartDataItem[];
+};
+
+const RegularLabel = (props: CustomBarLabelConfig) => {
+  const { x, y, value, data, index = 0, width } = props;
+  const item = data[index];
+
+  if (item.type === "stacked") return null;
+
+  const centerX = Number(x) + Number(width) / 2;
+
+  return (
+    <text
+      x={centerX}
+      y={Number(y)}
+      dy={-6}
+      fill="#FAFAFA"
+      fontSize={12}
+      fontWeight={500}
+      textAnchor="middle"
+      className="text-xs font-medium"
+    >
+      {item?.displayValue || `$${formatNumberUserReadable(Number(value))}`}
+    </text>
+  );
+};
+
+const StackedLabel = (props: CustomBarLabelConfig) => {
+  const { x, y, data, index = 0, width } = props;
+  const item = data[index];
+
+  if (item.type !== "stacked" || !item.stackedValues?.length) return null;
+
+  const centerX = Number(x) + Number(width) / 2;
+  const total = getStackedTotal(item);
+
+  return (
+    <text
+      x={centerX}
+      y={Number(y)}
+      dy={-6}
+      fill="#FAFAFA"
+      fontSize={12}
+      fontWeight={500}
+      textAnchor="middle"
+      className="text-xs font-medium"
+    >
+      ${formatNumberUserReadable(total)}
+    </text>
+  );
+};
+
 interface CustomTooltipProps {
   active?: boolean;
   payload?: Array<{
@@ -344,6 +309,41 @@ interface CustomTooltipProps {
   }>;
   label?: string;
 }
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (!(active && payload && payload.length)) return null;
+
+  const item = payload[0].payload as ChartDataItem;
+
+  return (
+    <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
+      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
+        {label}
+      </p>
+      {item.type === "stacked" && item.stackedValues ? (
+        <>
+          {item.stackedValues
+            .filter((item) => item.value !== 0)
+            .map((barStacked, index) => (
+              <p key={index} className="flex gap-1.5 text-neutral-50">
+                <strong>
+                  {barStacked.label}: $
+                  {Math.round(barStacked.value).toLocaleString()}
+                </strong>
+              </p>
+            ))}
+        </>
+      ) : (
+        <p className="flex gap-1.5 text-neutral-50">
+          <strong>
+            {item.displayValue ||
+              `$${item.value && Math.round(item.value).toLocaleString()}`}
+          </strong>
+        </p>
+      )}
+    </div>
+  );
+};
 
 interface AxisTickProps {
   x: number;
