@@ -20,6 +20,7 @@ import {
   ResponsiveContainer,
   LabelList,
   Cell,
+  LabelProps,
 } from "recharts";
 import { SkeletonRow } from "@/components/atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
@@ -168,18 +169,22 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     return item.value || 0;
   };
 
-  const RegularLabel = (props: any) => {
-    const { x, y, value, data, index, width } = props;
+  type CustomBarLabelConfig = Omit<LabelProps, "ref"> & {
+    data: ChartDataItem[];
+  };
+
+  const RegularLabel = (props: CustomBarLabelConfig) => {
+    const { x, y, value, data, index = 0, width } = props;
     const item = data[index];
 
     if (item.type === "stacked") return null;
 
-    const centerX = x + width / 2;
+    const centerX = Number(x) + Number(width) / 2;
 
     return (
       <text
         x={centerX}
-        y={y}
+        y={Number(y)}
         dy={-6}
         fill="#FAFAFA"
         fontSize={12}
@@ -187,24 +192,24 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         textAnchor="middle"
         className="text-xs font-medium"
       >
-        {item.displayValue || `$${formatNumberUserReadable(value)}`}
+        {item?.displayValue || `$${formatNumberUserReadable(Number(value))}`}
       </text>
     );
   };
 
-  const StackedLabel = (props: any) => {
-    const { x, y, data, index, width } = props;
+  const StackedLabel = (props: CustomBarLabelConfig) => {
+    const { x, y, data, index = 0, width } = props;
     const item = data[index];
 
     if (item.type !== "stacked" || !item.stackedValues?.length) return null;
 
-    const centerX = x + width / 2;
+    const centerX = Number(x) + Number(width) / 2;
     const total = getStackedTotal(item);
 
     return (
       <text
         x={centerX}
-        y={y}
+        y={Number(y)}
         dy={-6}
         fill="#FAFAFA"
         fontSize={12}
@@ -274,10 +279,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             radius={[4, 4, 4, 4]}
           >
             <LabelList
-              dataKey="value"
-              position="top"
-              offset={6}
-              content={<RegularLabel data={chartData} />}
+              content={(props) => <RegularLabel {...props} data={chartData} />}
             />
           </Bar>
 
@@ -319,10 +321,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                       ?.stackedValues?.length || 0) -
                       1 && (
                     <LabelList
-                      dataKey="stackedValues"
-                      position="top"
-                      offset={6}
-                      content={<StackedLabel data={chartData} />}
+                      content={(props) => (
+                        <StackedLabel {...props} data={chartData} />
+                      )}
                     />
                   )}
                 </Bar>
