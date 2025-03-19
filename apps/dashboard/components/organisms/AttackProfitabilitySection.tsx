@@ -65,9 +65,6 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
         >
           <AttackCostBarChart />
         </TheCardChartLayout>
-        <TheCardChartLayout title="Cost of Attack by Category">
-          <AttackCostBarChart />
-        </TheCardChartLayout>
         <div className="flex flex-col gap-2">
           <ExtractableValueAccordion />
         </div>
