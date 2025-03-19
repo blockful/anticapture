@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -35,10 +35,15 @@ interface StackedValue {
   color: string;
 }
 
+const enum BarChartEnum {
+  REGULAR = "Regular",
+  STACKED = "Stacked",
+}
+
 interface ChartDataItem {
   name: string;
   id: string;
-  type: "regular" | "stacked";
+  type: BarChartEnum;
   value?: number;
   displayValue?: string;
   stackedValues?: StackedValue[];
@@ -101,7 +106,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "liquidTreasury",
       name: "Liquid Treasury",
-      type: "regular",
+      type: BarChartEnum.REGULAR,
       value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
       displayValue:
         Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
@@ -111,7 +116,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "delegatedSupply",
       name: "Delegated Supply",
-      type: "stacked",
+      type: BarChartEnum.STACKED,
       stackedValues: [
         {
           value:
@@ -135,7 +140,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "activeSupply",
       name: "Active Supply",
-      type: "regular",
+      type: BarChartEnum.REGULAR,
       value:
         Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
         lastPrice,
@@ -143,7 +148,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "averageTurnout",
       name: "Average Turnout",
-      type: "regular",
+      type: BarChartEnum.REGULAR,
       value:
         Number(
           formatEther(
@@ -154,7 +159,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "topTokenHolder",
       name: "Top Holder",
-      type: "regular",
+      type: BarChartEnum.REGULAR,
       value:
         Number(
           formatEther(BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
@@ -189,10 +194,11 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           </Bar>
 
           {chartData.some(
-            (item) => item.type === "stacked" && item.stackedValues?.length,
+            (item) =>
+              item.type === BarChartEnum.STACKED && item.stackedValues?.length,
           ) &&
             chartData
-              .find((item) => item.type === "stacked")
+              .find((item) => item.type === BarChartEnum.STACKED)
               ?.stackedValues?.map((_, index) => (
                 <Bar
                   key={`stacked-bar-${index}`}
@@ -202,14 +208,16 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                     4,
                     4,
                     index ===
-                    (chartData.find((item) => item.type === "stacked")
-                      ?.stackedValues?.length || 0) -
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
                       1
                       ? 0
                       : 4,
                     index ===
-                    (chartData.find((item) => item.type === "stacked")
-                      ?.stackedValues?.length || 0) -
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
                       1
                       ? 0
                       : 4,
@@ -222,8 +230,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                     />
                   ))}
                   {index ===
-                    (chartData.find((item) => item.type === "stacked")
-                      ?.stackedValues?.length || 0) -
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
                       1 && (
                     <LabelList
                       content={(props) => (
@@ -240,7 +249,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 };
 
 const getStackedTotal = (item: ChartDataItem) => {
-  if (item.type === "stacked" && item.stackedValues?.length) {
+  if (item.type === BarChartEnum.STACKED && item.stackedValues?.length) {
     return item.stackedValues.reduce((sum, sv) => sum + sv.value, 0);
   }
   return item.value || 0;
@@ -254,7 +263,7 @@ const RegularLabel = (props: CustomBarLabelConfig) => {
   const { x, y, value, data, index = 0, width } = props;
   const item = data[index];
 
-  if (item.type === "stacked") return null;
+  if (item.type === BarChartEnum.STACKED) return null;
 
   const centerX = Number(x) + Number(width) / 2;
 
@@ -278,7 +287,8 @@ const StackedLabel = (props: CustomBarLabelConfig) => {
   const { x, y, data, index = 0, width } = props;
   const item = data[index];
 
-  if (item.type !== "stacked" || !item.stackedValues?.length) return null;
+  if (item.type !== BarChartEnum.STACKED || !item.stackedValues?.length)
+    return null;
 
   const centerX = Number(x) + Number(width) / 2;
   const total = getStackedTotal(item);
@@ -320,7 +330,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
       <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
         {label}
       </p>
-      {item.type === "stacked" && item.stackedValues ? (
+      {item.type === BarChartEnum.STACKED && item.stackedValues ? (
         <>
           {item.stackedValues
             .filter((item) => item.value !== 0)
