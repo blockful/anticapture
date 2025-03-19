@@ -26,6 +26,7 @@ import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 interface StackedValue {
   value: number;
@@ -70,6 +71,8 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 
   const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);
+
+  const { isMobile } = useScreenSize();
 
   const lastPrice = useMemo(() => {
     const prices = daoTokenPriceHistoricalData.prices;
@@ -252,14 +255,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   return (
     <div className={`h-80 w-full ${className || ""}`}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={chartData}
-          margin={{
-            top: 20,
-            right: 30,
-            left: 20,
-          }}
-        >
+        <BarChart data={chartData} barSize={isMobile ? 30 : 40}>
           <XAxis
             dataKey="name"
             height={60}
@@ -276,7 +272,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             fill="#EC762E"
             stackId="stack"
             radius={[4, 4, 4, 4]}
-            barSize={40}
           >
             <LabelList
               dataKey="value"
@@ -312,7 +307,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                       ? 0
                       : 4,
                   ]}
-                  barSize={40}
                 >
                   {chartData.map((entry, cellIndex) => (
                     <Cell
