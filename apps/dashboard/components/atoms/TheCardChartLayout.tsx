@@ -1,17 +1,19 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import React from "react";
+import { ReactNode } from "react";
+
+interface TheCardChartLayoutProps {
+  title: string | ReactNode;
+  children: ReactNode;
+  headerComponent?: ReactNode;
+}
 
 export const TheCardChartLayout = ({
   title,
-  headerComponent,
   children,
-}: {
-  title: string;
-  headerComponent?: React.ReactNode;
-  children: React.ReactNode;
-}) => {
+  headerComponent,
+}: TheCardChartLayoutProps) => {
   return (
     <Card className="flex flex-col rounded-lg border border-lightDark bg-dark shadow sm:max-w-full xl4k:max-w-full">
       <CardHeader className="flex flex-col justify-between rounded-t-lg px-4 py-3 md:flex-row">
