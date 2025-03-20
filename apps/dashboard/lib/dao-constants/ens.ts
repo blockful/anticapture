@@ -30,6 +30,9 @@ export const ENS: DaoConstants = {
       timestamp: 1784919179,
     },
   },
+  attackProfitability: {
+    riskLevel: RiskLevel.HIGH,
+  },
   governanceImplementation: {
     fields: [
       {

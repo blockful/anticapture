@@ -7,38 +7,40 @@ import {
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
+  RiskLevelCard,
   ExtractableValueAccordion,
 } from "@/components/atoms";
 import {
   MultilineChartExtractableValue,
   AttackCostBarChart,
 } from "@/components/molecules";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
+import daoConstantsByDaoId from "@/lib/dao-constants";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
-
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
-  const [treasuryMetric, setTreasuryMetric] = useState<string>(
-    `Non-${daoId}`,
-  );
+  const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
+
+  const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
 
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
-      icon={
-        <CrossHairIcon className="text-foreground" />
-      }
+      icon={<CrossHairIcon className="text-foreground" />}
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
         />
       }
-      description={SECTIONS_CONSTANTS.attackProfitability.description}  
+      description={SECTIONS_CONSTANTS.attackProfitability.description}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+      riskLevel={
+        <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
+      }
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"

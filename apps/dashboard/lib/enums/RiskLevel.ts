@@ -7,7 +7,7 @@ export enum RiskLevel {
 export const sortByRiskLevel = (
   a: { riskLevel: RiskLevel },
   b: { riskLevel: RiskLevel },
-  order: "asc" | "desc" = "asc"
+  order: "asc" | "desc" = "asc",
 ) => {
   const riskLevelOrder = [RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH];
   if (order === "asc") {

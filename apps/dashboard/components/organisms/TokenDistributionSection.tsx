@@ -8,7 +8,7 @@ import {
   TokenDistributionTable,
 } from "@/components/molecules";
 import { useTokenDistributionContext } from "@/contexts";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { RiskLevel, TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 

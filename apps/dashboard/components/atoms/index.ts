@@ -11,6 +11,7 @@ export * from "./ExtractableValueAccordion";
 export * from "./ExtractableValueCustomTooltip";
 export * from "./ExtractableValueToggleHeader";
 export * from "./HeaderDAOSidebarDropdown";
+export * from "./RiskLevelCard";
 export * from "./Skeleton";
 export * from "./Sparkline";
 export * from "./SwitchCardDaoInfoItem";
