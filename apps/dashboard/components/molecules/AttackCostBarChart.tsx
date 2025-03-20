@@ -125,7 +125,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                 BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
               ),
             ) * lastPrice,
-          label: "Delegated Supply",
+          label: "Other Delegations",
           color: "#EC762E",
         },
         {
@@ -205,22 +205,34 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
                   dataKey={`stackedValues[${index}].value`}
                   stackId="stack"
                   radius={[
-                    4,
-                    4,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 4
+                      : 0,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 4
+                      : 0,
                     index ===
                     (chartData.find(
                       (item) => item.type === BarChartEnum.STACKED,
                     )?.stackedValues?.length || 0) -
                       1
                       ? 0
-                      : 4,
+                      : 0,
                     index ===
                     (chartData.find(
                       (item) => item.type === BarChartEnum.STACKED,
                     )?.stackedValues?.length || 0) -
                       1
                       ? 0
-                      : 4,
+                      : 0,
                   ]}
                 >
                   {chartData.map((entry, cellIndex) => (
