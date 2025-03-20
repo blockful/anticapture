@@ -1,5 +1,5 @@
-import { RiskLevel } from "../enums";
-import { DaoConstants } from "./types";
+import { RiskLevel } from "@/lib/enums";
+import { DaoConstants } from "@/lib/dao-constants/types";
 
 export const UNI: DaoConstants = {
   name: "Uniswap",
