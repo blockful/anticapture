@@ -59,8 +59,17 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
         />
       </TheCardChartLayout>
 
-      <div className="grid w-full gap-4 md:grid-cols-1 lg:grid-cols-2">
-        <TheCardChartLayout title="Cost of Attack by Category">
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+        <TheCardChartLayout
+          title={
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Cost Comparison</span>
+              <span className="text-sm font-normal text-foreground">
+                Dollar value comparison of key security indicators.
+              </span>
+            </div>
+          }
+        >
           <AttackCostBarChart />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">

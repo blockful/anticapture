@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useMemo } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -18,20 +18,35 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  LabelList,
+  Cell,
+  LabelProps,
 } from "recharts";
 import { SkeletonRow } from "@/components/atoms";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
-import type { Props as BarProps } from "recharts/types/cartesian/Bar";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
+
+interface StackedValue {
+  value: number;
+  label: string;
+  color: string;
+}
+
+const enum BarChartEnum {
+  REGULAR = "Regular",
+  STACKED = "Stacked",
+}
 
 interface ChartDataItem {
   name: string;
-  value: number;
   id: string;
+  type: BarChartEnum;
+  value?: number;
   displayValue?: string;
-  secondaryValue?: number;
+  stackedValues?: StackedValue[];
 }
 
 interface AttackCostBarChartProps {
@@ -63,7 +78,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);
 
-  const lastPrice = React.useMemo(() => {
+  const { isMobile } = useScreenSize();
+
+  const lastPrice = useMemo(() => {
     const prices = daoTokenPriceHistoricalData.prices;
     return prices.length > 0 ? prices[prices.length - 1][1] : 0;
   }, [daoTokenPriceHistoricalData]);
@@ -85,33 +102,11 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     );
   }
 
-  type CustomBarConfig = Omit<BarProps, "ref"> & {
-    dataKey: string;
-  };
-
-  const stackKeys: CustomBarConfig[] = [
-    {
-      dataKey: "value",
-      fill: "#22c55e",
-      name: "Attack Cost",
-      stackId: "delegatedStack",
-      radius: [4, 4, 0, 0],
-      barSize: 40,
-    },
-    {
-      dataKey: "secondaryValue",
-      fill: "#35dc72",
-      name: "Attack Cost (Veto Council)",
-      stackId: "delegatedStack",
-      radius: [0, 0, 4, 4],
-      barSize: 40,
-    },
-  ];
-
   const chartData: ChartDataItem[] = [
     {
       id: "liquidTreasury",
       name: "Liquid Treasury",
+      type: BarChartEnum.REGULAR,
       value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
       displayValue:
         Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
@@ -121,19 +116,31 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "delegatedSupply",
       name: "Delegated Supply",
-      value:
-        Number(
-          formatEther(
-            BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
-          ),
-        ) * lastPrice,
-      secondaryValue: vetoCouncilVotingPower
-        ? Number(formatEther(BigInt(vetoCouncilVotingPower || "0"))) * lastPrice
-        : undefined,
+      type: BarChartEnum.STACKED,
+      stackedValues: [
+        {
+          value:
+            Number(
+              formatEther(
+                BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+              ),
+            ) * lastPrice,
+          label: "Delegated Supply",
+          color: "#EC762E",
+        },
+        {
+          value: vetoCouncilVotingPower
+            ? Number(formatEther(BigInt(vetoCouncilVotingPower))) * lastPrice
+            : 0,
+          label: "Veto Council",
+          color: "#EC762E50",
+        },
+      ],
     },
     {
       id: "activeSupply",
       name: "Active Supply",
+      type: BarChartEnum.REGULAR,
       value:
         Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
         lastPrice,
@@ -141,6 +148,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     {
       id: "averageTurnout",
       name: "Average Turnout",
+      type: BarChartEnum.REGULAR,
       value:
         Number(
           formatEther(
@@ -150,7 +158,8 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     },
     {
       id: "topTokenHolder",
-      name: "Top Token Holder",
+      name: "Top Holder",
+      type: BarChartEnum.REGULAR,
       value:
         Number(
           formatEther(BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
@@ -161,36 +170,142 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   return (
     <div className={`h-80 w-full ${className || ""}`}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={chartData}
-          margin={{
-            top: 20,
-            right: 30,
-            left: 20,
-          }}
-        >
+        <BarChart data={chartData} barSize={isMobile ? 30 : 40}>
           <XAxis
             dataKey="name"
             height={60}
             tick={(props) => <CustomXAxisTick {...props} />}
             interval={0}
+            axisLine={false}
+            tickLine={false}
           />
-          <YAxis tick={(props) => <CustomYAxisTick {...props} />} />
+          <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
           <Tooltip content={<CustomTooltip />} cursor={false} />
-          {stackKeys.map((config) => (
-            <Bar
-              key={config.dataKey}
-              dataKey={config.dataKey}
-              fill={config.fill}
-              name={config.name}
-              stackId={config.stackId}
-              radius={config.radius}
-              barSize={config.barSize}
+
+          <Bar
+            dataKey="value"
+            fill="#EC762E"
+            stackId="stack"
+            radius={[4, 4, 4, 4]}
+          >
+            <LabelList
+              content={(props) => <RegularLabel {...props} data={chartData} />}
             />
-          ))}
+          </Bar>
+
+          {chartData.some(
+            (item) =>
+              item.type === BarChartEnum.STACKED && item.stackedValues?.length,
+          ) &&
+            chartData
+              .find((item) => item.type === BarChartEnum.STACKED)
+              ?.stackedValues?.map((_, index) => (
+                <Bar
+                  key={`stacked-bar-${index}`}
+                  dataKey={`stackedValues[${index}].value`}
+                  stackId="stack"
+                  radius={[
+                    4,
+                    4,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 0
+                      : 4,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 0
+                      : 4,
+                  ]}
+                >
+                  {chartData.map((entry, cellIndex) => (
+                    <Cell
+                      key={`cell-${cellIndex}`}
+                      fill={entry.stackedValues?.[index]?.color || "#EC762E"}
+                    />
+                  ))}
+                  {index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1 && (
+                    <LabelList
+                      content={(props) => (
+                        <StackedLabel {...props} data={chartData} />
+                      )}
+                    />
+                  )}
+                </Bar>
+              ))}
         </BarChart>
       </ResponsiveContainer>
     </div>
+  );
+};
+
+const getStackedTotal = (item: ChartDataItem) => {
+  if (item.type === BarChartEnum.STACKED && item.stackedValues?.length) {
+    return item.stackedValues.reduce((sum, sv) => sum + sv.value, 0);
+  }
+  return item.value || 0;
+};
+
+type CustomBarLabelConfig = Omit<LabelProps, "ref"> & {
+  data: ChartDataItem[];
+};
+
+const RegularLabel = (props: CustomBarLabelConfig) => {
+  const { x, y, value, data, index = 0, width } = props;
+  const item = data[index];
+
+  if (item.type === BarChartEnum.STACKED) return null;
+
+  const centerX = Number(x) + Number(width) / 2;
+
+  return (
+    <text
+      x={centerX}
+      y={Number(y)}
+      dy={-6}
+      fill="#FAFAFA"
+      fontSize={12}
+      fontWeight={500}
+      textAnchor="middle"
+      className="text-xs font-medium"
+    >
+      {item?.displayValue || `$${formatNumberUserReadable(Number(value))}`}
+    </text>
+  );
+};
+
+const StackedLabel = (props: CustomBarLabelConfig) => {
+  const { x, y, data, index = 0, width } = props;
+  const item = data[index];
+
+  if (item.type !== BarChartEnum.STACKED || !item.stackedValues?.length)
+    return null;
+
+  const centerX = Number(x) + Number(width) / 2;
+  const total = getStackedTotal(item);
+
+  return (
+    <text
+      x={centerX}
+      y={Number(y)}
+      dy={-6}
+      fill="#FAFAFA"
+      fontSize={12}
+      fontWeight={500}
+      textAnchor="middle"
+      className="text-xs font-medium"
+    >
+      ${formatNumberUserReadable(total)}
+    </text>
   );
 };
 
@@ -208,23 +323,34 @@ interface CustomTooltipProps {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (!(active && payload && payload.length)) return null;
 
+  const item = payload[0].payload as ChartDataItem;
+
   return (
     <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
       <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
         {label}
       </p>
-      {payload.map((entry, index) => (
-        <p
-          key={index}
-          style={{ color: entry.color }}
-          className="flex gap-1.5 text-neutral-50"
-        >
+      {item.type === BarChartEnum.STACKED && item.stackedValues ? (
+        <>
+          {item.stackedValues
+            .filter((item) => item.value !== 0)
+            .map((barStacked, index) => (
+              <p key={index} className="flex gap-1.5 text-neutral-50">
+                <strong>
+                  {barStacked.label}: $
+                  {Math.round(barStacked.value).toLocaleString()}
+                </strong>
+              </p>
+            ))}
+        </>
+      ) : (
+        <p className="flex gap-1.5 text-neutral-50">
           <strong>
-            {entry.payload?.displayValue ||
-              `$${entry.value && entry.value.toLocaleString()}`}
+            {item.displayValue ||
+              `$${item.value && Math.round(item.value).toLocaleString()}`}
           </strong>
         </p>
-      ))}
+      )}
     </div>
   );
 };
@@ -257,42 +383,34 @@ const CustomYAxisTick = (props: AxisTickProps) => {
 };
 
 const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
-  const MAX_CHARS_PER_LINE = 10;
   const words = String(payload.value).split(" ");
-  const lines = [];
-  let currentLine = "";
-
-  // Group words into lines without exceeding max length
-  words.forEach((word: string) => {
-    if (currentLine.length + word.length <= MAX_CHARS_PER_LINE) {
-      currentLine += (currentLine ? " " : "") + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  });
-
-  // Add the last line if it's not empty
-  if (currentLine) {
-    lines.push(currentLine);
-  }
+  const firstLine = words[0];
+  const secondLine = words.slice(1).join(" ");
 
   return (
     <g transform={`translate(${x},${y})`}>
-      {lines.map((line, index) => (
+      <text
+        x={0}
+        y={0}
+        dy={10}
+        textAnchor="middle"
+        fill="#A1A1AA"
+        className="text-[8px] font-light sm:text-xs sm:font-medium"
+      >
+        {firstLine}
+      </text>
+      {secondLine && (
         <text
-          key={index}
           x={0}
           y={0}
-          dy={16 + index * 12} // Increase dy for each line
+          dy={28}
           textAnchor="middle"
-          fill="gray"
-          fontSize={10}
-          className="font-medium"
+          fill="#A1A1AA"
+          className="text-[8px] font-light sm:text-xs sm:font-medium"
         >
-          {line}
+          {secondLine}
         </text>
-      ))}
+      )}
     </g>
   );
 };
