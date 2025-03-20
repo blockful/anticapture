@@ -1,7 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/client/utils";
-import React, { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 export const TheSectionLayout = ({
@@ -13,12 +12,12 @@ export const TheSectionLayout = ({
   children,
   anchorId,
 }: {
-  icon?: React.JSX.Element;
+  icon?: JSX.Element;
   title: string;
   description?: string;
-  switchDate?: React.JSX.Element;
+  switchDate?: JSX.Element;
   riskLevel?: ReactNode;
-  children: React.ReactNode;
+  children: ReactNode;
   anchorId: string;
 }) => {
   const { ref, inView } = useInView({
@@ -43,24 +42,31 @@ export const TheSectionLayout = ({
               {title}
             </h1>
           </div>
+          {switchDate && !description && (
+            <div className="flex">{switchDate}</div>
+          )}
         </div>
         <div className="flex w-full">
-          <p className="text-md flex w-full flex-col text-justify text-start text-[#a1a1aa]">
+          <p className="text-md flex w-full flex-col text-justify text-[#a1a1aa]">
             {description}
           </p>
         </div>
       </div>
-      <div
-        className={cn(
-          "flex w-full flex-col justify-between gap-4 sm:flex-row",
-          riskLevel && switchDate
-            ? "justify-between"
-            : !riskLevel && switchDate && "w-full justify-end",
-        )}
-      >
-        {riskLevel}
-        {switchDate}
-      </div>
+      {riskLevel && switchDate ? (
+        <div className="flex w-full flex-col justify-between gap-4 sm:flex-row">
+          {riskLevel}
+          {switchDate}
+        </div>
+      ) : (
+        !riskLevel &&
+        switchDate &&
+        description && (
+          <div className="flex w-full flex-col justify-end gap-4 sm:flex-row">
+            {riskLevel}
+            {switchDate}
+          </div>
+        )
+      )}
       {children}
     </div>
   );
