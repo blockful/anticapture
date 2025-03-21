@@ -5,6 +5,7 @@ export * from "./useDaoData";
 export * from "./useDaoTokenHistoricalData";
 export * from "./useDelegatedSupply";
 export * from "./useProposals";
+export * from "./useScrollHeader";
 export * from "./useTimeSeriesData";
 export * from "./useTopTokenHolderNonDao";
 export * from "./useTreasuryAssetNonDaoToken";
