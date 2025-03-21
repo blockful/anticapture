@@ -51,7 +51,7 @@ export const useSectionObserver = ({
     setTimeout(() => {
       isScrollingRef.current = false;
       hasScrolledRef.current = true;
-    }, 1000);
+    }, 500);
   };
 
   return { activeSection, handleSectionClick };

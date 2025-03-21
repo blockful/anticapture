@@ -13,13 +13,15 @@ export const ButtonHeaderDAOSidebarMobile = ({
     title: string;
   }[];
 }) => {
-  const { handleSectionClick } = useSectionObserver({
+  const { activeSection, handleSectionClick } = useSectionObserver({
     initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
   });
 
   return (
     <Tabs
       defaultValue={SECTIONS_CONSTANTS.daoInfo.anchorId}
+      value={activeSection || SECTIONS_CONSTANTS.daoInfo.anchorId}
+      onValueChange={(value) => handleSectionClick(value)}
       className="w-fit min-w-full"
     >
       <TabsList
@@ -37,7 +39,6 @@ export const ButtonHeaderDAOSidebarMobile = ({
             )}
             key={option.anchorId}
             value={option.anchorId}
-            onClick={() => handleSectionClick(option.anchorId)}
           >
             {option.title}
           </TabsTrigger>
