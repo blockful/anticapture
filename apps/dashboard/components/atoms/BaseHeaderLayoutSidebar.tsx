@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toggleScreenScroll } from "@/lib/client/utils";
-import { ConnectWallet } from "@/components/atoms";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { HeaderMobile } from "./HeaderMobile";
+import { ConnectWallet } from "@/components/atoms";
+import { HeaderMobile } from "@/components/molecules";
 
 export const BaseHeaderLayoutSidebar = ({
   children,
