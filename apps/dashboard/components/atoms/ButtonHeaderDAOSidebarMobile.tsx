@@ -8,15 +8,14 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 export const ButtonHeaderDAOSidebarMobile = ({
   options,
 }: {
-  options: Array<{
+  options: {
     anchorId: string;
     title: string;
-  }>;
+  }[];
 }) => {
-  const { activeSection, handleSectionClick } = useSectionObserver({
+  const { handleSectionClick } = useSectionObserver({
     initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
   });
-  const isActive = (sectionId: string) => activeSection === sectionId;
 
   return (
     <Tabs
