@@ -6,6 +6,7 @@ import { AnticaptureIcon, ConnectWallet } from "@/components/atoms";
 import { SUPPORTED_DAO_NAMES, DaoIdEnum } from "@/lib/types/daos";
 import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
+import Link from "next/link";
 
 export const HeaderMobile = () => {
   const pathname = usePathname();
@@ -37,9 +38,9 @@ export const HeaderMobile = () => {
       >
         <div className="px-4 py-3">
           <div className="flex justify-between">
-            <div className="flex">
+            <Link href={"/"} className="flex cursor-pointer">
               <AnticaptureIcon />
-            </div>
+            </Link>
             <div className="flex">
               <ConnectWallet />
             </div>
