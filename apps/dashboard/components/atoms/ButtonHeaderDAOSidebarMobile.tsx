@@ -23,13 +23,18 @@ export const ButtonHeaderDAOSidebarMobile = ({
       defaultValue={SECTIONS_CONSTANTS.daoInfo.anchorId}
       className="w-fit min-w-full"
     >
-      <TabsList className="flex">
+      <TabsList
+        className={cn(
+          "group flex border-b border-t border-b-white/10 border-t-white/10 pl-4",
+        )}
+      >
         {options.map((option) => (
           <TabsTrigger
             className={cn(
-              "gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium text-foreground",
-              isActive(option.anchorId) &&
-                "border-b border-tangerine text-tangerine",
+              "relative gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium text-foreground",
+              "data-[state=active]:text-tangerine",
+              "after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[1px] after:bg-transparent after:content-['']",
+              "data-[state=active]:after:bg-tangerine",
             )}
             key={option.anchorId}
             value={option.anchorId}
