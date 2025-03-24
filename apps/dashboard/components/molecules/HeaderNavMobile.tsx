@@ -1,3 +1,5 @@
+"use client";
+
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/components/atoms";
 
