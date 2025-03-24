@@ -1,39 +1,47 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useScrollHeader } from "@/hooks";
-import { AnticaptureIcon, ConnectWallet } from "@/components/atoms";
+import Link from "next/link";
 import { SUPPORTED_DAO_NAMES, DaoIdEnum } from "@/lib/types/daos";
+import { AnticaptureIcon, ConnectWallet } from "@/components/atoms";
 import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
-import Link from "next/link";
 
 export const HeaderMobile = () => {
   const pathname = usePathname();
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [showHeader, setShowHeader] = useState<boolean>(true);
 
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
-  const { headerRef, observerRef, isVisible, isAtTop, headerHeight } =
-    useScrollHeader();
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= 0) {
+        setShowHeader(true);
+      } else if (currentScrollY < lastScrollY) {
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY) {
+        setShowHeader(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   return (
     <>
-      <div
-        ref={observerRef}
-        className="pointer-events-none absolute top-0 h-2 w-full"
-      />
-
-      {!isAtTop && <div style={{ height: headerHeight }} />}
-
       <header
-        ref={headerRef}
         className={cn(
-          "left-0 right-0 top-0 z-40 w-full bg-darkest transition-all duration-300",
-          isAtTop ? "relative" : "fixed",
-          !isAtTop && !isVisible ? "-translate-y-full" : "translate-y-0",
-          !isAtTop && "shadow-md",
+          "fixed left-0 right-0 top-0 z-40 w-full bg-darkest shadow-md transition-transform duration-300",
+          showHeader ? "translate-y-0" : "-translate-y-full",
         )}
       >
         <div className="px-4 py-3">
@@ -47,8 +55,14 @@ export const HeaderMobile = () => {
           </div>
         </div>
       </header>
+
       {isValidDao && (
-        <div className="transition-all duration-700">
+        <div
+          className={cn(
+            "sticky top-0 z-30 w-full bg-darkest transition-all duration-300",
+            showHeader && "top-[57px]",
+          )}
+        >
           <HeaderNavMobile />
         </div>
       )}
