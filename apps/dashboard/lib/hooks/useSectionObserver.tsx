@@ -4,10 +4,12 @@ import { useEffect, useState, useRef } from "react";
 
 interface UseSectionObserverProps {
   initialSection?: string;
+  headerOffset: number | null;
 }
 
 export const useSectionObserver = ({
   initialSection,
+  headerOffset = null,
 }: UseSectionObserverProps) => {
   const [activeSection, setActiveSection] = useState<string | null>(
     initialSection ?? null,
@@ -47,6 +49,17 @@ export const useSectionObserver = ({
       behavior: "smooth",
       block: "start",
     });
+
+    const section = document.getElementById(sectionId);
+    if (headerOffset && section) {
+      const sectionRect = section.getBoundingClientRect();
+      const offsetPosition = sectionRect.top + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
 
     setTimeout(() => {
       isScrollingRef.current = false;

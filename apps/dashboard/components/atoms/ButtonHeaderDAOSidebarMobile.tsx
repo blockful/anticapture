@@ -15,6 +15,7 @@ export const ButtonHeaderDAOSidebarMobile = ({
 }) => {
   const { activeSection, handleSectionClick } = useSectionObserver({
     initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
+    headerOffset: 100,
   });
 
   return (
