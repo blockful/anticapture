@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DaoTemplate } from "@/components/04-templates";
+import { DaoTemplate } from "@/components/templates";
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 
 type Props = {
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function DaoPage() {
   return (
-    <div className="mx-auto flex flex-col items-center gap-8 px-8 py-6 lg:gap-16 xl:overflow-auto">
+    <div className="mx-auto flex flex-col items-center gap-8 px-8 py-6 lg:gap-16">
       <DaoTemplate />
     </div>
   );

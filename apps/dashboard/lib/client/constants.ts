@@ -1,7 +1,4 @@
-export const dashboardSectionAnchorID = "dashboardSection";
-export const daoInfoSectionAnchorID = "daoInfoSection";
-export const tokenDistributionSectionAnchorID = "tokenDistributionSection";
-export const governanceActivitySectionAnchorID = "governanceActivitySection";
+
 
 export enum MetricTypesEnum {
   TOTAL_SUPPLY = "TOTAL_SUPPLY",
@@ -18,3 +15,9 @@ export enum MetricTypesEnum {
 }
 
 export const metricTypeArray = Object.values(MetricTypesEnum);
+
+export const SECONDS_PER_DAY = 86400;
+export const MILLISECONDS_PER_SECOND = 1000;
+export const MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * 60;
+export const MILLISECONDS_PER_HOUR = MILLISECONDS_PER_SECOND * 60 * 60;
+export const MILLISECONDS_PER_DAY = SECONDS_PER_DAY * MILLISECONDS_PER_SECOND;

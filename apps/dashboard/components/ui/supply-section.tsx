@@ -2,21 +2,19 @@
 
 import { useEffect, useState } from "react";
 
-import { DAO } from "@/lib/types/daos";
-
 import { AnimatedNumber } from "./animated-number";
-import { useDaoDataContext } from "@/components/contexts/DaoDataContext";
-import { SupplyIcon } from "@/components/01-atoms";
+import { useDaoDataContext } from "@/contexts/DaoDataContext";
+import { SupplyIcon } from "@/components/atoms";
 
 export const SupplySection = () => {
   const { daoData } = useDaoDataContext();
 
-  const [totalSupply, setTotalSupply] = useState<number | null>(null);
+  const [totalSupply, setTotalSupply] = useState<number | undefined>(undefined);
   const [totalVotingPower, setTotalVotingPower] = useState<number | null>(null);
 
   useEffect(() => {
     if (daoData) {
-      setTotalSupply((daoData as DAO).totalSupply);
+      setTotalSupply(daoData.totalSupply ?? undefined);
       // setTotalVotingPower((daoData as DAO).totalVotingPower);
     }
   }, [daoData]);
