@@ -17,6 +17,8 @@ export const HeaderMobile = () => {
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
+  const headerHeight = 57;
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -55,6 +57,8 @@ export const HeaderMobile = () => {
           </div>
         </div>
       </header>
+
+      <div style={{ height: headerHeight }} />
 
       {isValidDao && (
         <div

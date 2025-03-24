@@ -12,10 +12,14 @@ export const ButtonHeaderDAOSidebarMobile = ({
     anchorId: string;
     title: string;
   }[];
+  headerOffset?: number;
 }) => {
+  const MOBILE_DEFAULT_OFFSET = 120;
+
   const { activeSection, handleSectionClick } = useSectionObserver({
     initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
-    headerOffset: 100,
+    headerOffset: MOBILE_DEFAULT_OFFSET,
+    useWindowScrollTo: true,
   });
 
   return (
