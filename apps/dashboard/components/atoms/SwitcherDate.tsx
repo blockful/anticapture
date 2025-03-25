@@ -45,10 +45,10 @@ export const SwitcherDate = ({
             : "border-transparent bg-lightDark",
         )}
       >
-        <span>{isSelected}</span>
+        <span className="font-medium- text-sm">{isSelected}</span>
         <ChevronDown
           className={cn(
-            "size-4 transition-transform duration-200",
+            "size-3 transition-transform duration-200",
             isOpen && "rotate-180",
           )}
         />
