@@ -6,6 +6,7 @@ export * from "./BaseCardDaoInfo";
 export * from "./BaseHeaderLayoutSidebar";
 export * from "./ButtonCardDaoInfoItem";
 export * from "./ButtonHeaderDAOSidebar";
+export * from "./ButtonHeaderDAOSidebarMobile";
 export * from "./ConnectWallet";
 export * from "./ExtractableValueAccordion";
 export * from "./ExtractableValueCustomTooltip";

@@ -15,14 +15,6 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 
-const enum HeaderNavItems {
-  DAO_INFO = "DAO Info",
-  ATTACK_PROFITABILITY = "Attack Profitability",
-  TOKEN_DISTRIBUTION = "Token Distribution",
-  GOVERNANCE_ACTIVITY = "Governance Activity",
-  GOVERNANCE_IMPLEMENTATION = "Governance Implementation",
-}
-
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
