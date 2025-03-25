@@ -19,9 +19,9 @@ export const ExtractableValueToggleHeader = ({
   const { daoId }: { daoId: string } = useParams();
 
   return (
-    <div className="flex flex-col gap-1 md:flex-row md:gap-3">
+    <div className="flex flex-row gap-1 md:gap-3">
       <div className="flex flex-col gap-3 md:flex-row">
-        <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-3 lg:flex">
           <div className="h-2 w-2 rounded-sm bg-green-500" />
           <p className="text-sm font-medium leading-normal text-[#a1a1aa]">
             Treasury
@@ -33,10 +33,10 @@ export const ExtractableValueToggleHeader = ({
           options={[`Non-${daoId.toUpperCase() as DaoIdEnum}`, "All"]}
         />
       </div>
-      <div className="flex items-center border-r border-[#27272a]" />
+      <div className="hidden items-center border-r border-[#27272a] lg:flex" />
 
       <div className="flex flex-col gap-3 md:flex-row">
-        <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-3 lg:flex">
           <div className="h-2 w-2 rounded-sm bg-[#f87171]" />
           <p className="text-sm font-medium leading-normal text-[#a1a1aa]">
             Cost
