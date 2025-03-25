@@ -19,7 +19,7 @@ export const ExtractableValueToggleHeader = ({
   const { daoId }: { daoId: string } = useParams();
 
   return (
-    <div className="flex flex-row gap-1 md:gap-3">
+    <div className="flex flex-row gap-2 md:gap-3">
       <div className="flex flex-col gap-3 md:flex-row">
         <div className="hidden items-center gap-3 lg:flex">
           <div className="h-2 w-2 rounded-sm bg-green-500" />
