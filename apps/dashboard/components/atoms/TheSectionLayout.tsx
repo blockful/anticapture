@@ -40,7 +40,7 @@ export const TheSectionLayout = ({
         <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
           <div className="flex items-center gap-3">
             {icon}
-            <h1 className="text-left text-xl font-medium tracking-[-0.05%] text-white sm:text-3xl">
+            <h1 className="text-xl font-medium leading-7 tracking-[-0.05%] text-[#FAFAFA] sm:text-left sm:leading-none">
               {title}
             </h1>
           </div>
@@ -49,13 +49,13 @@ export const TheSectionLayout = ({
           )}
         </div>
         <div className="flex w-full">
-          <p className="text-md flex w-full flex-col text-justify text-[#a1a1aa]">
+          <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
             {description}
           </p>
         </div>
       </div>
       {riskLevel && switchDate ? (
-        <div className="flex h-full w-full flex-col justify-between gap-4 sm:flex-row">
+        <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
           <div>{riskLevel}</div>
           <div>{switchDate}</div>
         </div>
