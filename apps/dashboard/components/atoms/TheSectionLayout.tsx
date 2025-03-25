@@ -55,7 +55,7 @@ export const TheSectionLayout = ({
         </div>
       </div>
       {riskLevel && switchDate ? (
-        <div className="flex h-full w-full flex-col justify-between gap-4 sm:flex-row">
+        <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
           <div>{riskLevel}</div>
           <div>{switchDate}</div>
         </div>
