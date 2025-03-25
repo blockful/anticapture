@@ -39,7 +39,7 @@ export const SwitcherDate = ({
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex min-w-[49px] items-center gap-1 rounded-lg border px-2.5 py-1.5 text-white transition-all duration-200",
+          "flex min-w-[49px] items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
             : "border-transparent bg-lightDark",
