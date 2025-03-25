@@ -1,7 +1,7 @@
 "use client";
 
 import { HomeDashboardSection } from "@/components/organisms";
-import { ReachOutToUsCard } from "../molecules/ReachOutToUsCard";
+import { ReachOutToUsCard } from "@/components/molecules/ReachOutToUsCard";
 
 export const HomeTemplate = () => {
   return (
