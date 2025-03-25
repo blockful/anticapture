@@ -1,5 +1,6 @@
 "use client";
 
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
@@ -20,8 +21,9 @@ export const TheSectionLayout = ({
   children: ReactNode;
   anchorId: string;
 }) => {
+  const { isMobile } = useScreenSize();
   const { ref, inView } = useInView({
-    threshold: 0.9,
+    threshold: isMobile ? 0.3 : 0.9,
   });
 
   useEffect(() => {
