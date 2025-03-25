@@ -21,9 +21,9 @@ export const TheSectionLayout = ({
   children: ReactNode;
   anchorId: string;
 }) => {
-  const { isMobile } = useScreenSize();
+  const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
-    threshold: isMobile ? 0.3 : 0.9,
+    threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
   });
 
   useEffect(() => {
