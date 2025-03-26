@@ -1,8 +1,13 @@
 import { DaoConstants } from "@/lib/dao-constants/types";
 import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
+import ENSLogo from "@/public/logo/ENS.png";
+import { DaoIdEnum } from "../types/daos";
 
 export const ENS: DaoConstants = {
   name: "Ethereum Name Service",
+  daoId: DaoIdEnum.ENS,
+  icon: ENSLogo,
+  inAnalysis: false,
   contracts: {
     governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
     token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",

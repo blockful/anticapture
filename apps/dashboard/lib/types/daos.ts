@@ -1,6 +1,7 @@
 export enum DaoIdEnum {
   UNISWAP = "UNI",
   ENS = "ENS",
+  OPTIMISM = "OP",
 }
 
 export const SUPPORTED_DAO_NAMES = Object.values(DaoIdEnum);

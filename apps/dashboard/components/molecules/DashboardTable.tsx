@@ -15,28 +15,15 @@ import {
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import ENSLogo from "@/public/logo/ENS.png";
-import UNILogo from "@/public/logo/UNI.png";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks";
-
-const daoDetails: Record<
-  DaoIdEnum,
-  { icon: StaticImageData; tooltip: string }
-> = {
-  [DaoIdEnum.UNISWAP]: {
-    icon: UNILogo,
-    tooltip: "Total current value of tokens in circulation.",
-  },
-  [DaoIdEnum.ENS]: {
-    icon: ENSLogo,
-    tooltip: "",
-  },
-};
+import daoConstantsByDaoId from "@/lib/dao-constants";
+import { BadgeInAnalysis } from "../atoms/BadgeInAnalysis";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
-
+  const { isMobile } = useScreenSize();
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
@@ -44,9 +31,6 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const data = Object.values(DaoIdEnum).map((daoId, index) => ({
     id: index,
     dao: daoId,
-    delegatedSupply: null as null | string,
-    profitability: null,
-    delegatesToPass: null,
   }));
 
   // Create a cell component that stores its value in the ref
@@ -72,7 +56,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     }, [supplyData, rowIndex]);
 
     if (!supplyData) {
-      return <SkeletonRow className="w-full h-5" />;
+      return <SkeletonRow className="h-5 w-full" />;
     }
 
     const formattedSupply = formatNumberUserReadable(
@@ -80,7 +64,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="px-4 py-3 flex items-center justify-end text-end">
+      <div className="flex items-center justify-end px-4 py-3 text-end">
         {formattedSupply}
       </div>
     );
@@ -90,7 +74,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "#",
       cell: ({ row }) => (
-        <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 text-[#fafafa]">
+        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 py-3 text-[#fafafa]">
           {row.index + 1}
         </p>
       ),
@@ -122,13 +106,22 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoDetails[dao as DaoIdEnum] : null;
+        const details = dao ? daoConstantsByDaoId[dao as DaoIdEnum] : null;
         return (
-          <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
-            {details && (
-              <Image src={details.icon} alt={"OK"} width={24} height={24} />
-            )}
-            {dao}
+          <p className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+            <div className="flex w-20 items-center gap-2">
+              {details && (
+                <Image
+                  className="overflow-hidden rounded-full"
+                  src={details.icon}
+                  alt={"OK"}
+                  width={24}
+                  height={24}
+                />
+              )}
+              {dao}
+            </div>
+            {!isMobile && <BadgeInAnalysis />}
           </p>
         );
       },
@@ -139,7 +132,17 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-
+        if (daoConstantsByDaoId[daoId].inAnalysis) {
+          return isMobile ? (
+            <div className="flex items-center justify-end px-4 py-3 text-end">
+              <BadgeInAnalysis />
+            </div>
+          ) : (
+            <div className="flex items-center justify-end px-4 py-3 text-end">
+              -
+            </div>
+          );
+        }
         return (
           <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
         );
@@ -187,6 +190,9 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       withPagination={true}
       withSorting={true}
       onRowClick={handleRowClick}
+      disableRowClick={(row: DashboardDao) =>
+        !!daoConstantsByDaoId[row.dao as DaoIdEnum].inAnalysis
+      }
     />
   );
 };

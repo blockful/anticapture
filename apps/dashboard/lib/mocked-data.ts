@@ -9,9 +9,7 @@ import { DAYS_IN_MILLISECONDS, TimeInterval } from "./enums/TimeInterval";
 
 export type DashboardDao = {
   dao: string;
-  delegatedSupply: string | null;
-  profitability: string | null;
-  delegatesToPass: string | null;
+  inAnalysis?: boolean;
 };
 
 export type TokenDistribution = {

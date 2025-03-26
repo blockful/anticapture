@@ -14,9 +14,14 @@ export const GovernanceImplementationSection = ({
 }) => {
   const [openCardId, setOpenCardId] = useState<string | null>(null);
   
+  if (daoConstantsByDaoId[daoId].inAnalysis) {
+    return null;
+  }
+
   const governanceImplementationFields =
     daoConstantsByDaoId[daoId].governanceImplementation?.fields;
-    
+
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.governanceImplementation.title}
