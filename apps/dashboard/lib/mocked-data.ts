@@ -89,15 +89,9 @@ export const tokenDistributionData: TokenDistribution[] = [
 export const dashboardData: DashboardDao[] = [
   {
     dao: DaoIdEnum.UNISWAP,
-    delegatedSupply: null,
-    profitability: null,
-    delegatesToPass: null,
   },
   {
     dao: DaoIdEnum.ENS,
-    delegatedSupply: null,
-    profitability: null,
-    delegatesToPass: null,
   },
 ];
 

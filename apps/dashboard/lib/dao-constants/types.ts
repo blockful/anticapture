@@ -8,14 +8,12 @@ export type DaoConstants = DaoConstantsInAnalysis | DaoConstantsFullySupported;
 
 export type DaoConstantsInAnalysis = {
   name: string;
-  daoId: DaoIdEnum;
   icon: StaticImageData;
   inAnalysis: true;
 };
 
 export type DaoConstantsFullySupported = {
   name: string;
-  daoId: DaoIdEnum;
   icon: StaticImageData;
   inAnalysis: false;
   contracts: {

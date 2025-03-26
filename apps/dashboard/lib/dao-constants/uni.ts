@@ -5,7 +5,6 @@ import { DaoIdEnum } from "@/lib/types/daos";
 
 export const UNI: DaoConstants = {
   name: "Uniswap",
-  daoId: DaoIdEnum.UNISWAP,
   icon: UNILogo,
   inAnalysis: false,
   contracts: {

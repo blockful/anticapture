@@ -14,13 +14,13 @@ import {
   TokensIcon,
 } from "@/components/atoms";
 import { useCountdown } from "@/hooks";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { formatCountdown } from "@/lib/client/utils/time";
 
 export const SecurityCouncilCard = ({
   daoConstants,
 }: {
-  daoConstants: DaoConstants;
+  daoConstants: DaoConstantsFullySupported;
 }) => {
   const { securityCouncil } = daoConstants;
   const targetTimestamp = securityCouncil?.expiration.timestamp;

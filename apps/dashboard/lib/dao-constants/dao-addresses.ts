@@ -11,6 +11,11 @@ interface DaoAddresses {
     ENSDaoWallet: string;
     ENSColdWallet: string;
   };
+  [DaoIdEnum.OPTIMISM]: {
+    OptimismTimelock: string;
+    OptimismTokenDistributor: string;
+    OptimismUniv3Uni: string;
+  };
 }
 
 export const DAO_ADDRESSES: DaoAddresses = {
@@ -24,10 +29,16 @@ export const DAO_ADDRESSES: DaoAddresses = {
     ENSDaoWallet: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
     ENSColdWallet: "0x690F0581eCecCf8389c223170778cD9D029606F2",
   },
+  [DaoIdEnum.OPTIMISM]: {
+    OptimismTimelock: "",
+    OptimismTokenDistributor: "",
+    OptimismUniv3Uni: "",
+  },
 };
 
 export const DAO_VETO_COUNCIL_ADDRESSES: Record<DaoIdEnum, string | undefined> =
   {
     [DaoIdEnum.UNISWAP]: undefined,
     [DaoIdEnum.ENS]: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
+    [DaoIdEnum.OPTIMISM]: undefined,
   };
