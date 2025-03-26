@@ -27,7 +27,7 @@ export const HeaderDAOSidebar = () => {
       {isValidDao && (
         <div className="flex w-full flex-col">
           <HeaderDAOSidebarDropdown />
-          <div className="flex flex-col px-4 pb-4 pt-1">
+          <div className="flex flex-col px-4 pb-4 pt-1 gap-3">
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
               icon={PieChartIcon}

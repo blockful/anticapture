@@ -19,17 +19,17 @@ export const GovernanceImplementationCard = ({
 }) => {
 
   const riskStyles = {
-    [RiskLevel.HIGH]: "bg-white/15 text-red-500 rounded-full",
-    [RiskLevel.MEDIUM]: "bg-white/15 text-amber-500 rounded-full",
-    [RiskLevel.LOW]: "bg-white/15 text-green-500 rounded-full",
+    [RiskLevel.HIGH]: "bg-white/10 text-red-400 rounded-full",
+    [RiskLevel.MEDIUM]: "bg-white/10 text-amber-500 rounded-full",
+    [RiskLevel.LOW]: "bg-white/10 text-green-500 rounded-full",
   };
 
   return (
     <Card
       className={cn(
-        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-4 py-5 shadow transition-all duration-200 hover:cursor-pointer md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
-          ? "z-20 rounded-b-none bg-lightDark"
+          ? "z-20 rounded-b-none bg-lightDark border-middleDark"
           : "rounded-b-lg hover:bg-lightDark",
       )}
       onClick={onToggle}
@@ -93,7 +93,7 @@ export const GovernanceImplementationCard = ({
       </div>
       <div
         className={cn(
-          "absolute z-20 rounded-b-lg border border-t-0 border-lightDark bg-lightDark px-4",
+          "absolute z-20 rounded-b-lg border border-t-0 border-middleDark bg-lightDark px-4",
           "top-full -left-px w-[calc(100%+2px)] overflow-hidden",
           isOpen 
             ? "visible max-h-[1000px] transform-gpu transition-all duration-500 ease-in-out pb-5" 
@@ -101,7 +101,7 @@ export const GovernanceImplementationCard = ({
         )}
         onClick={(e) => e.stopPropagation()} // Prevent clicks on description from closing
       >
-        <div className="pt-5">
+        <div className="pt-1">
           <p className="text-sm text-foreground">{description}</p>
         </div>
       </div>
