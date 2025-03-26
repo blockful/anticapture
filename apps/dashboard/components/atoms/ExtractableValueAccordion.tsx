@@ -143,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <DollarIcon className="h-4 w-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -195,7 +195,7 @@ export const ExtractableValueAccordion = () => {
               {item.icon}
               {item.title}
             </div>
-            <PlusIcon className="h-4 w-4 text-foreground transition-transform duration-300 group-data-[state=open]/trigger:rotate-45" />
+            <PlusIcon className="h-4 w-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
           <AccordionContent className="overflow-hidden transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>

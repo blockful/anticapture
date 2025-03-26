@@ -97,11 +97,18 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   if (isLoading) {
     return (
       <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow width="w-full" height="h-80" />
+        <SkeletonRow className="h-80 w-full" />
       </div>
     );
   }
-
+  const barColors = [
+    "#EC762E57",
+    "#EC762E",
+    "#EC762EA1",
+    "#EC762E81",
+    "#EC762ED1",
+    "",
+  ];
   const chartData: ChartDataItem[] = [
     {
       id: "liquidTreasury",
@@ -168,9 +175,13 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   ];
 
   return (
-    <div className={`h-80 w-full ${className || ""}`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} barSize={isMobile ? 30 : 40}>
+    <div className={`w-full ${className || ""}`}>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart
+          data={chartData}
+          barSize={isMobile ? 30 : 40}
+          margin={{ top: 20 }}
+        >
           <XAxis
             dataKey="name"
             height={60}
@@ -184,10 +195,13 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 
           <Bar
             dataKey="value"
-            fill="#EC762E"
             stackId="stack"
+            fill={"#EC762E"}
             radius={[4, 4, 4, 4]}
           >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={barColors[index % 4]} />
+            ))}
             <LabelList
               content={(props) => <RegularLabel {...props} data={chartData} />}
             />

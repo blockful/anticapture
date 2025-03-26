@@ -20,16 +20,29 @@ export const ButtonHeaderDAOSidebar = ({
 
   return (
     <button
-      className={`flex w-full items-center gap-3 rounded-md border border-transparent p-2 ${isActive(anchorId) ? "cursor-default bg-lightDark" : "hover:border-lightDark hover:bg-transparent"}`}
+      className={cn(
+        `flex w-full items-center gap-3 rounded-md border border-transparent p-2`,
+        {
+          "cursor-default bg-white": isActive(anchorId),
+          "hover:border-lightDark hover:bg-transparent": !isActive(anchorId),
+        },
+      )}
       onClick={() => handleSectionClick(anchorId)}
     >
       <Icon
         className={cn("h-5 w-5", {
-          "text-white": isActive(anchorId),
+          "text-darkest": isActive(anchorId),
           "text-foreground": !isActive(anchorId),
         })}
       />
-      <p className="text-sm font-medium text-white">{label}</p>
+      <p
+        className={cn("text-sm font-medium", {
+          "text-darkest": isActive(anchorId),
+          "text-foreground": !isActive(anchorId),
+        })}
+      >
+        {label}
+      </p>
     </button>
   );
 };

@@ -79,7 +79,7 @@ export const GovernanceActivityTable = () => {
         const details = metric ? metricDetails[metric] : null;
 
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
@@ -94,7 +94,7 @@ export const GovernanceActivityTable = () => {
         const average: number = row.getValue("average");
 
         if (!average) {
-          return <SkeletonRow />;
+          return <SkeletonRow className="h-5 w-32"/>;
         }
 
         return (
@@ -132,18 +132,18 @@ export const GovernanceActivityTable = () => {
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
         if (!variation) {
-          return <SkeletonRow />;
+          return <SkeletonRow className="h-5 w-32"/>;
         }
         if (variation == "-") {
           return (
-            <p className="flex items-center justify-center gap-1 text-center">
+            <p className="px-4 py-3 flex items-center justify-center gap-1 text-center">
               -
             </p>
           );
         }
         return (
           <p
-            className={`flex items-center justify-center gap-1 text-center ${
+            className={`px-4 py-3 flex items-center justify-center gap-1 text-center ${
               Number(variation) > 0
                 ? "text-[#4ade80]"
                 : Number(variation) < 0
@@ -192,8 +192,8 @@ export const GovernanceActivityTable = () => {
 
         if (variation === null) {
           return (
-            <div className="flex w-full">
-              <SkeletonRow width="w-[340px]" height="h-[45px]" />
+            <div className="flex w-full px-4 py-3">
+              <SkeletonRow className="h-[45px] w-[340px]" />
             </div>
           );
         }
@@ -269,6 +269,7 @@ export const GovernanceActivityTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
+      onRowClick={() => {}}
     />
   );
 };

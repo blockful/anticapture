@@ -10,8 +10,8 @@ type SparklineProps = {
 
 export const Sparkline: React.FC<SparklineProps> = ({
   data,
-  width = 340,
-  height = 45,
+  width = 320,
+  height = 32,
   strokeColor = "#4ADE80",
   className = "",
 }) => {
