@@ -193,7 +193,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           <Bar
             dataKey="value"
             stackId="stack"
-            fill={"#EC762E"}
             radius={[4, 4, 4, 4]}
           >
             {chartData.map((entry, index) => (
