@@ -47,6 +47,7 @@ interface ChartDataItem {
   value?: number;
   displayValue?: string;
   stackedValues?: StackedValue[];
+  customColor?: string;
 }
 
 interface AttackCostBarChartProps {
@@ -97,24 +98,17 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   if (isLoading) {
     return (
       <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow className="h-80 w-full" />
+        <SkeletonRow className="h-70 w-full" />
       </div>
     );
   }
-  const barColors = [
-    "#EC762E57",
-    "#EC762E",
-    "#EC762EA1",
-    "#EC762E81",
-    "#EC762ED1",
-    "",
-  ];
   const chartData: ChartDataItem[] = [
     {
       id: "liquidTreasury",
       name: "Liquid Treasury",
       type: BarChartEnum.REGULAR,
       value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+      customColor: "#EC762EFF",
       displayValue:
         Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
           ? undefined
@@ -133,14 +127,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
               ),
             ) * lastPrice,
           label: "Other Delegations",
-          color: "#EC762E",
+          color: "#EC762ECC",
         },
         {
           value: vetoCouncilVotingPower
             ? Number(formatEther(BigInt(vetoCouncilVotingPower))) * lastPrice
             : 0,
           label: "Veto Council",
-          color: "#EC762E50",
+          color: "#EC762E9F",
         },
       ],
     },
@@ -148,6 +142,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       id: "activeSupply",
       name: "Active Supply",
       type: BarChartEnum.REGULAR,
+      customColor: "#EC762EE6",
       value:
         Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
         lastPrice,
@@ -156,6 +151,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       id: "averageTurnout",
       name: "Average Turnout",
       type: BarChartEnum.REGULAR,
+      customColor: "#EC762EB3",
       value:
         Number(
           formatEther(
@@ -167,6 +163,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       id: "topTokenHolder",
       name: "Top Holder",
       type: BarChartEnum.REGULAR,
+      customColor: "#EC762E80",
       value:
         Number(
           formatEther(BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
@@ -200,7 +197,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             radius={[4, 4, 4, 4]}
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={barColors[index % 4]} />
+              <Cell key={`cell-${index}`} fill={entry.customColor} />
             ))}
             <LabelList
               content={(props) => <RegularLabel {...props} data={chartData} />}

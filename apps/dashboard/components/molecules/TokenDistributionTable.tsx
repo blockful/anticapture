@@ -150,10 +150,12 @@ export const TokenDistributionTable = () => {
 
         if (variation === null) {
           return (
-            <SkeletonRow
-              className="h-5 w-32"
-              parentClassName="justify-end flex animate-pulse space-x-2"
-            />
+            <div className="flex items-center justify-end">
+              <SkeletonRow
+                className="h-5 w-32"
+                parentClassName="justify-end flex animate-pulse space-x-2"
+              />
+            </div>
           );
         }
 
@@ -206,13 +208,13 @@ export const TokenDistributionTable = () => {
           row.getValue("chartLastDays") ?? [];
         if (chartLastDays.length === 0) {
           return (
-            <div className="flex w-full">
-              <SkeletonRow className="h-[45px] w-32" />
+            <div className="flex w-full justify-center">
+              <SkeletonRow className="h-5 w-32" />
             </div>
           );
         }
         return (
-          <div className="flex w-full py-2.5 px-4 justify-center">
+          <div className="flex w-full py-2.5 justify-center">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
               strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
@@ -221,7 +223,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-3">
+        <div className="flex w-full items-start justify-start px-6">
           Last {days.slice(0, -1)} days
         </div>
       ),
