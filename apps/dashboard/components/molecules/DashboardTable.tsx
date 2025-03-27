@@ -135,9 +135,14 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         if (daoConstantsByDaoId[daoId].inAnalysis) {
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end">
-             {isMobile ? (  <BadgeInAnalysis />) : '-'}
+              {isMobile ? (
+                <BadgeInAnalysis />
+              ) : (
+                "-"
+              )}
             </div>
-          )
+          );
+        }
         return (
           <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
         );
