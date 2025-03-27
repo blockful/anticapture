@@ -17,7 +17,6 @@ export const GovernanceImplementationCard = ({
   isOpen: boolean;
   onToggle: (e: React.MouseEvent) => void;
 }) => {
-
   const riskStyles = {
     [RiskLevel.HIGH]: "bg-white/10 text-red-400 rounded-full",
     [RiskLevel.MEDIUM]: "bg-white/10 text-amber-500 rounded-full",
@@ -27,16 +26,18 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "relative flex w-full flex-col rounded-t-lg border-none px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer sm:border sm:border-lightDark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
-          ? "z-20 rounded-b-none bg-lightDark border-middleDark"
-          : "rounded-b-lg hover:bg-lightDark",
+          ? "z-20 rounded-b-none border-middleDark bg-lightDark"
+          : "hover:bg-lightDark sm:rounded-b-lg",
       )}
       onClick={onToggle}
     >
       <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0"> {/* Added min-w-0 to allow truncation */}
-          <div className="relative flex h-6 w-6 shrink-0 items-center justify-center"> {/* Added shrink-0 */}
+        <div className="flex min-w-0 items-center gap-2">
+          {" "}
+          <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+            {" "}
             <span
               className={cn(
                 "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
@@ -54,13 +55,17 @@ export const GovernanceImplementationCard = ({
               -
             </span>
           </div>
-          <div className="flex md:flex-row flex-col md:items-center md:text-center text-left md:gap-2 gap-0 min-w-0"> {/* Added min-w-0 */}
-            <h3 className="text-white truncate">{title}</h3>
-            <span className="text-xl hidden md:inline font-thin text-foreground shrink-0">•</span>
-            <span className="text-foreground truncate shrink-0">{value}</span>
+          <div className="flex min-w-0 gap-0 text-left sm:flex-col md:flex-row md:items-center md:gap-2 md:text-center">
+            {" "}
+            <h3 className="truncate text-white">{title}</h3>
+            <span className="hidden shrink-0 text-xl font-thin text-foreground md:inline">
+              •
+            </span>
+            <span className="shrink-0 truncate text-foreground">{value}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 ml-2 shrink-0"> {/* Added ml-2 and shrink-0 */}
+        <div className="ml-2 flex shrink-0 items-center gap-2">
+          {" "}
           <span
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-0.5",
@@ -82,7 +87,8 @@ export const GovernanceImplementationCard = ({
                 className={cn(
                   "text-xs",
                   (riskLevel === RiskLevel.LOW ||
-                    riskLevel === RiskLevel.MEDIUM) && "text-foreground",
+                    riskLevel === RiskLevel.MEDIUM) &&
+                    "text-foreground",
                 )}
               >
                 •
@@ -94,12 +100,12 @@ export const GovernanceImplementationCard = ({
       <div
         className={cn(
           "absolute z-20 rounded-b-lg border border-t-0 border-middleDark bg-lightDark px-4",
-          "top-full -left-px w-[calc(100%+2px)] overflow-hidden",
-          isOpen 
-            ? "visible max-h-[1000px] transform-gpu transition-all duration-500 ease-in-out pb-5" 
-            : "invisible max-h-0 transform-gpu transition-all duration-200 ease-in-out pb-0"
+          "-left-px top-full w-[calc(100%+2px)] overflow-hidden",
+          isOpen
+            ? "visible max-h-[1000px] transform-gpu pb-5 transition-all duration-500 ease-in-out"
+            : "invisible max-h-0 transform-gpu pb-0 transition-all duration-200 ease-in-out",
         )}
-        onClick={(e) => e.stopPropagation()} // Prevent clicks on description from closing
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="pt-1">
           <p className="text-sm text-foreground">{description}</p>
