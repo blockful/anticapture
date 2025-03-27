@@ -23,7 +23,7 @@ import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
-  const { isMobile, isTablet, isDesktop } = useScreenSize();
+  const { isMobile, isTablet } = useScreenSize();
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
@@ -141,7 +141,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
               )}
               {dao}
             </div>
-            {!isMobile && !isTablet && isDesktop && details?.inAnalysis && (
+            {!isMobile && details?.inAnalysis && (
               <BadgeInAnalysis />
             )}
           </div>

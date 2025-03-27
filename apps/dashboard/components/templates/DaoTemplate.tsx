@@ -26,7 +26,7 @@ export const DaoTemplate = () => {
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
       <TokenDistributionSection />
-      <GovernanceActivitySection />
+      {/* <GovernanceActivitySection /> */}
     </>
   );
 };
