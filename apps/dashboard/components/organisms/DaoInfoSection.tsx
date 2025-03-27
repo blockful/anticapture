@@ -13,9 +13,10 @@ import daoConstantsByDaoId from "@/lib/dao-constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-
   const daoConstants = daoConstantsByDaoId[daoId];
-
+  if (daoConstants.inAnalysis) {
+    return null;
+  }
   const DaoInfo = () => {
     return (
       <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
@@ -33,6 +34,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       title={SECTIONS_CONSTANTS.daoInfo.title}
       icon={<GlobeIcon />}
       anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
+      className="gap-5 border-b-2 border-b-white/10 px-4 pb-8 pt-10 sm:gap-6 sm:px-0 sm:pb-0 sm:pt-0"
     >
       <DaoInfo />
     </TheSectionLayout>

@@ -44,7 +44,7 @@ const AccordionData: AccordionDataProps[] = [
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
-              Ideal Scenario (Full Delegation Considered):
+              Ideal Scenario (Full Delegation Considered)
             </p>
             <p className="card-text-accordion">
               Assumes that every delegated governance token is used in voting,
@@ -105,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
     ),
   },
   {
-    title: "Average Quorum",
+    title: "Average Turnout",
     icon: (
       <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
@@ -143,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <DollarIcon className="h-4 w-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -159,14 +159,14 @@ const AccordionData: AccordionDataProps[] = [
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
             </p>
-            <ChevronLeftIcon />
+            <ChevronLeftIcon className="text-white" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               treasury funds
             </p>
           </Badge>
           <EqualsIcon />
           <Badge className="group-hover:bg-dark">
-            <AlertTriangleIcon />
+            <AlertTriangleIcon className="text-white" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               DAO AT RISK
             </p>
@@ -195,7 +195,7 @@ export const ExtractableValueAccordion = () => {
               {item.icon}
               {item.title}
             </div>
-            <PlusIcon className="h-4 w-4 text-foreground transition-transform duration-300 group-data-[state=open]/trigger:rotate-45" />
+            <PlusIcon className="h-4 w-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
           <AccordionContent className="overflow-hidden transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>

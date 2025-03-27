@@ -1,9 +1,9 @@
 "use client";
 
-import { DaoIdEnum } from "@/lib/types/daos";
-import { SwitcherChart } from "@/components/atoms";
 import { Dispatch, SetStateAction } from "react";
 import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/lib/types/daos";
+import { SwitcherChart } from "@/components/atoms";
 
 export const ExtractableValueToggleHeader = ({
   treasuryMetric,
@@ -19,8 +19,8 @@ export const ExtractableValueToggleHeader = ({
   const { daoId }: { daoId: string } = useParams();
 
   return (
-    <div className="flex flex-col gap-1 md:flex-row md:gap-3">
-      <div className="flex flex-col gap-3 md:flex-row">
+    <div className="flex w-full items-start gap-1 sm:w-fit sm:items-end sm:gap-2 sm:pt-0 lg:flex-row lg:gap-3">
+      <div className="flex flex-col flex-wrap items-start gap-2 lg:flex-row lg:items-center lg:gap-3">
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-sm bg-green-500" />
           <p className="text-sm font-medium leading-normal text-[#a1a1aa]">
@@ -33,9 +33,9 @@ export const ExtractableValueToggleHeader = ({
           options={[`Non-${daoId.toUpperCase() as DaoIdEnum}`, "All"]}
         />
       </div>
-      <div className="flex items-center border-r border-[#27272a]" />
+      <div className="items-center border-r border-[#27272a] lg:flex" />
 
-      <div className="flex flex-col gap-3 md:flex-row">
+      <div className="flex flex-col flex-wrap items-start gap-2 lg:flex-row lg:items-center lg:gap-3">
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-sm bg-[#f87171]" />
           <p className="text-sm font-medium leading-normal text-[#a1a1aa]">

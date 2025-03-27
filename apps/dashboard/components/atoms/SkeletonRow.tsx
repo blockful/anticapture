@@ -1,7 +1,7 @@
-export const SkeletonRow = ({ width = "w-32", height = "h-5" }) => {
+export const SkeletonRow = ({ className, parentClassName }: { className: string; parentClassName?: string }) => {
   return (
-    <div className={`flex animate-pulse justify-center space-x-2`}>
-      <div className={`${width} ${height} rounded bg-gray-300`} />
+    <div className={`${parentClassName|| "flex animate-pulse justify-center space-x-2"} `}>
+      <div className={`${className} rounded bg-gray-300`} />
     </div>
   );
 };

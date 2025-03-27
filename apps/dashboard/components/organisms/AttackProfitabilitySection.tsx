@@ -26,6 +26,10 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
 
+  if (daoConstants.inAnalysis) {
+    return null;
+  }
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
@@ -34,6 +38,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
+          disableRecentData={true}
         />
       }
       description={SECTIONS_CONSTANTS.attackProfitability.description}
@@ -41,9 +46,11 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
       riskLevel={
         <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
       }
+      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
+        description=""
         headerComponent={
           <ExtractableValueToggleHeader
             treasuryMetric={treasuryMetric}

@@ -29,6 +29,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowClick?: (row: TData) => void;
+  disableRowClick?: (row: TData) => boolean;
 }
 
 export const TheTable = <TData, TValue>({
@@ -38,6 +39,7 @@ export const TheTable = <TData, TValue>({
   columns,
   data,
   onRowClick,
+  disableRowClick,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -76,20 +78,15 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table
-      style={{
-        borderRadius: "6px",
-        borderColor: "var(--color-lightDark)",
-        borderWidth: "1px",
-        overflow: "hidden",
-      }}
-      className="table-auto border-lightDark bg-dark text-foreground lg:table-fixed"
-    >
+    <Table className="table-auto bg-darkest md:bg-dark text-foreground lg:table-fixed">
       <TableHeader className="text-sm font-medium text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-lightDark">
             {headerGroup.headers.map((header) => (
-              <TableHead key={header.id}>
+              <TableHead 
+                key={header.id}
+                style={{ width: header.column.getSize() }}
+              >
                 {header.isPlaceholder
                   ? null
                   : flexRender(
@@ -107,21 +104,19 @@ export const TheTable = <TData, TValue>({
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent ${onRowClick && "cursor-pointer hover:bg-darkest"}`}
-                onClick={() => onRowClick?.(row.original)}
+                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "cursor-pointer hover:bg-lightDark" : ""}`}
+                onClick={() =>
+                  !disableRowClick?.(row.original) && onRowClick?.(row.original)
+                }
               >
-                {row.getVisibleCells().map((cell) => {
-                  const cellValue = cell.getValue();
-                  const isCellLoading = cellValue === null;
-                  return (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  );
-                })}
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell 
+                    key={cell.id}
+                    style={{ width: cell.column.getSize() }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
             );
           })

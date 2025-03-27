@@ -74,7 +74,7 @@ export const HeaderDAOSidebarDropdown = () => {
     <div className="relative inline-block w-full" ref={dropdownRef}>
       <div className="border-b border-b-lightDark p-3">
         <Link
-          className="group flex gap-x-1.5 text-xs font-medium text-foreground hover:text-white"
+          className="group flex gap-x-1.5 text-xs font-medium text-foreground hover:text-white transition-color duration-500 ease-in-out"
           href={"/"}
         >
           <ArrowLeftIcon className="group-[hover]:text-white" />
@@ -89,7 +89,7 @@ export const HeaderDAOSidebarDropdown = () => {
           aria-haspopup="menu"
         >
           <div className="flex w-full items-center gap-2">
-            <div className="rounded-[6px] border border-middleDark bg-lightDark p-1.5">
+            <div className="rounded-[6px] border border-lightDark bg-dark p-1.5">
               {currentItem?.icon}
             </div>
             <h1 className="text-sm font-semibold text-white">
@@ -104,7 +104,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="absolute z-50 mt-2 w-full rounded-lg border border-middleDark bg-lightDark p-2 shadow-lg"
+          className="absolute z-50 mt-2 w-full rounded-lg border border-lightDark bg-dark p-2 shadow-lg"
           role="menu"
         >
           {dropdownItems.map((item) => (
@@ -118,7 +118,7 @@ export const HeaderDAOSidebarDropdown = () => {
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
               <div className="flex w-full items-center gap-2">
-                <div className="rounded-[6px] border border-middleDark bg-lightDark p-1.5">
+                <div className="rounded-[6px] border border-lightDark bg-dark p-1.5">
                   {item.icon}
                 </div>
                 <h1 className="text-sm font-semibold text-white">

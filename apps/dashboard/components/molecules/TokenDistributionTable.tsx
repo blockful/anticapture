@@ -36,29 +36,29 @@ const metricDetails: Record<
   string,
   { icon: React.ReactNode; tooltip: string }
 > = {
-  "Total Supply": {
+  Total: {
     icon: undefined,
     tooltip: "The total number of tokens in existence.",
   },
-  "Delegated Supply": {
+  Delegated: {
     icon: undefined,
     tooltip:
       "The total number of tokens delegated, representing the maximum possible voting power. Any address holding over 50% of this supply effectively controls the DAO.",
   },
-  "Circulating Supply": {
+  Circulating: {
     icon: undefined,
     tooltip:
       "The total number of tokens issued or distributed. Often calculated as the total supply minus tokens held in DAO-controlled issuing or vesting contracts.",
   },
-  "CEX Supply": {
+  CEX: {
     icon: undefined,
     tooltip: "The number of tokens available on centralized exchanges.",
   },
-  "DEX Supply": {
+  DEX: {
     icon: undefined,
     tooltip: "The number of tokens available on decentralized exchanges.",
   },
-  "Lending Supply": {
+  Lending: {
     icon: undefined,
     tooltip:
       "The number of tokens that can be borrowed through lending protocols.",
@@ -90,14 +90,14 @@ export const TokenDistributionTable = () => {
         const metric: string = row.getValue("metric");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
           </p>
         );
       },
-      header: "Metrics",
+      header: "Supply",
     },
     {
       accessorKey: "currentValue",
@@ -105,11 +105,16 @@ export const TokenDistributionTable = () => {
         const currentValue: number = row.getValue("currentValue");
 
         if (currentValue === null) {
-          return <SkeletonRow />;
+          return (
+            <SkeletonRow
+              className="h-5 w-32"
+              parentClassName="justify-end flex animate-pulse space-x-2"
+            />
+          );
         }
 
         return (
-          <div className="flex items-center justify-center text-center">
+          <div className="flex items-center justify-end text-end px-4 py-3">
             {currentValue && formatNumberUserReadable(currentValue)}
           </div>
         );
@@ -117,7 +122,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full"
+          className="w-full justify-end px-0 text-end"
           onClick={() => column.toggleSorting()}
         >
           Current value ({daoData?.id})
@@ -144,12 +149,19 @@ export const TokenDistributionTable = () => {
         const variation: string = row.getValue("variation");
 
         if (variation === null) {
-          return <SkeletonRow />;
+          return (
+            <div className="flex items-center justify-end">
+              <SkeletonRow
+                className="h-5 w-32"
+                parentClassName="justify-end flex animate-pulse space-x-2"
+              />
+            </div>
+          );
         }
 
         return (
           <p
-            className={`flex items-center justify-center gap-1 text-center ${
+            className={`px-4 py-3 flex items-center justify-end gap-1 text-end ${
               Number(variation) > 0
                 ? "text-[#4ade80]"
                 : Number(variation) < 0
@@ -169,7 +181,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full"
+          className="w-full justify-end px-0 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -196,13 +208,13 @@ export const TokenDistributionTable = () => {
           row.getValue("chartLastDays") ?? [];
         if (chartLastDays.length === 0) {
           return (
-            <div className="flex w-full">
-              <SkeletonRow width="w-[340px]" height="h-[45px]" />
+            <div className="flex w-full justify-center">
+              <SkeletonRow className="h-5 w-32" />
             </div>
           );
         }
         return (
-          <div className="flex w-full">
+          <div className="flex w-full py-2.5 justify-center">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
               strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
@@ -211,7 +223,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start">
+        <div className="flex w-full items-start justify-start px-6">
           Last {days.slice(0, -1)} days
         </div>
       ),
@@ -223,7 +235,7 @@ export const TokenDistributionTable = () => {
       columns={tokenDistributionColumns}
       data={[
         {
-          metric: "Total Supply",
+          metric: "Total",
           currentValue: totalSupply.value
             ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
             : null,
@@ -233,7 +245,7 @@ export const TokenDistributionTable = () => {
           chartLastDays: totalSupplyChart,
         },
         {
-          metric: "Delegated Supply",
+          metric: "Delegated",
           currentValue: delegatedSupply.value
             ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
             : null,
@@ -243,7 +255,7 @@ export const TokenDistributionTable = () => {
           chartLastDays: delegatedSupplyChart,
         },
         {
-          metric: "Circulating Supply",
+          metric: "Circulating",
           currentValue: circulatingSupply.value
             ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))
             : null,
@@ -253,7 +265,7 @@ export const TokenDistributionTable = () => {
           chartLastDays: circulatingSupplyChart,
         },
         {
-          metric: "CEX Supply",
+          metric: "CEX",
           currentValue: cexSupply.value
             ? String(BigInt(cexSupply.value) / BigInt(10 ** 18))
             : null,
@@ -263,7 +275,7 @@ export const TokenDistributionTable = () => {
           chartLastDays: cexSupplyChart,
         },
         {
-          metric: "DEX Supply",
+          metric: "DEX",
           currentValue: dexSupply.value
             ? String(BigInt(dexSupply.value) / BigInt(10 ** 18))
             : null,
@@ -273,7 +285,7 @@ export const TokenDistributionTable = () => {
           chartLastDays: dexSupplyChart,
         },
         {
-          metric: "Lending Supply",
+          metric: "Lending",
           currentValue: lendingSupply.value
             ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18))
             : null,
@@ -285,6 +297,7 @@ export const TokenDistributionTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
+      onRowClick={() => {}}
     />
   );
 };
