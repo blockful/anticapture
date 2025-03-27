@@ -1,4 +1,5 @@
 import daoConstantsByDaoId from "@/lib/dao-constants";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
@@ -35,7 +36,7 @@ export const useTreasuryAssetNonDaoToken = (
 ) => {
   const key = daoId && days ? [`treasury-assets`, daoId, days] : null;
 
-  const { supportsLiquidTreasuryCall } = daoConstantsByDaoId[daoId];
+  const { supportsLiquidTreasuryCall } = daoConstantsByDaoId[daoId] as DaoConstantsFullySupported;
 
   // Only create a valid key if the DAO supports liquid treasury calls
   const fetchKey = supportsLiquidTreasuryCall ? key : null;
