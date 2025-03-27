@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -12,6 +13,7 @@ export const TheSectionLayout = ({
   riskLevel,
   children,
   anchorId,
+  className,
 }: {
   icon?: JSX.Element;
   title: string;
@@ -20,6 +22,7 @@ export const TheSectionLayout = ({
   riskLevel?: ReactNode;
   children: ReactNode;
   anchorId: string;
+  className?: string;
 }) => {
   const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
@@ -35,7 +38,14 @@ export const TheSectionLayout = ({
   }, [inView, anchorId]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-6" id={anchorId} ref={ref}>
+    <div
+      className={cn(
+        "flex h-full w-full flex-col gap-6 sm:border-none",
+        className,
+      )}
+      id={anchorId}
+      ref={ref}
+    >
       <div className="flex h-full w-full flex-col gap-2">
         <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
           <div className="flex items-center gap-3">
@@ -55,10 +65,13 @@ export const TheSectionLayout = ({
         </div>
       </div>
       {riskLevel && switchDate ? (
-        <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
-          <div>{riskLevel}</div>
-          <div>{switchDate}</div>
-        </div>
+        <>
+          <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
+            <div>{riskLevel}</div>
+            <div>{switchDate}</div>
+          </div>
+          <div className="w-full border-b border-b-white/10 sm:hidden" />
+        </>
       ) : (
         !riskLevel &&
         switchDate &&
