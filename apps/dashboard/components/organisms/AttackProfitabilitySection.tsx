@@ -38,6 +38,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
+          disableRecentData={true}
         />
       }
       description={SECTIONS_CONSTANTS.attackProfitability.description}
