@@ -32,7 +32,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       title={SECTIONS_CONSTANTS.daoInfo.title}
       icon={<GlobeIcon />}
       anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
-      className="gap-5 border-b-2 border-b-white/10 px-4 pb-8 pt-16 sm:gap-6 sm:px-0 sm:pb-0 sm:pt-0"
+      className="gap-5 border-b-2 border-b-white/10 px-4 pb-8 pt-10 sm:gap-6 sm:px-0 sm:pb-0 sm:pt-0"
     >
       <DaoInfo />
     </TheSectionLayout>
