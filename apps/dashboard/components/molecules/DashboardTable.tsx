@@ -67,7 +67,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       <div className="flex items-center justify-end px-4 py-3 text-end text-white">
         {formattedSupply} | {" "}
         <div className="text-sm pl-1">
-          ({Number(supplyData.changeRate || 0 * 100).toFixed(2)}%)
+          ({(Number(supplyData.changeRate || 0)*100).toFixed(2)}%)
         </div>
       </div>
     );
