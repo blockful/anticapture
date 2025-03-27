@@ -2,9 +2,20 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
 import { RiskLevel } from "@/lib/enums";
+import { StaticImageData } from "next/image";
 
-export type DaoConstants = {
+export type DaoConstants = DaoConstantsInAnalysis | DaoConstantsFullySupported;
+
+export type DaoConstantsInAnalysis = {
   name: string;
+  icon: StaticImageData;
+  inAnalysis: true;
+};
+
+export type DaoConstantsFullySupported = {
+  name: string;
+  icon: StaticImageData;
+  inAnalysis: false;
   contracts: {
     governor: Address;
     token: Address;

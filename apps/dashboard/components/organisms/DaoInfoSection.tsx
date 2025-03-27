@@ -14,7 +14,9 @@ import { DaoIdEnum } from "@/lib/types/daos";
 
 export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConstants = daoConstantsByDaoId[daoId];
-
+  if (daoConstants.inAnalysis) {
+    return null;
+  }
   const DaoInfo = () => {
     return (
       <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">

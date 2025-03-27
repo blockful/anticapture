@@ -15,6 +15,9 @@ export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConstantsByDaoId[daoIdEnum];
+  if (daoConstants.inAnalysis) {
+    return null;
+  }
   return (
     <>
       <DaoInfoSection daoId={daoIdEnum} />
