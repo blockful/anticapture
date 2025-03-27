@@ -14,6 +14,7 @@ import {
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
 import daoConstantsByDaoId from "@/lib/dao-constants";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
@@ -21,13 +22,12 @@ export const HeaderDAOSidebar = () => {
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
-
   return (
     <BaseHeaderLayoutSidebar>
-      {isValidDao && (
+      {isValidDao ? (
         <div className="flex w-full flex-col">
           <HeaderDAOSidebarDropdown />
-          <div className="flex flex-col px-4 pb-4 pt-1 gap-3">
+          <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
               icon={PieChartIcon}
@@ -48,8 +48,11 @@ export const HeaderDAOSidebar = () => {
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
             />
-            {!!daoConstantsByDaoId[daoId as DaoIdEnum]
-              .governanceImplementation && (
+            {!!(
+              daoConstantsByDaoId[
+                daoId as DaoIdEnum
+              ] as DaoConstantsFullySupported
+            ).governanceImplementation && (
               <ButtonHeaderDAOSidebar
                 anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
                 icon={Lightbulb}
@@ -58,6 +61,8 @@ export const HeaderDAOSidebar = () => {
             )}
           </div>
         </div>
+      ) : (
+        <> </>
       )}
       {!isDefault && !isValidDao && (
         <div className="flex flex-col items-center space-x-2">

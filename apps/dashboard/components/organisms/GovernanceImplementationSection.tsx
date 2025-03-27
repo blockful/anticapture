@@ -13,6 +13,10 @@ export const GovernanceImplementationSection = ({
   daoId: DaoIdEnum;
 }) => {
   const [openCardId, setOpenCardId] = useState<string | null>(null);
+  
+  if (daoConstantsByDaoId[daoId].inAnalysis) {
+    return null;
+  }
 
   const governanceImplementationFields =
     daoConstantsByDaoId[daoId].governanceImplementation?.fields;
