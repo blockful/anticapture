@@ -78,12 +78,15 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table className="table-auto bg-dark text-foreground lg:table-fixed">
+    <Table className="table-auto bg-darkest md:bg-dark text-foreground lg:table-fixed">
       <TableHeader className="text-sm font-medium text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-lightDark">
             {headerGroup.headers.map((header) => (
-              <TableHead key={header.id}>
+              <TableHead 
+                key={header.id}
+                style={{ width: header.column.getSize() }}
+              >
                 {header.isPlaceholder
                   ? null
                   : flexRender(
@@ -107,7 +110,10 @@ export const TheTable = <TData, TValue>({
                 }
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell 
+                    key={cell.id}
+                    style={{ width: cell.column.getSize() }}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
