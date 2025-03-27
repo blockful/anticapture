@@ -56,7 +56,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     }, [supplyData, rowIndex]);
 
     if (!supplyData) {
-      return <SkeletonRow className="h-5 w-full" />;
+      return <SkeletonRow className="h-5 w-full max-w-32" />;
     }
 
     const formattedSupply = formatNumberUserReadable(
@@ -108,7 +108,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConstantsByDaoId[dao as DaoIdEnum] : null;
         return (
-          <p className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+          <div className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
             <div className="flex w-20 items-center gap-2">
               {details && (
                 <Image
@@ -121,8 +121,8 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
               )}
               {dao}
             </div>
-            {!isMobile && <BadgeInAnalysis />}
-          </p>
+            {details?.inAnalysis && !isMobile && <BadgeInAnalysis />}
+          </div>
         );
       },
       header: () => <h4 className="font-normal">DAO</h4>,
