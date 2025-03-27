@@ -43,11 +43,11 @@ export const HeaderDAOSidebar = () => {
               icon={ArrowLeftRight}
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
-            <ButtonHeaderDAOSidebar
+            {/* <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
-            />
+            /> */}
             {!!(
               daoConstantsByDaoId[
                 daoId as DaoIdEnum
