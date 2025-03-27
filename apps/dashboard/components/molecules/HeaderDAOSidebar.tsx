@@ -22,6 +22,11 @@ export const HeaderDAOSidebar = () => {
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
+
+  const daoConstants = daoConstantsByDaoId[
+    daoId as DaoIdEnum
+  ] as DaoConstantsFullySupported;
+
   return (
     <BaseHeaderLayoutSidebar>
       {isValidDao ? (
@@ -54,11 +59,13 @@ export const HeaderDAOSidebar = () => {
               icon={ArrowLeftRight}
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
-            <ButtonHeaderDAOSidebar
-              anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-              icon={ActivityIcon}
-              label={SECTIONS_CONSTANTS.governanceActivity.title}
-            />
+            {!daoConstants.removeGovernanceActivitySection && (
+              <ButtonHeaderDAOSidebar
+                anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
+                icon={ActivityIcon}
+                label={SECTIONS_CONSTANTS.governanceActivity.title}
+              />
+            )}
           </div>
         </div>
       ) : (

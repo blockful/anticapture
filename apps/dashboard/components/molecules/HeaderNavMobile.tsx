@@ -2,28 +2,19 @@
 
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/components/atoms";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
-import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
-import { usePathname } from "next/navigation";
-
-interface NavOption {
-  anchorId: string;
-  title: string;
-}
 
 export const HeaderNavMobile = () => {
-  const pathname = usePathname();
-  const isDefault = pathname === "/";
-  const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
+  const { daoId }: { daoId: string } = useParams();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConstantsByDaoId[
+    daoIdEnum
+  ] as DaoConstantsFullySupported;
 
-  const hasGovernanceImplementation =
-    isValidDao &&
-    !!(daoConstantsByDaoId[daoId as DaoIdEnum] as DaoConstantsFullySupported)
-      .governanceImplementation;
-
-  const options: NavOption[] = [
+  const options = [
     {
       anchorId: SECTIONS_CONSTANTS.daoInfo.anchorId,
       title: SECTIONS_CONSTANTS.daoInfo.title,
@@ -32,7 +23,7 @@ export const HeaderNavMobile = () => {
       anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
       title: SECTIONS_CONSTANTS.attackProfitability.title,
     },
-    ...(hasGovernanceImplementation
+    ...(daoConstants.governanceImplementation
       ? [
           {
             anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
@@ -44,10 +35,14 @@ export const HeaderNavMobile = () => {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
       title: SECTIONS_CONSTANTS.tokenDistribution.title,
     },
-    {
-      anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
-      title: SECTIONS_CONSTANTS.governanceActivity.title,
-    },
+    ...(daoConstants.removeGovernanceActivitySection
+      ? []
+      : [
+          {
+            anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
+            title: SECTIONS_CONSTANTS.governanceActivity.title,
+          },
+        ]),
   ];
 
   return (
