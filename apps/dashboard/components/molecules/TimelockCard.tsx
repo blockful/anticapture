@@ -8,13 +8,13 @@ import {
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
 export const TimelockCard = ({
   daoConstants,
 }: {
-  daoConstants: DaoConstants;
+  daoConstants: DaoConstantsFullySupported;
 }) => {
   const timelockData: CardData = {
     title: "Timelock",

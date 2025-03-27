@@ -26,6 +26,10 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
 
+  if (daoConstants.inAnalysis) {
+    return null;
+  }
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
@@ -34,6 +38,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
+          disableRecentData={true}
         />
       }
       description={SECTIONS_CONSTANTS.attackProfitability.description}

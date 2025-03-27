@@ -1,28 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/client/utils";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { CheckIcon, ChevronDown } from "lucide-react";
 
+interface SwitcherDateProps {
+  setTimeInterval: (timeInterval: TimeInterval) => void;
+  defaultValue: TimeInterval;
+  disableRecentData?: boolean; // If true, the 7 days and 30 days tabs will not be shown
+}
+
 export const SwitcherDate = ({
   setTimeInterval,
   defaultValue,
-}: {
-  setTimeInterval: (timeInterval: TimeInterval) => void;
-  defaultValue: TimeInterval;
-}) => {
+  disableRecentData = false,
+}: SwitcherDateProps) => {
   const { isMobile } = useScreenSize();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<TimeInterval>(defaultValue);
+
+  const activeTimeIntervals = useMemo(() => {
+    const intervals = Object.values(TimeInterval);
+    return disableRecentData
+      ? intervals.filter(
+          (interval) =>
+            interval !== TimeInterval.SEVEN_DAYS &&
+            interval !== TimeInterval.THIRTY_DAYS,
+        )
+      : intervals;
+  }, [disableRecentData]);
 
   const handleSelect = (value: TimeInterval) => {
     setIsSelected(value);
     setTimeInterval(value);
     setIsOpen(false);
   };
+
+  const formatInterval = (interval: TimeInterval) =>
+    interval === TimeInterval.ONE_YEAR ? "1y" : interval;
 
   return isMobile ? (
     <div
@@ -45,7 +63,9 @@ export const SwitcherDate = ({
             : "border-transparent bg-lightDark",
         )}
       >
-        <span className="font-medium- text-sm">{isSelected}</span>
+        <span className="font-medium- text-sm">
+          {formatInterval(isSelected)}
+        </span>
         <ChevronDown
           className={cn(
             "size-3 transition-transform duration-200",
@@ -56,7 +76,7 @@ export const SwitcherDate = ({
 
       {isOpen && (
         <div className="absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
-          {Object.values(TimeInterval).map((interval) => (
+          {activeTimeIntervals.map((interval) => (
             <button
               key={interval}
               className={cn(
@@ -65,7 +85,7 @@ export const SwitcherDate = ({
               )}
               onClick={() => handleSelect(interval)}
             >
-              {interval === TimeInterval.ONE_YEAR ? "1y" : interval}
+              {formatInterval(interval)}
               {isSelected == interval && <CheckIcon className="size-3.5" />}
             </button>
           ))}
@@ -75,34 +95,16 @@ export const SwitcherDate = ({
   ) : (
     <Tabs defaultValue={defaultValue}>
       <TabsList>
-        <TabsTrigger
-          className="w-[52px] px-3 py-0.5 text-sm font-normal"
-          value={TimeInterval.SEVEN_DAYS}
-          onClick={() => setTimeInterval(TimeInterval.SEVEN_DAYS)}
-        >
-          {TimeInterval.SEVEN_DAYS}
-        </TabsTrigger>
-        <TabsTrigger
-          className="w-[52px] px-3 py-0.5 text-sm font-normal"
-          value={TimeInterval.THIRTY_DAYS}
-          onClick={() => setTimeInterval(TimeInterval.THIRTY_DAYS)}
-        >
-          {TimeInterval.THIRTY_DAYS}
-        </TabsTrigger>
-        <TabsTrigger
-          className="w-[52px] px-3 py-0.5 text-sm font-normal"
-          value={TimeInterval.NINETY_DAYS}
-          onClick={() => setTimeInterval(TimeInterval.NINETY_DAYS)}
-        >
-          {TimeInterval.NINETY_DAYS}
-        </TabsTrigger>
-        <TabsTrigger
-          className="w-[52px] px-3 py-0.5 text-sm font-normal"
-          value={TimeInterval.ONE_YEAR}
-          onClick={() => setTimeInterval(TimeInterval.ONE_YEAR)}
-        >
-          1y
-        </TabsTrigger>
+        {activeTimeIntervals.map((interval) => (
+          <TabsTrigger
+            key={interval}
+            className="w-[52px] px-3 py-0.5 text-sm font-normal"
+            value={interval}
+            onClick={() => setTimeInterval(interval)}
+          >
+            {formatInterval(interval)}
+          </TabsTrigger>
+        ))}
       </TabsList>
     </Tabs>
   );

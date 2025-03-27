@@ -17,6 +17,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();
 
+  if (daoConstants.inAnalysis) {
+    return null;
+  }
+
   if (!daoData) {
     return <Skeleton />;
   }
