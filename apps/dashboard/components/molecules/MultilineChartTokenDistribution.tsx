@@ -16,6 +16,7 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { TokenDistributionCustomTooltip } from "@/components/atoms";
+import { MILLISECONDS_PER_SECOND } from "@/lib/client/constants";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[]>;
@@ -77,7 +78,15 @@ export const MultilineChartTokenDistribution = ({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(date) => timestampToReadableDate(date)}
+              tickFormatter={(timestamp) =>
+                new Date(
+                  Number(timestamp * MILLISECONDS_PER_SECOND),
+                ).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              }
             />
             <YAxis
               domain={["auto", "auto"]}
