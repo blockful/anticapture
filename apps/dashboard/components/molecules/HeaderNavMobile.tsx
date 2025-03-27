@@ -23,6 +23,14 @@ export const HeaderNavMobile = () => {
       anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
       title: SECTIONS_CONSTANTS.attackProfitability.title,
     },
+    ...(daoConstants.governanceImplementation
+      ? [
+          {
+            anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
+            title: SECTIONS_CONSTANTS.governanceImplementation.title,
+          },
+        ]
+      : []),
     {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
       title: SECTIONS_CONSTANTS.tokenDistribution.title,
@@ -35,10 +43,6 @@ export const HeaderNavMobile = () => {
             title: SECTIONS_CONSTANTS.governanceActivity.title,
           },
         ]),
-    {
-      anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
-      title: SECTIONS_CONSTANTS.governanceImplementation.title,
-    },
   ];
 
   return (

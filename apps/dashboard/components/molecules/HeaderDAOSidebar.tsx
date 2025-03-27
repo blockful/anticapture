@@ -43,6 +43,17 @@ export const HeaderDAOSidebar = () => {
               icon={CrossHairIcon}
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
+            {!!(
+              daoConstantsByDaoId[
+                daoId as DaoIdEnum
+              ] as DaoConstantsFullySupported
+            ).governanceImplementation && (
+              <ButtonHeaderDAOSidebar
+                anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+                icon={Lightbulb}
+                label={SECTIONS_CONSTANTS.governanceImplementation.title}
+              />
+            )}
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               icon={ArrowLeftRight}
@@ -53,17 +64,6 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
                 icon={ActivityIcon}
                 label={SECTIONS_CONSTANTS.governanceActivity.title}
-              />
-            )}
-            {!!(
-              daoConstantsByDaoId[
-                daoId as DaoIdEnum
-              ] as DaoConstantsFullySupported
-            ).governanceImplementation && (
-              <ButtonHeaderDAOSidebar
-                anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
-                icon={Lightbulb}
-                label={SECTIONS_CONSTANTS.governanceImplementation.title}
               />
             )}
           </div>
