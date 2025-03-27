@@ -14,16 +14,16 @@ export const HeaderNavMobile = () => {
       title: SECTIONS_CONSTANTS.attackProfitability.title,
     },
     {
+      anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
+      title: SECTIONS_CONSTANTS.governanceImplementation.title,
+    },
+    {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
       title: SECTIONS_CONSTANTS.tokenDistribution.title,
     },
     {
       anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
       title: SECTIONS_CONSTANTS.governanceActivity.title,
-    },
-    {
-      anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
-      title: SECTIONS_CONSTANTS.governanceImplementation.title,
     },
   ];
 
