@@ -105,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
     ),
   },
   {
-    title: "Average Quorum",
+    title: "Average Turnout",
     icon: (
       <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
