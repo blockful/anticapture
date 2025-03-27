@@ -72,7 +72,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     }, [supplyData, rowIndex]);
 
     if (!supplyData) {
-      return <SkeletonRow />;
+      return <SkeletonRow className="w-full h-5" />;
     }
 
     const formattedSupply = formatNumberUserReadable(
@@ -80,7 +80,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="flex items-center justify-center text-center">
+      <div className="px-4 py-3 flex items-center justify-end text-end">
         {formattedSupply}
       </div>
     );
@@ -90,7 +90,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     {
       accessorKey: "#",
       cell: ({ row }) => (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 text-[#fafafa]">
+        <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 text-[#fafafa]">
           {row.index + 1}
         </p>
       ),
@@ -100,7 +100,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           className="w-fit"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          #
+          <h4 className="font-normal">#</h4>
           <ArrowUpDown
             props={{
               className: "h-4 w-4",
@@ -124,7 +124,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoDetails[dao as DaoIdEnum] : null;
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
             {details && (
               <Image src={details.icon} alt={"OK"} width={24} height={24} />
             )}
@@ -132,7 +132,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           </p>
         );
       },
-      header: "DAO",
+      header: () => <h4 className="font-normal">DAO</h4>,
     },
     {
       accessorKey: "delegatedSupply",
@@ -147,10 +147,10 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full"
+          className="w-full justify-end px-0"
           onClick={() => column.toggleSorting()}
         >
-          Delegated Supply ({days})
+          <h4 className="font-normal">Delegated Supply ({days})</h4>
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",

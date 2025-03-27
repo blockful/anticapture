@@ -114,6 +114,6 @@
   }
 
   .card-text-accordion {
-    @apply text-sm font-normal leading-tight text-foreground
+    @apply text-sm font-normal leading-normal text-foreground
   }
 }

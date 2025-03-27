@@ -10,7 +10,7 @@ export const DollarIcon = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g opacity="0.5">
+      <g>
         <path
           d="M10 1.66675V18.3334"
           stroke="currentColor"

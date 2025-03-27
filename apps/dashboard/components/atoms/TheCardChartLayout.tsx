@@ -29,9 +29,11 @@ export const TheCardChartLayout = ({
           <CardTitle className="flex items-center gap-2.5 text-sm font-medium leading-normal text-[#fafafa]">
             {title}
           </CardTitle>
-          <CardDescription className="flex text-sm font-normal text-foreground">
-            {description}
-          </CardDescription>
+          {description && (
+            <CardDescription className="flex text-sm font-normal text-foreground">
+              {description}
+            </CardDescription>
+          )}
         </div>
         {headerComponent}
       </CardHeader>

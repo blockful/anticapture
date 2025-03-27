@@ -84,6 +84,7 @@ export const SwitcherChart = ({
       <TabsList>
         {options.map((option) => (
           <TabsTrigger
+            className="px-3 py-0.5 text-sm font-normal"
             key={option}
             value={option}
             onClick={() => setMetric(option)}

@@ -79,7 +79,7 @@ export const GovernanceActivityTable = () => {
         const details = metric ? metricDetails[metric] : null;
 
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
@@ -94,11 +94,15 @@ export const GovernanceActivityTable = () => {
         const average: number = row.getValue("average");
 
         if (!average) {
-          return <SkeletonRow />;
+          return (
+            <div className="flex items-center justify-end">
+              <SkeletonRow className="h-5 w-32" />
+            </div>
+          );
         }
 
         return (
-          <div className="flex items-center justify-center text-center">
+          <div className="px-4 flex items-center justify-end text-end">
             {average && formatNumberUserReadable(average)}
           </div>
         );
@@ -106,7 +110,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full"
+          className="w-full justify-end px-0"
           onClick={() => column.toggleSorting()}
         >
           Average
@@ -132,18 +136,22 @@ export const GovernanceActivityTable = () => {
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
         if (!variation) {
-          return <SkeletonRow />;
+          return (
+            <div className="flex items-center justify-end">
+              <SkeletonRow className="h-5 w-32" />
+            </div>
+          );
         }
         if (variation == "-") {
           return (
-            <p className="flex items-center justify-center gap-1 text-center">
+            <p className="flex items-center justify-end gap-1 px-4 py-3 text-end">
               -
             </p>
           );
         }
         return (
           <p
-            className={`flex items-center justify-center gap-1 text-center ${
+            className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
                 ? "text-[#4ade80]"
                 : Number(variation) < 0
@@ -163,7 +171,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full"
+          className="w-full justify-end px-0"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -192,14 +200,14 @@ export const GovernanceActivityTable = () => {
 
         if (variation === null) {
           return (
-            <div className="flex w-full">
-              <SkeletonRow width="w-[340px]" height="h-[45px]" />
+            <div className="flex w-full px-4 py-3">
+              <SkeletonRow className="h-5 w-[320px]" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-[45px] w-full items-start justify-start px-4">
+          <div className="flex h-[52px] w-full items-start justify-start">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
               strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
@@ -208,7 +216,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start">
+        <div className="flex w-full items-start justify-start px-6">
           Last {days.slice(0, -1)} days
         </div>
       ),
@@ -269,6 +277,7 @@ export const GovernanceActivityTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
+      onRowClick={() => {}}
     />
   );
 };

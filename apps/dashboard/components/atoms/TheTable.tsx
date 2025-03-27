@@ -77,13 +77,7 @@ export const TheTable = <TData, TValue>({
 
   return (
     <Table
-      style={{
-        borderRadius: "6px",
-        borderColor: "var(--color-lightDark)",
-        borderWidth: "1px",
-        overflow: "hidden",
-      }}
-      className="table-auto border-lightDark bg-dark text-foreground lg:table-fixed"
+      className="table-auto bg-dark text-foreground lg:table-fixed"
     >
       <TableHeader className="text-sm font-medium text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
@@ -107,7 +101,7 @@ export const TheTable = <TData, TValue>({
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent ${onRowClick && "cursor-pointer hover:bg-darkest"}`}
+                className={`border-transparent ${onRowClick && "cursor-pointer hover:bg-lightDark"}`}
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => {

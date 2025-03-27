@@ -76,28 +76,28 @@ export const SwitcherDate = ({
     <Tabs defaultValue={defaultValue}>
       <TabsList>
         <TabsTrigger
-          className="min-w-[72px] px-1.5 py-0.5 text-sm font-medium"
+          className="w-[52px] px-3 py-0.5 text-sm font-normal"
           value={TimeInterval.SEVEN_DAYS}
           onClick={() => setTimeInterval(TimeInterval.SEVEN_DAYS)}
         >
           {TimeInterval.SEVEN_DAYS}
         </TabsTrigger>
         <TabsTrigger
-          className="min-w-[72px] px-1.5 py-0.5 text-sm font-medium"
+          className="w-[52px] px-3 py-0.5 text-sm font-normal"
           value={TimeInterval.THIRTY_DAYS}
           onClick={() => setTimeInterval(TimeInterval.THIRTY_DAYS)}
         >
           {TimeInterval.THIRTY_DAYS}
         </TabsTrigger>
         <TabsTrigger
-          className="min-w-[72px] px-1.5 py-0.5 text-sm font-medium"
+          className="w-[52px] px-3 py-0.5 text-sm font-normal"
           value={TimeInterval.NINETY_DAYS}
           onClick={() => setTimeInterval(TimeInterval.NINETY_DAYS)}
         >
           {TimeInterval.NINETY_DAYS}
         </TabsTrigger>
         <TabsTrigger
-          className="min-w-[72px] px-1.5 py-0.5 text-sm font-medium"
+          className="w-[52px] px-3 py-0.5 text-sm font-normal"
           value={TimeInterval.ONE_YEAR}
           onClick={() => setTimeInterval(TimeInterval.ONE_YEAR)}
         >
