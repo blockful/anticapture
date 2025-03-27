@@ -30,6 +30,8 @@ export const DaoTemplate = () => {
       {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
+      <TokenDistributionSection />
+      <GovernanceActivitySection />
     </>
   );
 };
