@@ -41,6 +41,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
       riskLevel={
         <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
       }
+      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
