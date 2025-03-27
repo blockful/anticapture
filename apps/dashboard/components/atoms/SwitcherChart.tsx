@@ -29,7 +29,7 @@ export const SwitcherChart = ({
 
   return isMobile ? (
     <div
-      className="relative"
+      className="relative min-w-[100px]"
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
           setIsOpen(false);
