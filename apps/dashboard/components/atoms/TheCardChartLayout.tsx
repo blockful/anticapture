@@ -20,7 +20,7 @@ export const TheCardChartLayout = ({
     <Card className="flex flex-col rounded-lg border border-lightDark bg-dark shadow sm:max-w-full xl4k:max-w-full">
       <CardHeader className="flex flex-col justify-between rounded-t-lg px-4 py-3 md:flex-row">
         <CardTitle className="items-center gap-2.5 text-sm font-medium leading-normal text-[#fafafa]">
-          {title} <br/>
+          {title} <br />
           {description && (
             <p className="text-sm font-normal leading-normal text-foreground">
               {description}
@@ -30,7 +30,7 @@ export const TheCardChartLayout = ({
         {headerComponent}
       </CardHeader>
 
-      <CardContent className="flex h-full w-full flex-col px-4 py-4 lg:flex-row">
+      <CardContent className="flex h-full w-full flex-col p-0 sm:px-4 sm:py-4 lg:flex-row">
         {children}
       </CardContent>
     </Card>
