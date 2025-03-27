@@ -44,7 +44,7 @@ const AccordionData: AccordionDataProps[] = [
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
-              Ideal Scenario (Full Delegation Considered):
+              Ideal Scenario (Full Delegation Considered)
             </p>
             <p className="card-text-accordion">
               Assumes that every delegated governance token is used in voting,
@@ -159,14 +159,14 @@ const AccordionData: AccordionDataProps[] = [
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
             </p>
-            <ChevronLeftIcon />
+            <ChevronLeftIcon className="text-white" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               treasury funds
             </p>
           </Badge>
           <EqualsIcon />
           <Badge className="group-hover:bg-dark">
-            <AlertTriangleIcon />
+            <AlertTriangleIcon className="text-white" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               DAO AT RISK
             </p>
