@@ -133,16 +133,11 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
         if (daoConstantsByDaoId[daoId].inAnalysis) {
-          return isMobile ? (
+          return (
             <div className="flex items-center justify-end px-4 py-3 text-end">
-              <BadgeInAnalysis />
+             {isMobile ? (  <BadgeInAnalysis />) : '-'}
             </div>
-          ) : (
-            <div className="flex items-center justify-end px-4 py-3 text-end">
-              -
-            </div>
-          );
-        }
+          )
         return (
           <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
         );
