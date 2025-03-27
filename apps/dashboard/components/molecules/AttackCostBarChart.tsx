@@ -417,7 +417,7 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
         dy={10}
         textAnchor="middle"
         fill="#A1A1AA"
-        className="text-[8px] font-light sm:text-xs sm:font-medium"
+        className="text-[12px] font-medium leading-4 sm:text-xs"
       >
         {firstLine}
       </text>
@@ -428,7 +428,7 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
           dy={28}
           textAnchor="middle"
           fill="#A1A1AA"
-          className="text-[8px] font-light sm:text-xs sm:font-medium"
+          className="text-[12px] font-medium leading-4 sm:text-xs"
         >
           {secondLine}
         </text>
