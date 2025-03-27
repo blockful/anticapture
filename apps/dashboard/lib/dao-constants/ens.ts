@@ -145,4 +145,5 @@ export const ENS: DaoConstants = {
       },
     ].sort((a, b) => sortByRiskLevel(a, b, "desc")),
   },
+  removeGovernanceActivitySection: true,
 };

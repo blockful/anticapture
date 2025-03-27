@@ -18,12 +18,15 @@ export const DaoTemplate = () => {
   if (daoConstants.inAnalysis) {
     return null;
   }
+
   return (
     <>
       <DaoInfoSection daoId={daoIdEnum} />
       <AttackProfitabilitySection daoId={daoIdEnum} />
       <TokenDistributionSection />
-      <GovernanceActivitySection />
+      {!daoConstants.removeGovernanceActivitySection && (
+        <GovernanceActivitySection />
+      )}
       {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}

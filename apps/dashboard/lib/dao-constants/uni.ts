@@ -25,4 +25,5 @@ export const UNI: DaoConstants = {
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
   },
+  removeGovernanceActivitySection: false,
 };
