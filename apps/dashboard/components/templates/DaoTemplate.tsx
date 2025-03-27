@@ -23,15 +23,13 @@ export const DaoTemplate = () => {
     <>
       <DaoInfoSection daoId={daoIdEnum} />
       <AttackProfitabilitySection daoId={daoIdEnum} />
-      <TokenDistributionSection />
-      {!daoConstants.removeGovernanceActivitySection && (
-        <GovernanceActivitySection />
-      )}
       {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
       <TokenDistributionSection />
-      <GovernanceActivitySection />
+      {!daoConstants.removeGovernanceActivitySection && (
+        <GovernanceActivitySection />
+      )}
     </>
   );
 };
