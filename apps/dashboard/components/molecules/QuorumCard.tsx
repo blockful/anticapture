@@ -57,7 +57,7 @@ export const QuorumCard = () => {
     icon: <UsersIcon className="text-[#FAFAFA]" />,
     sections: [
       {
-        title: "Logic",
+        title: "For + Abstain",
         tooltip:
           "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
         items: [<TextCardDaoInfoItem label="For" key={"text-logic"} />],
