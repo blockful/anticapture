@@ -2,8 +2,18 @@
 
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/components/atoms";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/lib/types/daos";
+import daoConstantsByDaoId from "@/lib/dao-constants";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 
 export const HeaderNavMobile = () => {
+  const { daoId }: { daoId: string } = useParams();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConstantsByDaoId[
+    daoIdEnum
+  ] as DaoConstantsFullySupported;
+
   const options = [
     {
       anchorId: SECTIONS_CONSTANTS.daoInfo.anchorId,
@@ -17,10 +27,14 @@ export const HeaderNavMobile = () => {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
       title: SECTIONS_CONSTANTS.tokenDistribution.title,
     },
-    {
-      anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
-      title: SECTIONS_CONSTANTS.governanceActivity.title,
-    },
+    ...(daoConstants.removeGovernanceActivitySection
+      ? []
+      : [
+          {
+            anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
+            title: SECTIONS_CONSTANTS.governanceActivity.title,
+          },
+        ]),
     {
       anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
       title: SECTIONS_CONSTANTS.governanceImplementation.title,
