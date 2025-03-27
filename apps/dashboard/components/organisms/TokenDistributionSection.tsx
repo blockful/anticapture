@@ -8,7 +8,7 @@ import {
   TokenDistributionTable,
 } from "@/components/molecules";
 import { useTokenDistributionContext } from "@/contexts";
-import { RiskLevel, TimeInterval } from "@/lib/enums";
+import { TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
@@ -59,6 +59,7 @@ export const TokenDistributionSection = () => {
       }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
+      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <MultilineChartTokenDistribution
         datasets={datasets}

@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function DaoPage() {
   return (
-    <div className="mx-auto flex flex-col items-center gap-8 px-4 py-6 sm:px-8 lg:gap-16">
+    <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
       <DaoTemplate />
     </div>
   );

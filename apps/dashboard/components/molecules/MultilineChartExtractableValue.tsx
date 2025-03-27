@@ -154,7 +154,7 @@ export const MultilineChartExtractableValue = ({
     });
 
   return (
-    <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
+    <div className="flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>

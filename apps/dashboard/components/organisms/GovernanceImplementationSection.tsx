@@ -21,28 +21,27 @@ export const GovernanceImplementationSection = ({
   const governanceImplementationFields =
     daoConstantsByDaoId[daoId].governanceImplementation?.fields;
 
-
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.governanceImplementation.title}
       icon={<Lightbulb className="text-foreground" />}
       description={SECTIONS_CONSTANTS.governanceImplementation.description}
       anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
-      <div className="flex flex-wrap gap-4 relative">
-        {/* Darkening overlay */}
-        <div 
+      <div className="relative flex flex-wrap gap-4">
+        <div
           className={cn(
-            "absolute inset-0 bg-black transition-opacity duration-200 z-10",
-            openCardId ? "opacity-50" : "opacity-0 pointer-events-none"
+            "absolute inset-0 z-10 bg-black transition-opacity duration-200",
+            openCardId ? "opacity-50" : "pointer-events-none opacity-0",
           )}
           onClick={() => setOpenCardId(null)}
         />
-        
+
         {governanceImplementationFields?.map((field) => {
           const cardId = field.name;
           const isOpen = openCardId === cardId;
-          
+
           return (
             <GovernanceImplementationCard
               key={cardId}

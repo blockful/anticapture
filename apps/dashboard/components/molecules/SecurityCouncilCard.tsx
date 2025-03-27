@@ -40,7 +40,7 @@ export const SecurityCouncilCard = ({
       {
         title: "Multisig",
         tooltip:
-          "On-chain governance relies on smart contracts that only execute transactions approved by on-chain votes.",
+          "The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
             switched={securityCouncil.isActive}
@@ -70,8 +70,7 @@ export const SecurityCouncilCard = ({
       },
       {
         title: "Expiration",
-        tooltip:
-          "Off-chain governance—often done through Snapshot—allows token holders to vote without on-chain transactions.",
+        tooltip: `The security council is implemented with an expiration date. Once expired, any address can call a function to remove the privileged access that the council has to the timelock's "cancel()" function, preventing it to perpetuating a veto hold over the DAO.`,
         items: [
           <ButtonCardDaoInfoItem
             key="Expiration"
