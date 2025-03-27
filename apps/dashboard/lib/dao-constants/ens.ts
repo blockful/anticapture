@@ -15,7 +15,7 @@ export const ENS: DaoConstants = {
   snapshot: "https://snapshot.box/#/s:ens.eth",
   rules: {
     delay: true,
-    changeVote: true,
+    changeVote: false,
     timelock: true,
     cancelFunction: false,
   },
