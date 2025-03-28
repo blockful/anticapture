@@ -1,19 +1,16 @@
+"use client";
+
 import { RiskLevel } from "@/lib/enums";
 import { cn } from "@/lib/client/utils";
 import { Card } from "@/components/ui/card";
+import { GovernanceImplementationField } from "@/lib/dao-constants/types";
 
 export const GovernanceImplementationCard = ({
-  title,
-  value,
-  description,
-  riskLevel,
+  field,
   isOpen,
   onToggle,
 }: {
-  title: string;
-  value: string;
-  description: string;
-  riskLevel: RiskLevel;
+  field: GovernanceImplementationField;
   isOpen: boolean;
   onToggle: (e: React.MouseEvent) => void;
 }) => {
@@ -57,11 +54,13 @@ export const GovernanceImplementationCard = ({
           </div>
           <div className="flex min-w-0 gap-0 text-left sm:flex-col md:flex-row md:items-center md:gap-2 md:text-center">
             {" "}
-            <h3 className="truncate text-white">{title}</h3>
+            <h3 className="truncate text-white">{field.name}</h3>
             <span className="hidden shrink-0 text-xl font-thin text-foreground md:inline">
               •
             </span>
-            <span className="shrink-0 truncate text-foreground">{value}</span>
+            <span className="shrink-0 truncate text-foreground">
+              {field.value || ""}
+            </span>
           </div>
         </div>
         <div className="ml-2 flex shrink-0 items-center gap-2">
@@ -69,16 +68,16 @@ export const GovernanceImplementationCard = ({
           <span
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-0.5",
-              riskStyles[riskLevel],
+              riskStyles[field.riskLevel],
             )}
           >
-            {riskLevel}
+            {field.riskLevel}
             <span className="inline-flex">
               <span className={cn("text-xs")}>•</span>
               <span
                 className={cn(
                   "text-xs",
-                  riskLevel === RiskLevel.LOW && "text-foreground",
+                  field.riskLevel === RiskLevel.LOW && "text-foreground",
                 )}
               >
                 •
@@ -86,8 +85,8 @@ export const GovernanceImplementationCard = ({
               <span
                 className={cn(
                   "text-xs",
-                  (riskLevel === RiskLevel.LOW ||
-                    riskLevel === RiskLevel.MEDIUM) &&
+                  (field.riskLevel === RiskLevel.LOW ||
+                    field.riskLevel === RiskLevel.MEDIUM) &&
                     "text-foreground",
                 )}
               >
@@ -108,7 +107,7 @@ export const GovernanceImplementationCard = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pt-1">
-          <p className="text-sm text-foreground">{description}</p>
+          <p className="text-sm text-foreground">{field.description}</p>
         </div>
       </div>
     </Card>

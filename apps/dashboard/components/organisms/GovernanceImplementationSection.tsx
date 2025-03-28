@@ -1,19 +1,22 @@
+"use client";
+
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { TheSectionLayout } from "@/components/atoms";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { GovernanceImplementationCard } from "@/components/molecules/GovernanceImplementationCard";
+import { GovernanceImplementationCard } from "@/components/molecules";
 import { useState } from "react";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
+import { GovernanceImplementationField } from "@/lib/dao-constants/types";
 
 export const GovernanceImplementationSection = ({
   daoId,
 }: {
   daoId: DaoIdEnum;
 }) => {
-  const [openCardId, setOpenCardId] = useState<string | null>(null);
-  
+  const [isOpenCardId, setIsOpenCardId] = useState<string | null>(null);
+
   if (daoConstantsByDaoId[daoId].inAnalysis) {
     return null;
   }
@@ -33,30 +36,29 @@ export const GovernanceImplementationSection = ({
         <div
           className={cn(
             "absolute inset-0 z-10 bg-black transition-opacity duration-200",
-            openCardId ? "opacity-50" : "pointer-events-none opacity-0",
+            isOpenCardId ? "opacity-50" : "pointer-events-none opacity-0",
           )}
-          onClick={() => setOpenCardId(null)}
+          onClick={() => setIsOpenCardId(null)}
         />
 
-        {governanceImplementationFields?.map((field) => {
-          const cardId = field.name;
-          const isOpen = openCardId === cardId;
+        {governanceImplementationFields?.map(
+          (field: GovernanceImplementationField, index: number) => {
+            const cardId = field.name;
+            const isOpen = isOpenCardId === cardId;
 
-          return (
-            <GovernanceImplementationCard
-              key={cardId}
-              title={field.name}
-              value={field.value || ""}
-              description={field.description}
-              riskLevel={field.riskLevel}
-              isOpen={isOpen}
-              onToggle={(e) => {
-                e.stopPropagation();
-                setOpenCardId(isOpen ? null : cardId);
-              }}
-            />
-          );
-        })}
+            return (
+              <GovernanceImplementationCard
+                key={index}
+                field={field}
+                isOpen={isOpen}
+                onToggle={(e) => {
+                  e.stopPropagation();
+                  setIsOpenCardId(isOpen ? null : cardId);
+                }}
+              />
+            );
+          },
+        )}
       </div>
     </TheSectionLayout>
   );
