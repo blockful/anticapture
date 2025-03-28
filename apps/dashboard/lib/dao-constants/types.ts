@@ -46,6 +46,7 @@ export type DaoConstantsFullySupported = {
   attackProfitability: {
     riskLevel: RiskLevel;
   };
+  removeGovernanceActivitySection: boolean;
 };
 
 export enum ChainNameEnum {

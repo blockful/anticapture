@@ -18,6 +18,7 @@ export const DaoTemplate = () => {
   if (daoConstants.inAnalysis) {
     return null;
   }
+
   return (
     <>
       <DaoInfoSection daoId={daoIdEnum} />
@@ -26,7 +27,9 @@ export const DaoTemplate = () => {
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
       <TokenDistributionSection />
-      <GovernanceActivitySection />
+      {!daoConstants.removeGovernanceActivitySection && (
+        <GovernanceActivitySection />
+      )}
     </>
   );
 };

@@ -23,7 +23,7 @@ import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
-  const { isMobile } = useScreenSize();
+  const { isMobile, isTablet } = useScreenSize();
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
@@ -56,7 +56,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     }, [supplyData, rowIndex]);
 
     if (!supplyData) {
-      return <SkeletonRow className="h-5 w-full max-w-32" />;
+      return <SkeletonRow className="h-5 w-full md:max-w-32 max-w-20" />;
     }
 
     const formattedSupply = formatNumberUserReadable(
@@ -64,8 +64,11 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="flex items-center justify-end px-4 py-3 text-end">
-        {formattedSupply}
+      <div className="flex items-center justify-end px-4 py-3 text-end text-white">
+        {formattedSupply} | {" "}
+        <div className="text-sm pl-1">
+          ({(Number(supplyData.changeRate || 0)*100).toFixed(2)}%)
+        </div>
       </div>
     );
   };
@@ -73,15 +76,31 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const dashboardColumns: ColumnDef<DashboardDao>[] = [
     {
       accessorKey: "#",
-      cell: ({ row }) => (
-        <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 overflow-auto px-4 py-3 text-[#fafafa]">
-          {row.index + 1}
-        </p>
-      ),
+      size: 20,
+      cell: ({ row }) => {
+        const dao: string = row.getValue("dao");
+        const details = dao ? daoConstantsByDaoId[dao as DaoIdEnum] : null;
+        return (
+          <div className="flex items-center justify-center gap-3">
+            <p className="scrollbar-none items-centeroverflow-auto flex py-3 text-foreground">
+              {row.index + 1}
+            </p>
+            {isMobile && details && (
+              <Image
+                className="overflow-hidden rounded-full"
+                src={details.icon}
+                alt={"OK"}
+                width={24}
+                height={24}
+              />
+            )}
+          </div>
+        );
+      },
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-fit"
+          className="flex h-8 w-5 items-center justify-center gap-3 pl-10"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <h4 className="font-normal">#</h4>
@@ -104,13 +123,14 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     },
     {
       accessorKey: "dao",
+      size: isMobile ? 1 : 100,
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConstantsByDaoId[dao as DaoIdEnum] : null;
         return (
           <div className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
-            <div className="flex w-20 items-center gap-2">
-              {details && (
+            <div className="flex md:w-20 w-5 items-center gap-2">
+              {!isMobile && details && (
                 <Image
                   className="overflow-hidden rounded-full"
                   src={details.icon}
@@ -121,7 +141,9 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
               )}
               {dao}
             </div>
-            {details?.inAnalysis && !isMobile && <BadgeInAnalysis />}
+            {!isMobile && details?.inAnalysis && (
+              <BadgeInAnalysis />
+            )}
           </div>
         );
       },
@@ -129,17 +151,14 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     },
     {
       accessorKey: "delegatedSupply",
+      size: isMobile ? 1 : 100,
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
         if (daoConstantsByDaoId[daoId].inAnalysis) {
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end">
-              {isMobile ? (
-                <BadgeInAnalysis />
-              ) : (
-                "-"
-              )}
+              {isMobile ? <BadgeInAnalysis /> : "-"}
             </div>
           );
         }
@@ -153,7 +172,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           className="w-full justify-end px-0"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="font-normal">Delegated Supply ({days})</h4>
+          <h4 className="font-normal truncate">Delegated Supply {!isMobile && `(${days})`}</h4>
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
