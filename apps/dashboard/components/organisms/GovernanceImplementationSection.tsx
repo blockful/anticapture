@@ -33,6 +33,10 @@ export const GovernanceImplementationSection = ({
   ) => {
     if (isDesktop || isTablet) {
       e.stopPropagation();
+      if (isOpen) {
+        setOpenCardIds([]);
+        return;
+      }
       setOpenCardIds([cardId]);
       return;
     }
