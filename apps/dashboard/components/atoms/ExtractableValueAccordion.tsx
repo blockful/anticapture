@@ -79,25 +79,26 @@ const AccordionData: AccordionDataProps[] = [
         <div className="flex flex-col gap-2">
           <p className="card-text-accordion">
             This represents the total value of governance tokens that have been
-            delegated to others for voting.
+            delegated to addresses for voting.
           </p>
           <p className="card-text-accordion">
-            If all delegated tokens were used in a vote, this would be the
-            highest possible governance participation level.
+            After a proposal’s voting delay is over there’s a snapshot of voting
+            power, and any delegations after that won’t be considered for that
+            proposal.
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
             <TokensIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
-              ALL TOKENS IN A VOTE
+              Voting power in a proposal
             </p>
           </Badge>
           <EqualsIcon />
           <Badge className="group-hover:bg-dark">
             <BarChartSecondaryIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
-              highest gov participation
+              Delegated cap at snapshot
             </p>
           </Badge>
         </div>
@@ -113,20 +114,22 @@ const AccordionData: AccordionDataProps[] = [
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2">
           <p className="card-text-accordion">
-            This measures how much voting power is actually used in decisions on
-            average. It&apos;s calculated by adding up all tokens used in past
-            governance votes and dividing by the number of proposals.
+            This measures the average amount of voting power used in decisions.
+            Average Turnout is calculated by adding up all tokens used in past
+            governance votes and dividing by the number of proposals, while
+            Active Supply looks at all voters in proposals in a given time frame
+            and calculates their current voting power.
           </p>
           <p className="card-text-accordion">
-            A lower quorum means fewer people participate in voting, making it
-            easier for an attacker to take control.
+            Lower numbers in those mean fewer tokens being used in voting,
+            making it easier for an attacker to take control.
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
             <ArrowDownIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
-              Lower quorum
+              Lower Participation
             </p>
           </Badge>
           <EqualsIcon />
@@ -148,11 +151,12 @@ const AccordionData: AccordionDataProps[] = [
     content: (
       <div className="flex flex-col gap-3">
         <div className="card-text-accordion flex">
-          Attack cost is compared to the DAO&apos;s total treasury assets. There
-          are two ways to do this: 1. Including governance tokens: But this is
-          risky because an attack could cause the price of these tokens to drop.
-          2. Excluding governance tokens: This gives a clearer picture of the
-          real financial security of the DAO.
+          Attack cost is compared to the DAO&apos;s treasury assets. There are two
+          ways to do this: 1. Including governance tokens, which is more
+          volatile given the token price is normally very impacted by an attack,
+          or 2. Excluding governance tokens, which shows a closer picture of
+          what an attacker would have as “minimum profit” from a well-executed
+          capture.
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
@@ -188,10 +192,10 @@ export const ExtractableValueAccordion = () => {
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group flex w-full flex-col rounded-lg border border-white/10 bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4"
+          className="group flex w-full flex-col rounded-lg data-[state=open]:border data-[state=open]:border-white/10 bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4"
         >
           <AccordionTrigger className="group/trigger flex w-full items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground transition-colors duration-300 group-hover:text-white group-data-[state=open]/trigger:text-white">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-white group-data-[state=open]/trigger:text-white">
               {item.icon}
               {item.title}
             </div>

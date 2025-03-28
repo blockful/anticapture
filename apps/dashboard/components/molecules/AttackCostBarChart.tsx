@@ -357,7 +357,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           {item.stackedValues
             .filter((item) => item.value !== 0)
             .map((barStacked, index) => (
-              <p key={index} className="flex gap-1.5 text-neutral-50">
+              <p key={index} className="flex gap-1.5 text-neutral-50 text-sm">
                 <strong>
                   {barStacked.label}: $
                   {Math.round(barStacked.value).toLocaleString()}
@@ -366,7 +366,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
             ))}
         </>
       ) : (
-        <p className="flex gap-1.5 text-neutral-50">
+        <p className="flex gap-1.5 text-neutral-50 text-sm">
           <strong>
             {item.displayValue ||
               `$${item.value && Math.round(item.value).toLocaleString()}`}

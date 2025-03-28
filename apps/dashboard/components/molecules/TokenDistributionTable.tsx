@@ -43,7 +43,7 @@ const metricDetails: Record<
   Delegated: {
     icon: undefined,
     tooltip:
-      "The total number of tokens delegated, representing the maximum possible voting power. Any address holding over 50% of this supply effectively controls the DAO.",
+      "Delegated supply is the total number of tokens that have been delegated for voting, representing the maximum voting power that can currently be used.",
   },
   Circulating: {
     icon: undefined,
