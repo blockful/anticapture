@@ -192,7 +192,7 @@ export const ExtractableValueAccordion = () => {
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group flex w-full flex-col rounded-lg data-[state=open]:border data-[state=open]:border-white/10 bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4"
+          className="group flex w-full flex-col rounded-lg border border-transparent data-[state=open]:border-white/10 bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4"
         >
           <AccordionTrigger className="group/trigger flex w-full items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-white group-data-[state=open]/trigger:text-white">
