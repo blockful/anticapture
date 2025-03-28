@@ -26,6 +26,24 @@ export const GovernanceImplementationSection = ({
   const governanceImplementationFields =
     daoConstantsByDaoId[daoId].governanceImplementation?.fields;
 
+  const handleToggle = (
+    e: React.MouseEvent<Element, MouseEvent>,
+    cardId: string,
+    isOpen: boolean,
+  ) => {
+    if (isDesktop || isTablet) {
+      e.stopPropagation();
+      setOpenCardIds([cardId]);
+      return;
+    }
+
+    setOpenCardIds((prev) => {
+      if (isOpen) {
+        return prev.filter((id) => id !== cardId);
+      }
+      return [...prev, cardId];
+    });
+  };
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.governanceImplementation.title}
@@ -56,18 +74,7 @@ export const GovernanceImplementationSection = ({
                 field={field}
                 isOpen={isOpen}
                 onToggle={(e) => {
-                  if (isDesktop || isTablet) {
-                    e.stopPropagation();
-                    setOpenCardIds([cardId]);
-                    return;
-                  }
-
-                  setOpenCardIds((prev) => {
-                    if (isOpen) {
-                      return prev.filter((id) => id !== cardId);
-                    }
-                    return [...prev, cardId];
-                  });
+                  handleToggle(e, cardId, isOpen);
                 }}
               />
             );
