@@ -9,10 +9,6 @@ assignees: ''
 
 ## Bug Report
 
-### External Resolver dApp version
-
-<!-- Please specify the commit or tag version. -->
-
 ### Current behavior
 
 <!-- Describe how the bug manifests. -->

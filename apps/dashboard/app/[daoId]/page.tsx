@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const ogImage: Record<DaoIdEnum, string> = {
-    ENS: `${baseUrl}/opengraph-images/ens.png`,
-    UNI: `${baseUrl}/opengraph-images/uni.png`,
+  const ogImage: Record<Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM>, string> = {
+    [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
+    [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
   };
 
-  const imageUrl = ogImage[daoId] || `${baseUrl}/opengraph-images/default.png`;
+  const imageUrl = ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM>] || `${baseUrl}/opengraph-images/default.png`;
 
   return {
     title: `${!SUPPORTED_DAO_NAMES.includes(daoId) ? "Anticapture - DAO Not Found" : `Anticapture - ${daoId} DAO`}`,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function DaoPage() {
   return (
-    <div className="mx-auto flex flex-col items-center gap-8 px-8 py-6 lg:gap-16 xl:overflow-auto">
+    <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
       <DaoTemplate />
     </div>
   );

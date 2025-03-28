@@ -1,0 +1,55 @@
+"use client";
+
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { ButtonHeaderDAOSidebarMobile } from "@/components/atoms";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/lib/types/daos";
+import daoConstantsByDaoId from "@/lib/dao-constants";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+
+export const HeaderNavMobile = () => {
+  const { daoId }: { daoId: string } = useParams();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConstantsByDaoId[
+    daoIdEnum
+  ] as DaoConstantsFullySupported;
+
+  const options = [
+    {
+      anchorId: SECTIONS_CONSTANTS.daoInfo.anchorId,
+      title: SECTIONS_CONSTANTS.daoInfo.title,
+    },
+    {
+      anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
+      title: SECTIONS_CONSTANTS.attackProfitability.title,
+    },
+    ...(daoConstants.governanceImplementation
+      ? [
+          {
+            anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
+            title: SECTIONS_CONSTANTS.governanceImplementation.title,
+          },
+        ]
+      : []),
+    {
+      anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
+      title: SECTIONS_CONSTANTS.tokenDistribution.title,
+    },
+    ...(daoConstants.removeGovernanceActivitySection
+      ? []
+      : [
+          {
+            anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
+            title: SECTIONS_CONSTANTS.governanceActivity.title,
+          },
+        ]),
+  ];
+
+  return (
+    <div className="w-full">
+      <div className="scrollbar-none w-full overflow-x-auto">
+        <ButtonHeaderDAOSidebarMobile options={options} />
+      </div>
+    </div>
+  );
+};

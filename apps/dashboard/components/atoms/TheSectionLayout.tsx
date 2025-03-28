@@ -1,26 +1,32 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { TooltipInfo } from "@/components/atoms";
+import { cn } from "@/lib/client/utils";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 export const TheSectionLayout = ({
-  anchorId,
   icon,
   title,
   description,
   switchDate,
+  riskLevel,
   children,
+  anchorId,
+  className,
 }: {
-  anchorId?: string;
-  icon?: React.JSX.Element;
+  icon?: JSX.Element;
   title: string;
   description?: string;
-  switchDate?: React.JSX.Element;
-  children: React.ReactNode;
+  switchDate?: JSX.Element;
+  riskLevel?: ReactNode;
+  children: ReactNode;
+  anchorId: string;
+  className?: string;
 }) => {
+  const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
-    threshold: 0.9,
+    threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
   });
 
   useEffect(() => {
@@ -32,24 +38,50 @@ export const TheSectionLayout = ({
   }, [inView, anchorId]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-5" id={anchorId} ref={ref}>
-      <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
-        <div className="flex items-center gap-3">
-          {icon}
-          <h1 className="text-left text-xl font-medium tracking-[-0.05%] text-white sm:text-3xl">
-            {title}
-          </h1>
-          <div>
-            {description && (
-              <p className="flex w-full flex-col text-start text-xs text-[#a1a1aa] sm:w-[75%] lg:w-[50%]">
-                <TooltipInfo text={description} />
-              </p>
-            )}
+    <div
+      className={cn(
+        "flex h-full w-full flex-col gap-6 sm:border-none",
+        className,
+      )}
+      id={anchorId}
+      ref={ref}
+    >
+      <div className="flex h-full w-full flex-col gap-2">
+        <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
+          <div className="flex items-center gap-3">
+            {icon}
+            <h1 className="text-xl font-medium leading-7 tracking-[-0.05%] text-[#FAFAFA] sm:text-left sm:leading-none">
+              {title}
+            </h1>
           </div>
+          {switchDate && !description && (
+            <div className="flex">{switchDate}</div>
+          )}
         </div>
-
-        <div className="flex">{switchDate}</div>
+        <div className="flex w-full">
+          <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
+            {description}
+          </p>
+        </div>
       </div>
+      {riskLevel && switchDate ? (
+        <>
+          <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
+            <div>{riskLevel}</div>
+            <div>{switchDate}</div>
+          </div>
+          <div className="w-full border-b border-b-white/10 sm:hidden" />
+        </>
+      ) : (
+        !riskLevel &&
+        switchDate &&
+        description && (
+          <div className="flex h-full w-full flex-row justify-end gap-4">
+            <div>{riskLevel}</div>
+            <div>{switchDate}</div>
+          </div>
+        )
+      )}
       {children}
     </div>
   );

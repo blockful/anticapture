@@ -4,16 +4,20 @@ import { useEffect, useState, useRef } from "react";
 
 interface UseSectionObserverProps {
   initialSection?: string;
+  headerOffset?: number;
+  useWindowScrollTo?: boolean;
 }
 
 export const useSectionObserver = ({
   initialSection,
+  headerOffset = 0,
+  useWindowScrollTo = false,
 }: UseSectionObserverProps) => {
   const [activeSection, setActiveSection] = useState<string | null>(
     initialSection ?? null,
   );
-  const isScrollingRef = useRef(false);
-  const hasScrolledRef = useRef(false);
+  const isScrollingRef = useRef<boolean>(false);
+  const hasScrolledRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleSectionChange = (event: Event) => {
@@ -43,15 +47,29 @@ export const useSectionObserver = ({
   const handleSectionClick = (sectionId: string) => {
     isScrollingRef.current = true;
     setActiveSection(sectionId);
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+
+    const section = document.getElementById(sectionId);
+    if (section) {
+      if (useWindowScrollTo && headerOffset > 0) {
+        const sectionTop = section.getBoundingClientRect().top;
+        const offsetPosition = window.scrollY + sectionTop - headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: "smooth",
+        });
+      } else {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }
 
     setTimeout(() => {
       isScrollingRef.current = false;
       hasScrolledRef.current = true;
-    }, 1000);
+    }, 500);
   };
 
   return { activeSection, handleSectionClick };

@@ -3,12 +3,6 @@
 import { usePathname } from "next/navigation";
 import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
 import {
-  daoInfoSectionAnchorID,
-  extractableValueSectionAnchorID,
-  governanceActivitySectionAnchorID,
-  tokenDistributionSectionAnchorID,
-} from "@/lib/client/constants";
-import {
   ActivityIcon,
   ArrowLeftRight,
   BaseHeaderLayoutSidebar,
@@ -17,13 +11,10 @@ import {
   ButtonHeaderDAOSidebar,
   CrossHairIcon,
 } from "@/components/atoms";
-
-const enum HeaderNavItems {
-  DAO_INFO = "DAO Info",
-  EXTRACTABLE_VALUE = "Extractable Value",
-  TOKEN_DISTRIBUTION = "Token Distribution",
-  GOVERNANCE_ACTIVITY = "Governance Activity",
-}
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { Lightbulb } from "lucide-react";
+import daoConstantsByDaoId from "@/lib/dao-constants";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
@@ -32,34 +23,53 @@ export const HeaderDAOSidebar = () => {
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
+  const daoConstants = daoConstantsByDaoId[
+    daoId as DaoIdEnum
+  ] as DaoConstantsFullySupported;
+
   return (
     <BaseHeaderLayoutSidebar>
-      {isValidDao && (
+      {isValidDao ? (
         <div className="flex w-full flex-col">
           <HeaderDAOSidebarDropdown />
-          <div className="flex flex-col px-4 pb-4 pt-1">
+          <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
             <ButtonHeaderDAOSidebar
-              anchorId={daoInfoSectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
               icon={PieChartIcon}
-              label={HeaderNavItems.DAO_INFO}
+              label={SECTIONS_CONSTANTS.daoInfo.title}
             />
             <ButtonHeaderDAOSidebar
-              anchorId={extractableValueSectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
               icon={CrossHairIcon}
-              label={HeaderNavItems.EXTRACTABLE_VALUE}
+              label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
+            {!!(
+              daoConstantsByDaoId[
+                daoId as DaoIdEnum
+              ] as DaoConstantsFullySupported
+            ).governanceImplementation && (
+              <ButtonHeaderDAOSidebar
+                anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+                icon={Lightbulb}
+                label={SECTIONS_CONSTANTS.governanceImplementation.title}
+              />
+            )}
             <ButtonHeaderDAOSidebar
-              anchorId={tokenDistributionSectionAnchorID}
+              anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               icon={ArrowLeftRight}
-              label={HeaderNavItems.TOKEN_DISTRIBUTION}
+              label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
-            <ButtonHeaderDAOSidebar
-              anchorId={governanceActivitySectionAnchorID}
-              icon={ActivityIcon}
-              label={HeaderNavItems.GOVERNANCE_ACTIVITY}
-            />
+            {!daoConstants.removeGovernanceActivitySection && (
+              <ButtonHeaderDAOSidebar
+                anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
+                icon={ActivityIcon}
+                label={SECTIONS_CONSTANTS.governanceActivity.title}
+              />
+            )}
           </div>
         </div>
+      ) : (
+        <> </>
       )}
       {!isDefault && !isValidDao && (
         <div className="flex flex-col items-center space-x-2">

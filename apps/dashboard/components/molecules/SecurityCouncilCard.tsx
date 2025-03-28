@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Badge,
   BaseCardDaoInfo,
@@ -12,15 +13,14 @@ import {
   SwitchCardDaoInfoItem,
   TokensIcon,
 } from "@/components/atoms";
-import { useCountdown } from "@/hooks/useCountdown";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { useCountdown } from "@/hooks";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { formatCountdown } from "@/lib/client/utils/time";
-import { useMemo } from "react";
 
 export const SecurityCouncilCard = ({
   daoConstants,
 }: {
-  daoConstants: DaoConstants;
+  daoConstants: DaoConstantsFullySupported;
 }) => {
   const { securityCouncil } = daoConstants;
   const targetTimestamp = securityCouncil?.expiration.timestamp;
@@ -40,7 +40,7 @@ export const SecurityCouncilCard = ({
       {
         title: "Multisig",
         tooltip:
-          "On-chain governance relies on smart contracts that only execute transactions approved by on-chain votes.",
+          "The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
             switched={securityCouncil.isActive}
@@ -63,25 +63,26 @@ export const SecurityCouncilCard = ({
                 {securityCouncil.multisig.threshold} /{" "}
                 {securityCouncil.multisig.signers}
               </p>
-              <ExternalLinkIcon className="text-[#EC762E]" />
+              <ExternalLinkIcon className="text-tangerine" />
             </Badge>
           </button>,
         ],
       },
       {
         title: "Expiration",
-        tooltip:
-          "Off-chain governance—often done through Snapshot—allows token holders to vote without on-chain transactions.",
+        tooltip: `The security council is implemented with an expiration date. Once expired, any address can call a function to remove the privileged access that the council has to the timelock's "cancel()" function, preventing it to perpetuating a veto hold over the DAO.`,
         items: [
           <ButtonCardDaoInfoItem
             key="Expiration"
             label={securityCouncil.expiration.date}
-            icon={<FocusIcon className="text-[#EC762E]" />}
+            icon={<FocusIcon className="text-tangerine" />}
+            className="cursor-default"
           />,
           <ButtonCardDaoInfoItem
             key="Expiration Countdown"
             label={formattedCountdown}
-            icon={<TokensIcon className="text-[#EC762E]" />}
+            icon={<TokensIcon className="text-tangerine" />}
+            className={`${countdown.isLoading ? "flex animate-pulse justify-center space-x-2" : "cursor-default"}`}
           />,
         ],
       },

@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { createContext, useContext } from "react";
-import { useDaoData } from "@/hooks/useDaoData";
+import { useDaoData } from "@/hooks";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
 interface DaoDataContextProps {

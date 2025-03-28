@@ -2,6 +2,8 @@ export * from "./ContractsCard";
 export * from "./DashboardTable";
 export * from "./GovernanceActivityTable";
 export * from "./HeaderDAOSidebar";
+export * from "./HeaderMobile";
+export * from "./HeaderNavMobile";
 export * from "./HeaderSidebar";
 export * from "./QuorumCard";
 export * from "./SecurityCouncilCard";

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
@@ -8,7 +7,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MetricData, TokenDistributionContextProps } from "./types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
-import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
+import { useTimeSeriesData } from "@/hooks";
 
 const initialTokenDistributionMetricData = {
   value: undefined,

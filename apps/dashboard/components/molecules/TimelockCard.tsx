@@ -8,13 +8,13 @@ import {
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
 export const TimelockCard = ({
   daoConstants,
 }: {
-  daoConstants: DaoConstants;
+  daoConstants: DaoConstantsFullySupported;
 }) => {
   const timelockData: CardData = {
     title: "Timelock",
@@ -32,7 +32,7 @@ export const TimelockCard = ({
           <ButtonCardDaoInfoItem
             key={"button-card"}
             label="View"
-            icon={<ExternalLinkIcon className="text-[#EC762E]" />}
+            icon={<ExternalLinkIcon className="text-tangerine" />}
             onClick={() =>
               openEtherscanAddress(daoConstants.contracts.timelock)
             }
@@ -53,7 +53,7 @@ export const TimelockCard = ({
             <ButtonCardDaoInfoItem
               key={"button-card"}
               label="View"
-              icon={<ExternalLinkIcon className="text-[#EC762E]" />}
+              icon={<ExternalLinkIcon className="text-tangerine" />}
               inverted={true}
               onClick={() =>
                 window.open(

@@ -19,14 +19,16 @@ import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-constants/types";
 import { useDaoDataContext } from "@/contexts";
-import { useDaoTokenHistoricalData } from "@/hooks/useDaoTokenHistoricalData";
-import { useTreasuryAssetNonDaoToken } from "@/hooks/useTreasuryAssetNonDaoToken";
+import {
+  useDaoTokenHistoricalData,
+  useTimeSeriesData,
+  useTreasuryAssetNonDaoToken,
+} from "@/hooks";
 import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
   normalizeDataset,
 } from "@/lib/client/utils";
-import { useTimeSeriesData } from "@/hooks/useTimeSeriesDataFromGraphQL";
 import { MetricTypesEnum } from "@/lib/client/constants";
 
 interface MultilineChartExtractableValueProps {
@@ -152,7 +154,7 @@ export const MultilineChartExtractableValue = ({
     });
 
   return (
-    <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
+    <div className="flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>

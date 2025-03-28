@@ -9,13 +9,13 @@ import {
   NewspaperIcon,
   TokensIcon,
 } from "@/components/atoms";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
 export const ContractsCard = ({
   daoConstants,
 }: {
-  daoConstants: DaoConstants;
+  daoConstants: DaoConstantsFullySupported;
 }) => {
   const contractsData: CardData = {
     title: "Contracts",
@@ -29,7 +29,7 @@ export const ContractsCard = ({
           <ButtonCardDaoInfoItem
             key="governor"
             label="Governor"
-            icon={<CrownIcon className="text-[#EC762E]" />}
+            icon={<CrownIcon className="text-tangerine" />}
             onClick={() =>
               openEtherscanAddress(daoConstants.contracts.governor)
             }
@@ -37,7 +37,7 @@ export const ContractsCard = ({
           <ButtonCardDaoInfoItem
             key="token"
             label="Token"
-            icon={<TokensIcon className="text-[#EC762E]" />}
+            icon={<TokensIcon className="text-tangerine" />}
             onClick={() => openEtherscanAddress(daoConstants.contracts.token)}
           />,
         ],
@@ -50,7 +50,7 @@ export const ContractsCard = ({
           <ButtonCardDaoInfoItem
             key="Snapshot"
             label="Snapshot"
-            icon={<FocusIcon className="text-[#EC762E]" />}
+            icon={<FocusIcon className="text-tangerine" />}
             onClick={() =>
               window.open(
                 `${daoConstants.snapshot}`,
@@ -62,7 +62,7 @@ export const ContractsCard = ({
           <ButtonCardDaoInfoItem
             key="Token"
             label="Token"
-            icon={<TokensIcon className="text-[#EC762E]" />}
+            icon={<TokensIcon className="text-tangerine" />}
             onClick={() => openEtherscanAddress(daoConstants.contracts.token)}
           />,
         ],

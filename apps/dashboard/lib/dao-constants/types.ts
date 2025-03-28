@@ -1,11 +1,21 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
+import { RiskLevel } from "@/lib/enums";
 import { StaticImageData } from "next/image";
-export type DaoConstants = {
-  id: DaoIdEnum;
+
+export type DaoConstants = DaoConstantsInAnalysis | DaoConstantsFullySupported;
+
+export type DaoConstantsInAnalysis = {
   name: string;
   icon: StaticImageData;
+  inAnalysis: true;
+};
+
+export type DaoConstantsFullySupported = {
+  name: string;
+  icon: StaticImageData;
+  inAnalysis: false;
   contracts: {
     governor: Address;
     token: Address;
@@ -20,6 +30,7 @@ export type DaoConstants = {
     cancelFunction: boolean;
   };
   supportsLiquidTreasuryCall: boolean;
+  governanceImplementation?: GovernanceImplementation;
   securityCouncil?: {
     isActive: boolean;
     multisig: {
@@ -33,6 +44,10 @@ export type DaoConstants = {
     };
   };
   fullySupported: boolean;
+  attackProfitability: {
+    riskLevel: RiskLevel;
+  };
+  removeGovernanceActivitySection: boolean;
 };
 
 export enum ChainNameEnum {
@@ -65,3 +80,14 @@ export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number;
 }
+
+export type GovernanceImplementation = {
+  fields: GovernanceImplementationField[];
+};
+
+export type GovernanceImplementationField = {
+  name: string;
+  value: string;
+  description: string;
+  riskLevel: RiskLevel;
+};
