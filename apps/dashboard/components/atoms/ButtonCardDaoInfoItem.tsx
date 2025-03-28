@@ -2,6 +2,7 @@
 
 import { ReactNode, ButtonHTMLAttributes } from "react";
 import { Badge } from "@/components/atoms";
+import { cn } from "@/lib/client/utils";
 
 interface ButtonCardDaoInfoItemProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,7 +20,11 @@ export function ButtonCardDaoInfoItem({
 }: ButtonCardDaoInfoItemProps) {
   return (
     <button className={`flex h-full w-full ${className ?? ""}`} {...props}>
-      <Badge className="flex h-full w-full gap-1 hover:border-lightDark hover:bg-transparent">
+      <Badge
+        className={cn("flex h-full w-full gap-1", {
+          "hover:border-lightDark hover:bg-transparent": !props.disabled,
+        })}
+      >
         {inverted ? (
           <>
             <p className="text-sm font-medium leading-tight">{label}</p>

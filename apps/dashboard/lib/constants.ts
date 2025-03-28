@@ -24,7 +24,7 @@ export const SECTIONS_CONSTANTS = {
   tokenDistribution: {
     title: "Token Distribution",
     description:
-      "Token distribution metrics are based on Blockful's Governance Indexer and are updated after a new block is confirmed with new interaction with relevant contracts.",
+      "Token distribution metrics are based on Blockful's Governance Indexer and are updated daily based on the events and interaction with relevant contracts.",
     anchorId: "tokenDistributionSection",
   },
   governanceImplementation: {
