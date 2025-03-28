@@ -4,6 +4,7 @@ import { RiskLevel } from "@/lib/enums";
 import { cn } from "@/lib/client/utils";
 import { Card } from "@/components/ui/card";
 import { GovernanceImplementationField } from "@/lib/dao-constants/types";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const GovernanceImplementationCard = ({
   field,
@@ -14,6 +15,7 @@ export const GovernanceImplementationCard = ({
   isOpen: boolean;
   onToggle: (e: React.MouseEvent) => void;
 }) => {
+  const { isDesktop, isTablet } = useScreenSize();
   const riskStyles = {
     [RiskLevel.HIGH]: "bg-white/10 text-red-400 rounded-full",
     [RiskLevel.MEDIUM]: "bg-white/10 text-amber-500 rounded-full",
@@ -23,9 +25,9 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "flex w-full flex-col gap-3.5 rounded-t-lg border-none px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-lightDark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
-          ? "z-20 rounded-b-none border-middleDark bg-lightDark"
+          ? "z-20 rounded-b-none sm:border-middleDark sm:bg-lightDark"
           : "hover:bg-lightDark sm:rounded-b-lg",
       )}
       onClick={onToggle}
@@ -98,13 +100,17 @@ export const GovernanceImplementationCard = ({
       </div>
       <div
         className={cn(
-          "absolute z-20 rounded-b-lg border border-t-0 border-middleDark bg-lightDark px-4",
-          "-left-px top-full w-[calc(100%+2px)] overflow-hidden",
+          "z-20 rounded-b-lg border-none sm:absolute sm:border sm:border-t-0 sm:border-middleDark sm:bg-lightDark sm:px-4",
+          "-left-px top-full w-[calc(100%+2px)]",
           isOpen
-            ? "visible max-h-[1000px] transform-gpu pb-5 transition-all duration-500 ease-in-out"
-            : "invisible max-h-0 transform-gpu pb-0 transition-all duration-200 ease-in-out",
+            ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"
+            : "hidden transition-all duration-300 ease-in-out sm:invisible sm:h-0",
         )}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          if (isDesktop || isTablet) {
+            e.stopPropagation();
+          }
+        }}
       >
         <div className="pt-1">
           <p className="text-sm text-foreground">{field.description}</p>

@@ -9,13 +9,15 @@ import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/lib/dao-constants/types";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const GovernanceImplementationSection = ({
   daoId,
 }: {
   daoId: DaoIdEnum;
 }) => {
-  const [isOpenCardId, setIsOpenCardId] = useState<string | null>(null);
+  const { isDesktop, isTablet } = useScreenSize();
+  const [openCardIds, setOpenCardIds] = useState<string[]>([]);
 
   if (daoConstantsByDaoId[daoId].inAnalysis) {
     return null;
@@ -35,16 +37,18 @@ export const GovernanceImplementationSection = ({
       <div className="relative flex flex-wrap gap-4">
         <div
           className={cn(
-            "absolute inset-0 z-10 bg-black transition-opacity duration-200",
-            isOpenCardId ? "opacity-50" : "pointer-events-none opacity-0",
+            "absolute inset-0 z-10 transition-all duration-200 ease-in-out sm:bg-black sm:transition-opacity",
+            openCardIds.length > 0
+              ? "hidden sm:block sm:opacity-50"
+              : "pointer-events-none opacity-0",
           )}
-          onClick={() => setIsOpenCardId(null)}
+          onClick={() => setOpenCardIds([])}
         />
 
         {governanceImplementationFields?.map(
           (field: GovernanceImplementationField, index: number) => {
             const cardId = field.name;
-            const isOpen = isOpenCardId === cardId;
+            const isOpen = openCardIds.includes(cardId);
 
             return (
               <GovernanceImplementationCard
@@ -52,8 +56,18 @@ export const GovernanceImplementationSection = ({
                 field={field}
                 isOpen={isOpen}
                 onToggle={(e) => {
-                  e.stopPropagation();
-                  setIsOpenCardId(isOpen ? null : cardId);
+                  if (isDesktop || isTablet) {
+                    e.stopPropagation();
+                    setOpenCardIds([cardId]);
+                    return;
+                  }
+
+                  setOpenCardIds((prev) => {
+                    if (isOpen) {
+                      return prev.filter((id) => id !== cardId);
+                    }
+                    return [...prev, cardId];
+                  });
                 }}
               />
             );
