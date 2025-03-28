@@ -97,7 +97,11 @@ export const TokenDistributionTable = () => {
           </p>
         );
       },
-      header: "Supply",
+      header: () => (
+        <div className="flex w-full items-start justify-start pl-4">
+          Supply
+        </div>
+      ),
     },
     {
       accessorKey: "currentValue",
@@ -122,7 +126,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-0 text-end"
+          className="w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Current value ({daoData?.id})
@@ -181,7 +185,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-0 text-end"
+          className="w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -223,7 +227,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-6">
+        <div className="flex w-full items-center justify-center pr-20">
           Last {days.slice(0, -1)} days
         </div>
       ),
