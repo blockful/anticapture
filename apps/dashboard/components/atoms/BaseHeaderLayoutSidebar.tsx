@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { ReactNode, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toggleScreenScroll } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
@@ -10,11 +10,8 @@ import { HeaderMobile } from "@/components/molecules";
 export const BaseHeaderLayoutSidebar = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
-  /**
-   * Below logic is only used for screens that are smaller than 1200px wide
-   */
   const [displaySidebar, setDisplaySidebar] = useState<boolean>(false);
   const { isMobile, isTablet } = useScreenSize();
   const toggleSidebar = () => {

@@ -1,3 +1,5 @@
+"use client";
+
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { Clock2 } from "lucide-react";
 

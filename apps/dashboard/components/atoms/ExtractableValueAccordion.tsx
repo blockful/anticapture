@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { ReactNode } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -26,8 +26,8 @@ import {
 
 interface AccordionDataProps {
   title: string;
-  icon: React.ReactNode;
-  content: React.ReactNode;
+  icon: ReactNode;
+  content: ReactNode;
 }
 
 const AccordionData: AccordionDataProps[] = [
