@@ -1,16 +1,16 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { DashboardDao } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpDown,
-  TheTable,
   ArrowState,
+  BadgeInAnalysis,
+  TheTable,
   SkeletonRow,
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
@@ -18,7 +18,6 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks";
 import daoConstantsByDaoId from "@/lib/dao-constants";
-import { BadgeInAnalysis } from "../atoms/BadgeInAnalysis";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {
