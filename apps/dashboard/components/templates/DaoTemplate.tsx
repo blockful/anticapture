@@ -10,6 +10,7 @@ import {
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
+import { ShowSupportSection } from "../organisms/ShowSupportSection";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -22,6 +23,7 @@ export const DaoTemplate = () => {
   return (
     <>
       <DaoInfoSection daoId={daoIdEnum} />
+      <ShowSupportSection />
       <AttackProfitabilitySection daoId={daoIdEnum} />
       {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
