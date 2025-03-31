@@ -17,7 +17,7 @@ export const HeaderSidebar = () => {
             <AnticaptureIcon />
           </div>
           <div className="flex">
-            <p className="text-xs font-medium text-foreground">{packageJson.version}</p>
+            <p className="text-xs font-medium text-foreground">v{packageJson.version}</p>
           </div>
         </div>
         <div className="flex w-full p-4">
