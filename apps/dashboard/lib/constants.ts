@@ -32,4 +32,9 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
+  showSupport: {
+    title: "Support Potential DAOs",
+    description: "",
+    anchorId: "showSupportSection", 
+  },
 };

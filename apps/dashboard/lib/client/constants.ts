@@ -1,4 +1,3 @@
-
 export enum MetricTypesEnum {
   TOTAL_SUPPLY = "TOTAL_SUPPLY",
   DELEGATED_SUPPLY = "DELEGATED_SUPPLY",

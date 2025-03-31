@@ -2,48 +2,49 @@
 
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/components/atoms";
-import { showSupportSectionAnchorID } from "@/lib/client/constants";
 import daoConstants from "@/lib/dao-constants";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { usePetition } from "@/hooks/usePetition";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
-import {
-  ReachOutToUsCard,
-  SupportDaoCard,
-} from "@/components/molecules";
+import { ReachOutToUsCard, SupportDaoCard } from "@/components/molecules";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { PetitionResponse } from "@/hooks/usePetition";
+
 export const ShowSupportSection = () => {
   const router = useRouter();
 
   const { address } = useAccount();
 
-  const petitions = {
+  const petitions: Record<DaoIdEnum, PetitionResponse | undefined> = {
     [DaoIdEnum.ENS]: usePetition(DaoIdEnum.ENS, address).data,
     [DaoIdEnum.UNISWAP]: usePetition(DaoIdEnum.UNISWAP, address).data,
+    [DaoIdEnum.OPTIMISM]: usePetition(DaoIdEnum.OPTIMISM, address).data,
+    
   };
 
   return (
     <TheSectionLayout
-      title="Support Potential DAOs"
+      title={SECTIONS_CONSTANTS.showSupport.title}
       icon={<HeartIcon className="text-foreground" />}
-      description="Show support for your favorite DAOs, so it can be fully supported by Anticapture! It's free and easy!"
-      anchorId={showSupportSectionAnchorID}
+      description={SECTIONS_CONSTANTS.showSupport.description}
+      anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
     >
       <div className="flex flex-wrap gap-4">
-        {Object.values(daoConstants).map((dao) => (
+        {Object.entries(daoConstants).map(([daoId, dao]) => (
           <SupportDaoCard
             key={dao.name}
             daoIcon={dao.icon}
             daoName={dao.name}
-            daoId={dao.id}
-            totalCountSupport={petitions[dao.id]?.totalSignatures || 0}
+            daoId={daoId as DaoIdEnum}
+            totalCountSupport={petitions[daoId as DaoIdEnum]?.totalSignatures || 0}
             votingPowerSupport={Number(
-              formatEther(BigInt(petitions[dao.id]?.totalSignaturesPower || 0)),
+              formatEther(BigInt(petitions[daoId as DaoIdEnum]?.totalSignaturesPower || 0)),
             )}
-            userSupport={petitions[dao.id]?.userSigned || false}
+            userSupport={petitions[daoId as DaoIdEnum]?.userSigned || false}
             onClick={() => {
-              router.push(`/${dao.id}`);
+              router.push(`/${daoId}`);
             }}
           />
         ))}
