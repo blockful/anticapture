@@ -4,7 +4,7 @@ import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
 
-interface PetitionResponse {
+export interface PetitionResponse {
   petitionSignatures: PetitionSignature[];
   totalSignatures: number;
   totalSignaturesPower: string;
