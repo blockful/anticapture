@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
   };
 
-  const imageUrl = ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM>] || `${baseUrl}/opengraph-images/default.png`;
+  const imageUrl =
+    ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM>] ||
+    `${baseUrl}/opengraph-images/default.png`;
 
   return {
     title: `${!SUPPORTED_DAO_NAMES.includes(daoId) ? "Anticapture - DAO Not Found" : `Anticapture - ${daoId} DAO`}`,

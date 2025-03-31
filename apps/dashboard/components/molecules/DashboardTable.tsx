@@ -146,7 +146,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           </div>
         );
       },
-      header: () => <h4 className="font-normal pl-4">DAO</h4>,
+      header: () => <h4 className="pl-4 font-normal">DAO</h4>,
     },
     {
       accessorKey: "delegatedSupply",

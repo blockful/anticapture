@@ -36,7 +36,9 @@ export const useTreasuryAssetNonDaoToken = (
 ) => {
   const key = daoId && days ? [`treasury-assets`, daoId, days] : null;
 
-  const { supportsLiquidTreasuryCall } = daoConstantsByDaoId[daoId] as DaoConstantsFullySupported;
+  const { supportsLiquidTreasuryCall } = daoConstantsByDaoId[
+    daoId
+  ] as DaoConstantsFullySupported;
 
   // Only create a valid key if the DAO supports liquid treasury calls
   const fetchKey = supportsLiquidTreasuryCall ? key : null;

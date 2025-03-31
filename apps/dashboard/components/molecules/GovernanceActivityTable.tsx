@@ -106,7 +106,7 @@ export const GovernanceActivityTable = () => {
         }
 
         return (
-          <div className="px-4 flex items-center justify-end text-end">
+          <div className="flex items-center justify-end px-4 text-end">
             {average && formatNumberUserReadable(average)}
           </div>
         );

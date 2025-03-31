@@ -14,7 +14,10 @@ interface DaoLayoutProps {
 export default function DaoLayout({ children, params }: DaoLayoutProps) {
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
-  if (!SUPPORTED_DAO_NAMES.includes(daoId) || daoConstantsByDaoId[daoId].inAnalysis) {
+  if (
+    !SUPPORTED_DAO_NAMES.includes(daoId) ||
+    daoConstantsByDaoId[daoId].inAnalysis
+  ) {
     return <NotFound />;
   }
 
