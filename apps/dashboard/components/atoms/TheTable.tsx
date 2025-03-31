@@ -87,7 +87,10 @@ export const TheTable = <TData, TValue>({
                 <TableHead
                   key={header.id}
                   style={{
-                    width: header.column.getSize() !== 150 ? header.column.getSize() : "auto",
+                    width:
+                      header.column.getSize() !== 150
+                        ? header.column.getSize()
+                        : "auto",
                   }}
                 >
                   {header.isPlaceholder

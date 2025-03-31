@@ -1,6 +1,11 @@
+"use client";
+
 import { cn } from "@/lib/client/utils";
-import { CircleCheckIcon, CircleNotCheckedIcon } from "./icons";
-import { Badge } from "./Badge";
+import {
+  Badge,
+  CircleCheckIcon,
+  CircleNotCheckedIcon,
+} from "@/components/atoms";
 
 interface SwitchItemProps {
   switched?: boolean;

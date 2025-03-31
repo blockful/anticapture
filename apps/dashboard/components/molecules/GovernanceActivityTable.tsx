@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { GovernanceActivity } from "@/lib/mocked-data";
@@ -11,6 +10,7 @@ import {
   TooltipInfo,
   ArrowState,
   Sparkline,
+  SkeletonRow,
 } from "@/components/atoms";
 import {
   cn,
@@ -19,7 +19,6 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
-import { SkeletonRow } from "@/components/atoms";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -106,7 +105,7 @@ export const GovernanceActivityTable = () => {
         }
 
         return (
-          <div className="px-4 flex items-center justify-end text-end">
+          <div className="flex items-center justify-end px-4 text-end">
             {average && formatNumberUserReadable(average)}
           </div>
         );

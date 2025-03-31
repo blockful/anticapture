@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { InfoIcon } from "./icons/InfoIcon";
+import { InfoIcon } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 
 export function TooltipInfo({

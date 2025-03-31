@@ -9,6 +9,7 @@ import {
 import { DashboardTable } from "@/components/molecules";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+
 export const HomeDashboardSection = () => {
   const [timeIntervalDashboard, setTimeIntervalDashboard] =
     useState<TimeInterval>(TimeInterval.NINETY_DAYS);

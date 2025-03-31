@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { ReactNode } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -26,8 +26,8 @@ import {
 
 interface AccordionDataProps {
   title: string;
-  icon: React.ReactNode;
-  content: React.ReactNode;
+  icon: ReactNode;
+  content: ReactNode;
 }
 
 const AccordionData: AccordionDataProps[] = [
@@ -151,8 +151,8 @@ const AccordionData: AccordionDataProps[] = [
     content: (
       <div className="flex flex-col gap-3">
         <div className="card-text-accordion flex">
-          Attack cost is compared to the DAO&apos;s treasury assets. There are two
-          ways to do this: 1. Including governance tokens, which is more
+          Attack cost is compared to the DAO&apos;s treasury assets. There are
+          two ways to do this: 1. Including governance tokens, which is more
           volatile given the token price is normally very impacted by an attack,
           or 2. Excluding governance tokens, which shows a closer picture of
           what an attacker would have as “minimum profit” from a well-executed
@@ -192,7 +192,7 @@ export const ExtractableValueAccordion = () => {
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group flex w-full flex-col rounded-lg border border-transparent data-[state=open]:border-white/10 bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4"
+          className="group flex w-full flex-col rounded-lg border border-transparent bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
         >
           <AccordionTrigger className="group/trigger flex w-full items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-white group-data-[state=open]/trigger:text-white">

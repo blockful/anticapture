@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeftIcon, EnsIcon, UniswapIcon } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -74,7 +74,7 @@ export const HeaderDAOSidebarDropdown = () => {
     <div className="relative inline-block w-full" ref={dropdownRef}>
       <div className="border-b border-b-lightDark p-3">
         <Link
-          className="group flex gap-x-1.5 text-xs font-medium text-foreground hover:text-white transition-color duration-500 ease-in-out"
+          className="transition-color group flex gap-x-1.5 text-xs font-medium text-foreground duration-500 ease-in-out hover:text-white"
           href={"/"}
         >
           <ArrowLeftIcon className="group-[hover]:text-white" />
