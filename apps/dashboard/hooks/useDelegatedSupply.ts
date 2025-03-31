@@ -16,15 +16,11 @@ export const fetchDelegatedSupply = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<DelegatedSupplyPromise> => {
-  try {
-    const response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
+  const response = await fetch(
+    `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
+    { next: { revalidate: 3600 } },
+  );
+  return response.json();
 };
 
 /**

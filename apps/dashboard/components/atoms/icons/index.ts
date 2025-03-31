@@ -35,6 +35,7 @@ export * from "./PlusIcon";
 export * from "./SimpleGlobeIcon";
 export * from "./SupplyIcon";
 export * from "./TokensIcon";
+export * from "./TrendingUpIcon";
 export * from "./UncertaintyIcon";
 export * from "./UniswapIcon";
 export * from "./UsersIcon";

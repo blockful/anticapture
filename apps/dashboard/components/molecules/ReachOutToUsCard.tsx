@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 export const ReachOutToUsCard = () => {
   return (
     <Card
-      className="flex w-full rounded-lg border border-lightDark bg-dark px-3 md:px-4 md:py-5 py-3 shadow hover:cursor-pointer hover:bg-tangerine/15 xl4k:max-w-full"
+      className="flex w-full sm:w-[calc(50%-10px)] rounded-lg border border-lightDark bg-dark px-3 md:px-4 py-3 shadow hover:cursor-pointer hover:bg-tangerine/15 xl4k:max-w-full"
       onClick={() => {
         window.open("https://tally.so/r/nrvGbv", "_blank", "noopener,noreferrer");
       }}

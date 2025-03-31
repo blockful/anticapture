@@ -14,15 +14,11 @@ export const fetchActiveSupply = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<ActiveSupplyPromise> => {
-  try {
-    const response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
+  const response = await fetch(
+    `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
+    { next: { revalidate: 3600 } },
+  );
+  return response.json();
 };
 
 /**
