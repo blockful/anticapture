@@ -640,6 +640,75 @@ app.get("/doc-json", (c) => {
           },
         },
       },
+      "/petition/{daoId}": {
+        get: {
+          tags: ["Petition"],
+          summary: "Get petition signatures",
+          description: "Get petition signatures of a DAO",
+          operationId: "getPetitionSignatures",
+          parameters: [
+            {
+              name: "daoId",
+              in: "path",
+              description: "Dao ID",
+              required: true,
+              schema: {
+                type: "string",
+              },
+            },
+            {
+              name: "userAddress",
+              in: "query",
+              description: "User address",
+              required: false,
+              schema: { type: "string" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Successful operation",
+              content: {
+                "application/json": {
+                  schema: {
+                    $ref: "#/components/schemas/PetitionSignatures",
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ["Petition"],
+          summary: "Sign petition",
+          description: "Sign petition",
+          operationId: "signPetition",
+          parameters: [
+            {
+              name: "daoId",
+              in: "path",
+              description: "Dao ID",
+              required: true,
+              schema: {
+                type: "string",
+              },
+            },
+          ],
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/PetitionSignature",
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Successful operation",
+            },
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -907,6 +976,97 @@ app.get("/doc-json", (c) => {
               example: "124483516.95437849",
             },
             date: {
+              type: "string",
+              format: "string",
+              example: "2025-02-12",
+            },
+          },
+        },
+        PetitionSignatures: {
+          type: "object",
+          properties: {
+            petitionSignatures: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  accountId: {
+                    type: "string",
+                    format: "string",
+                    example: "0x1234567890123456789012345678901234567890",
+                  },
+                  daoId: {
+                    type: "string",
+                    format: "string",
+                    example: "UNI",
+                  },
+                  timestamp: {
+                    type: "string",
+                    format: "string",
+                    example: "2025-02-12",
+                  },
+                  message: {
+                    type: "string",
+                    format: "string",
+                    example: "This is a message",
+                  },
+                  signature: {
+                    type: "string",
+                    format: "string",
+                    example: "0x1234567890123456789012345678901234567890",
+                  },
+                },
+              },
+            },
+            totalSignatures: {
+              type: "number",
+              format: "number",
+              example: 100,
+            },
+            totalSignaturesPower: {
+              type: "number",
+              format: "number",
+              example: 100,
+            },
+            latestVoters: {
+              type: "array",
+              items: {
+                type: "string",
+                format: "string",
+                example: "0x1234567890123456789012345678901234567890",
+              },
+            },
+            userSigned: {
+              type: "boolean",
+              format: "boolean",
+              example: true,
+            },
+          },
+        },
+        PetitionSignature: {
+          type: "object",
+          properties: {
+            accountId: {
+              type: "string",
+              format: "string",
+              example: "0x1234567890123456789012345678901234567890",
+            },
+            message: {
+              type: "string",
+              format: "string",
+              example: "This is a message",
+            },
+            signature: {
+              type: "string",
+              format: "string",
+              example: "0x1234567890123456789012345678901234567890",
+            },
+            daoId: {
+              type: "string",
+              format: "string",
+              example: "UNI",
+            },
+            timestamp: {
               type: "string",
               format: "string",
               example: "2025-02-12",
