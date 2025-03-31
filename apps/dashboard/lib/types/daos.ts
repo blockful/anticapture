@@ -1,4 +1,4 @@
-import daoConstantsByDaoId from "../dao-constants";
+import daoConstantsByDaoId from "@/lib/dao-constants";
 
 export enum DaoIdEnum {
   UNISWAP = "UNI",
