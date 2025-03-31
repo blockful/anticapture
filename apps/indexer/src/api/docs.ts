@@ -677,22 +677,13 @@ app.get("/doc-json", (c) => {
             },
           },
         },
+      },
+      "/petition": {
         post: {
           tags: ["Petition"],
           summary: "Sign petition",
           description: "Sign petition",
           operationId: "signPetition",
-          parameters: [
-            {
-              name: "daoId",
-              in: "path",
-              description: "Dao ID",
-              required: true,
-              schema: {
-                type: "string",
-              },
-            },
-          ],
           requestBody: {
             content: {
               "application/json": {
