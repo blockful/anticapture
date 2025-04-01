@@ -6,6 +6,7 @@ import {
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/lib/dao-constants/types";
+import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/lib/client/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -73,9 +74,6 @@ export function formatBlocksToUserReadable(num: number): string {
 
 // Helper function to convert seconds to a readable time format
 function formatSecondsToReadable(totalSeconds: number): string {
-  const SECONDS_PER_MINUTE = 60;
-  const SECONDS_PER_HOUR = 3600; // 60 minutes * 60 seconds
-
   const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
   const minutes = Math.floor(
     (totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
