@@ -121,7 +121,7 @@ export const CardDaoSignature = () => {
         </div>
       )}
       {isSignedToSupportDao && (
-        <div className="flex w-full flex-col items-center gap-6">
+        <div className="flex w-full flex-col gap-6">
           <div className="flex flex-col gap-1.5">
             <div className="flex gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-300" />
