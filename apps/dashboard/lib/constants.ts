@@ -40,6 +40,9 @@ export const SECTIONS_CONSTANTS = {
   supportDaos: {
     title: "Support DAOs",
     description: "",
-    anchorId: "supportDaosSection", 
+    anchorId: "supportDaosSection",
   },
 };
+
+export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
+export const ANTICAPTURE_TELEGRAM = "https://t.me/danimimm";

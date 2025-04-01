@@ -17,6 +17,7 @@ import {
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet, TelegramIcon, TwitterIcon } from "@/components/atoms";
+import { ANTICAPTURE_TELEGRAM, ANTICAPTURE_TWITTER } from "@/lib/constants";
 
 export const CardDaoSignature = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -40,7 +41,6 @@ export const CardDaoSignature = () => {
   };
 
   const isSignedToSupportDao: boolean = data?.userSigned || false;
-  const isDaoSupported: boolean = false; //TODO: Adjust this to use DAO-SUPPORTEDs
 
   if (loading) {
     return <div>Loading...</div>;
@@ -52,8 +52,12 @@ export const CardDaoSignature = () => {
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
             <Image
-              alt={`${isDaoSupported ? "Show Support Arbitrum" : "Dao Supported"}`}
-              src={isDaoSupported ? ArbitrumSupportedDao : ArbitrumShowSupport}
+              alt={`${isSignedToSupportDao ? "Show Support Arbitrum" : "Dao Supported"}`}
+              src={
+                isSignedToSupportDao
+                  ? ArbitrumSupportedDao
+                  : ArbitrumShowSupport
+              }
               width={156}
               height={156}
               className="h-[156px] w-[156px] flex-shrink-0 object-contain"
@@ -63,9 +67,9 @@ export const CardDaoSignature = () => {
         </div>
         <div className="flex w-full rounded-md border border-lightDark bg-dark py-2.5 pl-3.5 pr-[15px] sm:hidden">
           <Image
-            alt={`${isDaoSupported ? "Show Support Arbitrum" : "Dao Supported"}`}
+            alt={`${isSignedToSupportDao ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={
-              isDaoSupported
+              isSignedToSupportDao
                 ? ArbitrumSupportedDaoMobile
                 : ArbitrumShowSupportMobile
             }
@@ -73,7 +77,7 @@ export const CardDaoSignature = () => {
           />
         </div>
       </div>
-      {!isDaoSupported && (
+      {!isSignedToSupportDao && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
             <h3 className="flex text-[18px] font-medium leading-6 text-[#FAFAFA]">
@@ -116,7 +120,7 @@ export const CardDaoSignature = () => {
           )}
         </div>
       )}
-      {isDaoSupported && (
+      {isSignedToSupportDao && (
         <div className="flex w-full flex-col items-center gap-6">
           <div className="flex flex-col gap-1.5">
             <div className="flex gap-2">
@@ -137,7 +141,7 @@ export const CardDaoSignature = () => {
             </p>
             <div className="flex gap-2.5">
               <Link
-                href="https://t.me/anticapture_xyz"
+                href={ANTICAPTURE_TELEGRAM}
                 target="_blank"
                 className="flex items-center gap-1 text-tangerine"
               >
@@ -146,7 +150,7 @@ export const CardDaoSignature = () => {
               </Link>
               <div className="flex h-[75%] border border-white/10" />
               <Link
-                href="https://x.com/anticapture_xyz"
+                href={ANTICAPTURE_TWITTER}
                 target="_blank"
                 className="flex items-center gap-1 text-tangerine"
               >
