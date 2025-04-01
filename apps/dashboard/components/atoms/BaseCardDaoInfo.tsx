@@ -40,7 +40,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex h-full w-full flex-col gap-5 p-0 sm:p-2">
+      <CardContent className="flex h-full w-full flex-col gap-4 p-0 sm:gap-5 sm:p-2">
         {data.sections.map((section, index) => (
           <div key={index} className="flex justify-between gap-2 sm:flex-col">
             <div className="flex w-full items-center gap-1.5">
