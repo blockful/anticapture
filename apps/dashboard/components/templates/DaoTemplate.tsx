@@ -5,12 +5,12 @@ import {
   AttackProfitabilitySection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
-import { ShowSupportSection } from "../organisms/ShowSupportSection";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
