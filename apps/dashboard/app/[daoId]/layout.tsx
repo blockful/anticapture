@@ -22,13 +22,15 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
   }
 
   return (
-    <DaoDataProvider daoId={daoId}>
-      <TokenDistributionProvider daoId={daoId}>
-        <GovernanceActivityProvider daoId={daoId}>
-          <HeaderDAOSidebar />
-          {children}
-        </GovernanceActivityProvider>
-      </TokenDistributionProvider>
-    </DaoDataProvider>
+    <div className="max-h-screen overflow-auto xl:ml-[330px]">
+      <DaoDataProvider daoId={daoId}>
+        <TokenDistributionProvider daoId={daoId}>
+          <GovernanceActivityProvider daoId={daoId}>
+            <HeaderDAOSidebar />
+            {children}
+          </GovernanceActivityProvider>
+        </TokenDistributionProvider>
+      </DaoDataProvider>
+    </div>
   );
 }
