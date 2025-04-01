@@ -55,34 +55,32 @@ export const QuorumCard = () => {
   const quorumData: CardData = {
     title: "Quorum",
     icon: <UsersIcon className="text-[#FAFAFA]" />,
+    optionalHeaderValue: (
+      <p className="flex text-sm text-tangerine">
+        ${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}
+      </p>
+    ),
     sections: [
       {
         title: "Logic",
         tooltip:
-          "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
-        items: [
-          <TextCardDaoInfoItem label="For + Abstain" key={"text-logic"} />,
-        ],
-      },
-      {
-        title: "Quorum",
-        tooltip:
-          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn't reach quorum.",
+          'Specifies whether quorum is calculated based on "For" votes, "For + Abstain" votes, or all votes cast',
         items: [
           <TextCardDaoInfoItem
-            key={"text-quorum"}
-            value={`${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`}
+            key="text-logic"
+            item={{ label: "For + Abstain" }}
           />,
         ],
       },
+
       {
         title: "Proposal Threshold",
         tooltip:
           "The minimum voting power required to submit an on-chain proposal.",
         items: [
           <TextCardDaoInfoItem
-            value={proposalThresholdText}
-            key={"text-proposal-threshold"}
+            key="text-proposal-threshold"
+            item={{ value: proposalThresholdText }}
           />,
         ],
       },

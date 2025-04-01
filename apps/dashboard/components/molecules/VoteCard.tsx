@@ -31,7 +31,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
 
   const voteData: CardData = {
     title: "Vote",
-    icon: <ClickIcon />,
+    icon: <ClickIcon className="size-4 text-foreground" />,
     sections: [
       {
         title: "Delay",
@@ -45,7 +45,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
-                className="cursor-default"
+                className="cursor-default text-white"
                 icon={<BlocksIcon />}
                 label={formatBlocksToUserReadable(daoData.votingDelay)}
               />
