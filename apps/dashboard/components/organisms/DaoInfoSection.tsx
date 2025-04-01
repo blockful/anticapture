@@ -57,15 +57,16 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   // };
 
   return (
-    <section className="flex h-full w-full flex-col rounded-md px-4 pb-8 pt-10 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0">
-      <div id="dao-info-header" className="flex gap-3.5 p-4 sm:gap-5">
+    <section className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0">
+      <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
         <div className="flex">
           <Image
-            className="overflow-hidden rounded-full"
+            className="rounded-full"
             src={daoConstants.icon}
             alt={"OK"}
             width={72}
             height={72}
+            objectFit="contain"
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -94,6 +95,41 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       </div>
+      <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
+        <div className="flex items-center gap-3">
+          <Image
+            className="rounded-full"
+            src={daoConstants.icon}
+            alt={"OK"}
+            width={36}
+            height={36}
+          />
+          <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
+            {daoConstants.name}
+          </h2>
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <DaoInfoDropdown
+              defaultValue={{
+                value: "OnChain Gov",
+                icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
+                onClick: () => {},
+              }}
+              options={onChainOptions}
+            />
+            <DaoInfoDropdown
+              defaultValue={{
+                value: "OffChain Gov",
+                icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
+                onClick: () => {},
+              }}
+              options={offChainOptions}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="border border-lightDark" />
       <div
         id="dao-info-cards"
         className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
