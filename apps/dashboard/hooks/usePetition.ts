@@ -1,4 +1,4 @@
-import { BACKEND_ENDPOINT, PETITION_ENDPOINT } from "@/lib/server/utils";
+import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
 import { Address, Hex } from "viem";
@@ -6,7 +6,7 @@ import { Address, Hex } from "viem";
 /**
  * Interface for a single petition signature
  */
-interface PetitionSignature {
+export interface PetitionSignature {
   accountId: Address;
   daoId: DaoIdEnum;
   timestamp: string;
@@ -17,7 +17,7 @@ interface PetitionSignature {
 /**
  * Interface for the petition API response
  */
-interface PetitionResponse {
+export interface PetitionResponse {
   petitionSignatures: PetitionSignature[];
   totalSignatures: number;
   totalSignaturesPower: number;
@@ -28,7 +28,7 @@ interface PetitionResponse {
 /**
  * Interface for the petition signature request body
  */
-interface PetitionSignatureRequest {
+export interface PetitionSignatureRequest {
   accountId: Address;
   message: string;
   signature: string;
@@ -47,7 +47,7 @@ const fetchPetitionSignatures = async (
   userAddress: Address,
 ): Promise<PetitionResponse> => {
   const response = await fetch(
-    `${PETITION_ENDPOINT}/petition/${daoId}?userAddress=${userAddress}`,
+    `${BACKEND_ENDPOINT}/petition/${daoId}?userAddress=${userAddress}`,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch petition data: ${response.statusText}`);
@@ -62,7 +62,7 @@ const fetchPetitionSignatures = async (
  * @param userAddress - The address of the user submitting the signature
  * @returns Promise<PetitionResponse> - The updated petition data
  */
-const submitPetitionSignature = async (
+export const submitPetitionSignature = async (
   daoId: DaoIdEnum,
   signature: Hex,
   userAddress: Address,
@@ -75,7 +75,7 @@ const submitPetitionSignature = async (
     timestamp: String(new Date().getTime()),
   };
 
-  const response = await fetch(`${PETITION_ENDPOINT}/petition`, {
+  const response = await fetch(`${BACKEND_ENDPOINT}/petition`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -121,32 +121,4 @@ export const usePetitionSignatures = (
     error: error || null,
     refetch: () => mutate(),
   };
-};
-
-/**
- * Hook for submitting petition signatures
- * @param daoId - The ID of the DAO to submit the signature for
- * @param userAddress - The address of the user submitting the signature
- * @returns Function to submit signature and loading/error states
- */
-export const useSubmitPetition = (
-  daoId: DaoIdEnum,
-  userAddress: Address | undefined,
-) => {
-  const submit = async (signature: Address) => {
-    if (!userAddress) {
-      throw new Error("User address is required to submit signature");
-    }
-
-    try {
-      return await submitPetitionSignature(daoId, signature, userAddress);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to submit signature: ${error.message}`);
-      }
-      throw new Error("Failed to submit signature: Unknown error");
-    }
-  };
-
-  return submit;
 };

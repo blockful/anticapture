@@ -16,15 +16,11 @@ export const fetchProposals = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<ProposalsResponse> => {
-  try {
-    const response: Response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/proposals/compare?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
+  const response: Response = await fetch(
+    `${BACKEND_ENDPOINT}/dao/${daoId}/proposals/compare?days=${days}`,
+    { next: { revalidate: 3600 } },
+  );
+  return response.json();
 };
 
 /**

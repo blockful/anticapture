@@ -22,6 +22,7 @@ export const UNI: DaoConstants = {
     cancelFunction: true,
   },
   supportsLiquidTreasuryCall: false,
+  fullySupported: true,
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
   },

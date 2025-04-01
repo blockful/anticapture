@@ -43,6 +43,7 @@ export type DaoConstantsFullySupported = {
       timestamp: number;
     };
   };
+  fullySupported: boolean;
   attackProfitability: {
     riskLevel: RiskLevel;
   };

@@ -13,7 +13,7 @@ import { TwitterIcon } from "./icons/TwitterIcon";
 import { TelegramIcon } from "./icons/TelegramIcon";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { usePetitionSignatures, useSubmitPetition } from "@/hooks/usePetition";
+import { submitPetitionSignature, usePetitionSignatures } from "@/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 
@@ -24,7 +24,6 @@ export const CardDaoSignature = () => {
   const { isConnected, address } = useAccount();
 
   const { data, loading } = usePetitionSignatures(daoIdEnum, address);
-  const submitPetition = useSubmitPetition(daoIdEnum, address);
 
   const handleSubmit = async () => {
     if (!address) return;
@@ -35,7 +34,7 @@ export const CardDaoSignature = () => {
     });
 
     try {
-      await submitPetition(signature);
+      await submitPetitionSignature(daoIdEnum, signature, address);
     } catch (error) {
       console.error("Failed to submit signature:", error);
     }
