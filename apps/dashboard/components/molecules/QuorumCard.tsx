@@ -39,7 +39,7 @@ export const QuorumCard = () => {
     : "No Quorum";
 
   const quorumPercentage = quorumMinPercentage
-    ? `(${parseFloat(quorumMinPercentage).toFixed(2)}%)`
+    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}%)`
     : "(N/A)";
 
   const proposalThresholdValue = daoData.proposalThreshold
@@ -57,7 +57,7 @@ export const QuorumCard = () => {
     icon: <UsersIcon className="text-foreground" />,
     optionalHeaderValue: (
       <p className="flex text-sm text-tangerine">
-        ${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}
+        {quorumValue} {daoData.id || "Unknown ID"} {quorumPercentage}
       </p>
     ),
     sections: [
