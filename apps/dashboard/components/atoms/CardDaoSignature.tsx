@@ -1,28 +1,27 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import ArbitrumShowSupport from "@/public/show-support/ArbitrumShowSupport.png";
 import ArbitrumShowSupportMobile from "@/public/show-support/ArbitrumShowSupportMobile.png";
 import ArbitrumSupportedDao from "@/public/show-support/ArbitrumSupportedDao.png";
 import ArbitrumSupportedDaoMobile from "@/public/show-support/ArbitrumSupportedDaoMobile.png";
-import { ConnectWallet } from "./ConnectWallet";
+import { useParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import { CheckCircle2, Pencil } from "lucide-react";
-import Link from "next/link";
-import { TwitterIcon } from "./icons/TwitterIcon";
-import { TelegramIcon } from "./icons/TelegramIcon";
-import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { submitPetitionSignature, usePetitionSignatures } from "@/hooks/usePetition";
+import {
+  submitPetitionSignature,
+  usePetitionSignatures,
+} from "@/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
+import { ConnectWallet, TelegramIcon, TwitterIcon } from "@/components/atoms";
 
 export const CardDaoSignature = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-
   const { isConnected, address } = useAccount();
-
   const { data, loading } = usePetitionSignatures(daoIdEnum, address);
 
   const handleSubmit = async () => {
