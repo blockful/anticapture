@@ -39,7 +39,7 @@ export const CardDaoSignature = () => {
     }
   };
 
-  const isSignedToSupprt: boolean = data?.userSigned || false;
+  const isSignedToSupportDao: boolean = data?.userSigned || false;
   const isDaoSupported: boolean = false; //TODO: Adjust this to use DAO-SUPPORTEDs
 
   if (loading) {
@@ -95,20 +95,20 @@ export const CardDaoSignature = () => {
               />
             </div>
           )}
-          {isConnected && !isSignedToSupprt && (
+          {isConnected && !isSignedToSupportDao && (
             <div className="flex">
               <button
                 onClick={handleSubmit}
-                className="btn-connect-wallet !w-fit !bg-[#FAFAFA] text-sm font-medium !text-dark"
+                className="btn-connect-wallet !w-fit !border-transparent !bg-[#FAFAFA] text-sm font-medium !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
               >
                 <Pencil className="h-4 w-4" />
                 Sign to support
               </button>
             </div>
           )}
-          {isConnected && isSignedToSupprt && (
+          {isConnected && isSignedToSupportDao && (
             <div className="flex">
-              <button className="btn-connect-wallet !w-fit !bg-[#FAFAFA] text-sm font-medium !text-dark">
+              <button className="btn-connect-wallet !w-fit !border-transparent !bg-[#FAFAFA] text-sm font-medium !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70">
                 <CheckCircle2 className="h-4 w-4" />
                 Signed
               </button>
