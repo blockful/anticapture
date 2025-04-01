@@ -23,7 +23,7 @@ export const DaoTemplate = () => {
   return (
     <>
       <DaoInfoSection daoId={daoIdEnum} />
-      <ShowSupportSection />
+      {daoConstantsByDaoId[daoIdEnum].inAnalysis && <ShowSupportSection />}
       <AttackProfitabilitySection daoId={daoIdEnum} />
       {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
