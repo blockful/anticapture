@@ -17,9 +17,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();
+  const { isMobile } = useScreenSize();
 
   if (daoConstants.inAnalysis) {
     return null;
@@ -47,7 +49,11 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
               <BadgeCardDaoInfoItem
                 className="cursor-default text-white"
                 icon={<BlocksIcon />}
-                label={formatBlocksToUserReadable(daoData.votingDelay)}
+                label={
+                  isMobile
+                    ? formatBlocksToUserReadable(daoData.votingDelay, true)
+                    : formatBlocksToUserReadable(daoData.votingDelay, false)
+                }
               />
             </TooltipTrigger>
             <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">
