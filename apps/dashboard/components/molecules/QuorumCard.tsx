@@ -54,7 +54,7 @@ export const QuorumCard = () => {
 
   const quorumData: CardData = {
     title: "Quorum",
-    icon: <UsersIcon className="text-[#FAFAFA]" />,
+    icon: <UsersIcon className="text-foreground" />,
     optionalHeaderValue: (
       <p className="flex text-sm text-tangerine">
         ${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}
