@@ -57,17 +57,14 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     return (
       <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
         <ContractsCard daoConstants={daoConstants} />
-        <VoteCard daoConstants={daoConstants} />
-        <TimelockCard daoConstants={daoConstants} />
-        <QuorumCard />
         <SecurityCouncilCard daoConstants={daoConstants} />
       </div>
     );
   };
 
   return (
-    <section className="flex h-full w-full flex-col rounded-md border-lightDark bg-dark px-4 pb-8 pt-10 sm:px-0 sm:pb-0 sm:pt-0">
-      <div className="flex gap-3.5 p-4 sm:gap-5">
+    <section className="flex h-full w-full flex-col rounded-md border border-lightDark bg-dark px-4 pb-8 pt-10 sm:px-0 sm:pb-0 sm:pt-0">
+      <div id="dao-info-header" className="flex gap-3.5 p-4 sm:gap-5">
         <div className="flex">
           <Image
             className="overflow-hidden rounded-full"
@@ -101,6 +98,21 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               options={offChainOptions}
             />
           </div>
+        </div>
+      </div>
+      <div
+        id="dao-info-cards"
+        className="flex w-full gap-2 border-t border-lightDark p-2"
+      >
+        <div className="flex w-full border-r border-lightDark">
+          <VoteCard daoConstants={daoConstants} />
+        </div>
+
+        <div className="flex w-full border-r border-lightDark">
+          <TimelockCard daoConstants={daoConstants} />
+        </div>
+        <div className="flex w-full">
+          <QuorumCard />
         </div>
       </div>
     </section>
