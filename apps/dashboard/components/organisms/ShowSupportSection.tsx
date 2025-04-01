@@ -2,8 +2,7 @@
 
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { HeartIcon } from "lucide-react";
-import { TheSectionLayout } from "../atoms";
-import { CardDaoSignature } from "../atoms/CardDaoSignature";
+import { CardDaoSignature, TheSectionLayout } from "@/components/atoms";
 
 export const ShowSupportSection = () => {
   return (
