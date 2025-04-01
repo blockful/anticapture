@@ -24,8 +24,8 @@ interface BaseCardDaoInfoProps {
 
 export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
   return (
-    <Card className="flex !w-full flex-col border-none bg-dark sm:max-w-full xl4k:max-w-full">
-      <CardHeader id="daoinfo-basecard-header" className="py-2 sm:p-2">
+    <Card className="flex !w-full flex-col border-none sm:max-w-full sm:bg-dark xl4k:max-w-full">
+      <CardHeader id="daoinfo-basecard-header" className="!py-2 px-0 sm:p-2">
         <div
           className={cn(
             "flex w-full items-center",
@@ -40,15 +40,17 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex h-full w-full flex-col gap-5 p-2">
+      <CardContent className="flex h-full w-full flex-col gap-5 p-0 sm:p-2">
         {data.sections.map((section, index) => (
-          <div key={index} className="flex flex-col gap-2">
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-foreground">{section.title}</h1>
+          <div key={index} className="flex justify-between gap-2 sm:flex-col">
+            <div className="flex w-full items-center gap-1.5">
+              <h1 className="text-sm font-normal text-foreground">
+                {section.title}
+              </h1>
               {section.tooltip && <TooltipInfo text={section.tooltip} />}
             </div>
 
-            <div className="flex h-full w-full gap-2">
+            <div className="flex h-full w-full justify-end gap-2 sm:justify-start">
               {section.items.map((item, index) => (
                 <div key={index} className="flex">
                   {item}

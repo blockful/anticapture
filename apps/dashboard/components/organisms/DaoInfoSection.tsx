@@ -7,13 +7,7 @@ import {
   DaoInfoDropdown,
   FocusIcon,
 } from "@/components/atoms";
-import {
-  ContractsCard,
-  QuorumCard,
-  SecurityCouncilCard,
-  TimelockCard,
-  VoteCard,
-} from "@/components/molecules";
+import { QuorumCard, TimelockCard, VoteCard } from "@/components/molecules";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
@@ -53,17 +47,17 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   ];
 
-  const DaoInfo = () => {
-    return (
-      <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
-        <ContractsCard daoConstants={daoConstants} />
-        <SecurityCouncilCard daoConstants={daoConstants} />
-      </div>
-    );
-  };
+  // const DaoInfo = () => {
+  //   return (
+  //     <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
+  //       <ContractsCard daoConstants={daoConstants} />
+  //       <SecurityCouncilCard daoConstants={daoConstants} />
+  //     </div>
+  //   );
+  // };
 
   return (
-    <section className="flex h-full w-full flex-col rounded-md border border-lightDark bg-dark px-4 pb-8 pt-10 sm:px-0 sm:pb-0 sm:pt-0">
+    <section className="flex h-full w-full flex-col rounded-md px-4 pb-8 pt-10 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0">
       <div id="dao-info-header" className="flex gap-3.5 p-4 sm:gap-5">
         <div className="flex">
           <Image
@@ -102,13 +96,13 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       </div>
       <div
         id="dao-info-cards"
-        className="flex w-full gap-2 border-t border-lightDark p-2"
+        className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
       >
-        <div className="flex w-full border-r border-lightDark">
+        <div className="flex w-full sm:border-r sm:border-lightDark">
           <VoteCard daoConstants={daoConstants} />
         </div>
 
-        <div className="flex w-full border-r border-lightDark">
+        <div className="flex w-full sm:border-r sm:border-lightDark">
           <TimelockCard daoConstants={daoConstants} />
         </div>
         <div className="flex w-full">
