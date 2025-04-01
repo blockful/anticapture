@@ -6,31 +6,38 @@ import {
   CircleCheckIcon,
   CircleNotCheckedIcon,
 } from "@/components/atoms";
+import { ReactNode } from "react";
 
 interface SwitchItemProps {
   switched?: boolean;
+  icon?: ReactNode;
+  onClick?: () => void;
 }
 
 export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
   return (
     <Badge
-      className={cn("flex h-full w-full bg-opacity-20 lg:w-fit", [
-        item.switched ? "bg-[#4ADE80]" : "bg-[#F87171]",
-      ])}
+      className={cn(
+        "flex h-full w-full !gap-1.5 !bg-lightDark bg-opacity-20 !px-2.5 !py-1 lg:w-fit",
+        item.onClick &&
+          "!cursor-pointer transition-all duration-300 hover:!bg-middleDark",
+      )}
+      onClick={item.onClick}
     >
       {item.switched ? (
-        <CircleCheckIcon className="text-[#4ADE80]" />
+        <CircleCheckIcon className="text-green-400" />
       ) : (
-        <CircleNotCheckedIcon className="text-[#F87171]" />
+        <CircleNotCheckedIcon className="text-red-400" />
       )}
       <p
         className={cn([
           "text-sm font-medium leading-tight",
-          item.switched ? "text-[#4ADE80]" : "text-[#F87171]",
+          item.switched ? "text-green-400" : "text-red-400",
         ])}
       >
         {item.switched ? "Yes" : "No"}
       </p>
+      <span> {item.icon}</span>
     </Badge>
   );
 };
