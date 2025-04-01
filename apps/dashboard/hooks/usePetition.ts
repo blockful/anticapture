@@ -12,6 +12,7 @@ export interface PetitionSignature {
   timestamp: string;
   message: string;
   signature: string;
+  votingPower: string;
 }
 
 /**
@@ -20,7 +21,7 @@ export interface PetitionSignature {
 export interface PetitionResponse {
   petitionSignatures: PetitionSignature[];
   totalSignatures: number;
-  totalSignaturesPower: number;
+  totalSignaturesPower: string;
   latestVoters: string[];
   userSigned: boolean;
 }
