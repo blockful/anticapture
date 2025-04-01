@@ -2,7 +2,7 @@ import React from "react";
 
 export default function ElectionPage() {
   return (
-    <div className="min-h-screen w-full bg-dark">
+    <div className="bg-dar min-h-screen w-full">
       <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col text-center">
           <h1 className="text-xl font-bold text-white sm:text-5xl">

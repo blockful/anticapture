@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface DaoLayoutProps {
   children: React.ReactNode;
   params: { daoId: string };
@@ -6,28 +8,31 @@ interface DaoLayoutProps {
 export default function DaoLayout({ children }: DaoLayoutProps) {
   return (
     <div>
-      <div className="z-20 flex w-full items-center justify-center border-b border-b-lightDark bg-dark px-5 shadow-2xl shadow-blue-500/80">
+      <div className="z-20 flex w-full items-center justify-center border-b border-b-lightDark bg-dark px-5 shadow-xl shadow-dark">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 text-gray-100">
-          <div className="flex items-center gap-2">
+          <Link href="/election/ens" className="flex items-center gap-2">
             <span className="text-2xl">📊</span>
             <span className="text-xl font-semibold">Electionful</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-6">
-            <a
-              href="/results"
+            <Link
+              href="/election/ens/results"
               className="transition-colors hover:text-blue-400"
             >
               Results
-            </a>
-            <a
-              href="/metrics"
+            </Link>
+            <Link
+              href="/election/ens/metrics"
               className="transition-colors hover:text-blue-400"
             >
               Metrics
-            </a>
-            <a href="/vote" className="transition-colors hover:text-blue-400">
+            </Link>
+            <Link
+              href="/election/ens/vote"
+              className="transition-colors hover:text-blue-400"
+            >
               Vote
-            </a>
+            </Link>
           </div>
         </div>
       </div>

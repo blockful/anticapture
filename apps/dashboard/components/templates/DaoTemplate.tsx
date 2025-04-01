@@ -10,6 +10,7 @@ import {
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
+import { ElectionBanner } from "@/components/ElectionBanner";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -21,6 +22,7 @@ export const DaoTemplate = () => {
 
   return (
     <>
+      <ElectionBanner />
       <DaoInfoSection daoId={daoIdEnum} />
       <AttackProfitabilitySection daoId={daoIdEnum} />
       {!!daoConstants.governanceImplementation && (
