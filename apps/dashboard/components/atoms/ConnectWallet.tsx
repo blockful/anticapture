@@ -1,8 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { WalletIcon } from "@/components/atoms";
+import { cn } from "@/lib/client/utils";
 
-export const ConnectWallet = () => {
+export const ConnectWallet = ({
+  label = "Connect",
+  className,
+}: {
+  label?: string;
+  className?: string;
+}) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -40,10 +47,10 @@ export const ConnectWallet = () => {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="btn-connect-wallet"
+                    className={cn("btn-connect-wallet", className)}
                   >
                     <WalletIcon />
-                    Connect
+                    {label}
                   </button>
                 );
               }
@@ -84,7 +91,7 @@ export const ConnectWallet = () => {
                         )}
                       </div>
                     )}
-                    {chain.name}
+                    {/* {chain.name} */}
                   </button>
                   <button onClick={openAccountModal} type="button">
                     {account.displayName}

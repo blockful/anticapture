@@ -1,9 +1,23 @@
-import { SWRConfiguration } from "swr";
-
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
+import { Address, Hex } from "viem";
 
+/**
+ * Interface for a single petition signature
+ */
+export interface PetitionSignature {
+  accountId: Address;
+  daoId: DaoIdEnum;
+  timestamp: string;
+  message: string;
+  signature: string;
+  votingPower: string;
+}
+
+/**
+ * Interface for the petition API response
+ */
 export interface PetitionResponse {
   petitionSignatures: PetitionSignature[];
   totalSignatures: number;
@@ -12,52 +26,100 @@ export interface PetitionResponse {
   userSigned: boolean;
 }
 
-type PetitionSignature = {
-  accountId: string;
-  daoId: DaoIdEnum;
-  timestamp: string;
+/**
+ * Interface for the petition signature request body
+ */
+export interface PetitionSignatureRequest {
+  accountId: Address;
   message: string;
   signature: string;
-  votingPower: string | null;
-};
-
-/* Fetch Proposals */
-export const fetchPetition = async ({
-  daoId,
-  userAddress,
-}: {
   daoId: DaoIdEnum;
-  userAddress?: string;
-}): Promise<PetitionResponse> => {
-  const response: Response = await fetch(
-    `${BACKEND_ENDPOINT}/petition/${daoId}?userAddress=${userAddress || ""}`,
-    { next: { revalidate: 3600 } },
+  timestamp: string;
+}
+
+/**
+ * Fetches petition signatures for a specific DAO and user
+ * @param daoId - The ID of the DAO to fetch signatures for
+ * @param userAddress - The address of the user to check signature status
+ * @returns Promise<PetitionResponse> - The petition data with signatures
+ */
+const fetchPetitionSignatures = async (
+  daoId: DaoIdEnum,
+  userAddress: Address,
+): Promise<PetitionResponse> => {
+  const response = await fetch(
+    `${BACKEND_ENDPOINT}/petition/${daoId}?userAddress=${userAddress}`,
   );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch petition data: ${response.statusText}`);
+  }
   return response.json();
 };
 
 /**
- * SWR hook to fetch and manage proposals data
- * @param daoId The DAO ID to fetch data for
- * @param days The number of days to compare
- * @param config Optional SWR configuration
- * @returns SWR response with proposals data
+ * Submits a new petition signature
+ * @param daoId - The ID of the DAO to submit the signature for
+ * @param signature - The signature to submit
+ * @param userAddress - The address of the user submitting the signature
+ * @returns Promise<PetitionResponse> - The updated petition data
  */
-export const usePetition = (
+export const submitPetitionSignature = async (
   daoId: DaoIdEnum,
-  userAddress?: string,
-  config?: Partial<SWRConfiguration<PetitionResponse, Error>>,
-) => {
-  const key = daoId && userAddress ? [`petition`, daoId, userAddress] : null;
+  signature: Hex,
+  userAddress: Address,
+): Promise<PetitionResponse> => {
+  const requestBody: PetitionSignatureRequest = {
+    accountId: userAddress,
+    message: "I support Arbitrum fully integrated into the Anticapture",
+    signature,
+    daoId,
+    timestamp: String(new Date().getTime()),
+  };
 
-  return useSWR<PetitionResponse>(
-    key,
-    async () => {
-      return await fetchPetition({ daoId, userAddress });
+  const response = await fetch(`${BACKEND_ENDPOINT}/petition`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to submit petition signature: ${response.statusText}`,
+    );
+  }
+  return response.json();
+};
+
+/**
+ * Hook for fetching petition signatures
+ * @param daoId - The ID of the DAO to fetch signatures for
+ * @param userAddress - The address of the user to check signature status
+ * @returns PetitionResponse data and loading/error states
+ */
+export const usePetitionSignatures = (
+  daoId: DaoIdEnum,
+  userAddress: Address | undefined,
+) => {
+  const { data, error, isLoading, mutate } = useSWR<PetitionResponse>(
+    daoId && userAddress ? `petition/${daoId}/${userAddress}` : null,
+    () => {
+      if (!userAddress) {
+        throw new Error("User address is required to fetch petition data");
+      }
+      return fetchPetitionSignatures(daoId, userAddress);
     },
     {
       revalidateOnFocus: false,
-      ...config,
+      revalidateOnReconnect: false,
     },
   );
+
+  return {
+    data: data || null,
+    loading: isLoading,
+    error: error || null,
+    refetch: () => mutate(),
+  };
 };

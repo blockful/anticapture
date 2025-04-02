@@ -1,10 +1,10 @@
 "use client";
 
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { MetricData, TokenDistributionContextProps } from "./types";
+import { MetricData, TokenDistributionContextProps } from "@/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks";

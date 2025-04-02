@@ -1,23 +1,21 @@
+"use client";
+
 import { RiskLevel } from "@/lib/enums";
 import { cn } from "@/lib/client/utils";
 import { Card } from "@/components/ui/card";
+import { GovernanceImplementationField } from "@/lib/dao-constants/types";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const GovernanceImplementationCard = ({
-  title,
-  value,
-  description,
-  riskLevel,
+  field,
   isOpen,
   onToggle,
 }: {
-  title: string;
-  value: string;
-  description: string;
-  riskLevel: RiskLevel;
+  field: GovernanceImplementationField;
   isOpen: boolean;
   onToggle: (e: React.MouseEvent) => void;
 }) => {
-
+  const { isDesktop, isTablet } = useScreenSize();
   const riskStyles = {
     [RiskLevel.HIGH]: "bg-white/10 text-red-400 rounded-full",
     [RiskLevel.MEDIUM]: "bg-white/10 text-amber-500 rounded-full",
@@ -27,16 +25,18 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "relative flex w-full flex-col rounded-t-lg border border-lightDark bg-dark px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg !border-b border-x-transparent !border-b-lightDark border-t-transparent px-3 py-3 shadow transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-lightDark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
-          ? "z-20 rounded-b-none bg-lightDark border-middleDark"
-          : "rounded-b-lg hover:bg-lightDark",
+          ? "z-20 rounded-b-none sm:border-middleDark sm:bg-lightDark"
+          : "sm:rounded-b-lg sm:hover:bg-lightDark",
       )}
       onClick={onToggle}
     >
       <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0"> {/* Added min-w-0 to allow truncation */}
-          <div className="relative flex h-6 w-6 shrink-0 items-center justify-center"> {/* Added shrink-0 */}
+        <div className="flex min-w-0 items-center gap-2">
+          {" "}
+          <div className="relative flex h-4 w-4 shrink-0 items-center justify-center sm:h-6 sm:w-6">
+            {" "}
             <span
               className={cn(
                 "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
@@ -54,26 +54,32 @@ export const GovernanceImplementationCard = ({
               -
             </span>
           </div>
-          <div className="flex md:flex-row flex-col md:items-center md:text-center text-left md:gap-2 gap-0 min-w-0"> {/* Added min-w-0 */}
-            <h3 className="text-white truncate">{title}</h3>
-            <span className="text-xl hidden md:inline font-thin text-foreground shrink-0">•</span>
-            <span className="text-foreground truncate shrink-0">{value}</span>
+          <div className="flex items-center gap-2 sm:flex-col md:flex-row md:text-center">
+            {" "}
+            <h3 className="truncate text-sm font-medium leading-tight text-[#FAFAFA]">
+              {field.name}
+            </h3>
+            <div className="h-1 w-1 rounded-full bg-white bg-opacity-30" />
+            <span className="shrink-0 truncate text-sm font-medium leading-tight text-[#71717a]">
+              {field.value || ""}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2 ml-2 shrink-0"> {/* Added ml-2 and shrink-0 */}
+        <div className="ml-2 flex shrink-0 items-center gap-2">
+          {" "}
           <span
             className={cn(
-              "flex items-center gap-1 rounded-md px-2 py-0.5",
-              riskStyles[riskLevel],
+              "flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-medium leading-tight",
+              riskStyles[field.riskLevel],
             )}
           >
-            {riskLevel}
+            {field.riskLevel}
             <span className="inline-flex">
               <span className={cn("text-xs")}>•</span>
               <span
                 className={cn(
                   "text-xs",
-                  riskLevel === RiskLevel.LOW && "text-foreground",
+                  field.riskLevel === RiskLevel.LOW && "text-foreground",
                 )}
               >
                 •
@@ -81,8 +87,9 @@ export const GovernanceImplementationCard = ({
               <span
                 className={cn(
                   "text-xs",
-                  (riskLevel === RiskLevel.LOW ||
-                    riskLevel === RiskLevel.MEDIUM) && "text-foreground",
+                  (field.riskLevel === RiskLevel.LOW ||
+                    field.riskLevel === RiskLevel.MEDIUM) &&
+                    "text-foreground",
                 )}
               >
                 •
@@ -93,16 +100,20 @@ export const GovernanceImplementationCard = ({
       </div>
       <div
         className={cn(
-          "absolute z-20 rounded-b-lg border border-t-0 border-middleDark bg-lightDark px-4",
-          "top-full -left-px w-[calc(100%+2px)] overflow-hidden",
-          isOpen 
-            ? "visible max-h-[1000px] transform-gpu transition-all duration-500 ease-in-out pb-5" 
-            : "invisible max-h-0 transform-gpu transition-all duration-200 ease-in-out pb-0"
+          "z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:border-middleDark sm:bg-lightDark sm:px-4",
+          "-left-px top-full w-[calc(100%+2px)]",
+          isOpen
+            ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"
+            : "hidden transition-all duration-300 ease-in-out sm:invisible sm:h-0",
         )}
-        onClick={(e) => e.stopPropagation()} // Prevent clicks on description from closing
+        onClick={(e) => {
+          if (isDesktop || isTablet) {
+            e.stopPropagation();
+          }
+        }}
       >
         <div className="pt-1">
-          <p className="text-sm text-foreground">{description}</p>
+          <p className="text-sm text-foreground">{field.description}</p>
         </div>
       </div>
     </Card>

@@ -50,7 +50,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
-        description=""
+        description="Treasury values above supply costs indicate high risk."
         headerComponent={
           <ExtractableValueToggleHeader
             treasuryMetric={treasuryMetric}

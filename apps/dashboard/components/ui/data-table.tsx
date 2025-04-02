@@ -47,7 +47,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
 
   let tableConfig: TableOptions<TData> = {
@@ -91,11 +91,11 @@ export function DataTable<TData, TValue>({
   const [currentPageNumber, setCurrentPageNumber] = useState<number>(1);
 
   return (
-    <div className="w-full p-4 rounded-md border border-lightDark text-foreground">
-      <div className="flex items-center justify-between mb-4 space-x-4">
+    <div className="w-full rounded-md border border-lightDark p-4 text-foreground">
+      <div className="mb-4 flex items-center justify-between space-x-4">
         <div className="flex space-x-3">
           {icon}
-          <h3 className="text-white font-medium">{title}</h3>
+          <h3 className="font-medium text-white">{title}</h3>
         </div>
         <Input
           placeholder="Filter by ENS name or ETH address..."
@@ -105,11 +105,11 @@ export function DataTable<TData, TValue>({
           onChange={(event: any) =>
             table.getColumn(filterColumn)?.setFilterValue(event.target.value)
           }
-          className="max-w-sm bg-dark border-lightDark placeholder:text-middleDark"
+          className="max-w-sm border-lightDark bg-dark placeholder:text-middleDark"
         />
       </div>
       <Table className="bg-dark text-foreground">
-        <TableHeader className="text-foreground text-sm font-medium">
+        <TableHeader className="text-sm font-medium text-foreground">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="border-lightDark">
               {headerGroup.headers.map((header) => {
@@ -119,7 +119,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );

@@ -21,7 +21,9 @@ const fetchTopTokenHolder = async (
   daoId: DaoIdEnum,
 ): Promise<AccountBalance | null> => {
   const daoAddresses = Object.values(DAO_ADDRESSES[daoId]);
-  const tokenAddress = (daoConstantsByDaoId[daoId] as DaoConstantsFullySupported).contracts.token;
+  const tokenAddress = (
+    daoConstantsByDaoId[daoId] as DaoConstantsFullySupported
+  ).contracts.token;
 
   const response = await fetch(`${BACKEND_ENDPOINT}`, {
     method: "POST",
