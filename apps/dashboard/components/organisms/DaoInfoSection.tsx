@@ -8,7 +8,12 @@ import {
   DaoLogoVariant,
   FocusIcon,
 } from "@/components/atoms";
-import { QuorumCard, TimelockCard, VoteCard } from "@/components/molecules";
+import {
+  QuorumCard,
+  SecurityCouncilCard,
+  TimelockCard,
+  VoteCard,
+} from "@/components/molecules";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
@@ -115,6 +120,9 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
         </div>
+      </div>
+      <div className="flex h-full w-full">
+        <SecurityCouncilCard daoConstants={daoConstants} />
       </div>
       <div className="border border-lightDark sm:hidden" />
       <div
