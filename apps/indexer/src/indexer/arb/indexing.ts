@@ -6,9 +6,13 @@ import {
 } from "@/lib/event-handlers";
 import viemClient from "@/lib/viemClient";
 import { dao, daoToken, token } from "ponder:schema";
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { Address } from "viem";
 
 const daoId = DaoIdEnum.ARB;
+const network = NetworkEnum.ARBITRUM;
+const tokenAddress = viemClient.daoConfigParams[network][daoId]
+  ?.tokenAddress as Address;
 
 ponder.on("ARBToken:setup", async ({ context }) => {
   await context.db.insert(dao).values({
@@ -19,12 +23,12 @@ ponder.on("ARBToken:setup", async ({ context }) => {
     timelockDelay: BigInt(0),
     proposalThreshold: BigInt(0),
   });
-  const decimals = await viemClient.getDecimals(DaoIdEnum.ARB);
-  const arbTokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  const decimals = await viemClient.getDecimals(daoId, network);
+
   await context.db.insert(token).values({
-    id: arbTokenAddress,
+    id: tokenAddress,
     name: daoId,
-    decimals,
+    decimals: decimals as number,
     totalSupply: BigInt(0),
     delegatedSupply: BigInt(0),
     cexSupply: BigInt(0),
@@ -34,20 +38,12 @@ ponder.on("ARBToken:setup", async ({ context }) => {
     treasury: BigInt(0),
   });
   await context.db.insert(daoToken).values({
-    id: daoId + "-" + arbTokenAddress,
+    id: daoId + "-" + tokenAddress,
     daoId,
-    tokenId: arbTokenAddress,
+    tokenId: tokenAddress,
   });
 });
 
-ponder.on("ARBToken:DelegateChanged", async ({ event, context }) => {
-  await delegateChanged(event, context, daoId);
-});
-
-ponder.on("ARBToken:DelegateVotesChanged", async ({ event, context }) => {
-  await delegatedVotesChanged(event, context, daoId);
-});
-
 ponder.on("ARBToken:Transfer", async ({ event, context }) => {
-  await tokenTransfer(event, context, daoId);
+  await tokenTransfer(event, context, daoId, network);
 });
