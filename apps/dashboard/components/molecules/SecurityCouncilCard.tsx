@@ -3,19 +3,22 @@
 import { useMemo } from "react";
 import {
   Badge,
-  BaseCardDaoInfo,
   ButtonCardDaoInfoItem,
   CardData,
+  CountdownDaoInfo,
   ExternalLinkIcon,
   FocusIcon,
   GlassesIcon,
   NewspaperIcon,
   SwitchCardDaoInfoItem,
   TokensIcon,
+  TooltipInfo,
 } from "@/components/atoms";
 import { useCountdown } from "@/hooks";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { formatCountdown } from "@/lib/client/utils/time";
+import { CheckCheck, Key, ShieldCheck } from "lucide-react";
+import { cn } from "@/lib/client/utils";
 
 export const SecurityCouncilCard = ({
   daoConstants,
@@ -90,5 +93,61 @@ export const SecurityCouncilCard = ({
     ],
   };
 
-  return <BaseCardDaoInfo data={securityCouncilData} />;
+  return (
+    <div className="flex h-full w-full gap-6 py-2 sm:gap-5 sm:p-4">
+      <div className="flex w-full justify-between gap-5">
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
+          <div className="flex gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
+            <ShieldCheck className="size-4 text-foreground sm:size-6" />
+            <h3 className="text-xs font-semibold uppercase text-[#FAFAFA] sm:hidden">
+              Security Council
+            </h3>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <h3 className="hidden text-xs font-semibold uppercase text-[#FAFAFA] sm:block">
+              Security Council
+            </h3>
+            <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
+              <p className="text-sm font-medium text-foreground">Multisig:</p>
+              <div className="flex items-center gap-1.5 rounded-lg bg-dark px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
+                <div
+                  className={cn(
+                    "flex items-center gap-1.5",
+                    securityCouncil.isActive
+                      ? "text-green-400"
+                      : "text-red-400",
+                  )}
+                >
+                  <CheckCheck className="size-3.5" />
+                  <p className="text-sm font-medium">
+                    {securityCouncil.isActive ? "Yes" : "No"}
+                  </p>
+                </div>
+                <div className="size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
+                <Key className="size-3.5 text-tangerine" />
+                <p className="text-sm font-medium text-[#FAFAFA]">
+                  {securityCouncil.multisig.threshold}/
+                  {securityCouncil.multisig.signers}
+                  <span className="hidden text-foreground sm:inline">
+                    {" "}
+                    required for transactions
+                  </span>
+                  <span className="inline text-foreground sm:hidden">
+                    {" "}
+                    required
+                  </span>
+                </p>
+                <div className="hidden sm:flex">
+                  <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="hidden sm:flex">
+          <CountdownDaoInfo daoConstants={daoConstants} />
+        </div>
+      </div>
+    </div>
+  );
 };
