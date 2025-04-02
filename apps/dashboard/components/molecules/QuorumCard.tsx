@@ -5,7 +5,7 @@ import {
   CardData,
   TextCardDaoInfoItem,
   UsersIcon,
-  Skeleton,
+  SkeletonDaoInfoCards,
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
@@ -15,7 +15,7 @@ export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();
   if (!daoData) {
-    return <Skeleton />;
+    return <SkeletonDaoInfoCards />;
   }
 
   const quorumMinPercentage =

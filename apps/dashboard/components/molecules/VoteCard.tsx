@@ -6,7 +6,7 @@ import {
   BlocksIcon,
   CardData,
   ClickIcon,
-  Skeleton,
+  SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
 } from "@/components/atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
@@ -28,7 +28,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   }
 
   if (!daoData) {
-    return <Skeleton />;
+    return <SkeletonDaoInfoCards />;
   }
 
   const voteData: CardData = {
