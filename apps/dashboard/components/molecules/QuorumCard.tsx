@@ -10,13 +10,8 @@ import {
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext, useTokenDistributionContext } from "@/contexts";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 
-export const QuorumCard = ({
-  daoConstants,
-}: {
-  daoConstants: DaoConstantsFullySupported;
-}) => {
+export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();
   if (!daoData) {
@@ -52,7 +47,7 @@ export const QuorumCard = ({
     : "No Threshold";
 
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
-    ? `(${parseFloat(proposalThresholdPercentage).toFixed(2)}%)`
+    ? `(${parseFloat(proposalThresholdPercentage).toFixed(1)}%)`
     : "(N/A)";
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
@@ -85,7 +80,7 @@ export const QuorumCard = ({
         items: [
           <TextCardDaoInfoItem
             key="text-proposal-threshold"
-            item={{ value: proposalThresholdText, icon: daoConstants.icon }}
+            item={{ value: proposalThresholdText, daoId: daoData.id }}
           />,
         ],
       },
