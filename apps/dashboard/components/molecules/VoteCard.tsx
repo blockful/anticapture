@@ -12,7 +12,11 @@ import {
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();

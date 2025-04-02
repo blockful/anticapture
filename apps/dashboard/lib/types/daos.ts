@@ -1,9 +1,10 @@
-import daoConstantsByDaoId from "../dao-constants";
+import daoConstantsByDaoId from "@/lib/dao-constants";
 
 export enum DaoIdEnum {
   UNISWAP = "UNI",
   ENS = "ENS",
   OPTIMISM = "OP",
+  ARBITRUM = "ARB",
 }
 
 export const SUPPORTED_DAO_NAMES = Object.values(DaoIdEnum).filter(

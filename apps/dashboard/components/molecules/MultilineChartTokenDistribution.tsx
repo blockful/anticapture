@@ -4,7 +4,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
@@ -66,45 +65,43 @@ export const MultilineChartTokenDistribution = ({
   return (
     <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
       <ChartContainer className="h-full w-full" config={chartConfig}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid vertical={false} stroke="#27272a" />
-            <XAxis
-              dataKey="date"
-              scale="time"
-              type="number"
-              domain={["auto", "auto"]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(date) => timestampToReadableDate(date)}
-            />
-            <YAxis
-              domain={["auto", "auto"]}
-              tickFormatter={(value) =>
-                formatNumberUserReadable(
-                  Number(BigInt(Number(value)) / BigInt(10 ** 18)),
-                )
-              }
-            />
-            <Tooltip
-              content={
-                <TokenDistributionCustomTooltip chartConfig={chartConfig} />
-              }
-            />
-            {Object.keys(chartConfig)
-              .filter((item) => newDataSets.includes(item))
-              .map((key) => (
-                <Line
-                  key={key}
-                  dataKey={key}
-                  stroke={chartConfig[key as keyof typeof chartConfig].color}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <LineChart data={chartData}>
+          <CartesianGrid vertical={false} stroke="#27272a" />
+          <XAxis
+            dataKey="date"
+            scale="time"
+            type="number"
+            domain={["auto", "auto"]}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tickFormatter={(date) => timestampToReadableDate(date)}
+          />
+          <YAxis
+            domain={["auto", "auto"]}
+            tickFormatter={(value) =>
+              formatNumberUserReadable(
+                Number(BigInt(Number(value)) / BigInt(10 ** 18)),
+              )
+            }
+          />
+          <Tooltip
+            content={
+              <TokenDistributionCustomTooltip chartConfig={chartConfig} />
+            }
+          />
+          {Object.keys(chartConfig)
+            .filter((item) => newDataSets.includes(item))
+            .map((key) => (
+              <Line
+                key={key}
+                dataKey={key}
+                stroke={chartConfig[key as keyof typeof chartConfig].color}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
+        </LineChart>
       </ChartContainer>
     </div>
   );

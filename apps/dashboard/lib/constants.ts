@@ -9,6 +9,11 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "daoInfoSection",
   },
+  showSupport: {
+    title: "Show Support",
+    description: undefined,
+    anchorId: "showSupportSection",
+  },
   attackProfitability: {
     title: "Attack Profitability",
     description:
@@ -24,7 +29,7 @@ export const SECTIONS_CONSTANTS = {
   tokenDistribution: {
     title: "Token Distribution",
     description:
-      "Token distribution metrics are based on Blockful's Governance Indexer and are updated after a new block is confirmed with new interaction with relevant contracts.",
+      "Token distribution metrics are based on Blockful's Governance Indexer and are updated daily based on the events and interaction with relevant contracts.",
     anchorId: "tokenDistributionSection",
   },
   governanceImplementation: {
@@ -32,9 +37,12 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
-  showSupport: {
-    title: "Support Potential DAOs",
+  supportDaos: {
+    title: "Support DAOs",
     description: "",
-    anchorId: "showSupportSection", 
+    anchorId: "supportDaosSection",
   },
 };
+
+export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
+export const ANTICAPTURE_TELEGRAM = "https://t.me/danimimm";

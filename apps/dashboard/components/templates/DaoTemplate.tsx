@@ -5,6 +5,7 @@ import {
   AttackProfitabilitySection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
@@ -22,6 +23,7 @@ export const DaoTemplate = () => {
   return (
     <>
       <DaoInfoSection daoId={daoIdEnum} />
+      {daoConstantsByDaoId[daoIdEnum].inAnalysis && <ShowSupportSection />}
       <AttackProfitabilitySection daoId={daoIdEnum} />
       {!!daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />

@@ -128,7 +128,11 @@ export const timestampToReadableDate = (date: number) => {
   const newDate = new Date(timestamp);
   if (isNaN(newDate.getTime())) return "Invalid Date";
 
-  return newDate.toLocaleDateString("en-US");
+  return newDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 };
 
 export function capitalizeFirstLetter(str: string) {

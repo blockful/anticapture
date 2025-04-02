@@ -4,7 +4,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
@@ -28,6 +27,7 @@ import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
   normalizeDataset,
+  timestampToReadableDate,
 } from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
 
@@ -156,47 +156,39 @@ export const MultilineChartExtractableValue = ({
   return (
     <div className="flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
       <ChartContainer className="h-full w-full" config={chartConfig}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid vertical={false} stroke="#27272a" />
-            <XAxis
-              dataKey="date"
-              scale="time"
-              type="number"
-              domain={["auto", "auto"]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(timestamp) =>
-                new Date(timestamp).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                })
-              }
-            />
-            <YAxis hide={true} />
-            <Tooltip
-              content={
-                <ExtractableValueCustomTooltip chartConfig={chartConfig} />
-              }
-            />
-            {Object.entries(chartConfig)
-              .filter(
-                ([key], index: number) =>
-                  !filterData || key !== filterData[index],
-              )
-              .map(([key, config]) => (
-                <Line
-                  key={key}
-                  dataKey={key}
-                  stroke={config.color}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <LineChart data={chartData}>
+          <CartesianGrid vertical={false} stroke="#27272a" />
+          <XAxis
+            dataKey="date"
+            scale="time"
+            type="number"
+            domain={["auto", "auto"]}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tickFormatter={(date) => timestampToReadableDate(date)}
+          />
+          <YAxis hide={true} />
+          <Tooltip
+            content={
+              <ExtractableValueCustomTooltip chartConfig={chartConfig} />
+            }
+          />
+          {Object.entries(chartConfig)
+            .filter(
+              ([key], index: number) =>
+                !filterData || key !== filterData[index],
+            )
+            .map(([key, config]) => (
+              <Line
+                key={key}
+                dataKey={key}
+                stroke={config.color}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
+        </LineChart>
       </ChartContainer>
     </div>
   );
