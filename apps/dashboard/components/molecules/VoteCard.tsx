@@ -47,7 +47,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
-                className="cursor-default text-white"
+                className="cursor-default bg-dark text-white sm:bg-lightDark"
                 icon={<BlocksIcon />}
                 label={
                   isMobile
