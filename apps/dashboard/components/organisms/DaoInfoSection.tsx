@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import {
   CrownIcon,
   TokensIcon,
   DaoInfoDropdown,
+  DaoLogoIcon,
+  DaoLogoVariant,
   FocusIcon,
 } from "@/components/atoms";
 import { QuorumCard, TimelockCard, VoteCard } from "@/components/molecules";
@@ -47,26 +48,14 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   ];
 
-  // const DaoInfo = () => {
-  //   return (
-  //     <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
-  //       <ContractsCard daoConstants={daoConstants} />
-  //       <SecurityCouncilCard daoConstants={daoConstants} />
-  //     </div>
-  //   );
-  // };
-
   return (
     <section className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0">
       <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
         <div className="flex">
-          <Image
-            className="rounded-full"
-            src={daoConstants.icon}
-            alt={"OK"}
-            width={72}
-            height={72}
-            objectFit="contain"
+          <DaoLogoIcon
+            daoId={daoId}
+            className="size-[72px] rounded-full"
+            variant={DaoLogoVariant.DEFAULT}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -97,12 +86,10 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
-          <Image
-            className="rounded-full"
-            src={daoConstants.icon}
-            alt={"OK"}
-            width={36}
-            height={36}
+          <DaoLogoIcon
+            daoId={daoId}
+            className="size-8 rounded-full"
+            variant={DaoLogoVariant.DEFAULT}
           />
           <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
             {daoConstants.name}
@@ -145,7 +132,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="w-full border-b border-lightDark sm:hidden" />
 
         <div className="flex w-full">
-          <QuorumCard daoConstants={daoConstants} />
+          <QuorumCard />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
       </div>
