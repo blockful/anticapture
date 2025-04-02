@@ -3,12 +3,12 @@
 import {
   BaseCardDaoInfo,
   CardData,
-  LockIcon,
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
+import { Clock4 } from "lucide-react";
 
 export const TimelockCard = ({
   daoConstants,
@@ -17,7 +17,7 @@ export const TimelockCard = ({
 }) => {
   const timelockData: CardData = {
     title: "Timelock",
-    icon: <LockIcon className="size-4 text-foreground" />,
+    icon: <Clock4 className="size-4 text-foreground" />,
     sections: [
       {
         title: "Timelock",
