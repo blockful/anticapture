@@ -1,6 +1,7 @@
 export enum DaoIdEnum {
   UNI = "UNI",
   ENS = "ENS",
+  ARB = "ARB",
 }
 
 export enum DaysEnum {

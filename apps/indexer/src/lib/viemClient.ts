@@ -6,10 +6,25 @@ import { anvil, mainnet } from "viem/chains";
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 import { DaoIdEnum } from "./enums";
 import { GovernorAbiType, TokenAbiType } from "@/indexer/types";
+import { ARBTokenAbi } from "@/indexer/arb/abi/ARBTokenAbi";
 dotenv.config();
 
 const ponderConfig =
   config.ponder[process.env.STATUS as "production" | "staging" | "test"];
+
+type DaoConfigParams = {
+  [key in Exclude<DaoIdEnum, DaoIdEnum.ARB>]: {
+    tokenAbi: TokenAbiType;
+    tokenAddress: Address;
+    governorAbi: GovernorAbiType;
+    governorAddress: Address;
+  };
+} & {
+  [DaoIdEnum.ARB]: {
+    tokenAbi: TokenAbiType;
+    tokenAddress: Address;
+  };
+};
 
 const viemClient = () => {
   const publicClient = createPublicClient({
@@ -17,14 +32,7 @@ const viemClient = () => {
     transport: http(process.env.ALCHEMY_RPC_URL_1),
   });
 
-  const daoConfigParams: {
-    [key in DaoIdEnum]: {
-      tokenAbi: TokenAbiType;
-      tokenAddress: Address;
-      governorAbi: GovernorAbiType;
-      governorAddress: Address;
-    };
-  } = {
+  const daoConfigParams: DaoConfigParams = {
     [DaoIdEnum.UNI]: {
       tokenAbi: UNITokenAbi,
       tokenAddress: ponderConfig.contracts.UNIToken.address,
@@ -37,6 +45,10 @@ const viemClient = () => {
       governorAbi: ENSGovernorAbi,
       governorAddress: ponderConfig.contracts.ENSGovernor.address,
     },
+    [DaoIdEnum.ARB]: {
+      tokenAbi: ARBTokenAbi,
+      tokenAddress: ponderConfig.contracts.ARBToken.address,
+    },
   };
 
   const getDecimals = async (daoId: DaoIdEnum) => {
@@ -48,7 +60,7 @@ const viemClient = () => {
     return await tokenContract.read.decimals();
   };
 
-  const getQuorum = async (daoId: DaoIdEnum) => {
+  const getQuorum = async (daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>) => {
     const governorContract = getContract({
       client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
@@ -63,7 +75,9 @@ const viemClient = () => {
     }
   };
 
-  const getProposalThreshold = async (daoId: DaoIdEnum) => {
+  const getProposalThreshold = async (
+    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+  ) => {
     const governorContract = getContract({
       client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
@@ -72,7 +86,7 @@ const viemClient = () => {
     return await governorContract.read.proposalThreshold();
   };
 
-  const getVotingDelay = async (daoId: DaoIdEnum) => {
+  const getVotingDelay = async (daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>) => {
     const governorContract = getContract({
       client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
@@ -81,7 +95,7 @@ const viemClient = () => {
     return await governorContract.read.votingDelay();
   };
 
-  const getVotingPeriod = async (daoId: DaoIdEnum) => {
+  const getVotingPeriod = async (daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>) => {
     const governorContract = getContract({
       client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
@@ -90,7 +104,9 @@ const viemClient = () => {
     return await governorContract.read.votingPeriod();
   };
 
-  const getTimelockDelay = async (daoId: DaoIdEnum): Promise<bigint> => {
+  const getTimelockDelay = async (
+    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+  ): Promise<bigint> => {
     const governorContract = getContract({
       client: publicClient,
       abi: daoConfigParams[daoId].governorAbi,
@@ -123,10 +139,12 @@ const viemClient = () => {
     const timelockAddress = await governorContract.read.timelock();
     const timelockContract = getContract({
       client: publicClient,
-      abi: timelockAbis[daoId],
+      abi: timelockAbis[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARB>],
       address: timelockAddress,
     });
-    return await timelockContract.read[timelockAbis[daoId][0].name]();
+    return await timelockContract.read[
+      timelockAbis[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARB>][0].name
+    ]();
   };
 
   return {
