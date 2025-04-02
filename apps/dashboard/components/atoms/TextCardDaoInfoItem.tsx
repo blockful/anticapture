@@ -1,12 +1,12 @@
 "use client";
 
-import { StaticImageData } from "next/image";
-import Image from "next/image";
+import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoLogoIcon, DaoLogoVariant } from "@/components/atoms";
 
 interface TextItemProps {
   label?: string;
   value?: string;
-  icon?: StaticImageData;
+  daoId?: DaoIdEnum;
 }
 
 export const TextCardDaoInfoItem = ({
@@ -18,11 +18,15 @@ export const TextCardDaoInfoItem = ({
 }) => {
   return (
     <div
-      className={`flex h-full w-full px-2 py-1 text-sm font-medium leading-tight text-[#FAFAFA] sm:rounded-lg sm:bg-lightDark ${className}`}
+      className={`flex h-full w-full gap-1.5 rounded-lg bg-dark px-2 py-1 text-sm font-medium leading-tight text-[#FAFAFA] sm:bg-lightDark ${className}`}
     >
-      {item.icon && (
+      {item.daoId && (
         <p className="flex items-center">
-          <Image alt="ok" src={item.icon} />
+          <DaoLogoIcon
+            daoId={item.daoId}
+            className="size-4"
+            variant={DaoLogoVariant.SECONDARY}
+          />
         </p>
       )}
       <p>
