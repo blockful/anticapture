@@ -145,7 +145,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="w-full border-b border-lightDark sm:hidden" />
 
         <div className="flex w-full">
-          <QuorumCard />
+          <QuorumCard daoConstants={daoConstants} />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
       </div>

@@ -1,8 +1,12 @@
 "use client";
 
+import { StaticImageData } from "next/image";
+import Image from "next/image";
+
 interface TextItemProps {
   label?: string;
-  value?: string | number;
+  value?: string;
+  icon?: StaticImageData;
 }
 
 export const TextCardDaoInfoItem = ({
@@ -13,10 +17,17 @@ export const TextCardDaoInfoItem = ({
   className?: string;
 }) => {
   return (
-    <p
-      className={`flex h-full w-full rounded-lg bg-lightDark px-2 py-1 text-sm font-medium leading-tight text-[#FAFAFA] ${className}`}
+    <div
+      className={`flex h-full w-full px-2 py-1 text-sm font-medium leading-tight text-[#FAFAFA] sm:rounded-lg sm:bg-lightDark ${className}`}
     >
-      {item.label} {item.value}
-    </p>
+      {item.icon && (
+        <p className="flex items-center">
+          <Image alt="ok" src={item.icon} />
+        </p>
+      )}
+      <p>
+        {item.label} {item.value}
+      </p>
+    </div>
   );
 };
