@@ -116,7 +116,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       </div>
-      <div className="border border-lightDark" />
+      <div className="border border-lightDark sm:hidden" />
       <div
         id="dao-info-cards"
         className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
