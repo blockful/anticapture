@@ -9,6 +9,7 @@ export * from "./ButtonCardDaoInfoItem";
 export * from "./ButtonHeaderDAOSidebar";
 export * from "./ButtonHeaderDAOSidebarMobile";
 export * from "./ConnectWallet";
+export * from "./CountdownDaoInfo";
 export * from "./DaoInfoDropdown";
 export * from "./ExtractableValueAccordion";
 export * from "./ExtractableValueCustomTooltip";
