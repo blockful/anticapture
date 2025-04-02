@@ -9,6 +9,7 @@ import {
   ArrowState,
   ArrowUpDown,
   Sparkline,
+  SkeletonRow,
   TheTable,
   TooltipInfo,
 } from "@/components/atoms";
@@ -20,7 +21,6 @@ import {
   formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
-import { SkeletonRow } from "@/components/atoms";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -43,7 +43,7 @@ const metricDetails: Record<
   Delegated: {
     icon: undefined,
     tooltip:
-      "The total number of tokens delegated, representing the maximum possible voting power. Any address holding over 50% of this supply effectively controls the DAO.",
+      "Delegated supply is the total number of tokens that have been delegated for voting, representing the maximum voting power that can currently be used.",
   },
   Circulating: {
     icon: undefined,
@@ -90,14 +90,16 @@ export const TokenDistributionTable = () => {
         const metric: string = row.getValue("metric");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p className="px-4 py-3 scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto text-[#fafafa]">
+          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
           </p>
         );
       },
-      header: "Supply",
+      header: () => (
+        <div className="flex w-full items-start justify-start pl-4">Supply</div>
+      ),
     },
     {
       accessorKey: "currentValue",
@@ -114,7 +116,7 @@ export const TokenDistributionTable = () => {
         }
 
         return (
-          <div className="flex items-center justify-end text-end px-4 py-3">
+          <div className="flex items-center justify-end px-4 py-3 text-end">
             {currentValue && formatNumberUserReadable(currentValue)}
           </div>
         );
@@ -122,7 +124,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-0 text-end"
+          className="w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Current value ({daoData?.id})
@@ -161,7 +163,7 @@ export const TokenDistributionTable = () => {
 
         return (
           <p
-            className={`px-4 py-3 flex items-center justify-end gap-1 text-end ${
+            className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
                 ? "text-[#4ade80]"
                 : Number(variation) < 0
@@ -181,7 +183,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-0 text-end"
+          className="w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -214,7 +216,7 @@ export const TokenDistributionTable = () => {
           );
         }
         return (
-          <div className="flex w-full py-2.5 justify-center">
+          <div className="flex w-full justify-center py-2.5">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
               strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
@@ -223,7 +225,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-6">
+        <div className="flex w-full items-center justify-center pr-20">
           Last {days.slice(0, -1)} days
         </div>
       ),

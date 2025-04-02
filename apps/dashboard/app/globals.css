@@ -65,16 +65,15 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%; 
-    --chart-2: 340 75% 55%; 
-    --chart-3: 30 80% 55%;  
-    --chart-4: 280 65% 60%; 
-    --chart-5: 160 60% 45%; 
-    --chart-6: 200 75% 45%; 
-    --chart-7: 50 85% 50%;  
-    }
+    --chart-1: 220 70% 50%;
+    --chart-2: 340 75% 55%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 160 60% 45%;
+    --chart-6: 200 75% 45%;
+    --chart-7: 50 85% 50%;
+  }
 }
-
 
 @layer utilities {
   .card-container-about {
@@ -110,10 +109,10 @@
   }
 
   .btn-connect-wallet {
-    @apply flex w-full items-center justify-center gap-2 rounded-md border border-transparent bg-lightDark px-3 py-1.5 text-white hover:bg-transparent hover:border hover:border-lightDark;
+    @apply flex w-full items-center justify-center gap-2 rounded-md border border-transparent bg-lightDark px-3 py-1.5 text-white hover:border hover:border-lightDark hover:bg-transparent;
   }
 
   .card-text-accordion {
-    @apply text-sm font-normal leading-normal text-foreground
+    @apply text-sm font-normal leading-normal text-foreground;
   }
 }

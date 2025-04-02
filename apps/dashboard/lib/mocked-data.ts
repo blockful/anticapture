@@ -5,7 +5,7 @@ import {
   PriceEntry,
   TokenHistoricalDataMetrics,
 } from "@/lib/dao-constants/types";
-import { DAYS_IN_MILLISECONDS, TimeInterval } from "./enums/TimeInterval";
+import { DAYS_IN_MILLISECONDS, TimeInterval } from "@/lib/enums/TimeInterval";
 
 export type DashboardDao = {
   dao: string;
