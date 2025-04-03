@@ -103,7 +103,7 @@ export const SecurityCouncilCard = ({
               Security Council
             </h3>
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-3 sm:gap-1.5">
             <h3 className="hidden text-xs font-semibold uppercase text-[#FAFAFA] sm:block">
               Security Council
             </h3>
@@ -141,6 +141,13 @@ export const SecurityCouncilCard = ({
                   <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
                 </div>
               </div>
+            </div>
+            <div className="flex w-full items-center justify-between sm:hidden">
+              <p className="text-sm font-medium text-foreground">Countdown:</p>
+              <CountdownDaoInfo
+                daoConstants={daoConstants}
+                className="border-none bg-dark"
+              />
             </div>
           </div>
         </div>
