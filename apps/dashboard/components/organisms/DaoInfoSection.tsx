@@ -18,6 +18,7 @@ import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConstantsByDaoId from "@/lib/dao-constants";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConstants = daoConstantsByDaoId[daoId];
@@ -54,7 +55,10 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   ];
 
   return (
-    <section className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0">
+    <section
+      id={SECTIONS_CONSTANTS.daoInfo.anchorId}
+      className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
+    >
       <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
         <div className="flex">
           <DaoLogoIcon
