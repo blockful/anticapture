@@ -10,6 +10,7 @@ import {
   FocusIcon,
   GlassesIcon,
   NewspaperIcon,
+  ProgressBar,
   SwitchCardDaoInfoItem,
   TokensIcon,
   TooltipInfo,
@@ -33,6 +34,19 @@ export const SecurityCouncilCard = ({
     () => formatCountdown(countdown),
     [countdown],
   );
+
+  // Calculate progress
+  const progress = useMemo(() => {
+    if (!securityCouncil) return 0;
+    const start = new Date(securityCouncil.startDate).getTime();
+    const end = new Date(securityCouncil.expiration.date).getTime();
+    const now = Date.now();
+
+    const total = end - start;
+    const current = now - start;
+
+    return Math.min(Math.max((current / total) * 100, 0), 100);
+  }, [securityCouncil]);
 
   if (!securityCouncil) return null;
 
@@ -94,7 +108,7 @@ export const SecurityCouncilCard = ({
   };
 
   return (
-    <div className="flex h-full w-full gap-6 py-2 sm:gap-5 sm:p-4">
+    <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5 sm:p-4">
       <div className="flex w-full justify-between gap-5">
         <div className="flex w-full flex-col gap-3 sm:flex-row">
           <div className="flex gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
@@ -142,6 +156,7 @@ export const SecurityCouncilCard = ({
                 </div>
               </div>
             </div>
+
             <div className="flex w-full items-center justify-between sm:hidden">
               <p className="text-sm font-medium text-foreground">Countdown:</p>
               <CountdownDaoInfo
@@ -154,6 +169,15 @@ export const SecurityCouncilCard = ({
         <div className="hidden sm:flex">
           <CountdownDaoInfo daoConstants={daoConstants} />
         </div>
+      </div>
+      <div className="flex">
+        <ProgressBar
+          startDate="July 1, 2024"
+          endDate="July 26, 2026"
+          progress={45}
+          warning={true}
+          className="" // 3 months before add alert-triangle
+        />
       </div>
     </div>
   );

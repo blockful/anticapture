@@ -15,6 +15,7 @@ export * from "./ExtractableValueAccordion";
 export * from "./ExtractableValueCustomTooltip";
 export * from "./ExtractableValueToggleHeader";
 export * from "./HeaderDAOSidebarDropdown";
+export * from "./ProgressBar";
 export * from "./RiskLevelCard";
 export * from "./SkeletonDaoInfoCards";
 export * from "./SkeletonRow";
