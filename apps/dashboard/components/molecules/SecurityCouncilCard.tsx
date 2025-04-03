@@ -1,23 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  Badge,
-  ButtonCardDaoInfoItem,
-  CardData,
-  CountdownDaoInfo,
-  ExternalLinkIcon,
-  FocusIcon,
-  GlassesIcon,
-  NewspaperIcon,
-  ProgressBar,
-  SwitchCardDaoInfoItem,
-  TokensIcon,
-  TooltipInfo,
-} from "@/components/atoms";
-import { useCountdown } from "@/hooks";
+import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
-import { formatCountdown } from "@/lib/client/utils/time";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 
@@ -27,18 +12,10 @@ export const SecurityCouncilCard = ({
   daoConstants: DaoConstantsFullySupported;
 }) => {
   const { securityCouncil } = daoConstants;
-  const targetTimestamp = securityCouncil?.expiration.timestamp;
-  const countdown = useCountdown(targetTimestamp);
 
-  const formattedCountdown = useMemo(
-    () => formatCountdown(countdown),
-    [countdown],
-  );
-
-  // Calculate progress
   const progress = useMemo(() => {
     if (!securityCouncil) return 0;
-    const start = new Date(securityCouncil.startDate).getTime();
+    const start = new Date(securityCouncil.expiration.startDate).getTime();
     const end = new Date(securityCouncil.expiration.date).getTime();
     const now = Date.now();
 
@@ -48,64 +25,29 @@ export const SecurityCouncilCard = ({
     return Math.min(Math.max((current / total) * 100, 0), 100);
   }, [securityCouncil]);
 
-  if (!securityCouncil) return null;
+  const warning = useMemo(() => {
+    if (!securityCouncil) return 0;
 
-  const securityCouncilData: CardData = {
-    title: "Security Council",
-    icon: <NewspaperIcon />,
-    sections: [
-      {
-        title: "Multisig",
-        tooltip:
-          "The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract.",
-        items: [
-          <SwitchCardDaoInfoItem
-            switched={securityCouncil.isActive}
-            key="switch"
-          />,
-          <button
-            className="flex h-full w-full"
-            key="multisig"
-            onClick={() =>
-              window.open(
-                `${daoConstants.securityCouncil?.multisig.externalLink}`,
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-          >
-            <Badge className="flex h-full w-full gap-1 hover:border-lightDark hover:bg-transparent">
-              <GlassesIcon />
-              <p className="text-sm font-medium leading-tight">
-                {securityCouncil.multisig.threshold} /{" "}
-                {securityCouncil.multisig.signers}
-              </p>
-              <ExternalLinkIcon className="text-tangerine" />
-            </Badge>
-          </button>,
-        ],
-      },
-      {
-        title: "Expiration",
-        tooltip: `The security council is implemented with an expiration date. Once expired, any address can call a function to remove the privileged access that the council has to the timelock's "cancel()" function, preventing it to perpetuating a veto hold over the DAO.`,
-        items: [
-          <ButtonCardDaoInfoItem
-            key="Expiration"
-            label={securityCouncil.expiration.date}
-            icon={<FocusIcon className="text-tangerine" />}
-            disabled
-          />,
-          <ButtonCardDaoInfoItem
-            key="Expiration Countdown"
-            label={formattedCountdown}
-            disabled
-            icon={<TokensIcon className="text-tangerine" />}
-            className={`${countdown.isLoading ? "flex animate-pulse justify-center space-x-2" : ""}`}
-          />,
-        ],
-      },
-    ],
-  };
+    const start = new Date(securityCouncil.expiration.startDate).getTime();
+    const end = new Date(securityCouncil.expiration.date).getTime();
+    const alertTimestamp = securityCouncil.expiration.alertExpiration;
+
+    // Convert alertTimestamp from seconds to milliseconds
+    const alertMs = alertTimestamp * 1000;
+
+    // Calculate the total duration of the progress bar
+    const totalDuration = end - start;
+
+    // Calculate the position of the warning as a percentage
+    const warningPosition = ((alertMs - start) / totalDuration) * 100;
+
+    // Return the warning percentage if it's a valid number
+    return isNaN(warningPosition)
+      ? 0
+      : Math.min(Math.max(warningPosition, 0), 100);
+  }, [securityCouncil]);
+
+  if (!securityCouncil) return null;
 
   return (
     <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5 sm:p-4">
@@ -172,11 +114,10 @@ export const SecurityCouncilCard = ({
       </div>
       <div className="flex">
         <ProgressBar
-          startDate="July 1, 2024"
-          endDate="July 26, 2026"
-          progress={45}
-          warning={true}
-          className="" // 3 months before add alert-triangle
+          startDate={securityCouncil.expiration.startDate}
+          endDate={securityCouncil.expiration.date}
+          progress={progress}
+          warning={warning}
         />
       </div>
     </div>

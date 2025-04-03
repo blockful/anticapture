@@ -6,7 +6,12 @@ import {
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/lib/dao-constants/types";
-import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/lib/client/constants";
+import {
+  DAYS_PER_MONTH,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
+} from "@/lib/client/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -286,4 +291,16 @@ export const findMostRecentValue = <
 
   // Return the found item's value
   return items[index][valueKey];
+};
+
+export const calculateMonthsBefore = ({
+  timestamp,
+  monthsBeforeTimestamp,
+}: {
+  timestamp: number;
+  monthsBeforeTimestamp: number;
+}): number => {
+  const SECONDS_TO_SUBTRACT =
+    monthsBeforeTimestamp * DAYS_PER_MONTH * SECONDS_PER_DAY;
+  return timestamp - SECONDS_TO_SUBTRACT;
 };
