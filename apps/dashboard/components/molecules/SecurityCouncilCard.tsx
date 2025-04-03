@@ -5,6 +5,7 @@ import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
+import Link from "next/link";
 
 export const SecurityCouncilCard = ({
   daoConstants,
@@ -80,19 +81,24 @@ export const SecurityCouncilCard = ({
                   </p>
                 </div>
                 <div className="size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
-                <Key className="size-3.5 text-tangerine" />
-                <p className="text-sm font-medium text-[#FAFAFA]">
+                <Link
+                  href={securityCouncil.multisig.externalLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-1 border-b border-dashed border-foreground text-sm font-medium text-[#FAFAFA] duration-300 hover:border-[#FAFAFA]"
+                >
+                  <Key className="size-3.5 text-tangerine" />
                   {securityCouncil.multisig.threshold}/
                   {securityCouncil.multisig.signers}
-                  <span className="hidden text-foreground sm:inline">
+                  <span className="hidden text-foreground duration-300 group-hover:text-[#FAFAFA] sm:inline">
                     {" "}
                     required for transactions
                   </span>
-                  <span className="inline text-foreground sm:hidden">
+                  <span className="inline text-foreground duration-300 group-hover:text-[#FAFAFA] sm:hidden">
                     {" "}
                     required
                   </span>
-                </p>
+                </Link>
                 <div className="hidden sm:flex">
                   <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
                 </div>
