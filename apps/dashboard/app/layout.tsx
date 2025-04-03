@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { GlobalProviders } from "@/components/providers/GlobalProviders";
 import { ReactNode } from "react";
+import HotjarScript from "@/hotjar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,6 +50,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <HotjarScript />
+      </head>
       <body
         className={`${inter.className} overflow-x-hidden bg-darkest xl:overflow-hidden`}
       >
