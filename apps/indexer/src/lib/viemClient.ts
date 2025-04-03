@@ -60,26 +60,21 @@ const viemClient = () => {
     [NetworkEnum.MAINNET]: {
       [DaoIdEnum.UNI]: {
         tokenAbi: UNITokenAbi,
-        tokenAddress: ponderConfig.networks.mainnet?.contracts?.UNIToken
-          ?.address as Address,
+        tokenAddress: ponderConfig.contracts.UNIToken?.address as Address,
         governorAbi: UNIGovernorAbi,
-        governorAddress: ponderConfig.networks.mainnet?.contracts?.UNIGovernor
-          ?.address as Address,
+        governorAddress: ponderConfig.contracts.UNIGovernor?.address as Address,
       },
       [DaoIdEnum.ENS]: {
         tokenAbi: ENSTokenAbi,
-        tokenAddress: ponderConfig.networks.mainnet?.contracts?.ENSToken
-          ?.address as Address,
+        tokenAddress: ponderConfig.contracts.ENSToken?.address as Address,
         governorAbi: ENSGovernorAbi,
-        governorAddress: ponderConfig.networks.mainnet?.contracts?.ENSGovernor
-          ?.address as Address,
+        governorAddress: ponderConfig.contracts.ENSGovernor?.address as Address,
       },
     },
     [NetworkEnum.ARBITRUM]: {
       [DaoIdEnum.ARB]: {
         tokenAbi: ARBTokenAbi,
-        tokenAddress: ponderConfig.networks.arbitrum?.contracts?.ARBToken
-          ?.address as Address,
+        tokenAddress: ponderConfig.contracts.ARBToken?.address as Address,
       },
     },
     [NetworkEnum.ANVIL]: {},

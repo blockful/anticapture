@@ -33,16 +33,16 @@ export type Network = {
   chain: typeof mainnet | typeof anvil | typeof arbitrum;
   chainId: number;
   rpcUrls: string[];
-  contracts: Partial<{
-    [K in ContractName]: PonderContract<K>;
-  }>;
   disableCache?: boolean;
 };
 
+type EnvironmentConfig = {
+  networks: Partial<Record<NetworkEnum, Network>>;
+  contracts: Partial<Record<ContractName, PonderContract<ContractName>>>;
+};
+
 type Config = {
-  [key in "production" | "staging" | "test"]: {
-    networks: Partial<Record<NetworkEnum, Network>>;
-  };
+  [key in "production" | "staging" | "test"]: EnvironmentConfig;
 };
 
 // Contract ABI mapping
@@ -54,7 +54,7 @@ export const contractAbis: ContractAbis = {
   ARBToken: ARBTokenAbi,
 };
 
-export const config: Config = {
+export const config = {
   production: {
     networks: {
       [NetworkEnum.MAINNET]: {
@@ -62,51 +62,45 @@ export const config: Config = {
         chain: mainnet,
         chainId: 1,
         rpcUrls: [process.env.PONDER_RPC_URL_ETH_1 as string],
-        contracts: {
-          ENSToken: {
-            abi: contractAbis.ENSToken,
-            network: "mainnet",
-            address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.ENS].token,
-            startBlock: 9380410,
-          } as PonderContract<"ENSToken">,
-          ENSGovernor: {
-            abi: contractAbis.ENSGovernor,
-            network: "mainnet",
-            address:
-              CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.ENS].governor,
-            startBlock: 13533772,
-          } as PonderContract<"ENSGovernor">,
-          UNIToken: {
-            abi: contractAbis.UNIToken,
-            network: "mainnet",
-            address:
-              CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.UNI].token,
-            startBlock: 10861674,
-          } as PonderContract<"UNIToken">,
-          UNIGovernor: {
-            abi: contractAbis.UNIGovernor,
-            network: "mainnet",
-            address:
-              CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.UNI].governor,
-            startBlock: 13059157,
-          } as PonderContract<"UNIGovernor">,
-        },
       },
       [NetworkEnum.ARBITRUM]: {
         name: "arbitrum",
         chainId: 42161,
         chain: arbitrum,
         rpcUrls: [process.env.PONDER_RPC_URL_ARB_1 as string],
-        contracts: {
-          ARBToken: {
-            abi: contractAbis.ARBToken,
-            network: "arbitrum",
-            address:
-              CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB].token,
-            startBlock: 0,
-          } as PonderContract<"ARBToken">,
-        },
       },
+    },
+    contracts: {
+      ENSToken: {
+        abi: contractAbis.ENSToken,
+        network: "mainnet",
+        address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.ENS].token,
+        startBlock: 9380410,
+      } as PonderContract<"ENSToken">,
+      ENSGovernor: {
+        abi: contractAbis.ENSGovernor,
+        network: "mainnet",
+        address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.ENS].governor,
+        startBlock: 13533772,
+      } as PonderContract<"ENSGovernor">,
+      UNIToken: {
+        abi: contractAbis.UNIToken,
+        network: "mainnet",
+        address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.UNI].token,
+        startBlock: 10861674,
+      } as PonderContract<"UNIToken">,
+      UNIGovernor: {
+        abi: contractAbis.UNIGovernor,
+        network: "mainnet",
+        address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.UNI].governor,
+        startBlock: 13059157,
+      } as PonderContract<"UNIGovernor">,
+      ARBToken: {
+        abi: contractAbis.ARBToken,
+        network: "arbitrum",
+        address: CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB].token,
+        startBlock: 0,
+      } as PonderContract<"ARBToken">,
     },
   },
   staging: {
@@ -116,48 +110,45 @@ export const config: Config = {
         chainId: 1,
         chain: mainnet,
         rpcUrls: [process.env.PONDER_RPC_URL_ETH_1 as string],
-        contracts: {
-          ENSToken: {
-            abi: contractAbis.ENSToken,
-            network: "mainnet",
-            address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-            startBlock: 9380410,
-          } as PonderContract<"ENSToken">,
-          ENSGovernor: {
-            abi: contractAbis.ENSGovernor,
-            network: "mainnet",
-            address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-            startBlock: 13533772,
-          } as PonderContract<"ENSGovernor">,
-          UNIToken: {
-            abi: contractAbis.UNIToken,
-            network: "mainnet",
-            address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-            startBlock: 10861674,
-          } as PonderContract<"UNIToken">,
-          UNIGovernor: {
-            abi: contractAbis.UNIGovernor,
-            network: "mainnet",
-            address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
-            startBlock: 13059157,
-          } as PonderContract<"UNIGovernor">,
-        },
       },
       [NetworkEnum.ARBITRUM]: {
         name: "arbitrum",
         chainId: 42161,
         chain: arbitrum,
         rpcUrls: [process.env.PONDER_RPC_URL_ARB_1 as string],
-        contracts: {
-          ARBToken: {
-            abi: contractAbis.ARBToken,
-            network: "arbitrum",
-            address:
-              CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB].token,
-            startBlock: 0,
-          } as PonderContract<"ARBToken">,
-        },
       },
+    },
+    contracts: {
+      ENSToken: {
+        abi: contractAbis.ENSToken,
+        network: "mainnet",
+        address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        startBlock: 9380410,
+      } as PonderContract<"ENSToken">,
+      ENSGovernor: {
+        abi: contractAbis.ENSGovernor,
+        network: "mainnet",
+        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+        startBlock: 13533772,
+      } as PonderContract<"ENSGovernor">,
+      UNIToken: {
+        abi: contractAbis.UNIToken,
+        network: "mainnet",
+        address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        startBlock: 10861674,
+      } as PonderContract<"UNIToken">,
+      UNIGovernor: {
+        abi: contractAbis.UNIGovernor,
+        network: "mainnet",
+        address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+        startBlock: 13059157,
+      } as PonderContract<"UNIGovernor">,
+      ARBToken: {
+        abi: contractAbis.ARBToken,
+        network: "arbitrum",
+        address: CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB].token,
+        startBlock: 0,
+      } as PonderContract<"ARBToken">,
     },
   },
   test: {
@@ -168,39 +159,39 @@ export const config: Config = {
         chain: anvil,
         disableCache: true,
         rpcUrls: [process.env.PONDER_TEST_RPC_URL_1 as string],
-        contracts: {
-          ENSToken: {
-            abi: contractAbis.ENSToken,
-            network: "anvil",
-            address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-            startBlock: 0,
-          } as PonderContract<"ENSToken">,
-          ENSGovernor: {
-            abi: contractAbis.ENSGovernor,
-            network: "anvil",
-            address: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
-            startBlock: 0,
-          } as PonderContract<"ENSGovernor">,
-          UNIToken: {
-            abi: contractAbis.UNIToken,
-            network: "anvil",
-            address: zeroAddress,
-            startBlock: 0,
-          } as PonderContract<"UNIToken">,
-          UNIGovernor: {
-            abi: contractAbis.UNIGovernor,
-            network: "anvil",
-            address: zeroAddress,
-            startBlock: 0,
-          } as PonderContract<"UNIGovernor">,
-          ARBToken: {
-            abi: contractAbis.ARBToken,
-            network: "anvil",
-            address: zeroAddress,
-            startBlock: 0,
-          } as PonderContract<"ARBToken">,
-        },
       },
     },
+    contracts: {
+      ENSToken: {
+        abi: contractAbis.ENSToken,
+        network: "anvil",
+        address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+        startBlock: 0,
+      } as PonderContract<"ENSToken">,
+      ENSGovernor: {
+        abi: contractAbis.ENSGovernor,
+        network: "anvil",
+        address: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+        startBlock: 0,
+      } as PonderContract<"ENSGovernor">,
+      UNIToken: {
+        abi: contractAbis.UNIToken,
+        network: "anvil",
+        address: zeroAddress,
+        startBlock: 0,
+      } as PonderContract<"UNIToken">,
+      UNIGovernor: {
+        abi: contractAbis.UNIGovernor,
+        network: "anvil",
+        address: zeroAddress,
+        startBlock: 0,
+      } as PonderContract<"UNIGovernor">,
+      ARBToken: {
+        abi: contractAbis.ARBToken,
+        network: "anvil",
+        address: zeroAddress,
+        startBlock: 0,
+      } as PonderContract<"ARBToken">,
+    },
   },
-};
+} as const;
