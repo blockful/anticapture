@@ -5,23 +5,10 @@ import { config } from "./config";
 import { NetworkEnum } from "@/lib/enums";
 dotenv.config();
 
-let networks;
-let contracts;
-
-if (!process.env.STATUS) {
-  throw new Error("Env variable STATUS is not defined");
-} else if (
-  process.env.STATUS === "production" ||
-  process.env.STATUS === "nodeful"
-) {
-  ({ networks, contracts } = config["production"]);
-} else if (process.env.STATUS === "staging") {
-  ({ networks, contracts } = config["staging"]);
-} else if (process.env.STATUS === "test") {
-  ({ networks, contracts } = config["test"]);
-} else {
-  throw new Error("No ENV variable STATUS");
-}
+if (!process.env.STATUS) throw new Error("Env variable STATUS is not defined");
+const { networks, contracts } =
+  config[process.env.STATUS as "production" | "staging" | "test"];
+if (!networks || !contracts) throw new Error("No networks or contracts");
 
 const databaseConfig = process.env.DATABASE_URL
   ? {
