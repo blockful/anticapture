@@ -16,7 +16,7 @@ const initialTokenDistributionMetricData = {
 
 export const TokenDistributionContext =
   createContext<TokenDistributionContextProps>({
-    days: TimeInterval.NINETY_DAYS,
+    days: TimeInterval.ONE_YEAR,
     setDays: () => {},
     totalSupply: initialTokenDistributionMetricData,
     setTotalSupply: () => {},
@@ -51,7 +51,7 @@ export const TokenDistributionProvider = ({
   children: React.ReactNode;
   daoId: DaoIdEnum;
 }) => {
-  const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+  const [days, setDays] = useState<TimeInterval>(TimeInterval.ONE_YEAR);
   const [totalSupply, setTotalSupply] = useState<MetricData>(
     initialTokenDistributionMetricData,
   );
