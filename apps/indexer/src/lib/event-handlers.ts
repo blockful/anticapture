@@ -20,9 +20,9 @@ import {
   MetricTypesEnum,
   TREASURY_ADDRESSES,
 } from "./constants";
-import { zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 import viemClient from "./viemClient";
-import { DaoIdEnum } from "./enums";
+import { DaoIdEnum, NetworkEnum } from "./enums";
 import {
   DaoDelegateChangedEvent,
   DaoDelegateVotesChangedEvent,
@@ -37,6 +37,7 @@ export const delegateChanged = async (
   event: DaoDelegateChangedEvent,
   context: Context,
   daoId: string,
+  network: NetworkEnum,
 ) => {
   // Inserting accounts if didn't exist
   await context.db
@@ -100,6 +101,7 @@ export const delegatedVotesChanged = async (
   event: DaoDelegateVotesChangedEvent,
   context: Context,
   daoId: string,
+  network: NetworkEnum,
 ) => {
   //Inserting delegate account if didn't exist
   await context.db
@@ -175,6 +177,7 @@ export const tokenTransfer = async (
   event: DaoTransferEvent,
   context: Context,
   daoId: DaoIdEnum,
+  network: NetworkEnum,
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -203,7 +206,8 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  const tokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
+  const tokenAddress = viemClient.daoConfigParams[network][daoId]
+    ?.tokenAddress as Address;
 
   // Create a new transfer record
   await context.db.insert(transfers).values({
@@ -407,6 +411,7 @@ export const voteCast = async (
   event: DaoVoteCastEvent,
   context: Context,
   daoId: string,
+  network: NetworkEnum,
 ) => {
   const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -475,6 +480,7 @@ export const proposalCreated = async (
   event: DaoProposalCreatedEvent,
   context: Context,
   daoId: string,
+  network: NetworkEnum,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -528,6 +534,7 @@ export const proposalCanceled = async (
   event: DaoProposalCanceledEvent,
   context: Context,
   daoId: string,
+  network: NetworkEnum,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -548,6 +555,7 @@ export const proposalExecuted = async (
   event: DaoProposalExecutedEvent,
   context: Context,
   daoId: string,
+  network: NetworkEnum,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -571,6 +579,7 @@ const storeDailyBucket = async (
   metricType: MetricTypesEnum,
   currentValue: bigint,
   newValue: bigint,
+  network: NetworkEnum,
 ) => {
   const volume = delta(newValue, currentValue);
   const dayStartTimestampInSeconds =
