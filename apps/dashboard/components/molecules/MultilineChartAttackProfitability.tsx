@@ -36,23 +36,27 @@ interface MultilineChartExtractableValueProps {
   filterData?: string[];
 }
 
-export const MultilineChartExtractableValue = ({
+export const MultilineChartAttackProfitability = ({
   filterData,
   days,
 }: MultilineChartExtractableValueProps) => {
   const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
+
+  const selectedDays = parseInt(days.split("d")[0]);
+
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
     days,
   );
+
   const { data: daoTokenPriceHistoricalData = { prices: [] } } =
     useDaoTokenHistoricalData(daoId.toUpperCase() as DaoIdEnum);
 
   const { data: treasuryData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
     [MetricTypesEnum.TREASURY],
-    parseInt(days.split("d")[0]),
+    selectedDays,
     {
       refreshInterval: 300000,
       revalidateOnFocus: false,
@@ -62,7 +66,7 @@ export const MultilineChartExtractableValue = ({
   const { data: delegatedData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
     [MetricTypesEnum.DELEGATED_SUPPLY],
-    parseInt(days.split("d")[0]),
+    selectedDays,
     {
       refreshInterval: 300000,
       revalidateOnFocus: false,
@@ -71,6 +75,7 @@ export const MultilineChartExtractableValue = ({
 
   let delegatedSupplyChart;
   let treasurySupplyChart;
+
   if (treasuryData) {
     treasurySupplyChart = treasuryData[MetricTypesEnum.TREASURY];
   }
