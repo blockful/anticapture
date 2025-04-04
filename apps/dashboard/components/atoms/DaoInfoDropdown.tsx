@@ -50,7 +50,7 @@ export const DaoInfoDropdown = ({
         <ChevronDown
           className={cn(
             "size-3 flex-shrink-0 transition-transform duration-200",
-            isOpen && "rotate-180",
+            {"rotate-180": isOpen},
           )}
         />
       </button>
