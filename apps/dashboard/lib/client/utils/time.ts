@@ -12,10 +12,10 @@ export function formatCountdown(countdown: CountdownTime): string {
   if (countdown.expired) return "Expired";
 
   const parts = [];
-  if (countdown.days > 0) parts.push(`${countdown.days}d`);
-  if (countdown.hours > 0) parts.push(`${countdown.hours}h`);
-  if (countdown.minutes > 0) parts.push(`${countdown.minutes}m`);
-  if (countdown.seconds > 0) parts.push(`${countdown.seconds}s`);
+  if (countdown.days > 0) parts.push(`${countdown.days}days`);
+  if (countdown.hours > 0) parts.push(`${countdown.hours}hours`);
+  if (countdown.minutes > 0) parts.push(`${countdown.minutes}hours`);
+  if (countdown.seconds > 0) parts.push(`${countdown.seconds}seconds`);
 
   return parts.join(" ");
 }

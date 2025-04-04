@@ -39,8 +39,10 @@ export type DaoConstantsFullySupported = {
       externalLink: string;
     };
     expiration: {
+      startDate: string;
       date: string;
       timestamp: number;
+      alertExpiration: number;
     };
   };
   attackProfitability: {
