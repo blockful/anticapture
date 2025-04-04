@@ -11,7 +11,7 @@ import {
   ExtractableValueAccordion,
 } from "@/components/atoms";
 import {
-  MultilineChartExtractableValue,
+  MultilineChartAttackProfitability,
   AttackCostBarChart,
 } from "@/components/molecules";
 import { TimeInterval } from "@/lib/enums";
@@ -61,7 +61,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
           />
         }
       >
-        <MultilineChartExtractableValue
+        <MultilineChartAttackProfitability
           days={days}
           filterData={[treasuryMetric, costMetric]}
         />
