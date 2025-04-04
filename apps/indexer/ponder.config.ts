@@ -2,6 +2,7 @@ import { createConfig, loadBalance } from "ponder";
 import { http, Transport, webSocket } from "viem";
 import dotenv from "dotenv";
 import { config } from "./config";
+import { NetworkEnum } from "@/lib/enums";
 dotenv.config();
 
 let networks;
@@ -31,30 +32,12 @@ const databaseConfig = process.env.DATABASE_URL
     }
   : {};
 
-const networkConfigs = Object.entries(networks).reduce(
-  (acc, [network, { chainId, rpcUrls }]) => ({
-    ...acc,
-    [network]: {
-      chainId,
-      transport:
-        rpcUrls.length > 1
-          ? loadBalance(rpcUrls.map((url) => http(url)))
-          : webSocket(rpcUrls[0]),
-      maxRequestsPerSecond:
-        process.env.STATUS !== "production" && process.env.STATUS !== "staging"
-          ? 10000
-          : 1000,
-    },
-  }),
-  {} as Record<
-    string,
-    { chainId: number; transport: Transport; maxRequestsPerSecond: number }
-  >
-);
-
 // Create a Ponder configuration with specific contract ABIs
 export default createConfig({
-  networks: networkConfigs,
+  networks: networks as Record<
+    NetworkEnum,
+    { chainId: number; transport: Transport; maxRequestsPerSecond: number }
+  >,
   contracts,
   ...databaseConfig,
 });

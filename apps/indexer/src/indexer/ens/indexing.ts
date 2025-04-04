@@ -32,7 +32,7 @@ ponder.on("ENSToken:setup", async ({ context }) => {
   const timelockDelay = await viemClient.getTimelockDelay(daoId, network);
   const proposalThreshold = await viemClient.getProposalThreshold(
     daoId,
-    network
+    network,
   );
 
   await context.db.insert(dao).values({

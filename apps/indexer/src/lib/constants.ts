@@ -24,6 +24,7 @@ export const CONTRACT_ADDRESSES = {
       token: "0x912ce59144191c1204e64559fe8253a0e49e6548",
     },
   },
+  [NetworkEnum.ANVIL]: {},
 };
 
 export const TREASURY_ADDRESSES = {

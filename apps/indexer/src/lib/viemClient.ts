@@ -30,8 +30,7 @@ type GovernorDaoConfig = {
 };
 
 type DaoConfigs = {
-  [key in Exclude<DaoIdEnum, DaoIdEnum.ARB>]: TokenDaoConfig &
-    GovernorDaoConfig;
+  [value in DaoIdEnum.ENS | DaoIdEnum.UNI]: TokenDaoConfig & GovernorDaoConfig;
 } & {
   [DaoIdEnum.ARB]: TokenDaoConfig;
 };
@@ -90,7 +89,7 @@ const viemClient = () => {
   };
 
   const getQuorum = async (
-    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+    daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
     network: NetworkEnum
   ) => {
     const governorContract = getContract({
@@ -108,7 +107,7 @@ const viemClient = () => {
   };
 
   const getProposalThreshold = async (
-    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+    daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
     network: NetworkEnum
   ) => {
     const governorContract = getContract({
@@ -120,7 +119,7 @@ const viemClient = () => {
   };
 
   const getVotingDelay = async (
-    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+    daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
     network: NetworkEnum
   ) => {
     const governorContract = getContract({
@@ -132,7 +131,7 @@ const viemClient = () => {
   };
 
   const getVotingPeriod = async (
-    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+    daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
     network: NetworkEnum
   ) => {
     const governorContract = getContract({
@@ -144,7 +143,7 @@ const viemClient = () => {
   };
 
   const getTimelockDelay = async (
-    daoId: Exclude<DaoIdEnum, DaoIdEnum.ARB>,
+    daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
     network: NetworkEnum
   ): Promise<bigint> => {
     const governorContract = getContract({
@@ -179,11 +178,11 @@ const viemClient = () => {
     const timelockAddress = await governorContract.read.timelock();
     const timelockContract = getContract({
       client: clients[network],
-      abi: timelockAbis[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARB>],
+      abi: timelockAbis[daoId],
       address: timelockAddress,
     });
     return await timelockContract.read[
-      timelockAbis[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARB>][0].name
+      timelockAbis[daoId as DaoIdEnum.UNI | DaoIdEnum.ENS][0].name
     ]();
   };
 
