@@ -5,7 +5,7 @@ import {
   CardData,
   TextCardDaoInfoItem,
   UsersIcon,
-  Skeleton,
+  SkeletonDaoInfoCards,
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
@@ -15,7 +15,7 @@ export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();
   if (!daoData) {
-    return <Skeleton />;
+    return <SkeletonDaoInfoCards />;
   }
 
   const quorumMinPercentage =
@@ -39,7 +39,7 @@ export const QuorumCard = () => {
     : "No Quorum";
 
   const quorumPercentage = quorumMinPercentage
-    ? `(${parseFloat(quorumMinPercentage).toFixed(2)}%)`
+    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}%)`
     : "(N/A)";
 
   const proposalThresholdValue = daoData.proposalThreshold
@@ -47,42 +47,40 @@ export const QuorumCard = () => {
     : "No Threshold";
 
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
-    ? `(${parseFloat(proposalThresholdPercentage).toFixed(2)}%)`
+    ? `(${parseFloat(proposalThresholdPercentage).toFixed(1)}%)`
     : "(N/A)";
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
 
   const quorumData: CardData = {
     title: "Quorum",
-    icon: <UsersIcon className="text-[#FAFAFA]" />,
+    icon: <UsersIcon className="text-foreground" />,
+    optionalHeaderValue: (
+      <p className="flex text-sm text-tangerine">
+        {quorumValue} {daoData.id || "Unknown ID"} {quorumPercentage}
+      </p>
+    ),
     sections: [
       {
         title: "Logic",
         tooltip:
-          "Specifies whether quorum is calculated based on “For” votes, “For + Abstain” votes, or all votes cast",
-        items: [
-          <TextCardDaoInfoItem label="For + Abstain" key={"text-logic"} />,
-        ],
-      },
-      {
-        title: "Quorum",
-        tooltip:
-          "A proposal must meet or exceed a minimum vote threshold (quorum) to pass. Even with majority approval, it fails if it doesn't reach quorum.",
+          'Specifies whether quorum is calculated based on "For" votes, "For + Abstain" votes, or all votes cast',
         items: [
           <TextCardDaoInfoItem
-            key={"text-quorum"}
-            value={`${quorumValue} ${daoData.id || "Unknown ID"} ${quorumPercentage}`}
+            key="text-logic"
+            item={{ label: "For + Abstain" }}
           />,
         ],
       },
+
       {
         title: "Proposal Threshold",
         tooltip:
           "The minimum voting power required to submit an on-chain proposal.",
         items: [
           <TextCardDaoInfoItem
-            value={proposalThresholdText}
-            key={"text-proposal-threshold"}
+            key="text-proposal-threshold"
+            item={{ value: proposalThresholdText, daoId: daoData.id }}
           />,
         ],
       },

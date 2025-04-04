@@ -2,14 +2,13 @@
 
 import {
   BaseCardDaoInfo,
-  ButtonCardDaoInfoItem,
   CardData,
-  LockIcon,
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
+import { Clock4 } from "lucide-react";
 
 export const TimelockCard = ({
   daoConstants,
@@ -18,7 +17,7 @@ export const TimelockCard = ({
 }) => {
   const timelockData: CardData = {
     title: "Timelock",
-    icon: <LockIcon />,
+    icon: <Clock4 className="size-4 text-foreground" />,
     sections: [
       {
         title: "Timelock",
@@ -27,16 +26,11 @@ export const TimelockCard = ({
         items: [
           <SwitchCardDaoInfoItem
             switched={daoConstants.rules.timelock}
-            key={"switch"}
-          />,
-          <ButtonCardDaoInfoItem
-            key={"button-card"}
-            label="View"
-            icon={<ExternalLinkIcon className="text-tangerine" />}
+            icon={<ExternalLinkIcon className="text-foreground" />}
             onClick={() =>
               openEtherscanAddress(daoConstants.contracts.timelock)
             }
-            inverted={true}
+            key={"switch"}
           />,
         ],
       },
@@ -47,23 +41,16 @@ export const TimelockCard = ({
         items: [
           <SwitchCardDaoInfoItem
             switched={daoConstants.rules.cancelFunction}
+            icon={<ExternalLinkIcon className="text-foreground" />}
+            onClick={() =>
+              window.open(
+                `${daoConstants.cancelFunction}`,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
             key={"switch"}
           />,
-          daoConstants.rules.cancelFunction && (
-            <ButtonCardDaoInfoItem
-              key={"button-card"}
-              label="View"
-              icon={<ExternalLinkIcon className="text-tangerine" />}
-              inverted={true}
-              onClick={() =>
-                window.open(
-                  `${daoConstants.cancelFunction}`,
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
-            />
-          ),
         ],
       },
     ],
