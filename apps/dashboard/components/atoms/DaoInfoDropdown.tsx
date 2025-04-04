@@ -37,9 +37,10 @@ export const DaoInfoDropdown = ({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
-          isOpen
-            ? "border-tangerine bg-[#26262A]"
-            : "border-transparent bg-lightDark",
+          {
+             "border-tangerine bg-[#26262A]": isOpen,
+             "border-transparent bg-lightDark": !isOpen
+          }
         )}
       >
         {defaultValue.icon}
