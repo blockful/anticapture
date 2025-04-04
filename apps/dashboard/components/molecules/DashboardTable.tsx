@@ -64,10 +64,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
 
     return (
       <div className="flex items-center justify-end px-4 py-3 text-end text-white">
-        {formattedSupply} |{" "}
-        <div className="pl-1 text-sm">
-          ({(Number(supplyData.changeRate || 0) * 100).toFixed(2)}%)
-        </div>
+        {formattedSupply}
       </div>
     );
   };
@@ -170,7 +167,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           onClick={() => column.toggleSorting()}
         >
           <h4 className="truncate font-normal">
-            Delegated Supply {!isMobile && `(${days})`}
+            Delegated Supply
           </h4>
           <ArrowUpDown
             props={{
