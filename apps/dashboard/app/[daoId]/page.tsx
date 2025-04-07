@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DaoTemplate } from "@/components/templates";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 type Props = {

@@ -1,5 +1,5 @@
 import { RiskLevel } from "@/lib/enums";
-import { DaoConfiguration } from "@/lib/dao-constants/types";
+import { DaoConfiguration } from "@/lib/dao-config/types";
 import UNILogo from "@/public/logo/UNI.png";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SupportStageEnum } from "../enums/SupportStageEnum";

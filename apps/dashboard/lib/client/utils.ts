@@ -5,7 +5,7 @@ import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
-} from "@/lib/dao-constants/types";
+} from "@/lib/dao-config/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

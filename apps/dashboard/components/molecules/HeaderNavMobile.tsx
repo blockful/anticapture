@@ -4,7 +4,7 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/components/atoms";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();

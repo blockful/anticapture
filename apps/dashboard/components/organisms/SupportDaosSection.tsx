@@ -7,8 +7,8 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { ReachOutToUsCard, SupportDaoCard } from "@/components/molecules";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
-import daoConfigByDaoId from "@/lib/dao-constants";
-import { DaoConfiguration } from "@/lib/dao-constants/types";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoConfiguration } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 import { pickBy } from "lodash";
 

@@ -13,7 +13,7 @@ import {
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();

@@ -11,7 +11,7 @@ import {
 } from "@/components/atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
-import { DaoInfoConfig } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 import {
   Tooltip,
   TooltipContent,

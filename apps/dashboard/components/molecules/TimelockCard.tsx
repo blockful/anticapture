@@ -8,7 +8,7 @@ import {
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
-import { DaoInfoConfig } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
 export const TimelockCard = ({

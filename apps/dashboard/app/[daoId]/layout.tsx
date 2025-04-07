@@ -8,7 +8,7 @@ import NotFound from "@/app/[daoId]/not-found";
 import { HeaderDAOSidebar } from "@/components/molecules";
 import { TokenDistributionProvider } from "@/contexts/TokenDistributionContext";
 import { GovernanceActivityProvider } from "@/contexts/GovernanceActivityContext";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 interface DaoLayoutProps {
   children: React.ReactNode;

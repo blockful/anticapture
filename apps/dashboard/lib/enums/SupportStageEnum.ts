@@ -1,6 +1,5 @@
 export enum SupportStageEnum {
   FULL = "FULL",
-  PARTIAL_ANALYSIS = "ANALYSIS",
-  EMPTY_ANALYSIS = "ANALYSIS_EMPTY",
+  ANALYSIS = "ANALYSIS",
   ELECTION = "ELECTION",
 }

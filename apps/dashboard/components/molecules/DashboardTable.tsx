@@ -17,7 +17,7 @@ import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
@@ -28,7 +28,8 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
-    (daoId) => daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+    (daoId) =>
+      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({
@@ -132,8 +133,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         const isInAnalysis =
-          details?.supportStage === SupportStageEnum.PARTIAL_ANALYSIS ||
-          details?.supportStage === SupportStageEnum.EMPTY_ANALYSIS;
+          details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
           <div className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
             <div className="flex w-5 items-center gap-2 md:w-20">
@@ -160,10 +160,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
         const isInAnalysis =
-          daoConfigByDaoId[daoId].supportStage ===
-            SupportStageEnum.PARTIAL_ANALYSIS ||
-          daoConfigByDaoId[daoId].supportStage ===
-            SupportStageEnum.EMPTY_ANALYSIS;
+          daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ANALYSIS;
         if (isInAnalysis) {
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end">

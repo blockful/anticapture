@@ -1,9 +1,9 @@
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
-import { DAO_ADDRESSES } from "@/lib/dao-constants/dao-addresses";
-import daoConfigByDaoId from "@/lib/dao-constants";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import { DAO_ADDRESSES } from "@/lib/dao-config/dao-addresses";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoConstantsFullySupported } from "@/lib/dao-config/types";
 interface AccountBalance {
   accountId: string;
   balance: string;

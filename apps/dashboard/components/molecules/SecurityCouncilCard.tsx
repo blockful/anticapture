@@ -15,7 +15,7 @@ import {
 } from "@/components/atoms";
 import { useCountdown } from "@/hooks";
 import { formatCountdown } from "@/lib/client/utils/time";
-import { DaoInfoConfig } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 
 export const SecurityCouncilCard = ({
   targetTimestamp,

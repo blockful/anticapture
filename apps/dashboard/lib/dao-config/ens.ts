@@ -1,4 +1,4 @@
-import { DaoConfiguration } from "@/lib/dao-constants/types";
+import { DaoConfiguration } from "@/lib/dao-config/types";
 import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
 import ENSLogo from "@/public/logo/ENS.png";
 import { SupportStageEnum } from "../enums/SupportStageEnum";

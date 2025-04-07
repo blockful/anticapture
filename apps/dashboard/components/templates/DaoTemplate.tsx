@@ -10,17 +10,16 @@ import {
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
-  const { supportStage } = daoConstants;
+  const { disableDaoPage } = daoConstants;
 
   // EMPTY_ANALYSIS DAOs are handled by the layout
-  if (supportStage === SupportStageEnum.EMPTY_ANALYSIS) {
+  if (disableDaoPage) {
     return null;
   }
 

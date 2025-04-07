@@ -1,5 +1,5 @@
-import daoConfigByDaoId from "@/lib/dao-constants";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoConstantsFullySupported } from "@/lib/dao-config/types";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";

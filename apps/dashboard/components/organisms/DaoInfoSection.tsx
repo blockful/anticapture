@@ -9,7 +9,7 @@ import {
   VoteCard,
 } from "@/components/molecules";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { DaoInfoConfig } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 
 export const DaoInfoSection = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
 

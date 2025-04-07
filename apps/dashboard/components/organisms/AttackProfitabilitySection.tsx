@@ -17,9 +17,9 @@ import {
 import { RiskLevel, TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
-import daoConfigByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { AttackProfitabilityConfig } from "@/lib/dao-constants/types";
+import { AttackProfitabilityConfig } from "@/lib/dao-config/types";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -31,12 +31,7 @@ export const AttackProfitabilitySection = ({
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
-
-  const daoConstants = daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum];
-  const { supportStage } = daoConstants;
-
-  // EMPTY_ANALYSIS is handled by layout
-  if (supportStage === SupportStageEnum.EMPTY_ANALYSIS) {
+  if (!attackProfitability?.enabled) {
     return null;
   }
 

@@ -17,7 +17,7 @@ import {
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 
 const sortingByAscendingOrDescendingNumber = (
