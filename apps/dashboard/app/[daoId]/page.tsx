@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { DaoTemplate } from "@/components/templates";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConfigByDaoId from "@/lib/dao-config";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 type Props = {
   params: { daoId: string };
@@ -10,7 +8,6 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
-  const daoConstants = daoConfigByDaoId[daoId];
 
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -35,24 +32,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let title = `Anticapture - ${daoId} DAO`;
   let description = `Explore and mitigate governance risks in ${daoId} DAO.`;
 
-  switch (daoConstants.supportStage) {
-    case SupportStageEnum.EMPTY_ANALYSIS:
-      title = `Anticapture - ${daoId} DAO (Coming Soon)`;
-      description = `The ${daoId} DAO is currently under analysis. Check back later for updates.`;
-      break;
-    case SupportStageEnum.PARTIAL_ANALYSIS:
-    case SupportStageEnum.ELECTION:
-      description = `Explore preliminary governance analysis for ${daoId} DAO.`;
-      break;
-    // FULL stage uses default title and description
-  }
-
   return {
     title,
     description,
     openGraph: {
-      title,
-      description,
+      title: `Anticapture - ${daoId} DAO`,
+      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
       images: [
         {
           url: imageUrl,
@@ -64,8 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: `Anticapture - ${daoId} DAO`,
+      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
       images: [imageUrl],
     },
   };
