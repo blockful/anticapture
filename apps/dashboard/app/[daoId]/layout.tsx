@@ -25,8 +25,8 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
   }
 
   // Handle empty analysis DAOs
-  if (daoConstants.supportStage === SupportStageEnum.EMPTY_ANALYSIS) {
-    return <NotFound reason={SupportStageEnum.EMPTY_ANALYSIS} />;
+  if (daoConstants.disableDaoPage) {
+    return <NotFound reason={"disabled"} />;
   }
 
   // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
