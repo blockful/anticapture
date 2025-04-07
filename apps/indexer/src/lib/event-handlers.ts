@@ -579,7 +579,6 @@ const storeDailyBucket = async (
   metricType: MetricTypesEnum,
   currentValue: bigint,
   newValue: bigint,
-  network: NetworkEnum,
 ) => {
   const volume = delta(newValue, currentValue);
   const dayStartTimestampInSeconds =

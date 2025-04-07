@@ -1,4 +1,4 @@
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-constants";
 import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -36,7 +36,7 @@ export const useTreasuryAssetNonDaoToken = (
 ) => {
   const key = daoId && days ? [`treasury-assets`, daoId, days] : null;
 
-  const { supportsLiquidTreasuryCall } = daoConstantsByDaoId[
+  const { supportsLiquidTreasuryCall } = daoConfigByDaoId[
     daoId
   ] as DaoConstantsFullySupported;
 

@@ -3,53 +3,9 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "../client/constants";
 import { RiskLevel } from "@/lib/enums";
 import { StaticImageData } from "next/image";
+import { SupportStageEnum } from "../enums/SupportStageEnum";
 
-export type DaoConstants = DaoConstantsInAnalysis | DaoConstantsFullySupported;
-
-export type DaoConstantsInAnalysis = {
-  name: string;
-  icon: StaticImageData;
-  inAnalysis: true;
-};
-
-export type DaoConstantsFullySupported = {
-  name: string;
-  icon: StaticImageData;
-  inAnalysis: false;
-  contracts: {
-    governor: Address;
-    token: Address;
-    timelock: Address;
-  };
-  cancelFunction?: string;
-  snapshot: string;
-  rules: {
-    delay: boolean;
-    changeVote: boolean;
-    timelock: boolean;
-    cancelFunction: boolean;
-  };
-  supportsLiquidTreasuryCall: boolean;
-  governanceImplementation?: GovernanceImplementation;
-  securityCouncil?: {
-    isActive: boolean;
-    multisig: {
-      threshold: number;
-      signers: number;
-      externalLink: string;
-    };
-    expiration: {
-      date: string;
-      timestamp: number;
-    };
-  };
-  fullySupported: boolean;
-  attackProfitability: {
-    riskLevel: RiskLevel;
-  };
-  removeGovernanceActivitySection: boolean;
-};
-
+// Existing types
 export enum ChainNameEnum {
   Ethereum = "ethereum",
 }
@@ -82,7 +38,7 @@ export interface MultilineChartDataSetPoint {
 }
 
 export type GovernanceImplementation = {
-  fields: GovernanceImplementationField[];
+  fields?: GovernanceImplementationField[];
 };
 
 export type GovernanceImplementationField = {
@@ -91,3 +47,85 @@ export type GovernanceImplementationField = {
   description: string;
   riskLevel: RiskLevel;
 };
+
+// Base configuration for any section
+export interface SectionConfig {
+  enabled: boolean;
+}
+
+// Base DAO information
+interface BaseInfo {
+  name: string;
+  icon: StaticImageData;
+  supportStage: SupportStageEnum;
+  disableDaoPage?: boolean;
+}
+
+// Section configurations without data storage
+export interface DaoInfoConfig extends SectionConfig {
+  contracts?: {
+    governor: Address;
+    token: Address;
+    timelock: Address;
+  };
+  cancelFunction?: string;
+  snapshot?: string;
+  rules?: {
+    delay?: boolean;
+    changeVote?: boolean;
+    timelock?: boolean;
+    cancelFunction?: boolean;
+  };
+  securityCouncil?: {
+    isActive: boolean;
+    multisig: {
+      threshold: number;
+      signers: number;
+      externalLink: string;
+    };
+    expiration: {
+      date: string;
+      timestamp: number;
+    };
+  };
+}
+
+export interface AttackProfitabilityConfig extends SectionConfig {
+  riskLevel?: RiskLevel;
+  supportsLiquidTreasuryCall?: boolean;
+  blurChart?: boolean;
+}
+export interface GovernanceImplementationConfig extends SectionConfig,
+    GovernanceImplementation {}
+
+export interface TokenDistributionConfig extends SectionConfig {
+  blurChart?: boolean;
+  blurFields?: {
+    [MetricTypesEnum.TOTAL_SUPPLY]: boolean;
+    [MetricTypesEnum.CIRCULATING_SUPPLY]: boolean;
+    [MetricTypesEnum.CEX_SUPPLY]: boolean;
+    [MetricTypesEnum.DEX_SUPPLY]: boolean;
+    [MetricTypesEnum.LENDING_SUPPLY]: boolean;
+    [MetricTypesEnum.DELEGATED_SUPPLY]: boolean;
+  };
+}
+export interface GovernanceActivityConfig extends SectionConfig {
+  blurFields?: {
+    [MetricTypesEnum.VOTES]: boolean;
+    [MetricTypesEnum.PROPOSALS]: boolean;
+    [MetricTypesEnum.ACTIVE_SUPPLY]: boolean;
+    [MetricTypesEnum.AVERAGE_TURNOUT]: boolean;
+    [MetricTypesEnum.TREASURY]: boolean;
+  };
+}
+export interface ShowSupportConfig extends SectionConfig {}
+
+// Complete DAO configuration structure
+export interface DaoConfiguration extends BaseInfo {
+  daoInfo?: DaoInfoConfig;
+  attackProfitability?: AttackProfitabilityConfig;
+  governanceImplementation?: GovernanceImplementationConfig;
+  tokenDistribution?: TokenDistributionConfig;
+  governanceActivity?: GovernanceActivityConfig;
+  showSupport?: ShowSupportConfig;
+}

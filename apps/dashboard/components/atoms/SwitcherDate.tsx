@@ -11,12 +11,14 @@ interface SwitcherDateProps {
   setTimeInterval: (timeInterval: TimeInterval) => void;
   defaultValue: TimeInterval;
   disableRecentData?: boolean; // If true, the 7 days and 30 days tabs will not be shown
+  disabled?: boolean;
 }
 
 export const SwitcherDate = ({
   setTimeInterval,
   defaultValue,
   disableRecentData = false,
+  disabled
 }: SwitcherDateProps) => {
   const { isMobile } = useScreenSize();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -56,6 +58,7 @@ export const SwitcherDate = ({
         aria-expanded={isOpen}
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
+        disabled={disabled}
         className={cn(
           "flex min-w-[49px] items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           isOpen
@@ -84,6 +87,7 @@ export const SwitcherDate = ({
                 isSelected == interval && "bg-middleDark",
               )}
               onClick={() => handleSelect(interval)}
+              disabled={disabled}
             >
               {formatInterval(interval)}
               {isSelected == interval && <CheckIcon className="size-3.5" />}
@@ -101,6 +105,7 @@ export const SwitcherDate = ({
             className="w-[52px] px-3 py-0.5 text-sm font-normal"
             value={interval}
             onClick={() => setTimeInterval(interval)}
+            disabled={disabled}
           >
             {formatInterval(interval)}
           </TabsTrigger>

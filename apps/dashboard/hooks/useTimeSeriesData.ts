@@ -94,6 +94,7 @@ export const useTimeSeriesData = (
     revalidateOnReconnect?: boolean;
   },
 ) => {
+  console.log("metricTypes", metricTypes);
   const fetcher = () =>
     fetchTimeSeriesDataFromGraphQL(daoId, metricTypes, days);
 

@@ -14,25 +14,23 @@ import {
   TokensIcon,
 } from "@/components/atoms";
 import { useCountdown } from "@/hooks";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { formatCountdown } from "@/lib/client/utils/time";
+import { DaoInfoConfig } from "@/lib/dao-constants/types";
 
 export const SecurityCouncilCard = ({
-  daoConstants,
+  targetTimestamp,
+  securityCouncil,
 }: {
-  daoConstants: DaoConstantsFullySupported;
+  targetTimestamp: number;
+  securityCouncil: DaoInfoConfig["securityCouncil"];
 }) => {
-  const { securityCouncil } = daoConstants;
-  const targetTimestamp = securityCouncil?.expiration.timestamp;
   const countdown = useCountdown(targetTimestamp);
-
+    
   const formattedCountdown = useMemo(
     () => formatCountdown(countdown),
     [countdown],
   );
-
   if (!securityCouncil) return null;
-
   const securityCouncilData: CardData = {
     title: "Security Council",
     icon: <NewspaperIcon />,
@@ -51,7 +49,7 @@ export const SecurityCouncilCard = ({
             key="multisig"
             onClick={() =>
               window.open(
-                `${daoConstants.securityCouncil?.multisig.externalLink}`,
+                `${securityCouncil.multisig.externalLink}`,
                 "_blank",
                 "noopener,noreferrer",
               )

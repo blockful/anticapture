@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { DaoTemplate } from "@/components/templates";
-import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
+import daoConfigByDaoId from "@/lib/dao-constants";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 type Props = {
   params: { daoId: string };
@@ -8,6 +10,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConfigByDaoId[daoId];
 
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -28,12 +31,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>
     ] || `${baseUrl}/opengraph-images/default.png`;
 
+  // Generate title and description based on support stage
+  let title = `Anticapture - ${daoId} DAO`;
+  let description = `Explore and mitigate governance risks in ${daoId} DAO.`;
+
+  switch (daoConstants.supportStage) {
+    case SupportStageEnum.EMPTY_ANALYSIS:
+      title = `Anticapture - ${daoId} DAO (Coming Soon)`;
+      description = `The ${daoId} DAO is currently under analysis. Check back later for updates.`;
+      break;
+    case SupportStageEnum.PARTIAL_ANALYSIS:
+    case SupportStageEnum.ELECTION:
+      description = `Explore preliminary governance analysis for ${daoId} DAO.`;
+      break;
+    // FULL stage uses default title and description
+  }
+
   return {
-    title: `${!SUPPORTED_DAO_NAMES.includes(daoId) ? "Anticapture - DAO Not Found" : `Anticapture - ${daoId} DAO`}`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title,
+    description,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title,
+      description,
       images: [
         {
           url: imageUrl,
@@ -45,8 +64,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title,
+      description,
       images: [imageUrl],
     },
   };

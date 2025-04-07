@@ -1,10 +1,14 @@
-import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import {
+  ALL_DAOS,
+  DaoIdEnum,
+} from "@/lib/types/daos";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 import { DaoDataProvider } from "@/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { HeaderDAOSidebar } from "@/components/molecules";
 import { TokenDistributionProvider } from "@/contexts/TokenDistributionContext";
 import { GovernanceActivityProvider } from "@/contexts/GovernanceActivityContext";
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-constants";
 
 interface DaoLayoutProps {
   children: React.ReactNode;
@@ -13,14 +17,19 @@ interface DaoLayoutProps {
 
 export default function DaoLayout({ children, params }: DaoLayoutProps) {
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConfigByDaoId[daoId];
 
-  if (
-    !SUPPORTED_DAO_NAMES.includes(daoId) ||
-    daoConstantsByDaoId[daoId].inAnalysis
-  ) {
-    return <NotFound />;
+  // Check if DAO exists and handle support stages
+  if (!ALL_DAOS.includes(daoId)) {
+    return <NotFound reason="not_found" />;
   }
 
+  // Handle empty analysis DAOs
+  if (daoConstants.supportStage === SupportStageEnum.EMPTY_ANALYSIS) {
+    return <NotFound reason={SupportStageEnum.EMPTY_ANALYSIS} />;
+  }
+
+  // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
     <DaoDataProvider daoId={daoId}>
       <TokenDistributionProvider daoId={daoId}>

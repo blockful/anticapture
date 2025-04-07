@@ -8,13 +8,13 @@ import {
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-constants/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
 export const TimelockCard = ({
-  daoConstants,
+  daoInfo,
 }: {
-  daoConstants: DaoConstantsFullySupported;
+  daoInfo: DaoInfoConfig;
 }) => {
   const timelockData: CardData = {
     title: "Timelock",
@@ -26,7 +26,7 @@ export const TimelockCard = ({
           "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoConstants.rules.timelock}
+            switched={daoInfo.rules?.timelock}
             key={"switch"}
           />,
           <ButtonCardDaoInfoItem
@@ -34,7 +34,7 @@ export const TimelockCard = ({
             label="View"
             icon={<ExternalLinkIcon className="text-tangerine" />}
             onClick={() =>
-              openEtherscanAddress(daoConstants.contracts.timelock)
+              openEtherscanAddress(daoInfo.contracts?.timelock)
             }
             inverted={true}
           />,
@@ -46,10 +46,10 @@ export const TimelockCard = ({
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoConstants.rules.cancelFunction}
+            switched={daoInfo.rules?.cancelFunction}
             key={"switch"}
           />,
-          daoConstants.rules.cancelFunction && (
+          daoInfo.rules?.cancelFunction && (
             <ButtonCardDaoInfoItem
               key={"button-card"}
               label="View"
@@ -57,7 +57,7 @@ export const TimelockCard = ({
               inverted={true}
               onClick={() =>
                 window.open(
-                  `${daoConstants.cancelFunction}`,
+                  `${daoInfo.cancelFunction}`,
                   "_blank",
                   "noopener,noreferrer",
                 )

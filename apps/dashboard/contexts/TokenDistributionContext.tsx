@@ -8,6 +8,7 @@ import { MetricData, TokenDistributionContextProps } from "@/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks";
+import daoConfigByDaoId from "@/lib/dao-constants";
 
 const initialTokenDistributionMetricData = {
   value: undefined,
@@ -135,10 +136,28 @@ export const TokenDistributionProvider = ({
 
   const parsedDays = parseInt(days.split("d")[0]);
 
+  const validMetricTypes = metricTypes.filter((metric) => {
+    const tokenDistributionMetricTypes = Object.keys(
+      daoConfigByDaoId[daoId].tokenDistribution?.blurFields ?? {},
+    );
+    if (!tokenDistributionMetricTypes.includes(metric)) {
+      return false;
+    }
+    const blurFields = daoConfigByDaoId[daoId].tokenDistribution?.blurFields;
+    if (blurFields === undefined) {
+      return true;
+    }
+    const blurField = blurFields[metric as keyof typeof blurFields];
+    if (blurField) {
+      return false;
+    }
+    return true;
+  });
+
   // Use the SWR hook to fetch data
   const { data: allData, error } = useTimeSeriesData(
     daoId,
-    metricTypes,
+    validMetricTypes,
     parsedDays,
     {
       refreshInterval: 300000, // Refresh every 5 minutes

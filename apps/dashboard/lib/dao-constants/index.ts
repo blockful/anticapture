@@ -1,14 +1,14 @@
 import { DaoIdEnum } from "../types/daos";
 import { ENS } from "./ens";
 import { OP } from "./op";
-import { DaoConstants } from "./types";
+import { DaoConfiguration } from "./types";
 import { UNI } from "./uni";
 import { ARB } from "./arb";
 
-export type DaoConstantsByDaoId = {
-  [key in DaoIdEnum]: DaoConstants;
+export type DaoConfigByDaoId = {
+  [key in DaoIdEnum]: DaoConfiguration;
 };
 
-const daoConstantsByDaoId: DaoConstantsByDaoId = { ARB, UNI, ENS, OP };
+const daoConfigByDaoId: DaoConfigByDaoId = { ARB, UNI, ENS, OP };
 
-export default daoConstantsByDaoId;
+export default daoConfigByDaoId;

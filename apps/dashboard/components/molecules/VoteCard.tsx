@@ -11,19 +11,15 @@ import {
 } from "@/components/atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-constants/types";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
+export const VoteCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
   const { daoData } = useDaoDataContext();
-
-  if (daoConstants.inAnalysis) {
-    return null;
-  }
 
   if (!daoData) {
     return <Skeleton />;
@@ -40,7 +36,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         items: [
           <SwitchCardDaoInfoItem
             key={"switch"}
-            switched={daoConstants.rules.delay}
+            switched={daoInfo.rules?.delay}
           />,
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
@@ -63,7 +59,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         items: [
           <SwitchCardDaoInfoItem
             key={"switch"}
-            switched={daoConstants.rules.changeVote}
+            switched={daoInfo.rules?.changeVote}
           />,
         ],
       },

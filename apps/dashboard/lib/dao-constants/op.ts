@@ -1,9 +1,11 @@
 import { DaoIdEnum } from "../types/daos";
 import OPLogo from "@/public/logo/Optimism.png";
-import { DaoConstants } from "./types";
+import { SupportStageEnum } from "../enums/SupportStageEnum";
+import { DaoConfiguration } from "./types";
 
-export const OP: DaoConstants = {
+export const OP: DaoConfiguration = {
   name: "Optimism",
   icon: OPLogo,
-  inAnalysis: true,
+  supportStage: SupportStageEnum.EMPTY_ANALYSIS,
+  disableDaoPage: true
 };
