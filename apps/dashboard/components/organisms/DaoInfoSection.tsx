@@ -12,12 +12,11 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { DaoInfoConfig } from "@/lib/dao-config/types";
 
 export const DaoInfoSection = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
-
   const DaoInfo = () => {
     return (
       <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
         {/* Contracts info shown for all stages */}
-        <ContractsCard contracts={daoInfo.contracts} />
+        <ContractsCard contracts={daoInfo.contracts} daoInfo={daoInfo} />
 
         {/* Vote info shown for all stages */}
         <VoteCard daoInfo={daoInfo} />

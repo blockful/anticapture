@@ -7,26 +7,19 @@ export const ARB: DaoConfiguration = {
   name: "Arbitrum",
   icon: ArbitrumLogo,
   supportStage: SupportStageEnum.ELECTION,
-  // Basic DAO info shown for all stages except EMPTY_ANALYSIS
   daoInfo: {
     enabled: false,
   },
-
-  // Attack profitability shown for all stages except EMPTY_ANALYSIS
   attackProfitability: {
     enabled: false,
   },
-
-  // Governance implementation disabled for non-FULL stage
   governanceImplementation: {
     enabled: false,
     fields: [],
   },
-
-  // Token distribution shown for all stages except EMPTY_ANALYSIS
   tokenDistribution: {
     enabled: true,
-    blurChart: true,  
+    blurChart: true,
     blurFields: {
       [MetricTypesEnum.TOTAL_SUPPLY]: false,
       [MetricTypesEnum.CIRCULATING_SUPPLY]: false,
@@ -36,8 +29,6 @@ export const ARB: DaoConfiguration = {
       [MetricTypesEnum.DELEGATED_SUPPLY]: true,
     },
   },
-
-  // Governance activity disabled for non-FULL stage
   governanceActivity: {
     enabled: false,
     blurFields: {
@@ -48,7 +39,6 @@ export const ARB: DaoConfiguration = {
       [MetricTypesEnum.TREASURY]: true,
     },
   },
-  // Show support section enabled for ELECTION stage
   showSupport: {
     enabled: true,
   },

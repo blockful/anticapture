@@ -13,9 +13,11 @@ import { DaoInfoConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
 export const ContractsCard = ({
-  contracts, 
+  contracts,
+  daoInfo,
 }: {
   contracts: DaoInfoConfig["contracts"];
+  daoInfo: DaoInfoConfig;
 }) => {
   if (!contracts) {
     return null;

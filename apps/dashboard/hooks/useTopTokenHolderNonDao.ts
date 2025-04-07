@@ -3,7 +3,6 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
 import { DAO_ADDRESSES } from "@/lib/dao-config/dao-addresses";
 import daoConfigByDaoId from "@/lib/dao-config";
-import { DaoConstantsFullySupported } from "@/lib/dao-config/types";
 interface AccountBalance {
   accountId: string;
   balance: string;
@@ -21,10 +20,10 @@ const fetchTopTokenHolder = async (
   daoId: DaoIdEnum,
 ): Promise<AccountBalance | null> => {
   const daoAddresses = Object.values(DAO_ADDRESSES[daoId]);
-  const tokenAddress = (
-    daoConfigByDaoId[daoId] as DaoConstantsFullySupported
-  ).contracts.token;
-
+  const tokenAddress = daoConfigByDaoId[daoId].daoInfo?.contracts?.token;
+  if (!tokenAddress) {
+    return null;
+  }
   const response = await fetch(`${BACKEND_ENDPOINT}`, {
     method: "POST",
     headers: {

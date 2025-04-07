@@ -19,10 +19,6 @@ export const GovernanceImplementationSection = ({
   const { isDesktop, isTablet } = useScreenSize();
   const [openCardIds, setOpenCardIds] = useState<string[]>([]);
 
-  if (daoConfigByDaoId[daoId].inAnalysis) {
-    return null;
-  }
-
   const governanceImplementationFields =
     daoConfigByDaoId[daoId].governanceImplementation?.fields;
 

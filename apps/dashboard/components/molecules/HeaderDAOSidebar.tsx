@@ -48,7 +48,6 @@ export const HeaderDAOSidebar = () => {
       <div className="flex w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
-          {/* Basic DAO info shown for all stages except EMPTY_ANALYSIS */}
           {daoConfig.daoInfo?.enabled && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
@@ -56,8 +55,6 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.daoInfo.title}
             />
           )}
-
-          {/* Attack profitability shown for all stages except EMPTY_ANALYSIS */}
           {daoConfig.attackProfitability?.enabled && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
@@ -65,8 +62,6 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
           )}
-
-          {/* Governance implementation only shown for FULL stage if available */}
           {daoConfig.governanceImplementation?.enabled && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
@@ -74,8 +69,6 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.governanceImplementation.title}
             />
           )}
-
-          {/* Token distribution shown for all stages except EMPTY_ANALYSIS */}
           {daoConfig.tokenDistribution?.enabled && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
@@ -83,8 +76,6 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
-
-          {/* Governance activity only shown for FULL stage unless explicitly removed */}
           {daoConfig.governanceActivity?.enabled && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
@@ -92,8 +83,6 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.governanceActivity.title}
             />
           )}
-
-          {/* Show support section only shown for election stage */}
           {daoConfig.showSupport?.enabled && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}

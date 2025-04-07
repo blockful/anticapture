@@ -11,11 +11,7 @@ import {
 import { DaoInfoConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 
-export const TimelockCard = ({
-  daoInfo,
-}: {
-  daoInfo: DaoInfoConfig;
-}) => {
+export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
   const timelockData: CardData = {
     title: "Timelock",
     icon: <LockIcon />,
@@ -29,15 +25,18 @@ export const TimelockCard = ({
             switched={daoInfo.rules?.timelock}
             key={"switch"}
           />,
-          <ButtonCardDaoInfoItem
-            key={"button-card"}
-            label="View"
-            icon={<ExternalLinkIcon className="text-tangerine" />}
-            onClick={() =>
-              openEtherscanAddress(daoInfo.contracts?.timelock)
-            }
-            inverted={true}
-          />,
+          daoInfo.contracts?.timelock && (
+            <ButtonCardDaoInfoItem
+              key={"button-card"}
+              label="View"
+              icon={<ExternalLinkIcon className="text-tangerine" />}
+              onClick={() =>
+                daoInfo.contracts?.timelock &&
+                openEtherscanAddress(daoInfo.contracts?.timelock)
+              }
+              inverted={true}
+            />
+          ),
         ],
       },
       {
