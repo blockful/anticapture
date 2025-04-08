@@ -13,7 +13,6 @@ import { ExtractableValueCustomTooltip } from "@/components/atoms";
 
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useParams } from "next/navigation";
-import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-constants/types";
@@ -28,6 +27,7 @@ import {
   normalizeDatasetAllTreasury,
   normalizeDataset,
   timestampToReadableDate,
+  filterPriceHistoryByTimeInterval,
 } from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
 
@@ -56,7 +56,7 @@ export const MultilineChartAttackProfitability = ({
   const { data: treasuryData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
     [MetricTypesEnum.TREASURY],
-    selectedDays,
+    days as TimeInterval,
     {
       refreshInterval: 300000,
       revalidateOnFocus: false,
@@ -66,7 +66,7 @@ export const MultilineChartAttackProfitability = ({
   const { data: delegatedData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
     [MetricTypesEnum.DELEGATED_SUPPLY],
-    selectedDays,
+    days as TimeInterval,
     {
       refreshInterval: 300000,
       revalidateOnFocus: false,

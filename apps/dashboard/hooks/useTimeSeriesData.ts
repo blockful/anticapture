@@ -1,29 +1,34 @@
-import { MetricTypesEnum } from "@/lib/client/constants";
+import useSWR from "swr";
+import { MetricTypesEnum, MILLISECONDS_PER_DAY } from "@/lib/client/constants";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import useSWR from "swr";
+import {
+  DAYS_IN_MILLISECONDS,
+  TIME_INTERVAL_TO_DAYS,
+  TimeInterval,
+} from "@/lib/enums/TimeInterval";
 
-export const fetchTimeSeriesDataFromGraphQL = async (
+const fetchTimeSeriesDataFromGraphQL = async (
   daoId: DaoIdEnum,
   metricTypes: MetricTypesEnum[],
-  days: number,
 ): Promise<Record<MetricTypesEnum, DaoMetricsDayBucket[]>> => {
-  const dateFilter = String(BigInt(Date.now() - days * 86400000)).slice(0, 10);
+  const oneYearAgo = String(
+    BigInt(Date.now() - DAYS_IN_MILLISECONDS[TimeInterval.ONE_YEAR]),
+  ).slice(0, 10);
 
-  // Build a query that fetches all metric types in a single request
   const whereConditions = metricTypes
     .map(
       (metricType) => `
       ${metricType}: daoMetricsDayBucketss(
         where: {
           metricType: ${metricType},
-          date_gte: "${dateFilter}",
+          date_gte: "${oneYearAgo}",
           daoId: "${daoId}"
         },
         orderBy: "date",
         orderDirection: "asc",
-        limit: ${days}
+        limit: 365
       ) {
         items {
           date
@@ -45,68 +50,186 @@ export const fetchTimeSeriesDataFromGraphQL = async (
 
   const response = await fetch(`${BACKEND_ENDPOINT}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      query: `
-          query DaoMetricsDayBuckets {
-            ${whereConditions}
-          }
-        `,
+      query: `query DaoMetricsDayBuckets { ${whereConditions} }`,
     }),
   });
 
   const data = await response.json();
-
-  // Process the results for each metric type
-  const results: Record<MetricTypesEnum, DaoMetricsDayBucket[]> = {} as Record<
-    MetricTypesEnum,
-    DaoMetricsDayBucket[]
-  >;
+  const metricsByType: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
+    {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
   for (const metricType of metricTypes) {
-    if (data?.data?.[metricType]?.items) {
-      results[metricType] = data.data[metricType]
-        .items as DaoMetricsDayBucket[];
-    } else {
-      results[metricType] = [];
-    }
+    metricsByType[metricType] = data?.data?.[metricType]?.items || [];
   }
 
-  return results;
+  return metricsByType;
 };
 
 /**
- * SWR hook for fetching time series data for multiple metrics
- * @param daoId The DAO ID to fetch data for
- * @param metricTypes Array of metric types to fetch
- * @param days Number of days of data to fetch
- * @param options Additional SWR options
+ * Filters metric data for a specific time period
+ * Returns metrics filtered by the selected period
+ */
+const filterMetricsByPeriod = (
+  data: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined,
+  metricTypes: MetricTypesEnum[],
+  days: TimeInterval,
+): Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined => {
+  if (!data) return undefined;
+
+  const filteredMetricsByPeriod: Record<
+    MetricTypesEnum,
+    DaoMetricsDayBucket[]
+  > = {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
+
+  const now = Date.now();
+  const cutoffTimestamp = now - DAYS_IN_MILLISECONDS[days];
+  const cutoffDate = Math.floor(cutoffTimestamp / 1000).toString();
+
+  for (const metricType of metricTypes) {
+    if (
+      !data[metricType] ||
+      !Array.isArray(data[metricType]) ||
+      data[metricType].length === 0
+    ) {
+      filteredMetricsByPeriod[metricType] = [];
+      continue;
+    }
+
+    const sortedData = [...data[metricType]].sort(
+      (a, b) => Number(a.date) - Number(b.date),
+    );
+
+    const filteredData = sortedData.filter(
+      (item) => Number(item.date) >= Number(cutoffDate),
+    );
+
+    if (filteredData.length === 0) {
+      const numDays = TIME_INTERVAL_TO_DAYS[days];
+      filteredMetricsByPeriod[metricType] = sortedData.slice(
+        -Math.min(numDays, sortedData.length),
+      );
+    } else {
+      filteredMetricsByPeriod[metricType] = filteredData;
+    }
+  }
+
+  return filteredMetricsByPeriod;
+};
+
+/**
+ * Applies continuity to metrics by filling gaps with last known values
+ * Returns metrics with continuous data points
+ */
+const applyMetricsContinuity = (
+  data: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined,
+  metricTypes: MetricTypesEnum[],
+): Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined => {
+  if (!data) return undefined;
+
+  const metricsWithContinuity: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
+    {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
+
+  const allDates = new Set<string>();
+  for (const metricType of metricTypes) {
+    if (data[metricType]) {
+      data[metricType].forEach((item) => {
+        allDates.add(item.date);
+      });
+    }
+  }
+
+  const sortedDates = Array.from(allDates).sort(
+    (a, b) => Number(a) - Number(b),
+  );
+
+  for (const metricType of metricTypes) {
+    metricsWithContinuity[metricType] = [];
+
+    if (data[metricType] && data[metricType].length > 0) {
+      let lastKnownEntry: DaoMetricsDayBucket | null = null;
+
+      for (const date of sortedDates) {
+        const entry = data[metricType].find((item) => item.date === date);
+
+        if (entry) {
+          metricsWithContinuity[metricType].push(entry);
+          lastKnownEntry = entry;
+        } else if (lastKnownEntry) {
+          metricsWithContinuity[metricType].push({
+            ...lastKnownEntry,
+            date: date,
+          });
+        }
+      }
+    }
+  }
+
+  return metricsWithContinuity;
+};
+
+const processData = (
+  fullData: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined,
+  metricTypes: MetricTypesEnum[],
+  days: TimeInterval,
+): Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined => {
+  if (!fullData) return undefined;
+
+  const filteredData = filterMetricsByPeriod(fullData, metricTypes, days);
+
+  return filteredData
+    ? applyMetricsContinuity(filteredData, metricTypes)
+    : undefined;
+};
+
+/**
+ * Hook for fetching time series data
+ * Retrieves data for the complete period (365 days) and processes it to the desired format
  */
 export const useTimeSeriesData = (
   daoId: DaoIdEnum,
   metricTypes: MetricTypesEnum[],
-  days: number,
+  days: TimeInterval,
   options?: {
     refreshInterval?: number;
     revalidateOnFocus?: boolean;
     revalidateOnReconnect?: boolean;
   },
 ) => {
-  const fetcher = () =>
-    fetchTimeSeriesDataFromGraphQL(daoId, metricTypes, days);
-
-  // Create a unique key for this data request
-  const swrKey =
-    daoId && metricTypes.length > 0 && days > 0
-      ? [`timeSeriesData`, daoId, metricTypes.join(","), days]
+  /* Create a cache key based only on daoId and metricTypes, not on days
+   * This ensures that only one request is made for each DAO and metrics combination
+   */
+  const fetchKey =
+    daoId && metricTypes.length > 0
+      ? [`timeSeriesData`, daoId, metricTypes.join(",")]
       : null;
 
-  return useSWR(swrKey, fetcher, {
-    refreshInterval: options?.refreshInterval || 0, // Default to no auto-refresh
-    revalidateOnFocus: options?.revalidateOnFocus ?? false, // Default to false
-    revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
-    dedupingInterval: 10000, // Dedupe identical requests within 10 seconds
-  });
+  const {
+    data: fullData,
+    error,
+    isLoading,
+  } = useSWR(
+    fetchKey,
+    () => fetchTimeSeriesDataFromGraphQL(daoId, metricTypes),
+    {
+      refreshInterval: options?.refreshInterval ?? 0,
+      revalidateOnFocus: options?.revalidateOnFocus ?? true,
+      revalidateOnMount: true,
+      revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
+      revalidateIfStale: true,
+      dedupingInterval: 2000,
+      keepPreviousData: false,
+    },
+  );
+
+  const processedData = fullData
+    ? processData(fullData, metricTypes, days)
+    : undefined;
+
+  return {
+    data: processedData,
+    error,
+    isLoading,
+  };
 };
