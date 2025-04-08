@@ -2,8 +2,7 @@
 import dotenv from "dotenv";
 import { ENSGovernorAbi, ENSTokenAbi } from "./src/indexer/ens/abi";
 import { UNIGovernorAbi, UNITokenAbi } from "./src/indexer/uni/abi";
-import { Address, Transport, webSocket, zeroAddress } from "viem";
-import { anvil, arbitrum, mainnet } from "viem/chains";
+import { Address, webSocket, zeroAddress } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 import { ARBTokenAbi } from "./src/indexer/arb/abi/ARBTokenAbi";
