@@ -89,7 +89,7 @@ export const config = {
         abi: contractAbis.ARBToken,
         network: NetworkEnum.ARBITRUM,
         address: CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB].token,
-        startBlock: 0,
+        startBlock: 70398200,
       } as PonderContract<"ARBToken">,
     },
   },
