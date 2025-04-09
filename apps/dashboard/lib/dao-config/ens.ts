@@ -155,7 +155,7 @@ export const ENS: DaoConfiguration = {
     enabled: true,
   },
   governanceActivity: {
-    enabled: true,
+    enabled: false,
   },
   showSupport: {
     enabled: false,
