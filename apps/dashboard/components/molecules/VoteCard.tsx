@@ -6,28 +6,34 @@ import {
   BlocksIcon,
   CardData,
   ClickIcon,
-  Skeleton,
+  SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
 } from "@/components/atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { DaoConstants } from "@/lib/dao-constants/types";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
   const { daoData } = useDaoDataContext();
+  const { isMobile } = useScreenSize();
 
   if (daoConstants.inAnalysis) {
     return null;
   }
 
   if (!daoData) {
-    return <Skeleton />;
+    return <SkeletonDaoInfoCards />;
   }
 
   const voteData: CardData = {
     title: "Vote",
-    icon: <ClickIcon />,
+    icon: <ClickIcon className="size-4 text-foreground" />,
     sections: [
       {
         title: "Delay",
@@ -41,9 +47,13 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
-                className="cursor-default"
+                className="cursor-default bg-dark text-white sm:bg-lightDark"
                 icon={<BlocksIcon />}
-                label={formatBlocksToUserReadable(daoData.votingDelay)}
+                label={
+                  isMobile
+                    ? formatBlocksToUserReadable(daoData.votingDelay, true)
+                    : formatBlocksToUserReadable(daoData.votingDelay, false)
+                }
               />
             </TooltipTrigger>
             <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">

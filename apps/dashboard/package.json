@@ -1,13 +1,14 @@
 {
   "name": "@anticapture/dashboard",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@namehash/ens-utils": "^1.18.0",

@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { InfoIcon } from "./icons/InfoIcon";
+import { InfoIcon } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 
 export function TooltipInfo({
@@ -18,7 +18,7 @@ export function TooltipInfo({
   return (
     <Tooltip>
       <TooltipTrigger role="button" aria-label="tooltip-info">
-        <InfoIcon className="cursor-pointer" />
+        <InfoIcon className="cursor-pointer text-foreground" />
       </TooltipTrigger>
       <TooltipContent
         side="top"

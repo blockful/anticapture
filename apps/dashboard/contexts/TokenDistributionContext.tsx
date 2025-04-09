@@ -1,10 +1,10 @@
 "use client";
 
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { MetricData, TokenDistributionContextProps } from "./types";
+import { MetricData, TokenDistributionContextProps } from "@/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks";
@@ -16,7 +16,7 @@ const initialTokenDistributionMetricData = {
 
 export const TokenDistributionContext =
   createContext<TokenDistributionContextProps>({
-    days: TimeInterval.NINETY_DAYS,
+    days: TimeInterval.ONE_YEAR,
     setDays: () => {},
     totalSupply: initialTokenDistributionMetricData,
     setTotalSupply: () => {},
@@ -51,7 +51,7 @@ export const TokenDistributionProvider = ({
   children: React.ReactNode;
   daoId: DaoIdEnum;
 }) => {
-  const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+  const [days, setDays] = useState<TimeInterval>(TimeInterval.ONE_YEAR);
   const [totalSupply, setTotalSupply] = useState<MetricData>(
     initialTokenDistributionMetricData,
   );

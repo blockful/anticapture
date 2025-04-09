@@ -20,7 +20,8 @@ import daoConstantsByDaoId from "@/lib/dao-constants";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+  const defaultDays = TimeInterval.ONE_YEAR;
+  const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
 
@@ -36,7 +37,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
       icon={<CrossHairIcon className="text-foreground" />}
       switchDate={
         <SwitcherDate
-          defaultValue={TimeInterval.NINETY_DAYS}
+          defaultValue={defaultDays}
           setTimeInterval={setDays}
           disableRecentData={true}
         />
@@ -50,7 +51,7 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
-        description=""
+        description="Treasury values above supply costs indicate high risk."
         headerComponent={
           <ExtractableValueToggleHeader
             treasuryMetric={treasuryMetric}

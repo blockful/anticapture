@@ -6,6 +6,7 @@ import {
   BaseHeaderLayoutSidebar,
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import packageJson from "@/package.json";
 
 export const HeaderSidebar = () => {
   return (
@@ -16,7 +17,7 @@ export const HeaderSidebar = () => {
             <AnticaptureIcon />
           </div>
           <div className="flex">
-            <p className="text-xs font-medium text-foreground">v1.0</p>
+          <p className="text-xs font-medium text-foreground">v{packageJson.version}</p>
           </div>
         </div>
         <div className="flex w-full p-4">

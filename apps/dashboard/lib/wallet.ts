@@ -51,7 +51,7 @@ const connectors = connectorsForWallets(
   {
     projectId,
     appName,
-  }
+  },
 );
 
 const wagmiConfig = createConfig({

@@ -57,8 +57,7 @@ interface AttackCostBarChartProps {
 export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const timeInterval = TimeInterval.NINETY_DAYS;
-
+  const timeInterval = TimeInterval.ONE_YEAR;
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -190,11 +189,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
           <Tooltip content={<CustomTooltip />} cursor={false} />
 
-          <Bar
-            dataKey="value"
-            stackId="stack"
-            radius={[4, 4, 4, 4]}
-          >
+          <Bar dataKey="value" stackId="stack" radius={[4, 4, 4, 4]}>
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.customColor} />
             ))}
@@ -357,7 +352,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           {item.stackedValues
             .filter((item) => item.value !== 0)
             .map((barStacked, index) => (
-              <p key={index} className="flex gap-1.5 text-neutral-50">
+              <p key={index} className="flex gap-1.5 text-sm text-neutral-50">
                 <strong>
                   {barStacked.label}: $
                   {Math.round(barStacked.value).toLocaleString()}
@@ -366,7 +361,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
             ))}
         </>
       ) : (
-        <p className="flex gap-1.5 text-neutral-50">
+        <p className="flex gap-1.5 text-sm text-neutral-50">
           <strong>
             {item.displayValue ||
               `$${item.value && Math.round(item.value).toLocaleString()}`}

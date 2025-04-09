@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 
 import "@rainbow-me/rainbowkit/styles.css";
@@ -12,11 +12,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 const queryClient = new QueryClient();
 
-export const GlobalProviders = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const GlobalProviders = ({ children }: { children: ReactNode }) => {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
