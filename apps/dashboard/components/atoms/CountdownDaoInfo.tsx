@@ -22,6 +22,7 @@ export const CountdownDaoInfo = ({
       days: countdown.days,
       hours: countdown.hours,
       minutes: countdown.minutes,
+      seconds: countdown.seconds,
     };
   }, [countdown]);
 
@@ -34,7 +35,7 @@ export const CountdownDaoInfo = ({
         className,
       )}
     >
-      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0">
+      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0 pl-1">
         <span className="m:text-[16px] text-[14px] font-medium leading-5 text-white">
           {formattedCountdown.days}
         </span>
@@ -48,11 +49,18 @@ export const CountdownDaoInfo = ({
         <span className="text-xs font-medium text-foreground">hours</span>
       </div>
       <div className="h-[85%] items-center border border-middleDark" />
-      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0">
+      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0 px-1">
         <span className="text-[14px] font-medium leading-5 text-white sm:text-[16px]">
           {formattedCountdown.minutes}
         </span>
         <span className="text-xs font-medium text-foreground">min</span>
+      </div>
+      <div className="h-[85%] items-center border border-middleDark" />
+      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0 pr-2 pl-1">
+        <span className="text-[14px] font-medium leading-5 text-white sm:text-[16px]">
+          {formattedCountdown.seconds}
+        </span>
+        <span className="text-xs font-medium text-foreground">sec</span>
       </div>
     </div>
   );
