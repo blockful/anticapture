@@ -19,7 +19,9 @@
     "dump-database": "dotenv -- turbo run dump-database --filter=@anticapture/indexer",
     "restore-database": "dotenv -- turbo run restore-database --filter=@anticapture/indexer",
     "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'",
-    "lint:fix": "dotenv -- turbo run lint:fix --filter=@anticapture/indexer"
+    "lint:fix": "dotenv -- turbo run lint:fix --filter=@anticapture/indexer",
+    "drop-public:indexer": "dotenv -- turbo run drop-public --filter=@anticapture/indexer",
+    "drop-all-schemas:indexer": "dotenv -- turbo run drop-all-schemas --filter=@anticapture/indexer"
   },
   "author": "",
   "license": "ISC",

@@ -40,6 +40,16 @@
     },
     "restore-database": {},
     "dump-database": {},
-    "lint:fix": {}
+    "lint:fix": {},
+    "drop-public": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "drop-all-schemas": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    }
   }
 }

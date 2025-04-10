@@ -37,7 +37,7 @@ export const delegateChanged = async (
   event: DaoDelegateChangedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
+  network: NetworkEnum
 ) => {
   // Inserting accounts if didn't exist
   await context.db
@@ -101,7 +101,7 @@ export const delegatedVotesChanged = async (
   event: DaoDelegateVotesChangedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
+  network: NetworkEnum
 ) => {
   //Inserting delegate account if didn't exist
   await context.db
@@ -117,7 +117,7 @@ export const delegatedVotesChanged = async (
       { name: "newVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
 
   const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -126,7 +126,7 @@ export const delegatedVotesChanged = async (
       { name: "previousVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
 
   // Create a new voting power history record
@@ -169,7 +169,7 @@ export const delegatedVotesChanged = async (
     daoId,
     MetricTypesEnum.DELEGATED_SUPPLY,
     currentDelegatedSupply,
-    newDelegatedSupply,
+    newDelegatedSupply
   );
 };
 
@@ -177,16 +177,16 @@ export const tokenTransfer = async (
   event: DaoTransferEvent,
   context: Context,
   daoId: DaoIdEnum,
-  network: NetworkEnum,
+  network: NetworkEnum
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
-      { name: "value", daos: ["ENS", "SHU"] },
+      { name: "value", daos: ["ENS", "SHU", "ARB"] },
       { name: "amount", daos: ["COMP", "UNI"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
 
   const { from, to } = event.args;
@@ -246,9 +246,12 @@ export const tokenTransfer = async (
       balance: current.balance - value,
     }));
 
-  const currentLendingSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.lendingSupply;
+  const currentLendingSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.lendingSupply ?? BigInt(0);
 
   const lendingAddressList = Object.values(LendingAddresses[daoId]);
   const isToLending = lendingAddressList.includes(to);
@@ -269,13 +272,16 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.LENDING_SUPPLY,
       currentLendingSupply,
-      newLendingSupply,
+      newLendingSupply
     );
   }
 
-  const currentCexSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.cexSupply;
+  const currentCexSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.cexSupply ?? BigInt(0);
 
   const cexAddressList = Object.values(CEXAddresses[daoId]);
   const isToCex = cexAddressList.includes(to);
@@ -294,13 +300,16 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.CEX_SUPPLY,
       currentCexSupply,
-      newCexSupply,
+      newCexSupply
     );
   }
 
-  const currentDexSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.dexSupply;
+  const currentDexSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.dexSupply ?? BigInt(0);
 
   const dexAddressList = Object.values(DEXAddresses[daoId]);
   const isToDex = dexAddressList.includes(to);
@@ -319,13 +328,16 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
-      newDexSupply,
+      newDexSupply
     );
   }
 
-  const currentTreasury = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.treasury;
+  const currentTreasury =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.treasury ?? BigInt(0);
 
   const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
   const isToTreasury = treasuryAddressList.includes(to);
@@ -347,13 +359,16 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.TREASURY,
       currentTreasury,
-      newTreasury,
+      newTreasury
     );
   }
 
-  const currentTotalSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.totalSupply;
+  const currentTotalSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.totalSupply ?? BigInt(0);
 
   const burningAddressesAddressList = Object.values(BurningAddresses[daoId]);
   const isToBurningAddress = burningAddressesAddressList.includes(to);
@@ -378,13 +393,16 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.TOTAL_SUPPLY,
       currentTotalSupply,
-      newTotalSupply,
+      newTotalSupply
     );
   }
 
-  const currentCirculatingSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.circulatingSupply;
+  const currentCirculatingSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.circulatingSupply ?? BigInt(0);
 
   const isCirculatingSupplyTransaction =
     isTotalSupplyTransaction || isTreasuryTransaction;
@@ -402,7 +420,7 @@ export const tokenTransfer = async (
       daoId,
       MetricTypesEnum.CIRCULATING_SUPPLY,
       currentCirculatingSupply,
-      newCirculatingSupply,
+      newCirculatingSupply
     );
   }
 };
@@ -410,8 +428,7 @@ export const tokenTransfer = async (
 export const voteCast = async (
   event: DaoVoteCastEvent,
   context: Context,
-  daoId: string,
-  network: NetworkEnum,
+  daoId: string
 ) => {
   const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -419,13 +436,13 @@ export const voteCast = async (
       { name: "votes", daos: ["UNI"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
 
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [{ name: "proposalId", daos: ["ENS", "UNI"] }],
     event.args,
-    daoId,
+    daoId
   );
 
   await context.db
@@ -480,7 +497,7 @@ export const proposalCreated = async (
   event: DaoProposalCreatedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
+  network: NetworkEnum
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -488,7 +505,7 @@ export const proposalCreated = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
 
   await context.db
@@ -534,7 +551,7 @@ export const proposalCanceled = async (
   event: DaoProposalCanceledEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
+  network: NetworkEnum
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -542,7 +559,7 @@ export const proposalCanceled = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
   await context.db
     .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
@@ -555,7 +572,7 @@ export const proposalExecuted = async (
   event: DaoProposalExecutedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
+  network: NetworkEnum
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -563,7 +580,7 @@ export const proposalExecuted = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId,
+    daoId
   );
   await context.db
     .update(proposalsOnchain, { id: [proposalId, daoId].join("-") })
@@ -586,7 +603,7 @@ const storeDailyBucket = async (
       0,
       0,
       0,
-      0,
+      0
     ) / 1000;
   await context.db
     .insert(daoMetricsDayBuckets)
