@@ -48,6 +48,13 @@ export const HeaderDAOSidebar = () => {
       <div className="flex w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
+          {daoConfig.showSupport && (
+            <ButtonHeaderDAOSidebar
+              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
+              icon={ActivityIcon}
+              label={SECTIONS_CONSTANTS.showSupport.title}
+            />
+          )}
           {daoConfig.daoInfo && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
@@ -81,13 +88,6 @@ export const HeaderDAOSidebar = () => {
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
-            />
-          )}
-          {daoConfig.showSupport && (
-            <ButtonHeaderDAOSidebar
-              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
-              icon={ActivityIcon}
-              label={SECTIONS_CONSTANTS.showSupport.title}
             />
           )}
         </div>
