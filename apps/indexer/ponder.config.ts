@@ -1,32 +1,24 @@
-import { createConfig, loadBalance } from "ponder";
-import { http, Transport, webSocket } from "viem";
-import dotenv from "dotenv";
+import { createConfig } from "ponder";
+import { Transport } from "viem";
 import { config } from "./config";
 import { NetworkEnum } from "@/lib/enums";
-dotenv.config();
+import { env } from "./confg";
 
-if (!process.env.STATUS) throw new Error("Env variable STATUS is not defined");
-const { networks, contracts } =
-  config[process.env.STATUS as "production" | "staging" | "test"];
+
+const { networks, contracts } = config[env.STATUS];
+
 if (!networks || !contracts) throw new Error("No networks or contracts");
 
-const databaseConfig = process.env.DATABASE_URL
-  ? {
-      database: {
-        kind: "postgres" as "postgres",
-        connectionString: process.env.DATABASE_URL,
-      },
-    }
-  : {};
-
-// Create a Ponder configuration with specific contract ABIs
 export default createConfig({
+  database: {
+    kind: "postgres",
+    connectionString: env.DATABASE_URL,
+  },
   networks: networks as Record<
     NetworkEnum,
     { chainId: number; transport: Transport; maxRequestsPerSecond: number }
   >,
   contracts,
-  ...databaseConfig,
 });
 
 //@ts-ignore
