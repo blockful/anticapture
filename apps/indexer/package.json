@@ -29,7 +29,8 @@
     "hono": "^4.5.0",
     "ioredis": "^5.5.0",
     "ponder": "^0.9.19",
-    "viem": "^2.21.9"
+    "viem": "^2.21.9",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.4",
