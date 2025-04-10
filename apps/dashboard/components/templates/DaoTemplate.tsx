@@ -23,21 +23,21 @@ export const DaoTemplate = () => {
 
   return (
     <>
-      {daoConstants.daoInfo?.enabled && (
+      {daoConstants.daoInfo && (
         <DaoInfoSection daoInfo={daoConstants.daoInfo} />
       )}
-      {daoConstants.showSupport?.enabled && <ShowSupportSection />}
-      {daoConstants.attackProfitability?.enabled && (
+      {daoConstants.showSupport && <ShowSupportSection />}
+      {daoConstants.attackProfitability && (
         <AttackProfitabilitySection
           daoId={daoIdEnum}
           attackProfitability={daoConstants.attackProfitability}
         />
       )}
-      {daoConstants.governanceImplementation?.enabled && (
+      {daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
-      {daoConstants.tokenDistribution?.enabled && <TokenDistributionSection />}
-      {daoConstants.governanceActivity?.enabled && (
+      {daoConstants.tokenDistribution && <TokenDistributionSection />}
+      {daoConstants.governanceActivity && (
         <GovernanceActivitySection />
       )}
     </>

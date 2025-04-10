@@ -136,28 +136,10 @@ export const TokenDistributionProvider = ({
 
   const parsedDays = parseInt(days.split("d")[0]);
 
-  const validMetricTypes = metricTypes.filter((metric) => {
-    const tokenDistributionMetricTypes = Object.keys(
-      daoConfigByDaoId[daoId].tokenDistribution?.blurFields ?? {},
-    );
-    if (!tokenDistributionMetricTypes.includes(metric)) {
-      return false;
-    }
-    const blurFields = daoConfigByDaoId[daoId].tokenDistribution?.blurFields;
-    if (blurFields === undefined) {
-      return true;
-    }
-    const blurField = blurFields[metric as keyof typeof blurFields];
-    if (blurField) {
-      return false;
-    }
-    return true;
-  });
-
   // Use the SWR hook to fetch data
   const { data: allData, error } = useTimeSeriesData(
     daoId,
-    validMetricTypes,
+    metricTypes,
     parsedDays,
     {
       refreshInterval: 300000, // Refresh every 5 minutes

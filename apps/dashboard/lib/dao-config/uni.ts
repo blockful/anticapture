@@ -9,7 +9,7 @@ export const UNI: DaoConfiguration = {
   icon: UNILogo,
   supportStage: SupportStageEnum.FULL,
   daoInfo: {
-    enabled: true,
+    
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -26,20 +26,18 @@ export const UNI: DaoConfiguration = {
     },
   },
   attackProfitability: {
-    enabled: true,
+    
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: false,
   },
-  governanceImplementation: {
-    enabled: false,
-  },
+  governanceImplementation: false,
   tokenDistribution: {
-    enabled: true,
+    
   },
   governanceActivity: {
-    enabled: true,
+    
   },
   showSupport: {
-    enabled: true,
+    
   },
 };

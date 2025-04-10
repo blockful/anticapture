@@ -31,7 +31,7 @@ export const AttackProfitabilitySection = ({
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
-  if (!attackProfitability?.enabled) {
+  if (!attackProfitability) {
     return null;
   }
 

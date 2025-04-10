@@ -2,12 +2,12 @@ import { DaoConfiguration } from "@/lib/dao-config/types";
 import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
 import ENSLogo from "@/public/logo/ENS.png";
 import { SupportStageEnum } from "../enums/SupportStageEnum";
+import { MetricTypesEnum } from "../client/constants";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
   supportStage: SupportStageEnum.FULL,
   daoInfo: {
-    enabled: true,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -37,12 +37,10 @@ export const ENS: DaoConfiguration = {
   },
   icon: ENSLogo,
   attackProfitability: {
-    enabled: true,
     riskLevel: RiskLevel.HIGH,
     supportsLiquidTreasuryCall: true,
   },
   governanceImplementation: {
-    enabled: true,
     fields: [
       {
         name: "Vote Mutability",
@@ -151,13 +149,7 @@ export const ENS: DaoConfiguration = {
       },
     ].sort((a, b) => sortByRiskLevel(a, b, "desc")),
   },
-  tokenDistribution: {
-    enabled: true,
-  },
-  governanceActivity: {
-    enabled: false,
-  },
-  showSupport: {
-    enabled: false,
-  },
+  tokenDistribution: true,
+  governanceActivity: true,
+  showSupport: false,
 };

@@ -15,32 +15,32 @@ export const HeaderNavMobile = () => {
     {
       anchorId: SECTIONS_CONSTANTS.daoInfo.anchorId,
       title: SECTIONS_CONSTANTS.daoInfo.title,
-      enabled: daoConfig.daoInfo?.enabled,
+      enabled: !!daoConfig.daoInfo,
     },
     {
       anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
       title: SECTIONS_CONSTANTS.attackProfitability.title,
-      enabled: daoConfig.attackProfitability?.enabled,
+      enabled: !!daoConfig.attackProfitability,
     },
     {
       anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
       title: SECTIONS_CONSTANTS.governanceImplementation.title,
-      enabled: daoConfig.governanceImplementation?.enabled,
+      enabled: !!daoConfig.governanceImplementation,
           },
     {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
       title: SECTIONS_CONSTANTS.tokenDistribution.title,
-      enabled: daoConfig.tokenDistribution?.enabled,
+      enabled: !!daoConfig.tokenDistribution,
     },
     {
       anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
       title: SECTIONS_CONSTANTS.governanceActivity.title,
-      enabled: daoConfig.governanceActivity?.enabled,
+      enabled: !!daoConfig.governanceActivity,
     },
     {
       anchorId: SECTIONS_CONSTANTS.showSupport.anchorId,
       title: SECTIONS_CONSTANTS.showSupport.title,
-      enabled: daoConfig.showSupport?.enabled,
+      enabled: daoConfig.showSupport,
     },
   ];
 

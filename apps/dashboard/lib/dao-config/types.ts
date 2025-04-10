@@ -48,11 +48,6 @@ export type GovernanceImplementationField = {
   riskLevel: RiskLevel;
 };
 
-// Base configuration for any section
-export interface SectionConfig {
-  enabled: boolean;
-}
-
 // Base DAO information
 interface BaseInfo {
   name: string;
@@ -62,7 +57,7 @@ interface BaseInfo {
 }
 
 // Section configurations without data storage
-export interface DaoInfoConfig extends SectionConfig {
+export interface DaoInfoConfig {
   contracts?: {
     governor: Address;
     token: Address;
@@ -90,42 +85,20 @@ export interface DaoInfoConfig extends SectionConfig {
   };
 }
 
-export interface AttackProfitabilityConfig extends SectionConfig {
+export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
   supportsLiquidTreasuryCall?: boolean;
   blurChart?: boolean;
 }
-export interface GovernanceImplementationConfig extends SectionConfig,
-    GovernanceImplementation {}
-
-export interface TokenDistributionConfig extends SectionConfig {
-  blurChart?: boolean;
-  blurFields?: {
-    [MetricTypesEnum.TOTAL_SUPPLY]: boolean;
-    [MetricTypesEnum.CIRCULATING_SUPPLY]: boolean;
-    [MetricTypesEnum.CEX_SUPPLY]: boolean;
-    [MetricTypesEnum.DEX_SUPPLY]: boolean;
-    [MetricTypesEnum.LENDING_SUPPLY]: boolean;
-    [MetricTypesEnum.DELEGATED_SUPPLY]: boolean;
-  };
-}
-export interface GovernanceActivityConfig extends SectionConfig {
-  blurFields?: {
-    [MetricTypesEnum.VOTES]: boolean;
-    [MetricTypesEnum.PROPOSALS]: boolean;
-    [MetricTypesEnum.ACTIVE_SUPPLY]: boolean;
-    [MetricTypesEnum.AVERAGE_TURNOUT]: boolean;
-    [MetricTypesEnum.TREASURY]: boolean;
-  };
-}
-export interface ShowSupportConfig extends SectionConfig {}
+export interface GovernanceImplementationConfig
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoInfo?: DaoInfoConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
-  tokenDistribution?: TokenDistributionConfig;
-  governanceActivity?: GovernanceActivityConfig;
-  showSupport?: ShowSupportConfig;
+  tokenDistribution?: boolean;
+  governanceActivity?: boolean;
+  showSupport?: boolean;
 }

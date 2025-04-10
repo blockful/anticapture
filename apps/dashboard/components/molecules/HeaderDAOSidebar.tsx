@@ -48,42 +48,42 @@ export const HeaderDAOSidebar = () => {
       <div className="flex w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
-          {daoConfig.daoInfo?.enabled && (
+          {daoConfig.daoInfo && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
               icon={PieChartIcon}
               label={SECTIONS_CONSTANTS.daoInfo.title}
             />
           )}
-          {daoConfig.attackProfitability?.enabled && (
+          {daoConfig.attackProfitability && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
               icon={CrossHairIcon}
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
           )}
-          {daoConfig.governanceImplementation?.enabled && (
+          {daoConfig.governanceImplementation && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
               icon={Lightbulb}
               label={SECTIONS_CONSTANTS.governanceImplementation.title}
             />
           )}
-          {daoConfig.tokenDistribution?.enabled && (
+          {daoConfig.tokenDistribution && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               icon={ArrowLeftRight}
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
-          {daoConfig.governanceActivity?.enabled && (
+          {daoConfig.governanceActivity && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
             />
           )}
-          {daoConfig.showSupport?.enabled && (
+          {daoConfig.showSupport && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
               icon={ActivityIcon}
