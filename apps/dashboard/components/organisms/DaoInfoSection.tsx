@@ -16,7 +16,7 @@ export const DaoInfoSection = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
     return (
       <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
         {/* Contracts info shown for all stages */}
-        <ContractsCard contracts={daoInfo.contracts} daoInfo={daoInfo} />
+        <ContractsCard daoInfo={daoInfo} />
 
         {/* Vote info shown for all stages */}
         <VoteCard daoInfo={daoInfo} />
