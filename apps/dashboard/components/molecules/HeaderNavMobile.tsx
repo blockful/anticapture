@@ -8,6 +8,9 @@ import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();
+  if(!daoId){
+    return null
+  }
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdEnum];
 
