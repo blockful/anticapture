@@ -1,24 +1,14 @@
 import { createConfig, loadBalance } from "ponder";
-import { http, webSocket } from "viem";
+import { http, Transport, webSocket } from "viem";
 import dotenv from "dotenv";
 import { config } from "./config";
+import { NetworkEnum } from "@/lib/enums";
 dotenv.config();
 
-let networks, contracts;
-if (!process.env.STATUS) {
-  throw new Error("Env variable STATUS is not defined");
-} else if (
-  process.env.STATUS === "production" ||
-  process.env.STATUS === "nodeful"
-) {
-  ({ networks, contracts } = config.ponder["production"]);
-} else if (process.env.STATUS === "staging") {
-  ({ networks, contracts } = config.ponder["staging"]);
-} else if (process.env.STATUS === "test") {
-  ({ networks, contracts } = config.ponder["test"]);
-} else {
-  throw new Error("No ENV variable STATUS");
-}
+if (!process.env.STATUS) throw new Error("Env variable STATUS is not defined");
+const { networks, contracts } =
+  config[process.env.STATUS as "production" | "staging" | "test"];
+if (!networks || !contracts) throw new Error("No networks or contracts");
 
 const databaseConfig = process.env.DATABASE_URL
   ? {
@@ -29,25 +19,12 @@ const databaseConfig = process.env.DATABASE_URL
     }
   : {};
 
+// Create a Ponder configuration with specific contract ABIs
 export default createConfig({
-  networks: {
-    mainnet: {
-      chainId: networks.chainId,
-      transport:
-        networks.rpcUrls.length > 1
-          ? loadBalance(networks.rpcUrls.map((url) => http(url)))
-          : webSocket(networks.rpcUrls[0]),
-      maxRequestsPerSecond:
-        process.env.STATUS !== "production" && process.env.STATUS !== "staging"
-          ? 10000
-          : 1000,
-    },
-    anvil: {
-      chainId: 31337,
-      transport: http("http://127.0.0.1:8545"),
-      disableCache: true,
-    },
-  },
+  networks: networks as Record<
+    NetworkEnum,
+    { chainId: number; transport: Transport; maxRequestsPerSecond: number }
+  >,
   contracts,
   ...databaseConfig,
 });

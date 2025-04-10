@@ -12,6 +12,7 @@ export * from "./MultilineChartTokenDistribution";
 export * from "./QuorumCard";
 export * from "./ReachOutToUsCard";
 export * from "./SecurityCouncilCard";
+export * from "./SupportDaoCard";
 export * from "./TimelockCard";
 export * from "./TokenDistributionTable";
 export * from "./VoteCard";

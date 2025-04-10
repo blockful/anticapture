@@ -14,20 +14,25 @@ import {
   MultilineChartExtractableValue,
   AttackCostBarChart,
 } from "@/components/molecules";
-import { TimeInterval } from "@/lib/enums";
+import { RiskLevel, TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { AttackProfitabilityConfig } from "@/lib/dao-config/types";
 
-export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
+export const AttackProfitabilitySection = ({
+  daoId,
+  attackProfitability,
+}: {
+  daoId: DaoIdEnum;
+  attackProfitability: AttackProfitabilityConfig;
+}) => {
   const defaultDays = TimeInterval.ONE_YEAR;
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
-
-  const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
-
-  if (daoConstants.inAnalysis) {
+  if (!attackProfitability) {
     return null;
   }
 
@@ -45,7 +50,9 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
       description={SECTIONS_CONSTANTS.attackProfitability.description}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={
-        <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
+        <RiskLevelCard
+          status={attackProfitability?.riskLevel ?? RiskLevel.LOW}
+        />
       }
       className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
@@ -66,7 +73,6 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
           filterData={[treasuryMetric, costMetric]}
         />
       </TheCardChartLayout>
-
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <TheCardChartLayout
           title={

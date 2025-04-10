@@ -1,14 +1,10 @@
-import daoConstantsByDaoId from "@/lib/dao-constants";
 
 export enum DaoIdEnum {
   UNISWAP = "UNI",
   ENS = "ENS",
   OPTIMISM = "OP",
+  ARBITRUM = "ARB",
 }
-
-export const SUPPORTED_DAO_NAMES = Object.values(DaoIdEnum).filter(
-  (daoId) => !daoConstantsByDaoId[daoId].inAnalysis,
-);
 
 export interface DAO {
   id: DaoIdEnum;
@@ -19,3 +15,5 @@ export interface DAO {
   timelockDelay: number;
   totalSupply?: number;
 }
+
+export const ALL_DAOS = Object.values(DaoIdEnum);

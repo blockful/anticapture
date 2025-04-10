@@ -16,14 +16,16 @@ import {
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConstantsByDaoId from "@/lib/dao-constants";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { Address } from "viem";
 
 export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const daoConstants = daoConstantsByDaoId[daoId];
+  const daoConfig = daoConfigByDaoId[daoId];
+  const daoInfo = daoConfig.daoInfo;
 
-  if (daoConstants.inAnalysis) {
+  if (!daoInfo) {
     return null;
   }
 
@@ -31,12 +33,14 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     {
       value: "Governor",
       icon: <CrownIcon className="text-tangerine" />,
-      onClick: () => openEtherscanAddress(daoConstants.contracts.governor),
+      onClick: () =>
+        openEtherscanAddress(daoInfo?.contracts?.governor as Address),
     },
     {
       value: "Token",
       icon: <TokensIcon className="text-tangerine" />,
-      onClick: () => openEtherscanAddress(daoConstants.contracts.token),
+      onClick: () =>
+        openEtherscanAddress(daoInfo?.contracts?.token as Address),
     },
   ];
 
@@ -45,12 +49,12 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Snapshot",
       icon: <FocusIcon className="text-tangerine" />,
       onClick: () =>
-        window.open(daoConstants.snapshot, "_blank", "noopener,noreferrer"),
+        window.open(daoInfo?.snapshot as string, "_blank", "noopener,noreferrer"),
     },
     {
       value: "Token",
       icon: <TokensIcon className="text-tangerine" />,
-      onClick: () => openEtherscanAddress(daoConstants.contracts.token),
+      onClick: () => openEtherscanAddress(daoInfo?.contracts?.token as Address),
     },
   ];
 
@@ -70,7 +74,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="flex flex-col gap-2">
           <div>
             <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
-              {daoConstants.name}
+              {daoConfig.name}
             </h2>
           </div>
           <div className="flex gap-2">
@@ -101,7 +105,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             variant={DaoLogoVariant.DEFAULT}
           />
           <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
-            {daoConstants.name}
+            {daoConfig.name}
           </h2>
         </div>
         <div className="flex flex-col gap-3">
@@ -126,7 +130,9 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
       </div>
       <div className="flex h-full w-full">
-        <SecurityCouncilCard daoConstants={daoConstants} />
+        <SecurityCouncilCard
+          daoInfo={daoInfo}
+        />
       </div>
       <div className="border border-lightDark sm:hidden" />
       <div
@@ -134,12 +140,12 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
       >
         <div className="flex w-full sm:border-r sm:border-lightDark">
-          <VoteCard daoConstants={daoConstants} />
+          <VoteCard daoInfo={daoInfo} />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
 
         <div className="flex w-full sm:border-r sm:border-lightDark">
-          <TimelockCard daoConstants={daoConstants} />
+          <TimelockCard daoInfo={daoInfo} />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
 

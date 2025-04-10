@@ -17,8 +17,9 @@ import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks";
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
@@ -26,8 +27,12 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
+  const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
+    (daoId) =>
+      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+  );
   // Create initial data
-  const data = Object.values(DaoIdEnum).map((daoId, index) => ({
+  const data = notOnElectionDaoIds.map((daoId, index) => ({
     id: index,
     dao: daoId,
   }));
@@ -80,7 +85,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       size: 60,
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoConstantsByDaoId[dao as DaoIdEnum] : null;
+        const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         return (
           <div className="flex items-center justify-center gap-3">
             <p className="scrollbar-none items-centeroverflow-auto flex py-3 text-foreground">
@@ -128,7 +133,9 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoConstantsByDaoId[dao as DaoIdEnum] : null;
+        const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
+        const isInAnalysis =
+          details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
           <div className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
             <div className="flex w-5 items-center gap-2 md:w-20">
@@ -143,7 +150,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
               )}
               {dao}
             </div>
-            {!isMobile && details?.inAnalysis && <BadgeInAnalysis />}
+            {!isMobile && isInAnalysis && <BadgeInAnalysis />}
           </div>
         );
       },
@@ -154,7 +161,9 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        if (daoConstantsByDaoId[daoId].inAnalysis) {
+        const isInAnalysis =
+          daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ANALYSIS;
+        if (isInAnalysis) {
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end">
               {isMobile ? <BadgeInAnalysis /> : "-"}
@@ -209,7 +218,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
       withSorting={true}
       onRowClick={handleRowClick}
       disableRowClick={(row: DashboardDao) =>
-        !!daoConstantsByDaoId[row.dao as DaoIdEnum].inAnalysis
+        !!daoConfigByDaoId[row.dao as DaoIdEnum].disableDaoPage
       }
     />
   );

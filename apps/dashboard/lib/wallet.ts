@@ -8,7 +8,7 @@ import {
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import { createConfig, http } from "wagmi";
 import { createPublicClient, createWalletClient } from "viem";
-import { mainnet } from "viem/chains";
+import { mainnet } from "wagmi/chains";
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 

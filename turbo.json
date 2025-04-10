@@ -4,6 +4,8 @@
     "NODE_ENV",
     "DATABASE_URL",
     "PONDER_RPC_URL_1",
+    "PONDER_RPC_URL_ARB_1",
+    "PONDER_RPC_URL_ETH_1",
     "DUNE_API_URL",
     "DUNE_API_KEY",
     "START_BLOCK",
@@ -38,6 +40,16 @@
     },
     "restore-database": {},
     "dump-database": {},
-    "lint:fix": {}
+    "lint:fix": {},
+    "drop-public": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "drop-all-schemas": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    }
   }
 }

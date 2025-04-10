@@ -2,17 +2,17 @@
 
 import { useCountdown } from "@/hooks";
 import { cn } from "@/lib/client/utils";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 
 export const CountdownDaoInfo = ({
-  daoConstants,
+  daoInfo,
   className,
 }: {
-  daoConstants: DaoConstantsFullySupported;
+  daoInfo: DaoInfoConfig;
   className?: string;
 }) => {
-  const { securityCouncil } = daoConstants;
+  const { securityCouncil } = daoInfo;
   const targetTimestamp = securityCouncil?.expiration.timestamp;
   const countdown = useCountdown(targetTimestamp);
 

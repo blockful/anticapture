@@ -13,7 +13,7 @@ import {
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/lib/client/utils";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { TokenDistributionCustomTooltip } from "@/components/atoms";
 
 interface MultilineChartTokenDistributionProps {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DaoTemplate } from "@/components/templates";
-import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 
 type Props = {
   params: { daoId: string };
@@ -15,18 +15,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const ogImage: Record<Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM>, string> = {
+  const ogImage: Record<
+    Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>,
+    string
+  > = {
     [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
   };
 
   const imageUrl =
-    ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM>] ||
-    `${baseUrl}/opengraph-images/default.png`;
+    ogImage[
+      daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>
+    ] || `${baseUrl}/opengraph-images/default.png`;
+
+  // Generate title and description based on support stage
+  let title = `Anticapture - ${daoId} DAO`;
+  let description = `Explore and mitigate governance risks in ${daoId} DAO.`;
 
   return {
-    title: `${!SUPPORTED_DAO_NAMES.includes(daoId) ? "Anticapture - DAO Not Found" : `Anticapture - ${daoId} DAO`}`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title,
+    description,
     openGraph: {
       title: `Anticapture - ${daoId} DAO`,
       description: `Explore and mitigate governance risks in ${daoId} DAO.`,
