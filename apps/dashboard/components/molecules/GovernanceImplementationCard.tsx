@@ -3,7 +3,7 @@
 import { RiskLevel } from "@/lib/enums";
 import { cn } from "@/lib/client/utils";
 import { Card } from "@/components/ui/card";
-import { GovernanceImplementationField } from "@/lib/dao-constants/types";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const GovernanceImplementationCard = ({

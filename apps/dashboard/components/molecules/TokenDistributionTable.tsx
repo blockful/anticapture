@@ -13,7 +13,7 @@ import {
   TheTable,
   TooltipInfo,
 } from "@/components/atoms";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import {
   cn,

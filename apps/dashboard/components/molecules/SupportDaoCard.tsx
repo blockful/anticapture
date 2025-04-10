@@ -6,24 +6,44 @@ import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TrendingUpIcon } from "@/components/atoms";
 import { ChevronRight } from "lucide-react";
+import { useAccount } from "wagmi";
+import { formatEther } from "viem";
+import { usePetitionSignatures } from "@/hooks/usePetition";
 
 export const SupportDaoCard = ({
   daoIcon,
   daoName,
   daoId,
   onClick,
-  userSupport,
-  votingPowerSupport,
-  totalCountSupport,
+  userSupport: externalUserSupport,
+  votingPowerSupport: externalVotingPowerSupport,
+  totalCountSupport: externalTotalCountSupport,
 }: {
   daoIcon: StaticImageData;
   daoName: string;
   daoId: DaoIdEnum;
   onClick: () => void;
-  userSupport: boolean;
-  votingPowerSupport: number;
-  totalCountSupport: number;
+  userSupport?: boolean;
+  votingPowerSupport?: number;
+  totalCountSupport?: number;
 }) => {
+  // Get petition data internally if not provided externally
+  const { address } = useAccount();
+  const { data: petitionData } = usePetitionSignatures(daoId, address);
+  
+  // Use external data if provided, otherwise use petition data
+  const userSupport = externalUserSupport !== undefined ? 
+    externalUserSupport : 
+    petitionData?.userSigned || false;
+    
+  const totalCountSupport = externalTotalCountSupport !== undefined ? 
+    externalTotalCountSupport : 
+    petitionData?.totalSignatures || 0;
+    
+  const votingPowerSupport = externalVotingPowerSupport !== undefined ? 
+    externalVotingPowerSupport : 
+    Number(formatEther(BigInt(petitionData?.totalSignaturesPower || 0)));
+
   return (
     <Card
       className="flex w-full flex-row rounded-lg border border-lightDark bg-dark px-4 py-5 shadow hover:cursor-pointer hover:bg-lightDark md:w-[calc(50%-10px)] xl4k:max-w-full"
