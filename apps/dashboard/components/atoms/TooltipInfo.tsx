@@ -18,7 +18,7 @@ export function TooltipInfo({
   return (
     <Tooltip>
       <TooltipTrigger role="button" aria-label="tooltip-info">
-        <InfoIcon className="cursor-pointer" />
+        <InfoIcon className="cursor-pointer text-foreground" />
       </TooltipTrigger>
       <TooltipContent
         side="top"

@@ -2,19 +2,18 @@
 
 import {
   BaseCardDaoInfo,
-  ButtonCardDaoInfoItem,
   CardData,
-  LockIcon,
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
 import { DaoInfoConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
-
+import { Clock4 } from "lucide-react";
+import { Address } from "viem";
 export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
   const timelockData: CardData = {
     title: "Timelock",
-    icon: <LockIcon />,
+    icon: <Clock4 className="size-4 text-foreground" />,
     sections: [
       {
         title: "Timelock",
@@ -22,21 +21,13 @@ export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
           "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoInfo.rules?.timelock}
+            switched={daoInfo?.rules?.timelock}
+            icon={<ExternalLinkIcon className="text-foreground" />}
+            onClick={() =>
+              openEtherscanAddress(daoInfo?.contracts?.timelock as Address)
+            }
             key={"switch"}
           />,
-          daoInfo.contracts?.timelock && (
-            <ButtonCardDaoInfoItem
-              key={"button-card"}
-              label="View"
-              icon={<ExternalLinkIcon className="text-tangerine" />}
-              onClick={() =>
-                daoInfo.contracts?.timelock &&
-                openEtherscanAddress(daoInfo.contracts?.timelock)
-              }
-              inverted={true}
-            />
-          ),
         ],
       },
       {
@@ -45,24 +36,17 @@ export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoInfo.rules?.cancelFunction}
+            switched={daoInfo?.rules?.cancelFunction}
+            icon={<ExternalLinkIcon className="text-foreground" />}
+            onClick={() =>
+              window.open(
+                `${daoInfo.cancelFunction}`,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
             key={"switch"}
           />,
-          daoInfo.rules?.cancelFunction && (
-            <ButtonCardDaoInfoItem
-              key={"button-card"}
-              label="View"
-              icon={<ExternalLinkIcon className="text-tangerine" />}
-              inverted={true}
-              onClick={() =>
-                window.open(
-                  `${daoInfo.cancelFunction}`,
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
-            />
-          ),
         ],
       },
     ],

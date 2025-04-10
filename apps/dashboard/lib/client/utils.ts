@@ -6,6 +6,12 @@ import {
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/lib/dao-config/types";
+import {
+  DAYS_PER_MONTH,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
+} from "@/lib/client/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -53,7 +59,10 @@ export function formatNumberUserReadable(num: number): string {
   return num.toString();
 }
 
-export function formatBlocksToUserReadable(num: number): string {
+export function formatBlocksToUserReadable(
+  num: number,
+  useAbbreviations: boolean = false,
+): string {
   // Constants
   const SECONDS_PER_BLOCK = 12;
 
@@ -68,14 +77,14 @@ export function formatBlocksToUserReadable(num: number): string {
     return formatTimeUnit(Math.round(totalSeconds), "sec");
   }
 
-  return formatSecondsToReadable(totalSeconds);
+  return formatSecondsToReadable(totalSeconds, useAbbreviations);
 }
 
-// Helper function to convert seconds to a readable time format
-function formatSecondsToReadable(totalSeconds: number): string {
-  const SECONDS_PER_MINUTE = 60;
-  const SECONDS_PER_HOUR = 3600; // 60 minutes * 60 seconds
-
+// Helper function to convert seconds to a readable time format with optional abbreviations
+function formatSecondsToReadable(
+  totalSeconds: number,
+  useAbbreviations: boolean = false,
+): string {
   const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
   const minutes = Math.floor(
     (totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
@@ -86,20 +95,24 @@ function formatSecondsToReadable(totalSeconds: number): string {
 
   // Add hours if we have any
   if (hours > 0) {
-    parts.push(formatTimeUnit(hours, "hour"));
+    parts.push(useAbbreviations ? `${hours}h` : formatTimeUnit(hours, "hour"));
   }
 
   // Add minutes if we have any
   if (minutes > 0) {
-    parts.push(formatTimeUnit(minutes, "min"));
+    parts.push(
+      useAbbreviations ? `${minutes}min` : formatTimeUnit(minutes, "min"),
+    );
   }
 
   // Add seconds only if we have no hours and minutes
   if (parts.length === 0 && seconds > 0) {
-    parts.push(formatTimeUnit(seconds, "sec"));
+    parts.push(
+      useAbbreviations ? `${seconds}s` : formatTimeUnit(seconds, "sec"),
+    );
   }
 
-  return parts.join(", ");
+  return parts.join(useAbbreviations ? " " : ", ");
 }
 
 // Helper function to format a time unit with proper pluralization
@@ -278,4 +291,16 @@ export const findMostRecentValue = <
 
   // Return the found item's value
   return items[index][valueKey];
+};
+
+export const calculateMonthsBefore = ({
+  timestamp,
+  monthsBeforeTimestamp,
+}: {
+  timestamp: number;
+  monthsBeforeTimestamp: number;
+}): number => {
+  const SECONDS_TO_SUBTRACT =
+    monthsBeforeTimestamp * DAYS_PER_MONTH * SECONDS_PER_DAY;
+  return timestamp - SECONDS_TO_SUBTRACT;
 };

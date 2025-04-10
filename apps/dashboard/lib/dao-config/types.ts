@@ -81,6 +81,8 @@ export interface DaoInfoConfig {
     expiration: {
       date: string;
       timestamp: number;
+      startDate: string;
+      alertExpiration: number;
     };
   };
 }

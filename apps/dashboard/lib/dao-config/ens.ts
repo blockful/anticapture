@@ -1,6 +1,7 @@
 import { DaoConfiguration } from "@/lib/dao-config/types";
 import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
 import ENSLogo from "@/public/logo/ENS.png";
+import { calculateMonthsBefore } from "@/lib/client/utils";
 import { SupportStageEnum } from "../enums/SupportStageEnum";
 import { MetricTypesEnum } from "../client/constants";
 
@@ -30,8 +31,13 @@ export const ENS: DaoConfiguration = {
           "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
       },
       expiration: {
-        date: "26 July 2026",
+        startDate: "July 1, 2024",
+        date: "July 26 2026",
         timestamp: 1784919179,
+        alertExpiration: calculateMonthsBefore({
+          monthsBeforeTimestamp: 3,
+          timestamp: 1784919179,
+        }),
       },
     },
   },

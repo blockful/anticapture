@@ -45,7 +45,7 @@ export interface PetitionSignatureRequest {
  */
 const fetchPetitionSignatures = async (
   daoId: DaoIdEnum,
-  userAddress: Address,
+  userAddress: Address | undefined,
 ): Promise<PetitionResponse> => {
   const response = await fetch(
     `${BACKEND_ENDPOINT}/petition/${daoId}?userAddress=${userAddress}`,
@@ -103,11 +103,8 @@ export const usePetitionSignatures = (
   userAddress: Address | undefined,
 ) => {
   const { data, error, isLoading, mutate } = useSWR<PetitionResponse>(
-    daoId && userAddress ? `petition/${daoId}/${userAddress}` : null,
+    daoId ? `petition/${daoId}?userAddress=${userAddress}` : null,
     () => {
-      if (!userAddress) {
-        throw new Error("User address is required to fetch petition data");
-      }
       return fetchPetitionSignatures(daoId, userAddress);
     },
     {
@@ -115,7 +112,6 @@ export const usePetitionSignatures = (
       revalidateOnReconnect: false,
     },
   );
-
   return {
     data: data || null,
     loading: isLoading,

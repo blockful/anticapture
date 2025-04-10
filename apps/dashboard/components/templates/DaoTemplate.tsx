@@ -24,7 +24,7 @@ export const DaoTemplate = () => {
   return (
     <>
       {daoConstants.daoInfo && (
-        <DaoInfoSection daoInfo={daoConstants.daoInfo} />
+        <DaoInfoSection daoId={daoIdEnum} />
       )}
       {daoConstants.showSupport && <ShowSupportSection />}
       {daoConstants.attackProfitability && (

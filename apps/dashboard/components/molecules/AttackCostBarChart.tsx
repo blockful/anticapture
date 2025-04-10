@@ -57,8 +57,7 @@ interface AttackCostBarChartProps {
 export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const timeInterval = TimeInterval.NINETY_DAYS;
-
+  const timeInterval = TimeInterval.ONE_YEAR;
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,

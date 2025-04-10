@@ -60,7 +60,12 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     }, [supplyData, rowIndex]);
 
     if (!supplyData) {
-      return <SkeletonRow className="h-5 w-full max-w-20 md:max-w-32" />;
+      return (
+        <SkeletonRow
+          parentClassName="flex animate-pulse justify-end pr-4"
+          className="h-5 w-full max-w-20 md:max-w-32"
+        />
+      );
     }
 
     const formattedSupply = formatNumberUserReadable(
@@ -69,10 +74,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
 
     return (
       <div className="flex items-center justify-end px-4 py-3 text-end text-white">
-        {formattedSupply} |{" "}
-        <div className="pl-1 text-sm">
-          ({(Number(supplyData.changeRate || 0) * 100).toFixed(2)}%)
-        </div>
+        {formattedSupply}
       </div>
     );
   };
@@ -178,9 +180,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
           className="w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="truncate font-normal">
-            Delegated Supply {!isMobile && `(${days})`}
-          </h4>
+          <h4 className="truncate font-normal">Delegated Supply</h4>
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",

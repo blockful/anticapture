@@ -28,7 +28,8 @@ export const AttackProfitabilitySection = ({
   daoId: DaoIdEnum;
   attackProfitability: AttackProfitabilityConfig;
 }) => {
-  const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+  const defaultDays = TimeInterval.ONE_YEAR;
+  const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
   if (!attackProfitability) {
@@ -41,7 +42,7 @@ export const AttackProfitabilitySection = ({
       icon={<CrossHairIcon className="text-foreground" />}
       switchDate={
         <SwitcherDate
-          defaultValue={TimeInterval.NINETY_DAYS}
+          defaultValue={defaultDays}
           setTimeInterval={setDays}
           disableRecentData={true}
         />
