@@ -595,7 +595,7 @@ const storeDailyBucket = async (
   daoId: string,
   metricType: MetricTypesEnum,
   currentValue: bigint,
-  newValue: bigint
+  newValue: bigint,
 ) => {
   const volume = delta(newValue, currentValue);
   const dayStartTimestampInSeconds =

@@ -2,27 +2,27 @@
 
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/components/atoms";
-import daoConstants from "@/lib/dao-constants";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { formatEther } from "viem";
-import { useAccount } from "wagmi";
 import { ReachOutToUsCard, SupportDaoCard } from "@/components/molecules";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { PetitionResponse, usePetitionSignatures } from "@/hooks/usePetition";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoConfiguration } from "@/lib/dao-config/types";
+import { useMemo } from "react";
+import { pickBy } from "lodash";
 
 export const SupportDaosSection = () => {
   const router = useRouter();
-
-  const { address } = useAccount();
-
-  const petitions: Record<DaoIdEnum, PetitionResponse | null> = {
-    [DaoIdEnum.ENS]: usePetitionSignatures(DaoIdEnum.ENS, address).data,
-    [DaoIdEnum.UNISWAP]: usePetitionSignatures(DaoIdEnum.UNISWAP, address).data,
-    [DaoIdEnum.OPTIMISM]: usePetitionSignatures(DaoIdEnum.OPTIMISM, address).data,
-    [DaoIdEnum.ARBITRUM]: usePetitionSignatures(DaoIdEnum.ARBITRUM, address).data,
-    
-  };
+  
+  // Create an object with only DAOs in election stage using lodash pickBy
+  const daoConfigElectionDaos = useMemo(() => {
+    // Use pickBy to filter objects where supportStage is ELECTION
+    return pickBy(
+      daoConfigByDaoId, 
+      (daoConfig: DaoConfiguration) => daoConfig.supportStage === SupportStageEnum.ELECTION
+    ) as typeof daoConfigByDaoId;
+  }, []);
 
   return (
     <TheSectionLayout
@@ -32,17 +32,12 @@ export const SupportDaosSection = () => {
       anchorId={SECTIONS_CONSTANTS.supportDaos.anchorId}
     >
       <div className="flex flex-wrap gap-4">
-        {Object.entries(daoConstants).map(([daoId, dao]) => (
+        {Object.entries(daoConfigElectionDaos).map(([daoId, dao]) => (
           <SupportDaoCard
             key={dao.name}
             daoIcon={dao.icon}
             daoName={dao.name}
             daoId={daoId as DaoIdEnum}
-            totalCountSupport={petitions[daoId as DaoIdEnum]?.totalSignatures || 0}
-            votingPowerSupport={Number(
-              formatEther(BigInt(petitions[daoId as DaoIdEnum]?.totalSignaturesPower || 0)),
-            )}
-            userSupport={petitions[daoId as DaoIdEnum]?.userSigned || false}
             onClick={() => {
               router.push(`/${daoId}`);
             }}

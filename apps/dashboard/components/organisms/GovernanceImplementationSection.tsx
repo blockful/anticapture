@@ -1,6 +1,6 @@
 "use client";
 
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { TheSectionLayout } from "@/components/atoms";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { GovernanceImplementationCard } from "@/components/molecules";
@@ -8,7 +8,7 @@ import { useState } from "react";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
-import { GovernanceImplementationField } from "@/lib/dao-constants/types";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const GovernanceImplementationSection = ({
@@ -19,12 +19,8 @@ export const GovernanceImplementationSection = ({
   const { isDesktop, isTablet } = useScreenSize();
   const [openCardIds, setOpenCardIds] = useState<string[]>([]);
 
-  if (daoConstantsByDaoId[daoId].inAnalysis) {
-    return null;
-  }
-
   const governanceImplementationFields =
-    daoConstantsByDaoId[daoId].governanceImplementation?.fields;
+    daoConfigByDaoId[daoId].governanceImplementation?.fields;
 
   const handleToggle = (
     e: React.MouseEvent<Element, MouseEvent>,

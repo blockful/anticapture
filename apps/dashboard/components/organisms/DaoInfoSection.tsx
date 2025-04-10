@@ -9,22 +9,31 @@ import {
   VoteCard,
 } from "@/components/molecules";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import daoConstantsByDaoId from "@/lib/dao-constants";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 
-export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const daoConstants = daoConstantsByDaoId[daoId];
-  if (daoConstants.inAnalysis) {
-    return null;
-  }
+export const DaoInfoSection = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
   const DaoInfo = () => {
     return (
       <div className="grid w-full gap-2 text-white md:grid-cols-2 xl:gap-4">
-        <ContractsCard daoConstants={daoConstants} />
-        <VoteCard daoConstants={daoConstants} />
-        <TimelockCard daoConstants={daoConstants} />
+        {/* Contracts info shown for all stages */}
+        <ContractsCard daoInfo={daoInfo} />
+
+        {/* Vote info shown for all stages */}
+        <VoteCard daoInfo={daoInfo} />
+
+        {/* Timelock info only shown for FULL stage */}
+        <TimelockCard daoInfo={daoInfo} />
+
+        {/* Quorum info shown for all stages */}
         <QuorumCard />
-        <SecurityCouncilCard daoConstants={daoConstants} />
+
+        {/* Security council info only shown for FULL stage */}
+        {daoInfo.securityCouncil && (
+          <SecurityCouncilCard
+            targetTimestamp={daoInfo.securityCouncil?.expiration.timestamp ?? 0}
+            securityCouncil={daoInfo.securityCouncil}
+          />
+        )}
       </div>
     );
   };

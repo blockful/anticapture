@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
+import ArbitrumIcon from "@/public/logo/Arbitrum.png";
+import Image from "next/image";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -52,6 +54,17 @@ export const HeaderDAOSidebarDropdown = () => {
         icon: <EnsIcon className="h-5 w-5" />,
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
+      },
+      {
+        id: 2,
+        label: "Arbitrum",
+        icon: (
+          <div className="h-5 w-5 rounded-full bg-white">
+            <Image src={ArbitrumIcon} alt="Arbitrum" className="h-5 w-5" />
+          </div>
+        ),
+        href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
+        name: DaoIdEnum.ARBITRUM,
       },
     ],
     [],
