@@ -11,12 +11,12 @@ import {
 import viemClient from "@/lib/viemClient";
 import { dao, daoToken, token } from "ponder:schema";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
-import { Address } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 const daoId = DaoIdEnum.UNI;
-const network = NetworkEnum.MAINNET;
-const tokenAddress = CONTRACT_ADDRESSES[network][daoId].token;
+const network = NetworkEnum.ETHEREUM;
+const tokenAddress = CONTRACT_ADDRESSES[network][daoId]!.token;
+
 ponder.on("UNIToken:setup", async ({ context }) => {
   const votingPeriod = await viemClient.getVotingPeriod(DaoIdEnum.UNI, network);
   const quorum = await viemClient.getQuorum(daoId, network);
@@ -24,7 +24,7 @@ ponder.on("UNIToken:setup", async ({ context }) => {
   const timelockDelay = await viemClient.getTimelockDelay(daoId, network);
   const proposalThreshold = await viemClient.getProposalThreshold(
     daoId,
-    network
+    network,
   );
 
   await context.db.insert(dao).values({
@@ -68,7 +68,7 @@ ponder.on("UNIToken:Transfer", async ({ event, context }) => {
 });
 
 ponder.on("UNIGovernor:VoteCast", async ({ event, context }) => {
-  await voteCast(event, context, daoId, network);
+  await voteCast(event, context, daoId);
 });
 
 /**

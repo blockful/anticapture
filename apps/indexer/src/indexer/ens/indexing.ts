@@ -21,9 +21,8 @@ import { dao, daoToken, token } from "ponder:schema";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 const daoId = DaoIdEnum.ENS;
-
-const network = NetworkEnum.MAINNET;
-const tokenAddress = CONTRACT_ADDRESSES[network][daoId].token;
+const network = NetworkEnum.ETHEREUM;
+const tokenAddress = CONTRACT_ADDRESSES[network][daoId]!.token;
 
 ponder.on("ENSToken:setup", async ({ context }) => {
   const votingPeriod = await viemClient.getVotingPeriod(daoId, network);
@@ -84,7 +83,7 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
  * Creates a new VotesOnchain record and updates the voter's vote count
  */
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
-  await voteCast(event, context, daoId, network);
+  await voteCast(event, context, daoId);
 });
 
 /**

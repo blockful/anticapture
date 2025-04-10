@@ -26,7 +26,7 @@ importers:
     dependencies:
       '@namehash/ens-utils':
         specifier: ^1.18.0
-        version: 1.18.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+        version: 1.18.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@radix-ui/react-accordion':
         specifier: ^1.2.3
         version: 1.2.3(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -44,7 +44,7 @@ importers:
         version: 1.1.4(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
-        version: 2.2.0(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))(wagmi@2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)))
+        version: 2.2.0(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(wagmi@2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2))
       '@tanstack/react-query':
         specifier: ^5.59.16
         version: 5.62.0(react@18.3.1)
@@ -95,10 +95,10 @@ importers:
         version: 1.0.7(tailwindcss@3.4.15(ts-node@10.9.2(@types/node@20.17.6)(typescript@5.7.2)))
       viem:
         specifier: ^2.21.34
-        version: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+        version: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
       wagmi:
         specifier: ^2.12.25
-        version: 2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
+        version: 2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -162,10 +162,13 @@ importers:
         version: 5.6.0
       ponder:
         specifier: ^0.9.19
-        version: 0.9.28(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.6)(@types/pg@8.11.10)(better-sqlite3@11.5.0)(hono@4.6.11)(prisma@5.22.0)(terser@5.36.0)(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
+        version: 0.9.28(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.6)(@types/pg@8.11.10)(better-sqlite3@11.5.0)(hono@4.6.11)(prisma@5.22.0)(terser@5.36.0)(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
       viem:
         specifier: ^2.21.9
-        version: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+        version: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.25.4
@@ -6991,6 +6994,9 @@ packages:
     resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
     engines: {node: '>=12.20'}
 
+  zod@3.24.2:
+    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+
   zustand@5.0.0:
     resolution: {integrity: sha512-LE+VcmbartOPM+auOjCCLQOsQ05zUTp8RkgwRzefUk+2jISdMMFnxvyTjA4YNWr5ZGXYbVsEMZosttuxUBkojQ==}
     engines: {node: '>=12.20.0'}
@@ -8748,7 +8754,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.12
       debug: 4.3.7
-      semver: 7.6.3
+      semver: 7.7.1
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -8826,13 +8832,13 @@ snapshots:
       '@motionone/dom': 10.18.0
       tslib: 2.8.1
 
-  '@namehash/ens-utils@1.18.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)':
+  '@namehash/ens-utils@1.18.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
       '@ethersproject/hash': 5.7.0
       date-fns: 3.3.1
       decimal.js: 10.4.3
-      viem: 2.21.16(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.16(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -8988,9 +8994,9 @@ snapshots:
 
   '@pkgr/core@0.1.1': {}
 
-  '@ponder/utils@0.2.3(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))':
+  '@ponder/utils@0.2.3(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))':
     dependencies:
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
     optionalDependencies:
       typescript: 5.7.2
 
@@ -9338,7 +9344,7 @@ snapshots:
 
   '@radix-ui/rect@1.1.0': {}
 
-  '@rainbow-me/rainbowkit@2.2.0(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))(wagmi@2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)))':
+  '@rainbow-me/rainbowkit@2.2.0(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(wagmi@2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2))':
     dependencies:
       '@tanstack/react-query': 5.62.0(react@18.3.1)
       '@vanilla-extract/css': 1.15.5
@@ -9350,8 +9356,8 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-remove-scroll: 2.6.0(@types/react@18.3.12)(react@18.3.1)
       ua-parser-js: 1.0.39
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
-      wagmi: 2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
+      wagmi: 2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
     transitivePeerDependencies:
       - '@types/react'
       - babel-plugin-macros
@@ -9416,9 +9422,9 @@ snapshots:
 
   '@rushstack/eslint-patch@1.10.4': {}
 
-  '@safe-global/safe-apps-provider@0.18.4(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)':
+  '@safe-global/safe-apps-provider@0.18.4(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
-      '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
       events: 3.3.0
     transitivePeerDependencies:
       - bufferutil
@@ -9426,10 +9432,10 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@safe-global/safe-apps-sdk@9.1.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)':
+  '@safe-global/safe-apps-sdk@9.1.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
       '@safe-global/safe-gateway-typescript-sdk': 3.22.4
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -9799,7 +9805,7 @@ snapshots:
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
-      semver: 7.6.3
+      semver: 7.7.1
       ts-api-utils: 1.4.0(typescript@5.7.2)
     optionalDependencies:
       typescript: 5.7.2
@@ -9868,16 +9874,16 @@ snapshots:
       - debug
       - utf-8-validate
 
-  '@wagmi/connectors@5.5.2(@types/react@18.3.12)(@wagmi/core@2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)))(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))':
+  '@wagmi/connectors@5.5.2(@types/react@18.3.12)(@wagmi/core@2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)':
     dependencies:
       '@coinbase/wallet-sdk': 4.2.3
       '@metamask/sdk': 0.31.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@safe-global/safe-apps-provider': 0.18.4(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
-      '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
-      '@wagmi/core': 2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
+      '@safe-global/safe-apps-provider': 0.18.4(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
+      '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
+      '@wagmi/core': 2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))
       '@walletconnect/ethereum-provider': 2.17.0(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(utf-8-validate@5.0.10)
       cbw-sdk: '@coinbase/wallet-sdk@3.9.3'
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
     optionalDependencies:
       typescript: 5.7.2
     transitivePeerDependencies:
@@ -9902,11 +9908,11 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@wagmi/core@2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))':
+  '@wagmi/core@2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.7.2)
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
       zustand: 5.0.0(@types/react@18.3.12)(react@18.3.1)(use-sync-external-store@1.2.0(react@18.3.1))
     optionalDependencies:
       '@tanstack/query-core': 5.62.0
@@ -10253,17 +10259,20 @@ snapshots:
       jsonparse: 1.3.1
       through: 2.3.8
 
-  abitype@0.10.3(typescript@5.7.2):
+  abitype@0.10.3(typescript@5.7.2)(zod@3.24.2):
     optionalDependencies:
       typescript: 5.7.2
+      zod: 3.24.2
 
-  abitype@1.0.5(typescript@5.7.2):
+  abitype@1.0.5(typescript@5.7.2)(zod@3.24.2):
     optionalDependencies:
       typescript: 5.7.2
+      zod: 3.24.2
 
-  abitype@1.0.6(typescript@5.7.2):
+  abitype@1.0.6(typescript@5.7.2)(zod@3.24.2):
     optionalDependencies:
       typescript: 5.7.2
+      zod: 3.24.2
 
   abort-controller@3.0.0:
     dependencies:
@@ -11325,7 +11334,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.2(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1)
@@ -11360,20 +11369,20 @@ snapshots:
       debug: 4.3.7
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.3.0
       is-glob: 4.0.3
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
       - eslint-import-resolver-node
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -11384,7 +11393,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -11395,7 +11404,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -12912,7 +12921,7 @@ snapshots:
 
   node-abi@3.71.0:
     dependencies:
-      semver: 7.6.3
+      semver: 7.7.1
     optional: true
 
   node-addon-api@2.0.2: {}
@@ -13037,14 +13046,14 @@ snapshots:
       type-check: 0.4.0
       word-wrap: 1.2.5
 
-  ox@0.1.2(typescript@5.7.2):
+  ox@0.1.2(typescript@5.7.2)(zod@3.24.2):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
       '@noble/curves': 1.6.0
       '@noble/hashes': 1.5.0
       '@scure/bip32': 1.5.0
       '@scure/bip39': 1.4.0
-      abitype: 1.0.6(typescript@5.7.2)
+      abitype: 1.0.6(typescript@5.7.2)(zod@3.24.2)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.7.2
@@ -13240,7 +13249,7 @@ snapshots:
 
   pngjs@5.0.0: {}
 
-  ponder@0.9.28(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.6)(@types/pg@8.11.10)(better-sqlite3@11.5.0)(hono@4.6.11)(prisma@5.22.0)(terser@5.36.0)(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)):
+  ponder@0.9.28(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.6)(@types/pg@8.11.10)(better-sqlite3@11.5.0)(hono@4.6.11)(prisma@5.22.0)(terser@5.36.0)(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -13249,8 +13258,8 @@ snapshots:
       '@escape.tech/graphql-armor-max-depth': 2.4.0
       '@escape.tech/graphql-armor-max-tokens': 2.5.0
       '@hono/node-server': 1.13.3(hono@4.6.11)
-      '@ponder/utils': 0.2.3(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
-      abitype: 0.10.3(typescript@5.7.2)
+      '@ponder/utils': 0.2.3(typescript@5.7.2)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))
+      abitype: 0.10.3(typescript@5.7.2)(zod@3.24.2)
       ansi-escapes: 7.0.0
       commander: 12.1.0
       conf: 12.0.0
@@ -13275,7 +13284,7 @@ snapshots:
       stacktrace-parser: 0.1.10
       superjson: 2.2.2
       terminal-size: 4.0.0
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
       vite: 5.0.7(@types/node@20.17.6)(terser@5.36.0)
       vite-node: 1.0.2(@types/node@20.17.6)(terser@5.36.0)
       vite-tsconfig-paths: 4.3.1(typescript@5.7.2)(vite@5.0.7(@types/node@20.17.6)(terser@5.36.0))
@@ -14475,14 +14484,14 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  viem@2.21.16(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10):
+  viem@2.21.16(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2):
     dependencies:
       '@adraffy/ens-normalize': 1.10.0
       '@noble/curves': 1.4.0
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
       '@scure/bip39': 1.4.0
-      abitype: 1.0.5(typescript@5.7.2)
+      abitype: 1.0.5(typescript@5.7.2)(zod@3.24.2)
       isows: 1.0.4(ws@8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
       webauthn-p256: 0.0.5
       ws: 8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -14493,15 +14502,15 @@ snapshots:
       - utf-8-validate
       - zod
 
-  viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10):
+  viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2):
     dependencies:
       '@noble/curves': 1.6.0
       '@noble/hashes': 1.5.0
       '@scure/bip32': 1.5.0
       '@scure/bip39': 1.4.0
-      abitype: 1.0.6(typescript@5.7.2)
+      abitype: 1.0.6(typescript@5.7.2)(zod@3.24.2)
       isows: 1.0.6(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))
-      ox: 0.1.2(typescript@5.7.2)
+      ox: 0.1.2(typescript@5.7.2)(zod@3.24.2)
       webauthn-p256: 0.0.10
       ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
     optionalDependencies:
@@ -14549,14 +14558,14 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.36.0
 
-  wagmi@2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)):
+  wagmi@2.13.2(@tanstack/query-core@5.62.0)(@tanstack/react-query@5.62.0(react@18.3.1))(@types/react@18.3.12)(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@tanstack/react-query': 5.62.0(react@18.3.1)
-      '@wagmi/connectors': 5.5.2(@types/react@18.3.12)(@wagmi/core@2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)))(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
-      '@wagmi/core': 2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10))
+      '@wagmi/connectors': 5.5.2(@types/react@18.3.12)(@wagmi/core@2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.8)(ioredis@5.6.0)(react@18.3.1)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
+      '@wagmi/core': 2.15.1(@tanstack/query-core@5.62.0)(@types/react@18.3.12)(react@18.3.1)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2))
       react: 18.3.1
       use-sync-external-store: 1.2.0(react@18.3.1)
-      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)
+      viem: 2.21.49(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.2)
     optionalDependencies:
       typescript: 5.7.2
     transitivePeerDependencies:
@@ -14748,6 +14757,8 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.1.1: {}
+
+  zod@3.24.2: {}
 
   zustand@5.0.0(@types/react@18.3.12)(react@18.3.1)(use-sync-external-store@1.2.0(react@18.3.1)):
     optionalDependencies:

@@ -2,7 +2,8 @@ import "dotenv/config";
 import { z } from "zod";
 
 const envSchema = z.object({
-  STATUS: z.enum(["production", "staging", "test"]),
+  RPC_URL: z.string(),
+  STATUS: z.enum(["production", "staging"]),
   DATABASE_URL: z.string(),
   PONDER_RPC_URL: z.string(),
   POOLING_INTERVAL: z.number().default(1000),
