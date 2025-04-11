@@ -44,7 +44,7 @@ export const HeaderSidebar = () => {
               label="Panel"
               onClick={() => {
                 const dashboardAnchorSection = document.getElementById(
-                  SECTIONS_CONSTANTS.dashboard.anchorId,
+                  SECTIONS_CONSTANTS.panel.anchorId,
                 );
 
                 dashboardAnchorSection?.scrollIntoView({

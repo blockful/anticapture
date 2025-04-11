@@ -1,8 +1,8 @@
 export const SECTIONS_CONSTANTS = {
-  dashboard: {
-    title: "Dashboard",
+  panel: {
+    title: "Panel",
     description: undefined,
-    anchorId: "dashboardSection",
+    anchorId: "panel",
   },
   daoOverview: {
     title: "DAO Overview",
