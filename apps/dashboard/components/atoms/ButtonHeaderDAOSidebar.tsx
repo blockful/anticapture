@@ -14,7 +14,7 @@ export const ButtonHeaderDAOSidebar = ({
   label: string;
 }) => {
   const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
+    initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
   });
   const isActive = (sectionId: string) => activeSection === sectionId;
 

@@ -4,10 +4,10 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "dashboardSection",
   },
-  daoInfo: {
-    title: "DAO Information",
+  daoOverview: {
+    title: "DAO Overview",
     description: undefined,
-    anchorId: "daoInfoSection",
+    anchorId: "daoOverviewSection",
   },
   showSupport: {
     title: "Show Support",

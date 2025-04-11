@@ -37,11 +37,11 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.showSupport.title}
             />
           )}
-          {daoConfig.daoInfo && (
+          {daoConfig.daoOverview && (
             <ButtonHeaderDAOSidebar
-              anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
+              anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
               icon={PieChartIcon}
-              label={SECTIONS_CONSTANTS.daoInfo.title}
+              label={SECTIONS_CONSTANTS.daoOverview.title}
             />
           )}
           {daoConfig.attackProfitability && (

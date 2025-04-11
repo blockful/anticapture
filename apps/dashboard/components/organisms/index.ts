@@ -1,5 +1,5 @@
 export * from "./AttackProfitabilitySection";
-export * from "./DaoInfoSection";
+export * from "./DaoOverviewSection";
 export * from "./GovernanceActivitySection";
 export * from "./GovernanceImplementationSection";
 export * from "./HomeDashboardSection";
