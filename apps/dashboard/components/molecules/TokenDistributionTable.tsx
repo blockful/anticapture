@@ -3,7 +3,7 @@
 import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { TokenDistribution } from "@/lib/mocked-data";
+import { chartMetrics, TokenDistribution } from "@/lib/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowState,
@@ -88,9 +88,15 @@ export const TokenDistributionTable = () => {
       accessorKey: "metric",
       cell: ({ row }) => {
         const metric: string = row.getValue("metric");
+        const currentValue = row.getValue("currentValue");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+          <p
+            className={cn(
+              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]",
+              { "blur-[4px]": currentValue === null },
+            )}
+          >
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
@@ -105,8 +111,7 @@ export const TokenDistributionTable = () => {
       accessorKey: "currentValue",
       cell: ({ row }) => {
         const currentValue: number = row.getValue("currentValue");
-
-        if (currentValue === null) {
+        if (currentValue === undefined) {
           return (
             <SkeletonRow
               className="h-5 w-32"
@@ -114,7 +119,15 @@ export const TokenDistributionTable = () => {
             />
           );
         }
-
+        if (currentValue === null) {
+          const randomNumber = Math.floor(Math.random() * 6);
+          const randomValues = ["36M", "100", "170K", "536M", "497K", "128K"];
+          return (
+            <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
+              {randomValues[randomNumber]}
+            </div>
+          );
+        }
         return (
           <div className="flex items-center justify-end px-4 py-3 text-end">
             {currentValue && formatNumberUserReadable(currentValue)}
@@ -150,7 +163,7 @@ export const TokenDistributionTable = () => {
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
 
-        if (variation === null) {
+        if (variation === undefined) {
           return (
             <div className="flex items-center justify-end">
               <SkeletonRow
@@ -160,7 +173,22 @@ export const TokenDistributionTable = () => {
             </div>
           );
         }
-
+        if (variation === null) {
+          const randomNumber = Math.floor(Math.random() * 6);
+          const randomValues = [
+            "38%",
+            "1.34%",
+            "14.89%",
+            "5.98%",
+            "14.89%",
+            "8.34%",
+          ];
+          return (
+            <div className="flex items-center justify-end text-[#4ade80] blur-[4px]">
+              {randomValues[randomNumber]}
+            </div>
+          );
+        }
         return (
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
@@ -208,10 +236,17 @@ export const TokenDistributionTable = () => {
         const variation: string = row.getValue("variation");
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
-        if (chartLastDays.length === 0) {
+        if (chartLastDays === undefined) {
           return (
             <div className="flex w-full justify-center">
               <SkeletonRow className="h-5 w-32" />
+            </div>
+          );
+        }
+        if (chartLastDays.length === 0) {
+          return (
+            <div className="blur-[4px] flex w-full justify-center py-2.5">
+              <Sparkline data={chartMetrics.map((item) => Number(item.high))} strokeColor={"#4ADE80"} />
             </div>
           );
         }
@@ -238,62 +273,62 @@ export const TokenDistributionTable = () => {
       data={[
         {
           metric: "Total",
-          currentValue: totalSupply.value
+          currentValue: !!totalSupply.value
             ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
-            : null,
-          variation: totalSupply.changeRate
+            : totalSupply.value,
+          variation: !!totalSupply.changeRate
             ? formatVariation(totalSupply.changeRate)
-            : null,
+            : totalSupply.changeRate,
           chartLastDays: totalSupplyChart,
         },
         {
           metric: "Delegated",
-          currentValue: delegatedSupply.value
+          currentValue: !!delegatedSupply.value
             ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
-            : null,
-          variation: delegatedSupply.changeRate
+            : delegatedSupply.value,
+          variation: !!delegatedSupply.changeRate
             ? formatVariation(delegatedSupply.changeRate)
-            : null,
+            : delegatedSupply.changeRate,
           chartLastDays: delegatedSupplyChart,
         },
         {
           metric: "Circulating",
           currentValue: circulatingSupply.value
             ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))
-            : null,
-          variation: circulatingSupply.changeRate
+            : circulatingSupply.value,
+          variation: !!circulatingSupply.changeRate
             ? formatVariation(circulatingSupply.changeRate)
-            : null,
+            : circulatingSupply.changeRate,
           chartLastDays: circulatingSupplyChart,
         },
         {
           metric: "CEX",
           currentValue: cexSupply.value
             ? String(BigInt(cexSupply.value) / BigInt(10 ** 18))
-            : null,
-          variation: cexSupply.changeRate
+            : cexSupply.value,
+          variation: !!cexSupply.changeRate
             ? formatVariation(cexSupply.changeRate)
-            : null,
+            : cexSupply.changeRate,
           chartLastDays: cexSupplyChart,
         },
         {
           metric: "DEX",
           currentValue: dexSupply.value
             ? String(BigInt(dexSupply.value) / BigInt(10 ** 18))
-            : null,
-          variation: dexSupply.changeRate
+            : dexSupply.value,
+          variation: !!dexSupply.changeRate
             ? formatVariation(dexSupply.changeRate)
-            : null,
+            : dexSupply.changeRate,
           chartLastDays: dexSupplyChart,
         },
         {
           metric: "Lending",
           currentValue: lendingSupply.value
             ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18))
-            : null,
-          variation: lendingSupply.changeRate
+            : lendingSupply.value,
+          variation: !!lendingSupply.changeRate
             ? formatVariation(lendingSupply.changeRate)
-            : null,
+            : lendingSupply.changeRate,
           chartLastDays: lendingSupplyChart,
         },
       ]}

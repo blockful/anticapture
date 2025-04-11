@@ -8,7 +8,6 @@ import { MetricData, TokenDistributionContextProps } from "@/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks";
-import daoConfigByDaoId from "@/lib/dao-config";
 
 const initialTokenDistributionMetricData = {
   value: undefined,
@@ -21,27 +20,27 @@ export const TokenDistributionContext =
     setDays: () => {},
     totalSupply: initialTokenDistributionMetricData,
     setTotalSupply: () => {},
-    totalSupplyChart: [],
+    totalSupplyChart: undefined,
     setTotalSupplyChart: () => {},
     circulatingSupply: initialTokenDistributionMetricData,
     setCirculatingSupply: () => {},
-    circulatingSupplyChart: [],
+    circulatingSupplyChart: undefined,
     setCirculatingSupplyChart: () => {},
     delegatedSupply: initialTokenDistributionMetricData,
     setDelegatedSupply: () => {},
-    delegatedSupplyChart: [],
+    delegatedSupplyChart: undefined,
     setDelegatedSupplyChart: () => {},
     cexSupply: initialTokenDistributionMetricData,
     setCexSupply: () => {},
-    cexSupplyChart: [],
+    cexSupplyChart: undefined,
     setCexSupplyChart: () => {},
     dexSupply: initialTokenDistributionMetricData,
     setDexSupply: () => {},
-    dexSupplyChart: [],
+    dexSupplyChart: undefined,
     setDexSupplyChart: () => {},
     lendingSupply: initialTokenDistributionMetricData,
     setLendingSupply: () => {},
-    lendingSupplyChart: [],
+    lendingSupplyChart: undefined,
     setLendingSupplyChart: () => {},
   });
 
@@ -184,7 +183,7 @@ export const TokenDistributionProvider = ({
         metric.setState({ value: currentHigh, changeRate });
         metric.setChart(data);
       } else {
-        metric.setState(initialTokenDistributionMetricData);
+        metric.setState({ value: null, changeRate: null });
         metric.setChart([]);
       }
     });
