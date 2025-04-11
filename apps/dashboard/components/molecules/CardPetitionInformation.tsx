@@ -1,3 +1,5 @@
+"use client";
+
 import { TooltipInfo } from "../atoms";
 import { Card } from "../ui/card";
 import { SupportersCarroussel } from "../atoms/SupportersCarroussel";
