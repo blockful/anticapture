@@ -156,6 +156,6 @@ export const ENS: DaoConfiguration = {
     ].sort((a, b) => sortByRiskLevel(a, b, "desc")),
   },
   tokenDistribution: true,
-  governanceActivity: true,
+  governanceActivity: false,
   showSupport: false,
 };

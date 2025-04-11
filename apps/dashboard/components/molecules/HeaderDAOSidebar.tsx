@@ -1,11 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DaoIdEnum, ALL_DAOS } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import {
   ActivityIcon,
   ArrowLeftRight,
-  BaseHeaderLayoutSidebar,
   PieChartIcon,
   HeaderDAOSidebarDropdown,
   ButtonHeaderDAOSidebar,
@@ -20,23 +19,6 @@ export const HeaderDAOSidebar = () => {
 
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && ALL_DAOS.includes(daoId as DaoIdEnum);
-
-  if (!isValidDao) {
-    return (
-      <BaseHeaderLayoutSidebar>
-        {!isDefault && (
-          <div className="flex flex-col items-center space-x-2">
-            <h1 className="text-sm font-semibold text-white">404 Not Found</h1>
-            <h1 className="text-sm font-semibold text-white">
-              Please back to Home Page
-            </h1>
-          </div>
-        )}
-      </BaseHeaderLayoutSidebar>
-    );
-  }
-
   const daoConfig = daoConfigByDaoId[daoId as DaoIdEnum];
 
   if (daoConfig.disableDaoPage) {
@@ -44,10 +26,10 @@ export const HeaderDAOSidebar = () => {
   }
 
   return (
-    <BaseHeaderLayoutSidebar>
-      <div className="flex w-full flex-col">
+    <aside className="fixed left-[72px] top-0 z-40 hidden h-screen w-[258px] border-r border-lightDark sm:block">
+      <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
-        <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
+        <div className="flex h-full flex-col gap-3 p-4">
           {daoConfig.showSupport && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
@@ -92,6 +74,6 @@ export const HeaderDAOSidebar = () => {
           )}
         </div>
       </div>
-    </BaseHeaderLayoutSidebar>
+    </aside>
   );
 };

@@ -57,9 +57,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         className={`${inter.className} overflow-x-hidden bg-darkest xl:overflow-hidden`}
       >
         <GlobalProviders>
-          <div className="max-h-screen overflow-auto xl:ml-[330px]">
-            {children}
-          </div>
+          {/* <div className="max-h-screen overflow-auto xl:ml-[330px]"> */}
+          {children}
+          {/* </div> */}
         </GlobalProviders>
       </body>
     </html>

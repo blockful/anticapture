@@ -33,7 +33,7 @@ export const SECTIONS_CONSTANTS = {
     anchorId: "tokenDistributionSection",
   },
   governanceImplementation: {
-    title: "Governance Implementation",
+    title: "Gov. Implementation",
     description: undefined,
     anchorId: "governanceImplementationSection",
   },

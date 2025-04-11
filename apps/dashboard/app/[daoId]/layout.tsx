@@ -1,7 +1,4 @@
-import {
-  ALL_DAOS,
-  DaoIdEnum,
-} from "@/lib/types/daos";
+import { ALL_DAOS, DaoIdEnum } from "@/lib/types/daos";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 import { DaoDataProvider } from "@/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
@@ -34,7 +31,7 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
     <DaoDataProvider daoId={daoId}>
       <TokenDistributionProvider daoId={daoId}>
         <GovernanceActivityProvider daoId={daoId}>
-          <HeaderDAOSidebar />
+          {/* <HeaderDAOSidebar /> */}
           {children}
         </GovernanceActivityProvider>
       </TokenDistributionProvider>
