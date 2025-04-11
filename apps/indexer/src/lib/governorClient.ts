@@ -1,6 +1,6 @@
 import { Account, Address, Chain, Client, Transport } from "viem";
 import { DaoIdEnum } from "./enums";
-import { GovernorAbiType, TokenAbiType } from "@/indexer/types";
+import { GovernorAbiType } from "@/indexer/types";
 import { getBlockNumber, readContract } from "viem/actions";
 
 export function newGovernorClient<
@@ -12,14 +12,6 @@ export function newGovernorClient<
   abi: GovernorAbiType,
   address: Address,
 ) {
-  const getDecimals = async (abi: TokenAbiType, address: Address) => {
-    return readContract(client, {
-      abi,
-      address,
-      functionName: "decimals",
-    });
-  };
-
   const getQuorum = async (daoId: DaoIdEnum) => {
     switch (daoId) {
       case DaoIdEnum.UNI:
@@ -101,7 +93,6 @@ export function newGovernorClient<
     getVotingDelay,
     getVotingPeriod,
     getTimelockDelay,
-    getDecimals,
     getQuorum,
     getProposalThreshold,
   };

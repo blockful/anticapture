@@ -22,6 +22,7 @@ import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { ENSGovernorAbi, ENSTokenAbi } from "./abi";
 import { newGovernorClient } from "@/lib/governorClient";
+import { readContract } from "viem/actions";
 
 const daoId = DaoIdEnum.ENS;
 const network = NetworkEnum.ETHEREUM;
@@ -48,7 +49,11 @@ ponder.on("ENSToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const decimals = await governorClient.getDecimals(ENSTokenAbi, tokenAddress);
+  const decimals = await readContract(client, {
+    abi: ENSTokenAbi,
+    address: tokenAddress,
+    functionName: "decimals",
+  });
   await context.db.insert(token).values({
     id: tokenAddress,
     name: daoId,

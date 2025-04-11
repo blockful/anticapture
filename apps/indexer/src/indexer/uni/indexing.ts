@@ -15,6 +15,7 @@ import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { UNIGovernorAbi, UNITokenAbi } from "./abi";
 import { newGovernorClient } from "@/lib/governorClient";
+import { readContract } from "viem/actions";
 
 const daoId = DaoIdEnum.UNI;
 const network = NetworkEnum.ETHEREUM;
@@ -41,7 +42,11 @@ ponder.on("UNIToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const decimals = await governorClient.getDecimals(UNITokenAbi, tokenAddress);
+  const decimals = await readContract(client, {
+    abi: UNITokenAbi,
+    address: tokenAddress,
+    functionName: "decimals",
+  });
   await context.db.insert(token).values({
     id: tokenAddress,
     name: daoId,
