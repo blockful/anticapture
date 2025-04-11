@@ -1,8 +1,12 @@
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
+import { ARBTokenAbi } from "@/indexer/arb/abi/ARBTokenAbi";
 import { Event } from "ponder:registry";
 
-export type TokenAbiType = typeof UNITokenAbi | typeof ENSTokenAbi;
+export type TokenAbiType =
+  | typeof UNITokenAbi
+  | typeof ENSTokenAbi
+  | typeof ARBTokenAbi;
 
 export type GovernorAbiType = typeof UNIGovernorAbi | typeof ENSGovernorAbi;
 
@@ -20,7 +24,8 @@ export type DaoDelegateVotesChangedEvent =
 
 export type DaoTransferEvent =
   | Event<"ENSToken:Transfer">
-  | Event<"UNIToken:Transfer">;
+  | Event<"UNIToken:Transfer">
+  | Event<"ARBToken:Transfer">;
 
 export type DaoProposalCreatedEvent =
   | Event<"ENSGovernor:ProposalCreated">

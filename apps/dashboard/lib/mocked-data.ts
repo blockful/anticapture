@@ -4,7 +4,7 @@ import {
   DaoMetricsDayBucket,
   PriceEntry,
   TokenHistoricalDataMetrics,
-} from "@/lib/dao-constants/types";
+} from "@/lib/dao-config/types";
 import { DAYS_IN_MILLISECONDS, TimeInterval } from "@/lib/enums/TimeInterval";
 
 export type DashboardDao = {

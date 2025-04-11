@@ -6,15 +6,11 @@ import {
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import { DaoInfoConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { Clock4 } from "lucide-react";
-
-export const TimelockCard = ({
-  daoConstants,
-}: {
-  daoConstants: DaoConstantsFullySupported;
-}) => {
+import { Address } from "viem";
+export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
   const timelockData: CardData = {
     title: "Timelock",
     icon: <Clock4 className="size-4 text-foreground" />,
@@ -25,10 +21,10 @@ export const TimelockCard = ({
           "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoConstants.rules.timelock}
+            switched={daoInfo?.rules?.timelock}
             icon={<ExternalLinkIcon className="text-foreground" />}
             onClick={() =>
-              openEtherscanAddress(daoConstants.contracts.timelock)
+              openEtherscanAddress(daoInfo?.contracts?.timelock as Address)
             }
             key={"switch"}
           />,
@@ -40,11 +36,11 @@ export const TimelockCard = ({
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoConstants.rules.cancelFunction}
+            switched={daoInfo?.rules?.cancelFunction}
             icon={<ExternalLinkIcon className="text-foreground" />}
             onClick={() =>
               window.open(
-                `${daoConstants.cancelFunction}`,
+                `${daoInfo.cancelFunction}`,
                 "_blank",
                 "noopener,noreferrer",
               )

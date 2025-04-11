@@ -1,4 +1,4 @@
-import { DAO_VETO_COUNCIL_ADDRESSES } from "@/lib/dao-constants/dao-addresses";
+import { DAO_VETO_COUNCIL_ADDRESSES } from "@/lib/dao-config/dao-addresses";
 import api from "@/lib/server/api";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";

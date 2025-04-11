@@ -9,6 +9,11 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "daoInfoSection",
   },
+  showSupport: {
+    title: "Show Support",
+    description: undefined,
+    anchorId: "showSupportSection",
+  },
   attackProfitability: {
     title: "Attack Profitability",
     description:
@@ -32,4 +37,12 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
+  supportDaos: {
+    title: "Support DAOs",
+    description: "",
+    anchorId: "supportDaosSection",
+  },
 };
+
+export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
+export const ANTICAPTURE_TELEGRAM = "https://t.me/danimimm";
