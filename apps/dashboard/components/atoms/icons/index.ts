@@ -1,6 +1,7 @@
 export * from "./ActivityIcon";
 export * from "./AlertTriangleIcon";
 export * from "./AnticaptureIcon";
+export * from "./AnticaptureIconMobile";
 export * from "./ArrowDownIcon";
 export * from "./ArrowLeftIcon";
 export * from "./ArrowLeftRight";

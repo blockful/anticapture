@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { AnticaptureIcon, ConnectWallet } from "@/components/atoms";
+import { AnticaptureIconMobile, ConnectWallet } from "@/components/atoms";
 import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
 
@@ -40,12 +40,12 @@ export const HeaderMobile = () => {
         )}
       >
         <div className="px-4 py-3">
-          <div className="flex justify-between">
-            <Link href={"/"} className="flex cursor-pointer">
-              <AnticaptureIcon />
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex cursor-pointer">
+              <AnticaptureIconMobile />
             </Link>
             <div className="flex">
-              <ConnectWallet />
+              <ConnectWallet className="!px-3 !py-1.5" />
             </div>
           </div>
         </div>
