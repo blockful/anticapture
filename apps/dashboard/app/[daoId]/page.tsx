@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { DaoTemplate } from "@/components/templates";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { HeaderNavMobile } from "@/components/molecules/HeaderNavMobile";
 import {
   HeaderDAOSidebar,
   HeaderMobile,
   HeaderSidebar,
 } from "@/components/molecules";
+import { DaoTemplate } from "@/components/templates";
 
 type Props = {
   params: { daoId: string };
@@ -68,7 +67,7 @@ export default function DaoPage() {
       <HeaderSidebar />
       <HeaderDAOSidebar />
       <main className="flex-1 overflow-auto sm:ml-[330px]">
-        <div className="block sm:hidden">
+        <div className="sm:hidden">
           <HeaderMobile />
         </div>
         <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
