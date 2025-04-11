@@ -6,6 +6,9 @@
  */
 
 import { ponder } from "ponder:registry";
+import { dao, daoToken, token } from "ponder:schema";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
 import {
   delegateChanged,
   delegatedVotesChanged,
@@ -15,24 +18,27 @@ import {
   tokenTransfer,
   voteCast,
 } from "@/lib/event-handlers";
-import viemClient from "@/lib/viemClient";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
-import { dao, daoToken, token } from "ponder:schema";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { ENSGovernorAbi, ENSTokenAbi } from "./abi";
+import { newGovernorClient } from "@/lib/governorClient";
 
 const daoId = DaoIdEnum.ENS;
 const network = NetworkEnum.ETHEREUM;
 const tokenAddress = CONTRACT_ADDRESSES[network][daoId]!.token;
 
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
+const governorClient = newGovernorClient(client, ENSGovernorAbi, tokenAddress);
+
 ponder.on("ENSToken:setup", async ({ context }) => {
-  const votingPeriod = await viemClient.getVotingPeriod(daoId, network);
-  const quorum = await viemClient.getQuorum(daoId, network);
-  const votingDelay = await viemClient.getVotingDelay(daoId, network);
-  const timelockDelay = await viemClient.getTimelockDelay(daoId, network);
-  const proposalThreshold = await viemClient.getProposalThreshold(
-    daoId,
-    network,
-  );
+  const votingPeriod = await governorClient.getVotingPeriod();
+  const quorum = await governorClient.getQuorum(daoId);
+  const votingDelay = await governorClient.getVotingDelay();
+  const timelockDelay = await governorClient.getTimelockDelay(daoId);
+  const proposalThreshold = await governorClient.getProposalThreshold();
 
   await context.db.insert(dao).values({
     id: daoId,
@@ -42,7 +48,7 @@ ponder.on("ENSToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const decimals = await viemClient.getDecimals(daoId, network);
+  const decimals = await governorClient.getDecimals(ENSTokenAbi, tokenAddress);
   await context.db.insert(token).values({
     id: tokenAddress,
     name: daoId,

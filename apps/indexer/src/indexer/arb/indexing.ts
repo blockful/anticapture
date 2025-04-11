@@ -1,18 +1,21 @@
 import { ponder } from "ponder:registry";
-import {
-  delegateChanged,
-  delegatedVotesChanged,
-  tokenTransfer,
-} from "@/lib/event-handlers";
-import viemClient from "@/lib/viemClient";
 import { dao, daoToken, token } from "ponder:schema";
+import { createPublicClient, http } from "viem";
+import { arbitrum } from "viem/chains";
+import { tokenTransfer } from "@/lib/event-handlers";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
-import { Address } from "viem";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { ARBTokenAbi } from "./abi";
+import { readContract } from "viem/actions";
 
 const daoId = DaoIdEnum.ARB;
 const network = NetworkEnum.ARBITRUM;
-const tokenAddress = viemClient.daoConfigParams[network][daoId]
-  ?.tokenAddress as Address;
+const tokenAddress = CONTRACT_ADDRESSES[network][daoId]!.token;
+
+const client = createPublicClient({
+  chain: arbitrum,
+  transport: http(),
+});
 
 ponder.on("ARBToken:setup", async ({ context }) => {
   await context.db.insert(dao).values({
@@ -23,7 +26,11 @@ ponder.on("ARBToken:setup", async ({ context }) => {
     timelockDelay: BigInt(0),
     proposalThreshold: BigInt(0),
   });
-  const decimals = await viemClient.getDecimals(daoId, network);
+  const decimals = await readContract(client, {
+    abi: ARBTokenAbi,
+    address: tokenAddress,
+    functionName: "decimals",
+  });
 
   await context.db.insert(token).values({
     id: tokenAddress,

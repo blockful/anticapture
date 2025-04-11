@@ -8,24 +8,30 @@ import {
   tokenTransfer,
   voteCast,
 } from "@/lib/event-handlers";
-import viemClient from "@/lib/viemClient";
 import { dao, daoToken, token } from "ponder:schema";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+import { UNIGovernorAbi, UNITokenAbi } from "./abi";
+import { newGovernorClient } from "@/lib/governorClient";
 
 const daoId = DaoIdEnum.UNI;
 const network = NetworkEnum.ETHEREUM;
 const tokenAddress = CONTRACT_ADDRESSES[network][daoId]!.token;
 
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
+const governorClient = newGovernorClient(client, UNIGovernorAbi, tokenAddress);
+
 ponder.on("UNIToken:setup", async ({ context }) => {
-  const votingPeriod = await viemClient.getVotingPeriod(DaoIdEnum.UNI, network);
-  const quorum = await viemClient.getQuorum(daoId, network);
-  const votingDelay = await viemClient.getVotingDelay(daoId, network);
-  const timelockDelay = await viemClient.getTimelockDelay(daoId, network);
-  const proposalThreshold = await viemClient.getProposalThreshold(
-    daoId,
-    network,
-  );
+  const votingPeriod = await governorClient.getVotingPeriod();
+  const quorum = await governorClient.getQuorum(daoId);
+  const votingDelay = await governorClient.getVotingDelay();
+  const timelockDelay = await governorClient.getTimelockDelay(daoId);
+  const proposalThreshold = await governorClient.getProposalThreshold();
 
   await context.db.insert(dao).values({
     id: daoId,
@@ -35,7 +41,7 @@ ponder.on("UNIToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const decimals = await viemClient.getDecimals(daoId, network);
+  const decimals = await governorClient.getDecimals(UNITokenAbi, tokenAddress);
   await context.db.insert(token).values({
     id: tokenAddress,
     name: daoId,
