@@ -42,8 +42,7 @@ export const ConnectWallet = () => {
                     type="button"
                     className="btn-connect-wallet"
                   >
-                    <WalletIcon />
-                    Connect
+                    <WalletIcon className="size-4" />
                   </button>
                 );
               }
@@ -84,7 +83,7 @@ export const ConnectWallet = () => {
                         )}
                       </div>
                     )}
-                    {chain.name}
+                    {/* {chain.name} */}
                   </button>
                   <button onClick={openAccountModal} type="button">
                     {account.displayName}
