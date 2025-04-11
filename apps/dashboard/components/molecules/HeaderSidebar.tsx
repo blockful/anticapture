@@ -35,7 +35,7 @@ export const HeaderSidebar = () => {
           href="/"
           className="flex w-full justify-center border-b border-b-lightDark p-3"
         >
-          <AnticaptureIcon />
+          <AnticaptureIcon className="size-9" />
         </Link>
         <div className="flex h-full w-full flex-col justify-between">
           <div className="flex h-full flex-col gap-1.5 p-1.5">
