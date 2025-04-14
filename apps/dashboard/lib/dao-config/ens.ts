@@ -2,8 +2,7 @@ import { DaoConfiguration } from "@/lib/dao-config/types";
 import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
 import ENSLogo from "@/public/logo/ENS.png";
 import { calculateMonthsBefore } from "@/lib/client/utils";
-import { SupportStageEnum } from "../enums/SupportStageEnum";
-import { MetricTypesEnum } from "../client/constants";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
