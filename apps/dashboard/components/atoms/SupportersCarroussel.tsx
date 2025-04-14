@@ -3,7 +3,7 @@
 import { useRef, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/client/utils";
-import { TooltipInfo } from "./TooltipInfo";
+import { TooltipInfo } from "@/components/atoms/TooltipInfo";
 
 interface Supporter {
   address: string;
@@ -29,7 +29,6 @@ export const SupportersCarroussel = ({
 
   // Set up the marquee-like animation
   useEffect(() => {
-
     const scrollElement = scrollContentRef.current;
     if (!scrollElement) return;
 
@@ -62,14 +61,14 @@ export const SupportersCarroussel = ({
   }, [supporters.length]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-b-lg bg-darkest p-4 sm:border-t sm:border-lightDark sm:bg-dark">
+    <div className="relative w-full overflow-hidden sm:rounded-b-lg bg-darkest p-4 sm:border-t border-b sm:border-b-0 border-lightDark sm:bg-dark">
       <div className="flex w-full gap-2">
-        <p className="   text-md text-gray-400 z-20">Latest Supporters</p>
+        <p className="text-md z-20 text-gray-400">Latest Supporters</p>
         <TooltipInfo text={"Latest 10 Supporters"} />
       </div>
 
       {/* Left shadow overlay */}
-      <div className="absolute left-4 top-0 z-10 h-full w-24 bg-gradient-to-r from-dark to-transparent"></div>
+      <div className="absolute left-3 top-0 z-10 h-full w-24 bg-gradient-to-r from-darkest to-transparent sm:from-dark" />
 
       <div className="relative rounded-lg pt-2">
         <div
@@ -103,7 +102,7 @@ export const SupportersCarroussel = ({
       </div>
 
       {/* Right shadow overlay */}
-      <div className="absolute right-4 top-0 z-10 h-full w-24 bg-gradient-to-l from-dark to-transparent"></div>
+      <div className="absolute right-4 top-0 z-10 h-full w-24 bg-gradient-to-l from-darkest to-transparent sm:from-dark" />
     </div>
   );
 };
