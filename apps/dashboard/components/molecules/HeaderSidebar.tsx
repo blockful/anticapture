@@ -1,15 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { Banana, Star, BarChart4 } from "lucide-react";
 import {
   AnticaptureIcon,
   ButtonHeaderSidebar,
   ConnectWallet,
 } from "@/components/atoms";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { Banana, Star, BarChart4 } from "lucide-react";
-import Link from "next/link";
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
 
 export const HeaderSidebar = () => {
   const router = useRouter();
@@ -40,7 +40,7 @@ export const HeaderSidebar = () => {
   );
 
   return (
-    <header className="fixed left-0 top-0 z-50 hidden h-screen w-[72px] border-r border-lightDark sm:block">
+    <header className="fixed left-0 top-0 z-50 hidden h-screen w-[72px] border-r border-lightDark bg-darkest sm:block">
       <div className="flex h-full w-full flex-col items-start">
         <Link
           href="/"
