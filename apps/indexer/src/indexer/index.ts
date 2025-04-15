@@ -4,7 +4,7 @@ import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { NetworkEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { ArbIndexer } from "@/indexer/arb/indexing";
+import { ArbIndexer } from "@/indexer/arb";
 // import { ENSIndexer } from "@/indexer/ens/indexing";
 // import { ENSGovernor } from "@/indexer/ens/governor";
 // import { UNIIndexer } from "@/indexer/uni/indexing";
@@ -44,7 +44,7 @@ switch (network) {
     break;
   }
   case NetworkEnum.ARBITRUM: {
-    await ArbIndexer(client, tokenAddress);
+    ArbIndexer(client, tokenAddress);
     break;
   }
   default:
