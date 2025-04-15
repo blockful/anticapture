@@ -88,13 +88,20 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   }, [daoTokenPriceHistoricalData]);
   useEffect(() => {
     if (
-      delegatedSupply.data?.currentDelegatedSupply === undefined ||
-      activeSupply.data?.activeSupply === undefined ||
-      averageTurnout.data?.currentAverageTurnout === undefined ||
-      daoTopTokenHolderExcludingTheDao?.balance === undefined ||
-      vetoCouncilVotingPower === undefined
+      delegatedSupply.data?.currentDelegatedSupply === undefined &&
+      activeSupply.data?.activeSupply === "0" &&
+      averageTurnout.data?.currentAverageTurnout === null &&
+      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+      vetoCouncilVotingPower === null
     ) {
       setMocked(true);
+    } else {
+      console.log(delegatedSupply.data?.currentDelegatedSupply);
+      console.log(activeSupply.data?.activeSupply);
+      console.log(averageTurnout.data?.currentAverageTurnout);
+      console.log(daoTopTokenHolderExcludingTheDao?.balance);
+      console.log(vetoCouncilVotingPower);
+      setMocked(false);
     }
   }, [
     delegatedSupply,
