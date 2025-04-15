@@ -5,10 +5,10 @@ import { getChain } from "@/lib/utils";
 import { NetworkEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { ArbIndexer } from "@/indexer/arb";
-// import { ENSIndexer } from "@/indexer/ens/indexing";
-// import { ENSGovernor } from "@/indexer/ens/governor";
-// import { UNIIndexer } from "@/indexer/uni/indexing";
-// import { UNIGovernor } from "@/indexer/uni/governor";
+import { EnsIndexer } from "@/indexer/ens";
+import { ENSGovernor } from "@/indexer/ens/governor";
+import { UniIndexer } from "@/indexer/uni";
+import { UNIGovernor } from "@/indexer/uni/governor";
 
 const {
   NETWORK: network,
@@ -37,10 +37,10 @@ const client = createPublicClient({
 
 switch (network) {
   case NetworkEnum.MAINNET: {
-    // const ensGovernor = new ENSGovernor(client, tokenAddress);
-    // new ENSIndexer(ensGovernor, tokenAddress);
-    // const uniGovernor = new UNIGovernor(client, tokenAddress);
-    // new UNIIndexer(uniGovernor, tokenAddress);
+    const ensGovernor = new ENSGovernor(client, tokenAddress);
+    EnsIndexer(client, tokenAddress, ensGovernor);
+    const uniGovernor = new UNIGovernor(client, tokenAddress);
+    UniIndexer(client, tokenAddress, uniGovernor);
     break;
   }
   case NetworkEnum.ARBITRUM: {
