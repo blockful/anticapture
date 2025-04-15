@@ -1,21 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { SUPPORTED_DAO_NAMES, DaoIdEnum } from "@/lib/types/daos";
 import { AnticaptureIcon, ConnectWallet } from "@/components/atoms";
 import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
 
 export const HeaderMobile = () => {
-  const pathname = usePathname();
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [showHeader, setShowHeader] = useState<boolean>(true);
-
-  const isDefault = pathname === "/";
-  const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
   const headerHeight = 57;
 
@@ -59,17 +52,14 @@ export const HeaderMobile = () => {
       </header>
 
       <div style={{ height: headerHeight }} />
-
-      {isValidDao && (
-        <div
-          className={cn(
-            "sticky top-0 z-30 w-full bg-darkest transition-all duration-300",
-            showHeader && "top-[57px]",
-          )}
-        >
-          <HeaderNavMobile />
-        </div>
-      )}
+      <div
+        className={cn(
+          "sticky top-0 z-30 w-full bg-darkest transition-all duration-300",
+          showHeader && "top-[57px]",
+        )}
+      >
+        <HeaderNavMobile />
+      </div>
     </>
   );
 };

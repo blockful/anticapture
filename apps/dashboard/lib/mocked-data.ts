@@ -3,7 +3,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import {
   DaoMetricsDayBucket,
   TokenHistoricalDataMetrics,
-} from "@/lib/dao-constants/types";
+} from "@/lib/dao-config/types";
 
 export type DashboardDao = {
   dao: string;

@@ -5,7 +5,7 @@ import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
-} from "@/lib/dao-constants/types";
+} from "@/lib/dao-config/types";
 import {
   DAYS_PER_MONTH,
   SECONDS_PER_DAY,

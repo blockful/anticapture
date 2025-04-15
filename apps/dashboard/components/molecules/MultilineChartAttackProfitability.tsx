@@ -15,7 +15,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { MultilineChartDataSetPoint } from "@/lib/dao-constants/types";
+import { MultilineChartDataSetPoint } from "@/lib/dao-config/types";
 import { useDaoDataContext } from "@/contexts";
 import {
   useDaoTokenHistoricalData,

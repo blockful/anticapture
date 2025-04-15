@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DaoIdEnum, SUPPORTED_DAO_NAMES } from "@/lib/types/daos";
+import { DaoIdEnum, ALL_DAOS } from "@/lib/types/daos";
 import {
   ActivityIcon,
   ArrowLeftRight,
@@ -13,72 +13,85 @@ import {
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
-import daoConstantsByDaoId from "@/lib/dao-constants";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
+  const isValidDao = daoId && ALL_DAOS.includes(daoId as DaoIdEnum);
 
-  const daoConstants = daoConstantsByDaoId[
-    daoId as DaoIdEnum
-  ] as DaoConstantsFullySupported;
+  if (!isValidDao) {
+    return (
+      <BaseHeaderLayoutSidebar>
+        {!isDefault && (
+          <div className="flex flex-col items-center space-x-2">
+            <h1 className="text-sm font-semibold text-white">404 Not Found</h1>
+            <h1 className="text-sm font-semibold text-white">
+              Please back to Home Page
+            </h1>
+          </div>
+        )}
+      </BaseHeaderLayoutSidebar>
+    );
+  }
+
+  const daoConfig = daoConfigByDaoId[daoId as DaoIdEnum];
+
+  if (daoConfig.disableDaoPage) {
+    return null;
+  }
 
   return (
     <BaseHeaderLayoutSidebar>
-      {isValidDao ? (
-        <div className="flex w-full flex-col">
-          <HeaderDAOSidebarDropdown />
-          <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
+      <div className="flex w-full flex-col">
+        <HeaderDAOSidebarDropdown />
+        <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
+          {daoConfig.showSupport && (
+            <ButtonHeaderDAOSidebar
+              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
+              icon={ActivityIcon}
+              label={SECTIONS_CONSTANTS.showSupport.title}
+            />
+          )}
+          {daoConfig.daoInfo && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
               icon={PieChartIcon}
               label={SECTIONS_CONSTANTS.daoInfo.title}
             />
+          )}
+          {daoConfig.attackProfitability && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
               icon={CrossHairIcon}
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
-            {!!(
-              daoConstantsByDaoId[
-                daoId as DaoIdEnum
-              ] as DaoConstantsFullySupported
-            ).governanceImplementation && (
-              <ButtonHeaderDAOSidebar
-                anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
-                icon={Lightbulb}
-                label={SECTIONS_CONSTANTS.governanceImplementation.title}
-              />
-            )}
+          )}
+          {daoConfig.governanceImplementation && (
+            <ButtonHeaderDAOSidebar
+              anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+              icon={Lightbulb}
+              label={SECTIONS_CONSTANTS.governanceImplementation.title}
+            />
+          )}
+          {daoConfig.tokenDistribution && (
             <ButtonHeaderDAOSidebar
               anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               icon={ArrowLeftRight}
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
-            {!daoConstants.removeGovernanceActivitySection && (
-              <ButtonHeaderDAOSidebar
-                anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-                icon={ActivityIcon}
-                label={SECTIONS_CONSTANTS.governanceActivity.title}
-              />
-            )}
-          </div>
+          )}
+          {daoConfig.governanceActivity && (
+            <ButtonHeaderDAOSidebar
+              anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
+              icon={ActivityIcon}
+              label={SECTIONS_CONSTANTS.governanceActivity.title}
+            />
+          )}
         </div>
-      ) : (
-        <> </>
-      )}
-      {!isDefault && !isValidDao && (
-        <div className="flex flex-col items-center space-x-2">
-          <h1 className="text-sm font-semibold text-white">404 Not Found</h1>
-          <h1 className="text-sm font-semibold text-white">
-            Please back to Home Page
-          </h1>
-        </div>
-      )}
+      </div>
     </BaseHeaderLayoutSidebar>
   );
 };

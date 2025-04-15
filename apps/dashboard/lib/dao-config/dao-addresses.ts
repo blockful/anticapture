@@ -16,6 +16,11 @@ interface DaoAddresses {
     OptimismTokenDistributor: string;
     OptimismUniv3Uni: string;
   };
+  [DaoIdEnum.ARBITRUM]: {
+    ArbitrumTimelock: string;
+    ArbitrumTokenDistributor: string;
+    ArbitrumDaoWallet: string;
+  };
 }
 
 export const DAO_ADDRESSES: DaoAddresses = {
@@ -34,6 +39,11 @@ export const DAO_ADDRESSES: DaoAddresses = {
     OptimismTokenDistributor: "",
     OptimismUniv3Uni: "",
   },
+  [DaoIdEnum.ARBITRUM]: {
+    ArbitrumDaoWallet: "",
+    ArbitrumTimelock: "",
+    ArbitrumTokenDistributor: "",
+  },
 };
 
 export const DAO_VETO_COUNCIL_ADDRESSES: Record<DaoIdEnum, string | undefined> =
@@ -41,4 +51,5 @@ export const DAO_VETO_COUNCIL_ADDRESSES: Record<DaoIdEnum, string | undefined> =
     [DaoIdEnum.UNISWAP]: undefined,
     [DaoIdEnum.ENS]: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
     [DaoIdEnum.OPTIMISM]: undefined,
+    [DaoIdEnum.ARBITRUM]: undefined,
   };
