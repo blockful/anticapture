@@ -1,0 +1,106 @@
+import { ponder } from "ponder:registry";
+import { Client, Address } from "viem";
+
+import {
+  delegateChanged,
+  delegatedVotesChanged,
+  proposalCanceled,
+  proposalCreated,
+  proposalExecuted,
+  tokenTransfer,
+  voteCast,
+} from "@/lib/event-handlers";
+import { DaoIdEnum } from "@/lib/enums";
+import { dao, daoToken, token } from "ponder:schema";
+import { Governor } from "@/interfaces/governor";
+import { readContract } from "viem/actions";
+import { UNITokenAbi } from "./abi";
+
+export function UniIndexer(
+  client: Client,
+  tokenAddress: Address,
+  governor: Governor,
+) {
+  const daoId = DaoIdEnum.UNI;
+
+  ponder.on("UNIToken:setup", async ({ context }) => {
+    const votingPeriod = await governor.getVotingPeriod();
+    const quorum = await governor.getQuorum();
+    const votingDelay = await governor.getVotingDelay();
+    const timelockDelay = await governor.getTimelockDelay();
+    const proposalThreshold = await governor.getProposalThreshold();
+
+    await context.db.insert(dao).values({
+      id: daoId,
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
+    });
+
+    const decimals = await readContract(client, {
+      abi: UNITokenAbi,
+      functionName: "decimals",
+      address: tokenAddress,
+    });
+
+    await context.db.insert(token).values({
+      id: tokenAddress,
+      name: daoId,
+      decimals,
+      totalSupply: BigInt(0),
+      delegatedSupply: BigInt(0),
+      cexSupply: BigInt(0),
+      dexSupply: BigInt(0),
+      lendingSupply: BigInt(0),
+      circulatingSupply: BigInt(0),
+      treasury: BigInt(0),
+    });
+    await context.db.insert(daoToken).values({
+      id: daoId + "-" + tokenAddress,
+      daoId,
+      tokenId: tokenAddress,
+    });
+  });
+
+  ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
+    await delegateChanged(event, context, daoId);
+  });
+
+  ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
+    await delegatedVotesChanged(event, context, daoId);
+  });
+
+  ponder.on("UNIToken:Transfer", async ({ event, context }) => {
+    await tokenTransfer(event, context, daoId, tokenAddress);
+  });
+
+  ponder.on("UNIGovernor:VoteCast", async ({ event, context }) => {
+    await voteCast(event, context, daoId);
+  });
+
+  /**
+   * Handler for ProposalCreated event of UNIGovernor contract
+   * Creates a new ProposalsOnchain record and updates the proposer's proposal count
+   */
+  ponder.on("UNIGovernor:ProposalCreated", async ({ event, context }) => {
+    await proposalCreated(event, context, daoId);
+  });
+
+  /**
+   * Handler for ProposalCanceled event of UNIGovernor contract
+   * Updates the status of a proposal to CANCELED
+   */
+  ponder.on("UNIGovernor:ProposalCanceled", async ({ event, context }) => {
+    await proposalCanceled(event, context, daoId);
+  });
+
+  /**
+   * Handler for ProposalExecuted event of UNIGovernor contract
+   * Updates the status of a proposal to EXECUTED
+   */
+  ponder.on("UNIGovernor:ProposalExecuted", async ({ event, context }) => {
+    await proposalExecuted(event, context, daoId);
+  });
+}
