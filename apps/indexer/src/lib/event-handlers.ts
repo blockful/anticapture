@@ -21,8 +21,7 @@ import {
   TREASURY_ADDRESSES,
 } from "./constants";
 import { Address, zeroAddress } from "viem";
-import viemClient from "./viemClient";
-import { DaoIdEnum, NetworkEnum } from "./enums";
+import { DaoIdEnum } from "./enums";
 import {
   DaoDelegateChangedEvent,
   DaoDelegateVotesChangedEvent,
@@ -37,7 +36,6 @@ export const delegateChanged = async (
   event: DaoDelegateChangedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
 ) => {
   // Inserting accounts if didn't exist
   await context.db
@@ -101,7 +99,6 @@ export const delegatedVotesChanged = async (
   event: DaoDelegateVotesChangedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
 ) => {
   //Inserting delegate account if didn't exist
   await context.db
@@ -494,7 +491,6 @@ export const proposalCreated = async (
   event: DaoProposalCreatedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -548,7 +544,6 @@ export const proposalCanceled = async (
   event: DaoProposalCanceledEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -569,7 +564,6 @@ export const proposalExecuted = async (
   event: DaoProposalExecutedEvent,
   context: Context,
   daoId: string,
-  network: NetworkEnum,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
