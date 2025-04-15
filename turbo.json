@@ -1,18 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "NODE_ENV",
-    "DATABASE_URL",
-    "PONDER_RPC_URL_1",
-    "PONDER_RPC_URL_ARB_1",
-    "PONDER_RPC_URL_ETH_1",
-    "DUNE_API_URL",
-    "DUNE_API_KEY",
-    "START_BLOCK",
-    "STATUS",
-    "REDIS_URL",
-    "COINGECKO_API_KEY"
-  ],
   "globalDependencies": [".env", "test.ts", "./migrations"],
   "tasks": {
     "build": {
