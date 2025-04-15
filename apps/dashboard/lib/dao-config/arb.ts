@@ -9,4 +9,8 @@ export const ARB: DaoConfiguration = {
   supportStage: SupportStageEnum.ELECTION,
   tokenDistribution: true,
   showSupport: true,
+  attackProfitability: {
+    riskLevel: undefined,
+    blurChart: true,
+  },
 };

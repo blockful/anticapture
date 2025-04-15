@@ -30,6 +30,7 @@ import {
   timestampToReadableDate,
 } from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
+import { useState } from "react";
 
 interface MultilineChartExtractableValueProps {
   days: string;
@@ -42,6 +43,7 @@ export const MultilineChartExtractableValue = ({
 }: MultilineChartExtractableValueProps) => {
   const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
+  const [mocked, setMocked] = useState(false);
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
     days,
@@ -77,6 +79,9 @@ export const MultilineChartExtractableValue = ({
   if (delegatedData) {
     delegatedSupplyChart = delegatedData[MetricTypesEnum.DELEGATED_SUPPLY];
   }
+
+  console.log(treasuryData);
+  console.log(delegatedData);
 
   const quorumValue = daoData?.quorum
     ? Number(daoData.quorum) / 10 ** 18
@@ -124,6 +129,7 @@ export const MultilineChartExtractableValue = ({
         )
       : [],
   };
+  if(datasets)
 
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>

@@ -15,17 +15,20 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { TokenDistributionCustomTooltip } from "@/components/atoms";
+import { ClockwiseIcon } from "../atoms/icons/ClockwiseIcon";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;
   chartConfig: Record<string, { label: string; color: string }>;
   filterData?: string;
+  mocked?: boolean;
 }
 
 export const MultilineChartTokenDistribution = ({
   datasets,
   chartConfig,
   filterData,
+  mocked = false,
 }: MultilineChartTokenDistributionProps) => {
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
@@ -62,7 +65,15 @@ export const MultilineChartTokenDistribution = ({
   );
 
   return (
-    <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
+    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
+      {mocked && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-full bg-dark px-4 py-2 text-foreground text-sm">
+            <ClockwiseIcon className="h-5 w-5 text-foreground" />
+            RESEARCH PENDING
+          </div>
+        </div>
+      )}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>
           <CartesianGrid vertical={false} stroke="#27272a" />

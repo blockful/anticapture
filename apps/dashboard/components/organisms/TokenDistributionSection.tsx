@@ -13,6 +13,7 @@ import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { mockedTokenMultineDatasets } from "@/lib/mocked-token-dist-datasets";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -48,7 +49,6 @@ export const TokenDistributionSection = () => {
     dexSupply: dexSupplyChart,
     lendingSupply: lendingSupplyChart,
   };
-
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
@@ -63,10 +63,18 @@ export const TokenDistributionSection = () => {
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
       className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
-      <MultilineChartTokenDistribution
-        datasets={datasets}
-        chartConfig={chartConfig}
-      />
+      {Object.values(datasets).some((value) => value!.length > 0) ? (
+        <MultilineChartTokenDistribution
+          datasets={datasets}
+          chartConfig={chartConfig}
+        />
+      ) : (
+        <MultilineChartTokenDistribution
+          datasets={mockedTokenMultineDatasets}
+          chartConfig={chartConfig}
+          mocked={true}
+        />
+      )}
       <TokenDistributionTable />
     </TheSectionLayout>
   );
