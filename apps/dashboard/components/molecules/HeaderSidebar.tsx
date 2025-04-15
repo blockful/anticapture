@@ -25,16 +25,6 @@ export const HeaderSidebar = () => {
           router.push("/");
         },
       },
-      {
-        anchorId: SECTIONS_CONSTANTS.panel.anchorId,
-        label: "Other",
-        icon: Star,
-      },
-      {
-        anchorId: SECTIONS_CONSTANTS.panel.anchorId,
-        label: "Other",
-        icon: Banana,
-      },
     ],
     [],
   );
