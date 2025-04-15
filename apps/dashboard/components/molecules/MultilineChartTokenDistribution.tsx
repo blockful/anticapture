@@ -15,7 +15,7 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { TokenDistributionCustomTooltip } from "@/components/atoms";
-import { ClockwiseIcon } from "../atoms/icons/ClockwiseIcon";
+import { ClockwiseIcon } from "@/components/atoms/icons/ClockwiseIcon";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;

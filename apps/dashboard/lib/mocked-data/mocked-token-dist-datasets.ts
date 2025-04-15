@@ -1,4 +1,4 @@
-import { DaoMetricsDayBucket } from "../dao-config/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 
 export const mockedTokenMultineDatasets: Record<string, DaoMetricsDayBucket[]> =
   {

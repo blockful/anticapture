@@ -32,7 +32,7 @@ import {
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
-import { ClockwiseIcon } from "../atoms/icons/ClockwiseIcon";
+import { ClockwiseIcon } from "@/components/atoms/icons/ClockwiseIcon";
 import { every } from "lodash";
 
 interface MultilineChartExtractableValueProps {

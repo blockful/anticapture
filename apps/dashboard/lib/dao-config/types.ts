@@ -1,9 +1,9 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { MetricTypesEnum } from "../client/constants";
+import { MetricTypesEnum } from "@/lib/client/constants";
 import { RiskLevel } from "@/lib/enums";
 import { StaticImageData } from "next/image";
-import { SupportStageEnum } from "../enums/SupportStageEnum";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 // Existing types
 export enum ChainNameEnum {

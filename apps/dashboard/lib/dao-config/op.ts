@@ -1,7 +1,6 @@
-import { DaoIdEnum } from "../types/daos";
 import OPLogo from "@/public/logo/Optimism.png";
-import { SupportStageEnum } from "../enums/SupportStageEnum";
-import { DaoConfiguration } from "./types";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import { DaoConfiguration } from "@/lib/dao-config/types";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",

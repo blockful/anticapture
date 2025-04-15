@@ -29,7 +29,6 @@ import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { mockedAttackCostBarData } from "@/lib/mocked-data/mocked-attack-cost-bar-data";
-import { ClockwiseIcon } from "../atoms/icons/ClockwiseIcon";
 
 interface StackedValue {
   value: number;
