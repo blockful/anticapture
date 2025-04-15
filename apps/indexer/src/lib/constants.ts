@@ -1,11 +1,22 @@
-import { zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 import { DaoIdEnum, NetworkEnum } from "./enums";
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;
 export const MILISECONDS_IN_DAY = SECONDS_IN_DAY * 1000;
 export const DAYS_IN_YEAR = 365;
 
-export const CONTRACT_ADDRESSES = {
+export const CONTRACT_ADDRESSES: Record<
+  NetworkEnum,
+  Partial<
+    Record<
+      DaoIdEnum,
+      {
+        token: Address;
+        governor?: Address;
+      }
+    >
+  >
+> = {
   [NetworkEnum.MAINNET]: {
     [DaoIdEnum.UNI]: {
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -14,9 +25,6 @@ export const CONTRACT_ADDRESSES = {
     [DaoIdEnum.ENS]: {
       token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-    },
-    [DaoIdEnum.ARB]: {
-      token: "0x912CE59144191C1204E64559FE8253a0e49E6548",
     },
   },
   [NetworkEnum.ARBITRUM]: {
