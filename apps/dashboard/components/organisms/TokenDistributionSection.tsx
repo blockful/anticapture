@@ -42,7 +42,7 @@ export const TokenDistributionSection = () => {
     setDays,
   } = useTokenDistributionContext();
 
-  const datasets: Record<string, DaoMetricsDayBucket[]> = {
+  const datasets: Record<string, DaoMetricsDayBucket[] | undefined> = {
     delegatedSupply: delegatedSupplyChart,
     cexSupply: cexSupplyChart,
     dexSupply: dexSupplyChart,

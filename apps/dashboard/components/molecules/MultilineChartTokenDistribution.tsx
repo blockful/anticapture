@@ -17,7 +17,7 @@ import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { TokenDistributionCustomTooltip } from "@/components/atoms";
 
 interface MultilineChartTokenDistributionProps {
-  datasets: Record<string, DaoMetricsDayBucket[]>;
+  datasets: Record<string, DaoMetricsDayBucket[] | undefined>;
   chartConfig: Record<string, { label: string; color: string }>;
   filterData?: string;
 }
@@ -29,15 +29,15 @@ export const MultilineChartTokenDistribution = ({
 }: MultilineChartTokenDistributionProps) => {
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
-      dataset.map((item) => item.date),
+      dataset?.map((item) => item.date),
     ),
   );
 
   const fillMissingData = (
-    dataset: DaoMetricsDayBucket[],
-    date: string,
+    dataset: DaoMetricsDayBucket[] | undefined,
+    date: string | undefined,
   ): number | null => {
-    const entry = dataset.find((item) => item.date === date);
+    const entry = dataset?.find((item) => item.date === date);
     return entry ? Number(entry.high) : null;
   };
 
@@ -45,7 +45,6 @@ export const MultilineChartTokenDistribution = ({
 
   const chartData = Array.from(allDates).map((date) => {
     const dataPoint: Record<string, any> = { date };
-
     Object.keys(datasets).forEach((key) => {
       const value = fillMissingData(
         datasets[key as keyof typeof datasets],
