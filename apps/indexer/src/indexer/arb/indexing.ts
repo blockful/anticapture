@@ -1,9 +1,5 @@
 import { ponder } from "ponder:registry";
-import {
-  delegateChanged,
-  delegatedVotesChanged,
-  tokenTransfer,
-} from "@/lib/event-handlers";
+import { tokenTransfer } from "@/lib/event-handlers";
 import viemClient from "@/lib/viemClient";
 import { dao, daoToken, token } from "ponder:schema";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";

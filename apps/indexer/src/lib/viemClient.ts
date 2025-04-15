@@ -90,7 +90,7 @@ const viemClient = () => {
 
   const getQuorum = async (
     daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
-    network: NetworkEnum
+    network: NetworkEnum,
   ) => {
     const governorContract = getContract({
       client: clients[network],
@@ -108,7 +108,7 @@ const viemClient = () => {
 
   const getProposalThreshold = async (
     daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
-    network: NetworkEnum
+    network: NetworkEnum,
   ) => {
     const governorContract = getContract({
       client: clients[network],
@@ -120,7 +120,7 @@ const viemClient = () => {
 
   const getVotingDelay = async (
     daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
-    network: NetworkEnum
+    network: NetworkEnum,
   ) => {
     const governorContract = getContract({
       client: clients[network],
@@ -132,7 +132,7 @@ const viemClient = () => {
 
   const getVotingPeriod = async (
     daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
-    network: NetworkEnum
+    network: NetworkEnum,
   ) => {
     const governorContract = getContract({
       client: clients[network],
@@ -144,7 +144,7 @@ const viemClient = () => {
 
   const getTimelockDelay = async (
     daoId: DaoIdEnum.UNI | DaoIdEnum.ENS,
-    network: NetworkEnum
+    network: NetworkEnum,
   ): Promise<bigint> => {
     const governorContract = getContract({
       client: clients[network],
