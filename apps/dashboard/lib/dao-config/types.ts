@@ -90,7 +90,6 @@ export interface DaoInfoConfig {
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
   supportsLiquidTreasuryCall?: boolean;
-  blurChart?: boolean;
 }
 export interface GovernanceImplementationConfig
   extends GovernanceImplementation {}

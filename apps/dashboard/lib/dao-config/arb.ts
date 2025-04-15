@@ -11,6 +11,5 @@ export const ARB: DaoConfiguration = {
   showSupport: true,
   attackProfitability: {
     riskLevel: undefined,
-    blurChart: true,
   },
 };

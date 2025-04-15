@@ -13,7 +13,7 @@ import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { mockedTokenMultineDatasets } from "@/lib/mocked-token-dist-datasets";
+import { mockedTokenMultineDatasets } from "@/lib/mocked-data/mocked-token-dist-datasets";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {

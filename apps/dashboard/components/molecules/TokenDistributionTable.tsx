@@ -3,7 +3,7 @@
 import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { chartMetrics, TokenDistribution } from "@/lib/mocked-data";
+import { chartMetrics, TokenDistribution } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowState,

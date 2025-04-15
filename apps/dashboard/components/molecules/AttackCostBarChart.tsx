@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -28,6 +28,8 @@ import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { mockedAttackCostBarData } from "@/lib/mocked-data/mocked-attack-cost-bar-data";
+import { ClockwiseIcon } from "../atoms/icons/ClockwiseIcon";
 
 interface StackedValue {
   value: number;
@@ -58,6 +60,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.ONE_YEAR;
+  const [mocked, setMocked] = useState(false);
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -84,7 +87,23 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     const prices = daoTokenPriceHistoricalData.prices;
     return prices.length > 0 ? prices[prices.length - 1][1] : 0;
   }, [daoTokenPriceHistoricalData]);
-
+  useEffect(() => {
+    if (
+      delegatedSupply.data?.currentDelegatedSupply === undefined ||
+      activeSupply.data?.activeSupply === undefined ||
+      averageTurnout.data?.currentAverageTurnout === undefined ||
+      daoTopTokenHolderExcludingTheDao?.balance === undefined ||
+      vetoCouncilVotingPower === undefined
+    ) {
+      setMocked(true);
+    }
+  }, [
+    delegatedSupply,
+    activeSupply,
+    averageTurnout,
+    daoTopTokenHolderExcludingTheDao,
+    vetoCouncilVotingPower,
+  ]);
   const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
@@ -101,77 +120,86 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       </div>
     );
   }
-  const chartData: ChartDataItem[] = [
-    {
-      id: "liquidTreasury",
-      name: "Liquid Treasury",
-      type: BarChartEnum.REGULAR,
-      value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
-      customColor: "#EC762EFF",
-      displayValue:
-        Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
-          ? undefined
-          : "<$10,000",
-    },
-    {
-      id: "delegatedSupply",
-      name: "Delegated Supply",
-      type: BarChartEnum.STACKED,
-      stackedValues: [
-        {
-          value:
-            Number(
-              formatEther(
-                BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
-              ),
-            ) * lastPrice,
-          label: "Other Delegations",
-          color: "#EC762ECC",
-        },
-        {
-          value: vetoCouncilVotingPower
-            ? Number(formatEther(BigInt(vetoCouncilVotingPower))) * lastPrice
-            : 0,
-          label: "Veto Council",
-          color: "#EC762E9F",
-        },
-      ],
-    },
-    {
-      id: "activeSupply",
-      name: "Active Supply",
-      type: BarChartEnum.REGULAR,
-      customColor: "#EC762EE6",
-      value:
-        Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
-        lastPrice,
-    },
-    {
-      id: "averageTurnout",
-      name: "Average Turnout",
-      type: BarChartEnum.REGULAR,
-      customColor: "#EC762EB3",
-      value:
-        Number(
-          formatEther(
-            BigInt(averageTurnout.data?.currentAverageTurnout || "0"),
-          ),
-        ) * lastPrice,
-    },
-    {
-      id: "topTokenHolder",
-      name: "Top Holder",
-      type: BarChartEnum.REGULAR,
-      customColor: "#EC762E80",
-      value:
-        Number(
-          formatEther(BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
-        ) * lastPrice,
-    },
-  ];
-
+  let chartData: ChartDataItem[] = [];
+  if (!mocked) {
+    chartData = [
+      {
+        id: "liquidTreasury",
+        name: "Liquid Treasury",
+        type: BarChartEnum.REGULAR,
+        value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+        customColor: "#EC762EFF",
+        displayValue:
+          Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+            ? undefined
+            : "<$10,000",
+      },
+      {
+        id: "delegatedSupply",
+        name: "Delegated Supply",
+        type: BarChartEnum.STACKED,
+        stackedValues: [
+          {
+            value:
+              Number(
+                formatEther(
+                  BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+                ),
+              ) * lastPrice,
+            label: "Other Delegations",
+            color: "#EC762ECC",
+          },
+          {
+            value: vetoCouncilVotingPower
+              ? Number(formatEther(BigInt(vetoCouncilVotingPower))) * lastPrice
+              : 0,
+            label: "Veto Council",
+            color: "#EC762E9F",
+          },
+        ],
+      },
+      {
+        id: "activeSupply",
+        name: "Active Supply",
+        type: BarChartEnum.REGULAR,
+        customColor: "#EC762EE6",
+        value:
+          Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
+          lastPrice,
+      },
+      {
+        id: "averageTurnout",
+        name: "Average Turnout",
+        type: BarChartEnum.REGULAR,
+        customColor: "#EC762EB3",
+        value:
+          Number(
+            formatEther(
+              BigInt(averageTurnout.data?.currentAverageTurnout || "0"),
+            ),
+          ) * lastPrice,
+      },
+      {
+        id: "topTokenHolder",
+        name: "Top Holder",
+        type: BarChartEnum.REGULAR,
+        customColor: "#EC762E80",
+        value:
+          Number(
+            formatEther(
+              BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0"),
+            ),
+          ) * lastPrice,
+      },
+    ];
+  } else {
+    chartData = mockedAttackCostBarData as ChartDataItem[];
+  }
   return (
-    <div className={`w-full ${className || ""}`}>
+    <div className={`relative w-full ${className || ""}`}>
+      {mocked && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]"></div>
+      )}
       <ResponsiveContainer width="100%" height={280}>
         <BarChart
           data={chartData}

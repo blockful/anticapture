@@ -13,7 +13,7 @@ import { ExtractableValueCustomTooltip } from "@/components/atoms";
 
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useParams } from "next/navigation";
-import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data";
+import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data/mocked-data";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-config/types";
@@ -30,7 +30,10 @@ import {
   timestampToReadableDate,
 } from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
+import { ClockwiseIcon } from "../atoms/icons/ClockwiseIcon";
+import { every } from "lodash";
 
 interface MultilineChartExtractableValueProps {
   days: string;
@@ -51,37 +54,32 @@ export const MultilineChartExtractableValue = ({
   const { data: daoTokenPriceHistoricalData = { prices: [] } } =
     useDaoTokenHistoricalData(daoId.toUpperCase() as DaoIdEnum);
 
-  const { data: treasuryData } = useTimeSeriesData(
+  const { data: timeSeriesData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
-    [MetricTypesEnum.TREASURY],
+    [MetricTypesEnum.TREASURY, MetricTypesEnum.DELEGATED_SUPPLY],
     parseInt(days.split("d")[0]),
     {
       refreshInterval: 300000,
       revalidateOnFocus: false,
     },
   );
-
-  const { data: delegatedData } = useTimeSeriesData(
-    daoId.toUpperCase() as DaoIdEnum,
-    [MetricTypesEnum.DELEGATED_SUPPLY],
-    parseInt(days.split("d")[0]),
-    {
-      refreshInterval: 300000,
-      revalidateOnFocus: false,
-    },
-  );
+  useEffect(() => {
+    if (
+      timeSeriesData !== undefined &&
+      Object.values(timeSeriesData).every((data) => data.length === 0)
+    ) {
+      setMocked(true);
+    } else {
+      setMocked(false);
+    }
+  }, [timeSeriesData]);
 
   let delegatedSupplyChart;
   let treasurySupplyChart;
-  if (treasuryData) {
-    treasurySupplyChart = treasuryData[MetricTypesEnum.TREASURY];
+  if (timeSeriesData) {
+    treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
+    delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
   }
-  if (delegatedData) {
-    delegatedSupplyChart = delegatedData[MetricTypesEnum.DELEGATED_SUPPLY];
-  }
-
-  console.log(treasuryData);
-  console.log(delegatedData);
 
   const quorumValue = daoData?.quorum
     ? Number(daoData.quorum) / 10 ** 18
@@ -105,31 +103,34 @@ export const MultilineChartExtractableValue = ({
     priceHistoryByTimeInterval[days as TimeInterval] ??
     priceHistoryByTimeInterval.full ??
     priceHistoryByTimeInterval;
-
-  const datasets: Record<string, MultilineChartDataSetPoint[]> = {
-    treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
-      treasuryAssetNonDAOToken,
-      "treasuryNonDAO",
-    ),
-    all: normalizeDatasetAllTreasury(
-      selectedPriceHistory,
-      "all",
-      treasuryAssetNonDAOToken,
-      treasurySupplyChart,
-    ),
-    quorum: quorumValue
-      ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue)
-      : [],
-    delegated: delegatedSupplyChart
-      ? normalizeDataset(
-          selectedPriceHistory,
-          "delegated",
-          null,
-          delegatedSupplyChart,
-        )
-      : [],
-  };
-  if(datasets)
+  let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
+  if (!mocked) {
+    datasets = {
+      treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
+        treasuryAssetNonDAOToken,
+        "treasuryNonDAO",
+      ),
+      all: normalizeDatasetAllTreasury(
+        selectedPriceHistory,
+        "all",
+        treasuryAssetNonDAOToken,
+        treasurySupplyChart,
+      ),
+      quorum: quorumValue
+        ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue)
+        : [],
+      delegated: delegatedSupplyChart
+        ? normalizeDataset(
+            selectedPriceHistory,
+            "delegated",
+            null,
+            delegatedSupplyChart,
+          )
+        : [],
+    };
+  } else {
+    datasets = mockedAttackProfitabilityDatasets;
+  }
 
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
@@ -160,7 +161,15 @@ export const MultilineChartExtractableValue = ({
     });
 
   return (
-    <div className="flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
+    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
+      {mocked && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]">
+          <div className="flex items-center gap-2 rounded-full bg-[#1c1c1c] px-4 py-2 text-sm text-foreground">
+            <ClockwiseIcon className="h-5 w-5 text-foreground" />
+            RESEARCH PENDING
+          </div>
+        </div>
+      )}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>
           <CartesianGrid vertical={false} stroke="#27272a" />
