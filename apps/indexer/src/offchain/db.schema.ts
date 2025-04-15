@@ -4,7 +4,6 @@ import * as offchainSchema from "./offchain.schema";
 import { TableConfig } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { getDbConfig } from "@/lib/config";
-import { camelcaseToSnakeCase } from "@/lib/utils";
 
 // Note: We need a separate file for merging the schemas because
 // "ponder.schema" can't be executed by drizzle-kit, and we also
