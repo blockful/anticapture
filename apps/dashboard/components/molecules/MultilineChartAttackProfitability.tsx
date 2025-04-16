@@ -13,7 +13,6 @@ import { ExtractableValueCustomTooltip } from "@/components/atoms";
 
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useParams } from "next/navigation";
-import { filterPriceHistoryByTimeInterval } from "@/lib/mocked-data/mocked-data";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-config/types";
@@ -28,6 +27,7 @@ import {
   normalizeDatasetAllTreasury,
   normalizeDataset,
   timestampToReadableDate,
+  filterPriceHistoryByTimeInterval,
 } from "@/lib/client/utils";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { useEffect, useState } from "react";
@@ -40,24 +40,28 @@ interface MultilineChartExtractableValueProps {
   filterData?: string[];
 }
 
-export const MultilineChartExtractableValue = ({
+export const MultilineChartAttackProfitability = ({
   filterData,
   days,
 }: MultilineChartExtractableValueProps) => {
   const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
   const [mocked, setMocked] = useState<boolean>(false);
+
+  const selectedDays = parseInt(days.split("d")[0]);
+
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
     days,
   );
+
   const { data: daoTokenPriceHistoricalData = { prices: [] } } =
     useDaoTokenHistoricalData(daoId.toUpperCase() as DaoIdEnum);
 
   const { data: timeSeriesData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
     [MetricTypesEnum.TREASURY, MetricTypesEnum.DELEGATED_SUPPLY],
-    parseInt(days.split("d")[0]),
+    days as TimeInterval,
     {
       refreshInterval: 300000,
       revalidateOnFocus: false,

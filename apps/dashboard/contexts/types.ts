@@ -10,49 +10,28 @@ export interface TokenDistributionContextProps {
   days: TimeInterval;
   setDays: (days: TimeInterval) => void;
   totalSupply: MetricData;
-  setTotalSupply: (totalSupply: MetricData) => void;
-  totalSupplyChart: DaoMetricsDayBucket[] | undefined;
-  setTotalSupplyChart: (totalSupplyChart: DaoMetricsDayBucket[]) => void;
+  totalSupplyChart: DaoMetricsDayBucket[];
   circulatingSupply: MetricData;
-  setCirculatingSupply: (circulatingSupply: MetricData) => void;
-  circulatingSupplyChart: DaoMetricsDayBucket[] | undefined;
-  setCirculatingSupplyChart: (
-    circulatingSupplyChart: DaoMetricsDayBucket[],
-  ) => void;
+  circulatingSupplyChart: DaoMetricsDayBucket[];
   delegatedSupply: MetricData;
-  setDelegatedSupply: (delegatedSupply: MetricData) => void;
-  delegatedSupplyChart: DaoMetricsDayBucket[] | undefined;
-  setDelegatedSupplyChart: (
-    delegatedSupplyChart: DaoMetricsDayBucket[],
-  ) => void;
+  delegatedSupplyChart: DaoMetricsDayBucket[];
   cexSupply: MetricData;
-  setCexSupply: (cexSupply: MetricData) => void;
-  cexSupplyChart: DaoMetricsDayBucket[] | undefined;
-  setCexSupplyChart: (cexSupplyChart: DaoMetricsDayBucket[]) => void;
+  cexSupplyChart: DaoMetricsDayBucket[];
   dexSupply: MetricData;
-  setDexSupply: (dexSupply: MetricData) => void;
-  dexSupplyChart: DaoMetricsDayBucket[] | undefined;
-  setDexSupplyChart: (dexSupplyChart: DaoMetricsDayBucket[]) => void;
+  dexSupplyChart: DaoMetricsDayBucket[];
   lendingSupply: MetricData;
-  setLendingSupply: (lendingSupply: MetricData) => void;
-  lendingSupplyChart: DaoMetricsDayBucket[] | undefined;
-  setLendingSupplyChart: (lendingSupplyChart: DaoMetricsDayBucket[]) => void;
+  lendingSupplyChart: DaoMetricsDayBucket[];
 }
 
 export interface GovernanceActivityContextProps {
   days: TimeInterval;
   setDays: (days: TimeInterval) => void;
   treasury: MetricData;
-
   setTreasury: (treasury: MetricData) => void;
   treasurySupplyChart: DaoMetricsDayBucket[];
   setTreasurySupplyChart: (treasurySupplyChart: DaoMetricsDayBucket[]) => void;
-
   proposals: MetricData;
-
   activeSupply: MetricData;
-
   votes: MetricData;
-
   averageTurnout: MetricData;
 }

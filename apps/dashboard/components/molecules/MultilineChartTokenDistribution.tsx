@@ -30,37 +30,34 @@ export const MultilineChartTokenDistribution = ({
   filterData,
   mocked = false,
 }: MultilineChartTokenDistributionProps) => {
+  if (!datasets || Object.keys(datasets).length === 0) {
+    return null;
+  }
+
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
       dataset?.map((item) => item.date),
     ),
   );
 
-  const fillMissingData = (
-    dataset: DaoMetricsDayBucket[] | undefined,
-    date: string | undefined,
-  ): number | null => {
-    const entry = dataset?.find((item) => item.date === date);
-    return entry ? Number(entry.high) : null;
-  };
+  const chartData = Array.from(allDates)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((date) => {
+      const dataPoint: Record<string, number | null> = {
+        date: Number(date),
+      };
 
-  let lastKnownValues: Record<string, number | null> = {};
+      Object.keys(datasets).forEach((key) => {
+        const entry = datasets[key as keyof typeof datasets]?.find(
+          (item) => item.date === date,
+        );
+        dataPoint[key] = entry ? Number(entry.high) : null;
+      });
 
-  const chartData = Array.from(allDates).map((date) => {
-    const dataPoint: Record<string, any> = { date };
-    Object.keys(datasets).forEach((key) => {
-      const value = fillMissingData(
-        datasets[key as keyof typeof datasets],
-        date,
-      );
-      if (value !== null) lastKnownValues[key] = value;
-      dataPoint[key] = lastKnownValues[key] ?? null;
+      return dataPoint;
     });
 
-    return dataPoint;
-  });
-
-  const newDataSets = Object.keys(datasets).filter(
+  const visibleDataSets = Object.keys(datasets).filter(
     (item) => item !== filterData,
   );
 
@@ -101,7 +98,7 @@ export const MultilineChartTokenDistribution = ({
             }
           />
           {Object.keys(chartConfig)
-            .filter((item) => newDataSets.includes(item))
+            .filter((item) => visibleDataSets.includes(item))
             .map((key) => (
               <Line
                 key={key}
