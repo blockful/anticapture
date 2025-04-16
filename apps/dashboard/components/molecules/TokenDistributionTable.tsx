@@ -3,7 +3,10 @@
 import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { mockedTableChartMetrics, TokenDistribution } from "@/lib/mocked-data/mocked-data";
+import {
+  mockedTableChartMetrics,
+  TokenDistribution,
+} from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowState,
@@ -245,8 +248,11 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="blur-[4px] flex w-full justify-center py-2.5">
-              <Sparkline data={mockedTableChartMetrics.map((item) => Number(item.high))} strokeColor={"#4ADE80"} />
+            <div className="flex w-full justify-center py-2.5 blur-[4px]">
+              <Sparkline
+                data={mockedTableChartMetrics.map((item) => Number(item.high))}
+                strokeColor={"#4ADE80"}
+              />
             </div>
           );
         }
@@ -276,7 +282,7 @@ export const TokenDistributionTable = () => {
           currentValue: !!totalSupply.value
             ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
             : totalSupply.value,
-          variation: !!totalSupply.changeRate
+          variation: totalSupply.changeRate
             ? formatVariation(totalSupply.changeRate)
             : totalSupply.changeRate,
           chartLastDays: totalSupplyChart,
@@ -286,7 +292,7 @@ export const TokenDistributionTable = () => {
           currentValue: !!delegatedSupply.value
             ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
             : delegatedSupply.value,
-          variation: !!delegatedSupply.changeRate
+          variation: delegatedSupply.changeRate
             ? formatVariation(delegatedSupply.changeRate)
             : delegatedSupply.changeRate,
           chartLastDays: delegatedSupplyChart,
@@ -296,7 +302,7 @@ export const TokenDistributionTable = () => {
           currentValue: circulatingSupply.value
             ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))
             : circulatingSupply.value,
-          variation: !!circulatingSupply.changeRate
+          variation: circulatingSupply.changeRate
             ? formatVariation(circulatingSupply.changeRate)
             : circulatingSupply.changeRate,
           chartLastDays: circulatingSupplyChart,
@@ -306,7 +312,7 @@ export const TokenDistributionTable = () => {
           currentValue: cexSupply.value
             ? String(BigInt(cexSupply.value) / BigInt(10 ** 18))
             : cexSupply.value,
-          variation: !!cexSupply.changeRate
+          variation: cexSupply.changeRate
             ? formatVariation(cexSupply.changeRate)
             : cexSupply.changeRate,
           chartLastDays: cexSupplyChart,
@@ -316,7 +322,7 @@ export const TokenDistributionTable = () => {
           currentValue: dexSupply.value
             ? String(BigInt(dexSupply.value) / BigInt(10 ** 18))
             : dexSupply.value,
-          variation: !!dexSupply.changeRate
+          variation: dexSupply.changeRate
             ? formatVariation(dexSupply.changeRate)
             : dexSupply.changeRate,
           chartLastDays: dexSupplyChart,
@@ -326,7 +332,7 @@ export const TokenDistributionTable = () => {
           currentValue: lendingSupply.value
             ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18))
             : lendingSupply.value,
-          variation: !!lendingSupply.changeRate
+          variation: lendingSupply.changeRate
             ? formatVariation(lendingSupply.changeRate)
             : lendingSupply.changeRate,
           chartLastDays: lendingSupplyChart,
