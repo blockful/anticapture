@@ -46,7 +46,7 @@ export const MultilineChartExtractableValue = ({
 }: MultilineChartExtractableValueProps) => {
   const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
-  const [mocked, setMocked] = useState(false);
+  const [mocked, setMocked] = useState<boolean>(false);
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
     days,
