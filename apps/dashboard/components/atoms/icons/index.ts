@@ -16,6 +16,7 @@ export * from "./ChevronRightIcon";
 export * from "./CircleCheckIcon";
 export * from "./CircleNotCheckedIcon";
 export * from "./ClickIcon";
+export * from "./ClockwiseIcon";
 export * from "./CrossHairIcon";
 export * from "./CrownIcon";
 export * from "./DaoLogoIcon";

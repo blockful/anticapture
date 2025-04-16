@@ -1,15 +1,14 @@
 import { SVGProps } from "react";
 
-export const ClockwiseIcon =  (props: SVGProps<SVGSVGElement>) => {
+export const ClockwiseIcon = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
-    {...props}
+      {...props}
       width="100%"
       height="100%"
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <mask id="path-1-inside-1_9409_5752" fill="white">
         <path
