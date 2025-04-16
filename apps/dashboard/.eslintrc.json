@@ -2,7 +2,11 @@
   "extends": "next/core-web-vitals",
   "plugins": ["import"],
   "rules": {
-    "import/no-relative-parent-imports": "error",
-    "import/no-relative-packages": "error"
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": ["../*", "./*"]
+      }
+    ]
   }
 }

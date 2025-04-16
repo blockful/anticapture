@@ -1,2 +1,2 @@
-export * from "./RiskLevel";
-export * from "./TimeInterval";
+export * from "@/lib/enums/RiskLevel";
+export * from "@/lib/enums/TimeInterval";
