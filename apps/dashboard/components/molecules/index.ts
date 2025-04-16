@@ -7,7 +7,7 @@ export * from "./HeaderDAOSidebar";
 export * from "./HeaderMobile";
 export * from "./HeaderNavMobile";
 export * from "./HeaderSidebar";
-export * from "./MultilineChartExtractableValue";
+export * from "./MultilineChartAttackProfitability";
 export * from "./MultilineChartTokenDistribution";
 export * from "./QuorumCard";
 export * from "./ReachOutToUsCard";
