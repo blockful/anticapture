@@ -1,3 +1,8 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "plugins": ["import"],
+  "rules": {
+    "import/no-relative-parent-imports": "error",
+    "import/no-relative-packages": "error"
+  }
 }

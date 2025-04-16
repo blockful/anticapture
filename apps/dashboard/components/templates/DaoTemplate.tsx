@@ -11,6 +11,7 @@ import {
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
+import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -36,6 +37,10 @@ export const DaoTemplate = () => {
       )}
       {daoConstants.tokenDistribution && <TokenDistributionSection />}
       {daoConstants.governanceActivity && <GovernanceActivitySection />}
+      <ShowYourSupportStickyBar 
+        message="Is Arbitrum at risk? More data needs more research."
+        buttonText="SIGN TO SHOW YOUR SUPPORT"
+      />
     </>
   );
 };

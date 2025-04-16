@@ -30,3 +30,4 @@ export * from "./TheSectionLayout";
 export * from "./TheTable";
 export * from "./TokenDistributionCustomTooltip";
 export * from "./TooltipInfo";
+export * from "./ShowYourSupportStickyBar";
