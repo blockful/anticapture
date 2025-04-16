@@ -96,11 +96,6 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     ) {
       setMocked(true);
     } else {
-      console.log(delegatedSupply.data?.currentDelegatedSupply);
-      console.log(activeSupply.data?.activeSupply);
-      console.log(averageTurnout.data?.currentAverageTurnout);
-      console.log(daoTopTokenHolderExcludingTheDao?.balance);
-      console.log(vetoCouncilVotingPower);
       setMocked(false);
     }
   }, [
