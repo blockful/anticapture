@@ -3,7 +3,7 @@
 import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { chartMetrics, TokenDistribution } from "@/lib/mocked-data/mocked-data";
+import { mockedTableChartMetrics, TokenDistribution } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowState,
@@ -246,7 +246,7 @@ export const TokenDistributionTable = () => {
         if (chartLastDays.length === 0) {
           return (
             <div className="blur-[4px] flex w-full justify-center py-2.5">
-              <Sparkline data={chartMetrics.map((item) => Number(item.high))} strokeColor={"#4ADE80"} />
+              <Sparkline data={mockedTableChartMetrics.map((item) => Number(item.high))} strokeColor={"#4ADE80"} />
             </div>
           );
         }
