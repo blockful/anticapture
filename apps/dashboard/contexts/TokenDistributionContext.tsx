@@ -57,8 +57,8 @@ export const TokenDistributionProvider = ({
     revalidateOnFocus: false,
   });
 
-  const calculateChangeRate = (data: DaoMetricsDayBucket[] = []): string => {
-    if (!data || data.length < 2) return "0";
+  const calculateChangeRate = (data: DaoMetricsDayBucket[] = []): string | null => {
+    if (!data || data.length < 2) return null;
 
     try {
       if (data.length > 0) {
@@ -75,23 +75,23 @@ export const TokenDistributionProvider = ({
         }
       }
     } catch (e) {
-      return "0";
+      return null;
     }
-    return "0";
+    return null;
   };
 
   const value: TokenDistributionContextProps = {
     days,
     setDays,
     totalSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high,
+      value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY],
       ),
     },
     totalSupplyChart: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY] || [],
     circulatingSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY]?.at(-1)?.high,
+      value: timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY]?.at(-1)?.high  ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY],
       ),
@@ -99,7 +99,7 @@ export const TokenDistributionProvider = ({
     circulatingSupplyChart:
       timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY] || [],
     delegatedSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high,
+      value: timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high  ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
       ),
@@ -107,21 +107,21 @@ export const TokenDistributionProvider = ({
     delegatedSupplyChart:
       timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY] || [],
     cexSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY]?.at(-1)?.high,
+      value: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY]?.at(-1)?.high ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY],
       ),
     },
     cexSupplyChart: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY] || [],
     dexSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY]?.at(-1)?.high,
+      value: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY]?.at(-1)?.high ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY],
       ),
     },
     dexSupplyChart: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY] || [],
     lendingSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY]?.at(-1)?.high,
+      value: timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY]?.at(-1)?.high ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY],
       ),

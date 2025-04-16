@@ -23,9 +23,7 @@ export const DaoTemplate = () => {
 
   return (
     <>
-      {daoConstants.daoInfo && (
-        <DaoInfoSection daoId={daoIdEnum} />
-      )}
+      {daoConstants.daoInfo && <DaoInfoSection daoId={daoIdEnum} />}
       {daoConstants.showSupport && <ShowSupportSection />}
       {daoConstants.attackProfitability && (
         <AttackProfitabilitySection
@@ -37,9 +35,7 @@ export const DaoTemplate = () => {
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
       {daoConstants.tokenDistribution && <TokenDistributionSection />}
-      {daoConstants.governanceActivity && (
-        <GovernanceActivitySection />
-      )}
+      {daoConstants.governanceActivity && <GovernanceActivitySection />}
     </>
   );
 };

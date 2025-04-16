@@ -1240,7 +1240,7 @@ export interface ChartMetrics {
   high: string;
 }
 
-export const chartMetrics: ChartMetrics[] = [
+export const mockedTableChartMetrics: ChartMetrics[] = [
   {
     date: "1736294400000",
     high: "196525268429952772970493008",

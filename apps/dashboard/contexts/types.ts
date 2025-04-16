@@ -2,8 +2,8 @@ import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 
 export interface MetricData {
-  value: string | undefined;
-  changeRate: string | undefined;
+  value: string | undefined | null;
+  changeRate: string | undefined | null;
 }
 
 export interface TokenDistributionContextProps {
