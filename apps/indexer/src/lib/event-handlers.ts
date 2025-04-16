@@ -203,16 +203,18 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  // Create a new transfer record
-  await context.db.insert(transfers).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
-    daoId,
-    tokenId: tokenAddress,
-    amount: value,
-    fromAccountId: from,
-    toAccountId: to,
-    timestamp: event.block.timestamp,
-  });
+  await context.db
+    .insert(transfers)
+    .values({
+      id: [event.transaction.hash, event.log.logIndex].join("-"),
+      daoId,
+      tokenId: tokenAddress,
+      amount: value,
+      fromAccountId: from,
+      toAccountId: to,
+      timestamp: event.block.timestamp,
+    })
+    .onConflictDoNothing();
 
   // Update the to account's balance
   await context.db
