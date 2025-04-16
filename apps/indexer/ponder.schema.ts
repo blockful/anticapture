@@ -4,37 +4,24 @@ import { zeroAddress } from "viem";
 
 export const dao = onchainTable("dao", (drizzle) => ({
   id: drizzle.text().primaryKey(),
-  quorum: drizzle.bigint(),
-  proposalThreshold: drizzle.bigint("proposal_threshold"),
-  votingDelay: drizzle.bigint("voting_delay"),
-  votingPeriod: drizzle.bigint("voting_period"),
-  timelockDelay: drizzle.bigint("timelock_delay"),
+  quorum: drizzle.bigint().notNull().default(0n),
+  proposalThreshold: drizzle.bigint("proposal_threshold").notNull().default(0n),
+  votingDelay: drizzle.bigint("voting_delay").notNull().default(0n),
+  votingPeriod: drizzle.bigint("voting_period").notNull().default(0n),
+  timelockDelay: drizzle.bigint("timelock_delay").notNull().default(0n),
 }));
-
-export const daoToken = onchainTable(
-  "dao_token",
-  (drizzle) => ({
-    id: drizzle.text().primaryKey(),
-    daoId: drizzle.text("dao_id").notNull(),
-    tokenId: drizzle.text("token_id").notNull(),
-  }),
-  (table) => ({
-    daoTokenDaoIdx: index().on(table.daoId),
-    daoTokenTokenIdx: index().on(table.tokenId),
-  }),
-);
 
 export const token = onchainTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
   decimals: drizzle.integer().notNull(),
-  totalSupply: drizzle.bigint("total_supply").notNull(),
-  delegatedSupply: drizzle.bigint("delegated_supply").notNull(),
-  cexSupply: drizzle.bigint("cex_supply").notNull(),
-  dexSupply: drizzle.bigint("dex_supply").notNull(),
-  lendingSupply: drizzle.bigint("lending_supply").notNull(),
-  circulatingSupply: drizzle.bigint("circulating_supply").notNull(),
-  treasury: drizzle.bigint().notNull(),
+  totalSupply: drizzle.bigint("total_supply").notNull().default(0n),
+  delegatedSupply: drizzle.bigint("delegated_supply").notNull().default(0n),
+  cexSupply: drizzle.bigint("cex_supply").notNull().default(0n),
+  dexSupply: drizzle.bigint("dex_supply").notNull().default(0n),
+  lendingSupply: drizzle.bigint("lending_supply").notNull().default(0n),
+  circulatingSupply: drizzle.bigint("circulating_supply").notNull().default(0n),
+  treasury: drizzle.bigint().notNull().default(0n),
 }));
 
 export const account = onchainTable("account", (drizzle) => ({
