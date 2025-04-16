@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { Banana, Star, BarChart4 } from "lucide-react";
+import { BarChart4 } from "lucide-react";
 import {
   AnticaptureIcon,
   ButtonHeaderSidebar,

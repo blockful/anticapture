@@ -3,7 +3,14 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { WalletIcon } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 import Image from "next/image";
-import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+import dynamic from "next/dynamic";
+
+const Jazzicon = dynamic(
+  () => import("react-jazzicon").then((mod) => mod.default),
+  {
+    ssr: false,
+  },
+);
 
 export const ConnectWallet = ({
   label = "Connect",
@@ -79,10 +86,12 @@ export const ConnectWallet = ({
                       </div>
                     ) : (
                       <div className="relative size-6 overflow-hidden rounded-full">
-                        <Jazzicon
-                          diameter={24}
-                          seed={jsNumberForAddress(account.address)}
-                        />
+                        {account.address && (
+                          <Jazzicon
+                            diameter={24}
+                            seed={parseInt(account.address.slice(2, 10), 16)}
+                          />
+                        )}
                       </div>
                     )}
                   </button>
