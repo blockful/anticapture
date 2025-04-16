@@ -48,7 +48,7 @@ const fetchPetitionSignatures = async (
   userAddress: Address | undefined,
 ): Promise<PetitionResponse> => {
   const response = await fetch(
-    `${BACKEND_ENDPOINT}/petition/${daoId}?userAddress=${userAddress}`,
+    `${BACKEND_ENDPOINT}/petition/${daoId.toUpperCase()}?userAddress=${userAddress}`,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch petition data: ${response.statusText}`);
@@ -103,7 +103,7 @@ export const usePetitionSignatures = (
   userAddress: Address | undefined,
 ) => {
   const { data, error, isLoading, mutate } = useSWR<PetitionResponse>(
-    daoId ? `petition/${daoId}?userAddress=${userAddress}` : null,
+    daoId ? `petition/${daoId.toUpperCase()}?userAddress=${userAddress}` : null,
     () => {
       return fetchPetitionSignatures(daoId, userAddress);
     },
