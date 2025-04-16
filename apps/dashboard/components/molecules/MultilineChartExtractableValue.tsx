@@ -163,7 +163,7 @@ export const MultilineChartExtractableValue = ({
   return (
     <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
       {mocked && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center border border-lightDark rounded-lg bg-black/5 backdrop-blur-[6px]">
           <div className="flex items-center gap-2 rounded-full bg-[#1c1c1c] px-4 py-2 text-sm text-foreground">
             <ClockwiseIcon className="h-5 w-5 text-foreground" />
             RESEARCH PENDING
