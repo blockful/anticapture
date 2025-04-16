@@ -20,6 +20,7 @@ export const GovernanceImplementationCard = ({
     [RiskLevel.HIGH]: "bg-white/10 text-red-400 rounded-full",
     [RiskLevel.MEDIUM]: "bg-white/10 text-amber-500 rounded-full",
     [RiskLevel.LOW]: "bg-white/10 text-green-500 rounded-full",
+    [RiskLevel.UNDEFINED]: "bg-white/10 text-gray-500 rounded-full",
   };
 
   return (
