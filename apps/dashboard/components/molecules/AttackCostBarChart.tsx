@@ -204,7 +204,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   return (
     <div className={`relative w-full ${className || ""}`}>
       {mocked && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]"></div>
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]"/>
       )}
       <ResponsiveContainer width="100%" height={280}>
         <BarChart
