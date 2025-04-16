@@ -2,10 +2,8 @@ import { User } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   DaoMetricsDayBucket,
-  PriceEntry,
   TokenHistoricalDataMetrics,
 } from "@/lib/dao-config/types";
-import { DAYS_IN_MILLISECONDS, TimeInterval } from "@/lib/enums/TimeInterval";
 
 export type DashboardDao = {
   dao: string;
@@ -1200,52 +1198,6 @@ export const multilineChart: TokenHistoricalDataMetrics = {
     [1741219200000, 261946260.0858625],
     [1741268694000, 245390488.3582915],
   ],
-};
-
-export const calculatePastTimestamp = (
-  lastTimestamp: number,
-  interval: TimeInterval,
-): number => lastTimestamp - DAYS_IN_MILLISECONDS[interval];
-
-export type FilteredChartData = {
-  full: PriceEntry[];
-} & Record<TimeInterval, PriceEntry[]>;
-
-export const filterPriceHistoryByTimeInterval = (
-  dataset: PriceEntry[],
-): FilteredChartData => {
-  if (dataset.length === 0) {
-    return {
-      full: dataset,
-      [TimeInterval.SEVEN_DAYS]: [],
-      [TimeInterval.THIRTY_DAYS]: [],
-      [TimeInterval.NINETY_DAYS]: [],
-      [TimeInterval.ONE_YEAR]: [],
-    };
-  }
-
-  const lastTimestamp = dataset[dataset.length - 1][0];
-
-  const cutoffTimestamps = Object.values(TimeInterval).reduce(
-    (acc, interval) => {
-      acc[interval] = calculatePastTimestamp(lastTimestamp, interval);
-      return acc;
-    },
-    {} as Record<TimeInterval, number>,
-  );
-
-  return {
-    full: dataset,
-    ...Object.values(TimeInterval).reduce(
-      (acc, interval) => {
-        acc[interval] = dataset.filter(
-          ([timestamp]) => timestamp >= cutoffTimestamps[interval],
-        );
-        return acc;
-      },
-      {} as Record<TimeInterval, PriceEntry[]>,
-    ),
-  };
 };
 
 export const enum GovernanceActivityMetrics {
