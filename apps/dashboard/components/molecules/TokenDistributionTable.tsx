@@ -24,6 +24,7 @@ import {
   formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
+import { useParams } from "next/navigation";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -85,7 +86,7 @@ export const TokenDistributionTable = () => {
     lendingSupply,
     lendingSupplyChart,
   } = useTokenDistributionContext();
-
+  const { daoId } = useParams();
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
       accessorKey: "metric",
@@ -123,11 +124,11 @@ export const TokenDistributionTable = () => {
           );
         }
         if (currentValue === null) {
-          const randomNumber = Math.floor(Math.random() * 6);
-          const randomValues = ["36M", "100", "170K", "536M", "497K", "128K"];
+          const randomNumber = Math.floor(Math.random() * 999);
+          const randomValues = ["K", "M"];
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
-              {randomValues[randomNumber]}
+              {randomNumber}{randomValues[randomNumber % 2]}
             </div>
           );
         }
@@ -143,7 +144,7 @@ export const TokenDistributionTable = () => {
           className="w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
-          Current value ({daoData?.id})
+          Current value ({daoId})
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -177,18 +178,9 @@ export const TokenDistributionTable = () => {
           );
         }
         if (variation === null) {
-          const randomNumber = Math.floor(Math.random() * 6);
-          const randomValues = [
-            "38%",
-            "1.34%",
-            "14.89%",
-            "5.98%",
-            "14.89%",
-            "8.34%",
-          ];
           return (
             <div className="flex items-center justify-end text-[#4ade80] blur-[4px]">
-              {randomValues[randomNumber]}
+              {(Math.random() * 100).toFixed(2)}%
             </div>
           );
         }
