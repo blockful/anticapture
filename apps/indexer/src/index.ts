@@ -1,29 +1,17 @@
-import { createPublicClient, http } from "viem";
+import { Address, createPublicClient, http } from "viem";
 
 import { env } from "@/env";
 import { getChain } from "@/lib/utils";
-import { NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { ArbIndexer } from "@/indexer/arb";
-import { EnsIndexer } from "@/indexer/ens";
-import { ENSGovernor } from "@/indexer/ens/governor";
-import { UniIndexer } from "@/indexer/uni";
-import { UNIGovernor } from "@/indexer/uni/governor";
+import { UNIGovernor } from "@/indexer/uni";
+import { ERC20Indexer, GovernorIndexer } from "@/indexer";
+import { Governor } from "@/interfaces";
+import { ENSGovernor } from "@/indexer/ens";
 
-const {
-  NETWORK: network,
-  DAO_ID: daoId,
-  CHAIN_ID: chainId,
-  RPC_URL: rpcUrl,
-} = env;
+const { NETWORK: network, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
-const tokenAddress = CONTRACT_ADDRESSES[network][daoId]!.token;
-if (!tokenAddress) {
-  throw new Error(
-    `Token address not found for network ${network} and daoId ${daoId}`,
-  );
-}
-
+const contracts = CONTRACT_ADDRESSES[network];
 const chain = getChain(chainId);
 if (!chain) {
   throw new Error(`Chain not found for chainId ${chainId}`);
@@ -35,18 +23,21 @@ const client = createPublicClient({
   transport: http(rpcUrl),
 });
 
-switch (network) {
-  case NetworkEnum.MAINNET: {
-    const ensGovernor = new ENSGovernor(client, tokenAddress);
-    EnsIndexer(client, tokenAddress, ensGovernor);
-    const uniGovernor = new UNIGovernor(client, tokenAddress);
-    UniIndexer(client, tokenAddress, uniGovernor);
-    break;
+for (const [id, { governor, token }] of Object.entries(contracts)) {
+  const daoId = id as DaoIdEnum;
+  ERC20Indexer(daoId, token.address, token.decimals);
+  if (governor) {
+    GovernorIndexer(daoId, getGovernorClient(daoId, governor));
   }
-  case NetworkEnum.ARBITRUM: {
-    ArbIndexer(client, tokenAddress);
-    break;
+}
+
+function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
+  switch (id) {
+    case DaoIdEnum.ENS:
+      return new ENSGovernor(client, address);
+    case DaoIdEnum.UNI:
+      return new UNIGovernor(client, address);
+    default:
+      throw new Error("Governor unavailable for this DAO");
   }
-  default:
-    throw new Error(`Unsupported network ${network}`);
 }

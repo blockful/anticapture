@@ -1,5 +1,9 @@
-import { Address, zeroAddress } from "viem";
+import { Abi, Address, zeroAddress } from "viem";
+
 import { DaoIdEnum, NetworkEnum } from "./enums";
+import { UNITokenAbi } from "@/indexer/uni";
+import { ENSTokenAbi } from "@/indexer/ens";
+import { ARBTokenAbi } from "@/indexer/arb";
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;
 export const MILISECONDS_IN_DAY = SECONDS_IN_DAY * 1000;
@@ -11,7 +15,7 @@ export const CONTRACT_ADDRESSES: Record<
     Record<
       DaoIdEnum,
       {
-        token: Address;
+        token: { address: Address; decimals: number; abi: Abi };
         governor?: Address;
       }
     >
@@ -19,21 +23,33 @@ export const CONTRACT_ADDRESSES: Record<
 > = {
   [NetworkEnum.MAINNET]: {
     [DaoIdEnum.UNI]: {
-      token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      token: {
+        address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        decimals: 18,
+        abi: UNITokenAbi,
+      },
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
     },
     [DaoIdEnum.ENS]: {
-      token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+      token: {
+        address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        decimals: 18,
+        abi: ENSTokenAbi,
+      },
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
     },
   },
   [NetworkEnum.ARBITRUM]: {
     [DaoIdEnum.ARB]: {
-      token: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+      token: {
+        address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+        decimals: 18,
+        abi: ARBTokenAbi,
+      },
     },
   },
   [NetworkEnum.ANVIL]: {},
-};
+} as const;
 
 export const TREASURY_ADDRESSES = {
   [DaoIdEnum.UNI]: {

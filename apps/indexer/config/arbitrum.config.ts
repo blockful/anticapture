@@ -4,7 +4,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { ARBTokenAbi } from "@/indexer/arb/abi";
+import { ARBTokenAbi } from "@/indexer/arb";
 
 export default createConfig({
   database: {
@@ -23,7 +23,8 @@ export default createConfig({
     ARBToken: {
       abi: ARBTokenAbi,
       network: "arbitrum_mainnet",
-      address: CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB]!.token,
+      address:
+        CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB]!.token.address,
       startBlock: 70398200,
     },
   },

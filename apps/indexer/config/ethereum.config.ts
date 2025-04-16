@@ -24,7 +24,8 @@ export default createConfig({
     ENSToken: {
       abi: ENSTokenAbi,
       network: "ethereum_mainnet",
-      address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.ENS]!.token,
+      address:
+        CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.ENS]!.token.address,
       startBlock: 9380410,
     },
     ENSGovernor: {
@@ -36,7 +37,8 @@ export default createConfig({
     UNIToken: {
       abi: UNITokenAbi,
       network: "ethereum_mainnet",
-      address: CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.UNI]!.token,
+      address:
+        CONTRACT_ADDRESSES[NetworkEnum.MAINNET][DaoIdEnum.UNI]!.token.address,
       startBlock: 10861674,
     },
     UNIGovernor: {
