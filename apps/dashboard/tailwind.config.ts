@@ -9,9 +9,6 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        roboto: ["Roboto", "sans-serif"],
-      },
       screens: {
         xl4k: "2000px",
       },

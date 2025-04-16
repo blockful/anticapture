@@ -38,9 +38,9 @@ export const ShowYourSupportStickyBar = ({
               <span className="text-sm font-normal">{message}</span>
               <button
                 onClick={openConnectModal}
-                className="font-roboto ml-4 flex items-center text-sm font-medium uppercase tracking-[0.1em] text-tangerine transition-colors hover:text-tangerine/90"
+                className="font-roboto ml-4 flex items-center text-sm font-medium uppercase tracking-[0.06em] text-tangerine transition-colors hover:text-tangerine/90"
               >
-                <span>{buttonText}</span>
+                <span>{buttonText}</span> 
                 <ChevronRight
                   className="ml-1 size-4 text-tangerine"
                   strokeWidth={2}
