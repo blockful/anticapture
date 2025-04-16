@@ -3,7 +3,10 @@
 import React from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { chartMetrics, TokenDistribution } from "@/lib/mocked-data/mocked-data";
+import {
+  mockedTableChartMetrics,
+  TokenDistribution,
+} from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowState,
@@ -21,6 +24,7 @@ import {
   formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
+import { useParams } from "next/navigation";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -82,7 +86,7 @@ export const TokenDistributionTable = () => {
     lendingSupply,
     lendingSupplyChart,
   } = useTokenDistributionContext();
-
+  const { daoId } = useParams();
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
       accessorKey: "metric",
@@ -120,11 +124,11 @@ export const TokenDistributionTable = () => {
           );
         }
         if (currentValue === null) {
-          const randomNumber = Math.floor(Math.random() * 6);
-          const randomValues = ["36M", "100", "170K", "536M", "497K", "128K"];
+          const randomNumber = Math.floor(Math.random() * 999);
+          const randomValues = ["K", "M"];
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
-              {randomValues[randomNumber]}
+              {randomNumber}{randomValues[randomNumber % 2]}
             </div>
           );
         }
@@ -140,7 +144,7 @@ export const TokenDistributionTable = () => {
           className="w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
-          Current value ({daoData?.id})
+          Current value ({daoId})
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -174,18 +178,9 @@ export const TokenDistributionTable = () => {
           );
         }
         if (variation === null) {
-          const randomNumber = Math.floor(Math.random() * 6);
-          const randomValues = [
-            "38%",
-            "1.34%",
-            "14.89%",
-            "5.98%",
-            "14.89%",
-            "8.34%",
-          ];
           return (
             <div className="flex items-center justify-end text-[#4ade80] blur-[4px]">
-              {randomValues[randomNumber]}
+              {(Math.random() * 100).toFixed(2)}%
             </div>
           );
         }
@@ -245,8 +240,11 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="blur-[4px] flex w-full justify-center py-2.5">
-              <Sparkline data={chartMetrics.map((item) => Number(item.high))} strokeColor={"#4ADE80"} />
+            <div className="flex w-full justify-center py-2.5 blur-[4px]">
+              <Sparkline
+                data={mockedTableChartMetrics.map((item) => Number(item.high))}
+                strokeColor={"#4ADE80"}
+              />
             </div>
           );
         }
@@ -276,7 +274,7 @@ export const TokenDistributionTable = () => {
           currentValue: !!totalSupply.value
             ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
             : totalSupply.value,
-          variation: !!totalSupply.changeRate
+          variation: totalSupply.changeRate
             ? formatVariation(totalSupply.changeRate)
             : totalSupply.changeRate,
           chartLastDays: totalSupplyChart,
@@ -286,7 +284,7 @@ export const TokenDistributionTable = () => {
           currentValue: !!delegatedSupply.value
             ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
             : delegatedSupply.value,
-          variation: !!delegatedSupply.changeRate
+          variation: delegatedSupply.changeRate
             ? formatVariation(delegatedSupply.changeRate)
             : delegatedSupply.changeRate,
           chartLastDays: delegatedSupplyChart,
@@ -296,7 +294,7 @@ export const TokenDistributionTable = () => {
           currentValue: circulatingSupply.value
             ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))
             : circulatingSupply.value,
-          variation: !!circulatingSupply.changeRate
+          variation: circulatingSupply.changeRate
             ? formatVariation(circulatingSupply.changeRate)
             : circulatingSupply.changeRate,
           chartLastDays: circulatingSupplyChart,
@@ -306,7 +304,7 @@ export const TokenDistributionTable = () => {
           currentValue: cexSupply.value
             ? String(BigInt(cexSupply.value) / BigInt(10 ** 18))
             : cexSupply.value,
-          variation: !!cexSupply.changeRate
+          variation: cexSupply.changeRate
             ? formatVariation(cexSupply.changeRate)
             : cexSupply.changeRate,
           chartLastDays: cexSupplyChart,
@@ -316,7 +314,7 @@ export const TokenDistributionTable = () => {
           currentValue: dexSupply.value
             ? String(BigInt(dexSupply.value) / BigInt(10 ** 18))
             : dexSupply.value,
-          variation: !!dexSupply.changeRate
+          variation: dexSupply.changeRate
             ? formatVariation(dexSupply.changeRate)
             : dexSupply.changeRate,
           chartLastDays: dexSupplyChart,
@@ -326,7 +324,7 @@ export const TokenDistributionTable = () => {
           currentValue: lendingSupply.value
             ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18))
             : lendingSupply.value,
-          variation: !!lendingSupply.changeRate
+          variation: lendingSupply.changeRate
             ? formatVariation(lendingSupply.changeRate)
             : lendingSupply.changeRate,
           chartLastDays: lendingSupplyChart,
