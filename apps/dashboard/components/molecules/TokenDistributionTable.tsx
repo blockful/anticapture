@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -17,7 +17,6 @@ import {
   TooltipInfo,
 } from "@/components/atoms";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
-import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import {
   cn,
   formatNumberUserReadable,
@@ -70,7 +69,7 @@ const metricDetails: Record<
 };
 
 export const TokenDistributionTable = () => {
-  const { daoData } = useDaoDataContext();
+  const [mounted, setMounted] = useState<boolean>(false);
   const {
     totalSupply,
     days,
@@ -87,6 +86,11 @@ export const TokenDistributionTable = () => {
     lendingSupplyChart,
   } = useTokenDistributionContext();
   const { daoId } = useParams();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
       accessorKey: "metric",
@@ -115,7 +119,7 @@ export const TokenDistributionTable = () => {
       accessorKey: "currentValue",
       cell: ({ row }) => {
         const currentValue: number = row.getValue("currentValue");
-        if (currentValue === undefined) {
+        if (!mounted) {
           return (
             <SkeletonRow
               className="h-5 w-32"
@@ -128,7 +132,8 @@ export const TokenDistributionTable = () => {
           const randomValues = ["K", "M"];
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
-              {randomNumber}{randomValues[randomNumber % 2]}
+              {randomNumber}
+              {randomValues[randomNumber % 2]}
             </div>
           );
         }
@@ -166,8 +171,7 @@ export const TokenDistributionTable = () => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
-
-        if (variation === undefined) {
+        if (!mounted) {
           return (
             <div className="flex items-center justify-end">
               <SkeletonRow
@@ -231,7 +235,7 @@ export const TokenDistributionTable = () => {
         const variation: string = row.getValue("variation");
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
-        if (chartLastDays === undefined) {
+        if (!mounted) {
           return (
             <div className="flex w-full justify-center">
               <SkeletonRow className="h-5 w-32" />

@@ -8,17 +8,17 @@ import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();
-  if(!daoId){
-    return null
+  if (!daoId) {
+    return null;
   }
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdEnum];
 
   const options = [
     {
-      anchorId: SECTIONS_CONSTANTS.daoInfo.anchorId,
-      title: SECTIONS_CONSTANTS.daoInfo.title,
-      enabled: !!daoConfig.daoInfo,
+      anchorId: SECTIONS_CONSTANTS.daoOverview.anchorId,
+      title: SECTIONS_CONSTANTS.daoOverview.title,
+      enabled: !!daoConfig.daoOverview,
     },
     {
       anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
@@ -29,7 +29,7 @@ export const HeaderNavMobile = () => {
       anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
       title: SECTIONS_CONSTANTS.governanceImplementation.title,
       enabled: !!daoConfig.governanceImplementation,
-          },
+    },
     {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
       title: SECTIONS_CONSTANTS.tokenDistribution.title,

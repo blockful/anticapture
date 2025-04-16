@@ -6,11 +6,15 @@ import {
   SwitchCardDaoInfoItem,
   ExternalLinkIcon,
 } from "@/components/atoms";
-import { DaoInfoConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { Clock4 } from "lucide-react";
 import { Address } from "viem";
-export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
+export const TimelockCard = ({
+  daoOverview,
+}: {
+  daoOverview: DaoOverviewConfig;
+}) => {
   const timelockData: CardData = {
     title: "Timelock",
     icon: <Clock4 className="size-4 text-foreground" />,
@@ -21,10 +25,10 @@ export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
           "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoInfo?.rules?.timelock}
+            switched={daoOverview?.rules?.timelock}
             icon={<ExternalLinkIcon className="text-foreground" />}
             onClick={() =>
-              openEtherscanAddress(daoInfo?.contracts?.timelock as Address)
+              openEtherscanAddress(daoOverview?.contracts?.timelock as Address)
             }
             key={"switch"}
           />,
@@ -36,11 +40,11 @@ export const TimelockCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoInfo?.rules?.cancelFunction}
+            switched={daoOverview?.rules?.cancelFunction}
             icon={<ExternalLinkIcon className="text-foreground" />}
             onClick={() =>
               window.open(
-                `${daoInfo.cancelFunction}`,
+                `${daoOverview.cancelFunction}`,
                 "_blank",
                 "noopener,noreferrer",
               )

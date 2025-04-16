@@ -1,13 +1,12 @@
 import { DaoConfiguration } from "@/lib/dao-config/types";
-import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
+import { RiskLevel, sortByRiskLevel, SupportStageEnum } from "@/lib/enums";
 import ENSLogo from "@/public/logo/ENS.png";
 import { calculateMonthsBefore } from "@/lib/client/utils";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
   supportStage: SupportStageEnum.FULL,
-  daoInfo: {
+  daoOverview: {
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -155,6 +154,6 @@ export const ENS: DaoConfiguration = {
     ].sort((a, b) => sortByRiskLevel(a, b, "desc")),
   },
   tokenDistribution: true,
-  governanceActivity: true,
+  governanceActivity: false,
   showSupport: false,
 };

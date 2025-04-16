@@ -6,7 +6,7 @@ export * from "@/components/atoms/BadgeInAnalysis";
 export * from "@/components/atoms/BaseCardDaoInfo";
 export * from "@/components/atoms/BaseHeaderLayoutSidebar";
 export * from "@/components/atoms/ButtonCardDaoInfoItem";
-export * from "@/components/atoms/ButtonHeaderDAOSidebar";
+export * from "@/components/atoms/ButtonHeaderSidebar";
 export * from "@/components/atoms/ButtonHeaderDAOSidebarMobile";
 export * from "@/components/atoms/CardDaoSignature";
 export * from "@/components/atoms/ConnectWallet";

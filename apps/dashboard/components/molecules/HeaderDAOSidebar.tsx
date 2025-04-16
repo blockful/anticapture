@@ -1,14 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DaoIdEnum, ALL_DAOS } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/lib/types/daos";
 import {
   ActivityIcon,
   ArrowLeftRight,
-  BaseHeaderLayoutSidebar,
   PieChartIcon,
   HeaderDAOSidebarDropdown,
-  ButtonHeaderDAOSidebar,
+  ButtonHeaderSidebar,
   CrossHairIcon,
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -20,23 +19,6 @@ export const HeaderDAOSidebar = () => {
 
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && ALL_DAOS.includes(daoId as DaoIdEnum);
-
-  if (!isValidDao) {
-    return (
-      <BaseHeaderLayoutSidebar>
-        {!isDefault && (
-          <div className="flex flex-col items-center space-x-2">
-            <h1 className="text-sm font-semibold text-white">404 Not Found</h1>
-            <h1 className="text-sm font-semibold text-white">
-              Please back to Home Page
-            </h1>
-          </div>
-        )}
-      </BaseHeaderLayoutSidebar>
-    );
-  }
-
   const daoConfig = daoConfigByDaoId[daoId as DaoIdEnum];
 
   if (daoConfig.disableDaoPage) {
@@ -44,47 +26,47 @@ export const HeaderDAOSidebar = () => {
   }
 
   return (
-    <BaseHeaderLayoutSidebar>
-      <div className="flex w-full flex-col">
+    <aside className="fixed left-[72px] top-0 z-50 hidden h-screen w-[258px] border-r border-lightDark bg-darkest sm:block">
+      <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
-        <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
+        <div className="flex h-full flex-col gap-3 p-4">
           {daoConfig.showSupport && (
-            <ButtonHeaderDAOSidebar
+            <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.showSupport.title}
             />
           )}
-          {daoConfig.daoInfo && (
-            <ButtonHeaderDAOSidebar
-              anchorId={SECTIONS_CONSTANTS.daoInfo.anchorId}
+          {daoConfig.daoOverview && (
+            <ButtonHeaderSidebar
+              anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
               icon={PieChartIcon}
-              label={SECTIONS_CONSTANTS.daoInfo.title}
+              label={SECTIONS_CONSTANTS.daoOverview.title}
             />
           )}
           {daoConfig.attackProfitability && (
-            <ButtonHeaderDAOSidebar
+            <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
               icon={CrossHairIcon}
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
           )}
           {daoConfig.governanceImplementation && (
-            <ButtonHeaderDAOSidebar
+            <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
               icon={Lightbulb}
               label={SECTIONS_CONSTANTS.governanceImplementation.title}
             />
           )}
           {daoConfig.tokenDistribution && (
-            <ButtonHeaderDAOSidebar
+            <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               icon={ArrowLeftRight}
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
           {daoConfig.governanceActivity && (
-            <ButtonHeaderDAOSidebar
+            <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
               icon={ActivityIcon}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
@@ -92,6 +74,6 @@ export const HeaderDAOSidebar = () => {
           )}
         </div>
       </div>
-    </BaseHeaderLayoutSidebar>
+    </aside>
   );
 };

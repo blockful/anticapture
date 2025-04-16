@@ -1,6 +1,7 @@
 export * from "@/components/atoms/icons/ActivityIcon";
 export * from "@/components/atoms/icons/AlertTriangleIcon";
 export * from "@/components/atoms/icons/AnticaptureIcon";
+export * from "@/components/atoms/icons/AnticaptureIconMobile";
 export * from "@/components/atoms/icons/ArrowDownIcon";
 export * from "@/components/atoms/icons/ArrowLeftIcon";
 export * from "@/components/atoms/icons/ArrowLeftRight";

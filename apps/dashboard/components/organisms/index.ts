@@ -1,5 +1,5 @@
 export * from "@/components/organisms/AttackProfitabilitySection";
-export * from "@/components/organisms/DaoInfoSection";
+export * from "@/components/organisms/DaoOverviewSection";
 export * from "@/components/organisms/GovernanceActivitySection";
 export * from "@/components/organisms/GovernanceImplementationSection";
 export * from "@/components/organisms/HomeDashboardSection";
