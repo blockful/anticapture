@@ -57,7 +57,7 @@ interface BaseInfo {
 }
 
 // Section configurations without data storage
-export interface DaoInfoConfig {
+export interface DaoOverviewConfig {
   contracts?: {
     governor: Address;
     token: Address;
@@ -96,7 +96,7 @@ export interface GovernanceImplementationConfig
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
-  daoInfo?: DaoInfoConfig;
+  daoOverview?: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   tokenDistribution?: boolean;

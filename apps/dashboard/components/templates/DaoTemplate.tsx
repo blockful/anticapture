@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  DaoInfoSection,
   AttackProfitabilitySection,
+  DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
   ShowSupportSection,
@@ -23,7 +23,7 @@ export const DaoTemplate = () => {
 
   return (
     <>
-      {daoConstants.daoInfo && <DaoInfoSection daoId={daoIdEnum} />}
+      {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
       {daoConstants.showSupport && <ShowSupportSection />}
       {daoConstants.attackProfitability && (
         <AttackProfitabilitySection

@@ -1,13 +1,13 @@
 export const SECTIONS_CONSTANTS = {
-  dashboard: {
-    title: "Dashboard",
+  panel: {
+    title: "Panel",
     description: undefined,
-    anchorId: "dashboardSection",
+    anchorId: "panel",
   },
-  daoInfo: {
-    title: "DAO Information",
+  daoOverview: {
+    title: "DAO Overview",
     description: undefined,
-    anchorId: "daoInfoSection",
+    anchorId: "daoOverviewSection",
   },
   showSupport: {
     title: "Show Support",
@@ -33,7 +33,7 @@ export const SECTIONS_CONSTANTS = {
     anchorId: "tokenDistributionSection",
   },
   governanceImplementation: {
-    title: "Governance Implementation",
+    title: "Gov. Implementation",
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
