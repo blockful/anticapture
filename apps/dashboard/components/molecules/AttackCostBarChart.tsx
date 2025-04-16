@@ -59,7 +59,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.ONE_YEAR;
-  const [mocked, setMocked] = useState(false);
+  const [mocked, setMocked] = useState<boolean>(false);
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
