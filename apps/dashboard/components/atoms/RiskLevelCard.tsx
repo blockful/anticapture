@@ -12,7 +12,7 @@ type RiskConfig = {
   icon: ReactNode;
 };
 
-const riskConfigs: Record<RiskLevel, RiskConfig> = {
+const riskConfigs: Record<RiskLevel | "undefined-risk-level", RiskConfig> = {
   [RiskLevel.HIGH]: {
     color: "red-400",
     pattern: ["bg-red-400/15", "bg-red-400/15", "bg-red-400"],
@@ -28,7 +28,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
     pattern: ["bg-green-500", "bg-white/15", "bg-white/15"],
     icon: <CheckCircle2 className="size-3.5 text-green-500 sm:size-4" />,
   },
-  [RiskLevel.UNDEFINED]: {
+  "undefined-risk-level": {
     color: "foreground",
     pattern: ["bg-white/15", "bg-white/15", "bg-white/15"],
     icon: <ClockwiseIcon className="h-3.5 w-3.5 text-foreground sm:h-4 sm:w-4" />,
@@ -77,7 +77,7 @@ interface RiskLevelCardProps {
 }
 
 export const RiskLevelCard = ({ status, className }: RiskLevelCardProps) => {
-  const config = riskConfigs[status ?? RiskLevel.UNDEFINED];
+  const config = riskConfigs[status ?? "undefined-risk-level"];
 
   return (
     <div className="flex h-full w-full flex-col items-start">

@@ -2,7 +2,6 @@ export enum RiskLevel {
   LOW = "Low",
   MEDIUM = "Medium",
   HIGH = "High",
-  UNDEFINED = "Undefined",
 }
 
 export const sortByRiskLevel = (
