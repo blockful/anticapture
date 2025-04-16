@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
-import { ClockwiseIcon } from "./icons/ClockwiseIcon";
+import { ClockwiseIcon } from "@/components/atoms";
 
 type RiskConfig = {
   color: string;
@@ -26,7 +26,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   [RiskLevel.LOW]: {
     color: "green-500",
     pattern: ["bg-green-500", "bg-white/15", "bg-white/15"],
-    icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-500 sm:h-4 sm:w-4" />,
+    icon: <CheckCircle2 className="size-3.5 text-green-500 sm:size-4" />,
   },
   [RiskLevel.UNDEFINED]: {
     color: "foreground",

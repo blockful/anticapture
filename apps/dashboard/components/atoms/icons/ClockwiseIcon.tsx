@@ -1,6 +1,9 @@
-export const ClockwiseIcon = ({ className }: { className?: string }) => {
+import { SVGProps } from "react";
+
+export const ClockwiseIcon =  (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
+    {...props}
       width="100%"
       height="100%"
       viewBox="0 0 16 16"
