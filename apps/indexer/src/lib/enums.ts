@@ -5,7 +5,7 @@ export enum DaoIdEnum {
 }
 
 export enum NetworkEnum {
-  MAINNET = "mainnet",
+  ETHEREUM = "ethereum",
   ARBITRUM = "arbitrum",
   ANVIL = "anvil",
 }
