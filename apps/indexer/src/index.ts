@@ -25,19 +25,22 @@ const client = createPublicClient({
 
 for (const [id, { governor, token }] of Object.entries(contracts)) {
   const daoId = id as DaoIdEnum;
-  ERC20Indexer(daoId, token.address, token.decimals);
-  if (governor) {
-    GovernorIndexer(daoId, getGovernorClient(daoId, governor));
-  }
+
+  const governorClient = getGovernorClient(daoId, governor);
+  ERC20Indexer(daoId, token.address, token.decimals, governorClient);
+  if (governorClient) GovernorIndexer(daoId);
 }
 
-function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
+function getGovernorClient(
+  id: DaoIdEnum,
+  address: Address,
+): Governor | undefined {
   switch (id) {
     case DaoIdEnum.ENS:
       return new ENSGovernor(client, address);
     case DaoIdEnum.UNI:
       return new UNIGovernor(client, address);
     default:
-      throw new Error("Governor unavailable for this DAO");
+      return;
   }
 }
