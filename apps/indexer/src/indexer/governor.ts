@@ -9,8 +9,27 @@ import {
   voteCast,
 } from "@/lib/event-handlers";
 import { DaoIdEnum } from "@/lib/enums";
+import { Governor } from "@/interfaces/governor";
+import { dao } from "ponder:schema";
 
-export function GovernorIndexer(daoId: DaoIdEnum) {
+export function GovernorIndexer(daoId: DaoIdEnum, governor: Governor) {
+  ponder.on(`${daoId}Governor:setup`, async ({ context }) => {
+    const votingPeriod = await governor.getVotingPeriod();
+    const quorum = await governor.getQuorum();
+    const votingDelay = await governor.getVotingDelay();
+    const timelockDelay = await governor.getTimelockDelay();
+    const proposalThreshold = await governor.getProposalThreshold();
+
+    await context.db.insert(dao).values({
+      id: daoId,
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
+    });
+  });
+
   ponder.on(`${daoId}Governor:VoteCast`, async ({ event, context }) => {
     await voteCast(event, context, daoId);
   });
