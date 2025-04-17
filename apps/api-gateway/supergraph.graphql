@@ -1,0 +1,174 @@
+schema
+    @link(url: "https://specs.apollo.dev/link/v1.0")
+    @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+    
+    
+    
+    
+    
+    
+    @link(url: "https://the-guild.dev/graphql/mesh/spec/v1.0", import: ["@source"]) 
+  {
+    query: Query
+    
+    
+  }
+
+  
+    directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+    directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+    
+      directive @join__field(
+        graph: join__Graph
+        requires: join__FieldSet
+        provides: join__FieldSet
+        type: String
+        external: Boolean
+        override: String
+        usedOverridden: Boolean
+        
+        
+      ) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+    
+    
+
+    directive @join__implements(
+      graph: join__Graph!
+      interface: String!
+    ) repeatable on OBJECT | INTERFACE
+
+    directive @join__type(
+      graph: join__Graph!
+      key: join__FieldSet
+      extension: Boolean! = false
+      resolvable: Boolean! = true
+      isInterfaceObject: Boolean! = false
+    ) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+    directive @join__unionMember(
+      graph: join__Graph!
+      member: String!
+    ) repeatable on UNION
+
+    scalar join__FieldSet
+    
+  
+  
+  directive @link(
+    url: String
+    as: String
+    for: link__Purpose
+    import: [link__Import]
+  ) repeatable on SCHEMA
+
+  scalar link__Import
+
+  enum link__Purpose {
+    """
+    `SECURITY` features provide metadata necessary to securely resolve fields.
+    """
+    SECURITY
+
+    """
+    `EXECUTION` features provide metadata necessary for operation execution.
+    """
+    EXECUTION
+  }
+
+  
+  
+  
+  
+  
+  
+  
+enum join__Graph {
+  COUNTRIES @join__graph(name: "Countries", url: "https://countries.trevorblades.com") 
+}
+
+directive @source(name: String!, type: String, subgraph: String!)  repeatable on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INTERFACE | UNION | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+scalar Countries_TransportOptions @source(name: "TransportOptions", subgraph: "Countries")  @join__type(graph: COUNTRIES) 
+
+type Countries_Continent @source(name: "Continent", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: ID!
+  countries: [Countries_Country!]! @source(name: "countries", type: "[Country!]!", subgraph: "Countries") 
+  name: String!
+}
+
+type Countries_Country @source(name: "Country", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  awsRegion: String!
+  capital: String
+  code: ID!
+  continent: Countries_Continent! @source(name: "continent", type: "Continent!", subgraph: "Countries") 
+  currencies: [String!]!
+  currency: String
+  emoji: String!
+  emojiU: String!
+  languages: [Countries_Language!]! @source(name: "languages", type: "[Language!]!", subgraph: "Countries") 
+  name(lang: String) : String!
+  native: String!
+  phone: String!
+  phones: [String!]!
+  states: [Countries_State!]! @source(name: "states", type: "[State!]!", subgraph: "Countries") 
+  subdivisions: [Countries_Subdivision!]! @source(name: "subdivisions", type: "[Subdivision!]!", subgraph: "Countries") 
+}
+
+type Countries_Language @source(name: "Language", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: ID!
+  name: String!
+  native: String!
+  rtl: Boolean!
+}
+
+type Query @source(name: "Query", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  continent(code: ID!) : Countries_Continent @source(name: "continent", type: "Continent", subgraph: "Countries") 
+  continents(
+    filter: Countries_ContinentFilterInput = {} @source(name: "filter", type: "ContinentFilterInput", subgraph: "Countries") 
+  ): [Countries_Continent!]! @source(name: "continents", type: "[Continent!]!", subgraph: "Countries") 
+  countries(
+    filter: Countries_CountryFilterInput = {} @source(name: "filter", type: "CountryFilterInput", subgraph: "Countries") 
+  ): [Countries_Country!]! @source(name: "countries", type: "[Country!]!", subgraph: "Countries") 
+  country(code: ID!) : Countries_Country @source(name: "country", type: "Country", subgraph: "Countries") 
+  language(code: ID!) : Countries_Language @source(name: "language", type: "Language", subgraph: "Countries") 
+  languages(
+    filter: Countries_LanguageFilterInput = {} @source(name: "filter", type: "LanguageFilterInput", subgraph: "Countries") 
+  ): [Countries_Language!]! @source(name: "languages", type: "[Language!]!", subgraph: "Countries") 
+}
+
+type Countries_State @source(name: "State", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: String
+  country: Countries_Country! @source(name: "country", type: "Country!", subgraph: "Countries") 
+  name: String!
+}
+
+type Countries_Subdivision @source(name: "Subdivision", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: ID!
+  emoji: String
+  name: String!
+}
+
+input Countries_ContinentFilterInput @source(name: "ContinentFilterInput", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: Countries_StringQueryOperatorInput @source(name: "code", type: "StringQueryOperatorInput", subgraph: "Countries") 
+}
+
+input Countries_CountryFilterInput @source(name: "CountryFilterInput", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: Countries_StringQueryOperatorInput @source(name: "code", type: "StringQueryOperatorInput", subgraph: "Countries") 
+  continent: Countries_StringQueryOperatorInput @source(name: "continent", type: "StringQueryOperatorInput", subgraph: "Countries") 
+  currency: Countries_StringQueryOperatorInput @source(name: "currency", type: "StringQueryOperatorInput", subgraph: "Countries") 
+  name: Countries_StringQueryOperatorInput @source(name: "name", type: "StringQueryOperatorInput", subgraph: "Countries") 
+}
+
+input Countries_LanguageFilterInput @source(name: "LanguageFilterInput", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  code: Countries_StringQueryOperatorInput @source(name: "code", type: "StringQueryOperatorInput", subgraph: "Countries") 
+}
+
+input Countries_StringQueryOperatorInput @source(name: "StringQueryOperatorInput", subgraph: "Countries")  @join__type(graph: COUNTRIES)  {
+  eq: String
+  in: [String!]
+  ne: String
+  nin: [String!]
+  regex: String
+}
