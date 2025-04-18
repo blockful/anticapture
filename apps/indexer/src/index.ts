@@ -4,14 +4,18 @@ import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { UNIGovernor } from "@/indexer/uni";
 import { ERC20Indexer, GovernorIndexer } from "@/indexer";
 import { Governor } from "@/interfaces";
 import { ENSGovernor } from "@/indexer/ens";
+import { UNIGovernor } from "@/indexer/uni";
 
-const { NETWORK: network, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
+const {
+  NETWORK: network,
+  DAO_ID: daoId,
+  CHAIN_ID: chainId,
+  RPC_URL: rpcUrl,
+} = env;
 
-const contracts = CONTRACT_ADDRESSES[network];
 const chain = getChain(chainId);
 if (!chain) {
   throw new Error(`Chain not found for chainId ${chainId}`);
@@ -23,12 +27,10 @@ const client = createPublicClient({
   transport: http(rpcUrl),
 });
 
-for (const [id, { governor, token }] of Object.entries(contracts)) {
-  const daoId = id as DaoIdEnum;
+const { token, governor } = CONTRACT_ADDRESSES[network][daoId]!;
 
-  ERC20Indexer(daoId, token.address, token.decimals);
-  if (governor) GovernorIndexer(daoId, getGovernorClient(daoId, governor));
-}
+ERC20Indexer(daoId, token.address, token.decimals);
+if (governor) GovernorIndexer(daoId, getGovernorClient(daoId, governor));
 
 function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
   switch (id) {
