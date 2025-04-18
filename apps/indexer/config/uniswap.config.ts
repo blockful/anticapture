@@ -4,7 +4,6 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { ENSGovernorAbi, ENSTokenAbi } from "../src/indexer/ens/abi";
 import { UNIGovernorAbi, UNITokenAbi } from "../src/indexer/uni/abi";
 
 export default createConfig({
@@ -21,20 +20,6 @@ export default createConfig({
     },
   },
   contracts: {
-    ENSToken: {
-      abi: ENSTokenAbi,
-      network: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.token.address,
-      startBlock: 9380410,
-    },
-    ENSGovernor: {
-      abi: ENSGovernorAbi,
-      network: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.governor,
-      startBlock: 13533772,
-    },
     UNIToken: {
       abi: UNITokenAbi,
       network: "ethereum_mainnet",

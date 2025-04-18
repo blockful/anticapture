@@ -1,6 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
-import { NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
 dotenv.config();
 
@@ -10,6 +10,7 @@ const envSchema = z.object({
   POOLING_INTERVAL: z.number().default(1000),
   MAX_REQUESTS_PER_SECOND: z.number().default(50),
   NETWORK: z.nativeEnum(NetworkEnum),
+  DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 });
 
