@@ -26,3 +26,18 @@ services:
     container_name: anticapture-contracts
     ports:
       - "8545:8545"
+
+  indexer:
+    build:
+      context: apps/indexer
+    container_name: anticapture-indexer
+    environment:
+      - DATABASE_URL=postgres://postgres:admin@anticapture-db:5432/postgres
+      - DAO_ID=ENS
+      - NETWORK=anvil
+      - RPC_URL=http://anticapture-contracts:8545
+    depends_on:
+      - db
+      - contracts
+    ports:
+      - "42069:42069"

@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": true,
   "scripts": {
-    "dev": "ponder dev --schema public",
+    "dev": "ponder dev --schema public --config config/test.config.ts",
     "start": "ponder start --schema public",
     "codegen": "ponder codegen",
     "serve": "npm run setup-drizzle && ponder serve --schema public",
