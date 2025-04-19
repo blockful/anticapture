@@ -1,7 +1,8 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["node_modules"]
+libs = ["lib"]
+optimizer = true
 remappings = [
   "@openzeppelin=node_modules/@openzeppelin",
   "forge-std=lib/forge-std",

@@ -1,18 +1,28 @@
 services:
   db:
     image: postgres:16.2
-    container_name: gateway-postgres-db
+    container_name: anticapture-db
     ports:
-      - '5432:5432'
+      - "5432:5432"
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
+    tmpfs:
+      - /var/lib/postgresql/data # in memory volume
 
   redis:
     image: redis:latest
     container_name: gateway-redis
     ports:
-      - '6379:6379'
+      - "6379:6379"
     restart: always
+
+  contracts:
+    build:
+      context: apps/indexer/contracts
+      dockerfile: Dockerfile
+    container_name: anticapture-contracts
+    ports:
+      - "8545:8545"
