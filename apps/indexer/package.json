@@ -5,20 +5,13 @@
   "scripts": {
     "dev": "ponder dev --schema public",
     "start": "ponder start --schema public",
-    "start-raw": "npm run drop-public && ponder start --schema public",
     "codegen": "ponder codegen",
     "serve": "npm run setup-drizzle && ponder serve --schema public",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc",
     "test": "jest --detectOpenHandles",
-    "clear-database": "tsx ./test/lib/database/clearDatabase.script.ts",
-    "locally:deploy-ens": "cd ./contracts && npm run locally:deploy-ens",
     "prepare": "husky",
-    "dump-database": "rm -rf dump && pg_dump $DATABASE_URL -n ponder_sync > dump",
-    "restore-database": "psql -d $DATABASE_URL < dump",
-    "drop-public": "psql -d $DATABASE_URL -c 'DROP SCHEMA public CASCADE;'",
-    "drop-all-schemas": "psql -d $DATABASE_URL -c \"DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS ponder_sync CASCADE\"",
     "setup-drizzle": "drizzle-kit migrate"
   },
   "dependencies": {
@@ -52,7 +45,6 @@
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "tsx": "^4.19.1",
     "typescript": "^5.3.3"
   },
   "engines": {
