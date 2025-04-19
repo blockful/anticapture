@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "supergraph": "mesh-compose -o supergraph.graphql",
-    "start": "hive-gateway supergraph"
+    "start": "pnpm supergraph && hive-gateway supergraph"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@graphql-hive/gateway": "^1.13.6",
-    "@graphql-mesh/compose-cli": "^1.4.7"
+    "@graphql-mesh/compose-cli": "^1.4.7",
+    "dotenv": "^16.4.7"
   }
 }

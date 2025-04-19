@@ -1,16 +1,11 @@
-import { createPrefixTransform, defineConfig, loadGraphQLHTTPSubgraph } from '@graphql-mesh/compose-cli'
+import { defineConfig, loadGraphQLHTTPSubgraph } from '@graphql-mesh/compose-cli'
+
+import { gatewayUrls } from './src/env'
 
 export const composeConfig = defineConfig({
-  subgraphs: [
-    {
-      sourceHandler: loadGraphQLHTTPSubgraph('Countries', {
-        endpoint: 'https://countries.trevorblades.com',
-      }),
-      transforms: [
-        createPrefixTransform({
-          value: "Countries_"
-        })
-      ]
-    }
-  ]
+  subgraphs: Object.entries(gatewayUrls).map(([key, url]) => ({
+    sourceHandler: loadGraphQLHTTPSubgraph(key, {
+      endpoint: url,
+    })
+  }))
 })
