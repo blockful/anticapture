@@ -20,6 +20,9 @@ importers:
       dotenv-cli:
         specifier: ^7.4.4
         version: 7.4.4
+      husky:
+        specifier: ^9.1.6
+        version: 9.1.7
       turbo:
         specifier: ^2.3.1
         version: 2.3.1
@@ -5108,6 +5111,11 @@ packages:
   human-signals@5.0.0:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
+
+  husky@9.1.7:
+    resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   idb-keyval@6.2.1:
     resolution: {integrity: sha512-8Sb3veuYCyrZL+VBt9LJfZjLUPWVvqn8tG28VqYNFCo43KHcKuq+b4EiXGeuaLAQWL2YmyDgMp2aSpH9JHsEQg==}
@@ -14343,6 +14351,8 @@ snapshots:
   human-signals@4.3.1: {}
 
   human-signals@5.0.0: {}
+
+  husky@9.1.7: {}
 
   idb-keyval@6.2.1: {}
 
