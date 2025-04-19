@@ -16,7 +16,7 @@ export const CONTRACT_ADDRESSES: Record<
       DaoIdEnum,
       {
         token: { address: Address; decimals: number; abi: Abi };
-        governor: Address;
+        governor?: Address;
       }
     >
   >
@@ -46,10 +46,18 @@ export const CONTRACT_ADDRESSES: Record<
         decimals: 18,
         abi: ARBTokenAbi,
       },
-      governor: "0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9",
     },
   },
-  [NetworkEnum.ANVIL]: {},
+  [NetworkEnum.ANVIL]: {
+    [DaoIdEnum.ENS]: {
+      token: {
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        decimals: 18,
+        abi: ENSTokenAbi,
+      },
+      governor: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    },
+  },
 } as const;
 
 export const TREASURY_ADDRESSES = {

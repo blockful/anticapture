@@ -4,7 +4,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { ENSGovernorAbi, ENSTokenAbi } from "../src/indexer/ens/abi";
+import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 
 export default createConfig({
   database: {
