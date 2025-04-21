@@ -16,7 +16,7 @@ export default createConfig({
       chainId: 1,
       transport: http(env.RPC_URL),
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
-      pollingInterval: env.POOLING_INTERVAL,
+      pollingInterval: env.POLLING_INTERVAL,
     },
   },
   contracts: {
