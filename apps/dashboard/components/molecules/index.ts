@@ -1,6 +1,5 @@
 export * from "./AttackCostBarChart";
 export * from "./ContractsCard";
-export * from "./DashboardTable";
 export * from "./GovernanceActivityTable";
 export * from "./GovernanceImplementationCard";
 export * from "./HeaderDAOSidebar";
@@ -9,6 +8,7 @@ export * from "./HeaderNavMobile";
 export * from "./HeaderSidebar";
 export * from "./MultilineChartAttackProfitability";
 export * from "./MultilineChartTokenDistribution";
+export * from "./PanelTable";
 export * from "./QuorumCard";
 export * from "./ReachOutToUsCard";
 export * from "./SecurityCouncilCard";
