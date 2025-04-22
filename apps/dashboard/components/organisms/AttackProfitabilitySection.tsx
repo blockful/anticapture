@@ -14,10 +14,8 @@ import {
   MultilineChartAttackProfitability,
   AttackCostBarChart,
 } from "@/components/molecules";
-import { RiskLevel, TimeInterval } from "@/lib/enums";
+import { TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
-import daoConfigByDaoId from "@/lib/dao-config";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { AttackProfitabilityConfig } from "@/lib/dao-config/types";
 
@@ -49,11 +47,7 @@ export const AttackProfitabilitySection = ({
       }
       description={SECTIONS_CONSTANTS.attackProfitability.description}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
-      riskLevel={
-        <RiskLevelCard
-          status={attackProfitability?.riskLevel}
-        />
-      }
+      riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
       className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <TheCardChartLayout

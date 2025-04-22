@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { DashboardDao } from "@/lib/mocked-data/mocked-data";
+import { PanelDao } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpDown,
@@ -21,7 +21,7 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
-export const DashboardTable = ({ days }: { days: TimeInterval }) => {
+export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create a ref to store the actual delegated supply values
@@ -79,7 +79,7 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     );
   };
 
-  const dashboardColumns: ColumnDef<DashboardDao>[] = [
+  const panelColumns: ColumnDef<PanelDao>[] = [
     {
       accessorKey: "#",
       size: 60,
@@ -206,18 +206,18 @@ export const DashboardTable = ({ days }: { days: TimeInterval }) => {
     },
   ];
 
-  const handleRowClick = (row: DashboardDao) => {
+  const handleRowClick = (row: PanelDao) => {
     row.dao && router.push(`/${row.dao.toLowerCase()}`);
   };
 
   return (
     <TheTable
-      columns={dashboardColumns}
+      columns={panelColumns}
       data={data}
       withPagination={true}
       withSorting={true}
       onRowClick={handleRowClick}
-      disableRowClick={(row: DashboardDao) =>
+      disableRowClick={(row: PanelDao) =>
         !!daoConfigByDaoId[row.dao as DaoIdEnum].disableDaoPage
       }
     />
