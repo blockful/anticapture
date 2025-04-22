@@ -16,15 +16,11 @@ export const fetchAverageTurnout = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<AverageTurnoutResponse> => {
-  try {
-    const response: Response = await fetch(
-      `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
-      { next: { revalidate: 3600 } },
-    );
-    return response.json();
-  } catch (e) {
-    throw e;
-  }
+  const response: Response = await fetch(
+    `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
+    { next: { revalidate: 3600 } },
+  );
+  return response.json();
 };
 
 /**

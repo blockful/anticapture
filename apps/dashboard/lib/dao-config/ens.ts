@@ -1,46 +1,48 @@
-import { DaoConstants } from "@/lib/dao-constants/types";
-import { RiskLevel, sortByRiskLevel } from "@/lib/enums";
+import { DaoConfiguration } from "@/lib/dao-config/types";
+import { RiskLevel, sortByRiskLevel, SupportStageEnum } from "@/lib/enums";
 import ENSLogo from "@/public/logo/ENS.png";
 import { calculateMonthsBefore } from "@/lib/client/utils";
 
-export const ENS: DaoConstants = {
+export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
-  icon: ENSLogo,
-  inAnalysis: false,
-  contracts: {
-    governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-    token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-    timelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
-  },
-  cancelFunction: "https://etherscan.io/address/0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7#writeContract#F1",
-  snapshot: "https://snapshot.box/#/s:ens.eth",
-  rules: {
-    delay: true,
-    changeVote: false,
-    timelock: true,
-    cancelFunction: true,
-  },
-  supportsLiquidTreasuryCall: true,
-  securityCouncil: {
-    isActive: true,
-    multisig: {
-      threshold: 4,
-      signers: 8,
-      externalLink:
-        "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
+  supportStage: SupportStageEnum.FULL,
+  daoOverview: {
+    snapshot: "https://snapshot.box/#/s:ens.eth",
+    contracts: {
+      governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+      timelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
     },
-    expiration: {
-      startDate: "July 1, 2024",
-      date: "July 26 2026",
-      timestamp: 1784919179,
-      alertExpiration: calculateMonthsBefore({
-        monthsBeforeTimestamp: 3,
+    cancelFunction: undefined,
+    rules: {
+      delay: true,
+      changeVote: false,
+      timelock: true,
+      cancelFunction: false,
+    },
+    securityCouncil: {
+      isActive: true,
+      multisig: {
+        threshold: 4,
+        signers: 8,
+        externalLink:
+          "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
+      },
+      expiration: {
+        startDate: "July 1, 2024",
+        date: "July 26 2026",
         timestamp: 1784919179,
-      }),
+        alertExpiration: calculateMonthsBefore({
+          monthsBeforeTimestamp: 3,
+          timestamp: 1784919179,
+        }),
+      },
     },
   },
+  icon: ENSLogo,
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
+    supportsLiquidTreasuryCall: true,
   },
   governanceImplementation: {
     fields: [
@@ -151,5 +153,7 @@ export const ENS: DaoConstants = {
       },
     ].sort((a, b) => sortByRiskLevel(a, b, "desc")),
   },
-  removeGovernanceActivitySection: true,
+  tokenDistribution: true,
+  governanceActivity: false,
+  showSupport: false,
 };

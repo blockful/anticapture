@@ -1,35 +1,41 @@
 "use client";
 
 import {
-  DaoInfoSection,
   AttackProfitabilitySection,
+  DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const daoConstants = daoConstantsByDaoId[daoIdEnum];
-  if (daoConstants.inAnalysis) {
+  const daoConstants = daoConfigByDaoId[daoIdEnum];
+  const { disableDaoPage } = daoConstants;
+  if (disableDaoPage) {
     return null;
   }
 
   return (
     <>
-      <DaoInfoSection daoId={daoIdEnum} />
-      <AttackProfitabilitySection daoId={daoIdEnum} />
-      {!!daoConstants.governanceImplementation && (
+      {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
+      {daoConstants.showSupport && <ShowSupportSection />}
+      {daoConstants.attackProfitability && (
+        <AttackProfitabilitySection
+          daoId={daoIdEnum}
+          attackProfitability={daoConstants.attackProfitability}
+        />
+      )}
+      {daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
-      <TokenDistributionSection />
-      {!daoConstants.removeGovernanceActivitySection && (
-        <GovernanceActivitySection />
-      )}
+      {daoConstants.tokenDistribution && <TokenDistributionSection />}
+      {daoConstants.governanceActivity && <GovernanceActivitySection />}
     </>
   );
 };

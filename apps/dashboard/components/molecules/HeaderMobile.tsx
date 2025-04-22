@@ -1,21 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { SUPPORTED_DAO_NAMES, DaoIdEnum } from "@/lib/types/daos";
-import { AnticaptureIcon, ConnectWallet } from "@/components/atoms";
+import { AnticaptureIconMobile, ConnectWallet } from "@/components/atoms";
 import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
 
 export const HeaderMobile = () => {
-  const pathname = usePathname();
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [showHeader, setShowHeader] = useState<boolean>(true);
-
-  const isDefault = pathname === "/";
-  const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
-  const isValidDao = daoId && SUPPORTED_DAO_NAMES.includes(daoId as DaoIdEnum);
 
   const headerHeight = 57;
 
@@ -47,29 +40,26 @@ export const HeaderMobile = () => {
         )}
       >
         <div className="px-4 py-3">
-          <div className="flex justify-between">
-            <Link href={"/"} className="flex cursor-pointer">
-              <AnticaptureIcon />
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex cursor-pointer">
+              <AnticaptureIconMobile />
             </Link>
             <div className="flex">
-              <ConnectWallet />
+              <ConnectWallet className="!px-3 !py-1.5" />
             </div>
           </div>
         </div>
       </header>
 
       <div style={{ height: headerHeight }} />
-
-      {isValidDao && (
-        <div
-          className={cn(
-            "sticky top-0 z-30 w-full bg-darkest transition-all duration-300",
-            showHeader && "top-[57px]",
-          )}
-        >
-          <HeaderNavMobile />
-        </div>
-      )}
+      <div
+        className={cn(
+          "sticky top-0 z-30 w-full bg-darkest transition-all duration-300",
+          showHeader && "top-[57px]",
+        )}
+      >
+        <HeaderNavMobile />
+      </div>
     </>
   );
 };

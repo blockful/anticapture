@@ -30,6 +30,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-intersection-observer": "^9.15.1",
+    "react-jazzicon": "^1.0.4",
     "recharts": "^2.15.0",
     "swr": "^2.3.2",
     "tailwind-merge": "^2.5.4",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

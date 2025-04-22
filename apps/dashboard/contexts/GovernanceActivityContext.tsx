@@ -1,12 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricData, GovernanceActivityContextProps } from "@/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { formatUnits } from "viem";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -14,8 +13,9 @@ import {
   useProposals,
   useVotes,
 } from "@/hooks";
+import { formatUnits } from "viem";
 
-const initialGovernanceActivityMetricData = {
+const initialMetricData = {
   value: undefined,
   changeRate: undefined,
 };
@@ -24,14 +24,14 @@ export const GovernanceActivityContext =
   createContext<GovernanceActivityContextProps>({
     days: TimeInterval.NINETY_DAYS,
     setDays: () => {},
-    treasury: initialGovernanceActivityMetricData,
+    treasury: initialMetricData,
     setTreasury: () => {},
     treasurySupplyChart: [],
     setTreasurySupplyChart: () => {},
-    proposals: initialGovernanceActivityMetricData,
-    activeSupply: initialGovernanceActivityMetricData,
-    votes: initialGovernanceActivityMetricData,
-    averageTurnout: initialGovernanceActivityMetricData,
+    proposals: initialMetricData,
+    activeSupply: initialMetricData,
+    votes: initialMetricData,
+    averageTurnout: initialMetricData,
   });
 
 export const GovernanceActivityProvider = ({
@@ -42,88 +42,67 @@ export const GovernanceActivityProvider = ({
   daoId: DaoIdEnum;
 }) => {
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
-  const [treasury, setTreasury] = useState<MetricData>(
-    initialGovernanceActivityMetricData,
-  );
+  const [treasury, setTreasury] = useState<MetricData>(initialMetricData);
   const [treasurySupplyChart, setTreasurySupplyChart] = useState<
     DaoMetricsDayBucket[]
   >([]);
 
-  const parsedDays = useMemo(() => parseInt(days.split("d")[0]), [days]);
-
-  // Use SWR hook for treasury data
-  const { data: treasuryData, error: treasuryError } = useTimeSeriesData(
+  const { data: treasuryData } = useTimeSeriesData(
     daoId,
     [MetricTypesEnum.TREASURY],
-    parsedDays,
+    days,
     {
-      refreshInterval: 300000, // Refresh every 5 minutes
+      refreshInterval: 300000,
       revalidateOnFocus: false,
     },
   );
 
-  // Use SWR hook for active supply data
   const { data: activeSupplyData } = useActiveSupply(daoId, days, {
-    refreshInterval: 300000, // Refresh every 5 minutes
+    refreshInterval: 300000,
     revalidateOnFocus: false,
   });
 
-  // Use SWR hook for proposals data
   const { data: proposalsData } = useProposals(daoId, days, {
-    refreshInterval: 300000, // Refresh every 5 minutes
+    refreshInterval: 300000,
     revalidateOnFocus: false,
   });
 
-  // Use SWR hook for votes data
   const { data: votesData } = useVotes(daoId, days, {
-    refreshInterval: 300000, // Refresh every 5 minutes
+    refreshInterval: 300000,
     revalidateOnFocus: false,
   });
 
-  // Use SWR hook for average turnout data
   const { data: averageTurnoutData } = useAverageTurnout(daoId, days, {
-    refreshInterval: 300000, // Refresh every 5 minutes
+    refreshInterval: 300000,
     revalidateOnFocus: false,
   });
 
-  // Fetch remaining governance data
-  useEffect(() => {
-    const fetchGovernanceData = async () => {
-      try {
-        // Process treasury data from SWR
-        if (treasuryData) {
-          const data = treasuryData[MetricTypesEnum.TREASURY];
-          const currentHigh = data[data.length - 1]?.high ?? "0";
-          const oldHigh = data[0]?.high ?? "0";
-          const changeRate =
-            currentHigh === "0"
-              ? "0"
-              : formatUnits(
-                  (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
-                    BigInt(1e18),
-                  18,
-                );
-          setTreasury({
-            value: String(BigInt(currentHigh) / BigInt(10 ** 18)),
-            changeRate: changeRate,
-          });
-          setTreasurySupplyChart(data);
-        }
-      } catch (error) {
-        console.error("Error fetching governance metrics", error);
-      }
-    };
+  if (treasuryData && treasuryData[MetricTypesEnum.TREASURY]) {
+    const data = treasuryData[MetricTypesEnum.TREASURY];
+    if (data.length > 0 && treasury.value === undefined) {
+      const currentHigh = data[data.length - 1]?.high ?? "0";
+      const oldHigh = data[0]?.high ?? "0";
+      let changeRate = "0";
 
-    fetchGovernanceData();
-  }, [
-    daoId,
-    days,
-    treasuryData,
-    treasuryError,
-    proposalsData,
-    votesData,
-    averageTurnoutData,
-  ]);
+      if (currentHigh !== "0" && oldHigh !== "0") {
+        try {
+          changeRate = formatUnits(
+            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
+              BigInt(1e18),
+            18,
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      setTreasury({
+        value: String(BigInt(currentHigh || "0") / BigInt(10 ** 18)),
+        changeRate,
+      });
+      setTreasurySupplyChart(data);
+    }
+  }
 
   return (
     <GovernanceActivityContext.Provider

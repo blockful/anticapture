@@ -11,21 +11,22 @@ export const ButtonHeaderDAOSidebarMobile = ({
   options: {
     anchorId: string;
     title: string;
+    enabled?: boolean;
   }[];
   headerOffset?: number;
 }) => {
   const MOBILE_DEFAULT_OFFSET = 120;
 
   const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
+    initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
     headerOffset: MOBILE_DEFAULT_OFFSET,
     useWindowScrollTo: true,
   });
 
   return (
     <Tabs
-      defaultValue={SECTIONS_CONSTANTS.daoInfo.anchorId}
-      value={activeSection || SECTIONS_CONSTANTS.daoInfo.anchorId}
+      defaultValue={SECTIONS_CONSTANTS.daoOverview.anchorId}
+      value={activeSection || SECTIONS_CONSTANTS.daoOverview.anchorId}
       onValueChange={(value) => handleSectionClick(value)}
       className="w-fit min-w-full"
     >
@@ -34,20 +35,23 @@ export const ButtonHeaderDAOSidebarMobile = ({
           "group flex border-b border-t border-b-white/10 border-t-white/10 pl-4",
         )}
       >
-        {options.map((option) => (
-          <TabsTrigger
-            className={cn(
-              "relative gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium text-foreground",
-              "data-[state=active]:text-tangerine",
-              "after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[1px] after:bg-transparent after:content-['']",
-              "data-[state=active]:after:bg-tangerine",
-            )}
-            key={option.anchorId}
-            value={option.anchorId}
-          >
-            {option.title}
-          </TabsTrigger>
-        ))}
+        {options.map(
+          (option) =>
+            option.enabled && (
+              <TabsTrigger
+                className={cn(
+                  "relative gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium text-foreground",
+                  "data-[state=active]:text-tangerine",
+                  "after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[1px] after:bg-transparent after:content-['']",
+                  "data-[state=active]:after:bg-tangerine",
+                )}
+                key={option.anchorId}
+                value={option.anchorId}
+              >
+                {option.title}
+              </TabsTrigger>
+            ),
+        )}
       </TabsList>
     </Tabs>
   );

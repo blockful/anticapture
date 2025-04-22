@@ -1,18 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
-import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import Link from "next/link";
+import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 
 export const SecurityCouncilCard = ({
-  daoConstants,
+  daoOverview,
 }: {
-  daoConstants: DaoConstantsFullySupported;
+  daoOverview: DaoOverviewConfig;
 }) => {
-  const { securityCouncil } = daoConstants;
+  const { securityCouncil } = daoOverview;
 
   const progress = useMemo(() => {
     if (!securityCouncil) return 0;
@@ -108,14 +108,14 @@ export const SecurityCouncilCard = ({
             <div className="flex w-full items-center justify-between sm:hidden">
               <p className="text-sm font-medium text-foreground">Countdown:</p>
               <CountdownDaoInfo
-                daoConstants={daoConstants}
+                daoOverview={daoOverview}
                 className="border-none bg-dark"
               />
             </div>
           </div>
         </div>
         <div className="hidden sm:flex">
-          <CountdownDaoInfo daoConstants={daoConstants} />
+          <CountdownDaoInfo daoOverview={daoOverview} />
         </div>
       </div>
       <div className="flex">

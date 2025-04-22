@@ -16,7 +16,7 @@ export const HomeDashboardSection = () => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.dashboard.title}
+      title={SECTIONS_CONSTANTS.panel.title}
       icon={<BarChartIcon className="h-6 w-6 text-foreground" />}
       switchDate={
         <SwitcherDate
@@ -24,7 +24,7 @@ export const HomeDashboardSection = () => {
           setTimeInterval={setTimeIntervalDashboard}
         />
       }
-      anchorId={SECTIONS_CONSTANTS.dashboard.anchorId}
+      anchorId={SECTIONS_CONSTANTS.panel.anchorId}
     >
       <DashboardTable days={timeIntervalDashboard} />
     </TheSectionLayout>

@@ -109,7 +109,7 @@
   }
 
   .btn-connect-wallet {
-    @apply flex w-full items-center justify-center gap-2 rounded-md border border-transparent bg-lightDark px-3 py-1.5 text-white hover:border hover:border-lightDark hover:bg-transparent;
+    @apply flex w-full items-center justify-center gap-2 rounded-md border border-transparent bg-lightDark p-3  text-white hover:border hover:border-lightDark hover:bg-transparent;
   }
 
   .card-text-accordion {

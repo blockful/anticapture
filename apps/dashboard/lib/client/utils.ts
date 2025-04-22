@@ -5,13 +5,14 @@ import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
-} from "@/lib/dao-constants/types";
+} from "@/lib/dao-config/types";
 import {
   DAYS_PER_MONTH,
   SECONDS_PER_DAY,
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
 } from "@/lib/client/constants";
+import { TimeInterval, DAYS_IN_MILLISECONDS } from "@/lib/enums";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -303,4 +304,50 @@ export const calculateMonthsBefore = ({
   const SECONDS_TO_SUBTRACT =
     monthsBeforeTimestamp * DAYS_PER_MONTH * SECONDS_PER_DAY;
   return timestamp - SECONDS_TO_SUBTRACT;
+};
+
+export const calculatePastTimestamp = (
+  lastTimestamp: number,
+  interval: TimeInterval,
+): number => lastTimestamp - DAYS_IN_MILLISECONDS[interval];
+
+export type FilteredChartData = {
+  full: PriceEntry[];
+} & Record<TimeInterval, PriceEntry[]>;
+
+export const filterPriceHistoryByTimeInterval = (
+  dataset: PriceEntry[],
+): FilteredChartData => {
+  if (dataset.length === 0) {
+    return {
+      full: dataset,
+      [TimeInterval.SEVEN_DAYS]: [],
+      [TimeInterval.THIRTY_DAYS]: [],
+      [TimeInterval.NINETY_DAYS]: [],
+      [TimeInterval.ONE_YEAR]: [],
+    };
+  }
+
+  const lastTimestamp = dataset[dataset.length - 1][0];
+
+  const cutoffTimestamps = Object.values(TimeInterval).reduce(
+    (acc, interval) => {
+      acc[interval] = calculatePastTimestamp(lastTimestamp, interval);
+      return acc;
+    },
+    {} as Record<TimeInterval, number>,
+  );
+
+  return {
+    full: dataset,
+    ...Object.values(TimeInterval).reduce(
+      (acc, interval) => {
+        acc[interval] = dataset.filter(
+          ([timestamp]) => timestamp >= cutoffTimestamps[interval],
+        );
+        return acc;
+      },
+      {} as Record<TimeInterval, PriceEntry[]>,
+    ),
+  };
 };

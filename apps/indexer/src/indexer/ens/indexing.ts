@@ -16,18 +16,24 @@ import {
   voteCast,
 } from "@/lib/event-handlers";
 import viemClient from "@/lib/viemClient";
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 import { dao, daoToken, token } from "ponder:schema";
-import { CONTRACT_ADDRESS_MAINNET } from "@/lib/constants";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 const daoId = DaoIdEnum.ENS;
 
+const network = NetworkEnum.MAINNET;
+const tokenAddress = CONTRACT_ADDRESSES[network][daoId].token;
+
 ponder.on("ENSToken:setup", async ({ context }) => {
-  const votingPeriod = await viemClient.getVotingPeriod(daoId);
-  const quorum = await viemClient.getQuorum(daoId);
-  const votingDelay = await viemClient.getVotingDelay(daoId);
-  const timelockDelay = await viemClient.getTimelockDelay(daoId);
-  const proposalThreshold = await viemClient.getProposalThreshold(daoId);
+  const votingPeriod = await viemClient.getVotingPeriod(daoId, network);
+  const quorum = await viemClient.getQuorum(daoId, network);
+  const votingDelay = await viemClient.getVotingDelay(daoId, network);
+  const timelockDelay = await viemClient.getTimelockDelay(daoId, network);
+  const proposalThreshold = await viemClient.getProposalThreshold(
+    daoId,
+    network,
+  );
 
   await context.db.insert(dao).values({
     id: daoId,
@@ -37,8 +43,7 @@ ponder.on("ENSToken:setup", async ({ context }) => {
     timelockDelay,
     proposalThreshold,
   });
-  const decimals = await viemClient.getDecimals(daoId);
-  const tokenAddress = CONTRACT_ADDRESS_MAINNET[daoId].token;
+  const decimals = await viemClient.getDecimals(daoId, network);
   await context.db.insert(token).values({
     id: tokenAddress,
     name: daoId,
@@ -59,11 +64,11 @@ ponder.on("ENSToken:setup", async ({ context }) => {
 });
 
 ponder.on("ENSToken:DelegateChanged", async ({ event, context }) => {
-  await delegateChanged(event, context, daoId);
+  await delegateChanged(event, context, daoId, network);
 });
 
 ponder.on("ENSToken:DelegateVotesChanged", async ({ event, context }) => {
-  await delegatedVotesChanged(event, context, daoId);
+  await delegatedVotesChanged(event, context, daoId, network);
 });
 
 /**
@@ -71,7 +76,7 @@ ponder.on("ENSToken:DelegateVotesChanged", async ({ event, context }) => {
  * Creates a new Transfer record and updates Account balances
  */
 ponder.on("ENSToken:Transfer", async ({ event, context }) => {
-  await tokenTransfer(event, context, daoId);
+  await tokenTransfer(event, context, daoId, network);
 });
 
 /**
@@ -79,7 +84,7 @@ ponder.on("ENSToken:Transfer", async ({ event, context }) => {
  * Creates a new VotesOnchain record and updates the voter's vote count
  */
 ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
-  await voteCast(event, context, daoId);
+  await voteCast(event, context, daoId, network);
 });
 
 /**
@@ -87,7 +92,7 @@ ponder.on("ENSGovernor:VoteCast", async ({ event, context }) => {
  * Creates a new ProposalsOnchain record and updates the proposer's proposal count
  */
 ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
-  await proposalCreated(event, context, daoId);
+  await proposalCreated(event, context, daoId, network);
 });
 
 /**
@@ -95,7 +100,7 @@ ponder.on("ENSGovernor:ProposalCreated", async ({ event, context }) => {
  * Updates the status of a proposal to CANCELED
  */
 ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
-  await proposalCanceled(event, context, daoId);
+  await proposalCanceled(event, context, daoId, network);
 });
 
 /**
@@ -103,5 +108,5 @@ ponder.on("ENSGovernor:ProposalCanceled", async ({ event, context }) => {
  * Updates the status of a proposal to EXECUTED
  */
 ponder.on("ENSGovernor:ProposalExecuted", async ({ event, context }) => {
-  await proposalExecuted(event, context, daoId);
+  await proposalExecuted(event, context, daoId, network);
 });

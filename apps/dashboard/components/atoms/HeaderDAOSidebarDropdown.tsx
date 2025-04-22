@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
+import ArbitrumIcon from "@/public/logo/Arbitrum.png";
+import Image from "next/image";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -59,6 +61,17 @@ export const HeaderDAOSidebarDropdown = () => {
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
       },
+      {
+        id: 2,
+        label: "Arbitrum",
+        icon: (
+          <div className="h-5 w-5 rounded-full bg-white">
+            <Image src={ArbitrumIcon} alt="Arbitrum" className="h-5 w-5" />
+          </div>
+        ),
+        href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
+        name: DaoIdEnum.ARBITRUM,
+      },
     ],
     [],
   );
@@ -78,16 +91,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div className="relative inline-block w-full" ref={dropdownRef}>
-      <div className="border-b border-b-lightDark p-3">
-        <Link
-          className="transition-color group flex gap-x-1.5 text-xs font-medium text-foreground duration-500 ease-in-out hover:text-white"
-          href={"/"}
-        >
-          <ArrowLeftIcon className="group-[hover]:text-white" />
-          Back to dashboard
-        </Link>
-      </div>
-      <div className="p-3">
+      <div className="border-b border-lightDark px-2 py-[7px]">
         <button
           className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-[#333]"
           onClick={toggleDropdown}

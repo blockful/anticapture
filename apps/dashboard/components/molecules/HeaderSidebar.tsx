@@ -1,43 +1,63 @@
 "use client";
 
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { BarChart4 } from "lucide-react";
 import {
   AnticaptureIcon,
-  BarChartIcon,
-  BaseHeaderLayoutSidebar,
+  ButtonHeaderSidebar,
+  ConnectWallet,
 } from "@/components/atoms";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import packageJson from "@/package.json";
 
 export const HeaderSidebar = () => {
-  return (
-    <BaseHeaderLayoutSidebar>
-      <div className="flex w-full flex-col items-start">
-        <div className="flex w-full items-center justify-between border-b border-b-lightDark px-4 py-3">
-          <div className="flex">
-            <AnticaptureIcon />
-          </div>
-          <div className="flex">
-          <p className="text-xs font-medium text-foreground">v{packageJson.version}</p>
-          </div>
-        </div>
-        <div className="flex w-full p-4">
-          <button
-            className="flex w-full items-center gap-3 rounded-md bg-lightDark p-2"
-            onClick={() => {
-              const dashboardAnchorSection = document.getElementById(
-                SECTIONS_CONSTANTS.dashboard.anchorId,
-              );
+  const router = useRouter();
 
-              dashboardAnchorSection?.scrollIntoView({
-                behavior: "smooth",
-              });
-            }}
-          >
-            <BarChartIcon className="text-white" />
-            <p className="text-sm font-medium text-white">Dashboard</p>
-          </button>
+  const headerItems = useMemo(
+    () => [
+      {
+        anchorId: SECTIONS_CONSTANTS.panel.anchorId,
+        label: "Panel",
+        icon: BarChart4,
+        onClick: () => {
+          sessionStorage.setItem("scrollToSection", "panel");
+          router.push("/");
+        },
+      },
+    ],
+    [],
+  );
+
+  return (
+    <header className="fixed left-0 top-0 z-50 hidden h-screen w-[72px] border-r border-lightDark bg-darkest sm:block">
+      <div className="flex h-full w-full flex-col items-start">
+        <Link
+          href="/"
+          className="flex w-full justify-center border-b border-b-lightDark p-3"
+        >
+          <AnticaptureIcon className="size-9" />
+        </Link>
+        <div className="flex h-full w-full flex-col justify-between">
+          <div className="flex h-full flex-col gap-1.5 p-1.5">
+            {headerItems.map((item) => (
+              <ButtonHeaderSidebar
+                key={item.anchorId}
+                anchorId={item.anchorId}
+                icon={item.icon}
+                label={item.label}
+                className="flex-col gap-1"
+                onClick={() => {
+                  router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
+                }}
+              />
+            ))}
+          </div>
+          <div className="flex px-3 py-4">
+            <ConnectWallet label="" />
+          </div>
         </div>
       </div>
-    </BaseHeaderLayoutSidebar>
+    </header>
   );
 };
