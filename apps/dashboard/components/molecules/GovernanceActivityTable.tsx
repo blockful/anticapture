@@ -94,7 +94,7 @@ export const GovernanceActivityTable = () => {
     {
       accessorKey: "average",
       cell: ({ row }) => {
-        const average: number = row.getValue("average");
+        const average: string = row.getValue("average");
 
         if (!average) {
           return (
@@ -106,7 +106,7 @@ export const GovernanceActivityTable = () => {
 
         return (
           <div className="flex items-center justify-end px-4 text-end">
-            {average && formatNumberUserReadable(average)}
+            {average}
           </div>
         );
       },
