@@ -35,6 +35,9 @@ importers:
       '@graphql-mesh/compose-cli':
         specifier: ^1.4.7
         version: 1.4.7(graphql@16.9.0)
+      '@omnigraph/openapi':
+        specifier: ^0.109.7
+        version: 0.109.7(graphql@16.9.0)
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
@@ -1392,6 +1395,12 @@ packages:
     peerDependencies:
       graphql: ^15.9.0 || ^16.9.0
 
+  '@graphql-mesh/transport-rest@0.9.4':
+    resolution: {integrity: sha512-5AK8eBOIt0WPr+ksTfGDMHFe+R7ZumNR1pPElfa8+saFdtgJh+EZAnQ+iMuvAzWJK1ZxjsTgnnn/gTucaVkHvA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: '*'
+
   '@graphql-mesh/transport-ws@1.0.9':
     resolution: {integrity: sha512-OjFFFX2GUVOcBcbd5ViTTaA6ComIV6XSDwMFB0KFOOqKVg7qaQK09OG00NXxJN7oTMhKMlPdzeaJXniHfq0m4g==}
     engines: {node: '>=18.0.0'}
@@ -1783,6 +1792,9 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
+  '@json-schema-tools/meta-schema@1.7.5':
+    resolution: {integrity: sha512-8Hy6tuMC2BQdK7O4ilLovFB9t0j5o0L/sQTuWeg2CNYpITmPiFTRiG7Yb/jYd483D8784kxLFJ0dT+T4O2hNmw==}
+
   '@kamilkisiela/fast-url-parser@1.1.4':
     resolution: {integrity: sha512-gbkePEBupNydxCelHCESvFSFM8XPh1Zs/OAVRW/rKpEqPAl5PbOM90Si8mv9bvnR53uPD2s/FiRxdvSejpRJew==}
 
@@ -1993,6 +2005,18 @@ packages:
   '@nolyfill/is-core-module@1.0.39':
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
+
+  '@omnigraph/json-schema@0.109.4':
+    resolution: {integrity: sha512-diBdbuNG8vPxRVtWUmrwelUfVcgLCuHZPJSZjkOfkxE3K6xVdIrRSBYcl1I89IcdsGZEhT8Lm7yFUo41JQxsaQ==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: '*'
+
+  '@omnigraph/openapi@0.109.7':
+    resolution: {integrity: sha512-p/VOUckCSQm4RLANmagSx4NcjCJZB2wImm0Bl3AC9tTCLNHhgK1B+cM1Kx9nGGqvbSf0LO8PIfs3VNE5ZJcS6g==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: '*'
 
   '@opentelemetry/api-logs@0.57.2':
     resolution: {integrity: sha512-uIX52NnTM0iBh84MShlpouI7UKqkZ7MrUszTmaypHBu4r7NofznSnQRfJ+uUeDtQDj6w8eFGg5KBLDAwAPz1+A==}
@@ -4990,6 +5014,14 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
+  graphql-compose@9.1.0:
+    resolution: {integrity: sha512-nFL2+oeF8IlKjXPzmFL9rlBhrHlJMKGC0JeuBfOkWLLNqAtlFV+M1YGuuORyx0+mbLsBl9XToKWBPPfCHL8HHA==}
+    peerDependencies:
+      graphql: ^14.2.0 || ^15.0.0 || ^16.0.0
+
+  graphql-fields@2.0.3:
+    resolution: {integrity: sha512-x3VE5lUcR4XCOxPIqaO4CE+bTK8u6gVouOdpQX9+EKHr+scqtK5Pp/l8nIGqIpN1TUlkKE6jDCCycm/WtLRAwA==}
+
   graphql-jit@0.8.7:
     resolution: {integrity: sha512-KGzCrsxQPfEiXOUIJCexWKiWF6ycjO89kAO6SdO8OWRGwYXbG0hsLuTnbFfMq0gj7d7/ib/Gh7jtst7FHZEEjw==}
     peerDependencies:
@@ -5000,6 +5032,11 @@ packages:
     engines: {node: '>=10'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+
+  graphql-type-json@0.3.2:
+    resolution: {integrity: sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==}
+    peerDependencies:
+      graphql: '>=0.8.0'
 
   graphql-ws@6.0.4:
     resolution: {integrity: sha512-8b4OZtNOvv8+NZva8HXamrc0y1jluYC0+13gdh7198FKjVzXyTvVc95DCwGzaKEfn3YuWZxUqjJlHe3qKM/F2g==}
@@ -5591,6 +5628,10 @@ packages:
   json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
 
+  json-machete@0.97.6:
+    resolution: {integrity: sha512-x2l9qLLO932QEbndVCqbDAT8jZ6B583/a7C3I4y1r17u+Z1FNSpnfHwpZS+FHY066/hUZaMnnhUPNe086ICgng==}
+    engines: {node: '>=16.0.0'}
+
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
 
@@ -5776,6 +5817,9 @@ packages:
   lodash.kebabcase@4.1.1:
     resolution: {integrity: sha512-N8XRTIMMqqDgSy4VLKPnJ/+hpGZN+PHQiJnSenYqPaVV/NCqEogTnAdZLQiGKhxX+JCs8waWq2t1XHWKOmlY8g==}
 
+  lodash.keys@4.2.0:
+    resolution: {integrity: sha512-J79MkJcp7Df5mizHiVNpjoHXLi4HLjh9VLS/M7lQSGoQ+0oQ+lWEigREkqKyizPB1IawvQLLKY8mzEcm1tkyxQ==}
+
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
 
@@ -5784,6 +5828,10 @@ packages:
 
   lodash.mergewith@4.6.2:
     resolution: {integrity: sha512-GK3g5RPZWTRSeLSpgP8Xhra+pnjBC56q9FZYe1d5RN3TJ35dbkGy3YqBSMbyCrlbi+CM9Z3Jk5yTL7RCsqboyQ==}
+
+  lodash.omit@4.5.0:
+    resolution: {integrity: sha512-XeqSp49hNGmlkj2EJlfrQFIzQ6lXdNro9sddtQzcJY8QaoC2GO0DT7xaIokHeyM+mIT0mPMlPvkYzg2xCuHdZg==}
+    deprecated: This package is deprecated. Use destructuring assignment syntax instead.
 
   lodash.once@4.1.1:
     resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
@@ -5805,6 +5853,12 @@ packages:
 
   lodash.upperfirst@4.3.1:
     resolution: {integrity: sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==}
+
+  lodash.without@4.4.0:
+    resolution: {integrity: sha512-M3MefBwfDhgKgINVuBJCO1YR3+gf6s9HNJsIiZ/Ru77Ws6uTb9eBuvrkpzO+9iLoAaRodGuq7tyrPCx+74QYGQ==}
+
+  lodash.xor@4.5.0:
+    resolution: {integrity: sha512-sVN2zimthq7aZ5sPGXnSz32rZPuqcparVW50chJQe+mzTYV+IsxSsl/2gnkWWE2Of7K3myBQBqtLKOUEHJKRsQ==}
 
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
@@ -6151,6 +6205,9 @@ packages:
   onetime@6.0.0:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
+
+  openapi-types@12.1.3:
+    resolution: {integrity: sha512-N4YtSYJqghVu4iek2ZUvcN/0aqH1kRDuNqzcycDxhOUpg7GdvLa2F3DgS6yBNhInhv2r/6I0Flkn7CqL8+nIcw==}
 
   openid-client@5.7.1:
     resolution: {integrity: sha512-jDBPgSVfTnkIh71Hg9pRvtJc6wTwqjRkN88+gCFtYWrlP4Yx2Dsrow8uPi3qLr/aeymPF3o2+dS+wOpglK04ew==}
@@ -6629,6 +6686,10 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
+  qs@6.14.0:
+    resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
+    engines: {node: '>=0.6'}
+
   query-string@7.1.3:
     resolution: {integrity: sha512-hh2WYhq4fi8+b+/2Kg9CEge4fDPvHS534aOOvOZeQ3+Vf2mCFsaFBYj0i+iXcAq6I9Vzp5fjMFBlONvayDC1qg==}
     engines: {node: '>=6'}
@@ -6918,8 +6979,24 @@ packages:
   shimmer@1.2.1:
     resolution: {integrity: sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==}
 
+  side-channel-list@1.0.0:
+    resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
+    engines: {node: '>= 0.4'}
+
+  side-channel-map@1.0.1:
+    resolution: {integrity: sha512-VCjCNfgMsby3tTdo02nbjtM/ewra6jPHmpThenkTYh8pG9ucZ/1P8So4u4FGBek/BjpOVsDCMoLA/iuBKIFXRA==}
+    engines: {node: '>= 0.4'}
+
+  side-channel-weakmap@1.0.2:
+    resolution: {integrity: sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A==}
+    engines: {node: '>= 0.4'}
+
   side-channel@1.0.6:
     resolution: {integrity: sha512-fDW/EZ6Q9RiO8eFG8Hj+7u/oW+XrPTIChwCOM2+th2A6OblDtYYIpve9m+KvI9Z4C9qSEXlaGR6bTEYHReuglA==}
+    engines: {node: '>= 0.4'}
+
+  side-channel@1.1.0:
+    resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
     engines: {node: '>= 0.4'}
 
   signal-exit@3.0.7:
@@ -7225,6 +7302,9 @@ packages:
   tmpl@1.0.5:
     resolution: {integrity: sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==}
 
+  to-json-schema@0.2.5:
+    resolution: {integrity: sha512-jP1ievOee8pec3tV9ncxLSS48Bnw7DIybgy112rhMCEhf3K4uyVNZZHr03iQQBzbV5v5Hos+dlZRRyk6YSMNDw==}
+
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
@@ -7493,6 +7573,9 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  url-join@4.0.1:
+    resolution: {integrity: sha512-jk1+QP6ZJqyOiuEI9AEWQfju/nB2Pw466kbA0LEZljHwKeMgd9WrAEgEGxjPDD2+TNbbb37rTyhEfrCXfuKXnA==}
 
   urlpattern-polyfill@10.0.0:
     resolution: {integrity: sha512-H/A06tKD7sS1O1X2SshBVeA5FLycRpjqiBeqGKmBwBDBy28EnRjORxTNe269KSSr5un5qyWi1iL61wLxpd+ZOg==}
@@ -9618,6 +9701,23 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
+  '@graphql-mesh/transport-rest@0.9.4(graphql@16.9.0)':
+    dependencies:
+      '@graphql-mesh/cross-helpers': 0.4.10(graphql@16.9.0)
+      '@graphql-mesh/string-interpolation': 0.5.8(graphql@16.9.0)
+      '@graphql-mesh/transport-common': 0.7.34(graphql@16.9.0)
+      '@graphql-mesh/types': 0.104.3(graphql@16.9.0)
+      '@graphql-mesh/utils': 0.104.3(graphql@16.9.0)
+      '@graphql-tools/utils': 10.8.6(graphql@16.9.0)
+      '@whatwg-node/fetch': 0.10.6
+      dset: 3.1.4
+      graphql: 16.9.0
+      graphql-fields: 2.0.3
+      graphql-scalars: 1.24.2(graphql@16.9.0)
+      qs: 6.14.0
+      tslib: 2.8.1
+      url-join: 4.0.1
+
   '@graphql-mesh/transport-ws@1.0.9(bufferutil@4.0.8)(graphql@16.9.0)(utf-8-validate@5.0.10)':
     dependencies:
       '@graphql-mesh/cross-helpers': 0.4.10(graphql@16.9.0)
@@ -10252,6 +10352,8 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
+  '@json-schema-tools/meta-schema@1.7.5': {}
+
   '@kamilkisiela/fast-url-parser@1.1.4': {}
 
   '@lit-labs/ssr-dom-shim@1.2.1': {}
@@ -10544,6 +10646,49 @@ snapshots:
       fastq: 1.17.1
 
   '@nolyfill/is-core-module@1.0.39': {}
+
+  '@omnigraph/json-schema@0.109.4(graphql@16.9.0)':
+    dependencies:
+      '@graphql-mesh/cross-helpers': 0.4.10(graphql@16.9.0)
+      '@graphql-mesh/string-interpolation': 0.5.8(graphql@16.9.0)
+      '@graphql-mesh/transport-common': 0.7.34(graphql@16.9.0)
+      '@graphql-mesh/transport-rest': 0.9.4(graphql@16.9.0)
+      '@graphql-mesh/types': 0.104.3(graphql@16.9.0)
+      '@graphql-mesh/utils': 0.104.3(graphql@16.9.0)
+      '@graphql-tools/delegate': 10.2.17(graphql@16.9.0)
+      '@graphql-tools/utils': 10.8.6(graphql@16.9.0)
+      '@json-schema-tools/meta-schema': 1.7.5
+      '@whatwg-node/fetch': 0.10.6
+      ajv: 8.17.1
+      ajv-formats: 2.1.1(ajv@8.17.1)
+      dset: 3.1.4
+      graphql: 16.9.0
+      graphql-compose: 9.1.0(graphql@16.9.0)
+      graphql-fields: 2.0.3
+      graphql-scalars: 1.24.2(graphql@16.9.0)
+      json-machete: 0.97.6
+      pascal-case: 3.1.2
+      qs: 6.14.0
+      to-json-schema: 0.2.5
+      tslib: 2.8.1
+      url-join: 4.0.1
+
+  '@omnigraph/openapi@0.109.7(graphql@16.9.0)':
+    dependencies:
+      '@graphql-mesh/cross-helpers': 0.4.10(graphql@16.9.0)
+      '@graphql-mesh/fusion-composition': 0.8.6(graphql@16.9.0)
+      '@graphql-mesh/string-interpolation': 0.5.8(graphql@16.9.0)
+      '@graphql-mesh/types': 0.104.3(graphql@16.9.0)
+      '@graphql-mesh/utils': 0.104.3(graphql@16.9.0)
+      '@graphql-tools/utils': 10.8.6(graphql@16.9.0)
+      '@omnigraph/json-schema': 0.109.4(graphql@16.9.0)
+      change-case: 4.1.2
+      graphql: 16.9.0
+      json-machete: 0.97.6
+      openapi-types: 12.1.3
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@opentelemetry/api-logs@0.57.2':
     dependencies:
@@ -13525,7 +13670,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.2(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1)
@@ -13560,20 +13705,20 @@ snapshots:
       debug: 4.3.7
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.3.0
       is-glob: 4.0.3
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
       - eslint-import-resolver-node
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -13584,7 +13729,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -13595,7 +13740,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -14146,6 +14291,13 @@ snapshots:
 
   graphemer@1.4.0: {}
 
+  graphql-compose@9.1.0(graphql@16.9.0):
+    dependencies:
+      graphql: 16.9.0
+      graphql-type-json: 0.3.2(graphql@16.9.0)
+
+  graphql-fields@2.0.3: {}
+
   graphql-jit@0.8.7(graphql@16.9.0):
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.9.0)
@@ -14160,6 +14312,10 @@ snapshots:
     dependencies:
       graphql: 16.9.0
       tslib: 2.8.1
+
+  graphql-type-json@0.3.2(graphql@16.9.0):
+    dependencies:
+      graphql: 16.9.0
 
   graphql-ws@6.0.4(graphql@16.9.0)(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)):
     dependencies:
@@ -14937,6 +15093,15 @@ snapshots:
 
   json-buffer@3.0.1: {}
 
+  json-machete@0.97.6:
+    dependencies:
+      '@json-schema-tools/meta-schema': 1.7.5
+      cross-inspect: 1.0.1
+      json-pointer: 0.6.2
+      to-json-schema: 0.2.5
+      tslib: 2.8.1
+      url-join: 4.0.1
+
   json-parse-even-better-errors@2.3.1: {}
 
   json-pointer@0.6.2:
@@ -15142,11 +15307,15 @@ snapshots:
 
   lodash.kebabcase@4.1.1: {}
 
+  lodash.keys@4.2.0: {}
+
   lodash.memoize@4.1.2: {}
 
   lodash.merge@4.6.2: {}
 
   lodash.mergewith@4.6.2: {}
+
+  lodash.omit@4.5.0: {}
 
   lodash.once@4.1.1: {}
 
@@ -15161,6 +15330,10 @@ snapshots:
   lodash.uniq@4.5.0: {}
 
   lodash.upperfirst@4.3.1: {}
+
+  lodash.without@4.4.0: {}
+
+  lodash.xor@4.5.0: {}
 
   lodash@4.17.21: {}
 
@@ -15477,6 +15650,8 @@ snapshots:
   onetime@6.0.0:
     dependencies:
       mimic-fn: 4.0.0
+
+  openapi-types@12.1.3: {}
 
   openid-client@5.7.1:
     dependencies:
@@ -15984,6 +16159,10 @@ snapshots:
       pngjs: 5.0.0
       yargs: 15.4.1
 
+  qs@6.14.0:
+    dependencies:
+      side-channel: 1.1.0
+
   query-string@7.1.3:
     dependencies:
       decode-uri-component: 0.2.2
@@ -16306,12 +16485,40 @@ snapshots:
 
   shimmer@1.2.1: {}
 
+  side-channel-list@1.0.0:
+    dependencies:
+      es-errors: 1.3.0
+      object-inspect: 1.13.3
+
+  side-channel-map@1.0.1:
+    dependencies:
+      call-bound: 1.0.4
+      es-errors: 1.3.0
+      get-intrinsic: 1.3.0
+      object-inspect: 1.13.3
+
+  side-channel-weakmap@1.0.2:
+    dependencies:
+      call-bound: 1.0.4
+      es-errors: 1.3.0
+      get-intrinsic: 1.3.0
+      object-inspect: 1.13.3
+      side-channel-map: 1.0.1
+
   side-channel@1.0.6:
     dependencies:
       call-bind: 1.0.7
       es-errors: 1.3.0
       get-intrinsic: 1.2.4
       object-inspect: 1.13.3
+
+  side-channel@1.1.0:
+    dependencies:
+      es-errors: 1.3.0
+      object-inspect: 1.13.3
+      side-channel-list: 1.0.0
+      side-channel-map: 1.0.1
+      side-channel-weakmap: 1.0.2
 
   signal-exit@3.0.7: {}
 
@@ -16651,6 +16858,15 @@ snapshots:
 
   tmpl@1.0.5: {}
 
+  to-json-schema@0.2.5:
+    dependencies:
+      lodash.isequal: 4.5.0
+      lodash.keys: 4.2.0
+      lodash.merge: 4.6.2
+      lodash.omit: 4.5.0
+      lodash.without: 4.4.0
+      lodash.xor: 4.5.0
+
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
@@ -16882,6 +17098,8 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  url-join@4.0.1: {}
 
   urlpattern-polyfill@10.0.0: {}
 
