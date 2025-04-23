@@ -21,18 +21,3 @@ assignees: ''
 
 <!--  Please explain the steps required to duplicate the issue,
 especially if you can provide a sample application. -->
-
-### Related code
-
-<!-- If you can illustrate the bug or feature request
-with an example, please provide it here. -->
-
-```sh
-insert short code snippets here
-```
-
-### Other information
-
-<!-- Could you list any other information that is relevant to your issue?
-Related issues, suggestions on how to fix, Stack Overflow links,
-forum links, etc. -->

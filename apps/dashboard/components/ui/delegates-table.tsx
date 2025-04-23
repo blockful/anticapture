@@ -7,7 +7,7 @@ import { ArrowUpDown, InfoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { sanitizeNumber } from "@/lib/client/utils";
-import { Delegates, delegatesData } from "@/lib/mocked-data";
+import { Delegates, delegatesData } from "@/lib/mocked-data/mocked-data";
 import { HeartIcon } from "@/components/atoms";
 
 export const delegatesColumns: ColumnDef<Delegates>[] = [

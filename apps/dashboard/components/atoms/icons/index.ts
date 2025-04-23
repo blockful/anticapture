@@ -1,6 +1,7 @@
 export * from "./ActivityIcon";
 export * from "./AlertTriangleIcon";
 export * from "./AnticaptureIcon";
+export * from "./AnticaptureIconMobile";
 export * from "./ArrowDownIcon";
 export * from "./ArrowLeftIcon";
 export * from "./ArrowLeftRight";
@@ -16,6 +17,7 @@ export * from "./ChevronRightIcon";
 export * from "./CircleCheckIcon";
 export * from "./CircleNotCheckedIcon";
 export * from "./ClickIcon";
+export * from "./ClockwiseIcon";
 export * from "./CrossHairIcon";
 export * from "./CrownIcon";
 export * from "./DaoLogoIcon";

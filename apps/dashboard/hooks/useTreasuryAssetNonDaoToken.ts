@@ -52,7 +52,7 @@ export const useTreasuryAssetNonDaoToken = (
   // Return default data (empty array) when liquid treasury is not supported
   const finalData = supportsLiquidTreasuryCall
     ? data
-    : [{ date: new Date().toISOString(), totalAssets: "0" }];
+    : [];
 
   return {
     data: finalData,

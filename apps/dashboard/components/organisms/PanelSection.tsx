@@ -6,27 +6,28 @@ import {
   SwitcherDate,
   TheSectionLayout,
 } from "@/components/atoms";
-import { DashboardTable } from "@/components/molecules";
+import { PanelTable } from "@/components/molecules";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
-export const HomeDashboardSection = () => {
-  const [timeIntervalDashboard, setTimeIntervalDashboard] =
-    useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+export const PanelSection = () => {
+  const [timeIntervalPanel, setTimeIntervalPanel] = useState<TimeInterval>(
+    TimeInterval.NINETY_DAYS,
+  );
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.dashboard.title}
+      title={SECTIONS_CONSTANTS.panel.title}
       icon={<BarChartIcon className="h-6 w-6 text-foreground" />}
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
-          setTimeInterval={setTimeIntervalDashboard}
+          setTimeInterval={setTimeIntervalPanel}
         />
       }
-      anchorId={SECTIONS_CONSTANTS.dashboard.anchorId}
+      anchorId={SECTIONS_CONSTANTS.panel.anchorId}
     >
-      <DashboardTable days={timeIntervalDashboard} />
+      <PanelTable days={timeIntervalPanel} />
     </TheSectionLayout>
   );
 };
