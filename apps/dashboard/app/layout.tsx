@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <HotjarScript />
       </head>
       <body
-        className={`${inter.className} overflow-x-hidden bg-darkest xl:overflow-hidden`}
+        className={`${inter.className} overflow-x-hidden xl:overflow-hidden`}
       >
         <GlobalProviders>{children}</GlobalProviders>
       </body>
