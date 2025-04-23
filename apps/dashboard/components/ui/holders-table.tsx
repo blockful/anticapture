@@ -7,7 +7,7 @@ import { Button } from "./button";
 import { ArrowUpDown } from "lucide-react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { RED_COLOR, GREEN_COLOR, sanitizeNumber } from "@/lib/client/utils";
-import { Holders, holdersData, IsDelegated } from "@/lib/mocked-data";
+import { Holders, holdersData, IsDelegated } from "@/lib/mocked-data/mocked-data";
 import { HandIcon } from "@/components/atoms";
 
 export const holdersColumns: ColumnDef<Holders>[] = [

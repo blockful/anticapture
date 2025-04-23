@@ -18,15 +18,15 @@ export const ButtonHeaderDAOSidebarMobile = ({
   const MOBILE_DEFAULT_OFFSET = 120;
 
   const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: SECTIONS_CONSTANTS.daoInfo.anchorId,
+    initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
     headerOffset: MOBILE_DEFAULT_OFFSET,
     useWindowScrollTo: true,
   });
 
   return (
     <Tabs
-      defaultValue={SECTIONS_CONSTANTS.daoInfo.anchorId}
-      value={activeSection || SECTIONS_CONSTANTS.daoInfo.anchorId}
+      defaultValue={SECTIONS_CONSTANTS.daoOverview.anchorId}
+      value={activeSection || SECTIONS_CONSTANTS.daoOverview.anchorId}
       onValueChange={(value) => handleSectionClick(value)}
       className="w-fit min-w-full"
     >

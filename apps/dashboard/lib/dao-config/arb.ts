@@ -1,7 +1,6 @@
 import ArbitrumLogo from "@/public/logo/Arbitrum.png";
-import { DaoConfiguration } from "./types";
-import { SupportStageEnum } from "../enums/SupportStageEnum";
-import { MetricTypesEnum } from "../client/constants";
+import { DaoConfiguration } from "@/lib/dao-config/types";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 export const ARB: DaoConfiguration = {
   name: "Arbitrum",
@@ -9,4 +8,7 @@ export const ARB: DaoConfiguration = {
   supportStage: SupportStageEnum.ELECTION,
   tokenDistribution: true,
   showSupport: true,
+  attackProfitability: {
+    riskLevel: undefined,
+  },
 };

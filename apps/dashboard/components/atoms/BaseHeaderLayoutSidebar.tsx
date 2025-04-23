@@ -4,8 +4,6 @@ import { ReactNode, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toggleScreenScroll } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { ConnectWallet } from "@/components/atoms";
-import { HeaderMobile } from "@/components/molecules";
 
 export const BaseHeaderLayoutSidebar = ({
   children,
@@ -13,36 +11,40 @@ export const BaseHeaderLayoutSidebar = ({
   children: ReactNode;
 }) => {
   const [displaySidebar, setDisplaySidebar] = useState<boolean>(false);
-  const { isMobile, isTablet } = useScreenSize();
+  const { isTablet, isDesktop } = useScreenSize();
+
   const toggleSidebar = () => {
     toggleScreenScroll();
     setDisplaySidebar(!displaySidebar);
   };
 
-  return isMobile && !isTablet ? (
-    <HeaderMobile />
-  ) : (
-    <>
-      <button
-        onClick={toggleSidebar}
-        className={`group fixed left-6 top-6 z-50 rounded-full border border-lightDark bg-darkest p-2 text-xs transition hover:bg-dark xl:hidden ${displaySidebar && "translate-x-[284px]"}`}
+  return (
+    <div className="relative flex h-screen overflow-hidden">
+      {isTablet && !isDesktop && (
+        <button
+          onClick={toggleSidebar}
+          className={`group fixed left-6 top-6 z-[100] rounded-full border border-lightDark bg-darkest p-2 text-xs transition hover:bg-dark xl:hidden ${
+            displaySidebar ? "translate-x-[284px]" : ""
+          }`}
+        >
+          {displaySidebar ? (
+            <ChevronLeft className="size-4 text-middleDark group-hover:text-foreground" />
+          ) : (
+            <ChevronRight className="size-4 text-middleDark group-hover:text-foreground" />
+          )}
+        </button>
+      )}
+      <div
+        className={`${
+          isTablet && !isDesktop
+            ? `fixed left-0 top-0 z-[90] h-screen transition-transform xl:absolute xl:translate-x-0 ${
+                displaySidebar ? "translate-x-0" : "-translate-x-[354px]"
+              }`
+            : "relative"
+        }`}
       >
-        {displaySidebar ? (
-          <ChevronLeft className="h-4 w-4 text-middleDark group-hover:text-foreground" />
-        ) : (
-          <ChevronRight className="h-4 w-4 text-middleDark group-hover:text-foreground" />
-        )}
-      </button>
-      <header
-        className={`border-r-1 fixed left-0 top-0 z-40 flex h-screen w-[330px] flex-col items-start justify-start border border-y-0 border-l-0 border-lightDark bg-dark shadow-lg transition-transform xl:absolute xl:translate-x-0 ${displaySidebar ? "translate-x-0" : "-translate-x-[354px]"}`}
-      >
-        <div className="flex h-full w-full flex-col justify-between">
-          <div>{children}</div>
-          <div className="flex w-full px-4 py-5">
-            <ConnectWallet />
-          </div>
-        </div>
-      </header>
-    </>
+        {children}
+      </div>
+    </div>
   );
 };

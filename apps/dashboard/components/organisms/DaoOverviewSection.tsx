@@ -21,11 +21,11 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { Address } from "viem";
 
-export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
+export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
-  const daoInfo = daoConfig.daoInfo;
+  const daoOverview = daoConfig.daoOverview;
 
-  if (!daoInfo) {
+  if (!daoOverview) {
     return null;
   }
 
@@ -34,13 +34,13 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Governor",
       icon: <CrownIcon className="text-tangerine" />,
       onClick: () =>
-        openEtherscanAddress(daoInfo?.contracts?.governor as Address),
+        openEtherscanAddress(daoOverview?.contracts?.governor as Address),
     },
     {
       value: "Token",
       icon: <TokensIcon className="text-tangerine" />,
       onClick: () =>
-        openEtherscanAddress(daoInfo?.contracts?.token as Address),
+        openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
   ];
 
@@ -49,18 +49,23 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Snapshot",
       icon: <FocusIcon className="text-tangerine" />,
       onClick: () =>
-        window.open(daoInfo?.snapshot as string, "_blank", "noopener,noreferrer"),
+        window.open(
+          daoOverview?.snapshot as string,
+          "_blank",
+          "noopener,noreferrer",
+        ),
     },
     {
       value: "Token",
       icon: <TokensIcon className="text-tangerine" />,
-      onClick: () => openEtherscanAddress(daoInfo?.contracts?.token as Address),
+      onClick: () =>
+        openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
   ];
 
   return (
     <section
-      id={SECTIONS_CONSTANTS.daoInfo.anchorId}
+      id={SECTIONS_CONSTANTS.daoOverview.anchorId}
       className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
     >
       <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
@@ -130,9 +135,7 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
       </div>
       <div className="flex h-full w-full">
-        <SecurityCouncilCard
-          daoInfo={daoInfo}
-        />
+        <SecurityCouncilCard daoOverview={daoOverview} />
       </div>
       <div className="border border-lightDark sm:hidden" />
       <div
@@ -140,12 +143,12 @@ export const DaoInfoSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
       >
         <div className="flex w-full sm:border-r sm:border-lightDark">
-          <VoteCard daoInfo={daoInfo} />
+          <VoteCard daoOverview={daoOverview} />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
 
         <div className="flex w-full sm:border-r sm:border-lightDark">
-          <TimelockCard daoInfo={daoInfo} />
+          <TimelockCard daoOverview={daoOverview} />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
 

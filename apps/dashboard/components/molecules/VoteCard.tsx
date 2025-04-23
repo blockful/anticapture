@@ -11,7 +11,7 @@ import {
 } from "@/components/atoms";
 import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
-import { DaoInfoConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import {
   Tooltip,
   TooltipContent,
@@ -19,7 +19,11 @@ import {
 } from "@/components/ui/tooltip";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
-export const VoteCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
+export const VoteCard = ({
+  daoOverview,
+}: {
+  daoOverview: DaoOverviewConfig;
+}) => {
   const { daoData } = useDaoDataContext();
   const { isMobile } = useScreenSize();
 
@@ -38,7 +42,7 @@ export const VoteCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
         items: [
           <SwitchCardDaoInfoItem
             key={"switch"}
-            switched={daoInfo.rules?.delay}
+            switched={daoOverview.rules?.delay}
           />,
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
@@ -65,7 +69,7 @@ export const VoteCard = ({ daoInfo }: { daoInfo: DaoInfoConfig }) => {
         items: [
           <SwitchCardDaoInfoItem
             key={"switch"}
-            switched={daoInfo.rules?.changeVote}
+            switched={daoOverview.rules?.changeVote}
           />,
         ],
       },

@@ -6,7 +6,7 @@ export * from "./BadgeInAnalysis";
 export * from "./BaseCardDaoInfo";
 export * from "./BaseHeaderLayoutSidebar";
 export * from "./ButtonCardDaoInfoItem";
-export * from "./ButtonHeaderDAOSidebar";
+export * from "./ButtonHeaderSidebar";
 export * from "./ButtonHeaderDAOSidebarMobile";
 export * from "./CardDaoSignature";
 export * from "./ConnectWallet";
