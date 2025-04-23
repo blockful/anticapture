@@ -5,7 +5,6 @@ import Image from "next/image";
 
 export const SupporterBadge = ({ address }: { address: Address }) => {
   const { data: ensData } = useEnsData(address);
-  console.log(ensData);
   return (
     <div
       key={`${address}-supporter-badge`}
