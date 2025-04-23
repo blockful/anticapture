@@ -1,14 +1,12 @@
-import { RiskLevel } from "@/lib/enums";
+import { RiskLevel, SupportStageEnum } from "@/lib/enums";
 import { DaoConfiguration } from "@/lib/dao-config/types";
 import UNILogo from "@/public/logo/UNI.png";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { SupportStageEnum } from "../enums/SupportStageEnum";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
   icon: UNILogo,
   supportStage: SupportStageEnum.FULL,
-  daoInfo: {
+  daoOverview: {
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",

@@ -2,17 +2,17 @@
 
 import { useCountdown } from "@/hooks";
 import { cn } from "@/lib/client/utils";
-import { DaoInfoConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 
 export const CountdownDaoInfo = ({
-  daoInfo,
+  daoOverview,
   className,
 }: {
-  daoInfo: DaoInfoConfig;
+  daoOverview: DaoOverviewConfig;
   className?: string;
 }) => {
-  const { securityCouncil } = daoInfo;
+  const { securityCouncil } = daoOverview;
   const targetTimestamp = securityCouncil?.expiration.timestamp;
   const countdown = useCountdown(targetTimestamp);
 
@@ -35,7 +35,7 @@ export const CountdownDaoInfo = ({
         className,
       )}
     >
-      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0 pl-1">
+      <div className="s flex items-center gap-1 pl-1 sm:flex-col sm:gap-0">
         <span className="m:text-[16px] text-[14px] font-medium leading-5 text-white">
           {formattedCountdown.days}
         </span>
@@ -49,14 +49,14 @@ export const CountdownDaoInfo = ({
         <span className="text-xs font-medium text-foreground">hours</span>
       </div>
       <div className="h-[85%] items-center border border-middleDark" />
-      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0 px-1">
+      <div className="s flex items-center gap-1 px-1 sm:flex-col sm:gap-0">
         <span className="text-[14px] font-medium leading-5 text-white sm:text-[16px]">
           {formattedCountdown.minutes}
         </span>
         <span className="text-xs font-medium text-foreground">min</span>
       </div>
       <div className="h-[85%] items-center border border-middleDark" />
-      <div className="s flex items-center gap-1 sm:flex-col sm:gap-0 pr-2 pl-1">
+      <div className="s flex items-center gap-1 pl-1 pr-2 sm:flex-col sm:gap-0">
         <span className="text-[14px] font-medium leading-5 text-white sm:text-[16px]">
           {formattedCountdown.seconds}
         </span>

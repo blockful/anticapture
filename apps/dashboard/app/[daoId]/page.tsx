@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
-import { DaoTemplate } from "@/components/templates";
 import { DaoIdEnum } from "@/lib/types/daos";
+import { BaseHeaderLayoutSidebar } from "@/components/atoms";
+import {
+  HeaderDAOSidebar,
+  HeaderMobile,
+  HeaderSidebar,
+} from "@/components/molecules";
+import { DaoTemplate } from "@/components/templates";
 
 type Props = {
   params: { daoId: string };
@@ -58,8 +64,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function DaoPage() {
   return (
-    <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
-      <DaoTemplate />
+    <div className="flex h-screen overflow-hidden">
+      <BaseHeaderLayoutSidebar>
+        <HeaderSidebar />
+        <HeaderDAOSidebar />
+      </BaseHeaderLayoutSidebar>
+      <main className="flex-1 overflow-auto lg:ml-[330px]">
+        <div className="sm:hidden">
+          <HeaderMobile />
+        </div>
+        <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
+          <DaoTemplate />
+        </div>
+      </main>
     </div>
   );
 }

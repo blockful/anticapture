@@ -1,9 +1,9 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { MetricTypesEnum } from "../client/constants";
+import { MetricTypesEnum } from "@/lib/client/constants";
 import { RiskLevel } from "@/lib/enums";
 import { StaticImageData } from "next/image";
-import { SupportStageEnum } from "../enums/SupportStageEnum";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 // Existing types
 export enum ChainNameEnum {
@@ -57,7 +57,7 @@ interface BaseInfo {
 }
 
 // Section configurations without data storage
-export interface DaoInfoConfig {
+export interface DaoOverviewConfig {
   contracts?: {
     governor: Address;
     token: Address;
@@ -90,14 +90,13 @@ export interface DaoInfoConfig {
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
   supportsLiquidTreasuryCall?: boolean;
-  blurChart?: boolean;
 }
 export interface GovernanceImplementationConfig
   extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
-  daoInfo?: DaoInfoConfig;
+  daoOverview?: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   tokenDistribution?: boolean;

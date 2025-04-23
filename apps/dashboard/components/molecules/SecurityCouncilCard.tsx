@@ -4,29 +4,15 @@ import { useMemo } from "react";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import Link from "next/link";
-import {
-  Badge,
-  BaseCardDaoInfo,
-  ButtonCardDaoInfoItem,
-  CardData,
-  ExternalLinkIcon,
-  FocusIcon,
-  GlassesIcon,
-  NewspaperIcon,
-  SwitchCardDaoInfoItem,
-  TokensIcon,
-  CountdownDaoInfo, ProgressBar, TooltipInfo
-} from "@/components/atoms";
-import { useCountdown } from "@/hooks";
-import { formatCountdown } from "@/lib/client/utils/time";
-import { DaoInfoConfig } from "@/lib/dao-config/types";
+import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 
 export const SecurityCouncilCard = ({
-  daoInfo,
+  daoOverview,
 }: {
-  daoInfo: DaoInfoConfig;
-  }) => {
-  const { securityCouncil } = daoInfo;
+  daoOverview: DaoOverviewConfig;
+}) => {
+  const { securityCouncil } = daoOverview;
 
   const progress = useMemo(() => {
     if (!securityCouncil) return 0;
@@ -122,14 +108,14 @@ export const SecurityCouncilCard = ({
             <div className="flex w-full items-center justify-between sm:hidden">
               <p className="text-sm font-medium text-foreground">Countdown:</p>
               <CountdownDaoInfo
-                daoInfo={daoInfo}
+                daoOverview={daoOverview}
                 className="border-none bg-dark"
               />
             </div>
           </div>
         </div>
         <div className="hidden sm:flex">
-          <CountdownDaoInfo daoInfo={daoInfo} />
+          <CountdownDaoInfo daoOverview={daoOverview} />
         </div>
       </div>
       <div className="flex">

@@ -39,7 +39,7 @@ export const SupportDaosSection = () => {
             daoName={dao.name}
             daoId={daoId as DaoIdEnum}
             onClick={() => {
-              router.push(`/${daoId}`);
+              router.push(`/${daoId.toLowerCase()}`);
             }}
           />
         ))}
