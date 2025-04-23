@@ -279,10 +279,7 @@ export const GovernanceActivityTable = () => {
         {
           metric: "Average Turnout",
           average: averageTurnout.value
-            ? formatNumberUserReadable(
-                Number(formatEther(BigInt(averageTurnout.value))),
-                2,
-              )
+            ? formatNumberUserReadable(Number(averageTurnout.value), 2)
             : null,
           variation:
             averageTurnout.changeRate == "0"
