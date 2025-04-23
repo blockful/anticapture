@@ -19,6 +19,7 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
+import { formatEther } from "viem";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -232,7 +233,9 @@ export const GovernanceActivityTable = () => {
       data={[
         {
           metric: "Treasury",
-          average: treasury.value ? treasury.value : null,
+          average: treasury.value
+            ? formatNumberUserReadable(Number(treasury.value))
+            : null,
           variation: treasury.changeRate
             ? formatVariation(treasury.changeRate)
             : null,
@@ -240,7 +243,9 @@ export const GovernanceActivityTable = () => {
         },
         {
           metric: "Proposals",
-          average: proposals.value ?? null,
+          average: proposals.value
+            ? formatNumberUserReadable(Number(proposals.value), 0)
+            : null,
           variation:
             proposals.changeRate == "0"
               ? "0.00"
@@ -251,7 +256,9 @@ export const GovernanceActivityTable = () => {
         {
           metric: "Active Supply",
           average: activeSupply.value
-            ? String(BigInt(activeSupply.value) / BigInt(10 ** 18))
+            ? formatNumberUserReadable(
+                Number(formatEther(BigInt(activeSupply.value))),
+              )
             : null,
           variation: activeSupply.changeRate
             ? formatVariation(activeSupply.changeRate)
@@ -259,7 +266,9 @@ export const GovernanceActivityTable = () => {
         },
         {
           metric: "Votes",
-          average: votes.value ? votes.value : null,
+          average: votes.value
+            ? formatNumberUserReadable(Number(votes.value), 0)
+            : null,
           variation:
             votes.changeRate == "0"
               ? "0.00"
@@ -269,7 +278,12 @@ export const GovernanceActivityTable = () => {
         },
         {
           metric: "Average Turnout",
-          average: averageTurnout.value ? averageTurnout.value : null,
+          average: averageTurnout.value
+            ? formatNumberUserReadable(
+                Number(formatEther(BigInt(averageTurnout.value))),
+                2,
+              )
+            : null,
           variation:
             averageTurnout.changeRate == "0"
               ? "0.00"
