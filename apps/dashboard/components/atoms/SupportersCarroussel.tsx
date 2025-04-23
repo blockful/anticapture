@@ -4,15 +4,11 @@ import { useRef, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/client/utils";
 import { TooltipInfo } from "@/components/atoms/TooltipInfo";
-
-interface Supporter {
-  address: string;
-  name: string;
-  icon: string;
-}
+import { Address } from "viem";
+import { SupporterBadge } from "./SupporterBadge";
 
 interface SupportersCarrousselProps {
-  supporters: Supporter[];
+  supporters: Address[];
 }
 
 // Creates a scrolling carousel that displays supporter badges
@@ -76,27 +72,7 @@ export const SupportersCarroussel = ({
           className="scrollbar-none flex items-center gap-2 overflow-x-auto px-4"
         >
           {paddedSupporters.map((supporter, index) => (
-            <div
-              key={`${supporter.address}-${index}`}
-              className={cn(
-                "flex min-w-max items-center gap-2 rounded-full bg-lightDark px-3 py-1.5",
-                "transition-all duration-200 hover:bg-gray-700",
-              )}
-            >
-              {supporter.icon ? (
-                <Image
-                  src={supporter.icon}
-                  alt={supporter.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="h-4 w-4 rounded-full bg-foreground" />
-              )}
-              <span className="max-w-[100px] truncate text-sm font-medium text-gray-200">
-                {!!supporter.name ? supporter.name : supporter.address}
-              </span>
-            </div>
+            <SupporterBadge key={`${supporter}-${index}`} address={supporter} />
           ))}
         </div>
       </div>

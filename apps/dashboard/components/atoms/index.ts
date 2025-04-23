@@ -21,6 +21,8 @@ export * from "./RiskLevelCard";
 export * from "./SkeletonDaoInfoCards";
 export * from "./SkeletonRow";
 export * from "./Sparkline";
+export * from "./SupportersCarroussel";
+export * from "./SupporterBadge";
 export * from "./SwitchCardDaoInfoItem";
 export * from "./SwitcherChart";
 export * from "./SwitcherDate";
