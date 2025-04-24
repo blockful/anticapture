@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/client/utils";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ChevronRight } from "lucide-react";
 
@@ -23,6 +25,7 @@ export const ShowYourSupportStickyBar = ({
         authenticationStatus,
         mounted,
       }) => {
+        const { isDesktop } = useScreenSize();
         const ready = mounted && authenticationStatus !== "loading";
         const connected =
           ready &&
@@ -34,7 +37,12 @@ export const ShowYourSupportStickyBar = ({
         }
         return (
           <div className="fixed bottom-0 left-0 right-4 z-10">
-            <div className="flex flex-col sm:flex-row gap-2 border-t border-lightDark bg-darkest py-3 pl-6 text-white xl:ml-[330px]">
+            <div
+              className={cn(
+                "flex flex-col sm:flex-row gap-2 border-t border-lightDark bg-darkest py-3 pl-6 text-white",
+                isDesktop ? "ml-[330px]" : "",
+              )}
+            >
               <span className="text-sm font-normal">{message}</span>
               <button
                 onClick={openConnectModal}

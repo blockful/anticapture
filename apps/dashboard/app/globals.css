@@ -116,3 +116,9 @@
     @apply text-sm font-normal leading-normal text-foreground;
   }
 }
+
+@layer fonts {
+  .font-roboto {
+    font-family: var(--font-roboto) !important;
+  }
+}
