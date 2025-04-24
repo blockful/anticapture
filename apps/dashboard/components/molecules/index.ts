@@ -1,6 +1,5 @@
 export * from "@/components/molecules/AttackCostBarChart";
 export * from "@/components/molecules/ContractsCard";
-export * from "@/components/molecules/DashboardTable";
 export * from "@/components/molecules/GovernanceActivityTable";
 export * from "@/components/molecules/GovernanceImplementationCard";
 export * from "@/components/molecules/HeaderDAOSidebar";
@@ -9,6 +8,7 @@ export * from "@/components/molecules/HeaderNavMobile";
 export * from "@/components/molecules/HeaderSidebar";
 export * from "@/components/molecules/MultilineChartAttackProfitability";
 export * from "@/components/molecules/MultilineChartTokenDistribution";
+export * from "@/components/molecules/PanelTable";
 export * from "@/components/molecules/QuorumCard";
 export * from "@/components/molecules/ReachOutToUsCard";
 export * from "@/components/molecules/SecurityCouncilCard";

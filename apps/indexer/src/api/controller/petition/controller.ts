@@ -2,7 +2,7 @@ import { db, schema } from "@/offchain/db.schema";
 import { isPetitionSignature, PetitionSignature } from "./types";
 import { Hono } from "hono";
 import { Hex, verifyMessage } from "viem";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 
 const app = new Hono();
 
@@ -27,7 +27,10 @@ app.get("/petition/:daoId", async (context) => {
     )
     .leftJoin(
       schema.accountPower,
-      eq(schema.account.id, schema.accountPower.accountId)
+      and(
+        eq(schema.account.id, schema.accountPower.accountId),
+        eq(schema.accountPower.daoId, daoId)
+      )
     )
     .where(eq(schema.petitionSignatures.daoId, daoId))
     .orderBy(desc(schema.petitionSignatures.timestamp));
@@ -35,7 +38,7 @@ app.get("/petition/:daoId", async (context) => {
     petitionSignatures,
     totalSignatures: petitionSignatures.length,
     totalSignaturesPower: petitionSignatures.reduce(
-      (acc, curr) => (curr.votingPower ? acc + curr.votingPower : acc),
+      (acc: bigint, curr: {votingPower: bigint}) => (curr.votingPower ? acc + curr.votingPower : acc),
       0n
     ),
     latestVoters: petitionSignatures

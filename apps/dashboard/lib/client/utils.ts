@@ -47,17 +47,17 @@ export function sanitizeNumber(amount: number) {
 export const RED_COLOR = "#FCA5A5";
 export const GREEN_COLOR = "#5BB98B";
 
-export function formatNumberUserReadable(num: number): string {
+export function formatNumberUserReadable(num: number, fixed: number = 2): string {
   if (num >= 1e9) {
-    return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+    return (num / 1e9).toFixed(fixed).replace(/\.0$/, "") + "B";
   }
   if (num >= 1e6) {
-    return (num / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+    return (num / 1e6).toFixed(fixed).replace(/\.0$/, "") + "M";
   }
   if (num >= 1e3) {
-    return (num / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+    return (num / 1e3).toFixed(fixed).replace(/\.0$/, "") + "K";
   }
-  return num.toString();
+  return num.toFixed(fixed).toString();
 }
 
 export function formatBlocksToUserReadable(

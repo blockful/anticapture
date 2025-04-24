@@ -5,7 +5,7 @@ import {
   TokenHistoricalDataMetrics,
 } from "@/lib/dao-config/types";
 
-export type DashboardDao = {
+export type PanelDao = {
   dao: string;
   inAnalysis?: boolean;
 };
@@ -84,7 +84,7 @@ export const tokenDistributionData: TokenDistribution[] = [
   },
 ];
 
-export const dashboardData: DashboardDao[] = [
+export const panelData: PanelDao[] = [
   {
     dao: DaoIdEnum.UNISWAP,
   },

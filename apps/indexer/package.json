@@ -24,7 +24,7 @@
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
     "@viem/anvil": "^0.0.10",
-    "drizzle-kit": "^0.30.4",
+    "drizzle-kit": "^0.31.0",
     "drizzle-orm": "^0.39.3",
     "hono": "^4.5.0",
     "ioredis": "^5.5.0",

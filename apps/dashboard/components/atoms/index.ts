@@ -21,6 +21,8 @@ export * from "@/components/atoms/RiskLevelCard";
 export * from "@/components/atoms/SkeletonDaoInfoCards";
 export * from "@/components/atoms/SkeletonRow";
 export * from "@/components/atoms/Sparkline";
+export * from "@/components/atoms/SupportersCarroussel";
+export * from "@/components/atoms/SupporterBadge";
 export * from "@/components/atoms/SwitchCardDaoInfoItem";
 export * from "@/components/atoms/SwitcherChart";
 export * from "@/components/atoms/SwitcherDate";
