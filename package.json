@@ -8,30 +8,21 @@
     "build:dashboard": "dotenv -- turbo run build --filter=@anticapture/dashboard",
     "dev:indexer": "dotenv -- turbo run dev --filter=@anticapture/indexer",
     "dev:dashboard": "dotenv -- turbo run dev --filter=@anticapture/dashboard",
-    "install:dashboard": "cd ./apps/dashboard && npm install",
-    "install:indexer": "cd ./apps/indexer && npm install",
     "start:dashboard": "dotenv -- turbo run start --filter=@anticapture/dashboard",
     "start:indexer": "dotenv -- turbo run start --filter=@anticapture/indexer",
     "start:server": "dotenv -- turbo run serve --filter=@anticapture/indexer",
     "serve:indexer": "dotenv -- turbo run serve --filter=@anticapture/indexer",
     "start:indexer-metrics": "dotenv -- turbo run start --filter=@anticapture/indexer-metrics",
-    "start-raw:indexer": "dotenv -- turbo run start-raw --filter=@anticapture/indexer",
-    "dump-database": "dotenv -- turbo run dump-database --filter=@anticapture/indexer",
-    "restore-database": "dotenv -- turbo run restore-database --filter=@anticapture/indexer",
-    "start-anvil": "dotenv -- bash -c 'anvil --fork-url \"$ALCHEMY_RPC_URL_1\"'",
-    "lint:fix": "dotenv -- turbo run lint:fix --filter=@anticapture/indexer",
-    "drop-public:indexer": "dotenv -- turbo run drop-public --filter=@anticapture/indexer",
-    "drop-all-schemas:indexer": "dotenv -- turbo run drop-all-schemas --filter=@anticapture/indexer"
+    "prepare": "husky"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@anticapture/dashboard": "./apps/dashboard",
-    "@anticapture/indexer": "./apps/indexer",
-    "turbo": "^2.3.1"
-  },
+  "license": "MIT",
   "packageManager": "pnpm@9.14.2",
   "devDependencies": {
-    "dotenv-cli": "^7.4.4"
+    "@types/node": "^20.16.5",
+    "turbo": "^2.3.1",
+    "husky": "^9.1.6",
+    "dotenv-cli": "^7.4.4",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0"
   }
 }

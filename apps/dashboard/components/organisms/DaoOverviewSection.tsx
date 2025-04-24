@@ -20,10 +20,27 @@ import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { Address } from "viem";
+import { useInView } from "react-intersection-observer";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useEffect } from "react";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
+  const { isMobile, isDesktop } = useScreenSize();
+  const { ref, inView } = useInView({
+    threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      window.dispatchEvent(
+        new CustomEvent("sectionInView", {
+          detail: SECTIONS_CONSTANTS.daoOverview.anchorId,
+        }),
+      );
+    }
+  }, [inView]);
 
   if (!daoOverview) {
     return null;
@@ -64,9 +81,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   ];
 
   return (
-    <section
+    <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
       className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
+      ref={ref}
     >
       <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
         <div className="flex">
@@ -157,6 +175,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
       </div>
-    </section>
+    </div>
   );
 };

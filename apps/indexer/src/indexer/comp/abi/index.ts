@@ -1,1 +1,0 @@
-export { COMPTokenAbi } from "./COMPTokenAbi";

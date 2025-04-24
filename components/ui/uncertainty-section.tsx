@@ -1,0 +1,1 @@
+import { AnimatedNumber } from '@/components/ui/animated-number'; 

@@ -34,7 +34,7 @@ export const ButtonHeaderSidebar = ({
         sessionStorage.removeItem("scrollToSection");
       }
     }
-  }, []);
+  }, [handleSectionClick]);
 
   return (
     <button

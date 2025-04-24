@@ -1,3 +1,5 @@
+import * as chains from "viem/chains";
+
 type ValueNamesByDao = {
   name: string;
   daos: string[];
@@ -53,6 +55,6 @@ export function max(...values: bigint[]): bigint {
   return values.reduce((max, value) => (value > max ? value : max));
 }
 
-export function camelcaseToSnakeCase(text: string): string {
-  return text.replace(/([A-Z])/g, "_$1").toLowerCase();
+export function getChain(chainId: number): chains.Chain | undefined {
+  return Object.values(chains).find((chain) => chain.id === chainId);
 }

@@ -1,0 +1,1712 @@
+schema
+    @link(url: "https://specs.apollo.dev/link/v1.0")
+    @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+    
+    
+    
+    
+    
+    
+    @link(
+  url: "https://the-guild.dev/graphql/mesh/spec/v1.0"
+  import: ["@merge", "@statusCodeTypeName", "@enum", "@httpOperation", "@transport", "@extraSchemaDefinitionDirective"]
+)
+  {
+    query: Query
+    mutation: Mutation
+    
+  }
+
+  
+    directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+    directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+    
+      directive @join__field(
+        graph: join__Graph
+        requires: join__FieldSet
+        provides: join__FieldSet
+        type: String
+        external: Boolean
+        override: String
+        usedOverridden: Boolean
+        
+        
+      ) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+    
+    
+
+    directive @join__implements(
+      graph: join__Graph!
+      interface: String!
+    ) repeatable on OBJECT | INTERFACE
+
+    directive @join__type(
+      graph: join__Graph!
+      key: join__FieldSet
+      extension: Boolean! = false
+      resolvable: Boolean! = true
+      isInterfaceObject: Boolean! = false
+    ) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+    directive @join__unionMember(
+      graph: join__Graph!
+      member: String!
+    ) repeatable on UNION
+
+    scalar join__FieldSet
+    
+  
+  
+  directive @link(
+    url: String
+    as: String
+    for: link__Purpose
+    import: [link__Import]
+  ) repeatable on SCHEMA
+
+  scalar link__Import
+
+  enum link__Purpose {
+    """
+    `SECURITY` features provide metadata necessary to securely resolve fields.
+    """
+    SECURITY
+
+    """
+    `EXECUTION` features provide metadata necessary for operation execution.
+    """
+    EXECUTION
+  }
+
+  
+  
+  
+  
+  
+  
+  
+enum join__Graph {
+  ETHEREUM @join__graph(name: "Ethereum", url: "https://dev.api.anticapture.com/") 
+  PETITION @join__graph(name: "Petition", url: "http://localhost:42069") 
+}
+
+directive @merge(
+  subgraph: String
+  argsExpr: String
+  keyArg: String
+  keyField: String
+  key: [String!]
+  additionalArgs: String
+) repeatable on FIELD_DEFINITION
+
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String)  repeatable on UNION
+
+directive @enum(subgraph: String, value: String)  repeatable on ENUM_VALUE
+
+directive @httpOperation(
+  subgraph: String
+  path: String
+  operationSpecificHeaders: [[String]]
+  httpMethod: HTTPMethod
+  isBinary: Boolean
+  requestBaseBody: ObjMap
+  queryParamArgMap: ObjMap
+  queryStringOptionsByParam: ObjMap
+  jsonApiFields: Boolean
+  queryStringOptions: ObjMap
+) repeatable on FIELD_DEFINITION
+
+directive @transport(
+  subgraph: String
+  kind: String
+  location: String
+  headers: [[String]]
+  queryStringOptions: ObjMap
+  queryParams: [[String]]
+) repeatable on SCHEMA
+
+directive @extraSchemaDefinitionDirective(directives: _DirectiveExtensions)  repeatable on OBJECT
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @join__type(graph: ETHEREUM)  @join__type(graph: PETITION)  @specifiedBy(
+  url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
+)
+
+scalar BigInt @join__type(graph: ETHEREUM) 
+
+scalar TransportOptions @join__type(graph: ETHEREUM) 
+
+scalar ObjMap @join__type(graph: PETITION) 
+
+scalar _DirectiveExtensions @join__type(graph: PETITION) 
+
+type PageInfo @join__type(graph: ETHEREUM)  {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Meta @join__type(graph: ETHEREUM)  {
+  status: JSON
+}
+
+type Query @extraSchemaDefinitionDirective(
+  directives: {transport: [{subgraph: "Petition", kind: "rest", location: "http://localhost:42069"}]}
+) @join__type(graph: ETHEREUM)  @join__type(graph: PETITION)  {
+  dao(id: String!) : dao @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  daos(
+    where: daoFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): daoPage! @join__field(graph: ETHEREUM) 
+  daoToken(id: String!) : daoToken @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  daoTokens(
+    where: daoTokenFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): daoTokenPage! @join__field(graph: ETHEREUM) 
+  token(id: String!) : token @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  tokens(
+    where: tokenFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): tokenPage! @join__field(graph: ETHEREUM) 
+  account(id: String!) : account @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  accounts(
+    where: accountFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountPage! @join__field(graph: ETHEREUM) 
+  accountBalance(id: String!) : accountBalance @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  accountBalances(
+    where: accountBalanceFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountBalancePage! @join__field(graph: ETHEREUM) 
+  accountPower(id: String!) : accountPower @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  accountPowers(
+    where: accountPowerFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountPowerPage! @join__field(graph: ETHEREUM) 
+  votingPowerHistory(id: String!) : votingPowerHistory @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  votingPowerHistorys(
+    where: votingPowerHistoryFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): votingPowerHistoryPage! @join__field(graph: ETHEREUM) 
+  delegations(id: String!) : delegations @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  delegationss(
+    where: delegationsFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): delegationsPage! @join__field(graph: ETHEREUM) 
+  transfers(id: String!) : transfers @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  transferss(
+    where: transfersFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): transfersPage! @join__field(graph: ETHEREUM) 
+  votesOnchain(id: String!) : votesOnchain @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  votesOnchains(
+    where: votesOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): votesOnchainPage! @join__field(graph: ETHEREUM) 
+  proposalsOnchain(id: String!) : proposalsOnchain @merge(subgraph: "Ethereum", keyField: "id", keyArg: "id")  @join__field(graph: ETHEREUM) 
+  proposalsOnchains(
+    where: proposalsOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): proposalsOnchainPage! @join__field(graph: ETHEREUM) 
+  daoMetricsDayBuckets(date: BigInt!, daoId: String!, tokenId: String!, metricType: String!) : daoMetricsDayBuckets @merge(subgraph: "Ethereum", keyField: "date", keyArg: "date")  @merge(subgraph: "Ethereum", keyField: "daoId", keyArg: "daoId")  @merge(subgraph: "Ethereum", keyField: "tokenId", keyArg: "tokenId")  @merge(subgraph: "Ethereum", keyField: "metricType", keyArg: "metricType")  @join__field(graph: ETHEREUM) 
+  daoMetricsDayBucketss(
+    where: daoMetricsDayBucketsFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): daoMetricsDayBucketsPage! @join__field(graph: ETHEREUM) 
+  _meta: Meta @join__field(graph: ETHEREUM) 
+  """
+  Returns an object of each DAO with basic information
+  """
+  getDaos: DAO @httpOperation(
+    subgraph: "Petition"
+    path: "/dao"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+  ) @join__field(graph: PETITION) 
+  """
+  Provides a specific DAO by it's id
+  """
+  getDaoById: [DAO] @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/:daoId"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+  ) @join__field(graph: PETITION) 
+  """
+  Compares the old and current total supply for a DAO
+  """
+  compareTotalSupply(
+    """
+    DAO ID (e.g., UNI, ENS)
+    """
+    daoId: String!
+    days: queryInput_compareTotalSupply_days!
+  ): TotalSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/total-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Compares the old and current delegated supply for a DAO
+  """
+  compareDelegatedSupply(
+    """
+    DAO ID (e.g., UNI, ENS)
+    """
+    daoId: String!
+    days: queryInput_compareDelegatedSupply_days!
+  ): DelegatedSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/delegated-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Compares the old and current circulating supply for a DAO
+  """
+  compareCirculatingSupply(
+    """
+    DAO ID (e.g., UNI, ENS)
+    """
+    daoId: String!
+    days: queryInput_compareCirculatingSupply_days!
+  ): CirculatingSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/circulating-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Compares the old and current supply on centralized exchanges (CEX) for a DAO
+  """
+  compareCexSupply(
+    """
+    DAO ID (e.g., UNI, ENS)
+    """
+    daoId: String!
+    days: queryInput_compareCexSupply_days!
+  ): CexSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/cex-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of DEX supply for a DAO over two time points
+  """
+  compareDexSupply("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareDexSupply_days!) : DexSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/dex-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of lending supply for a DAO over two time points
+  """
+  compareLendingSupply("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareLendingSupply_days!) : LendingSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/lending-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of treasury values for a DAO over two time points
+  """
+  compareTreasury("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareTreasury_days!) : TreasuryCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/treasury/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of active supply for a DAO over two time points
+  """
+  compareActiveSupply("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareActiveSupply_days!) : ActiveSupplyCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/active-supply/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of votes for a DAO over two time points
+  """
+  compareVotes("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareVotes_days!) : VotesCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/votes/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of proposals launched for a DAO over two time points
+  """
+  compareProposals("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareProposals_days!) : ProposalsCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/proposals/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Returns the comparison of average voter turnout for a DAO over two time points
+  """
+  compareAverageTurnout("""
+  Dao ID
+  """
+  daoId: String!, days: queryInput_compareAverageTurnout_days!) : AverageTurnoutCompare @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/average-turnout/compare"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"days\":\"days\"}"
+    queryStringOptionsByParam: "{\"days\":{}}"
+  ) @join__field(graph: PETITION) 
+  """
+  Get total assets of a DAO from Dune API
+  """
+  getTotalAssets("""
+  Dao ID
+  """
+  daoId: String!) : [getTotalAssets_response] @httpOperation(
+    subgraph: "Petition"
+    path: "/dao/{args.daoId}/total-assets"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+  ) @join__field(graph: PETITION) 
+  """
+  Get petition signatures of a DAO
+  """
+  getPetitionSignatures("""
+  Dao ID
+  """
+  daoId: String!, """
+  User address
+  """
+  userAddress: String) : PetitionSignatures @httpOperation(
+    subgraph: "Petition"
+    path: "/petition/{args.daoId}"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+    queryParamArgMap: "{\"userAddress\":\"userAddress\"}"
+  ) @join__field(graph: PETITION) 
+}
+
+type dao @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  quorum: BigInt
+  proposalThreshold: BigInt
+  votingDelay: BigInt
+  votingPeriod: BigInt
+  timelockDelay: BigInt
+}
+
+type daoPage @join__type(graph: ETHEREUM)  {
+  items: [dao!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type daoToken @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  daoId: String!
+  tokenId: String!
+}
+
+type daoTokenPage @join__type(graph: ETHEREUM)  {
+  items: [daoToken!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type token @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  name: String
+  decimals: Int!
+  totalSupply: BigInt!
+  delegatedSupply: BigInt!
+  cexSupply: BigInt!
+  dexSupply: BigInt!
+  lendingSupply: BigInt!
+  circulatingSupply: BigInt!
+  treasury: BigInt!
+}
+
+type tokenPage @join__type(graph: ETHEREUM)  {
+  items: [token!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type account @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+}
+
+type accountPage @join__type(graph: ETHEREUM)  {
+  items: [account!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type accountBalance @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  tokenId: String
+  accountId: String
+  balance: BigInt!
+}
+
+type accountBalancePage @join__type(graph: ETHEREUM)  {
+  items: [accountBalance!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type accountPower @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  accountId: String
+  daoId: String
+  votingPower: BigInt!
+  votesCount: Int!
+  proposalsCount: Int!
+  delegationsCount: Int!
+  delegate: String!
+  lastVoteTimestamp: BigInt!
+}
+
+type accountPowerPage @join__type(graph: ETHEREUM)  {
+  items: [accountPower!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type votingPowerHistory @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  daoId: String
+  accountId: String
+  votingPower: BigInt!
+  timestamp: BigInt!
+}
+
+type votingPowerHistoryPage @join__type(graph: ETHEREUM)  {
+  items: [votingPowerHistory!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type delegations @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  daoId: String
+  delegateeAccountId: String
+  delegatorAccountId: String
+  timestamp: BigInt
+}
+
+type delegationsPage @join__type(graph: ETHEREUM)  {
+  items: [delegations!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type transfers @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  daoId: String
+  tokenId: String
+  amount: BigInt
+  fromAccountId: String
+  toAccountId: String
+  timestamp: BigInt
+}
+
+type transfersPage @join__type(graph: ETHEREUM)  {
+  items: [transfers!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type votesOnchain @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  daoId: String
+  voterAccountId: String
+  proposalId: String
+  support: String
+  weight: String
+  reason: String
+  timestamp: BigInt
+}
+
+type votesOnchainPage @join__type(graph: ETHEREUM)  {
+  items: [votesOnchain!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type proposalsOnchain @join__type(graph: ETHEREUM, key: "id")  {
+  id: String!
+  daoId: String
+  proposerAccountId: String
+  targets: JSON
+  values: JSON
+  signatures: JSON
+  calldatas: JSON
+  startBlock: String
+  endBlock: String
+  description: String
+  timestamp: BigInt
+  status: String
+  forVotes: BigInt
+  againstVotes: BigInt
+  abstainVotes: BigInt
+}
+
+type proposalsOnchainPage @join__type(graph: ETHEREUM)  {
+  items: [proposalsOnchain!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type daoMetricsDayBuckets @join__type(graph: ETHEREUM, key: "date")  @join__type(graph: ETHEREUM, key: "daoId")  @join__type(graph: ETHEREUM, key: "tokenId")  @join__type(graph: ETHEREUM, key: "metricType")  {
+  date: BigInt!
+  daoId: String!
+  tokenId: String!
+  metricType: metricType!
+  open: BigInt!
+  close: BigInt!
+  low: BigInt!
+  high: BigInt!
+  average: BigInt!
+  volume: BigInt!
+  count: Int!
+}
+
+type daoMetricsDayBucketsPage @join__type(graph: ETHEREUM)  {
+  items: [daoMetricsDayBuckets!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DAO @join__type(graph: PETITION)  {
+  id: String
+  proposalThreshold: String
+  votingDelay: String
+  votingPeriod: String
+  quorum: String
+  timelockDelay: String
+}
+
+type TotalSupplyCompare @join__type(graph: PETITION)  {
+  oldTotalSupply: String
+  currentTotalSupply: String
+  changeRate: String
+}
+
+type DelegatedSupplyCompare @join__type(graph: PETITION)  {
+  oldDelegatedSupply: String
+  currentDelegatedSupply: String
+  changeRate: String
+}
+
+type CirculatingSupplyCompare @join__type(graph: PETITION)  {
+  oldCirculatingSupply: String
+  currentCirculatingSupply: String
+  changeRate: String
+}
+
+type CexSupplyCompare @join__type(graph: PETITION)  {
+  oldCexSupply: String
+  currentCexSupply: String
+  changeRate: String
+}
+
+type DexSupplyCompare @join__type(graph: PETITION)  {
+  oldDexSupply: String
+  currentDexSupply: String
+  changeRate: String
+}
+
+type LendingSupplyCompare @join__type(graph: PETITION)  {
+  oldLendingSupply: String
+  currentLendingSupply: String
+  changeRate: String
+}
+
+type TreasuryCompare @join__type(graph: PETITION)  {
+  oldTreasury: String
+  currentTreasury: String
+  changeRate: String
+}
+
+type ActiveSupplyCompare @join__type(graph: PETITION)  {
+  oldActiveSupply: String
+  currentActiveSupply: String
+  changeRate: String
+}
+
+type VotesCompare @join__type(graph: PETITION)  {
+  oldVotes: String
+  currentVotes: String
+  changeRate: String
+}
+
+type ProposalsCompare @join__type(graph: PETITION)  {
+  oldProposalsLaunched: String
+  currentProposalsLaunched: String
+  changeRate: String
+}
+
+type AverageTurnoutCompare @join__type(graph: PETITION)  {
+  oldVotes: String
+  currentVotes: String
+  changeRate: String
+}
+
+type TotalAssets @join__type(graph: PETITION)  {
+  totalAssets: String
+  date: String
+}
+
+type getTotalAssets_400_response @join__type(graph: PETITION)  {
+  error: String
+}
+
+type PetitionSignatures @join__type(graph: PETITION)  {
+  petitionSignatures: [query_getPetitionSignatures_petitionSignatures_items]
+  totalSignatures: Float
+  totalSignaturesPower: Float
+  latestVoters: [String]
+  userSigned: Boolean
+}
+
+type query_getPetitionSignatures_petitionSignatures_items @join__type(graph: PETITION)  {
+  accountId: String
+  daoId: String
+  timestamp: String
+  message: String
+  signature: String
+}
+
+type Mutation @join__type(graph: PETITION)  {
+  """
+  Sign petition
+  """
+  signPetition(input: PetitionSignature_Input) : JSON @httpOperation(
+    subgraph: "Petition"
+    path: "/petition"
+    operationSpecificHeaders: [["Content-Type", "application/json"]]
+    httpMethod: POST
+  )
+}
+
+union getTotalAssets_response @statusCodeTypeName(subgraph: "Petition", statusCode: "200", typeName: "TotalAssets")  @statusCodeTypeName(
+  subgraph: "Petition"
+  statusCode: "400"
+  typeName: "getTotalAssets_400_response"
+) @join__type(graph: PETITION)  @join__unionMember(graph: PETITION, member: "TotalAssets")  @join__unionMember(graph: PETITION, member: "getTotalAssets_400_response")  = TotalAssets | getTotalAssets_400_response
+
+enum metricType @join__type(graph: ETHEREUM)  {
+  TOTAL_SUPPLY @join__enumValue(graph: ETHEREUM) 
+  DELEGATED_SUPPLY @join__enumValue(graph: ETHEREUM) 
+  CEX_SUPPLY @join__enumValue(graph: ETHEREUM) 
+  DEX_SUPPLY @join__enumValue(graph: ETHEREUM) 
+  LENDING_SUPPLY @join__enumValue(graph: ETHEREUM) 
+  CIRCULATING_SUPPLY @join__enumValue(graph: ETHEREUM) 
+  TREASURY @join__enumValue(graph: ETHEREUM) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareTotalSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareDelegatedSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareCirculatingSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareCexSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareDexSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareLendingSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareTreasury_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareActiveSupply_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareVotes_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareProposals_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+"""
+Days interval to be calculated upon
+"""
+enum queryInput_compareAverageTurnout_days @join__type(graph: PETITION)  {
+  _7d @enum(subgraph: "Petition", value: "\"7d\"")  @join__enumValue(graph: PETITION) 
+  _30d @enum(subgraph: "Petition", value: "\"30d\"")  @join__enumValue(graph: PETITION) 
+  _90d @enum(subgraph: "Petition", value: "\"90d\"")  @join__enumValue(graph: PETITION) 
+  _365d @enum(subgraph: "Petition", value: "\"365d\"")  @join__enumValue(graph: PETITION) 
+}
+
+enum HTTPMethod @join__type(graph: PETITION)  {
+  GET @join__enumValue(graph: PETITION) 
+  HEAD @join__enumValue(graph: PETITION) 
+  POST @join__enumValue(graph: PETITION) 
+  PUT @join__enumValue(graph: PETITION) 
+  DELETE @join__enumValue(graph: PETITION) 
+  CONNECT @join__enumValue(graph: PETITION) 
+  OPTIONS @join__enumValue(graph: PETITION) 
+  TRACE @join__enumValue(graph: PETITION) 
+  PATCH @join__enumValue(graph: PETITION) 
+}
+
+input daoFilter @join__type(graph: ETHEREUM)  {
+  AND: [daoFilter]
+  OR: [daoFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  quorum: BigInt
+  quorum_not: BigInt
+  quorum_in: [BigInt]
+  quorum_not_in: [BigInt]
+  quorum_gt: BigInt
+  quorum_lt: BigInt
+  quorum_gte: BigInt
+  quorum_lte: BigInt
+  proposalThreshold: BigInt
+  proposalThreshold_not: BigInt
+  proposalThreshold_in: [BigInt]
+  proposalThreshold_not_in: [BigInt]
+  proposalThreshold_gt: BigInt
+  proposalThreshold_lt: BigInt
+  proposalThreshold_gte: BigInt
+  proposalThreshold_lte: BigInt
+  votingDelay: BigInt
+  votingDelay_not: BigInt
+  votingDelay_in: [BigInt]
+  votingDelay_not_in: [BigInt]
+  votingDelay_gt: BigInt
+  votingDelay_lt: BigInt
+  votingDelay_gte: BigInt
+  votingDelay_lte: BigInt
+  votingPeriod: BigInt
+  votingPeriod_not: BigInt
+  votingPeriod_in: [BigInt]
+  votingPeriod_not_in: [BigInt]
+  votingPeriod_gt: BigInt
+  votingPeriod_lt: BigInt
+  votingPeriod_gte: BigInt
+  votingPeriod_lte: BigInt
+  timelockDelay: BigInt
+  timelockDelay_not: BigInt
+  timelockDelay_in: [BigInt]
+  timelockDelay_not_in: [BigInt]
+  timelockDelay_gt: BigInt
+  timelockDelay_lt: BigInt
+  timelockDelay_gte: BigInt
+  timelockDelay_lte: BigInt
+}
+
+input daoTokenFilter @join__type(graph: ETHEREUM)  {
+  AND: [daoTokenFilter]
+  OR: [daoTokenFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  tokenId: String
+  tokenId_not: String
+  tokenId_in: [String]
+  tokenId_not_in: [String]
+  tokenId_contains: String
+  tokenId_not_contains: String
+  tokenId_starts_with: String
+  tokenId_ends_with: String
+  tokenId_not_starts_with: String
+  tokenId_not_ends_with: String
+}
+
+input tokenFilter @join__type(graph: ETHEREUM)  {
+  AND: [tokenFilter]
+  OR: [tokenFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  name: String
+  name_not: String
+  name_in: [String]
+  name_not_in: [String]
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_ends_with: String
+  name_not_starts_with: String
+  name_not_ends_with: String
+  decimals: Int
+  decimals_not: Int
+  decimals_in: [Int]
+  decimals_not_in: [Int]
+  decimals_gt: Int
+  decimals_lt: Int
+  decimals_gte: Int
+  decimals_lte: Int
+  totalSupply: BigInt
+  totalSupply_not: BigInt
+  totalSupply_in: [BigInt]
+  totalSupply_not_in: [BigInt]
+  totalSupply_gt: BigInt
+  totalSupply_lt: BigInt
+  totalSupply_gte: BigInt
+  totalSupply_lte: BigInt
+  delegatedSupply: BigInt
+  delegatedSupply_not: BigInt
+  delegatedSupply_in: [BigInt]
+  delegatedSupply_not_in: [BigInt]
+  delegatedSupply_gt: BigInt
+  delegatedSupply_lt: BigInt
+  delegatedSupply_gte: BigInt
+  delegatedSupply_lte: BigInt
+  cexSupply: BigInt
+  cexSupply_not: BigInt
+  cexSupply_in: [BigInt]
+  cexSupply_not_in: [BigInt]
+  cexSupply_gt: BigInt
+  cexSupply_lt: BigInt
+  cexSupply_gte: BigInt
+  cexSupply_lte: BigInt
+  dexSupply: BigInt
+  dexSupply_not: BigInt
+  dexSupply_in: [BigInt]
+  dexSupply_not_in: [BigInt]
+  dexSupply_gt: BigInt
+  dexSupply_lt: BigInt
+  dexSupply_gte: BigInt
+  dexSupply_lte: BigInt
+  lendingSupply: BigInt
+  lendingSupply_not: BigInt
+  lendingSupply_in: [BigInt]
+  lendingSupply_not_in: [BigInt]
+  lendingSupply_gt: BigInt
+  lendingSupply_lt: BigInt
+  lendingSupply_gte: BigInt
+  lendingSupply_lte: BigInt
+  circulatingSupply: BigInt
+  circulatingSupply_not: BigInt
+  circulatingSupply_in: [BigInt]
+  circulatingSupply_not_in: [BigInt]
+  circulatingSupply_gt: BigInt
+  circulatingSupply_lt: BigInt
+  circulatingSupply_gte: BigInt
+  circulatingSupply_lte: BigInt
+  treasury: BigInt
+  treasury_not: BigInt
+  treasury_in: [BigInt]
+  treasury_not_in: [BigInt]
+  treasury_gt: BigInt
+  treasury_lt: BigInt
+  treasury_gte: BigInt
+  treasury_lte: BigInt
+}
+
+input accountFilter @join__type(graph: ETHEREUM)  {
+  AND: [accountFilter]
+  OR: [accountFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+}
+
+input accountBalanceFilter @join__type(graph: ETHEREUM)  {
+  AND: [accountBalanceFilter]
+  OR: [accountBalanceFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  tokenId: String
+  tokenId_not: String
+  tokenId_in: [String]
+  tokenId_not_in: [String]
+  tokenId_contains: String
+  tokenId_not_contains: String
+  tokenId_starts_with: String
+  tokenId_ends_with: String
+  tokenId_not_starts_with: String
+  tokenId_not_ends_with: String
+  accountId: String
+  accountId_not: String
+  accountId_in: [String]
+  accountId_not_in: [String]
+  accountId_contains: String
+  accountId_not_contains: String
+  accountId_starts_with: String
+  accountId_ends_with: String
+  accountId_not_starts_with: String
+  accountId_not_ends_with: String
+  balance: BigInt
+  balance_not: BigInt
+  balance_in: [BigInt]
+  balance_not_in: [BigInt]
+  balance_gt: BigInt
+  balance_lt: BigInt
+  balance_gte: BigInt
+  balance_lte: BigInt
+}
+
+input accountPowerFilter @join__type(graph: ETHEREUM)  {
+  AND: [accountPowerFilter]
+  OR: [accountPowerFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  accountId: String
+  accountId_not: String
+  accountId_in: [String]
+  accountId_not_in: [String]
+  accountId_contains: String
+  accountId_not_contains: String
+  accountId_starts_with: String
+  accountId_ends_with: String
+  accountId_not_starts_with: String
+  accountId_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  votingPower: BigInt
+  votingPower_not: BigInt
+  votingPower_in: [BigInt]
+  votingPower_not_in: [BigInt]
+  votingPower_gt: BigInt
+  votingPower_lt: BigInt
+  votingPower_gte: BigInt
+  votingPower_lte: BigInt
+  votesCount: Int
+  votesCount_not: Int
+  votesCount_in: [Int]
+  votesCount_not_in: [Int]
+  votesCount_gt: Int
+  votesCount_lt: Int
+  votesCount_gte: Int
+  votesCount_lte: Int
+  proposalsCount: Int
+  proposalsCount_not: Int
+  proposalsCount_in: [Int]
+  proposalsCount_not_in: [Int]
+  proposalsCount_gt: Int
+  proposalsCount_lt: Int
+  proposalsCount_gte: Int
+  proposalsCount_lte: Int
+  delegationsCount: Int
+  delegationsCount_not: Int
+  delegationsCount_in: [Int]
+  delegationsCount_not_in: [Int]
+  delegationsCount_gt: Int
+  delegationsCount_lt: Int
+  delegationsCount_gte: Int
+  delegationsCount_lte: Int
+  delegate: String
+  delegate_not: String
+  delegate_in: [String]
+  delegate_not_in: [String]
+  delegate_contains: String
+  delegate_not_contains: String
+  delegate_starts_with: String
+  delegate_ends_with: String
+  delegate_not_starts_with: String
+  delegate_not_ends_with: String
+  lastVoteTimestamp: BigInt
+  lastVoteTimestamp_not: BigInt
+  lastVoteTimestamp_in: [BigInt]
+  lastVoteTimestamp_not_in: [BigInt]
+  lastVoteTimestamp_gt: BigInt
+  lastVoteTimestamp_lt: BigInt
+  lastVoteTimestamp_gte: BigInt
+  lastVoteTimestamp_lte: BigInt
+}
+
+input votingPowerHistoryFilter @join__type(graph: ETHEREUM)  {
+  AND: [votingPowerHistoryFilter]
+  OR: [votingPowerHistoryFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  accountId: String
+  accountId_not: String
+  accountId_in: [String]
+  accountId_not_in: [String]
+  accountId_contains: String
+  accountId_not_contains: String
+  accountId_starts_with: String
+  accountId_ends_with: String
+  accountId_not_starts_with: String
+  accountId_not_ends_with: String
+  votingPower: BigInt
+  votingPower_not: BigInt
+  votingPower_in: [BigInt]
+  votingPower_not_in: [BigInt]
+  votingPower_gt: BigInt
+  votingPower_lt: BigInt
+  votingPower_gte: BigInt
+  votingPower_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+input delegationsFilter @join__type(graph: ETHEREUM)  {
+  AND: [delegationsFilter]
+  OR: [delegationsFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  delegateeAccountId: String
+  delegateeAccountId_not: String
+  delegateeAccountId_in: [String]
+  delegateeAccountId_not_in: [String]
+  delegateeAccountId_contains: String
+  delegateeAccountId_not_contains: String
+  delegateeAccountId_starts_with: String
+  delegateeAccountId_ends_with: String
+  delegateeAccountId_not_starts_with: String
+  delegateeAccountId_not_ends_with: String
+  delegatorAccountId: String
+  delegatorAccountId_not: String
+  delegatorAccountId_in: [String]
+  delegatorAccountId_not_in: [String]
+  delegatorAccountId_contains: String
+  delegatorAccountId_not_contains: String
+  delegatorAccountId_starts_with: String
+  delegatorAccountId_ends_with: String
+  delegatorAccountId_not_starts_with: String
+  delegatorAccountId_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+input transfersFilter @join__type(graph: ETHEREUM)  {
+  AND: [transfersFilter]
+  OR: [transfersFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  tokenId: String
+  tokenId_not: String
+  tokenId_in: [String]
+  tokenId_not_in: [String]
+  tokenId_contains: String
+  tokenId_not_contains: String
+  tokenId_starts_with: String
+  tokenId_ends_with: String
+  tokenId_not_starts_with: String
+  tokenId_not_ends_with: String
+  amount: BigInt
+  amount_not: BigInt
+  amount_in: [BigInt]
+  amount_not_in: [BigInt]
+  amount_gt: BigInt
+  amount_lt: BigInt
+  amount_gte: BigInt
+  amount_lte: BigInt
+  fromAccountId: String
+  fromAccountId_not: String
+  fromAccountId_in: [String]
+  fromAccountId_not_in: [String]
+  fromAccountId_contains: String
+  fromAccountId_not_contains: String
+  fromAccountId_starts_with: String
+  fromAccountId_ends_with: String
+  fromAccountId_not_starts_with: String
+  fromAccountId_not_ends_with: String
+  toAccountId: String
+  toAccountId_not: String
+  toAccountId_in: [String]
+  toAccountId_not_in: [String]
+  toAccountId_contains: String
+  toAccountId_not_contains: String
+  toAccountId_starts_with: String
+  toAccountId_ends_with: String
+  toAccountId_not_starts_with: String
+  toAccountId_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+input votesOnchainFilter @join__type(graph: ETHEREUM)  {
+  AND: [votesOnchainFilter]
+  OR: [votesOnchainFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  voterAccountId: String
+  voterAccountId_not: String
+  voterAccountId_in: [String]
+  voterAccountId_not_in: [String]
+  voterAccountId_contains: String
+  voterAccountId_not_contains: String
+  voterAccountId_starts_with: String
+  voterAccountId_ends_with: String
+  voterAccountId_not_starts_with: String
+  voterAccountId_not_ends_with: String
+  proposalId: String
+  proposalId_not: String
+  proposalId_in: [String]
+  proposalId_not_in: [String]
+  proposalId_contains: String
+  proposalId_not_contains: String
+  proposalId_starts_with: String
+  proposalId_ends_with: String
+  proposalId_not_starts_with: String
+  proposalId_not_ends_with: String
+  support: String
+  support_not: String
+  support_in: [String]
+  support_not_in: [String]
+  support_contains: String
+  support_not_contains: String
+  support_starts_with: String
+  support_ends_with: String
+  support_not_starts_with: String
+  support_not_ends_with: String
+  weight: String
+  weight_not: String
+  weight_in: [String]
+  weight_not_in: [String]
+  weight_contains: String
+  weight_not_contains: String
+  weight_starts_with: String
+  weight_ends_with: String
+  weight_not_starts_with: String
+  weight_not_ends_with: String
+  reason: String
+  reason_not: String
+  reason_in: [String]
+  reason_not_in: [String]
+  reason_contains: String
+  reason_not_contains: String
+  reason_starts_with: String
+  reason_ends_with: String
+  reason_not_starts_with: String
+  reason_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+input proposalsOnchainFilter @join__type(graph: ETHEREUM)  {
+  AND: [proposalsOnchainFilter]
+  OR: [proposalsOnchainFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  proposerAccountId: String
+  proposerAccountId_not: String
+  proposerAccountId_in: [String]
+  proposerAccountId_not_in: [String]
+  proposerAccountId_contains: String
+  proposerAccountId_not_contains: String
+  proposerAccountId_starts_with: String
+  proposerAccountId_ends_with: String
+  proposerAccountId_not_starts_with: String
+  proposerAccountId_not_ends_with: String
+  startBlock: String
+  startBlock_not: String
+  startBlock_in: [String]
+  startBlock_not_in: [String]
+  startBlock_contains: String
+  startBlock_not_contains: String
+  startBlock_starts_with: String
+  startBlock_ends_with: String
+  startBlock_not_starts_with: String
+  startBlock_not_ends_with: String
+  endBlock: String
+  endBlock_not: String
+  endBlock_in: [String]
+  endBlock_not_in: [String]
+  endBlock_contains: String
+  endBlock_not_contains: String
+  endBlock_starts_with: String
+  endBlock_ends_with: String
+  endBlock_not_starts_with: String
+  endBlock_not_ends_with: String
+  description: String
+  description_not: String
+  description_in: [String]
+  description_not_in: [String]
+  description_contains: String
+  description_not_contains: String
+  description_starts_with: String
+  description_ends_with: String
+  description_not_starts_with: String
+  description_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  status: String
+  status_not: String
+  status_in: [String]
+  status_not_in: [String]
+  status_contains: String
+  status_not_contains: String
+  status_starts_with: String
+  status_ends_with: String
+  status_not_starts_with: String
+  status_not_ends_with: String
+  forVotes: BigInt
+  forVotes_not: BigInt
+  forVotes_in: [BigInt]
+  forVotes_not_in: [BigInt]
+  forVotes_gt: BigInt
+  forVotes_lt: BigInt
+  forVotes_gte: BigInt
+  forVotes_lte: BigInt
+  againstVotes: BigInt
+  againstVotes_not: BigInt
+  againstVotes_in: [BigInt]
+  againstVotes_not_in: [BigInt]
+  againstVotes_gt: BigInt
+  againstVotes_lt: BigInt
+  againstVotes_gte: BigInt
+  againstVotes_lte: BigInt
+  abstainVotes: BigInt
+  abstainVotes_not: BigInt
+  abstainVotes_in: [BigInt]
+  abstainVotes_not_in: [BigInt]
+  abstainVotes_gt: BigInt
+  abstainVotes_lt: BigInt
+  abstainVotes_gte: BigInt
+  abstainVotes_lte: BigInt
+}
+
+input daoMetricsDayBucketsFilter @join__type(graph: ETHEREUM)  {
+  AND: [daoMetricsDayBucketsFilter]
+  OR: [daoMetricsDayBucketsFilter]
+  date: BigInt
+  date_not: BigInt
+  date_in: [BigInt]
+  date_not_in: [BigInt]
+  date_gt: BigInt
+  date_lt: BigInt
+  date_gte: BigInt
+  date_lte: BigInt
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  tokenId: String
+  tokenId_not: String
+  tokenId_in: [String]
+  tokenId_not_in: [String]
+  tokenId_contains: String
+  tokenId_not_contains: String
+  tokenId_starts_with: String
+  tokenId_ends_with: String
+  tokenId_not_starts_with: String
+  tokenId_not_ends_with: String
+  metricType: metricType
+  metricType_not: metricType
+  metricType_in: [metricType]
+  metricType_not_in: [metricType]
+  open: BigInt
+  open_not: BigInt
+  open_in: [BigInt]
+  open_not_in: [BigInt]
+  open_gt: BigInt
+  open_lt: BigInt
+  open_gte: BigInt
+  open_lte: BigInt
+  close: BigInt
+  close_not: BigInt
+  close_in: [BigInt]
+  close_not_in: [BigInt]
+  close_gt: BigInt
+  close_lt: BigInt
+  close_gte: BigInt
+  close_lte: BigInt
+  low: BigInt
+  low_not: BigInt
+  low_in: [BigInt]
+  low_not_in: [BigInt]
+  low_gt: BigInt
+  low_lt: BigInt
+  low_gte: BigInt
+  low_lte: BigInt
+  high: BigInt
+  high_not: BigInt
+  high_in: [BigInt]
+  high_not_in: [BigInt]
+  high_gt: BigInt
+  high_lt: BigInt
+  high_gte: BigInt
+  high_lte: BigInt
+  average: BigInt
+  average_not: BigInt
+  average_in: [BigInt]
+  average_not_in: [BigInt]
+  average_gt: BigInt
+  average_lt: BigInt
+  average_gte: BigInt
+  average_lte: BigInt
+  volume: BigInt
+  volume_not: BigInt
+  volume_in: [BigInt]
+  volume_not_in: [BigInt]
+  volume_gt: BigInt
+  volume_lt: BigInt
+  volume_gte: BigInt
+  volume_lte: BigInt
+  count: Int
+  count_not: Int
+  count_in: [Int]
+  count_not_in: [Int]
+  count_gt: Int
+  count_lt: Int
+  count_gte: Int
+  count_lte: Int
+}
+
+input PetitionSignature_Input @join__type(graph: PETITION)  {
+  accountId: String
+  message: String
+  signature: String
+  daoId: String
+  timestamp: String
+}
