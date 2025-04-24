@@ -23,6 +23,7 @@ import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
+import { DaoOverviewStageProgressBar } from "@/components/molecules";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -86,39 +87,46 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
       ref={ref}
     >
-      <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
-        <div className="flex">
-          <DaoLogoIcon
-            daoId={daoId}
-            className="size-[72px] rounded-full"
-            variant={DaoLogoVariant.DEFAULT}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <div>
-            <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
-              {daoConfig.name}
-            </h2>
+      <div id="dao-info-header" className="hidden sm:flex p-4">
+        <div className="flex sm:flex-1 w-full flex-col gap-3.5 sm:pr-4 sm:border-r sm:border-lightDark">
+          <div className="flex gap-3.5 sm:gap-5">
+            <div className="flex">
+              <DaoLogoIcon
+                daoId={daoId}
+                className="size-[72px] rounded-full"
+                variant={DaoLogoVariant.DEFAULT}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <div>
+                <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
+                  {daoConfig.name}
+                </h2>
+              </div>
+              <div className="flex gap-2">
+                <DaoInfoDropdown
+                  defaultValue={{
+                    value: "OnChain Gov",
+                    icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
+                    onClick: () => {},
+                  }}
+                  options={onChainOptions}
+                />
+                <DaoInfoDropdown
+                  defaultValue={{
+                    value: "OffChain Gov",
+                    icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
+                    onClick: () => {},
+                  }}
+                  options={offChainOptions}
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <DaoInfoDropdown
-              defaultValue={{
-                value: "OnChain Gov",
-                icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
-                onClick: () => {},
-              }}
-              options={onChainOptions}
-            />
-            <DaoInfoDropdown
-              defaultValue={{
-                value: "OffChain Gov",
-                icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
-                onClick: () => {},
-              }}
-              options={offChainOptions}
-            />
-          </div>
+          <DaoOverviewStageProgressBar />
         </div>
+        
+        <div className="flex flex-1 w-full"></div>
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
