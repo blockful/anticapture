@@ -50,7 +50,7 @@ export const ShowYourSupportStickyBar = ({
               >
                 <span>{buttonText}</span> 
                 <ChevronRight
-                  className="ml-1 size-4 text-tangerine"
+                  className="ml-1 size-4 text-tangerine "
                   strokeWidth={2}
                 />
               </button>
