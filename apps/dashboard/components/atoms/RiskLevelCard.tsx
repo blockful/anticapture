@@ -46,7 +46,7 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="flex h-full flex-row gap-1 rounded-l-full border-lightDark bg-white/10 px-2">
+  <div className="flex h-full flex-row gap-1 rounded-l-full border-lightDark bg-lightDark px-2">
     <p className="flex items-center text-xs font-medium text-foreground">
       Risk level:
     </p>
@@ -58,7 +58,7 @@ const RiskLabel = ({
 );
 
 const RiskBar = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
-  <div className="flex items-center gap-1 rounded-r-full bg-white/10 p-1 pr-2">
+  <div className="flex items-center gap-1 rounded-r-full bg-lightDark p-1 pr-2">
     {pattern.map((bgClass, index) => (
       <div
         key={index}
