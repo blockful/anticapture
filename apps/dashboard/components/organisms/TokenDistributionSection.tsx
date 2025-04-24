@@ -61,7 +61,6 @@ export const TokenDistributionSection = () => {
       }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
-      className="border-b-2 border-b-white/10"
     >
       {Object.values(datasets).some((value) => value!.length > 0) ? (
         <MultilineChartTokenDistribution

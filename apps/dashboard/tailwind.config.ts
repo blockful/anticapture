@@ -22,6 +22,9 @@ const config: Config = {
         colored: "#E66AE9",
         accentColored: "#332433",
         tangerine: "#EC762E",
+        error: "#f87171",
+        warning: "#facc15",
+        success: "#4ade80",
       },
       keyframes: {
         "accordion-down": {

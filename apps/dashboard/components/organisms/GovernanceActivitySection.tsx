@@ -25,7 +25,6 @@ export const GovernanceActivitySection = () => {
       }
       description={SECTIONS_CONSTANTS.governanceActivity.description}
       anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-      className="border-b-2 border-b-white/10"
     >
       <GovernanceActivityTable />
     </TheSectionLayout>

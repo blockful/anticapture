@@ -40,7 +40,7 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "section-title-gap flex h-full w-full flex-col px-4 py-8 sm:border-none sm:bg-dark sm:px-5 sm:py-7",
+        "section-title-gap flex h-full w-full flex-col border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:bg-dark sm:px-5 sm:py-7",
         className,
       )}
       id={anchorId}

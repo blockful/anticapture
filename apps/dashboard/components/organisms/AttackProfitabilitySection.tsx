@@ -48,7 +48,6 @@ export const AttackProfitabilitySection = ({
       description={SECTIONS_CONSTANTS.attackProfitability.description}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
-      className="border-b-2 border-b-white/10"
     >
       <TheCardChartLayout
         title="Cost of Attack vs Profit"

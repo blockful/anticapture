@@ -14,26 +14,24 @@ type RiskConfig = {
 
 const riskConfigs: Record<RiskLevel | "undefined-risk-level", RiskConfig> = {
   [RiskLevel.HIGH]: {
-    color: "red-400",
-    pattern: ["bg-red-400", "bg-red-400", "bg-red-400"],
-    icon: <AlertTriangle className="h-3.5 w-3.5 text-red-400 sm:h-4 sm:w-4" />,
+    color: "error",
+    pattern: ["bg-error", "bg-error", "bg-error"],
+    icon: <AlertTriangle className="text-error size-3.5 sm:size-4" />,
   },
   [RiskLevel.MEDIUM]: {
-    color: "yellow-500",
-    pattern: ["bg-yellow-500", "bg-yellow-500", "bg-lightDark"],
-    icon: <AlertCircle className="h-3.5 w-3.5 text-yellow-500 sm:h-4 sm:w-4" />,
+    color: "warning",
+    pattern: ["bg-warning", "bg-warning", "bg-lightDark"],
+    icon: <AlertCircle className="text-warning size-3.5 sm:size-4" />,
   },
   [RiskLevel.LOW]: {
-    color: "green-500",
-    pattern: ["bg-green-500", "bg-lightDark", "bg-lightDark"],
-    icon: <CheckCircle2 className="size-3.5 text-green-500 sm:size-4" />,
+    color: "success",
+    pattern: ["bg-success", "bg-middleDark", "bg-middleDark"],
+    icon: <CheckCircle2 className="text-success size-3.5 sm:size-4" />,
   },
   "undefined-risk-level": {
     color: "foreground",
-    pattern: ["bg-lightDark", "bg-lightDark", "bg-lightDark"],
-    icon: (
-      <ClockwiseIcon className="h-3.5 w-3.5 text-foreground sm:h-4 sm:w-4" />
-    ),
+    pattern: ["bg-middleDark", "bg-middleDark", "bg-middleDark"],
+    icon: <ClockwiseIcon className="size-3.5 text-foreground sm:size-4" />,
   },
 } as const;
 
@@ -46,7 +44,7 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="flex h-full flex-row gap-1 rounded-l-full border-lightDark bg-lightDark px-2">
+  <div className="flex h-full flex-row gap-1 rounded-l-full bg-lightDark px-2">
     <p className="flex items-center text-xs font-medium text-foreground">
       Risk level:
     </p>
@@ -83,12 +81,7 @@ export const RiskLevelCard = ({ status, className }: RiskLevelCardProps) => {
 
   return (
     <div className="flex h-full w-full flex-col items-start">
-      <div
-        className={cn(
-          "flex h-7 w-fit flex-1 rounded-full border border-white/10",
-          className,
-        )}
-      >
+      <div className={cn("flex h-7 w-fit flex-1 rounded-full", className)}>
         <RiskLabel status={status} color={config.color} icon={config.icon} />
         <RiskBar pattern={config.pattern} />
       </div>
