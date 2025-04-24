@@ -7,8 +7,8 @@ dotenv.config();
 const envSchema = z.object({
   RPC_URL: z.string(),
   DATABASE_URL: z.string(),
-  POOLING_INTERVAL: z.number().default(1000),
-  MAX_REQUESTS_PER_SECOND: z.number().default(50),
+  POLLING_INTERVAL: z.coerce.number().default(10000), // 10s
+  MAX_REQUESTS_PER_SECOND: z.coerce.number().default(20),
   NETWORK: z.nativeEnum(NetworkEnum),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
