@@ -48,15 +48,18 @@ export const TheSectionLayout = ({
     >
       <div className="flex h-full w-full flex-col gap-2">
         <div className="flex h-full w-full flex-col gap-2 sm:flex-row sm:gap-3">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {icon}
-            <h1 className="text-xl font-medium leading-7 tracking-[-0.05%] text-[#FAFAFA] sm:text-left sm:leading-none">
+            <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
               {title}
             </h1>
           </div>
-          {switchDate && !description && (
+          <div className="flex items-center">
+            {riskLevel && <div className="flex h-full">{riskLevel}</div>}
+          </div>
+          {/* {switchDate && !description && (
             <div className="flex">{switchDate}</div>
-          )}
+          )} */}
         </div>
         <div className="flex w-full">
           <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
@@ -64,7 +67,9 @@ export const TheSectionLayout = ({
           </p>
         </div>
       </div>
-      {riskLevel && switchDate ? (
+      <div className="border-b border-b-white/10" />
+
+      {/* {riskLevel && switchDate ? (
         <>
           <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
             <div>{riskLevel}</div>
@@ -81,7 +86,7 @@ export const TheSectionLayout = ({
             <div>{switchDate}</div>
           </div>
         )
-      )}
+      )} */}
       {children}
     </div>
   );
