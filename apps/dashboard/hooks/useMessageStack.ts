@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from 'react';
-import { Message } from '@/components/molecules/MessageStacker/types';
+import { Message } from '@/components/molecules/MessageStacker';
 
 const CLOSED_MESSAGES_KEY = 'closed_messages';
 

@@ -1,8 +1,22 @@
 "use client";
 
 import { X } from "lucide-react";
-import { Message, MessageStackerProps } from "./types";
 import { useMessageStack } from "@/hooks/useMessageStack";
+
+export interface Message {
+  id: string;
+  content: React.ReactNode;
+  type?: "info" | "warning" | "success" | "error";
+  link?: {
+    text: string;
+    url: string;
+  };
+}
+
+interface MessageStackerProps {
+  messages: Message[];
+  onClose?: (messageId: string) => void;
+}
 
 const MessageItem = ({
   message,
@@ -12,7 +26,7 @@ const MessageItem = ({
   onClose: () => void;
 }) => {
   return (
-    <div className="flex w-full items-center justify-between gap-2 sm:rounded-lg bg-[#2C1810] px-4 py-3 text-sm text-tangerine">
+    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine sm:rounded-lg">
       {message.content}
       <button
         onClick={onClose}
@@ -34,7 +48,7 @@ export const MessageStacker = ({ messages }: MessageStackerProps) => {
   }
 
   return (
-    <div className="sm:mb-4 flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 sm:mb-4">
       {visibleMessages.map((message) => (
         <MessageItem
           key={message.id}
