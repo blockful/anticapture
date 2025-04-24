@@ -12,6 +12,8 @@ import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
+import { MessageStacker } from "../molecules/MessageStacker";
+import { TelegramBotMessage } from "../atoms/messages/TelegramBotMessage";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -22,8 +24,16 @@ export const DaoTemplate = () => {
     return null;
   }
 
+  const messages = [
+    {
+      id: "telegram-bot",
+      content: <TelegramBotMessage />,
+    },
+  ];
+
   return (
-    <>
+    <div className="flex min-h-screen w-full flex-col">
+      <MessageStacker messages={messages} />
       {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
       {daoConstants.showSupport && <ShowSupportSection />}
       {daoConstants.attackProfitability && (
@@ -37,10 +47,7 @@ export const DaoTemplate = () => {
       )}
       {daoConstants.tokenDistribution && <TokenDistributionSection />}
       {daoConstants.governanceActivity && <GovernanceActivitySection />}
-      <ShowYourSupportStickyBar 
-        message="Is Arbitrum at risk? More data needs more research."
-        buttonText="SIGN TO SHOW YOUR SUPPORT"
-      />
-    </>
+      <ShowYourSupportStickyBar/>
+    </div>
   );
 };
