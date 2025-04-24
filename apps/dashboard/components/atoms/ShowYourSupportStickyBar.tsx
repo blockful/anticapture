@@ -16,6 +16,7 @@ export const ShowYourSupportStickyBar = ({
   buttonText,
   onClick,
 }: ShowYourSupportStickyBarProps) => {
+  const { isDesktop } = useScreenSize();
   return (
     <ConnectButton.Custom>
       {({
@@ -25,7 +26,6 @@ export const ShowYourSupportStickyBar = ({
         authenticationStatus,
         mounted,
       }) => {
-        const { isDesktop } = useScreenSize();
         const ready = mounted && authenticationStatus !== "loading";
         const connected =
           ready &&

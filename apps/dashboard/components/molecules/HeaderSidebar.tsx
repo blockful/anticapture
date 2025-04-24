@@ -26,7 +26,7 @@ export const HeaderSidebar = () => {
         },
       },
     ],
-    [],
+    [router],
   );
 
   return (
