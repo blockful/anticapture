@@ -80,8 +80,8 @@ export const RiskLevelCard = ({ status, className }: RiskLevelCardProps) => {
   const config = riskConfigs[status ?? "undefined-risk-level"];
 
   return (
-    <div className="flex h-full w-full flex-col items-start">
-      <div className={cn("flex h-7 w-fit flex-1 rounded-full", className)}>
+    <div className="flex h-7 w-full flex-col items-start">
+      <div className={cn("flex h-full w-fit flex-1 rounded-full", className)}>
         <RiskLabel status={status} color={config.color} icon={config.icon} />
         <RiskBar pattern={config.pattern} />
       </div>

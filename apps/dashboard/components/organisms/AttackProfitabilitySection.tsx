@@ -38,13 +38,6 @@ export const AttackProfitabilitySection = ({
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
       icon={<CrossHairIcon className="text-foreground" />}
-      switchDate={
-        <SwitcherDate
-          defaultValue={defaultDays}
-          setTimeInterval={setDays}
-          disableRecentData={true}
-        />
-      }
       description={SECTIONS_CONSTANTS.attackProfitability.description}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
@@ -52,6 +45,13 @@ export const AttackProfitabilitySection = ({
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
         description="Treasury values above supply costs indicate high risk."
+        switchDate={
+          <SwitcherDate
+            defaultValue={defaultDays}
+            setTimeInterval={setDays}
+            disableRecentData={true}
+          />
+        }
         headerComponent={
           <ExtractableValueToggleHeader
             treasuryMetric={treasuryMetric}

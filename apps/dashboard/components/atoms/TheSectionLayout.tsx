@@ -9,7 +9,6 @@ export const TheSectionLayout = ({
   icon,
   title,
   description,
-  switchDate,
   riskLevel,
   children,
   anchorId,
@@ -18,7 +17,6 @@ export const TheSectionLayout = ({
   icon?: JSX.Element;
   title: string;
   description?: string;
-  switchDate?: JSX.Element;
   riskLevel?: ReactNode;
   children: ReactNode;
   anchorId: string;
@@ -46,47 +44,31 @@ export const TheSectionLayout = ({
       id={anchorId}
       ref={ref}
     >
-      <div className="flex h-full w-full flex-col gap-2">
-        <div className="flex h-full w-full flex-col gap-2 sm:flex-row sm:gap-3">
-          <div className="flex items-center gap-2">
-            {icon}
-            <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
-              {title}
-            </h1>
+      <div className="flex h-full w-full flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <div className="flex h-full w-full flex-col gap-2 sm:flex-row sm:gap-3">
+            <div className="flex items-center gap-2">
+              {icon}
+              <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
+                {title}
+              </h1>
+            </div>
+            <div className="hidden items-center sm:flex">
+              {riskLevel && <div className="flex h-full">{riskLevel}</div>}
+            </div>
           </div>
-          <div className="flex items-center">
-            {riskLevel && <div className="flex h-full">{riskLevel}</div>}
+          <div className="flex w-full">
+            <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
+              {description}
+            </p>
           </div>
-          {/* {switchDate && !description && (
-            <div className="flex">{switchDate}</div>
-          )} */}
         </div>
-        <div className="flex w-full">
-          <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
-            {description}
-          </p>
+        <div className="flex items-center sm:hidden">
+          {riskLevel && <div className="flex h-full w-full">{riskLevel}</div>}
         </div>
       </div>
       <div className="border-b border-b-white/10" />
 
-      {/* {riskLevel && switchDate ? (
-        <>
-          <div className="flex h-full w-full justify-between gap-4 sm:flex-row">
-            <div>{riskLevel}</div>
-            <div>{switchDate}</div>
-          </div>
-          <div className="w-full border-b border-b-white/10 sm:hidden" />
-        </>
-      ) : (
-        !riskLevel &&
-        switchDate &&
-        description && (
-          <div className="flex h-full w-full flex-row justify-end gap-4">
-            <div>{riskLevel}</div>
-            <div>{switchDate}</div>
-          </div>
-        )
-      )} */}
       {children}
     </div>
   );
