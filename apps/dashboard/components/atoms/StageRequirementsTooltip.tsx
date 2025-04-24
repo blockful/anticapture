@@ -1,6 +1,6 @@
 "use client"
 
-import { StageBadge } from "./StageBadge";
+import { StageBadge } from "@/components/atoms/StageBadge";
 
 interface StageRequirement {
   name: string;

@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import { StarOutlineIcon } from "../atoms/icons/StarOutlineIcon";
-import { StageRequirementsTooltip } from "../atoms/StageRequirementsTooltip";
+import { StarOutlineIcon } from "@/components/atoms/icons/StarOutlineIcon";
+import { StageRequirementsTooltip } from "@/components/atoms/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
