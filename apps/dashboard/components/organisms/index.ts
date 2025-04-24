@@ -1,8 +1,9 @@
-export * from "./AttackProfitabilitySection";
-export * from "./DaoOverviewSection";
-export * from "./GovernanceActivitySection";
-export * from "./GovernanceImplementationSection";
-export * from "./PanelSection";
-export * from "./ShowSupportSection";
-export * from "./SupportDaosSection";
-export * from "./TokenDistributionSection";
+
+export * from "@/components/organisms/AttackProfitabilitySection";
+export * from "@/components/organisms/DaoOverviewSection";
+export * from "@/components/organisms/GovernanceActivitySection";
+export * from "@/components/organisms/GovernanceImplementationSection";
+export * from "@/components/organisms/PanelSection";
+export * from "@/components/organisms/ShowSupportSection";
+export * from "@/components/organisms/SupportDaosSection";
+export * from "@/components/organisms/TokenDistributionSection";

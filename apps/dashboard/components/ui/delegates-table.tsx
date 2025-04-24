@@ -1,8 +1,8 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "./data-table";
-import { Button } from "./button";
+import { DataTable } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
 import { ArrowUpDown, InfoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
