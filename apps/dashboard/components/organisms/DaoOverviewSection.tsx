@@ -158,6 +158,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               options={offChainOptions}
             />
           </div>
+          <DaoOverviewStageProgressBar />
         </div>
       </div>
       <div className="flex h-full w-full">
