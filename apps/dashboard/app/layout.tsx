@@ -2,10 +2,10 @@ import "@/app/globals.css";
 import "tailwindcss";
 
 import type { Metadata } from "next";
-import { Inter, Roboto } from "next/font/google";
 import { GlobalProviders } from "@/components/providers/GlobalProviders";
 import { ReactNode } from "react";
 import HotjarScript from "@/hotjar";
+import { Inter, Roboto } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,7 +15,6 @@ const roboto = Roboto({
   display: 'swap',
   variable: '--font-roboto',
 });
-
 
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
