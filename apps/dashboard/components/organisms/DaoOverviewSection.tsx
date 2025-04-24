@@ -40,7 +40,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         }),
       );
     }
-  }, [inView, SECTIONS_CONSTANTS.daoOverview.anchorId]);
+  }, [inView]);
 
   if (!daoOverview) {
     return null;
