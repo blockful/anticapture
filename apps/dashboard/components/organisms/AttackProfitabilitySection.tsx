@@ -37,21 +37,25 @@ export const AttackProfitabilitySection = ({
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
+      subtitle={"Cost of Attack vs Profit"}
       icon={<CrossHairIcon className="text-foreground" />}
       description={SECTIONS_CONSTANTS.attackProfitability.description}
+      infoText={
+        "Treasury values above supply costs indicate high risk. And probably we can add something else here."
+      }
+      switchDate={
+        <SwitcherDate
+          defaultValue={defaultDays}
+          setTimeInterval={setDays}
+          disableRecentData={true}
+        />
+      }
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <TheCardChartLayout
-        title="Cost of Attack vs Profit"
-        description="Treasury values above supply costs indicate high risk."
-        switchDate={
-          <SwitcherDate
-            defaultValue={defaultDays}
-            setTimeInterval={setDays}
-            disableRecentData={true}
-          />
-        }
+        // title="Cost of Attack vs Profit"
+        // description="Treasury values above supply costs indicate high risk."
         headerComponent={
           <ExtractableValueToggleHeader
             treasuryMetric={treasuryMetric}
@@ -68,14 +72,14 @@ export const AttackProfitabilitySection = ({
       </TheCardChartLayout>
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <TheCardChartLayout
-          title={
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Cost Comparison</span>
-              <span className="text-sm font-normal text-foreground">
-                Dollar value comparison of key security indicators.
-              </span>
-            </div>
-          }
+        // title={
+        //   <div className="flex flex-col">
+        //     <span className="text-sm font-medium">Cost Comparison</span>
+        //     <span className="text-sm font-normal text-foreground">
+        //       Dollar value comparison of key security indicators.
+        //     </span>
+        //   </div>
+        // }
         >
           <AttackCostBarChart />
         </TheCardChartLayout>
