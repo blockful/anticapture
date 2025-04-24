@@ -115,4 +115,8 @@
   .card-text-accordion {
     @apply text-sm font-normal leading-normal text-foreground;
   }
+
+  .section-title-gap {
+    @apply gap-4 sm:gap-6;
+  }
 }

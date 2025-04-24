@@ -19,13 +19,13 @@ export const GovernanceActivitySection = () => {
       icon={<ArrowLeftRight className="text-foreground" />}
       switchDate={
         <SwitcherDate
-          defaultValue={TimeInterval.NINETY_DAYS}
+          defaultValue={TimeInterval.SEVEN_DAYS}
           setTimeInterval={setDays}
         />
       }
       description={SECTIONS_CONSTANTS.governanceActivity.description}
       anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
+      className="border-b-2 border-b-white/10"
     >
       <GovernanceActivityTable />
     </TheSectionLayout>

@@ -40,15 +40,15 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col gap-6 sm:border-none",
+        "section-title-gap flex h-full w-full flex-col px-4 py-8 sm:border-none sm:bg-dark sm:px-5 sm:py-7",
         className,
       )}
       id={anchorId}
       ref={ref}
     >
       <div className="flex h-full w-full flex-col gap-2">
-        <div className="flex h-full w-full flex-col justify-between gap-2 sm:flex-row sm:gap-0">
-          <div className="flex items-center gap-3">
+        <div className="flex h-full w-full flex-col gap-2 sm:flex-row sm:gap-3">
+          <div className="flex items-center gap-2.5">
             {icon}
             <h1 className="text-xl font-medium leading-7 tracking-[-0.05%] text-[#FAFAFA] sm:text-left sm:leading-none">
               {title}
