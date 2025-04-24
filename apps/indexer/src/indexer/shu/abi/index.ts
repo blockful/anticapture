@@ -1,1 +1,0 @@
-export { SHUTokenAbi } from "./SHUTokenAbi";
