@@ -77,7 +77,7 @@ export const TheSectionLayout = ({
       </div>
       <div className="border-b border-b-white/10" />
 
-      <div className="flex h-full w-full justify-between">
+      <div className="flex h-full w-full items-center justify-between">
         <div className="flex flex-col">
           <CardTitle className="font-roboto flex items-center text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
             {subtitle}
