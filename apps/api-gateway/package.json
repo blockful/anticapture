@@ -1,0 +1,19 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "supergraph": "mesh-compose -o supergraph.graphql",
+    "start": "npm run supergraph && hive-gateway supergraph"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@graphql-hive/gateway": "^1.13.6",
+    "@graphql-mesh/compose-cli": "^1.4.7",
+    "@omnigraph/openapi": "^0.109.7",
+    "dotenv": "^16.4.7"
+  }
+}
