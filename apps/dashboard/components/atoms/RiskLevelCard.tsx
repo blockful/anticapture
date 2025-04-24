@@ -50,7 +50,7 @@ const RiskLabel = ({
     <p className="flex items-center text-xs font-medium text-foreground">
       Risk level:
     </p>
-    <p className={`flex items-center gap-1 text-${color} text-sm font-medium`}>
+    <p className={`flex items-center gap-1 text-${color} text-xs font-medium`}>
       {status ?? "------"}
       {icon}
     </p>
