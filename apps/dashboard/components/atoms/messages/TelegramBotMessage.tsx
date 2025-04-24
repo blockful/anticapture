@@ -1,18 +1,26 @@
 "use client";
 
 import { ArrowRight, Send } from "lucide-react";
+import { useParams } from "next/navigation";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoIdEnum } from "@/lib/types/daos";
 
 export const TelegramBotMessage = () => {
+  const { daoId } = useParams() as { daoId: string };
   return (
-    <div className="flex gap-3 items-center tracking-wider sm:flex-row">
+    <div className="flex items-center gap-3 tracking-wider sm:flex-row">
       <Send className="size-4 text-white" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex gap-3">
           <span className="font-roboto font-normal text-white">
-            RECEIVE REAL-TIME UNISWAP SECURITY UPDATES.
+            RECEIVE REAL-TIME{" "}
+            {daoConfigByDaoId[
+              daoId.toUpperCase() as DaoIdEnum
+            ].name.toUpperCase()}{" "}
+            SECURITY UPDATES.
           </span>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-3">
           <a
             href={`https://t.me/anticapture_bot`}
             target="_blank"
