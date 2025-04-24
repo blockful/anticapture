@@ -1,4 +1,6 @@
-import useSWR from "swr";
+"use client";
+
+import {default as useSWR} from "swr";
 import { Address } from "viem";
 
 const ensUrl = "https://api.ensdata.net";

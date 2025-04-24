@@ -1,11 +1,9 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import Image from "next/image";
-import { cn } from "@/lib/client/utils";
 import { TooltipInfo } from "@/components/atoms/TooltipInfo";
 import { Address } from "viem";
-import { SupporterBadge } from "./SupporterBadge";
+import { SupporterBadge } from "@/components/atoms/SupporterBadge";
 
 interface SupportersCarrousselProps {
   supporters: Address[];
