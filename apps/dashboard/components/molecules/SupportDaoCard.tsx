@@ -2,7 +2,7 @@
 
 import Image, { StaticImageData } from "next/image";
 import { Card } from "@/components/ui/card";
-import { formatNumberUserReadable } from "@/lib/client/utils";
+import { formatNumberUserReadable, formatPlural } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TrendingUpIcon } from "@/components/atoms";
 import { ChevronRight } from "lucide-react";
@@ -50,7 +50,7 @@ export const SupportDaoCard = ({
   const supportersInfo = (
     <div className="text-xs text-gray-400">
       <div className="flex flex-col items-center gap-1 md:flex-row">
-        {votingPowerSupport && votingPowerSupport > 0 ? (
+        {votingPowerSupport > 0 ? (
           <div className="flex flex-row items-center gap-2">
             <TrendingUpIcon className="text-brandLightGreen h-4 w-4" />
             <div className="text-brandLightGreen">
@@ -61,24 +61,17 @@ export const SupportDaoCard = ({
           ""
         )}
         <div className="hidden md:inline">
-          {votingPowerSupport &&
-          votingPowerSupport > 0 &&
-          totalCountSupport &&
-          totalCountSupport > 0
-            ? "|"
-            : ""}
+          {votingPowerSupport > 0 && totalCountSupport > 0 ? "|" : ""}
         </div>
         <div className="flex flex-row gap-1">
-          {totalCountSupport && totalCountSupport > 0 ? (
+          {totalCountSupport > 0 ? (
             <div className="text-gray-400">{totalCountSupport} </div>
           ) : (
             ""
           )}
           {!votingPowerSupport && !totalCountSupport
             ? ""
-            : totalCountSupport === 1
-              ? "supporter"
-              : "supporters"}
+            : formatPlural(totalCountSupport, "supporter")}
         </div>
       </div>
     </div>
@@ -91,7 +84,7 @@ export const SupportDaoCard = ({
     >
       <div className="flex w-full flex-row justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="rounded-full overflow-hidden">
+          <div className="overflow-hidden rounded-full">
             <Image
               src={daoIcon}
               alt={daoName}
@@ -111,7 +104,7 @@ export const SupportDaoCard = ({
                 <p className="text-xs text-white">Supported</p>
               </div>
             </div>
-            <div className="flex sm:hidden justify-start">{supportersInfo}</div>
+            <div className="flex justify-start sm:hidden">{supportersInfo}</div>
           </div>
         </div>
         <div className="flex flex-row items-center gap-2">

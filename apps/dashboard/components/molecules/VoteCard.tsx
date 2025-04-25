@@ -9,7 +9,7 @@ import {
   SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
 } from "@/components/atoms";
-import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
+import { formatBlocksToUserReadable, formatPlural } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import {
@@ -57,7 +57,7 @@ export const VoteCard = ({
               />
             </TooltipTrigger>
             <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">
-              {formatTimeUnit(Number(daoData.votingDelay), "block")}
+              {formatPlural(Number(daoData.votingDelay), "block")}
             </TooltipContent>
           </Tooltip>,
         ],
