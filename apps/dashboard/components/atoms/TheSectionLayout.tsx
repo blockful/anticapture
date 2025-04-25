@@ -15,6 +15,7 @@ export const TheSectionLayout = ({
   infoText,
   days,
   switchDate,
+  isSwitchDateLinear = false,
   riskLevel,
   children,
   anchorId,
@@ -27,6 +28,7 @@ export const TheSectionLayout = ({
   infoText?: string;
   days?: string;
   switchDate?: ReactNode;
+  isSwitchDateLinear?: boolean;
   riskLevel?: ReactNode;
   children: ReactNode;
   anchorId: string;
@@ -55,17 +57,36 @@ export const TheSectionLayout = ({
       ref={ref}
     >
       <div className="flex h-full w-full flex-col gap-3">
-        <div className="flex flex-col gap-2">
+        <div
+          className={cn("flex flex-col gap-2", {
+            "gap-0": isSwitchDateLinear,
+          })}
+        >
           <div className="flex h-full w-full flex-col gap-2 sm:flex-row sm:gap-3">
-            <div className="flex items-center gap-2">
-              {icon}
-              <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
-                {title}
-              </h1>
-            </div>
-            <div className="hidden items-center sm:flex">
-              {riskLevel && <div className="flex h-full">{riskLevel}</div>}
-            </div>
+            {isSwitchDateLinear && (
+              <div className="flex w-full items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {icon}
+                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
+                    {title}
+                  </h1>
+                </div>
+                <div className="hidden items-center sm:flex">{switchDate}</div>
+              </div>
+            )}
+            {!isSwitchDateLinear && (
+              <>
+                <div className="flex items-center gap-2">
+                  {icon}
+                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
+                    {title}
+                  </h1>
+                </div>
+                <div className="hidden items-center sm:flex">
+                  {riskLevel && <div className="flex h-full">{riskLevel}</div>}
+                </div>
+              </>
+            )}
           </div>
           <div className="flex w-full">
             <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
@@ -79,17 +100,19 @@ export const TheSectionLayout = ({
       </div>
       {subtitle && <div className="border-b border-b-white/10" />}
 
-      <div className="flex h-full w-full items-center justify-between">
-        <div className="flex flex-col">
-          <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
-            {subtitle}
-          </CardTitle>
-          <p className="text-sm font-normal text-foreground">
-            {getDateRange(days ?? "")}
-          </p>
+      {!isSwitchDateLinear && (
+        <div className="flex h-full w-full items-center justify-between">
+          <div className="flex flex-col">
+            <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
+              {subtitle}
+            </CardTitle>
+            <p className="text-sm font-normal text-foreground">
+              {getDateRange(days ?? "")}
+            </p>
+          </div>
+          <div className="flex items-center">{switchDate}</div>
         </div>
-        <div className="flex items-center">{switchDate}</div>
-      </div>
+      )}
       {infoText && (
         <CardDescription className="flex items-center gap-2 rounded-lg bg-lightDark p-2 text-sm font-normal text-foreground">
           <InfoIcon className="text-tangerine" />
