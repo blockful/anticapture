@@ -6,11 +6,6 @@ import { useMessageStack } from "@/hooks/useMessageStack";
 export interface Message {
   id: string;
   content: React.ReactNode;
-  type?: "info" | "warning" | "success" | "error";
-  link?: {
-    text: string;
-    url: string;
-  };
 }
 
 interface MessageStackerProps {
@@ -48,7 +43,7 @@ export const MessageStacker = ({ messages }: MessageStackerProps) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 sm:mb-4">
+    <div className="flex w-full flex-col gap-2">
       {visibleMessages.map((message) => (
         <MessageItem
           key={message.id}

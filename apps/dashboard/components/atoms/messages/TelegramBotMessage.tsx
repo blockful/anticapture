@@ -4,6 +4,7 @@ import { ArrowRight, Send } from "lucide-react";
 import { useParams } from "next/navigation";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { DaoIdEnum } from "@/lib/types/daos";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/lib/constants";
 
 export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };
@@ -22,7 +23,7 @@ export const TelegramBotMessage = () => {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href={`https://t.me/anticapture_bot`}
+            href={ANTICAPTURE_TELEGRAM_BOT}
             target="_blank"
             rel="noopener noreferrer"
             className="font-normal hover:text-tangerine/80"

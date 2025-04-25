@@ -46,3 +46,4 @@ export const SECTIONS_CONSTANTS = {
 
 export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
 export const ANTICAPTURE_TELEGRAM = "https://t.me/danimimm";
+export const ANTICAPTURE_TELEGRAM_BOT = "https://t.me/anticapture_bot";

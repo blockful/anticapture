@@ -13,7 +13,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 import { MessageStacker } from "@/components/molecules";
-import { TelegramBotMessage } from "@/components/atoms/messages/TelegramBotMessage";
+import { TelegramBotMessage } from "@/components/atoms";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -32,22 +32,26 @@ export const DaoTemplate = () => {
   ];
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <MessageStacker messages={messages} />
-      {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
-      {daoConstants.showSupport && <ShowSupportSection />}
-      {daoConstants.attackProfitability && (
-        <AttackProfitabilitySection
-          daoId={daoIdEnum}
-          attackProfitability={daoConstants.attackProfitability}
-        />
-      )}
-      {daoConstants.governanceImplementation && (
-        <GovernanceImplementationSection daoId={daoIdEnum} />
-      )}
-      {daoConstants.tokenDistribution && <TokenDistributionSection />}
-      {daoConstants.governanceActivity && <GovernanceActivitySection />}
-      <ShowYourSupportStickyBar/>
-    </div>
+    <>
+      <div className="w-full gap-2 sm:px-8 sm:py-3">
+        <MessageStacker messages={messages} />
+      </div>
+      <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
+        {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
+        {daoConstants.showSupport && <ShowSupportSection />}
+        {daoConstants.attackProfitability && (
+          <AttackProfitabilitySection
+            daoId={daoIdEnum}
+            attackProfitability={daoConstants.attackProfitability}
+          />
+        )}
+        {daoConstants.governanceImplementation && (
+          <GovernanceImplementationSection daoId={daoIdEnum} />
+        )}
+        {daoConstants.tokenDistribution && <TokenDistributionSection />}
+        {daoConstants.governanceActivity && <GovernanceActivitySection />}
+        <ShowYourSupportStickyBar />
+      </div>
+    </>
   );
 };

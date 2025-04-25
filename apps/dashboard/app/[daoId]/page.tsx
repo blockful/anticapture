@@ -73,9 +73,7 @@ export default function DaoPage() {
         <div className="sm:hidden">
           <HeaderMobile />
         </div>
-        <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
-          <DaoTemplate />
-        </div>
+        <DaoTemplate />
       </main>
     </div>
   );
