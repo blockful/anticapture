@@ -33,25 +33,23 @@ export const DaoTemplate = () => {
 
   return (
     <>
-      <div className="w-full gap-2 sm:px-8 sm:py-3">
+      <div className="w-full gap-2 sm:py-3">
         <MessageStacker messages={messages} />
       </div>
-      <div className="mx-auto flex flex-col items-center sm:gap-8 sm:px-8 sm:py-6 lg:gap-16">
-        {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
-        {daoConstants.showSupport && <ShowSupportSection />}
-        {daoConstants.attackProfitability && (
-          <AttackProfitabilitySection
-            daoId={daoIdEnum}
-            attackProfitability={daoConstants.attackProfitability}
-          />
-        )}
-        {daoConstants.governanceImplementation && (
-          <GovernanceImplementationSection daoId={daoIdEnum} />
-        )}
-        {daoConstants.tokenDistribution && <TokenDistributionSection />}
-        {daoConstants.governanceActivity && <GovernanceActivitySection />}
-        <ShowYourSupportStickyBar />
-      </div>
+      {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
+      {daoConstants.showSupport && <ShowSupportSection />}
+      {daoConstants.attackProfitability && (
+        <AttackProfitabilitySection
+          daoId={daoIdEnum}
+          attackProfitability={daoConstants.attackProfitability}
+        />
+      )}
+      {daoConstants.governanceImplementation && (
+        <GovernanceImplementationSection daoId={daoIdEnum} />
+      )}
+      {daoConstants.tokenDistribution && <TokenDistributionSection />}
+      {daoConstants.governanceActivity && <GovernanceActivitySection />}
+      <ShowYourSupportStickyBar />
     </>
   );
 };
