@@ -18,7 +18,7 @@ export const PanelSection = () => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.panel.title}
-      icon={<BarChartIcon className="h-6 w-6 text-foreground" />}
+      icon={<BarChartIcon className="size-6 text-foreground" />}
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
@@ -26,6 +26,7 @@ export const PanelSection = () => {
         />
       }
       anchorId={SECTIONS_CONSTANTS.panel.anchorId}
+      className="!bg-darkest"
     >
       <PanelTable days={timeIntervalPanel} />
     </TheSectionLayout>
