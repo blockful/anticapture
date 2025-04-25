@@ -47,17 +47,17 @@ export function sanitizeNumber(amount: number) {
 export const RED_COLOR = "#FCA5A5";
 export const GREEN_COLOR = "#5BB98B";
 
-export function formatNumberUserReadable(num: number, fixed: number = 2): string {
+export function formatNumberUserReadable(num: number): string {
   if (num >= 1e9) {
-    return (num / 1e9).toFixed(fixed).replace(/\.0$/, "") + "B";
+    return (num / 1e9).toFixed(2).replace(/\.0$/, "") + "B";
   }
   if (num >= 1e6) {
-    return (num / 1e6).toFixed(fixed).replace(/\.0$/, "") + "M";
+    return (num / 1e6).toFixed(2).replace(/\.0$/, "") + "M";
   }
   if (num >= 1e3) {
-    return (num / 1e3).toFixed(fixed).replace(/\.0$/, "") + "K";
+    return (num / 1e3).toFixed(2).replace(/\.0$/, "") + "K";
   }
-  return num.toFixed(fixed).toString();
+  return num.toFixed(2).toString();
 }
 
 export function formatBlocksToUserReadable(
@@ -75,7 +75,7 @@ export function formatBlocksToUserReadable(
 
   // For small block counts, just show seconds
   if (num < 5) {
-    return formatTimeUnit(Math.round(totalSeconds), "sec");
+    return formatPlural(Math.round(totalSeconds), "sec");
   }
 
   return formatSecondsToReadable(totalSeconds, useAbbreviations);
@@ -96,29 +96,29 @@ function formatSecondsToReadable(
 
   // Add hours if we have any
   if (hours > 0) {
-    parts.push(useAbbreviations ? `${hours}h` : formatTimeUnit(hours, "hour"));
+    parts.push(useAbbreviations ? `${hours}h` : formatPlural(hours, "hour"));
   }
 
   // Add minutes if we have any
   if (minutes > 0) {
     parts.push(
-      useAbbreviations ? `${minutes}min` : formatTimeUnit(minutes, "min"),
+      useAbbreviations ? `${minutes}min` : formatPlural(minutes, "min"),
     );
   }
 
   // Add seconds only if we have no hours and minutes
   if (parts.length === 0 && seconds > 0) {
     parts.push(
-      useAbbreviations ? `${seconds}s` : formatTimeUnit(seconds, "sec"),
+      useAbbreviations ? `${seconds}s` : formatPlural(seconds, "sec"),
     );
   }
 
   return parts.join(useAbbreviations ? " " : ", ");
 }
 
-// Helper function to format a time unit with proper pluralization
-export function formatTimeUnit(count: number, unit: string): string {
-  return `${count} ${count === 1 ? unit : unit + "s"}`;
+// Helper function to format a word with proper pluralization
+export function formatPlural(count: number, word: string): string {
+  return `${count} ${count === 1 ? word : word + "s"}`;
 }
 
 export const formatVariation = (rateRaw: string): string =>
