@@ -40,6 +40,7 @@ export const TokenDistributionSection = () => {
     cexSupplyChart,
     dexSupplyChart,
     lendingSupplyChart,
+    days,
     setDays,
   } = useTokenDistributionContext();
 
@@ -61,6 +62,7 @@ export const TokenDistributionSection = () => {
       }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
+      days={days}
     >
       {Object.values(datasets).some((value) => value!.length > 0) ? (
         <MultilineChartTokenDistribution

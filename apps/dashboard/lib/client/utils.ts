@@ -8,6 +8,7 @@ import {
 } from "@/lib/dao-config/types";
 import {
   DAYS_PER_MONTH,
+  MILLISECONDS_PER_DAY,
   SECONDS_PER_DAY,
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
@@ -47,7 +48,10 @@ export function sanitizeNumber(amount: number) {
 export const RED_COLOR = "#FCA5A5";
 export const GREEN_COLOR = "#5BB98B";
 
-export function formatNumberUserReadable(num: number, fixed: number = 2): string {
+export function formatNumberUserReadable(
+  num: number,
+  fixed: number = 2,
+): string {
   if (num >= 1e9) {
     return (num / 1e9).toFixed(fixed).replace(/\.0$/, "") + "B";
   }
@@ -310,6 +314,20 @@ export const calculatePastTimestamp = (
   lastTimestamp: number,
   interval: TimeInterval,
 ): number => lastTimestamp - DAYS_IN_MILLISECONDS[interval];
+
+export const getDateRange = (days: string) => {
+  if (!days) return "";
+
+  const numDays = parseInt(days.replace("d", ""));
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const endTimestamp = now.getTime();
+
+  const startTimestamp = endTimestamp - numDays * MILLISECONDS_PER_DAY;
+
+  return `${timestampToReadableDate(startTimestamp)} - ${timestampToReadableDate(endTimestamp)}`;
+};
 
 export type FilteredChartData = {
   full: PriceEntry[];

@@ -50,6 +50,7 @@ export const AttackProfitabilitySection = ({
           disableRecentData={true}
         />
       }
+      days={days}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >

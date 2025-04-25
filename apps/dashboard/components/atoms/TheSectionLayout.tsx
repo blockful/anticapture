@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/client/utils";
+import { cn, getDateRange } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { InfoIcon } from "@/components/atoms";
 import { ReactNode, useEffect } from "react";
@@ -13,6 +13,7 @@ export const TheSectionLayout = ({
   subtitle,
   description,
   infoText,
+  days,
   switchDate,
   riskLevel,
   children,
@@ -24,6 +25,7 @@ export const TheSectionLayout = ({
   subtitle?: string;
   description?: string;
   infoText?: string;
+  days?: string;
   switchDate?: ReactNode;
   riskLevel?: ReactNode;
   children: ReactNode;
@@ -79,11 +81,11 @@ export const TheSectionLayout = ({
 
       <div className="flex h-full w-full items-center justify-between">
         <div className="flex flex-col">
-          <CardTitle className="font-roboto flex items-center text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
+          <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
             {subtitle}
           </CardTitle>
           <p className="text-sm font-normal text-foreground">
-            Jan 03, 2025 - Jan 03, 2025
+            {getDateRange(days ?? "")}
           </p>
         </div>
         <div className="flex items-center">{switchDate}</div>
