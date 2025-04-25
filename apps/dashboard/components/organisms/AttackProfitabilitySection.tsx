@@ -71,16 +71,11 @@ export const AttackProfitabilitySection = ({
           filterData={[treasuryMetric, costMetric]}
         />
       </TheCardChartLayout>
+      <div className="w-full border-t border-lightDark" />
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <TheCardChartLayout
-        // title={
-        //   <div className="flex flex-col">
-        //     <span className="text-sm font-medium">Cost Comparison</span>
-        //     <span className="text-sm font-normal text-foreground">
-        //       Dollar value comparison of key security indicators.
-        //     </span>
-        //   </div>
-        // }
+          title="Cost Comparison"
+          subtitle="Treasury values above supply costs indicate high risk."
         >
           <AttackCostBarChart />
         </TheCardChartLayout>

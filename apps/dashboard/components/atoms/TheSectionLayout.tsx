@@ -77,7 +77,7 @@ export const TheSectionLayout = ({
           {riskLevel && <div className="flex h-full w-full">{riskLevel}</div>}
         </div>
       </div>
-      <div className="border-b border-b-white/10" />
+      {subtitle && <div className="border-b border-b-white/10" />}
 
       <div className="flex h-full w-full items-center justify-between">
         <div className="flex flex-col">
