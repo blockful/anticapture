@@ -100,11 +100,11 @@ export const TheSectionLayout = ({
       </div>
       {subtitle && <div className="border-b border-b-white/10" />}
 
-      {!isSwitchDateLinear && !switchDate && (
+      {!isSwitchDateLinear && (
         <div
           className={cn(
             "h-full w-full items-center justify-between",
-            isSwitchDateLinear ? "flex" : "hidden",
+            isSwitchDateLinear ? "hidden" : "flex",
           )}
         >
           <div className="flex flex-col">

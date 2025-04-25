@@ -79,7 +79,7 @@ export function formatBlocksToUserReadable(
 
   // For small block counts, just show seconds
   if (num < 5) {
-    return formatTimeUnit(Math.round(totalSeconds), "sec");
+    return formatPlural(Math.round(totalSeconds), "sec");
   }
 
   return formatSecondsToReadable(totalSeconds, useAbbreviations);
@@ -100,29 +100,29 @@ function formatSecondsToReadable(
 
   // Add hours if we have any
   if (hours > 0) {
-    parts.push(useAbbreviations ? `${hours}h` : formatTimeUnit(hours, "hour"));
+    parts.push(useAbbreviations ? `${hours}h` : formatPlural(hours, "hour"));
   }
 
   // Add minutes if we have any
   if (minutes > 0) {
     parts.push(
-      useAbbreviations ? `${minutes}min` : formatTimeUnit(minutes, "min"),
+      useAbbreviations ? `${minutes}min` : formatPlural(minutes, "min"),
     );
   }
 
   // Add seconds only if we have no hours and minutes
   if (parts.length === 0 && seconds > 0) {
     parts.push(
-      useAbbreviations ? `${seconds}s` : formatTimeUnit(seconds, "sec"),
+      useAbbreviations ? `${seconds}s` : formatPlural(seconds, "sec"),
     );
   }
 
   return parts.join(useAbbreviations ? " " : ", ");
 }
 
-// Helper function to format a time unit with proper pluralization
-export function formatTimeUnit(count: number, unit: string): string {
-  return `${count} ${count === 1 ? unit : unit + "s"}`;
+// Helper function to format a word with proper pluralization
+export function formatPlural(count: number, word: string): string {
+  return `${count} ${count === 1 ? word : word + "s"}`;
 }
 
 export const formatVariation = (rateRaw: string): string =>

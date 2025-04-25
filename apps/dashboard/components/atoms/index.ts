@@ -1,4 +1,5 @@
 export * from "@/components/atoms/icons";
+export * from "@/components/atoms/messages";
 
 export * from "@/components/atoms/Badge";
 export * from "@/components/atoms/BadgeCardDaoInfoItem";

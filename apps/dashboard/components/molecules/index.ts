@@ -6,6 +6,7 @@ export * from "@/components/molecules/HeaderDAOSidebar";
 export * from "@/components/molecules/HeaderMobile";
 export * from "@/components/molecules/HeaderNavMobile";
 export * from "@/components/molecules/HeaderSidebar";
+export * from "@/components/molecules/MessageStacker";
 export * from "@/components/molecules/MultilineChartAttackProfitability";
 export * from "@/components/molecules/MultilineChartTokenDistribution";
 export * from "@/components/molecules/PanelTable";
