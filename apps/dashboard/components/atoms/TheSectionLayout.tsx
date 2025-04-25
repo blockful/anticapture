@@ -100,8 +100,13 @@ export const TheSectionLayout = ({
       </div>
       {subtitle && <div className="border-b border-b-white/10" />}
 
-      {!isSwitchDateLinear && (
-        <div className="flex h-full w-full items-center justify-between">
+      {!isSwitchDateLinear && !switchDate && (
+        <div
+          className={cn(
+            "h-full w-full items-center justify-between",
+            isSwitchDateLinear ? "flex" : "hidden",
+          )}
+        >
           <div className="flex flex-col">
             <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
               {subtitle}
