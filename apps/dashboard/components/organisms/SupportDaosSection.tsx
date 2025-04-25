@@ -14,13 +14,14 @@ import { pickBy } from "lodash";
 
 export const SupportDaosSection = () => {
   const router = useRouter();
-  
+
   // Create an object with only DAOs in election stage using lodash pickBy
   const daoConfigElectionDaos = useMemo(() => {
     // Use pickBy to filter objects where supportStage is ELECTION
     return pickBy(
-      daoConfigByDaoId, 
-      (daoConfig: DaoConfiguration) => daoConfig.supportStage === SupportStageEnum.ELECTION
+      daoConfigByDaoId,
+      (daoConfig: DaoConfiguration) =>
+        daoConfig.supportStage === SupportStageEnum.ELECTION,
     ) as typeof daoConfigByDaoId;
   }, []);
 
@@ -30,6 +31,7 @@ export const SupportDaosSection = () => {
       icon={<HeartIcon className="text-foreground" />}
       description={SECTIONS_CONSTANTS.supportDaos.description}
       anchorId={SECTIONS_CONSTANTS.supportDaos.anchorId}
+      className="!bg-darkest"
     >
       <div className="flex flex-wrap gap-4">
         {Object.entries(daoConfigElectionDaos).map(([daoId, dao]) => (
