@@ -63,15 +63,14 @@ export const SupportDaoCard = ({
         <div className="hidden md:inline">
           {votingPowerSupport > 0 && totalCountSupport > 0 ? "|" : ""}
         </div>
-        <div className="flex flex-row gap-1">
+        <div className="flex flex-row gap-1 text-gray-400">
           {totalCountSupport > 0 ? (
-            <div className="text-gray-400">{totalCountSupport} </div>
+            <div className="">
+              {formatPlural(totalCountSupport, "supporter")}{" "}
+            </div>
           ) : (
             ""
           )}
-          {!votingPowerSupport && !totalCountSupport
-            ? ""
-            : formatPlural(totalCountSupport, "supporter")}
         </div>
       </div>
     </div>
