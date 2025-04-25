@@ -27,7 +27,7 @@ export const HeaderNavMobile = () => {
     },
     {
       anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
-      title: SECTIONS_CONSTANTS.governanceImplementation.title,
+      title: SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation,
       enabled: !!daoConfig.governanceImplementation,
     },
     {

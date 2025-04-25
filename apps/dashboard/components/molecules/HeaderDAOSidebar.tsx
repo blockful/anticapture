@@ -55,7 +55,9 @@ export const HeaderDAOSidebar = () => {
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
               icon={Lightbulb}
-              label={SECTIONS_CONSTANTS.governanceImplementation.title}
+              label={
+                SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation
+              }
             />
           )}
           {daoConfig.tokenDistribution && (
