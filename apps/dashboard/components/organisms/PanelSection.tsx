@@ -12,7 +12,7 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const PanelSection = () => {
   const [timeIntervalPanel, setTimeIntervalPanel] = useState<TimeInterval>(
-    TimeInterval.NINETY_DAYS,
+    TimeInterval.ONE_YEAR,
   );
 
   return (
@@ -21,7 +21,7 @@ export const PanelSection = () => {
       icon={<BarChartIcon className="size-6 text-foreground" />}
       switchDate={
         <SwitcherDate
-          defaultValue={TimeInterval.NINETY_DAYS}
+          defaultValue={TimeInterval.ONE_YEAR}
           setTimeInterval={setTimeIntervalPanel}
         />
       }
