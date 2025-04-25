@@ -12,7 +12,7 @@ import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
-import { MessageStacker } from "@/components/molecules";
+import { Message, MessageStacker } from "@/components/molecules";
 import { TelegramBotMessage } from "@/components/atoms";
 
 export const DaoTemplate = () => {
@@ -24,11 +24,11 @@ export const DaoTemplate = () => {
     return null;
   }
 
-  const messages = [
-    {
-      id: "telegram-bot",
-      content: <TelegramBotMessage />,
-    },
+  const messages: Message[] = [
+    // {
+    //   id: "telegram-bot",
+    //   content: <TelegramBotMessage />,
+    // },
   ];
 
   return (
