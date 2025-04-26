@@ -100,7 +100,7 @@ export const TheSectionLayout = ({
       </div>
       {subtitle && <div className="border-b border-b-white/10" />}
 
-      {!isSwitchDateLinear && (
+      {!isSwitchDateLinear && switchDate && (
         <div
           className={cn(
             "h-full w-full items-center justify-between",
