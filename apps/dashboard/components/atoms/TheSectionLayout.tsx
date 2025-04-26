@@ -119,9 +119,9 @@ export const TheSectionLayout = ({
         </div>
       )}
       {infoText && (
-        <CardDescription className="flex w-full items-center gap-2 rounded-lg bg-lightDark p-2">
-          <div>
-            <InfoIcon className="size-3 w-fit text-tangerine sm:size-4" />
+        <CardDescription className="flex w-full items-start gap-2 rounded-lg bg-lightDark p-2 sm:items-center">
+          <div className="mt-0.5 sm:mt-0">
+            <InfoIcon className="size-4 w-fit text-tangerine" />
           </div>
           <p className="text-sm font-normal text-foreground">{infoText}</p>
         </CardDescription>
