@@ -145,7 +145,7 @@ export const CardDaoSignature = () => {
                 target="_blank"
                 className="flex items-center gap-1 text-tangerine"
               >
-                <TelegramIcon />
+                <TelegramIcon className="text-tangerine" />
                 Telegram
               </Link>
               <div className="flex h-[75%] border border-white/10" />
