@@ -53,6 +53,7 @@ export const TokenDistributionSection = () => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
+      subtitle="Token Supply Distribution"
       icon={<ArrowLeftRight className="text-foreground" />}
       switchDate={
         <SwitcherDate
