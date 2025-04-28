@@ -3,18 +3,24 @@ import { serve } from "@hono/node-server";
 
 import { env } from "./config";
 import { newRoutes } from "./routes";
-import { PetitionService } from "./services/signPetition";
+import { PetitionService } from "./services";
+import { GraphqlAnticaptureClient } from "./client";
 import { PostgresPetitionRepository } from "./repositories";
 
-const db = new PostgresPetitionRepository(env.DATABASE_URL);
+(async () => {
 
-const app = new Hono();
+  const app = new Hono();
 
-const petitionService = new PetitionService(db);
+  const db = new PostgresPetitionRepository(env.DATABASE_URL);
+  const anticaptureClient = new GraphqlAnticaptureClient(env.ANTICAPTURE_API_URL);
+  const petitionService = new PetitionService(db, anticaptureClient);
 
-newRoutes(app, petitionService);
+  newRoutes(app, petitionService);
 
-serve({
-  fetch: app.fetch,
-  port: env.PORT
-}, (info) => console.log(`Server is running on port ${info.port}`))
+  serve({
+    fetch: app.fetch,
+    port: env.PORT
+  }, (info) => console.log(`Server is running on port ${info.port}`))
+
+})()
+
