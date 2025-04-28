@@ -16,22 +16,22 @@ const riskConfigs: Record<RiskLevel | "undefined-risk-level", RiskConfig> = {
   [RiskLevel.HIGH]: {
     color: "error",
     pattern: ["bg-error", "bg-error", "bg-error"],
-    icon: <AlertTriangle className="text-error size-3.5 sm:size-4" />,
+    icon: <AlertTriangle className="size-3.5 text-error" />,
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
     pattern: ["bg-warning", "bg-warning", "bg-lightDark"],
-    icon: <AlertCircle className="text-warning size-3.5 sm:size-4" />,
+    icon: <AlertCircle className="size-3.5 text-warning" />,
   },
   [RiskLevel.LOW]: {
     color: "success",
     pattern: ["bg-success", "bg-middleDark", "bg-middleDark"],
-    icon: <CheckCircle2 className="text-success size-3.5 sm:size-4" />,
+    icon: <CheckCircle2 className="size-3.5 text-success" />,
   },
   "undefined-risk-level": {
     color: "foreground",
     pattern: ["bg-middleDark", "bg-middleDark", "bg-middleDark"],
-    icon: <ClockwiseIcon className="size-3.5 text-foreground sm:size-4" />,
+    icon: <ClockwiseIcon className="size-3.5 text-foreground" />,
   },
 } as const;
 
