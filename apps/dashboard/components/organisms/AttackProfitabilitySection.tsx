@@ -56,12 +56,14 @@ export const AttackProfitabilitySection = ({
     >
       <TheCardChartLayout
         headerComponent={
-          <ExtractableValueToggleHeader
-            treasuryMetric={treasuryMetric}
-            setTreasuryMetric={setTreasuryMetric}
-            costMetric={costMetric}
-            setCostMetric={setCostMetric}
-          />
+          <div className="flex w-full pt-3">
+            <ExtractableValueToggleHeader
+              treasuryMetric={treasuryMetric}
+              setTreasuryMetric={setTreasuryMetric}
+              costMetric={costMetric}
+              setCostMetric={setCostMetric}
+            />
+          </div>
         }
       >
         <MultilineChartAttackProfitability
