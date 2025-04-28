@@ -1,16 +1,16 @@
 import { ReactNode, SVGProps } from "react";
-import { DaoLogoVariant } from "@/components/atoms";
+import { DaoAvatarVariant } from "@/components/atoms";
 
 interface EnsIconProps extends SVGProps<SVGSVGElement> {
-  variant?: DaoLogoVariant;
+  variant?: DaoAvatarVariant;
 }
 
 export const EnsIcon = ({
-  variant = DaoLogoVariant.DEFAULT,
+  variant = DaoAvatarVariant.DEFAULT,
   ...props
 }: EnsIconProps) => {
-  const EnsIcons: Partial<Record<DaoLogoVariant, ReactNode>> = {
-    [DaoLogoVariant.DEFAULT]: (
+  const EnsIcons: Partial<Record<DaoAvatarVariant, ReactNode>> = {
+    [DaoAvatarVariant.DEFAULT]: (
       <svg
         {...props}
         width="202"
@@ -37,7 +37,7 @@ export const EnsIcon = ({
         />
       </svg>
     ),
-    [DaoLogoVariant.SECONDARY]: (
+    [DaoAvatarVariant.SECONDARY]: (
       <svg
         {...props}
         width="202"

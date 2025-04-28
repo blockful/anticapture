@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { ArrowLeftIcon, DaoLogoIcon, DaoLogoVariant } from "@/components/atoms";
+import { DaoAvatarIcon, DaoAvatarVariant } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
-import Link from "next/link";
 import ArbitrumIcon from "@/public/logo/Arbitrum.png";
 import Image from "next/image";
 
@@ -45,10 +44,10 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 0,
         label: "Uniswap",
         icon: (
-          <DaoLogoIcon
+          <DaoAvatarIcon
             daoId={DaoIdEnum.UNISWAP}
-            variant={DaoLogoVariant.SECONDARY}
-            className="h-5 w-5 text-[#FC72FF]"
+            variant={DaoAvatarVariant.SECONDARY}
+            className="size-5 text-[#FC72FF]"
           />
         ),
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
@@ -57,7 +56,7 @@ export const HeaderDAOSidebarDropdown = () => {
       {
         id: 1,
         label: "ENS",
-        icon: <DaoLogoIcon daoId={DaoIdEnum.ENS} className="h-5 w-5" />,
+        icon: <DaoAvatarIcon daoId={DaoIdEnum.ENS} className="size-5" />,
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
       },
@@ -65,8 +64,8 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 2,
         label: "Arbitrum",
         icon: (
-          <div className="h-5 w-5 rounded-full bg-white">
-            <Image src={ArbitrumIcon} alt="Arbitrum" className="h-5 w-5" />
+          <div className="size-5 rounded-full bg-white">
+            <Image src={ArbitrumIcon} alt="Arbitrum" className="size-5" />
           </div>
         ),
         href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,

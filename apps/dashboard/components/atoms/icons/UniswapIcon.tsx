@@ -1,16 +1,16 @@
 import { ReactNode, SVGProps } from "react";
-import { DaoLogoVariant } from "@/components/atoms";
+import { DaoAvatarVariant } from "@/components/atoms";
 
 interface UniswapIconProps extends SVGProps<SVGSVGElement> {
-  variant?: DaoLogoVariant;
+  variant?: DaoAvatarVariant;
 }
 
 export const UniswapIcon = ({
-  variant = DaoLogoVariant.DEFAULT,
+  variant = DaoAvatarVariant.DEFAULT,
   ...props
 }: UniswapIconProps) => {
-  const UniswapIcons: Partial<Record<DaoLogoVariant, ReactNode>> = {
-    [DaoLogoVariant.DEFAULT]: (
+  const UniswapIcons: Partial<Record<DaoAvatarVariant, ReactNode>> = {
+    [DaoAvatarVariant.DEFAULT]: (
       <svg
         {...props}
         width="36"
@@ -77,7 +77,7 @@ export const UniswapIcon = ({
         </defs>
       </svg>
     ),
-    [DaoLogoVariant.SECONDARY]: (
+    [DaoAvatarVariant.SECONDARY]: (
       <svg
         {...props}
         width="28"

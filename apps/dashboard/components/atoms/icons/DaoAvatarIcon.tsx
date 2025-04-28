@@ -1,22 +1,33 @@
+"use client";
+
 import { SVGProps } from "react";
 import { EnsIcon, OptimismIcon, UniswapIcon } from "@/components/atoms";
 import { DaoIdEnum } from "@/lib/types/daos";
 
-export enum DaoLogoVariant {
+export enum DaoAvatarVariant {
   DEFAULT = "default",
   SECONDARY = "secondary",
 }
 
-interface DaoLogoIconProps extends SVGProps<SVGSVGElement> {
-  daoId: DaoIdEnum;
-  variant?: DaoLogoVariant;
+export enum DaoAvatarSize {
+  SMALL = "small",
+  MEDIUM = "medium",
+  LARGE = "large",
+  XLARGE = "xlarge",
 }
 
-export const DaoLogoIcon = ({
+interface DaoAvatarIconProps extends SVGProps<SVGSVGElement> {
+  daoId: DaoIdEnum;
+  variant?: DaoAvatarVariant;
+  size?: DaoAvatarSize;
+}
+
+export const DaoAvatarIcon = ({
   daoId,
-  variant = DaoLogoVariant.DEFAULT,
+  variant = DaoAvatarVariant.DEFAULT,
+  size = DaoAvatarSize.MEDIUM,
   ...props
-}: DaoLogoIconProps) => {
+}: DaoAvatarIconProps) => {
   switch (daoId) {
     case DaoIdEnum.UNISWAP:
       return <UniswapIcon {...props} variant={variant} />;
