@@ -6,6 +6,7 @@ import { cn } from "@/lib/client/utils";
 import { Card } from "@/components/ui/card";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { RiskLevelCardSmall } from "@/components/atoms/RiskLevelCardSmall";
 
 export const GovernanceImplementationCard = ({
   field,
@@ -17,12 +18,6 @@ export const GovernanceImplementationCard = ({
   onToggle: (e: MouseEvent<HTMLDivElement>) => void;
 }) => {
   const { isDesktop, isTablet } = useScreenSize();
-  const riskStyles = {
-    [RiskLevel.HIGH]: "bg-white/10 text-red-400 rounded-full",
-    [RiskLevel.MEDIUM]: "bg-white/10 text-amber-500 rounded-full",
-    [RiskLevel.LOW]: "bg-white/10 text-green-500 rounded-full",
-    "undefined-risk-level": "bg-white/10 text-gray-500 rounded-full",
-  };
 
   return (
     <Card
@@ -30,15 +25,13 @@ export const GovernanceImplementationCard = ({
         "flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg !border-b border-x-transparent !border-b-lightDark border-t-transparent p-3 shadow transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-lightDark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
           ? "z-20 rounded-b-none sm:border-middleDark sm:bg-lightDark"
-          : "sm:rounded-b-lg sm:hover:bg-lightDark",
+          : "sm:rounded-b-lg sm:hover:bg-middleDark",
       )}
       onClick={onToggle}
     >
       <div className="flex w-full items-center justify-between">
         <div className="flex min-w-0 items-center gap-2">
-          {" "}
           <div className="relative flex size-4 shrink-0 items-center justify-center sm:size-6">
-            {" "}
             <span
               className={cn(
                 "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
@@ -67,37 +60,8 @@ export const GovernanceImplementationCard = ({
             </span>
           </div>
         </div>
-        <div className="ml-2 flex shrink-0 items-center gap-2">
-          {" "}
-          <span
-            className={cn(
-              "flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-medium leading-tight",
-              riskStyles[field.riskLevel],
-            )}
-          >
-            {field.riskLevel}
-            <span className="inline-flex">
-              <span className={cn("text-xs")}>•</span>
-              <span
-                className={cn(
-                  "text-xs",
-                  field.riskLevel === RiskLevel.LOW && "text-foreground",
-                )}
-              >
-                •
-              </span>
-              <span
-                className={cn(
-                  "text-xs",
-                  (field.riskLevel === RiskLevel.LOW ||
-                    field.riskLevel === RiskLevel.MEDIUM) &&
-                    "text-foreground",
-                )}
-              >
-                •
-              </span>
-            </span>
-          </span>
+        <div>
+          <RiskLevelCardSmall status={field.riskLevel} />
         </div>
       </div>
       <div
