@@ -20,7 +20,7 @@ const riskConfigs: Record<RiskLevel | "undefined-risk-level", RiskConfig> = {
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
-    pattern: ["bg-warning", "bg-warning", "bg-lightDark"],
+    pattern: ["bg-warning", "bg-warning", "bg-middleDark"],
     icon: <AlertCircle className="size-3.5 text-warning" />,
   },
   [RiskLevel.LOW]: {
