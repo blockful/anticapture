@@ -93,12 +93,12 @@ export const SwitcherDate = ({
       )}
     </div>
   ) : (
-    <Tabs defaultValue={defaultValue}>
+    <Tabs defaultValue={defaultValue} className="gap-1">
       <TabsList>
         {activeTimeIntervals.map((interval) => (
           <TabsTrigger
             key={interval}
-            className="w-[52px] px-3 py-0.5 text-sm font-normal"
+            className="min-w-[84px] px-3 py-1.5 text-sm font-medium"
             value={interval}
             onClick={() => setTimeInterval(interval)}
           >

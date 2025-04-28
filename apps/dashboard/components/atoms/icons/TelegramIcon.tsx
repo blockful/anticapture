@@ -12,7 +12,7 @@ export const TelegramIcon = (props: SVGProps<SVGSVGElement>) => {
     >
       <path
         d="M13.9987 3.33301L1.33203 8.33301L5.9987 8.99967M13.9987 3.33301L12.332 13.333L5.9987 8.99967M13.9987 3.33301L5.9987 8.99967M5.9987 8.99967V12.6663L8.16456 10.4816"
-        stroke="#EC762E"
+        stroke="currentColor"
         strokeWidth="1.2"
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -1,12 +1,14 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { Message } from '@/components/molecules/MessageStacker';
+import { useCallback, useEffect, useState } from "react";
+import { Message } from "@/components/molecules/MessageStacker";
 
-const CLOSED_MESSAGES_KEY = 'closed_messages';
+const CLOSED_MESSAGES_KEY = "closed_messages";
 
 export const useMessageStack = (messages: Message[]) => {
-  const [closedMessageIds, setClosedMessageIds] = useState<Set<string>>(new Set());
+  const [closedMessageIds, setClosedMessageIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load closed messages from localStorage on mount
@@ -18,7 +20,7 @@ export const useMessageStack = (messages: Message[]) => {
           setClosedMessageIds(new Set(JSON.parse(stored)));
         }
       } catch (error) {
-        console.error('Error loading closed messages:', error);
+        console.error("Error loading closed messages:", error);
       }
       setIsLoaded(true);
     };
@@ -31,13 +33,13 @@ export const useMessageStack = (messages: Message[]) => {
     if (isLoaded) {
       localStorage.setItem(
         CLOSED_MESSAGES_KEY,
-        JSON.stringify(Array.from(closedMessageIds))
+        JSON.stringify(Array.from(closedMessageIds)),
       );
     }
   }, [closedMessageIds, isLoaded]);
 
   const handleCloseMessage = useCallback((messageId: string) => {
-    setClosedMessageIds(prev => {
+    setClosedMessageIds((prev) => {
       const next = new Set(prev);
       next.add(messageId);
       return next;
@@ -46,12 +48,12 @@ export const useMessageStack = (messages: Message[]) => {
 
   // Filter out closed messages
   const visibleMessages = messages.filter(
-    message => !closedMessageIds.has(message.id)
+    (message) => !closedMessageIds.has(message.id),
   );
 
   return {
     visibleMessages,
     handleCloseMessage,
-    isLoaded
+    isLoaded,
   };
-}; 
+};

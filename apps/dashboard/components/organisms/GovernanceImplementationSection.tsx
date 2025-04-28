@@ -50,7 +50,6 @@ export const GovernanceImplementationSection = ({
       icon={<Lightbulb className="text-foreground" />}
       description={SECTIONS_CONSTANTS.governanceImplementation.description}
       anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
-      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <div className="relative flex flex-wrap gap-4">
         <div

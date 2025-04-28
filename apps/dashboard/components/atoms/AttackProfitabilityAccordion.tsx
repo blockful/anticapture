@@ -106,7 +106,7 @@ const AccordionData: AccordionDataProps[] = [
     ),
   },
   {
-    title: "Average Turnout",
+    title: "Average Turnout and Active Supply",
     icon: (
       <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
@@ -181,27 +181,27 @@ const AccordionData: AccordionDataProps[] = [
   },
 ];
 
-export const ExtractableValueAccordion = () => {
+export const AttackProfitabilityAccordion = () => {
   return (
     <Accordion
       type="single"
       defaultValue="item-0"
-      className="flex h-full w-full flex-col gap-3 text-white"
+      className="flex h-full w-full flex-col gap-2 text-white sm:gap-3"
     >
       {AccordionData.map((item, index) => (
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group flex w-full flex-col rounded-lg border border-transparent bg-dark p-3 transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
+          className="group flex w-full flex-col rounded-lg border border-lightDark bg-dark transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
         >
-          <AccordionTrigger className="group/trigger flex w-full items-center justify-between">
+          <AccordionTrigger className="group/trigger flex w-full items-center justify-between px-3 pt-3 data-[state=closed]:pb-3">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-white group-data-[state=open]/trigger:text-white">
               {item.icon}
               {item.title}
             </div>
             <PlusIcon className="h-4 w-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
-          <AccordionContent className="overflow-hidden transition-all">
+          <AccordionContent className="overflow-hidden px-3 pb-3 transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>
           </AccordionContent>
         </AccordionItem>

@@ -1,6 +1,9 @@
 export * from "@/components/atoms/icons";
 export * from "@/components/atoms/messages";
 
+export * from "@/components/atoms/AttackProfitabilityAccordion";
+export * from "@/components/atoms/AttackProfitabilityCustomTooltip";
+export * from "@/components/atoms/AttackProfitabilityToggleHeader";
 export * from "@/components/atoms/Badge";
 export * from "@/components/atoms/BadgeCardDaoInfoItem";
 export * from "@/components/atoms/BadgeInAnalysis";
@@ -13,12 +16,10 @@ export * from "@/components/atoms/CardDaoSignature";
 export * from "@/components/atoms/ConnectWallet";
 export * from "@/components/atoms/CountdownDaoInfo";
 export * from "@/components/atoms/DaoInfoDropdown";
-export * from "@/components/atoms/ExtractableValueAccordion";
-export * from "@/components/atoms/ExtractableValueCustomTooltip";
-export * from "@/components/atoms/ExtractableValueToggleHeader";
 export * from "@/components/atoms/HeaderDAOSidebarDropdown";
 export * from "@/components/atoms/ProgressBar";
 export * from "@/components/atoms/RiskLevelCard";
+export * from "@/components/atoms/RiskLevelCardSmall";
 export * from "@/components/atoms/SkeletonDaoInfoCards";
 export * from "@/components/atoms/SkeletonRow";
 export * from "@/components/atoms/Sparkline";

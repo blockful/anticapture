@@ -10,10 +10,10 @@ import { Inter, Roboto } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 const roboto = Roboto({
-  weight: ['400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-roboto',
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto",
 });
 
 const baseUrl =
@@ -61,7 +61,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <HotjarScript />
       </head>
       <body
-        className={`${inter.className} ${roboto.variable} overflow-x-hidden bg-darkest xl:overflow-hidden`}
+        className={`${inter.className} ${roboto.variable} overflow-x-hidden xl:overflow-hidden`}
       >
         <GlobalProviders>{children}</GlobalProviders>
       </body>

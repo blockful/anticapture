@@ -20,7 +20,7 @@ const riskConfigs: Record<RiskLevel | "undefined-risk-level", RiskConfig> = {
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
-    pattern: ["bg-warning", "bg-warning", "bg-middleDark"],
+    pattern: ["bg-warning", "bg-warning", "bg-lightDark"],
     icon: <AlertCircle className="size-3.5 text-warning" />,
   },
   [RiskLevel.LOW]: {
@@ -45,45 +45,44 @@ const RiskLabel = ({
   icon: ReactNode;
 }) => (
   <div className="flex h-full flex-row gap-1 rounded-l-full bg-lightDark px-2">
-    <p className="flex items-center text-xs font-medium text-foreground">
-      Risk level:
-    </p>
-    <p className={`flex items-center gap-1 text-${color} text-xs font-medium`}>
+    <p
+      className={`items-center gap-1 text-${color} hidden font-roboto text-xs font-medium md:flex`}
+    >
       {status ?? "------"}
+      {icon}
+    </p>
+    <p
+      className={`items-center gap-1 text-${color} flex font-roboto text-xs font-medium md:hidden`}
+    >
       {icon}
     </p>
   </div>
 );
 
-const RiskBar = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
+const RiskDots = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
   <div className="flex items-center gap-1 rounded-r-full bg-lightDark p-1 pr-2">
     {pattern.map((bgClass, index) => (
-      <div
-        key={index}
-        className={cn(
-          "h-2 w-5",
-          bgClass,
-          index === 2 && "rounded-r-full",
-          index === 0 && "rounded-l-full",
-        )}
-      />
+      <div key={index} className={cn("size-1 rounded-full", bgClass)} />
     ))}
   </div>
 );
 
-interface RiskLevelCardProps {
+interface RiskLevelCardSmallProps {
   status?: RiskLevel;
   className?: string;
 }
 
-export const RiskLevelCard = ({ status, className }: RiskLevelCardProps) => {
+export const RiskLevelCardSmall = ({
+  status,
+  className,
+}: RiskLevelCardSmallProps) => {
   const config = riskConfigs[status ?? "undefined-risk-level"];
 
   return (
     <div className="flex h-7 w-full flex-col items-start">
       <div className={cn("flex h-full w-fit flex-1 rounded-full", className)}>
         <RiskLabel status={status} color={config.color} icon={config.icon} />
-        <RiskBar pattern={config.pattern} />
+        <RiskDots pattern={config.pattern} />
       </div>
     </div>
   );
