@@ -55,8 +55,6 @@ export const AttackProfitabilitySection = ({
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <TheCardChartLayout
-        // title="Cost of Attack vs Profit"
-        // description="Treasury values above supply costs indicate high risk."
         headerComponent={
           <ExtractableValueToggleHeader
             treasuryMetric={treasuryMetric}
