@@ -11,8 +11,6 @@ export const validatePetitionSignature = z.object({
   accountId: z.string().refine((id) => isAddress(id), {
     message: "Invalid account",
   }),
-  daoId: z.string(),
-  timestamp: z.bigint(),
 });
 
 /**

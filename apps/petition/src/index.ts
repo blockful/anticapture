@@ -15,7 +15,8 @@ import { PostgresPetitionRepository } from "./repositories";
   const anticaptureClient = new GraphqlAnticaptureClient(env.ANTICAPTURE_API_URL);
   const petitionService = new PetitionService(db, anticaptureClient);
 
-  newRoutes(app, petitionService);
+  const supportedDAOs = await anticaptureClient.getDAOs();
+  newRoutes(app, petitionService, supportedDAOs);
 
   serve({
     fetch: app.fetch,
@@ -23,4 +24,3 @@ import { PostgresPetitionRepository } from "./repositories";
   }, (info) => console.log(`Server is running on port ${info.port}`))
 
 })()
-

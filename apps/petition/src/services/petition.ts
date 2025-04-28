@@ -12,26 +12,24 @@ interface AnticaptureClient {
   getSignaturesVotingPower: (daoId: string) => Promise<bigint>;
 }
 
+type PetitionResponse = {
+  petitionSignatures: PetitionSignatureRequest[];
+  totalSignatures: number;
+  totalSignaturesPower: bigint;
+  latestVoters: string[];
+  userSigned?: boolean;
+}
+
 export class PetitionService {
   private db: PetitionRepository;
   private anticaptureClient: AnticaptureClient;
-
-  supportedDAOs: string[] | undefined;
 
   constructor(db: PetitionRepository, anticaptureClient: AnticaptureClient) {
     this.db = db;
     this.anticaptureClient = anticaptureClient;
   }
 
-  async signPetition(petition: PetitionSignatureRequest) {
-    if (!this.supportedDAOs) {
-      this.supportedDAOs = await this.anticaptureClient.getDAOs();
-    }
-
-    if (!this.supportedDAOs.find((dao) => dao.toUpperCase() === petition.daoId.toUpperCase())) {
-      throw new Error(`Supported DAOs: ${this.supportedDAOs.join(", ")}`);
-    }
-
+  async signPetition(petition: Omit<PetitionSignatureRequest, "timestamp">) {
     const verifiedSignature = await verifyMessage({
       message: petition.message,
       signature: petition.signature,
@@ -40,24 +38,46 @@ export class PetitionService {
 
     if (!verifiedSignature) throw new Error("Invalid signature")
 
-    await this.db.newPetitionSignature(petition);
-    return petition;
+    const dbPetition = {
+      ...petition,
+      timestamp: BigInt(Date.now())
+    }
+    try {
+      await this.db.newPetitionSignature(dbPetition);
+      return dbPetition;
+    } catch (error) {
+      throw new Error("Failed to save petition signature");
+    }
   }
 
-  async readPetitions(daoId: string, userAddress: string) {
+  async readPetitions(daoId: string, userAddress?: string): Promise<PetitionResponse> {
     const petitionSignatures = await this.db.getPetitionSignatures(daoId);
 
-    return {
+    if (!petitionSignatures.length) {
+      return {
+        petitionSignatures,
+        totalSignatures: 0,
+        totalSignaturesPower: 0n,
+        latestVoters: [],
+      }
+    }
+
+    const response: PetitionResponse = {
       petitionSignatures,
       totalSignatures: petitionSignatures.length,
       totalSignaturesPower: await this.anticaptureClient.getSignaturesVotingPower(daoId),
       latestVoters: petitionSignatures
         .slice(0, 10)
-        .map(({ accountId }) => accountId),
-      userSigned: petitionSignatures.some(
+        .map(({ accountId }) => accountId)
+    };
+
+    if (userAddress) {
+      response.userSigned = petitionSignatures.some(
         (signature) =>
           signature.accountId.toLowerCase() === userAddress?.toLowerCase()
-      ),
-    };
+      )
+    }
+
+    return response;
   }
 }
