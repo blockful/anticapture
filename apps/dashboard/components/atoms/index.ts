@@ -19,6 +19,7 @@ export * from "@/components/atoms/ExtractableValueToggleHeader";
 export * from "@/components/atoms/HeaderDAOSidebarDropdown";
 export * from "@/components/atoms/ProgressBar";
 export * from "@/components/atoms/RiskLevelCard";
+export * from "@/components/atoms/RiskLevelCardSmall";
 export * from "@/components/atoms/SkeletonDaoInfoCards";
 export * from "@/components/atoms/SkeletonRow";
 export * from "@/components/atoms/Sparkline";

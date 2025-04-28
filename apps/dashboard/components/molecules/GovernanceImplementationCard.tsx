@@ -1,12 +1,11 @@
 "use client";
 
 import { MouseEvent } from "react";
-import { RiskLevel } from "@/lib/enums";
 import { cn } from "@/lib/client/utils";
 import { Card } from "@/components/ui/card";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { RiskLevelCardSmall } from "@/components/atoms/RiskLevelCardSmall";
+import { RiskLevelCardSmall } from "@/components/atoms";
 
 export const GovernanceImplementationCard = ({
   field,
