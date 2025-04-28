@@ -3,12 +3,12 @@
 import { useState } from "react";
 import {
   CrossHairIcon,
-  ExtractableValueToggleHeader,
+  AttackProfitabilityToggleHeader,
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
   RiskLevelCard,
-  ExtractableValueAccordion,
+  AttackProfitabilityAccordion,
 } from "@/components/atoms";
 import {
   MultilineChartAttackProfitability,
@@ -57,7 +57,7 @@ export const AttackProfitabilitySection = ({
       <TheCardChartLayout
         headerComponent={
           <div className="flex w-full pt-3">
-            <ExtractableValueToggleHeader
+            <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
               setTreasuryMetric={setTreasuryMetric}
               costMetric={costMetric}
@@ -80,7 +80,7 @@ export const AttackProfitabilitySection = ({
           <AttackCostBarChart />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">
-          <ExtractableValueAccordion />
+          <AttackProfitabilityAccordion />
         </div>
       </div>
     </TheSectionLayout>

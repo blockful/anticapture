@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SwitcherChart } from "@/components/atoms";
 
-export const ExtractableValueToggleHeader = ({
+export const AttackProfitabilityToggleHeader = ({
   treasuryMetric,
   setTreasuryMetric,
   costMetric,

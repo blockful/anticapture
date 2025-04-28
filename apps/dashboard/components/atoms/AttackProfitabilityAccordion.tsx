@@ -181,7 +181,7 @@ const AccordionData: AccordionDataProps[] = [
   },
 ];
 
-export const ExtractableValueAccordion = () => {
+export const AttackProfitabilityAccordion = () => {
   return (
     <Accordion
       type="single"
