@@ -88,7 +88,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     risks: [
       { name: "SPAM VULNERABLE", level: RiskLevel.LOW },
       { name: "EXTRACTABLE VALUE", level: RiskLevel.MEDIUM },
-      { name: "SAFEGUARDS", level: RiskLevel.MEDIUM },
+      { name: "SAFEGUARDS", level: undefined },
       { name: "HACKABLE", level: RiskLevel.HIGH },
       { name: "GOV INTERFACES VULNERABILITY", level: RiskLevel.HIGH },
       { name: "RESPONSE TIME", level: RiskLevel.LOW },

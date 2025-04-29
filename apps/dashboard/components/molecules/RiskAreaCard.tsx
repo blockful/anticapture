@@ -1,9 +1,10 @@
 import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
+import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 
 export type RiskArea = {
   name: string;
-  level: RiskLevel;
+  level?: RiskLevel;
 };
 
 interface RiskAreaCardProps {
@@ -18,7 +19,13 @@ interface RiskAreaCardWrapperProps {
 /**
  * Get icon component based on risk level
  */
-const getStatusIcon = (level: RiskLevel) => {
+const getStatusIcon = (level?: RiskLevel) => {
+  if (level === undefined) {
+    return <div className="flex items-center justify-center font-mono text-xs">
+        <CounterClockwiseClockIcon className="size-5 text-foreground" />
+      </div>
+  }
+  
   switch (level) {
     case RiskLevel.LOW:
       return <CheckCircle2 className="text-success" size={20} />;
@@ -32,7 +39,11 @@ const getStatusIcon = (level: RiskLevel) => {
 /**
  * Get text color class based on risk level
  */
-const getStatusColor = (level: RiskLevel) => {
+const getStatusColor = (level?: RiskLevel) => {
+  if (level === undefined) {
+    return "text-foreground";
+  }
+  
   switch (level) {
     case RiskLevel.LOW:
       return "text-success";
@@ -46,7 +57,11 @@ const getStatusColor = (level: RiskLevel) => {
 /**
  * Get background color class based on risk level
  */
-const getBackgroundColor = (level: RiskLevel) => {
+const getBackgroundColor = (level?: RiskLevel) => {
+  if (level === undefined) {
+    return "bg-lightDark";
+  }
+  
   switch (level) {
     case RiskLevel.LOW:
       return "bg-successDark";
@@ -82,15 +97,15 @@ export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
       <div className="flex h-[52px] sm:h-[72px] items-center">
         <div className="h-full flex flex-col gap-1">
           <div
-            className={`h-full w-1 lg:w-1.5 ${isBox3Filled ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
+            className={`h-full w-1 lg:w-1.5 ${risk.level !== undefined && isBox3Filled ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
             aria-hidden="true"
           />
           <div
-            className={`h-full w-1 lg:w-1.5 ${isBox2Filled ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
+            className={`h-full w-1 lg:w-1.5 ${risk.level !== undefined && isBox2Filled ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
             aria-hidden="true"
           />
           <div
-            className={`h-full w-1 lg:w-1.5 ${getBackgroundColor(risk.level)}`}
+            className={`h-full w-1 lg:w-1.5 ${risk.level !== undefined ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
             aria-hidden="true"
           />
         </div>
@@ -121,15 +136,12 @@ export const RiskAreaCardWrapper = ({
       </div>
       
       {/* Desktop layout - two columns */}
-      <div className="">
         {/* Left column cards */}
         <div className="hidden sm:grid sm:grid-cols-1 lg:grid-cols-2 gap-2">
           {risks.map((risk: RiskArea, index: number) => (
             <RiskAreaCard key={`left-${risk.name}-${index}`} riskArea={risk} />
           ))}
         </div>
-
-      </div>
     </div>
   );
 };
