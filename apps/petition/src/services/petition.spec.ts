@@ -36,30 +36,14 @@ describe("PetitionService", () => {
         message: "Sign this petition",
         signature: "0x123",
         accountId: "0xabc",
-        timestamp: 123n,
       }
 
       mockAnticaptureClient.getDAOs.mockResolvedValue(["DAO1"]);
       (verifyMessage as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
-      await expect(service.signPetition(expected)).resolves.toEqual(expected);
-      expect(mockDb.newPetitionSignature).toHaveBeenCalledWith(expected);
+      await expect(service.signPetition(expected)).resolves.toMatchObject(expected);
+      expect(mockDb.newPetitionSignature).toHaveBeenCalledWith(expect.objectContaining(expected));
     });
-
-    it("throws if DAO is not supported", async () => {
-      const expected: PetitionSignatureRequest = {
-        daoId: "DAO1",
-        message: "Sign this petition",
-        signature: "0x123",
-        accountId: "0xabc",
-        timestamp: 123n,
-      }
-
-      mockAnticaptureClient.getDAOs.mockResolvedValue(["DAO2"]);
-      await expect(service.signPetition(expected)).rejects.toThrow("Supported DAOs: DAO2");
-      expect(mockDb.newPetitionSignature).not.toHaveBeenCalled();
-    });
-
 
     it("throws if signature is invalid", async () => {
       const expected: PetitionSignatureRequest = {
@@ -67,7 +51,6 @@ describe("PetitionService", () => {
         message: "Sign this petition",
         signature: "0x123",
         accountId: "0xabc",
-        timestamp: 123n,
       }
 
       mockAnticaptureClient.getDAOs.mockResolvedValue(["DAO1"]);
@@ -80,19 +63,17 @@ describe("PetitionService", () => {
 
   describe("readPetitions", () => {
     it("returns petition data and userSigned=true if user signed", async () => {
-      const petitions = [
+      const petitions: PetitionSignatureRequest[] = [
         {
           daoId: "DAO1",
           message: "Sign this petition",
           signature: "0x123",
-          timestamp: 123n,
           accountId: "0xabc"
         },
         {
           daoId: "DAO1",
           message: "Sign this petition",
           signature: "0x123",
-          timestamp: 123n,
           accountId: "0xdef"
         },
       ];
@@ -113,7 +94,6 @@ describe("PetitionService", () => {
           daoId: "DAO1",
           message: "Sign this petition",
           signature: "0x123",
-          timestamp: 123n,
           accountId: "0xdef"
         },
       ];

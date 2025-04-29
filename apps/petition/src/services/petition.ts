@@ -1,10 +1,15 @@
 import { verifyMessage } from "viem";
 
-import { PetitionSignatureRequest } from "../types";
+import {
+  DBPetitionSignature,
+  PetitionSignatureRequest,
+  PetitionSignatureResponse
+} from "../types";
+
 
 interface PetitionRepository {
-  newPetitionSignature: (petitionSignature: PetitionSignatureRequest) => Promise<void>;
-  getPetitionSignatures: (daoId: string) => Promise<PetitionSignatureRequest[]>;
+  newPetitionSignature: (petitionSignature: DBPetitionSignature) => Promise<void>;
+  getPetitionSignatures: (daoId: string) => Promise<PetitionSignatureResponse[]>;
 }
 
 interface AnticaptureClient {
@@ -13,7 +18,7 @@ interface AnticaptureClient {
 }
 
 type PetitionResponse = {
-  petitionSignatures: PetitionSignatureRequest[];
+  petitionSignatures: PetitionSignatureResponse[];
   totalSignatures: number;
   totalSignaturesPower: bigint;
   latestVoters: string[];
@@ -29,7 +34,7 @@ export class PetitionService {
     this.anticaptureClient = anticaptureClient;
   }
 
-  async signPetition(petition: Omit<PetitionSignatureRequest, "timestamp">) {
+  async signPetition(petition: PetitionSignatureRequest) {
     const verifiedSignature = await verifyMessage({
       message: petition.message,
       signature: petition.signature,

@@ -1,6 +1,6 @@
-import type { FastifyBaseLogger, FastifyInstance, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerDefault } from "fastify";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { Address, Hex } from "viem";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import type { FastifyBaseLogger, FastifyInstance, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerDefault } from "fastify";
 
 /**
  * FastifyTypedInstance type provides proper typing for Fastify with Zod integration.
@@ -25,9 +25,11 @@ export interface PetitionSignatureRequest {
   signature: Hex;
   accountId: Address;
   daoId: string;
-  timestamp: bigint;
 }
 
 export interface PetitionSignatureResponse extends PetitionSignatureRequest {
   votingPower: bigint;
+  timestamp: bigint;
 }
+
+export type DBPetitionSignature = Omit<PetitionSignatureResponse, "votingPower">
