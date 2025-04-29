@@ -1,19 +1,17 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import {
-  AnticaptureIcon,
-  ButtonHeaderSidebar,
-  ConnectWallet,
-  TelegramIcon,
-} from "@/components/atoms";
+import { ButtonHeaderSidebar, TelegramIcon } from "@/components/atoms";
+import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
-import { X, Menu, BarChart4 } from "lucide-react";
+import { BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { DaoIdEnum } from "@/lib/types/daos";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoSelectorMobile } from "@/components/molecules";
 
-export const HeaderMobile = () => {
+export const StickyPageHeader = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
@@ -71,26 +69,20 @@ export const HeaderMobile = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  const { daoId }: { daoId: string } = useParams();
+  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConfigByDaoId[daoIdEnum];
+
   return (
     <>
-      <div className="h-[57px]" />
-      <div className="absolute left-0 right-0 top-0 z-50 bg-darkest px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex cursor-pointer">
-            <AnticaptureIcon />
-          </Link>
-          <div className="flex items-center gap-3">
-            <ConnectWallet className="!px-3 !py-1.5" />
-            <button className="p-2" onClick={onToggleMenu}>
-              {isMenuOpen ? (
-                <X className="size-6 text-zinc-50" />
-              ) : (
-                <Menu className="size-6 text-zinc-50" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+      <header
+        className={cn(
+          "fixed left-0 right-0 top-0 z-30 w-full bg-darkest shadow-md transition-transform duration-300",
+        )}
+      >
+        <DaoSelectorMobile daoIdEnum={daoIdEnum} />
+        <HeaderNavMobile />
+      </header>
 
       <div
         className={cn(
@@ -99,7 +91,7 @@ export const HeaderMobile = () => {
       >
         <div
           className={cn(
-            `fixed left-0 right-0 top-[${headerHeight}px] z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            `fixed left-0 right-0 top-[${headerHeight}px] z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",

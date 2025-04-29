@@ -46,3 +46,4 @@ export * from "@/components/atoms/icons/UncertaintyIcon";
 export * from "@/components/atoms/icons/UniswapIcon";
 export * from "@/components/atoms/icons/UsersIcon";
 export * from "@/components/atoms/icons/WalletIcon";
+export * from "@/components/atoms/icons/CarretSortIcon";
