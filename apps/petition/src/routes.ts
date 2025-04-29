@@ -1,38 +1,97 @@
-import { Hono } from "hono";
-import { validator } from "hono/validator";
+import { z } from "zod";
+import { isHex } from "viem";
+import { isAddress } from "viem";
 
 import { PetitionService } from "./services";
-import { petitionSignatureValidator } from "./middlewares";
+import { FastifyTypedInstance } from "./types";
 
-export async function newRoutes(
-  app: Hono,
+export function routes(
   petitionService: PetitionService,
   supportedDAOs: string[]
-) {
+): (app: FastifyTypedInstance) => void {
+  return (app: FastifyTypedInstance) => {
+    app.post(`/petitions/:daoId`, {
+      schema: {
+        body: z.object({
+          message: z.string(),
+          signature: z.string().refine((sig) => isHex(sig), {
+            message: "Invalid signature",
+          }),
+          accountId: z.string().refine((id) => isAddress(id), {
+            message: "Invalid account",
+          }),
+        }),
+        params: z.object({
+          daoId: z.string(),
+        }),
+        response: {
+          201: z.object({
+            message: z.string(),
+            signature: z.string().refine((sig) => isHex(sig), {
+              message: "Invalid signature",
+            }),
+            accountId: z.string().refine((id) => isAddress(id), {
+              message: "Invalid account",
+            }),
+            timestamp: z.bigint(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    }, async (request, response) => {
+      const petition = request.body;
+      const { daoId } = request.params;
 
-  // Create a route for each supported DAO
-  supportedDAOs.forEach(daoId => {
-    app.post(`/petitions/${daoId}`, validator("json", petitionSignatureValidator), async (context) => {
-      try {
-        const petitionData = context.req.valid("json");
-
-        const petition = await petitionService.signPetition({
-          ...petitionData,
-          daoId
-        });
-        return context.json({ petition }, 201);
-      } catch (error) {
-        return context.json({ error: error.message }, 400);
+      if (!supportedDAOs.includes(daoId)) {
+        return response.status(400).send({ message: "DAO not supported" });
       }
+
+      const dbPetition = await petitionService.signPetition({
+        ...petition,
+        daoId
+      });
+
+      return response.status(201).send(dbPetition);
     });
-  });
 
-  app.get("/petitions/:daoId", async (context) => {
-    const daoId = context.req.param("daoId");
-    const userAddress = context.req.query("userAddress");
-    return context.json(await petitionService.readPetitions(daoId, userAddress));
-  });
-
+    app.get("/petitions/:daoId", {
+      schema: {
+        params: z.object({
+          daoId: z.string(),
+        }),
+        querystring: z.object({
+          userAddress: z.string().refine((addr) => isAddress(addr), {
+            message: "Invalid user address",
+          }).optional(),
+        }),
+        response: {
+          200: z.object({
+            petitionSignatures: z.array(z.object({
+              message: z.string(),
+              signature: z.string().refine((sig) => isHex(sig), {
+                message: "Invalid signature",
+              }),
+              accountId: z.string().refine((id) => isAddress(id), {
+                message: "Invalid account",
+              }),
+              timestamp: z.bigint(),
+            })),
+            totalSignatures: z.number(),
+            totalSignaturesPower: z.bigint(),
+            latestVoters: z.array(z.string()),
+            userSigned: z.boolean().optional(),
+          })
+        }
+      }
+    }, async (request, response) => {
+      const { daoId } = request.params
+      const { userAddress } = request.query;
+      const petitions = await petitionService.readPetitions(daoId, userAddress)
+      return response.status(200).send(petitions)
+    });
+  }
 }
 
 //@ts-ignore
