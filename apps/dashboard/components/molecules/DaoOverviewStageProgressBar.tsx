@@ -1,13 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import { StarOutlineIcon } from "@/components/atoms/icons/StarOutlineIcon";
 import { StageRequirementsTooltip } from "@/components/atoms/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
-import { BulletPoint } from "../atoms/icons/BulletPoint";
-import { OutlinedBox } from "../atoms/OutlinedBox";
+import { BulletPoint } from "@/components/atoms/icons/BulletPoint";
+import { OutlinedBox } from "@/components/atoms/OutlinedBox";
 
 interface DaoOverviewStageProgressBarProps {
   currentStage?: number;
