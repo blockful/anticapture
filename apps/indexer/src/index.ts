@@ -42,3 +42,9 @@ function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
       throw new Error(`${id} Governor unavailable`);
   }
 }
+
+//@ts-ignore
+//This line is to avoid the error "Do not know how to serialize a BigInt"
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};

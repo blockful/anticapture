@@ -44,7 +44,7 @@ export const DaoOverviewStageProgressBar = ({
   return (
     <div className="relative">
       <div
-        className="flex w-full items-center justify-between sm:rounded-lg bg-darkest p-2 sm:max-w-[400px] sm:bg-lightDark border-b border-lightDark sm:border-none"
+        className="flex w-full items-center justify-between sm:rounded-lg bg-darkest p-2 sm:bg-lightDark border-b border-lightDark sm:border-none"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
         {/* Stage indicator */}
@@ -60,7 +60,7 @@ export const DaoOverviewStageProgressBar = ({
           {[...Array(totalBlocks)].map((_, index) => (
             <div
               key={index}
-              className={cn(`h-2 min-w-1 sm:max-w-3 flex-1`, {
+              className={cn(`h-2 min-w-1 flex-1`, {
                 "bg-tangerine": index < filledBlocks,
                 "bg-middleDark": index >= filledBlocks,
                 "rounded-l-md": index === 0,

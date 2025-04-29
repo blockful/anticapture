@@ -13,8 +13,9 @@ import {
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
+  RiskAreaCardWrapper,
 } from "@/components/molecules";
-import { FilePenLine, LinkIcon } from "lucide-react";
+import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -24,6 +25,7 @@ import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
 import { DaoOverviewStageProgressBar } from "@/components/molecules";
+import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -81,15 +83,31 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   ];
 
+  // Mock data for risk areas
+  const riskAreas = {
+    title: "RISK AREAS",
+    risks: [
+      { name: "SPAM VULNERABLE", level: RiskLevel.LOW },
+      { name: "EXTRACTABLE VALUE", level: RiskLevel.MEDIUM },
+      { name: "SAFEGUARDS", level: undefined },
+      { name: "HACKABLE", level: RiskLevel.HIGH },
+      { name: "GOV INTERFACES VULNERABILITY", level: RiskLevel.HIGH },
+      { name: "RESPONSE TIME", level: RiskLevel.LOW },
+    ],
+  };
+
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
       className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
       ref={ref}
     >
-      <div id="dao-info-header" className="hidden sm:flex p-4">
-        <div className="flex sm:flex-1 w-full flex-col gap-3.5 sm:pr-4 sm:border-r sm:border-lightDark">
-          <div className="flex gap-3.5 sm:gap-5">
+      <div
+        id="dao-info-header"
+        className="hidden w-full flex-col sm:flex xl:flex-row"
+      >
+        <div className="flex w-full flex-col items-start gap-4 p-4 xl:w-1/2">
+          <div className="flex gap-3.5">
             <div className="flex">
               <DaoLogoIcon
                 daoId={daoId}
@@ -123,10 +141,24 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </div>
             </div>
           </div>
-          <DaoOverviewStageProgressBar />
+          <div className="flex w-full flex-col">
+            <div className="mb-4 mt-5 flex h-full items-center gap-2">
+              <h3 className="hidden font-mono text-xs font-bold tracking-wider text-white sm:block">
+                CURRENT RESILIENCE STAGE
+              </h3>
+              <InfoIcon className="size-4 text-foreground" />
+            </div>
+            <DaoOverviewStageProgressBar />
+          </div>
         </div>
-        
-        <div className="flex flex-1 w-full"></div>
+        <div className="flex w-full p-4 xl:w-1/2">
+          <RiskAreaCardWrapper
+            title={riskAreas.title}
+            risks={riskAreas.risks}
+          />
+        </div>
+
+        <div className="flex w-full flex-1"></div>
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
@@ -161,7 +193,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <DaoOverviewStageProgressBar />
         </div>
       </div>
-      <div className="flex h-full w-full">
+      <div className="hidden h-full w-full sm:flex">
+        <SecurityCouncilCard daoOverview={daoOverview} />
+      </div>
+      <div className="mt-4 flex h-full w-full sm:hidden">
         <SecurityCouncilCard daoOverview={daoOverview} />
       </div>
       <div className="border border-lightDark sm:hidden" />
@@ -183,6 +218,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <QuorumCard />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
+      </div>
+
+      {/* Mobile risk areas without title */}
+      <div className="mt-4 sm:hidden">
+        <RiskAreaCardWrapper title={riskAreas.title} risks={riskAreas.risks} />
       </div>
     </div>
   );

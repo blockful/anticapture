@@ -4,6 +4,11 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "panel",
   },
+  alerts: {
+    title: "Alerts",
+    description: undefined,
+    anchorId: "alerts",
+  },
   daoOverview: {
     title: "DAO Overview",
     description: undefined,
@@ -33,7 +38,8 @@ export const SECTIONS_CONSTANTS = {
     anchorId: "tokenDistributionSection",
   },
   governanceImplementation: {
-    title: "Gov. Implementation",
+    title: "Governance Implementation",
+    titleAbbreviation: "Gov. Implementation",
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
@@ -46,3 +52,4 @@ export const SECTIONS_CONSTANTS = {
 
 export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
 export const ANTICAPTURE_TELEGRAM = "https://t.me/danimimm";
+export const ANTICAPTURE_TELEGRAM_BOT = "https://t.me/anticapture_bot";

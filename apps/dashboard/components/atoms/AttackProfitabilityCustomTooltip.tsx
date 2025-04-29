@@ -3,7 +3,7 @@
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { TooltipProps } from "recharts";
 
-export const ExtractableValueCustomTooltip: React.FC<
+export const AttackProfitabilityCustomTooltip: React.FC<
   TooltipProps<number, string> & {
     chartConfig: Record<string, { label: string }>;
   }

@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { ExtractableValueCustomTooltip } from "@/components/atoms";
+import { AttackProfitabilityCustomTooltip } from "@/components/atoms";
 
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useParams } from "next/navigation";
@@ -33,9 +33,8 @@ import { MetricTypesEnum } from "@/lib/client/constants";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
 import { ClockwiseIcon } from "@/components/atoms/icons/ClockwiseIcon";
-import { every } from "lodash";
 
-interface MultilineChartExtractableValueProps {
+interface MultilineChartAttackProfitabilityProps {
   days: string;
   filterData?: string[];
 }
@@ -43,7 +42,7 @@ interface MultilineChartExtractableValueProps {
 export const MultilineChartAttackProfitability = ({
   filterData,
   days,
-}: MultilineChartExtractableValueProps) => {
+}: MultilineChartAttackProfitabilityProps) => {
   const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
   const [mocked, setMocked] = useState<boolean>(false);
@@ -167,7 +166,7 @@ export const MultilineChartAttackProfitability = ({
   return (
     <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
       {mocked && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center border border-lightDark rounded-lg bg-black/5 backdrop-blur-[6px]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg border border-lightDark bg-black/5 backdrop-blur-[6px]">
           <div className="flex items-center gap-2 rounded-full bg-[#1c1c1c] px-4 py-2 text-sm text-foreground">
             <ClockwiseIcon className="h-5 w-5 text-foreground" />
             RESEARCH PENDING
@@ -190,7 +189,7 @@ export const MultilineChartAttackProfitability = ({
           <YAxis hide={true} />
           <Tooltip
             content={
-              <ExtractableValueCustomTooltip chartConfig={chartConfig} />
+              <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />
             }
           />
           {Object.entries(chartConfig)

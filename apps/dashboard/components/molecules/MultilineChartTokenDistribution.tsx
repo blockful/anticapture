@@ -62,10 +62,10 @@ export const MultilineChartTokenDistribution = ({
   );
 
   return (
-    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
+    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark text-white">
       {mocked && (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
-          <div className="flex items-center gap-2 rounded-full bg-dark px-4 py-2 text-foreground text-sm">
+          <div className="flex items-center gap-2 rounded-full bg-dark px-4 py-2 text-sm text-foreground">
             <ClockwiseIcon className="h-5 w-5 text-foreground" />
             RESEARCH PENDING
           </div>

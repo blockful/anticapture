@@ -9,6 +9,7 @@ import {
   AnticaptureIcon,
   ButtonHeaderSidebar,
   ConnectWallet,
+  TelegramIcon,
 } from "@/components/atoms";
 
 export const HeaderSidebar = () => {
@@ -18,12 +19,17 @@ export const HeaderSidebar = () => {
     () => [
       {
         anchorId: SECTIONS_CONSTANTS.panel.anchorId,
-        label: "Panel",
+        label: SECTIONS_CONSTANTS.panel.title,
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem("scrollToSection", "panel");
+          sessionStorage.setItem("scrollToSection", SECTIONS_CONSTANTS.panel.anchorId);
           router.push("/");
         },
+      },
+      {
+        anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
+        label: SECTIONS_CONSTANTS.alerts.title,
+        icon: TelegramIcon,
       },
     ],
     [router],
@@ -43,7 +49,7 @@ export const HeaderSidebar = () => {
             {headerItems.map((item) => (
               <ButtonHeaderSidebar
                 key={item.anchorId}
-                anchorId={item.anchorId}
+                anchorId={item.anchorId || ""}
                 icon={item.icon}
                 label={item.label}
                 className="flex-col gap-1"
