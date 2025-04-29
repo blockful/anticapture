@@ -6,6 +6,8 @@ import { StageRequirementsTooltip } from "@/components/atoms/StageRequirementsTo
 import { useState } from "react";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
+import { BulletPoint } from "../atoms/icons/BulletPoint";
+import { OutlinedBox } from "../atoms/OutlinedBox";
 
 interface DaoOverviewStageProgressBarProps {
   currentStage?: number;
@@ -25,8 +27,6 @@ export const DaoOverviewStageProgressBar = ({
   ],
 }: DaoOverviewStageProgressBarProps) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const totalBlocks = 8;
-  const filledBlocks = 5;
   const { isMobile } = useScreenSize();
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -42,38 +42,31 @@ export const DaoOverviewStageProgressBar = ({
     };
   }, [showTooltip]);
   return (
-    <div className="relative">
+    <div className="relative w-max py-0">
       <div
-        className="flex w-full items-center justify-between sm:rounded-lg bg-darkest p-2 sm:bg-lightDark border-b border-lightDark sm:border-none"
+        className="flex items-center justify-between gap-1 border-b border-lightDark bg-darkest p-2 py-0.5 sm:rounded-lg sm:border-none sm:bg-lightDark"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
         {/* Stage indicator */}
-        <div className="flex items-center gap-2">
-          <StarOutlineIcon className="text-tangerine" />
-          <span className="font-roboto text-sm font-medium uppercase tracking-wider text-tangerine">
+        <div className="flex gap-2">
+          <span
+            className={cn(
+              "font-roboto text-sm font-medium uppercase tracking-wider",
+              {
+                "text-error": currentStage === 0,
+                "text-warning": currentStage === 1,
+                "text-success": currentStage === 2,
+              },
+            )}
+          >
             Stage {currentStage}
           </span>
         </div>
-
-        {/* Progress bar */}
-        <div className="mx-3 flex flex-1 gap-1">
-          {[...Array(totalBlocks)].map((_, index) => (
-            <div
-              key={index}
-              className={cn(`h-2 min-w-1 flex-1`, {
-                "bg-tangerine": index < filledBlocks,
-                "bg-middleDark": index >= filledBlocks,
-                "rounded-l-md": index === 0,
-                "rounded-r-md": index === totalBlocks - 1,
-              })}
-            />
-          ))}
-        </div>
-
+        <BulletPoint className="mb-1 text-sm text-middleDark" />
         {/* Items to next stage */}
-        <div>
+        <div className="flex">
           <button
-            className="font-roboto group text-sm font-medium"
+            className="group font-roboto text-sm font-medium"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
@@ -85,6 +78,32 @@ export const DaoOverviewStageProgressBar = ({
               TO STAGE {currentStage + 1}
             </span>
           </button>
+        </div>
+        <div className="flex gap-2 p-2 pr-0">
+          <OutlinedBox
+            variant="error"
+            className="p-1 py-0.5"
+            onClick={() => setShowTooltip(!showTooltip)}
+            onMouseEnter={() => !isMobile && setShowTooltip(true)}
+          >
+            <span className="font-mono">10</span>
+          </OutlinedBox>
+          <OutlinedBox
+            variant="warning"
+            className="p-1 py-0.5"
+            onClick={() => setShowTooltip(!showTooltip)}
+            onMouseEnter={() => !isMobile && setShowTooltip(true)}
+          >
+            <span className="font-mono">10</span>
+          </OutlinedBox>
+          <OutlinedBox
+            variant="success"
+            className="p-1 py-0.5"
+            onClick={() => setShowTooltip(!showTooltip)}
+            onMouseEnter={() => !isMobile && setShowTooltip(true)}
+          >
+            <span className="font-mono">10</span>
+          </OutlinedBox>
         </div>
       </div>
       {showTooltip && (

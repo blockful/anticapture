@@ -33,9 +33,9 @@ export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
           "flex h-full h-[42px] flex-1 items-center justify-between p-2",
           {
             "bg-lightDark": risk.level === undefined,
-            "bg-successDark": risk.level === RiskLevel.LOW,
-            "bg-warningDark": risk.level === RiskLevel.MEDIUM,
-            "bg-errorDark": risk.level === RiskLevel.HIGH,
+            "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW,
+            "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM,
+            "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH,
           },
         )}
       >
@@ -72,25 +72,25 @@ export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
         <div className="flex h-full flex-col gap-1">
           <div
             className={cn("h-full w-1 lg:w-1.5", {
-              "bg-successDark": risk.level === RiskLevel.LOW && isBox3Filled,
-              "bg-warningDark": risk.level === RiskLevel.MEDIUM && isBox3Filled,
-              "bg-errorDark": risk.level === RiskLevel.HIGH && isBox3Filled,
+              "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW && isBox3Filled,
+              "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM && isBox3Filled,
+              "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH && isBox3Filled,
               "bg-lightDark": risk.level === undefined || !isBox3Filled,
             })}
           />
           <div
             className={cn("h-full w-1 lg:w-1.5", {
-              "bg-successDark": risk.level === RiskLevel.LOW && isBox2Filled,
-              "bg-warningDark": risk.level === RiskLevel.MEDIUM && isBox2Filled,
-              "bg-errorDark": risk.level === RiskLevel.HIGH && isBox2Filled,
+              "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW && isBox2Filled,
+              "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM && isBox2Filled,
+              "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH && isBox2Filled,
               "bg-lightDark": risk.level === undefined || !isBox2Filled,
             })}
           />
           <div
             className={cn("h-full w-1 lg:w-1.5", {
-              "bg-successDark": risk.level === RiskLevel.LOW,
-              "bg-warningDark": risk.level === RiskLevel.MEDIUM,
-              "bg-errorDark": risk.level === RiskLevel.HIGH,
+              "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW,
+              "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM,
+              "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH,
               "bg-lightDark": risk.level === undefined,
             })}
           />
