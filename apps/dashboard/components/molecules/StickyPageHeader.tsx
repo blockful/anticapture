@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { ButtonHeaderSidebar, TelegramIcon } from "@/components/atoms";
+import {
+  ButtonHeaderSidebar,
+  HeaderDAOSidebarDropdown,
+  TelegramIcon,
+} from "@/components/atoms";
 import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
 import { BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { useParams, useRouter } from "next/navigation";
-import { DaoIdEnum } from "@/lib/types/daos";
-import daoConfigByDaoId from "@/lib/dao-config";
-import { DaoSelectorMobile } from "@/components/molecules";
+import { useRouter } from "next/navigation";
 
 export const StickyPageHeader = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
@@ -69,18 +70,17 @@ export const StickyPageHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  const { daoId }: { daoId: string } = useParams();
-  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
-  const daoConstants = daoConfigByDaoId[daoIdEnum];
-
   return (
     <>
       <header
         className={cn(
-          "fixed left-0 right-0 top-0 z-30 w-full bg-darkest shadow-md transition-transform duration-300",
+          "fixed left-0 right-0 top-0 z-50 w-full bg-darkest shadow-md transition-transform duration-300",
         )}
       >
-        <DaoSelectorMobile daoIdEnum={daoIdEnum} />
+        {/* <div className="h-15 border-b border-lightDark"> */}
+        <HeaderDAOSidebarDropdown />
+        {/* </div> */}
+
         <HeaderNavMobile />
       </header>
 

@@ -13,7 +13,6 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 import { Message, MessageStacker } from "@/components/molecules";
-import { TelegramBotMessage } from "@/components/atoms";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();

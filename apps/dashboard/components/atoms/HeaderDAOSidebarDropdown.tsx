@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { ArrowLeftIcon, DaoLogoIcon, DaoLogoVariant } from "@/components/atoms";
+import { DaoLogoIcon, DaoLogoVariant } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
-import Link from "next/link";
 import ArbitrumIcon from "@/public/logo/Arbitrum.png";
 import Image from "next/image";
 
@@ -90,7 +89,10 @@ export const HeaderDAOSidebarDropdown = () => {
   };
 
   return (
-    <div className="relative inline-block w-full" ref={dropdownRef}>
+    <div
+      className="relative z-50 inline-block h-[60px] w-full border-b border-lightDark"
+      ref={dropdownRef}
+    >
       <div className="border-b border-lightDark px-2 py-[7px]">
         <button
           className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-[#333]"
