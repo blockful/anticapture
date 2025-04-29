@@ -11,7 +11,6 @@ import {
   AlertTriangleIcon,
   ArrowDownIcon,
   ArrowUpIcon,
-  Badge,
   BarChartSecondaryIcon,
   CalculatorIcon,
   ChevronLeftIcon,
@@ -23,6 +22,7 @@ import {
   TokensIcon,
   UsersIcon,
 } from "@/components/atoms";
+import { Badge } from "@/components/atoms/Badge";
 
 interface AccordionDataProps {
   title: string;
