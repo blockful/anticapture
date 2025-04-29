@@ -7,9 +7,10 @@ export enum Stage {
 }
 
 const STAGE_STYLES: Record<Stage, string> = {
-  [Stage.ZERO]: "border-red-500 text-red-500",
-  [Stage.ONE]: "border-yellow-500 text-yellow-500",
-  [Stage.TWO]: "border-green-500 text-green-500",
+  [Stage.ZERO]: "border-red-500 text-red-500 bg-[#F87171] bg-opacity-[0.08]  ",
+  [Stage.ONE]:
+    "border-yellow-500 text-yellow-500 bg-[#FACC15] bg-opacity-[0.12]",
+  [Stage.TWO]: "border-green-500 text-green-500 bg-[#4ADE80] bg-opacity-[0.12]",
 };
 
 interface StageTagProps {
