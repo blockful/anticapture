@@ -4,6 +4,11 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "panel",
   },
+  alerts: {
+    title: "Alerts",
+    description: undefined,
+    anchorId: "alerts",
+  },
   daoOverview: {
     title: "DAO Overview",
     description: undefined,

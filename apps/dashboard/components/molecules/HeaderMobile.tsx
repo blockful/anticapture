@@ -34,6 +34,7 @@ export const HeaderMobile = () => {
         },
       },
       {
+        anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
         label: "Get Security Alerts",
         icon: TelegramIcon,
       },

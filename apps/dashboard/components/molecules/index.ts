@@ -17,3 +17,4 @@ export * from "@/components/molecules/SupportDaoCard";
 export * from "@/components/molecules/TimelockCard";
 export * from "@/components/molecules/TokenDistributionTable";
 export * from "@/components/molecules/VoteCard";
+export * from "@/components/molecules/RiskAreaCard";
