@@ -1,6 +1,7 @@
 import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/client/utils";
 
 export type RiskArea = {
   name: string;
@@ -17,62 +18,6 @@ interface RiskAreaCardWrapperProps {
 }
 
 /**
- * Get icon component based on risk level
- */
-const getStatusIcon = (level?: RiskLevel) => {
-  if (level === undefined) {
-    return <div className="flex items-center justify-center font-mono text-xs">
-        <CounterClockwiseClockIcon className="size-5 text-foreground" />
-      </div>
-  }
-  
-  switch (level) {
-    case RiskLevel.LOW:
-      return <CheckCircle2 className="text-success" size={20} />;
-    case RiskLevel.MEDIUM:
-      return <Info className="text-warning" size={20} />;
-    case RiskLevel.HIGH:
-      return <AlertTriangle className="text-error" size={20} />;
-  }
-};
-
-/**
- * Get text color class based on risk level
- */
-const getStatusColor = (level?: RiskLevel) => {
-  if (level === undefined) {
-    return "text-foreground";
-  }
-  
-  switch (level) {
-    case RiskLevel.LOW:
-      return "text-success";
-    case RiskLevel.MEDIUM:
-      return "text-warning";
-    case RiskLevel.HIGH:
-      return "text-error";
-  }
-};
-
-/**
- * Get background color class based on risk level
- */
-const getBackgroundColor = (level?: RiskLevel) => {
-  if (level === undefined) {
-    return "bg-lightDark";
-  }
-  
-  switch (level) {
-    case RiskLevel.LOW:
-      return "bg-successDark";
-    case RiskLevel.MEDIUM:
-      return "bg-warningDark";
-    case RiskLevel.HIGH:
-      return "bg-errorDark";
-  }
-};
-
-/**
  * Individual card component for a single risk area
  */
 export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
@@ -84,28 +29,70 @@ export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
   return (
     <div className="flex-1 flex items-center gap-1">
       <div
-        className={`flex h-[52px] sm:h-[72px] flex-1 items-center justify-between px-2 sm:px-4 ${getBackgroundColor(risk.level)}`}
+        className={cn(
+          "flex h-[52px] sm:h-[72px] flex-1 items-center justify-between px-2 sm:px-4",
+          {
+            "bg-lightDark": risk.level === undefined,
+            "bg-successDark": risk.level === RiskLevel.LOW,
+            "bg-warningDark": risk.level === RiskLevel.MEDIUM,
+            "bg-errorDark": risk.level === RiskLevel.HIGH
+          }
+        )}
       >
         <span
-          className={`font-mono text-xs sm:text-base font-medium tracking-wider ${getStatusColor(risk.level)}`}
+          className={cn(
+            "font-mono text-xs sm:text-base font-medium tracking-wider",
+            {
+              "text-foreground": risk.level === undefined,
+              "text-success": risk.level === RiskLevel.LOW,
+              "text-warning": risk.level === RiskLevel.MEDIUM,
+              "text-error": risk.level === RiskLevel.HIGH
+            }
+          )}
           title={risk.name}
         >
           {risk.name}
         </span>
-        {getStatusIcon(risk.level)}
+        
+        {risk.level === undefined ? (
+          <div className="flex items-center justify-center font-mono text-xs">
+            <CounterClockwiseClockIcon className="size-5 text-foreground" />
+          </div>
+        ) : risk.level === RiskLevel.LOW ? (
+          <CheckCircle2 className="text-success" size={20} />
+        ) : risk.level === RiskLevel.MEDIUM ? (
+          <Info className="text-warning" size={20} />
+        ) : (
+          <AlertTriangle className="text-error" size={20} />
+        )}
       </div>
       <div className="flex h-[52px] sm:h-[72px] items-center">
         <div className="h-full flex flex-col gap-1">
           <div
-            className={`h-full w-1 lg:w-1.5 ${risk.level !== undefined && isBox3Filled ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
+            className={cn("h-full w-1 lg:w-1.5", {
+              "bg-successDark": risk.level === RiskLevel.LOW && isBox3Filled,
+              "bg-warningDark": risk.level === RiskLevel.MEDIUM && isBox3Filled,
+              "bg-errorDark": risk.level === RiskLevel.HIGH && isBox3Filled,
+              "bg-lightDark": risk.level === undefined || !isBox3Filled
+            })}
             aria-hidden="true"
           />
           <div
-            className={`h-full w-1 lg:w-1.5 ${risk.level !== undefined && isBox2Filled ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
+            className={cn("h-full w-1 lg:w-1.5", {
+              "bg-successDark": risk.level === RiskLevel.LOW && isBox2Filled,
+              "bg-warningDark": risk.level === RiskLevel.MEDIUM && isBox2Filled,
+              "bg-errorDark": risk.level === RiskLevel.HIGH && isBox2Filled,
+              "bg-lightDark": risk.level === undefined || !isBox2Filled
+            })}
             aria-hidden="true"
           />
           <div
-            className={`h-full w-1 lg:w-1.5 ${risk.level !== undefined ? getBackgroundColor(risk.level) : "bg-lightDark"}`}
+            className={cn("h-full w-1 lg:w-1.5", {
+              "bg-successDark": risk.level === RiskLevel.LOW,
+              "bg-warningDark": risk.level === RiskLevel.MEDIUM,
+              "bg-errorDark": risk.level === RiskLevel.HIGH,
+              "bg-lightDark": risk.level === undefined
+            })}
             aria-hidden="true"
           />
         </div>
@@ -128,20 +115,12 @@ export const RiskAreaCardWrapper = ({
         {title}
       </h3>
       
-      {/* Mobile layout - two columns */}
-      <div className="grid grid-cols-2 gap-1 sm:hidden">
+      {/* Desktop layout - two columns */}
+      <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-2">
         {risks.map((risk: RiskArea, index: number) => (
-          <RiskAreaCard key={`mobile-${risk.name}-${index}`} riskArea={risk} />
+          <RiskAreaCard key={`${risk.name}-${index}`} riskArea={risk} />
         ))}
       </div>
-      
-      {/* Desktop layout - two columns */}
-        {/* Left column cards */}
-        <div className="hidden sm:grid sm:grid-cols-1 lg:grid-cols-2 gap-2">
-          {risks.map((risk: RiskArea, index: number) => (
-            <RiskAreaCard key={`left-${risk.name}-${index}`} riskArea={risk} />
-          ))}
-        </div>
     </div>
   );
 };
