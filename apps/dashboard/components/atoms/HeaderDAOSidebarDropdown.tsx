@@ -90,10 +90,10 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="relative z-50 inline-block h-[60px] w-full border-b border-lightDark"
+      className="relative z-50 inline-block h-[65px] w-full border-b border-lightDark"
       ref={dropdownRef}
     >
-      <div className="border-b border-lightDark px-2 py-[7px]">
+      <div className="flex h-full items-center justify-between px-2 py-[7px]">
         <button
           className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-[#333]"
           onClick={toggleDropdown}

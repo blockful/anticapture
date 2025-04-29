@@ -77,9 +77,7 @@ export const StickyPageHeader = () => {
           "fixed left-0 right-0 top-0 z-50 w-full bg-darkest shadow-md transition-transform duration-300",
         )}
       >
-        {/* <div className="h-15 border-b border-lightDark"> */}
         <HeaderDAOSidebarDropdown />
-        {/* </div> */}
 
         <HeaderNavMobile />
       </header>
