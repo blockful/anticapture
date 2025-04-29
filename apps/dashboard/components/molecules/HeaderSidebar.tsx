@@ -19,15 +19,16 @@ export const HeaderSidebar = () => {
     () => [
       {
         anchorId: SECTIONS_CONSTANTS.panel.anchorId,
-        label: "Panel",
+        label: SECTIONS_CONSTANTS.panel.title,
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem("scrollToSection", "panel");
+          sessionStorage.setItem("scrollToSection", SECTIONS_CONSTANTS.panel.anchorId);
           router.push("/");
         },
       },
       {
-        label: "Alerts",
+        anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
+        label: SECTIONS_CONSTANTS.alerts.title,
         icon: TelegramIcon,
       },
     ],
