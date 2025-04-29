@@ -101,8 +101,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
       ref={ref}
     >
-      <div id="dao-info-header" className="hidden sm:flex w-full">
-        <div className="flex w-1/2 items-start p-4">
+      <div
+        id="dao-info-header"
+        className="hidden w-full flex-col sm:flex xl:flex-row"
+      >
+        <div className="flex w-full items-start p-4 xl:w-1/2">
           <div className="flex gap-3.5">
             <div className="flex">
               <DaoLogoIcon
@@ -138,7 +141,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
           </div>
         </div>
-        <div className="flex w-1/2 p-4">
+        <div className="flex w-full p-4 xl:w-1/2">
           <RiskAreaCardWrapper title={riskAreas.title} risks={riskAreas.risks} />
         </div>
       </div>
