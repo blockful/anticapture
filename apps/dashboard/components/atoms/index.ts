@@ -4,7 +4,6 @@ export * from "@/components/atoms/messages";
 export * from "@/components/atoms/AttackProfitabilityAccordion";
 export * from "@/components/atoms/AttackProfitabilityCustomTooltip";
 export * from "@/components/atoms/AttackProfitabilityToggleHeader";
-export * from "@/components/atoms/Badge";
 export * from "@/components/atoms/BadgeCardDaoInfoItem";
 export * from "@/components/atoms/BadgeInAnalysis";
 export * from "@/components/atoms/BaseCardDaoInfo";
