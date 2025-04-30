@@ -79,7 +79,7 @@ export const ResilienceStagesSection = ({
           >
             <div
               className={cn(
-                "flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white p-1",
+                "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white p-1",
                 StagesToBorderColor[currentDaoStage],
               )}
             >
