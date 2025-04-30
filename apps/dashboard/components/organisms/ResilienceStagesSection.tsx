@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  ArrowLeftRight,
   TheSectionLayout,
   Stage,
   RiskLevelCard,
   StageTag,
-  DaoLogoIcon,
+  DaoAvatarIcon,
 } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -79,11 +78,11 @@ export const ResilienceStagesSection = ({
           >
             <div
               className={cn(
-                "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white p-1",
+                "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white",
                 StagesToBorderColor[currentDaoStage],
               )}
             >
-              <DaoLogoIcon daoId={daoId} />
+              <DaoAvatarIcon isRounded daoId={daoId} />
             </div>
           </div>
 
