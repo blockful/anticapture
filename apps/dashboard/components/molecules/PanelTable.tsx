@@ -12,6 +12,8 @@ import {
   BadgeInAnalysis,
   TheTable,
   SkeletonRow,
+  DaoAvatarIcon,
+  DaoAvatarSize,
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -92,12 +94,10 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
               {row.index + 1}
             </p>
             {isMobile && details && (
-              <Image
-                className="overflow-hidden rounded-full"
-                src={details.icon}
-                alt={"OK"}
-                width={24}
-                height={24}
+              <DaoAvatarIcon
+                daoId={dao as DaoIdEnum}
+                size={DaoAvatarSize.MEDIUM}
+                isRounded
               />
             )}
           </div>
@@ -139,13 +139,11 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         return (
           <div className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
             <div className="flex w-5 items-center gap-2 md:w-20">
-              {!isMobile && details && (
-                <Image
-                  className="overflow-hidden rounded-full"
-                  src={details.icon}
-                  alt={"OK"}
-                  width={24}
-                  height={24}
+              {!isMobile && (
+                <DaoAvatarIcon
+                  daoId={dao as DaoIdEnum}
+                  size={DaoAvatarSize.SMALL}
+                  isRounded
                 />
               )}
               {dao}

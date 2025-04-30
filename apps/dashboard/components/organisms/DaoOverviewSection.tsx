@@ -5,8 +5,8 @@ import {
   TokensIcon,
   DaoInfoDropdown,
   DaoAvatarIcon,
-  DaoAvatarVariant,
   FocusIcon,
+  DaoAvatarSize,
 } from "@/components/atoms";
 import {
   QuorumCard,
@@ -88,11 +88,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     >
       <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
         <div className="flex">
-          <DaoAvatarIcon
-            daoId={daoId}
-            className="size-[72px] rounded-full"
-            variant={DaoAvatarVariant.DEFAULT}
-          />
+          <DaoAvatarIcon daoId={daoId} size={DaoAvatarSize.XLARGE} isRounded />
         </div>
         <div className="flex flex-col gap-2">
           <div>
@@ -122,11 +118,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
-          <DaoAvatarIcon
-            daoId={daoId}
-            className="size-8 rounded-full"
-            variant={DaoAvatarVariant.DEFAULT}
-          />
+          <DaoAvatarIcon daoId={daoId} size={DaoAvatarSize.MEDIUM} isRounded />
           <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
             {daoConfig.name}
           </h2>
