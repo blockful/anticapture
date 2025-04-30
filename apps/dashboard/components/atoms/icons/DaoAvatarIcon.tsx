@@ -3,9 +3,12 @@
 import { SVGProps } from "react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { cn } from "@/lib/client/utils";
-import { UniswapIcon } from "@/components/atoms/icons/UniswapIcon";
-import { EnsIcon } from "@/components/atoms/icons/EnsIcon";
-import { ArbitrumIcon } from "@/components/atoms/icons/ArbitrumIcon";
+import {
+  ArbitrumIcon,
+  EnsIcon,
+  OptimismIcon,
+  UniswapIcon,
+} from "@/components/atoms/icons";
 
 export enum DaoAvatarSize {
   XSMALL = "size-[16px]",
@@ -59,7 +62,15 @@ export const DaoAvatarIcon = ({
           showBackground={showBackground}
         />
       );
-    // default:
-    //   return null;
+    case DaoIdEnum.OPTIMISM:
+      return (
+        <OptimismIcon
+          {...props}
+          className={className}
+          showBackground={showBackground}
+        />
+      );
+    default:
+      return null;
   }
 };
