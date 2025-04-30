@@ -12,6 +12,7 @@ import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
+import { BarChart } from "lucide-react";
 
 interface ResilienceStagesSectionProps {
   currentDaoStage: Stage;
@@ -29,36 +30,32 @@ export const ResilienceStagesSection = ({
   };
 
   const StagesToLineStyle: Record<Stage, string> = {
-    [Stage.ZERO]: "w-[25%] bg-red-500",
-    [Stage.ONE]: "w-[75%] bg-yellow-500",
-    [Stage.TWO]: "w-full bg-green-500",
+    [Stage.ZERO]: "w-[25%] bg-error",
+    [Stage.ONE]: "w-[75%] bg-warning",
+    [Stage.TWO]: "w-full bg-success",
   };
 
   const StagesToBorderColor: Record<Stage, string> = {
-    [Stage.ZERO]: "border-red-500",
-    [Stage.ONE]: "border-yellow-500",
-    [Stage.TWO]: "border-green-500",
+    [Stage.ZERO]: "border-error",
+    [Stage.ONE]: "border-warning",
+    [Stage.TWO]: "border-success",
   };
 
   return (
     <TheSectionLayout
-      title={
-        <div className="flex flex-row items-center gap-2 whitespace-nowrap">
-          {SECTIONS_CONSTANTS.resilienceStages.title}
-          <RiskLevelCard status={RiskLevel.LOW} />
-        </div>
-      }
-      icon={<ArrowLeftRight className="text-foreground" />}
+      title={SECTIONS_CONSTANTS.resilienceStages.title}
+      subHeader={<RiskLevelCard status={RiskLevel.LOW} />}
+      icon={<BarChart className="text-foreground" />}
       description={SECTIONS_CONSTANTS.resilienceStages.description}
       anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
     >
       <div className="w-full py-6">
         {/* Timeline Component */}
-        <div className="relative h-1 bg-gray-400">
+        <div className="relative h-[2px] bg-middleDark">
           {/* Horizontal Line */}
           <div
             className={cn(
-              "absolute left-0 h-1",
+              "absolute left-0 h-[2px]",
               StagesToLineStyle[currentDaoStage],
             )}
           ></div>
@@ -82,7 +79,7 @@ export const ResilienceStagesSection = ({
           >
             <div
               className={cn(
-                "flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-yellow-400 bg-white p-1",
+                "flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white p-1",
                 StagesToBorderColor[currentDaoStage],
               )}
             >
