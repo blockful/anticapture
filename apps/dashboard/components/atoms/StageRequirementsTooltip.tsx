@@ -7,15 +7,10 @@ import {
   AlertTriangleIcon,
 } from "lucide-react";
 
-interface StageRequirement {
-  name: string;
-  value: string;
-}
-
 interface StageRequirementsTooltipProps {
   currentStage: number;
   nextStage: number;
-  requirements: StageRequirement[];
+  requirements: string[];
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }
@@ -81,12 +76,7 @@ export const StageRequirementsTooltip = ({
               <div key={index} className="flex items-center gap-2">
                 {variantIcons[currentStage % 3 as keyof typeof variantIcons]}
                 <span className="text-sm text-foreground">
-                  {req.name}
-                  {req.value && (
-                    <span className="text-foreground">
-                      {" >"} {req.value}
-                    </span>
-                  )}
+                  {req}
                 </span>
               </div>
             ))}

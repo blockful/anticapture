@@ -10,20 +10,14 @@ import { OutlinedBox } from "@/components/atoms/OutlinedBox";
 
 interface DaoOverviewStageProgressBarProps {
   currentStage?: number;
-  totalStages?: number;
   itemsToNextStage?: number;
-  requirements?: Array<{ name: string; value: string }>;
+  requirements?: string[];
 }
 
 export const DaoOverviewStageProgressBar = ({
   currentStage = 1,
-  totalStages = 2,
   itemsToNextStage = 3,
-  requirements = [
-    { name: "Nakamoto", value: "10" },
-    { name: "Vote Mutability", value: "" },
-    { name: "Non-profitable", value: "" },
-  ],
+  requirements = ["Nakamoto > 10", "Vote Mutability", "Non-profitable"],
 }: DaoOverviewStageProgressBarProps) => {
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const { isMobile } = useScreenSize();
