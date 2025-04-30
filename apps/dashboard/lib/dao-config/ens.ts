@@ -39,7 +39,6 @@ export const ENS: DaoConfiguration = {
       },
     },
   },
-  icon: ENSLogo,
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
     supportsLiquidTreasuryCall: true,
