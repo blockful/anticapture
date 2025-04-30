@@ -1,7 +1,5 @@
 import { cn } from "@/lib/client/utils";
-import { AlertCircle } from "lucide-react";
-import { AlertTriangle } from "lucide-react";
-import { CheckCircle2 } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import React from "react";
 
 type OutlinedBoxProps = React.ComponentProps<"div"> & {
