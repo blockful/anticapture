@@ -19,8 +19,6 @@ interface ResilienceStagesSectionProps {
 export const ResilienceStagesSection = ({
   currentDaoStage,
 }: ResilienceStagesSectionProps) => {
-  const { setDays, days } = useGovernanceActivityContext();
-
   const StagesToDaoAvatarPosition: Record<Stage, string> = {
     [Stage.ZERO]: "right-[75%]",
     [Stage.ONE]: "right-[25%]",
@@ -42,7 +40,6 @@ export const ResilienceStagesSection = ({
         </div>
       }
       icon={<ArrowLeftRight className="text-foreground" />}
-      days={days}
       description={SECTIONS_CONSTANTS.resilienceStages.description}
       anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
     >
