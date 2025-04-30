@@ -1,10 +1,10 @@
 import { cn } from "@/lib/client/utils";
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
-import React from "react";
+import { ComponentProps, ReactNode } from "react";
 
-type OutlinedBoxProps = React.ComponentProps<"div"> & {
+type OutlinedBoxProps = ComponentProps<"div"> & {
   variant?: "success" | "warning" | "error" | "lightDark";
-  customIcon?: React.ReactNode;
+  customIcon?: ReactNode;
   hideIcon?: boolean;
   iconPosition?: "left" | "right";
 };
@@ -42,21 +42,16 @@ export const OutlinedBox = ({
         "flex items-center gap-2 rounded-md border",
         props.className,
         variantClasses[variant],
+        {
+          "flex-row-reverse": iconPosition === "right",
+        },
       )}
     >
-      {iconPosition === "left" && !hideIcon && (
-        <>
-          {!customIcon && variantIcons[variant]}
-          {customIcon}
-        </>
-      )}
+      <>
+        {!customIcon && variantIcons[variant]}
+        {customIcon}
+      </>
       {children}
-      {iconPosition === "right" && !hideIcon && (
-        <>
-          {customIcon}
-          {!customIcon && variantIcons[variant]}
-        </>
-      )}
     </div>
   );
 };
