@@ -47,6 +47,9 @@ export const DaoTemplate = () => {
         />
       )}
       <ResilienceStagesSection currentDaoStage={Stage.ZERO} daoId={daoIdEnum} />
+      <ResilienceStagesSection currentDaoStage={Stage.ONE} daoId={daoIdEnum} />
+      <ResilienceStagesSection currentDaoStage={Stage.TWO} daoId={daoIdEnum} />
+
       {daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}

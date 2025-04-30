@@ -8,7 +8,6 @@ import {
   StageTag,
   DaoLogoIcon,
 } from "@/components/atoms";
-import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
@@ -26,13 +25,19 @@ export const ResilienceStagesSection = ({
   const StagesToDaoAvatarPosition: Record<Stage, string> = {
     [Stage.ZERO]: "right-[75%]",
     [Stage.ONE]: "right-[25%]",
-    [Stage.TWO]: "right-0",
+    [Stage.TWO]: "right-0 hidden",
   };
 
-  const StagesToLineWidth: Record<Stage, string> = {
+  const StagesToLineStyle: Record<Stage, string> = {
     [Stage.ZERO]: "w-[25%] bg-red-500",
     [Stage.ONE]: "w-[75%] bg-yellow-500",
     [Stage.TWO]: "w-full bg-green-500",
+  };
+
+  const StagesToBorderColor: Record<Stage, string> = {
+    [Stage.ZERO]: "border-red-500",
+    [Stage.ONE]: "border-yellow-500",
+    [Stage.TWO]: "border-green-500",
   };
 
   return (
@@ -54,7 +59,7 @@ export const ResilienceStagesSection = ({
           <div
             className={cn(
               "absolute left-0 h-1",
-              StagesToLineWidth[currentDaoStage],
+              StagesToLineStyle[currentDaoStage],
             )}
           ></div>
 
@@ -75,7 +80,12 @@ export const ResilienceStagesSection = ({
               StagesToDaoAvatarPosition[currentDaoStage],
             )}
           >
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-yellow-400 bg-white p-1",
+                StagesToBorderColor[currentDaoStage],
+              )}
+            >
               <DaoLogoIcon daoId={daoId} />
             </div>
           </div>
