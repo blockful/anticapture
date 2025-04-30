@@ -1,14 +1,14 @@
 "use client";
 
-import Image, { StaticImageData } from "next/image";
 import { Card } from "@/components/ui/card";
 import { formatNumberUserReadable, formatPlural } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TrendingUpIcon } from "@/components/atoms";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, TrendingUp } from "lucide-react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/hooks/usePetition";
+import { ReactNode } from "react";
 
 export const SupportDaoCard = ({
   daoIcon,
@@ -19,7 +19,7 @@ export const SupportDaoCard = ({
   votingPowerSupport: externalVotingPowerSupport,
   totalCountSupport: externalTotalCountSupport,
 }: {
-  daoIcon: StaticImageData;
+  daoIcon: ReactNode;
   daoName: string;
   daoId: DaoIdEnum;
   onClick: () => void;
@@ -50,26 +50,25 @@ export const SupportDaoCard = ({
   const supportersInfo = (
     <div className="text-xs text-gray-400">
       <div className="flex flex-col items-center gap-1 md:flex-row">
-        {votingPowerSupport > 0 ? (
+        {votingPowerSupport > 0 && (
           <div className="flex flex-row items-center gap-2">
             <TrendingUpIcon className="text-brandLightGreen h-4 w-4" />
             <div className="text-brandLightGreen">
               {formatNumberUserReadable(votingPowerSupport)} {daoId}
             </div>
           </div>
-        ) : (
-          ""
         )}
         <div className="hidden md:inline">
           {votingPowerSupport > 0 && totalCountSupport > 0 ? "|" : ""}
         </div>
         <div className="flex flex-row gap-1 text-gray-400">
-          {totalCountSupport > 0 ? (
-            <div className="">
-              {formatPlural(totalCountSupport, "supporter")}{" "}
+          {totalCountSupport > 0 && (
+            <div className="flex flex-row items-center gap-1.5">
+              <TrendingUp className="size-4 text-success" />
+              <p className="text-sm font-normal text-success">
+                {formatPlural(totalCountSupport, "supporter")}
+              </p>
             </div>
-          ) : (
-            ""
           )}
         </div>
       </div>
@@ -78,20 +77,12 @@ export const SupportDaoCard = ({
 
   return (
     <Card
-      className="flex w-full flex-row rounded-lg border border-lightDark bg-dark px-4 py-3 shadow hover:cursor-pointer hover:bg-lightDark md:w-[calc(50%-10px)] xl4k:max-w-full"
+      className="flex w-full flex-row rounded-md border border-lightDark bg-dark p-3 shadow hover:cursor-pointer hover:bg-lightDark md:w-[calc(50%-10px)] xl4k:max-w-full"
       onClick={onClick}
     >
       <div className="flex w-full flex-row justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="overflow-hidden rounded-full">
-            <Image
-              src={daoIcon}
-              alt={daoName}
-              width={36}
-              height={36}
-              className="flex-shrink-0"
-            />
-          </div>
+          {daoIcon}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <h3 className="text-md font-small truncate text-center text-white">
@@ -108,7 +99,9 @@ export const SupportDaoCard = ({
         </div>
         <div className="flex flex-row items-center gap-2">
           <div className="hidden sm:flex">{supportersInfo}</div>
-          <ChevronRight className="h-4 w-4 text-white/60" />
+          <div className="flex flex-row items-center p-2">
+            <ChevronRight className="size-4 text-foreground" />
+          </div>
         </div>
       </div>
     </Card>

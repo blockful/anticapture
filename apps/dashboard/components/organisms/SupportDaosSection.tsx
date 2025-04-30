@@ -1,7 +1,11 @@
 "use client";
 
 import { HeartIcon } from "lucide-react";
-import { TheSectionLayout } from "@/components/atoms";
+import {
+  DaoAvatarIcon,
+  DaoAvatarSize,
+  TheSectionLayout,
+} from "@/components/atoms";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ReachOutToUsCard, SupportDaoCard } from "@/components/molecules";
@@ -11,9 +15,11 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import { DaoConfiguration } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 import { pickBy } from "lodash";
+import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const SupportDaosSection = () => {
   const router = useRouter();
+  const { isMobile } = useScreenSize();
 
   // Create an object with only DAOs in election stage using lodash pickBy
   const daoConfigElectionDaos = useMemo(() => {
@@ -37,7 +43,13 @@ export const SupportDaosSection = () => {
         {Object.entries(daoConfigElectionDaos).map(([daoId, dao]) => (
           <SupportDaoCard
             key={dao.name}
-            daoIcon={dao.icon}
+            daoIcon={
+              <DaoAvatarIcon
+                daoId={daoId as DaoIdEnum}
+                size={isMobile ? DaoAvatarSize.MEDIUM : DaoAvatarSize.SMALL}
+                isRounded
+              />
+            }
             daoName={dao.name}
             daoId={daoId as DaoIdEnum}
             onClick={() => {

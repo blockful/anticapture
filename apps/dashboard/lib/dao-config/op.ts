@@ -4,7 +4,7 @@ import { DaoConfiguration } from "@/lib/dao-config/types";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
-  icon: OPLogo,
+  // icon: OPLogo,
   supportStage: SupportStageEnum.ANALYSIS,
-  disableDaoPage: true
+  disableDaoPage: true,
 };

@@ -5,8 +5,6 @@ import { DaoAvatarIcon, DaoAvatarSize } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
-import ArbitrumIcon from "@/public/logo/Arbitrum.png";
-import Image from "next/image";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -56,7 +54,13 @@ export const HeaderDAOSidebarDropdown = () => {
       {
         id: 1,
         label: "ENS",
-        icon: <DaoAvatarIcon daoId={DaoIdEnum.ENS} className="size-5" />,
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.ENS}
+            size={DaoAvatarSize.MEDIUM}
+            isRounded
+          />
+        ),
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
       },
@@ -64,9 +68,11 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 2,
         label: "Arbitrum",
         icon: (
-          <div className="size-5 rounded-full bg-white">
-            <Image src={ArbitrumIcon} alt="Arbitrum" className="size-5" />
-          </div>
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.ARBITRUM}
+            size={DaoAvatarSize.MEDIUM}
+            isRounded
+          />
         ),
         href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
         name: DaoIdEnum.ARBITRUM,
@@ -93,7 +99,7 @@ export const HeaderDAOSidebarDropdown = () => {
       className="relative z-50 inline-block h-[65px] w-full border-b border-lightDark"
       ref={dropdownRef}
     >
-      <div className="flex h-full items-center justify-between px-2 py-[7px]">
+      <div className="flex h-full items-center justify-between p-2">
         <button
           className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-[#333] sm:rounded-md sm:p-1"
           onClick={toggleDropdown}

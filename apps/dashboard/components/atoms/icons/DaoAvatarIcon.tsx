@@ -4,6 +4,8 @@ import { SVGProps } from "react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { cn } from "@/lib/client/utils";
 import { UniswapIcon } from "@/components/atoms/icons/UniswapIcon";
+import { EnsIcon } from "@/components/atoms/icons/EnsIcon";
+import { ArbitrumIcon } from "@/components/atoms/icons/ArbitrumIcon";
 
 export enum DaoAvatarSize {
   XSMALL = "size-[16px]",
@@ -29,20 +31,34 @@ export const DaoAvatarIcon = ({
   showBackground = true,
   ...props
 }: DaoAvatarIconProps) => {
+  const className = cn(isRounded ? "rounded-full" : "rounded-md", size);
+
   switch (daoId) {
     case DaoIdEnum.UNISWAP:
       return (
         <UniswapIcon
           {...props}
-          className={cn(isRounded ? "rounded-full" : "rounded-md", size)}
+          className={className}
           showBackground={showBackground}
         />
       );
 
-    // case DaoIdEnum.ENS:
-    //   return <EnsIcon {...props} isRounded={isRounded} size={size} />;
-    // case DaoIdEnum.OPTIMISM:
-    //   return <OptimismIcon {...props} isRounded={isRounded} size={size} />;
+    case DaoIdEnum.ENS:
+      return (
+        <EnsIcon
+          {...props}
+          className={className}
+          showBackground={showBackground}
+        />
+      );
+    case DaoIdEnum.ARBITRUM:
+      return (
+        <ArbitrumIcon
+          {...props}
+          className={className}
+          showBackground={showBackground}
+        />
+      );
     // default:
     //   return null;
   }
