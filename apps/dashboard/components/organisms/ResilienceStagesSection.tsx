@@ -5,8 +5,10 @@ import {
   TheSectionLayout,
   Stage,
   RiskLevelCard,
+  StageTag,
 } from "@/components/atoms";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
+import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
 
@@ -18,6 +20,18 @@ export const ResilienceStagesSection = ({
   currentDaoStage,
 }: ResilienceStagesSectionProps) => {
   const { setDays, days } = useGovernanceActivityContext();
+
+  const StagesToDaoAvatarPosition: Record<Stage, string> = {
+    [Stage.ZERO]: "right-[75%]",
+    [Stage.ONE]: "right-[25%]",
+    [Stage.TWO]: "right-0",
+  };
+
+  const StagesToLineWidth: Record<Stage, string> = {
+    [Stage.ZERO]: "w-[25%] bg-red-500",
+    [Stage.ONE]: "w-[75%] bg-yellow-500",
+    [Stage.TWO]: "w-full bg-green-500",
+  };
 
   return (
     <TheSectionLayout
@@ -36,28 +50,30 @@ export const ResilienceStagesSection = ({
         {/* Timeline Component */}
         <div className="relative h-1 bg-gray-400">
           {/* Horizontal Line */}
-          <div className="absolute left-0 h-1 w-[75%] bg-[#FACC15]"></div>
+          <div
+            className={cn(
+              "absolute left-0 h-1",
+              StagesToLineWidth[currentDaoStage],
+            )}
+          ></div>
 
           {/* Stage 0 */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2">
-            <div className="rounded-lg border-2 border-[#FACC15] bg-[#0E0E0E] px-4 py-1.5">
-              <span className="text-sm font-medium text-[#FACC15]">
-                STAGE 0
-              </span>
-            </div>
+            <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
           </div>
 
           {/* Stage 1 */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="rounded-lg border-2 border-[#FACC15] bg-[#0E0E0E] px-4 py-1.5">
-              <span className="text-sm font-medium text-[#FACC15]">
-                STAGE 1
-              </span>
-            </div>
+            <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
           </div>
 
           {/* Current Position Indicator */}
-          <div className="absolute right-[25%] top-1/2 -translate-y-1/2">
+          <div
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
+              StagesToDaoAvatarPosition[currentDaoStage],
+            )}
+          >
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#EC4899]">
               <span
                 role="img"
@@ -71,11 +87,7 @@ export const ResilienceStagesSection = ({
 
           {/* Stage 2 */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2">
-            <div className="rounded-lg border-2 border-[#6B7280] bg-[#1F2937] px-4 py-1.5">
-              <span className="text-sm font-medium text-[#9CA3AF]">
-                STAGE 2
-              </span>
-            </div>
+            <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
           </div>
         </div>
       </div>

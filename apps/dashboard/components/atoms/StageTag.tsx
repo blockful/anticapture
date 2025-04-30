@@ -27,7 +27,7 @@ export const StageTag = ({
   const stageStyles =
     daoStage < tagStage
       ? "border-gray-500 text-gray-500"
-      : STAGE_STYLES[tagStage] || "border-gray-500 text-gray-500";
+      : STAGE_STYLES[daoStage] || "border-gray-500 text-gray-500";
 
   return (
     <div
