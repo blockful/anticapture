@@ -30,19 +30,19 @@ export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
     <div className="flex flex-1 items-center gap-1">
       <div
         className={cn(
-          "flex h-full min-h-[62px] flex-1 items-center justify-between px-2",
+          "flex h-full h-[42px] flex-1 items-center justify-between p-2",
           {
             "bg-lightDark": risk.level === undefined,
-            "bg-successDark": risk.level === RiskLevel.LOW,
-            "bg-warningDark": risk.level === RiskLevel.MEDIUM,
-            "bg-errorDark": risk.level === RiskLevel.HIGH,
+            "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW,
+            "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM,
+            "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH,
           },
         )}
       >
-        <div className="max-w-[100px] sm:max-w-[150px]">
+        <div className="max-w-[110px]">
           <span
             className={cn(
-              "text-wrap font-mono text-xs font-medium tracking-wider sm:text-base",
+              "font-mono text-xs font-medium tracking-wider sm:text-xs",
               {
                 "text-foreground": risk.level === undefined,
                 "text-success": risk.level === RiskLevel.LOW,
@@ -68,34 +68,31 @@ export const RiskAreaCard = ({ riskArea: risk }: RiskAreaCardProps) => {
           <AlertTriangle className="text-error" size={20} />
         )}
       </div>
-      <div className="flex h-full min-h-[62px] items-center">
+      <div className="flex h-full h-[42px] items-center">
         <div className="flex h-full flex-col gap-1">
           <div
             className={cn("h-full w-1 lg:w-1.5", {
-              "bg-successDark": risk.level === RiskLevel.LOW && isBox3Filled,
-              "bg-warningDark": risk.level === RiskLevel.MEDIUM && isBox3Filled,
-              "bg-errorDark": risk.level === RiskLevel.HIGH && isBox3Filled,
+              "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW && isBox3Filled,
+              "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM && isBox3Filled,
+              "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH && isBox3Filled,
               "bg-lightDark": risk.level === undefined || !isBox3Filled,
             })}
-            aria-hidden="true"
           />
           <div
             className={cn("h-full w-1 lg:w-1.5", {
-              "bg-successDark": risk.level === RiskLevel.LOW && isBox2Filled,
-              "bg-warningDark": risk.level === RiskLevel.MEDIUM && isBox2Filled,
-              "bg-errorDark": risk.level === RiskLevel.HIGH && isBox2Filled,
+              "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW && isBox2Filled,
+              "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM && isBox2Filled,
+              "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH && isBox2Filled,
               "bg-lightDark": risk.level === undefined || !isBox2Filled,
             })}
-            aria-hidden="true"
           />
           <div
             className={cn("h-full w-1 lg:w-1.5", {
-              "bg-successDark": risk.level === RiskLevel.LOW,
-              "bg-warningDark": risk.level === RiskLevel.MEDIUM,
-              "bg-errorDark": risk.level === RiskLevel.HIGH,
+              "bg-success bg-opacity-[12%]": risk.level === RiskLevel.LOW,
+              "bg-warning bg-opacity-[12%]": risk.level === RiskLevel.MEDIUM,
+              "bg-error bg-opacity-[12%]": risk.level === RiskLevel.HIGH,
               "bg-lightDark": risk.level === undefined,
             })}
-            aria-hidden="true"
           />
         </div>
       </div>
@@ -113,7 +110,7 @@ export const RiskAreaCardWrapper = ({
   return (
     <div className="flex w-full flex-col">
       {/* Desktop title */}
-      <h3 className="mb-3 hidden font-mono text-xl font-medium tracking-wider text-white sm:block">
+      <h3 className="mb-3 hidden font-mono text-sm font-medium tracking-wider text-white sm:block">
         {title}
       </h3>
 

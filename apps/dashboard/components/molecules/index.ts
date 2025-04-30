@@ -1,5 +1,6 @@
 export * from "@/components/molecules/AttackCostBarChart";
 export * from "@/components/molecules/ContractsCard";
+export * from "@/components/molecules/DaoOverviewStageProgressBar";
 export * from "@/components/molecules/GovernanceActivityTable";
 export * from "@/components/molecules/GovernanceImplementationCard";
 export * from "@/components/molecules/HeaderDAOSidebar";

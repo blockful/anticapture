@@ -15,7 +15,7 @@ import {
   VoteCard,
   RiskAreaCardWrapper,
 } from "@/components/molecules";
-import { FilePenLine, LinkIcon } from "lucide-react";
+import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -24,6 +24,7 @@ import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
+import { DaoOverviewStageProgressBar } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -105,7 +106,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         id="dao-info-header"
         className="hidden w-full flex-col sm:flex xl:flex-row"
       >
-        <div className="flex w-full items-start p-4 xl:w-1/2">
+        <div className="flex w-full flex-col items-start gap-4 p-4 xl:w-1/2">
           <div className="flex gap-3.5">
             <div className="flex">
               <DaoLogoIcon
@@ -140,10 +141,24 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </div>
             </div>
           </div>
+          <div className="flex w-full flex-col">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+              <h3 className="hidden font-mono text-xs font-bold tracking-wider text-white sm:block">
+                CURRENT RESILIENCE STAGE
+              </h3>
+              <InfoIcon className="size-4 text-foreground" />
+            </div>
+            <DaoOverviewStageProgressBar />
+          </div>
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
-          <RiskAreaCardWrapper title={riskAreas.title} risks={riskAreas.risks} />
+          <RiskAreaCardWrapper
+            title={riskAreas.title}
+            risks={riskAreas.risks}
+          />
         </div>
+
+        <div className="flex w-full flex-1"></div>
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
@@ -175,12 +190,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               options={offChainOptions}
             />
           </div>
+          <DaoOverviewStageProgressBar />
         </div>
       </div>
-      <div className="hidden sm:flex h-full w-full">
+      <div className="hidden h-full w-full sm:flex">
         <SecurityCouncilCard daoOverview={daoOverview} />
       </div>
-      <div className="flex sm:hidden h-full w-full mt-4">
+      <div className="mt-4 flex h-full w-full sm:hidden">
         <SecurityCouncilCard daoOverview={daoOverview} />
       </div>
       <div className="border border-lightDark sm:hidden" />
