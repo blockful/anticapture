@@ -26,6 +26,7 @@ export const TextCardDaoInfoItem = ({
             daoId={item.daoId}
             size={DaoAvatarSize.XSMALL}
             className="!bg-transparent text-tangerine"
+            showBackground={false}
           />
         </p>
       )}

@@ -17,6 +17,7 @@ export interface DaoAvatarIconProps extends SVGProps<SVGSVGElement> {
   daoId: DaoIdEnum;
   isRounded?: boolean;
   size?: DaoAvatarSize;
+  showBackground?: boolean;
 }
 
 export type AvatarIconProps = Omit<DaoAvatarIconProps, "daoId">;
@@ -25,6 +26,7 @@ export const DaoAvatarIcon = ({
   daoId,
   isRounded = false,
   size = DaoAvatarSize.MEDIUM,
+  showBackground = true,
   ...props
 }: DaoAvatarIconProps) => {
   switch (daoId) {
@@ -33,6 +35,7 @@ export const DaoAvatarIcon = ({
         <UniswapIcon
           {...props}
           className={cn(isRounded ? "rounded-full" : "rounded-md", size)}
+          showBackground={showBackground}
         />
       );
 
