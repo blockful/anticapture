@@ -47,7 +47,7 @@ export const ProgressBar = ({
 
         {warning && warning > 0 && (
           <div
-            className="absolute -right-1.5 -top-2.5 z-30 size-8 rounded-full border-2 border-darkest bg-lightDark p-2"
+            className="absolute -right-1.5 -top-2.5 z-20 size-8 rounded-full border-2 border-darkest bg-lightDark p-2"
             style={{ left: `${warning}%` }}
           >
             <AlertTriangle className="absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-red-500" />

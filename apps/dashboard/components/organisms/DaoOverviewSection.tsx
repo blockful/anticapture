@@ -13,6 +13,7 @@ import {
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
+  RiskAreaCardWrapper,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -23,6 +24,7 @@ import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
+import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -80,40 +82,70 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   ];
 
+  // Mock data for risk areas
+  const riskAreas = {
+    title: "RISK AREAS",
+    risks: [
+      { name: "SPAM VULNERABLE", level: RiskLevel.LOW },
+      { name: "EXTRACTABLE VALUE", level: RiskLevel.MEDIUM },
+      { name: "SAFEGUARDS", level: undefined },
+      { name: "HACKABLE", level: RiskLevel.HIGH },
+      { name: "GOV INTERFACES VULNERABILITY", level: RiskLevel.HIGH },
+      { name: "RESPONSE TIME", level: RiskLevel.LOW },
+    ],
+  };
+
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
       className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
       ref={ref}
     >
-      <div id="dao-info-header" className="hidden gap-3.5 p-4 sm:flex sm:gap-5">
-        <div className="flex">
-          <DaoAvatarIcon daoId={daoId} size={DaoAvatarSize.XLARGE} isRounded />
+      <div
+        id="dao-info-header"
+        className="hidden w-full flex-col sm:flex xl:flex-row"
+      >
+        <div className="flex w-full items-start p-4 xl:w-1/2">
+          <div className="flex gap-3.5">
+            <div className="flex">
+              <DaoAvatarIcon
+                daoId={daoId}
+                size={DaoAvatarSize.XLARGE}
+                isRounded
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <div>
+                <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
+                  {daoConfig.name}
+                </h2>
+              </div>
+              <div className="flex gap-2">
+                <DaoInfoDropdown
+                  defaultValue={{
+                    value: "OnChain Gov",
+                    icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
+                    onClick: () => {},
+                  }}
+                  options={onChainOptions}
+                />
+                <DaoInfoDropdown
+                  defaultValue={{
+                    value: "OffChain Gov",
+                    icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
+                    onClick: () => {},
+                  }}
+                  options={offChainOptions}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <div>
-            <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
-              {daoConfig.name}
-            </h2>
-          </div>
-          <div className="flex gap-2">
-            <DaoInfoDropdown
-              defaultValue={{
-                value: "OnChain Gov",
-                icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
-                onClick: () => {},
-              }}
-              options={onChainOptions}
-            />
-            <DaoInfoDropdown
-              defaultValue={{
-                value: "OffChain Gov",
-                icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
-                onClick: () => {},
-              }}
-              options={offChainOptions}
-            />
-          </div>
+        <div className="flex w-full p-4 xl:w-1/2">
+          <RiskAreaCardWrapper
+            title={riskAreas.title}
+            risks={riskAreas.risks}
+          />
         </div>
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
@@ -144,7 +176,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       </div>
-      <div className="flex h-full w-full">
+      <div className="hidden h-full w-full sm:flex">
+        <SecurityCouncilCard daoOverview={daoOverview} />
+      </div>
+      <div className="mt-4 flex h-full w-full sm:hidden">
         <SecurityCouncilCard daoOverview={daoOverview} />
       </div>
       <div className="border border-lightDark sm:hidden" />
@@ -166,6 +201,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <QuorumCard />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
+      </div>
+
+      {/* Mobile risk areas without title */}
+      <div className="mt-4 sm:hidden">
+        <RiskAreaCardWrapper title={riskAreas.title} risks={riskAreas.risks} />
       </div>
     </div>
   );
