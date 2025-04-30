@@ -22,7 +22,7 @@ export const TheSectionLayout = ({
   className,
 }: {
   icon?: JSX.Element;
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   description?: string;
   infoText?: string;

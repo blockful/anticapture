@@ -14,6 +14,7 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 import { Message, MessageStacker } from "@/components/molecules";
 import { Stage, StageTag } from "@/components/atoms";
+import { ResilienceStagesSection } from "../organisms/ResilienceStagesSection";
 // import { TelegramBotMessage } from "@/components/atoms";
 
 export const DaoTemplate = () => {
@@ -45,14 +46,7 @@ export const DaoTemplate = () => {
           attackProfitability={daoConstants.attackProfitability}
         />
       )}
-      <div className="flex flex-row gap-2">
-        <StageTag tagStage={Stage.ZERO} daoStage={Stage.ONE} />
-        <StageTag tagStage={Stage.ONE} daoStage={Stage.ONE} />
-        <StageTag tagStage={Stage.TWO} daoStage={Stage.TWO} />
-        <StageTag tagStage={Stage.ZERO} daoStage={Stage.ZERO} />
-        <StageTag tagStage={Stage.TWO} daoStage={Stage.ZERO} />
-        <StageTag tagStage={Stage.TWO} daoStage={Stage.ZERO} />
-      </div>
+      <ResilienceStagesSection currentDaoStage={Stage.ONE} />
       {daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
