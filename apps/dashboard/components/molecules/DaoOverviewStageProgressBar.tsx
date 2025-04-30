@@ -25,7 +25,7 @@ export const DaoOverviewStageProgressBar = ({
     { name: "Non-profitable", value: "" },
   ],
 }: DaoOverviewStageProgressBarProps) => {
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const { isMobile } = useScreenSize();
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
