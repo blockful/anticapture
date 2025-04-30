@@ -46,7 +46,7 @@ export const DaoTemplate = () => {
           attackProfitability={daoConstants.attackProfitability}
         />
       )}
-      <ResilienceStagesSection currentDaoStage={Stage.ZERO} />
+      <ResilienceStagesSection currentDaoStage={Stage.ZERO} daoId={daoIdEnum} />
       {daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}

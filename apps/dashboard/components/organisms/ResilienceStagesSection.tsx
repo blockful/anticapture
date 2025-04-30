@@ -6,18 +6,22 @@ import {
   Stage,
   RiskLevelCard,
   StageTag,
+  DaoLogoIcon,
 } from "@/components/atoms";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/types/daos";
 
 interface ResilienceStagesSectionProps {
   currentDaoStage: Stage;
+  daoId: DaoIdEnum;
 }
 
 export const ResilienceStagesSection = ({
   currentDaoStage,
+  daoId,
 }: ResilienceStagesSectionProps) => {
   const StagesToDaoAvatarPosition: Record<Stage, string> = {
     [Stage.ZERO]: "right-[75%]",
@@ -71,14 +75,8 @@ export const ResilienceStagesSection = ({
               StagesToDaoAvatarPosition[currentDaoStage],
             )}
           >
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#EC4899]">
-              <span
-                role="img"
-                aria-label="Current position"
-                className="text-base"
-              >
-                🦄
-              </span>
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
+              <DaoLogoIcon daoId={daoId} />
             </div>
           </div>
 
