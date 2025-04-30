@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { DaoAvatarIcon, DaoAvatarSize } from "@/components/atoms";
+import { DaoAvatarIcon } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
@@ -44,7 +44,7 @@ export const HeaderDAOSidebarDropdown = () => {
         icon: (
           <DaoAvatarIcon
             daoId={DaoIdEnum.UNISWAP}
-            size={DaoAvatarSize.MEDIUM}
+            className="size-icon-md"
             isRounded
           />
         ),
@@ -57,7 +57,7 @@ export const HeaderDAOSidebarDropdown = () => {
         icon: (
           <DaoAvatarIcon
             daoId={DaoIdEnum.ENS}
-            size={DaoAvatarSize.MEDIUM}
+            className="size-icon-md"
             isRounded
           />
         ),
@@ -70,7 +70,7 @@ export const HeaderDAOSidebarDropdown = () => {
         icon: (
           <DaoAvatarIcon
             daoId={DaoIdEnum.ARBITRUM}
-            size={DaoAvatarSize.MEDIUM}
+            className="size-icon-md"
             isRounded
           />
         ),

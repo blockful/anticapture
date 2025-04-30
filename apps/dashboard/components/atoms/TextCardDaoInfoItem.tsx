@@ -1,7 +1,7 @@
 "use client";
 
 import { DaoIdEnum } from "@/lib/types/daos";
-import { DaoAvatarIcon, DaoAvatarSize } from "@/components/atoms";
+import { DaoAvatarIcon } from "@/components/atoms";
 
 interface TextItemProps {
   label?: string;
@@ -24,8 +24,7 @@ export const TextCardDaoInfoItem = ({
         <p className="flex items-center">
           <DaoAvatarIcon
             daoId={item.daoId}
-            size={DaoAvatarSize.XSMALL}
-            className="!bg-transparent text-tangerine"
+            className="size-icon-xs !bg-transparent text-tangerine"
             showBackground={false}
           />
         </p>

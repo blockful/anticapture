@@ -1,6 +1,6 @@
 "use client";
 
-import { SVGProps } from "react";
+import { ComponentProps } from "react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { cn } from "@/lib/client/utils";
 import {
@@ -10,18 +10,9 @@ import {
   UniswapIcon,
 } from "@/components/atoms/icons";
 
-export enum DaoAvatarSize {
-  XSMALL = "size-[16px]",
-  SMALL = "size-[24px]",
-  MEDIUM = "size-[36px]",
-  LARGE = "size-[48px]",
-  XLARGE = "size-[76px]",
-}
-
-export interface DaoAvatarIconProps extends SVGProps<SVGSVGElement> {
+export interface DaoAvatarIconProps extends ComponentProps<"svg"> {
   daoId: DaoIdEnum;
   isRounded?: boolean;
-  size?: DaoAvatarSize;
   showBackground?: boolean;
 }
 
@@ -30,11 +21,13 @@ export type AvatarIconProps = Omit<DaoAvatarIconProps, "daoId">;
 export const DaoAvatarIcon = ({
   daoId,
   isRounded = false,
-  size = DaoAvatarSize.MEDIUM,
   showBackground = true,
   ...props
 }: DaoAvatarIconProps) => {
-  const className = cn(isRounded ? "rounded-full" : "rounded-md", size);
+  const className = cn(
+    isRounded ? "rounded-full" : "rounded-md",
+    props.className,
+  );
 
   switch (daoId) {
     case DaoIdEnum.UNISWAP:

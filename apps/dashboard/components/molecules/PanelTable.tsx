@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/lib/mocked-data/mocked-data";
@@ -13,7 +12,6 @@ import {
   TheTable,
   SkeletonRow,
   DaoAvatarIcon,
-  DaoAvatarSize,
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -96,7 +94,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             {isMobile && details && (
               <DaoAvatarIcon
                 daoId={dao as DaoIdEnum}
-                size={DaoAvatarSize.MEDIUM}
+                className="size-icon-md"
                 isRounded
               />
             )}
@@ -142,7 +140,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
               {!isMobile && (
                 <DaoAvatarIcon
                   daoId={dao as DaoIdEnum}
-                  size={DaoAvatarSize.SMALL}
+                  className="size-icon-sm"
                   isRounded
                 />
               )}

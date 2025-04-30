@@ -1,18 +1,18 @@
-import { ReactNode, SVGProps } from "react";
+import { ComponentProps } from "react";
 
-interface EnsIconProps extends SVGProps<SVGSVGElement> {
+interface EnsIconProps extends ComponentProps<"svg"> {
   showBackground?: boolean;
 }
 
 export const EnsIcon = ({ showBackground = true, ...props }: EnsIconProps) => {
   return (
     <svg
-      {...props}
-      width="40"
-      height="40"
+      width="100%"
+      height="100%"
       viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       {showBackground && <rect width="40" height="40" fill="#0080BC" />}
       <g clip-path="url(#clip0_6662_10252)">

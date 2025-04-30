@@ -1,6 +1,6 @@
-import { SVGProps } from "react";
+import { ComponentProps } from "react";
 
-interface UniswapIconProps extends SVGProps<SVGSVGElement> {
+interface UniswapIconProps extends ComponentProps<"svg"> {
   showBackground?: boolean;
 }
 
@@ -10,12 +10,12 @@ export const UniswapIcon = ({
 }: UniswapIconProps) => {
   return (
     <svg
-      {...props}
-      width="400"
-      height="400"
+      width="100%"
+      height="100%"
       viewBox="0 0 400 400"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       {showBackground && <rect width="400" height="400" fill="#FFF2FB" />}
       <g clip-path="url(#clip0_6662_10256)">

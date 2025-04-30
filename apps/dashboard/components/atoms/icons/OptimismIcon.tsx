@@ -1,6 +1,6 @@
-import { SVGProps } from "react";
+import { ComponentProps } from "react";
 
-interface OptimismIconProps extends SVGProps<SVGSVGElement> {
+interface OptimismIconProps extends ComponentProps<"svg"> {
   showBackground?: boolean;
 }
 
@@ -10,12 +10,12 @@ export const OptimismIcon = ({
 }: OptimismIconProps) => {
   return (
     <svg
-      {...props}
-      width="40"
-      height="40"
+      width="100%"
+      height="100%"
       viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       {showBackground && <rect width="40" height="40" fill="white" />}
       <path

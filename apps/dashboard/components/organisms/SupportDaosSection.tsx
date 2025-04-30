@@ -1,11 +1,7 @@
 "use client";
 
 import { HeartIcon } from "lucide-react";
-import {
-  DaoAvatarIcon,
-  DaoAvatarSize,
-  TheSectionLayout,
-} from "@/components/atoms";
+import { DaoAvatarIcon, TheSectionLayout } from "@/components/atoms";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ReachOutToUsCard, SupportDaoCard } from "@/components/molecules";
@@ -19,7 +15,6 @@ import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
 export const SupportDaosSection = () => {
   const router = useRouter();
-  const { isMobile } = useScreenSize();
 
   // Create an object with only DAOs in election stage using lodash pickBy
   const daoConfigElectionDaos = useMemo(() => {
@@ -46,7 +41,7 @@ export const SupportDaosSection = () => {
             daoIcon={
               <DaoAvatarIcon
                 daoId={daoId as DaoIdEnum}
-                size={isMobile ? DaoAvatarSize.MEDIUM : DaoAvatarSize.SMALL}
+                className="size-icon-md sm:size-icon-sm"
                 isRounded
               />
             }
