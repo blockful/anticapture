@@ -25,9 +25,6 @@ const config: Config = {
         error: "#f87171",
         warning: "#facc15",
         success: "#4ade80",
-        successDark: "#1A2E1F",
-        warningDark: "#2E2A1A",
-        errorDark: "#2E1A1A",
       },
       keyframes: {
         "accordion-down": {
