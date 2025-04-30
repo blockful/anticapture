@@ -5,6 +5,7 @@ import {
   DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  ResilienceStagesSection,
   ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
@@ -13,8 +14,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 import { Message, MessageStacker } from "@/components/molecules";
-import { Stage, StageTag } from "@/components/atoms";
-import { ResilienceStagesSection } from "../organisms/ResilienceStagesSection";
+import { Stage } from "@/components/atoms";
 // import { TelegramBotMessage } from "@/components/atoms";
 
 export const DaoTemplate = () => {
