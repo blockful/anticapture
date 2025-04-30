@@ -51,6 +51,13 @@ const config: Config = {
       fontFamily: {
         roboto: ["var(--font-roboto)"],
       },
+      size: {
+        "icon-xs": "20px",
+        "icon-sm": "24px",
+        "icon-md": "36px",
+        "icon-lg": "48px",
+        "icon-xl": "76px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

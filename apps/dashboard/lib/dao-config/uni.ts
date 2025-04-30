@@ -4,7 +4,6 @@ import UNILogo from "@/public/logo/UNI.png";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
-  icon: UNILogo,
   supportStage: SupportStageEnum.FULL,
   daoOverview: {
     contracts: {
