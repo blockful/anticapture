@@ -60,7 +60,7 @@ export const RiskDescription = ({
             <div className="h-px w-full bg-lightDark mb-4" />
 
             <h3 className="font-mono text-sm font-medium tracking-wider text-white mb-4">
-              <span className="text-foreground">//</span> REQUIREMENTS
+              <span className="text-foreground">{`//`}</span> REQUIREMENTS
             </h3>
             <ul className="space-y-2">
               {requirements.map((requirement, index) => (
