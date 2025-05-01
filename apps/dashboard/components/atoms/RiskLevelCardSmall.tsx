@@ -44,7 +44,7 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="flex h-full flex-row gap-1 rounded-l-full bg-lightDark px-2">
+  <div className="flex h-full flex-row gap-1 rounded-l-full">
     <p
       className={`items-center gap-1 text-${color} hidden font-roboto text-xs font-medium md:flex`}
     >
@@ -60,7 +60,7 @@ const RiskLabel = ({
 );
 
 const RiskDots = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
-  <div className="flex items-center gap-1 rounded-r-full bg-lightDark p-1 pr-2">
+  <div className="flex items-center gap-1 rounded-r-full">
     {pattern.map((bgClass, index) => (
       <div key={index} className={cn("size-1 rounded-full", bgClass)} />
     ))}
@@ -79,11 +79,14 @@ export const RiskLevelCardSmall = ({
   const config = riskConfigs[status ?? "undefined-risk-level"];
 
   return (
-    <div className="flex h-7 w-full flex-col items-start">
-      <div className={cn("flex h-full w-fit flex-1 rounded-full", className)}>
-        <RiskLabel status={status} color={config.color} icon={config.icon} />
-        <RiskDots pattern={config.pattern} />
-      </div>
+    <div
+      className={cn(
+        "flex h-full w-fit rounded-full px-2 py-0.5 bg-lightDark gap-1",
+        className,
+      )}
+    >
+      <RiskLabel status={status} color={config.color} icon={config.icon} />
+      <RiskDots pattern={config.pattern} />
     </div>
   );
 };

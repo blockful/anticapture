@@ -5,6 +5,7 @@ import {
   DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  RiskAnalysisSection,
   ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
@@ -45,6 +46,15 @@ export const DaoTemplate = () => {
           attackProfitability={daoConstants.attackProfitability}
         />
       )}
+      {
+        daoConstants.riskAnalysis && (
+          <RiskAnalysisSection
+            daoId={daoIdEnum}
+          />
+        )}
+      {daoConstants.governanceImplementation && (
+        <GovernanceImplementationSection daoId={daoIdEnum} />
+      )}
       <div className="flex flex-row gap-2">
         <StageTag tagStage={Stage.ZERO} daoStage={Stage.ONE} />
         <StageTag tagStage={Stage.ONE} daoStage={Stage.ONE} />
@@ -53,9 +63,6 @@ export const DaoTemplate = () => {
         <StageTag tagStage={Stage.TWO} daoStage={Stage.ZERO} />
         <StageTag tagStage={Stage.TWO} daoStage={Stage.ZERO} />
       </div>
-      {daoConstants.governanceImplementation && (
-        <GovernanceImplementationSection daoId={daoIdEnum} />
-      )}
       {daoConstants.tokenDistribution && <TokenDistributionSection />}
       {daoConstants.governanceActivity && <GovernanceActivitySection />}
       <ShowYourSupportStickyBar />

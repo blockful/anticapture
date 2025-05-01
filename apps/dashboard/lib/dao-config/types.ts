@@ -101,4 +101,5 @@ export interface DaoConfiguration extends BaseInfo {
   tokenDistribution?: boolean;
   governanceActivity?: boolean;
   showSupport?: boolean;
+  riskAnalysis?: boolean;
 }

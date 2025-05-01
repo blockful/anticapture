@@ -150,6 +150,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <RiskAreaCardWrapper
             title={riskAreas.title}
             risks={riskAreas.risks}
+            variant="dao-overview"
+            gridColumns="grid-cols-2"
           />
         </div>
 
@@ -213,7 +215,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
-        <RiskAreaCardWrapper title={riskAreas.title} risks={riskAreas.risks} />
+        <RiskAreaCardWrapper 
+          title={riskAreas.title} 
+          risks={riskAreas.risks} 
+          variant="dao-overview"
+        />
       </div>
     </div>
   );

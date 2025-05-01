@@ -18,7 +18,7 @@ const config: Config = {
         middleDark: "#3F3F46",
         lightDark: "#27272A",
         foreground: "#A1A1AA",
-        white: "#FFFFFF",
+        white: "#FAFAFA",
         colored: "#E66AE9",
         accentColored: "#332433",
         tangerine: "#EC762E",
