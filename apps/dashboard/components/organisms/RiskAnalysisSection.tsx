@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldAlert } from "lucide-react";
+import { Gauge, ShieldAlert } from "lucide-react";
 import { TheSectionLayout, RiskLevelCard } from "@/components/atoms";
 import {
   RiskAreaCard,
@@ -30,7 +30,18 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     { name: "SAFEGUARDS", level: RiskLevel.MEDIUM },
     { name: "HACKABLE", level: RiskLevel.HIGH },
     { name: "RESPONSE TIME", level: RiskLevel.LOW },
-    { name: "GOV INTERFACES VULNERABILITY", level: RiskLevel.HIGH },
+    {
+      name: "GOV INTERFACES VULNERABILITY",
+      content: (
+        <span className="inline-flex flex-wrap align-baseline line-height-[0]">
+          <span className="inline-block">GOV INTERF</span>
+          <span className="hidden sm:inline-block">ACES</span>
+          <span className="inline-block sm:hidden">.&nbsp;</span>
+          <span className="inline-block"> VULNERABILITY</span>
+        </span>
+      ),
+      level: RiskLevel.HIGH,
+    },
   ];
 
   // Define the spam vulnerable requirements
@@ -108,12 +119,12 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.riskAnalysis.title}
-      icon={<ShieldAlert className="size-6 text-foreground" />}
+      icon={<Gauge className="size-6 text-foreground" />}
       description={SECTIONS_CONSTANTS.riskAnalysis.description}
       anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
       riskLevel={<RiskLevelCard status={RiskLevel.HIGH} />}
     >
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4 md:flex-row">
         <div className="md:w-2/5">
           <RiskAreaCardWrapper
             title="Risk Areas"
@@ -130,8 +141,8 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {activeRisk ? (
             riskDescriptions[activeRisk]
           ) : (
-            <div className="flex items-center justify-center h-full p-5 border border-lightDark bg-dark">
-              <p className="text-foreground text-center">
+            <div className="flex h-full items-center justify-center border border-lightDark bg-dark p-5">
+              <p className="text-center text-foreground">
                 Select a risk area to view details
               </p>
             </div>

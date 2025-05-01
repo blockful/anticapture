@@ -2,9 +2,11 @@ import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
+import { ReactNode } from "react";
 
 export type RiskArea = {
   name: string;
+  content?: ReactNode;
   level?: RiskLevel;
 };
 
@@ -15,8 +17,7 @@ interface RiskAreaCardProps {
   variant?: "dao-overview" | "risk-analysis";
 }
 
-type GridColumns =
-  | `${string}grid-cols-${number}${string}`
+type GridColumns = `${string}grid-cols-${number}${string}`;
 
 interface RiskAreaCardWrapperProps {
   title: string;
@@ -60,7 +61,9 @@ const RiskAreaCardInternal = ({
       <div
         className={cn(
           "flex h-full flex-1 items-center justify-between",
-          isRiskAnalysis ? "h-[62px] p-4" : "h-[42px] p-2",
+          isRiskAnalysis
+            ? "h-[62px] px-1 py-2 sm:px-2"
+            : "h-[42px] px-1 py-2 sm:px-2",
           {
             "bg-lightDark": risk.level === undefined,
             "bg-success": risk.level === RiskLevel.LOW,
@@ -70,11 +73,15 @@ const RiskAreaCardInternal = ({
           },
         )}
       >
-        <div className={isRiskAnalysis ? "" : "max-w-[110px]"}>
+        <div
+          className={cn(
+            "flex items-center",
+            isRiskAnalysis ? "" : "max-w-[110px]",
+          )}
+        >
           <span
             className={cn(
-              "font-mono font-medium tracking-wider",
-              isRiskAnalysis ? "text-sm" : "text-xs sm:text-xs",
+              "block font-mono text-xs font-medium sm:tracking-wider",
               {
                 "text-foreground": risk.level === undefined,
                 "text-success": risk.level === RiskLevel.LOW && !isActive,
@@ -85,27 +92,34 @@ const RiskAreaCardInternal = ({
             )}
             title={risk.name}
           >
-            {risk.name}
+            {risk.content ? risk.content : risk.name}
           </span>
         </div>
-
-        {risk.level === undefined ? (
-          <div className="flex items-center justify-center font-mono text-xs">
-            <CounterClockwiseClockIcon className="size-5 text-foreground" />
-          </div>
-        ) : risk.level === RiskLevel.LOW ? (
-          <CheckCircle2
-            className={cn("size-5", isActive ? "text-darkest" : "text-success")}
-          />
-        ) : risk.level === RiskLevel.MEDIUM ? (
-          <Info
-            className={cn("size-5", isActive ? "text-darkest" : "text-warning")}
-          />
-        ) : (
-          <AlertTriangle
-            className={cn("size-5", isActive ? "text-darkest" : "text-error")}
-          />
-        )}
+        <div className="flex items-center justify-center w-fit">
+          {risk.level === undefined ? (
+            <div className="flex items-center justify-center font-mono text-xs">
+              <CounterClockwiseClockIcon className="size-5 text-foreground" />
+            </div>
+          ) : risk.level === RiskLevel.LOW ? (
+            <CheckCircle2
+              className={cn(
+                "size-5",
+                isActive ? "text-darkest" : "text-success",
+              )}
+            />
+          ) : risk.level === RiskLevel.MEDIUM ? (
+            <Info
+              className={cn(
+                "size-5",
+                isActive ? "text-darkest" : "text-warning",
+              )}
+            />
+          ) : (
+            <AlertTriangle
+              className={cn("size-5", isActive ? "text-darkest" : "text-error")}
+            />
+          )}
+        </div>
       </div>
       <div
         className={cn(
@@ -183,7 +197,7 @@ export const RiskAreaCard = ({
       <div
         className={cn(
           "w-full p-1.5",
-          isActive && "border border-lightDark bg-dark",
+          isActive && "border border-lightDark bg-darkest sm:bg-dark",
         )}
       >
         <RiskAreaCardInternal
@@ -218,7 +232,7 @@ export const RiskAreaCardWrapper = ({
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
       {!hideTitle && (
-        <h3 className="mb-3 hidden font-mono text-sm font-medium tracking-wider text-white sm:block">
+        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block sm:text-sm">
           {title}
         </h3>
       )}
