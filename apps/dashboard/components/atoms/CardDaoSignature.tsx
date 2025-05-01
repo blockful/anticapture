@@ -95,7 +95,7 @@ export const CardDaoSignature = () => {
             <div className="flex">
               <ConnectWallet
                 label="Connect Wallet"
-                className="!w-fit !border-transparent !bg-[#FAFAFA] !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
+                className="!w-fit !border-transparent !bg-[#FAFAFA] !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70 py-1"
               />
             </div>
           )}

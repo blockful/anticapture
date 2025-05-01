@@ -11,7 +11,7 @@ export const ShowSupportSection = () => {
       title={SECTIONS_CONSTANTS.showSupport.title}
       icon={<HeartIcon className="text-foreground" />}
       anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
-      className="gap-5 px-4 py-8 sm:gap-4"
+      className="gap-5 sm:gap-4"
     >
       <CardPetitionInformation />
       <CardDaoSignature />
