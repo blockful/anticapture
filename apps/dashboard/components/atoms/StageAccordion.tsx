@@ -24,7 +24,7 @@ const AccordionData: AccordionDataProps[] = [
     title: <StageTagSimplified stage={Stage.ZERO} />,
     content: (
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
-        <div className="flex max-w-[200px] flex-col gap-1">
+        <div className="flex flex-col gap-1 sm:max-w-[200px]">
           <h3 className="text-[13px] font-medium leading-[18px] tracking-[6%] text-white">
             Critical Vulnerabilities
           </h3>
@@ -56,7 +56,7 @@ const AccordionData: AccordionDataProps[] = [
     title: <StageTagSimplified stage={Stage.ONE} />,
     content: (
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
-        <div className="flex max-w-[200px] flex-col gap-1">
+        <div className="flex flex-col gap-1 sm:max-w-[200px]">
           <h3 className="text-[13px] font-medium leading-[18px] tracking-[6%] text-white">
             Partial Risk Reduction
           </h3>
@@ -89,7 +89,7 @@ const AccordionData: AccordionDataProps[] = [
     title: <StageTagSimplified stage={Stage.TWO} isCompleted={false} />,
     content: (
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
-        <div className="flex max-w-[200px] flex-col gap-1">
+        <div className="flex flex-col gap-1 sm:max-w-[200px]">
           <h3 className="text-[13px] font-medium leading-[18px] tracking-[6%] text-white">
             Critical Vulnerabilities
           </h3>
