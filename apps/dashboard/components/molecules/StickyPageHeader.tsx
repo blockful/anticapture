@@ -33,6 +33,7 @@ export const StickyPageHeader = () => {
         },
       },
       {
+        anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
         label: "Get Security Alerts",
         icon: TelegramIcon,
       },

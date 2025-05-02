@@ -5,6 +5,7 @@ import {
   DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  RiskAnalysisSection,
   ResilienceStagesSection,
   ShowSupportSection,
   TokenDistributionSection,
@@ -45,6 +46,10 @@ export const DaoTemplate = () => {
           daoId={daoIdEnum}
           attackProfitability={daoConstants.attackProfitability}
         />
+      )}
+      {daoConstants.riskAnalysis && <RiskAnalysisSection daoId={daoIdEnum} />}
+      {daoConstants.governanceImplementation && (
+        <GovernanceImplementationSection daoId={daoIdEnum} />
       )}
       <ResilienceStagesSection currentDaoStage={Stage.ZERO} daoId={daoIdEnum} />
       <ResilienceStagesSection currentDaoStage={Stage.ONE} daoId={daoIdEnum} />

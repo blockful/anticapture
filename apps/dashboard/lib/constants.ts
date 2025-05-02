@@ -48,6 +48,11 @@ export const SECTIONS_CONSTANTS = {
     description: "",
     anchorId: "supportDaosSection",
   },
+  riskAnalysis: {
+    title: "Risk Analysis",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus commodo condimentum gravida. Aenean rutrum iaculis mollis. Nullam sit amet quam nisl. Mauris sagittis tortor et turpis interdum commodo.",
+    anchorId: "riskAnalysisSection",
+  },
   resilienceStages: {
     title: "Resilience Stages",
     description:

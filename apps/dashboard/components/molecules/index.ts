@@ -19,3 +19,4 @@ export * from "@/components/molecules/TimelockCard";
 export * from "@/components/molecules/TokenDistributionTable";
 export * from "@/components/molecules/VoteCard";
 export * from "@/components/molecules/RiskAreaCard";
+export * from "@/components/molecules/RiskDescription";
