@@ -52,7 +52,7 @@ export const ResilienceStagesSection = ({
       <div className="flex flex-col gap-2">
         <div className="w-full py-6">
           {/* Timeline Component */}
-          <div className="relative h-[2px] bg-middleDark">
+          <div className="relative h-0.5 bg-middleDark">
             {/* Horizontal Line */}
             <div
               className={cn(
