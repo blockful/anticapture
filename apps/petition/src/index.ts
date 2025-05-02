@@ -36,8 +36,7 @@ import { PostgresPetitionRepository } from "./repositories";
     routePrefix: '/docs',
   });
 
-  const supportedDAOs = await anticaptureClient.getDAOs();
-  app.register(routes(petitionService, supportedDAOs));
+  app.register(routes(petitionService, anticaptureClient));
 
   app.listen({ port: env.PORT }, () => console.log('HTTP server running!'));
 

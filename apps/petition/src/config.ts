@@ -5,7 +5,7 @@ config();
 
 export const baseConfig = {
   DATABASE_URL: z.string().optional().default("./test.db"),
-  PORT: z.number().optional().default(3000),
+  PORT: z.coerce.number().optional().default(5000),
   ANTICAPTURE_API_URL: z.string(),
   NODE_ENV: z.enum(["test", "production"]).optional().default("test"),
 };

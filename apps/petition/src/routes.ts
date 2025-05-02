@@ -5,9 +5,13 @@ import { isAddress } from "viem";
 import { PetitionService } from "./services";
 import { FastifyTypedInstance } from "./types";
 
+interface AnticaptureClient {
+  getDAOs: () => Promise<string[]>;
+}
+
 export function routes(
   petitionService: PetitionService,
-  supportedDAOs: string[]
+  anticaptureClient: AnticaptureClient
 ): (app: FastifyTypedInstance) => void {
   return (app: FastifyTypedInstance) => {
     app.post(`/petitions/:daoId`, {
@@ -43,6 +47,8 @@ export function routes(
     }, async (request, response) => {
       const petition = request.body;
       const { daoId } = request.params;
+
+      const supportedDAOs = await anticaptureClient.getDAOs();
 
       if (!supportedDAOs.includes(daoId)) {
         return response.status(400).send({ message: "DAO not supported" });
