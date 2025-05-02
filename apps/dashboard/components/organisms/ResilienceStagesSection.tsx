@@ -5,6 +5,7 @@ import {
   Stage,
   RiskLevelCard,
   StageTag,
+  StageAccordion,
   DaoAvatarIcon,
 } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
@@ -12,7 +13,6 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BarChart } from "lucide-react";
-import { StageAccordion } from "@/components/atoms/StageAccordion";
 
 interface ResilienceStagesSectionProps {
   currentDaoStage: Stage;

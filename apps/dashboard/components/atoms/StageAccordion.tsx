@@ -8,9 +8,7 @@ import {
 } from "@radix-ui/react-accordion";
 import { CheckCircle, MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
-import { Stage } from "@/components/atoms/StageTag";
-import { StageTagSimplified } from "@/components/atoms/StageTagSimplified";
-import { PlusIcon } from "@/components/atoms/icons/PlusIcon";
+import { PlusIcon, Stage, StageTagSimplified } from "@/components/atoms";
 
 interface AccordionDataProps {
   subtitle: string;
