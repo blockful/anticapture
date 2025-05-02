@@ -7,9 +7,9 @@ export enum Stage {
 }
 
 const STAGE_STYLES: Record<Stage, string> = {
-  [Stage.ZERO]: "border-error text-error bg-[#F87171]",
-  [Stage.ONE]: "border-warning text-warning bg-[#FACC15] ",
-  [Stage.TWO]: "border-success text-success bg-[#4ADE80]",
+  [Stage.ZERO]: "border-error text-error bg-error bg-opacity-[0.12]",
+  [Stage.ONE]: "border-warning text-warning bg-warning bg-opacity-[0.12]",
+  [Stage.TWO]: "border-success text-success bg-success bg-opacity-[0.12]",
 };
 
 interface StageTagProps {
@@ -33,7 +33,7 @@ export const StageTag = ({
     <div
       className={`inline-flex rounded-lg border bg-dark px-3 py-1 ${stageStyles} ${className}`}
     >
-      <span className="text-sm font-medium">
+      <span className="font-roboto text-sm font-medium">
         <span className="hidden sm:inline">STAGE </span>
         {tagStage}
       </span>

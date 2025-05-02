@@ -60,12 +60,12 @@ export const ResilienceStagesSection = ({
           ></div>
 
           {/* Stage 0 */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-dark">
             <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
           </div>
 
           {/* Stage 1 */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-dark">
             <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
           </div>
 
@@ -87,7 +87,7 @@ export const ResilienceStagesSection = ({
           </div>
 
           {/* Stage 2 */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
           </div>
         </div>
