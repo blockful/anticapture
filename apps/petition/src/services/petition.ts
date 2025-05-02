@@ -1,20 +1,19 @@
-import { verifyMessage } from "viem";
+import { Address, verifyMessage } from "viem";
 
 import {
-  DBPetitionSignature,
   PetitionSignatureRequest,
   PetitionSignatureResponse
 } from "../types";
 
 
 interface PetitionRepository {
-  newPetitionSignature: (petitionSignature: DBPetitionSignature) => Promise<void>;
+  newPetitionSignature: (petitionSignature: PetitionSignatureResponse) => Promise<void>;
   getPetitionSignatures: (daoId: string) => Promise<PetitionSignatureResponse[]>;
 }
 
 interface AnticaptureClient {
   getDAOs: () => Promise<string[]>;
-  getSignaturesVotingPower: (daoId: string) => Promise<bigint>;
+  getSignersVotingPower: (daoId: string, signers: Address[]) => Promise<bigint>;
 }
 
 type PetitionResponse = {
@@ -67,13 +66,13 @@ export class PetitionService {
       }
     }
 
+    const signers = petitionSignatures.map(({ accountId }) => accountId);
+
     const response: PetitionResponse = {
       petitionSignatures,
       totalSignatures: petitionSignatures.length,
-      totalSignaturesPower: await this.anticaptureClient.getSignaturesVotingPower(daoId),
-      latestVoters: petitionSignatures
-        .slice(0, 10)
-        .map(({ accountId }) => accountId)
+      totalSignaturesPower: await this.anticaptureClient.getSignersVotingPower(daoId, signers),
+      latestVoters: signers.slice(0, 10)
     };
 
     if (userAddress) {

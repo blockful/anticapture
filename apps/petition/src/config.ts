@@ -5,9 +5,9 @@ config();
 
 export const baseConfig = {
   DATABASE_URL: z.string().optional().default("./test.db"),
-  DIALECT: z.enum(["postgresql", "sqlite"]).optional().default("postgresql"),
   PORT: z.number().optional().default(3000),
   ANTICAPTURE_API_URL: z.string(),
+  NODE_ENV: z.enum(["test", "production"]).optional().default("test"),
 };
 
 const testConfig = z.object({

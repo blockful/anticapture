@@ -28,8 +28,5 @@ export interface PetitionSignatureRequest {
 }
 
 export interface PetitionSignatureResponse extends PetitionSignatureRequest {
-  votingPower: bigint;
   timestamp: bigint;
 }
-
-export type DBPetitionSignature = Omit<PetitionSignatureResponse, "votingPower">

@@ -4,7 +4,7 @@ import { eq, desc } from 'drizzle-orm';
 import { Hex, Address } from 'viem';
 
 import * as schema from './schema';
-import { DBPetitionSignature } from '../types';
+import { PetitionSignatureResponse } from '../types';
 
 export class PostgresPetitionRepository {
   db: NodePgDatabase<Record<string, never>>;
@@ -13,11 +13,11 @@ export class PostgresPetitionRepository {
     this.db = drizzle(databaseUrl);
   }
 
-  async newPetitionSignature(petitionSignature: DBPetitionSignature) {
+  async newPetitionSignature(petitionSignature: PetitionSignatureResponse) {
     await this.db.insert(schema.petitionSignatures).values(petitionSignature);
   }
 
-  async getPetitionSignatures(daoId: string) {
+  async getPetitionSignatures(daoId: string): Promise<PetitionSignatureResponse[]> {
     const signatures = await this.db
       .select()
       .from(schema.petitionSignatures)

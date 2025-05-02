@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { Address } from "viem";
 
 export default class GraphqlAnticaptureClient {
   private client: AxiosInstance;
@@ -25,15 +26,16 @@ export default class GraphqlAnticaptureClient {
     return response.data.daos;
   }
 
-  async getSignaturesVotingPower(daoId: string) {
+  async getSignersVotingPower(daoId: string, signers: Address[]) {
     const response = await this.client.post('', {
       query: `
-        query GetVotingPower($daoId: String!) {
-          votingPower(daoId: $daoId)
+        query GetVotingPower($daoId: String!, $signers: [String!]!) {
+          votingPower(daoId: $daoId, signers: $signers)
         }
       }`,
       variables: {
         daoId,
+        signers,
       },
     })
 
