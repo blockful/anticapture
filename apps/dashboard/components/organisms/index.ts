@@ -7,3 +7,4 @@ export * from "@/components/organisms/RiskAnalysisSection";
 export * from "@/components/organisms/ShowSupportSection";
 export * from "@/components/organisms/SupportDaosSection";
 export * from "@/components/organisms/TokenDistributionSection";
+export * from "@/components/organisms/ResilienceStagesSection";

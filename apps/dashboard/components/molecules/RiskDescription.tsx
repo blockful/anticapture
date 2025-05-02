@@ -38,9 +38,9 @@ export const RiskDescription = ({
     : [description];
 
   return (
-    <CorneredBox className="p-5 bg-darkest sm:bg-dark">
+    <CorneredBox className="p-5 bg-darkest sm:bg-dark gap-4">
       {/* Header with title and risk level */}
-      <div className="flex items-center justify-start gap-2 w-full mb-4">
+      <div className="flex items-center justify-start gap-2 w-full">
         <h2 className="text-lg font-medium text-white">{title}</h2>
         <RiskLevelCardSmall status={riskLevel} />
       </div>
