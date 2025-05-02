@@ -37,11 +37,14 @@ const AccordionData: AccordionDataProps[] = [
             REQUIREMENTS
           </h4>
           <div className="flex flex-row gap-2">
-            <CheckCircle className="size-4 text-success" />
+            <div className="flex items-start">
+              <CheckCircle className="size-4 text-success" />
+            </div>
             <p className="flex flex-wrap text-sm font-normal text-foreground">
-              All DAOs that have governor and timelock are considered at least{" "}
-              <span className="text-white"> Stage 0.</span>
-              <span className="block w-full">
+              All DAOs that have governor and timelock are considered at
+              least&nbsp;
+              <span className="whitespace-nowrap text-white">Stage 0.</span>
+              <span className="block">
                 At this stage, critical risks still be present and require
                 attention.
               </span>
@@ -69,12 +72,14 @@ const AccordionData: AccordionDataProps[] = [
             REQUIREMENTS
           </h4>
           <div className="flex flex-row gap-2">
-            <CheckCircle className="size-4 text-success" />
+            <div className="flex items-start">
+              <CheckCircle className="size-4 text-success" />
+            </div>
             <p className="flex flex-wrap text-sm font-normal text-foreground">
               Has no implementation details flagged as High Risk, but at least
-              one remains at Medium Risk, qualifying it as{" "}
-              <span className="text-white"> Stage 1.</span>
-              <span className="block w-full">
+              one remains at Medium Risk, qualifying it as&nbsp;
+              <span className="whitespace-nowrap text-white"> Stage 1.</span>
+              <span className="block">
                 Progress has been made, but further improvements are still
                 needed to enhance security.
               </span>
@@ -102,11 +107,13 @@ const AccordionData: AccordionDataProps[] = [
             REQUIREMENTS
           </h4>
           <div className="flex flex-row gap-2">
-            <CheckCircle className="size-4 text-success" />
+            <div className="flex items-start">
+              <CheckCircle className="size-4 text-success" />
+            </div>
             <p className="flex flex-wrap text-sm font-normal text-foreground">
               All DAOs that have governor and timelock are considered at least{" "}
-              <span className="text-white"> Stage 0.</span>
-              <span className="block w-full">
+              <span className="whitespace-nowrap text-white"> Stage 0.</span>
+              <span className="block">
                 At this stage, critical risks still be present and require
                 attention.
               </span>
