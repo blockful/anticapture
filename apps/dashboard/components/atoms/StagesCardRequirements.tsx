@@ -122,7 +122,7 @@ const Issue = ({
   return (
     <div className="flex items-center gap-[6px]">
       <AlertCircle className={cn(["size-4", STAGE_STYLES[daoStage]])} />
-      <span className="font-inter text-[14px] font-normal leading-[20px] text-[#FAFAFA]">
+      <span className="font-inter text-sm font-normal leading-5 text-white">
         {children}
       </span>
     </div>
