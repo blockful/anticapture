@@ -22,7 +22,7 @@ export const CorneredBox = ({
     <div
       className={cn(
         "relative h-full",
-        withBorder ? "border border-lightDark bg-dark" : "",
+        withBorder && "border border-lightDark bg-dark",
         className
       )}
     >
