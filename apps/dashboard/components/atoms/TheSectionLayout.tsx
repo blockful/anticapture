@@ -20,6 +20,7 @@ export const TheSectionLayout = ({
   children,
   anchorId,
   className,
+  subHeader,
 }: {
   icon?: JSX.Element;
   title: string;
@@ -33,6 +34,7 @@ export const TheSectionLayout = ({
   children: ReactNode;
   anchorId: string;
   className?: string;
+  subHeader?: ReactNode;
 }) => {
   const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
@@ -76,11 +78,16 @@ export const TheSectionLayout = ({
             )}
             {!isSwitchDateLinear && (
               <>
-                <div className="flex items-center gap-2">
-                  {icon}
-                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
-                    {title}
-                  </h1>
+                <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
+                  <div className="flex items-center gap-2">
+                    {icon}
+                    <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
+                      {title}
+                    </h1>
+                  </div>
+                  {subHeader && (
+                    <div className="flex items-center gap-2">{subHeader}</div>
+                  )}
                 </div>
                 <div className="hidden items-center sm:flex">
                   {riskLevel && <div className="flex h-full">{riskLevel}</div>}

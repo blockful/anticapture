@@ -51,7 +51,6 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
-  icon: StaticImageData;
   supportStage: SupportStageEnum;
   disableDaoPage?: boolean;
 }
@@ -102,4 +101,5 @@ export interface DaoConfiguration extends BaseInfo {
   tokenDistribution?: boolean;
   governanceActivity?: boolean;
   showSupport?: boolean;
+  riskAnalysis?: boolean;
 }

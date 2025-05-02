@@ -5,6 +5,8 @@ import {
   DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
+  RiskAnalysisSection,
+  ResilienceStagesSection,
   ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
@@ -13,7 +15,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 import { Message, MessageStacker } from "@/components/molecules";
-import { Stage, StageTag } from "@/components/atoms";
+import { Stage } from "@/components/atoms";
 // import { TelegramBotMessage } from "@/components/atoms";
 
 export const DaoTemplate = () => {
@@ -45,14 +47,14 @@ export const DaoTemplate = () => {
           attackProfitability={daoConstants.attackProfitability}
         />
       )}
-      <div className="flex flex-row gap-2">
-        <StageTag tagStage={Stage.ZERO} daoStage={Stage.ONE} />
-        <StageTag tagStage={Stage.ONE} daoStage={Stage.ONE} />
-        <StageTag tagStage={Stage.TWO} daoStage={Stage.TWO} />
-        <StageTag tagStage={Stage.ZERO} daoStage={Stage.ZERO} />
-        <StageTag tagStage={Stage.TWO} daoStage={Stage.ZERO} />
-        <StageTag tagStage={Stage.TWO} daoStage={Stage.ZERO} />
-      </div>
+      {daoConstants.riskAnalysis && <RiskAnalysisSection daoId={daoIdEnum} />}
+      {daoConstants.governanceImplementation && (
+        <GovernanceImplementationSection daoId={daoIdEnum} />
+      )}
+      <ResilienceStagesSection currentDaoStage={Stage.ZERO} daoId={daoIdEnum} />
+      <ResilienceStagesSection currentDaoStage={Stage.ONE} daoId={daoIdEnum} />
+      <ResilienceStagesSection currentDaoStage={Stage.TWO} daoId={daoIdEnum} />
+
       {daoConstants.governanceImplementation && (
         <GovernanceImplementationSection daoId={daoIdEnum} />
       )}

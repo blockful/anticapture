@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { DaoLogoIcon, DaoLogoVariant } from "@/components/atoms";
+import { DaoAvatarIcon } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
-import ArbitrumIcon from "@/public/logo/Arbitrum.png";
-import Image from "next/image";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -44,10 +42,10 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 0,
         label: "Uniswap",
         icon: (
-          <DaoLogoIcon
+          <DaoAvatarIcon
             daoId={DaoIdEnum.UNISWAP}
-            variant={DaoLogoVariant.SECONDARY}
-            className="h-5 w-5 text-[#FC72FF]"
+            className="size-icon-md"
+            isRounded
           />
         ),
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
@@ -56,7 +54,13 @@ export const HeaderDAOSidebarDropdown = () => {
       {
         id: 1,
         label: "ENS",
-        icon: <DaoLogoIcon daoId={DaoIdEnum.ENS} className="h-5 w-5" />,
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.ENS}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
       },
@@ -64,9 +68,11 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 2,
         label: "Arbitrum",
         icon: (
-          <div className="h-5 w-5 rounded-full bg-white">
-            <Image src={ArbitrumIcon} alt="Arbitrum" className="h-5 w-5" />
-          </div>
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.ARBITRUM}
+            className="size-icon-md"
+            isRounded
+          />
         ),
         href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
         name: DaoIdEnum.ARBITRUM,
@@ -93,23 +99,21 @@ export const HeaderDAOSidebarDropdown = () => {
       className="relative z-50 inline-block h-[65px] w-full border-b border-lightDark"
       ref={dropdownRef}
     >
-      <div className="flex h-full items-center justify-between px-2 py-[7px]">
+      <div className="flex h-full items-center justify-between p-2">
         <button
-          className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-[#333]"
+          className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-[#333] sm:rounded-md sm:p-1"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
           <div className="flex w-full items-center gap-2">
-            <div className="rounded-[6px] border border-lightDark bg-dark p-1.5">
-              {currentItem?.icon}
-            </div>
-            <h1 className="text-sm font-semibold text-white">
+            <div>{currentItem?.icon}</div>
+            <h1 className="text-[18px] font-medium leading-6 text-[#FAFAFA]">
               {currentItem?.label}
             </h1>
           </div>
           <div>
-            <ChevronsUpDown className="text-white" />
+            <ChevronsUpDown className="size-5 text-foreground" />
           </div>
         </button>
       </div>
@@ -130,10 +134,8 @@ export const HeaderDAOSidebarDropdown = () => {
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
               <div className="flex w-full items-center gap-2">
-                <div className="rounded-[6px] border border-lightDark bg-dark p-1.5">
-                  {item.icon}
-                </div>
-                <h1 className="text-sm font-semibold text-white">
+                <div>{item.icon}</div>
+                <h1 className="text-[18px] font-medium leading-6 text-[#FAFAFA]">
                   {item.label}
                 </h1>
               </div>

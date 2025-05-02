@@ -46,7 +46,7 @@ export const ConnectWallet = ({
                 userSelect: "none",
               },
             })}
-            className="flex h-full w-full"
+            className="flex w-full"
           >
             {(() => {
               if (!connected) {
