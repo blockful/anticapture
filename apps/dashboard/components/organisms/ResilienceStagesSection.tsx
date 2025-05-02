@@ -12,6 +12,7 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BarChart } from "lucide-react";
+// import { StageAccordion } from "@/components/atoms/StageAccordion";
 
 interface ResilienceStagesSectionProps {
   currentDaoStage: Stage;
@@ -48,13 +49,13 @@ export const ResilienceStagesSection = ({
       description={SECTIONS_CONSTANTS.resilienceStages.description}
       anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
     >
-      <div className="w-full py-6">
+      <div className="flex h-7 w-full items-center justify-center">
         {/* Timeline Component */}
-        <div className="relative h-[2px] bg-middleDark">
+        <div className="relative h-0.5 w-full bg-middleDark">
           {/* Horizontal Line */}
           <div
             className={cn(
-              "absolute left-0 h-[2px]",
+              "absolute left-0 h-0.5",
               StagesToLineStyle[currentDaoStage],
             )}
           ></div>
@@ -92,6 +93,8 @@ export const ResilienceStagesSection = ({
           </div>
         </div>
       </div>
+
+      {/* <StageAccordion /> */}
     </TheSectionLayout>
   );
 };
