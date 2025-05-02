@@ -58,7 +58,7 @@ export const StagesDaoOverview = ({
           </div>
           <BulletPoint className="mb-1 hidden text-sm text-middleDark sm:block" />
           {/* Items to next stage */}
-          <div className="flex">
+          <div className="flex justify-start">
             <button
               className="group font-roboto text-sm font-medium"
               onClick={() => setShowTooltip(!showTooltip)}
@@ -74,7 +74,7 @@ export const StagesDaoOverview = ({
             </button>
           </div>
         </div>
-        <div className="flex gap-2 p-2 pr-0">
+        <div className="flex gap-1 sm:gap-2 p-2 pr-0">
           <OutlinedBox
             variant="error"
             className="p-1 py-0.5"
