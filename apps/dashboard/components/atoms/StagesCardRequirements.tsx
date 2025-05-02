@@ -106,7 +106,7 @@ const Title = ({
 
 const Description = ({ children }: { children: React.ReactNode }) => {
   return (
-    <p className="font-inter mb-4 text-[14px] font-normal leading-[20px] text-[#FAFAFA]">
+    <p className="font-inter mb-4 text-sm font-normal leading-5 text-white">
       {children}
     </p>
   );
