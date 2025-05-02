@@ -209,7 +209,7 @@ export const RiskAreaCard = ({
       </div>
       {isActive && (
         <div className="flex h-full items-center justify-center">
-          <div className="h-0 w-0 border-y-8 border-l-8 border-y-transparent border-l-middleDark" />
+          <div className="size-0 border-y-8 border-l-8 border-y-transparent border-l-middleDark" />
         </div>
       )}
     </div>
