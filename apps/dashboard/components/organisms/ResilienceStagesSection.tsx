@@ -56,7 +56,7 @@ export const ResilienceStagesSection = ({
             {/* Horizontal Line */}
             <div
               className={cn(
-                "absolute left-0 h-[2px]",
+                "absolute left-0 h-0.5",
                 StagesToLineStyle[currentDaoStage],
               )}
             ></div>
