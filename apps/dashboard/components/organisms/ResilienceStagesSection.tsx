@@ -12,7 +12,7 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BarChart } from "lucide-react";
-// import { StageAccordion } from "@/components/atoms/StageAccordion";
+import { StageAccordion } from "@/components/atoms/StageAccordion";
 
 interface ResilienceStagesSectionProps {
   currentDaoStage: Stage;
@@ -94,7 +94,7 @@ export const ResilienceStagesSection = ({
         </div>
       </div>
 
-      {/* <StageAccordion /> */}
+      <StageAccordion />
     </TheSectionLayout>
   );
 };
