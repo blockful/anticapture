@@ -24,7 +24,7 @@ import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
-import { DaoOverviewStageProgressBar } from "@/components/molecules";
+import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -148,7 +148,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </h3>
               <InfoIcon className="size-4 text-foreground" />
             </div>
-            <DaoOverviewStageProgressBar />
+            <StagesDaoOverview />
           </div>
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
@@ -190,7 +190,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               options={offChainOptions}
             />
           </div>
-          <DaoOverviewStageProgressBar />
+          <StagesDaoOverview />
         </div>
       </div>
       <div className="hidden h-full w-full sm:flex">
