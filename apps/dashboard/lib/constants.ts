@@ -48,6 +48,12 @@ export const SECTIONS_CONSTANTS = {
     description: "",
     anchorId: "supportDaosSection",
   },
+  resilienceStages: {
+    title: "Resilience Stages",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus commodo condimentum gravida. Aenean rutrum iaculis mollis. Nullam sit amet quam nisl. Mauris sagittis tortor et turpis interdum commodo. ",
+    anchorId: "resilienceStagesSection",
+  },
 };
 
 export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
