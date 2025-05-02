@@ -76,7 +76,7 @@ const RiskAreaCardInternal = ({
         <div
           className={cn(
             "flex items-center",
-            isRiskAnalysis ? "" : "max-w-[110px]",
+            !isRiskAnalysis && "max-w-[110px]",
           )}
         >
           <span
