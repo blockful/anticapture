@@ -21,7 +21,7 @@ const MessageItem = ({
   onClose: () => void;
 }) => {
   return (
-    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine sm:rounded-lg">
+    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine">
       {message.content}
       <button
         onClick={onClose}

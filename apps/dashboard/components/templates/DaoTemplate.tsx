@@ -15,8 +15,8 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
 import { Message, MessageStacker } from "@/components/molecules";
-import { Stage } from "@/components/atoms";
-// import { TelegramBotMessage } from "@/components/atoms";
+import { Stage, TelegramBotMessage } from "@/components/atoms";
+import { DaoPageInteractionProvider } from "@/contexts/DaoPageInteractionContext";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -28,39 +28,50 @@ export const DaoTemplate = () => {
   }
 
   const messages: Message[] = [
-    // {
-    //   id: "telegram-bot",
-    //   content: <TelegramBotMessage />,
-    // },
+    {
+      id: "telegram-bot",
+      content: <TelegramBotMessage />,
+    },
   ];
 
   return (
-    <>
-      <div className="w-full gap-2 sm:py-3">
+    <DaoPageInteractionProvider>
+      <div className="w-full gap-2 pt-4 px-4 sm:py-2 sm:px-3">
         <MessageStacker messages={messages} />
       </div>
-      {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
-      {daoConstants.showSupport && <ShowSupportSection />}
-      {daoConstants.attackProfitability && (
-        <AttackProfitabilitySection
+      <div className="flex flex-col w-full items-center sm:gap-6 pt-0 sm:px-3 sm:pb-3">
+        {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
+        {daoConstants.showSupport && <ShowSupportSection />}
+        {daoConstants.attackProfitability && (
+          <AttackProfitabilitySection
+            daoId={daoIdEnum}
+            attackProfitability={daoConstants.attackProfitability}
+          />
+        )}
+        {daoConstants.riskAnalysis && <RiskAnalysisSection daoId={daoIdEnum} />}
+        {daoConstants.governanceImplementation && (
+          <GovernanceImplementationSection daoId={daoIdEnum} />
+        )}
+        <ResilienceStagesSection
+          currentDaoStage={Stage.ZERO}
           daoId={daoIdEnum}
-          attackProfitability={daoConstants.attackProfitability}
         />
-      )}
-      {daoConstants.riskAnalysis && <RiskAnalysisSection daoId={daoIdEnum} />}
-      {daoConstants.governanceImplementation && (
-        <GovernanceImplementationSection daoId={daoIdEnum} />
-      )}
-      <ResilienceStagesSection currentDaoStage={Stage.ZERO} daoId={daoIdEnum} />
-      <ResilienceStagesSection currentDaoStage={Stage.ONE} daoId={daoIdEnum} />
-      <ResilienceStagesSection currentDaoStage={Stage.TWO} daoId={daoIdEnum} />
+        <ResilienceStagesSection
+          currentDaoStage={Stage.ONE}
+          daoId={daoIdEnum}
+        />
+        <ResilienceStagesSection
+          currentDaoStage={Stage.TWO}
+          daoId={daoIdEnum}
+        />
 
-      {daoConstants.governanceImplementation && (
-        <GovernanceImplementationSection daoId={daoIdEnum} />
-      )}
-      {daoConstants.tokenDistribution && <TokenDistributionSection />}
-      {daoConstants.governanceActivity && <GovernanceActivitySection />}
+        {daoConstants.governanceImplementation && (
+          <GovernanceImplementationSection daoId={daoIdEnum} />
+        )}
+        {daoConstants.tokenDistribution && <TokenDistributionSection />}
+        {daoConstants.governanceActivity && <GovernanceActivitySection />}
+      </div>
       <ShowYourSupportStickyBar />
-    </>
+    </DaoPageInteractionProvider>
   );
 };

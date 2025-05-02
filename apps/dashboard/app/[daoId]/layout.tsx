@@ -4,6 +4,7 @@ import { DaoDataProvider } from "@/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { TokenDistributionProvider } from "@/contexts/TokenDistributionContext";
 import { GovernanceActivityProvider } from "@/contexts/GovernanceActivityContext";
+import { DaoPageInteractionProvider } from "@/contexts/DaoPageInteractionContext";
 import daoConfigByDaoId from "@/lib/dao-config";
 
 interface DaoLayoutProps {
@@ -30,7 +31,9 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
     <DaoDataProvider daoId={daoId}>
       <TokenDistributionProvider daoId={daoId}>
         <GovernanceActivityProvider daoId={daoId}>
+          <DaoPageInteractionProvider>
           {children}
+          </DaoPageInteractionProvider>
         </GovernanceActivityProvider>
       </TokenDistributionProvider>
     </DaoDataProvider>
