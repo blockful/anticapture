@@ -71,7 +71,7 @@ export const StickyPageHeader = () => {
   }, [lastScrollY]);
 
   return (
-    <>
+    <div className="h-[107px]">
       <header
         className={cn(
           "fixed left-0 right-0 top-0 z-30 w-full bg-darkest shadow-md transition-transform duration-300",
@@ -115,6 +115,6 @@ export const StickyPageHeader = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };

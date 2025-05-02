@@ -76,11 +76,9 @@ export default function DaoPage() {
         <HeaderDAOSidebar />
       </BaseHeaderLayoutSidebar>
       <main className="relative flex-1 overflow-auto lg:ml-[330px]">
-        <div className="sm:hidden h-[107px]">
+        <div className="sm:hidden">
           <StickyPageHeader />
-          <div className="px-4 py-3">
             <HeaderMobile />
-          </div>
         </div>
         <div className="mx-auto flex flex-col items-center sm:gap-6 sm:p-3">
           <DaoTemplate />

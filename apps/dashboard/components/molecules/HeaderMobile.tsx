@@ -74,7 +74,6 @@ export const HeaderMobile = () => {
 
   return (
     <>
-      <div className="h-[60px]" />
       <div className="absolute left-0 right-0 top-0 z-50 border-b border-lightDark bg-darkest px-4 py-3">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex cursor-pointer">
