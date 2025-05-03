@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "NODE_ENV=production tsx src/index.ts",
+    "start": "tsx src/index.ts",
     "db:migrate": "npx drizzle-kit push",
     "test": "vitest"
   },

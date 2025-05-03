@@ -38,6 +38,6 @@ import { PostgresPetitionRepository } from "./repositories";
 
   app.register(routes(petitionService, anticaptureClient));
 
-  app.listen({ port: env.PORT }, () => console.log('HTTP server running!'));
+  app.listen({ port: env.PORT }, () => console.log(`HTTP server running on port ${env.PORT}!`));
 
 })()

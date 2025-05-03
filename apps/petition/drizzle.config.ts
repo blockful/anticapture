@@ -2,11 +2,11 @@ import { Config, defineConfig } from 'drizzle-kit';
 
 import { env } from './src/config';
 
-let baseConfig: Config
+let config: Config
 
 switch (env.NODE_ENV) {
   case 'production':
-    baseConfig = {
+    config = {
       out: './drizzle',
       schema: './src/repositories/schema.ts',
       dialect: 'postgresql',
@@ -14,12 +14,13 @@ switch (env.NODE_ENV) {
         url: env.DATABASE_URL,
       },
     }
+    break;
   default:
-    baseConfig = {
+    config = {
       out: './drizzle',
       schema: './src/repositories/schema.ts',
       dialect: 'sqlite',
     }
 }
 
-export default defineConfig(baseConfig);
+export default defineConfig(config);
