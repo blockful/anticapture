@@ -640,28 +640,37 @@ app.get("/doc-json", (c) => {
           },
         },
       },
-      "/petition/{daoId}": {
+      "/dao/{daoId}/voting-power": {
         get: {
-          tags: ["Petition"],
-          summary: "Get petition signatures",
-          description: "Get petition signatures of a DAO",
-          operationId: "getPetitionSignatures",
+          tags: ["Token Distribution"],
+          summary: "Get voting power",
+          description: "Returns the total voting power of the specified accounts for a DAO",
+          operationId: "getVotingPower",
           parameters: [
             {
               name: "daoId",
               in: "path",
-              description: "Dao ID",
+              description: "DAO ID (e.g., UNI, ENS)",
               required: true,
               schema: {
                 type: "string",
+                example: "UNI",
               },
             },
             {
-              name: "userAddress",
+              name: "accounts",
               in: "query",
-              description: "User address",
-              required: false,
-              schema: { type: "string" },
+              description: "Ethereum addresses to check voting power for (can be single or multiple)",
+              required: true,
+              explode: true,
+              schema: {
+                type: "array",
+                items: {
+                  type: "string",
+                  format: "address",
+                  example: "0x1234567890123456789012345678901234567890",
+                },
+              },
             },
           ],
           responses: {
@@ -670,7 +679,29 @@ app.get("/doc-json", (c) => {
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/PetitionSignatures",
+                    type: "object",
+                    properties: {
+                      votingPower: {
+                        type: "number",
+                        example: 1000000000000000000000,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "404": {
+              description: "No data found",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      message: {
+                        type: "string",
+                        example: "No data found",
+                      },
+                    },
                   },
                 },
               },
@@ -678,28 +709,7 @@ app.get("/doc-json", (c) => {
           },
         },
       },
-      "/petition": {
-        post: {
-          tags: ["Petition"],
-          summary: "Sign petition",
-          description: "Sign petition",
-          operationId: "signPetition",
-          requestBody: {
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/PetitionSignature",
-                },
-              },
-            },
-          },
-          responses: {
-            "200": {
-              description: "Successful operation",
-            },
-          },
-        },
-      },
+
     },
     components: {
       schemas: {
