@@ -1,5 +1,5 @@
 {
-  "name": "petition",
+  "name": "@anticapture/petition",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
