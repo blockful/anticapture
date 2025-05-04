@@ -26,5 +26,29 @@
       ],
       "cwd": "${workspaceFolder}/apps/petition",
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "ponder api",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "run",
+        "serve",
+        "--config",
+        "config/ens.config.ts"
+      ],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "ENV_FILE": "${workspaceFolder}/apps/indexer/.env"
+      },
+      "outFiles": [
+        "${workspaceFolder}/**/*.js",
+        "!**/node_modules/**"
+      ],
+      "cwd": "${workspaceFolder}/apps/indexer",
+    },
   ]
 }
