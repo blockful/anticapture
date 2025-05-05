@@ -57,6 +57,33 @@ const RiskAreaCardInternal = ({
   // Adjust styling based on variant
   const isRiskAnalysis = variant === "risk-analysis";
 
+  const riskLevelIcons = {
+    [RiskLevel.LOW]: (
+      <CheckCircle2
+        className={cn(
+          "size-4 sm:size-5",
+          isActive ? "text-darkest" : "text-success",
+        )}
+      />
+    ),
+    [RiskLevel.MEDIUM]: (
+      <Info
+        className={cn(
+          "size-4 sm:size-5",
+          isActive ? "text-darkest" : "text-warning",
+        )}
+      />
+    ),
+    [RiskLevel.HIGH]: (
+      <AlertTriangle
+        className={cn(
+          "size-4 sm:size-5",
+          isActive ? "text-darkest" : "text-error",
+        )}
+      />
+    ),
+  };
+
   return (
     <div
       className={cn("flex w-full flex-1 cursor-pointer items-center gap-1")}
@@ -84,49 +111,27 @@ const RiskAreaCardInternal = ({
           )}
         >
           <span
-            className={cn(
-              "block font-mono font-medium sm:tracking-wider",
-              {
-                "!text-foreground": risk.level === undefined,
-                "!text-success": risk.level === RiskLevel.LOW && !isActive,
-                "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive,
-                "!text-error": risk.level === RiskLevel.HIGH && !isActive,
-                "text-darkest": isActive && risk.level !== undefined,
-                "text-alternative-sm": isRiskAnalysis,
-                "text-xs": !isRiskAnalysis,
-              },
-            )}
+            className={cn("block font-mono font-medium sm:tracking-wider", {
+              "!text-foreground": risk.level === undefined,
+              "!text-success": risk.level === RiskLevel.LOW && !isActive,
+              "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive,
+              "!text-error": risk.level === RiskLevel.HIGH && !isActive,
+              "text-darkest": isActive && risk.level !== undefined,
+              "text-alternative-sm": isRiskAnalysis,
+              "text-xs": !isRiskAnalysis,
+            })}
             title={risk.name}
           >
             {risk.content ? risk.content : risk.name}
           </span>
         </div>
         <div className="flex w-fit items-center justify-center">
-          {risk.level === undefined ? (
+          {risk.level ? (
+            riskLevelIcons[risk.level as RiskLevel]
+          ) : (
             <div className="flex items-center justify-center font-mono text-xs">
               <CounterClockwiseClockIcon className="size-4 text-foreground sm:size-5" />
             </div>
-          ) : risk.level === RiskLevel.LOW ? (
-            <CheckCircle2
-              className={cn(
-                "size-4 sm:size-5",
-                isActive ? "text-darkest" : "text-success",
-              )}
-            />
-          ) : risk.level === RiskLevel.MEDIUM ? (
-            <Info
-              className={cn(
-                "size-4 sm:size-5",
-                isActive ? "text-darkest" : "text-warning",
-              )}
-            />
-          ) : (
-            <AlertTriangle
-              className={cn(
-                "size-4 sm:size-5",
-                isActive ? "text-darkest" : "text-error",
-              )}
-            />
           )}
         </div>
       </div>
