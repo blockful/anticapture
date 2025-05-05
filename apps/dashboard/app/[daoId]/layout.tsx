@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { ALL_DAOS, DaoIdEnum } from "@/lib/types/daos";
 import { DaoDataProvider } from "@/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
-import { DaoPageInteractionProvider, GovernanceActivityProvider , TokenDistributionProvider } from "@/contexts/TokenDistributionContext";
+import { DaoPageInteractionProvider, GovernanceActivityProvider , TokenDistributionProvider } from "@/contexts";
 import daoConfigByDaoId from "@/lib/dao-config";
 
 interface DaoLayoutProps {

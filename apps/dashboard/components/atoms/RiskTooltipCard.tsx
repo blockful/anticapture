@@ -44,7 +44,7 @@ export const RiskTooltipCard = ({
           {descriptionArray.map((paragraph, index) => (
             <p
               key={index}
-              className={index < descriptionArray.length - 1 && "mb-2" }
+              className={(index < descriptionArray.length - 1) ? "mb-2" : ""}
             >
               {paragraph}
             </p>
