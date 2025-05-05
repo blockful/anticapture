@@ -1,4 +1,4 @@
-import { BACKEND_ENDPOINT } from "@/lib/server/utils";
+import { BACKEND_ENDPOINT, PETITION_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
 import { Address, Hex } from "viem";
@@ -12,7 +12,6 @@ export interface PetitionSignature {
   timestamp: string;
   message: string;
   signature: string;
-  votingPower: string;
 }
 
 /**
@@ -33,8 +32,6 @@ export interface PetitionSignatureRequest {
   accountId: Address;
   message: string;
   signature: string;
-  daoId: DaoIdEnum;
-  timestamp: string;
 }
 
 /**
@@ -48,7 +45,7 @@ const fetchPetitionSignatures = async (
   userAddress: Address | undefined,
 ): Promise<PetitionResponse> => {
   const response = await fetch(
-    `${BACKEND_ENDPOINT}/petition/${daoId.toUpperCase()}?userAddress=${userAddress}`,
+    `${PETITION_ENDPOINT}/petitions/${daoId}?userAddress=${userAddress}`,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch petition data: ${response.statusText}`);
@@ -72,11 +69,9 @@ export const submitPetitionSignature = async (
     accountId: userAddress,
     message: "I support Arbitrum fully integrated into the Anticapture",
     signature,
-    daoId,
-    timestamp: String(new Date().getTime()),
   };
 
-  const response = await fetch(`${BACKEND_ENDPOINT}/petition`, {
+  const response = await fetch(`${PETITION_ENDPOINT}/petitions/${daoId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -103,7 +98,7 @@ export const usePetitionSignatures = (
   userAddress: Address | undefined,
 ) => {
   const { data, error, isLoading, mutate } = useSWR<PetitionResponse>(
-    daoId ? `petition/${daoId.toUpperCase()}?userAddress=${userAddress}` : null,
+    daoId ? `petitions/${daoId}?userAddress=${userAddress}` : null,
     () => {
       return fetchPetitionSignatures(daoId, userAddress);
     },
