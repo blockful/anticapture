@@ -7,6 +7,7 @@ import {
   StageTag,
   StageAccordion,
   DaoAvatarIcon,
+  StagesCardRequirements,
 } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -93,6 +94,8 @@ export const ResilienceStagesSection = ({
           </div>
         </div>
       </div>
+
+      <StagesCardRequirements daoStage={currentDaoStage} />
 
       <StageAccordion />
     </TheSectionLayout>
