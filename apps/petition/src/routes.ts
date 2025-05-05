@@ -16,6 +16,8 @@ export function routes(
   return (app: FastifyTypedInstance) => {
     app.post(`/petitions/:daoId`, {
       schema: {
+        operationId: "signPetition",
+        tags: ["Petition"],
         body: z.object({
           message: z.string(),
           signature: z.string().refine((sig) => isHex(sig), {
@@ -50,7 +52,7 @@ export function routes(
 
       const supportedDAOs = await anticaptureClient.getDAOs();
 
-      if (!supportedDAOs.includes(daoId)) {
+      if (!supportedDAOs.some((dao) => dao.toLowerCase() === daoId.toLowerCase())) {
         return response.status(400).send({ message: "DAO not supported" });
       }
 
@@ -64,6 +66,8 @@ export function routes(
 
     app.get("/petitions/:daoId", {
       schema: {
+        operationId: "readPetitions",
+        tags: ["Petition"],
         params: z.object({
           daoId: z.string(),
         }),

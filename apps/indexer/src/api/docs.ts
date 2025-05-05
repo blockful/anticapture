@@ -3,9 +3,9 @@ import { swaggerUI } from "@hono/swagger-ui";
 
 const app = new Hono();
 // Use the middleware to serve Swagger UI at /ui
-app.get("/docs", swaggerUI({ url: "/doc-json" }));
+app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
-app.get("/doc-json", (c) => {
+app.get("/docs/json", (c) => {
   return c.json({
     openapi: "3.0.2",
     info: {
@@ -39,10 +39,6 @@ app.get("/doc-json", (c) => {
     ],
     tags: [
       {
-        name: "DAO",
-        description: "Lists each DAO",
-      },
-      {
         name: "Token Distribution",
         description: "Gets the information about DAO token distribution",
       },
@@ -50,70 +46,8 @@ app.get("/doc-json", (c) => {
         name: "Governance Activity",
         description: "Gets the information about DAO governance activity",
       },
-      {
-        name: "Dune",
-        description: "Gets the information from external source Dune API",
-      },
     ],
     paths: {
-      "/dao": {
-        get: {
-          tags: ["DAO"],
-          summary: "Returns all DAOs",
-          description: "Returns an object of each DAO with basic information",
-          operationId: "getDaos",
-          responses: {
-            "200": {
-              description: "Successful operation",
-              content: {
-                "application/json": {
-                  schema: {
-                    $ref: "#/components/schemas/DAO",
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      "/dao/:daoId": {
-        get: {
-          tags: ["DAO"],
-          summary: "Finds a specific DAO by id",
-          description: "Provides a specific DAO by it's id",
-          operationId: "getDaoById",
-          parameters: [
-            {
-              name: "daoId",
-              in: "param",
-              description: "Dao ID (ex: UNI, ENS, ...)",
-              required: true,
-              explode: false,
-              schema: {
-                type: "string",
-                enum: ["UNI", "ENS"],
-              },
-            },
-          ],
-          responses: {
-            "200": {
-              description: "successful operation",
-              content: {
-                "application/json": {
-                  schema: {
-                    items: {
-                      $ref: "#/components/schemas/DAO",
-                    },
-                  },
-                },
-              },
-            },
-            "400": {
-              description: "Invalid Dao ID",
-            },
-          },
-        },
-      },
       "/dao/{daoId}/total-supply/compare": {
         get: {
           tags: ["Token Distribution"],
@@ -592,9 +526,9 @@ app.get("/doc-json", (c) => {
       },
       "/dao/{daoId}/total-assets": {
         get: {
-          tags: ["Dune"],
+          tags: ["Token Distribution"],
           summary: "Get total assets",
-          description: "Get total assets of a DAO from Dune API",
+          description: "Get total assets of a DAO",
           operationId: "getTotalAssets",
           parameters: [
             {
@@ -682,8 +616,8 @@ app.get("/doc-json", (c) => {
                     type: "object",
                     properties: {
                       votingPower: {
-                        type: "number",
-                        example: 1000000000000000000000,
+                        type: "string",
+                        example: "1000000000000000000000",
                       },
                     },
                   },
@@ -718,34 +652,34 @@ app.get("/doc-json", (c) => {
           properties: {
             id: {
               type: "string",
-              format: "string",
               example: "UNI",
+              description: "Unique identifier for the DAO"
             },
             proposalThreshold: {
               type: "string",
-              format: "string",
               example: "1000000000000000000000000",
+              description: "Minimum voting power needed to create a proposal (in wei)"
             },
             votingDelay: {
               type: "string",
-              format: "string",
               example: "13140",
+              description: "Delay between proposal submission and voting start"
             },
             votingPeriod: {
               type: "string",
-              format: "string",
               example: "40320",
+              description: "Duration of voting period (in blocks)"
             },
             quorum: {
               type: "string",
-              format: "string",
-              example: "40000000000000000000000000",
+              example: "1000000000000000000000000",
+              description: "Minimum number of votes required for a proposal to pass"
             },
             timelockDelay: {
               type: "string",
-              format: "string",
               example: "172800",
-            },
+              description: "Time delay before execution after a proposal is approved"
+            }
           },
         },
         TotalSupplyCompare: {
@@ -753,17 +687,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldTotalSupply: {
               type: "string",
-              format: "string",
               example: "1000000000000000000000000000",
             },
             currentTotalSupply: {
               type: "string",
-              format: "string",
               example: "1000000000000000000000000000",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010674419057579838",
             },
           },
@@ -773,17 +704,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldDelegatedSupply: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentDelegatedSupply: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -793,17 +721,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldCirculatingSupply: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentCirculatingSupply: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -813,17 +738,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldCexSupply: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentCexSupply: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -833,17 +755,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldDexSupply: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentDexSupply: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -853,17 +772,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldLendingSupply: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentLendingSupply: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -873,17 +789,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldTreasury: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentTreasury: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -893,17 +806,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldActiveSupply: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentActiveSupply: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -913,17 +823,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldProposalsLaunched: {
               type: "string",
-              format: "string",
               example: "30",
             },
             currentProposalsLaunched: {
               type: "string",
-              format: "string",
               example: "60",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "1",
             },
           },
@@ -933,17 +840,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldVotes: {
               type: "string",
-              format: "string",
               example: "1000",
             },
             currentVotes: {
               type: "string",
-              format: "string",
               example: "3000",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "2",
             },
           },
@@ -953,17 +857,14 @@ app.get("/doc-json", (c) => {
           properties: {
             oldVotes: {
               type: "string",
-              format: "string",
               example: "204890444468088551324035469",
             },
             currentVotes: {
               type: "string",
-              format: "string",
               example: "202730905627735664105258518",
             },
             changeRate: {
               type: "string",
-              format: "string",
               example: "-0.010539968547382565",
             },
           },
@@ -973,12 +874,10 @@ app.get("/doc-json", (c) => {
           properties: {
             totalAssets: {
               type: "string",
-              format: "string",
               example: "124483516.95437849",
             },
             date: {
               type: "string",
-              format: "string",
               example: "2025-02-12",
             },
           },
@@ -993,27 +892,22 @@ app.get("/doc-json", (c) => {
                 properties: {
                   accountId: {
                     type: "string",
-                    format: "string",
                     example: "0x1234567890123456789012345678901234567890",
                   },
                   daoId: {
                     type: "string",
-                    format: "string",
                     example: "UNI",
                   },
                   timestamp: {
                     type: "string",
-                    format: "string",
                     example: "2025-02-12",
                   },
                   message: {
                     type: "string",
-                    format: "string",
                     example: "This is a message",
                   },
                   signature: {
                     type: "string",
-                    format: "string",
                     example: "0x1234567890123456789012345678901234567890",
                   },
                 },
@@ -1033,7 +927,6 @@ app.get("/doc-json", (c) => {
               type: "array",
               items: {
                 type: "string",
-                format: "string",
                 example: "0x1234567890123456789012345678901234567890",
               },
             },
@@ -1049,27 +942,22 @@ app.get("/doc-json", (c) => {
           properties: {
             accountId: {
               type: "string",
-              format: "string",
               example: "0x1234567890123456789012345678901234567890",
             },
             message: {
               type: "string",
-              format: "string",
               example: "This is a message",
             },
             signature: {
               type: "string",
-              format: "string",
               example: "0x1234567890123456789012345678901234567890",
             },
             daoId: {
               type: "string",
-              format: "string",
               example: "UNI",
             },
             timestamp: {
               type: "string",
-              format: "string",
               example: "2025-02-12",
             },
           },

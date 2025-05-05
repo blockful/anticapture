@@ -15,7 +15,7 @@ const mockDb = {
 
 const mockAnticaptureClient = {
   getDAOs: vi.fn(),
-  getSignaturesVotingPower: vi.fn(),
+  getSignersVotingPower: vi.fn(),
 };
 
 describe("PetitionService", () => {
@@ -78,7 +78,7 @@ describe("PetitionService", () => {
         },
       ];
       mockDb.getPetitionSignatures.mockResolvedValue(petitions);
-      mockAnticaptureClient.getSignaturesVotingPower.mockResolvedValue(123n);
+      mockAnticaptureClient.getSignersVotingPower.mockResolvedValue(123n);
 
       const result = await service.readPetitions("DAO1", "0xabc");
       expect(result.petitionSignatures).toEqual(petitions);
@@ -98,7 +98,7 @@ describe("PetitionService", () => {
         },
       ];
       mockDb.getPetitionSignatures.mockResolvedValue(petitions);
-      mockAnticaptureClient.getSignaturesVotingPower.mockResolvedValue(1n);
+      mockAnticaptureClient.getSignersVotingPower.mockResolvedValue(1n);
 
       const result = await service.readPetitions("DAO1", "0xabc");
       expect(result.userSigned).toBe(false);

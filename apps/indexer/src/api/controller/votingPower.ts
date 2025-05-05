@@ -33,7 +33,7 @@ app.get("/dao/:daoId/voting-power",
       .where(and(eq(accountPower.daoId, daoId), inArray(accountPower.accountId, accounts)));
 
     if (queryResult.length) {
-      return context.json({ votingPower: queryResult[0]?.sum || 0 });
+      return context.json({ votingPower: queryResult[0]?.sum || 0n });
     }
 
     return context.json({

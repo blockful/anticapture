@@ -12,6 +12,10 @@ const envSchema = z.object({
   NETWORK: z.nativeEnum(NetworkEnum),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
+  DUNE_API_URL: z.string(),
+  DUNE_API_KEY: z.string(),
+  COINGECKO_API_KEY: z.string(),
+  REDIS_URL: z.string().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);

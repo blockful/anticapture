@@ -11,10 +11,7 @@ describe("Petition Routes", () => {
 
   beforeEach(() => {
     app = fastify();
-    // petitionService = new PetitionService(
-    //   mockDb,
-    //   mockAnticaptureClient
-    // );
+
   })
 
   describe("POST /petitions/:daoId", () => {

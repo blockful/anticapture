@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
-    "db:migrate": "npx drizzle-kit push",
-    "test": "vitest"
+    "test": "vitest",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:generate": "npx drizzle-kit generate"
   },
   "keywords": [],
   "author": "",

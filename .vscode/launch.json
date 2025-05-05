@@ -16,7 +16,7 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "env": {
-        "NODE_ENV": "development",
+        "NODE_ENV": "production",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
         "ENV_FILE": "${workspaceFolder}/apps/petition/.env"
       },

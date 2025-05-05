@@ -11,26 +11,35 @@ export default class GraphqlAnticaptureClient {
   }
 
   async getDAOs() {
-    const response = await this.client.post('', {
-      query: `
-        query GetDAOs {
-          daos {
-            items {
-              id
-            }
-          }
-        }
-      `,
-    });
-    console.log({ response });
-    return response.data.daos;
+    // const response = await this.client.post('', {
+    //   query: `
+    //     query GetDAOs {
+    //       daos {
+    //         items {
+    //           id
+    //         }
+    //       }
+    //     }
+    //   `,
+    // });
+
+    // console.log({ response })
+
+    return ["ENS", "UNI", "ARB"];
   }
 
   async getSignersVotingPower(daoId: string, signers: Address[]) {
     const response = await this.client.post('', {
       query: `
-        query GetVotingPower($daoId: String!, $signers: [String!]!) {
-          votingPower(daoId: $daoId, signers: $signers)
+        query MyQuery {
+          getVotingPower(
+            accounts: $signers,
+            daoId: $daoId
+          ) {
+            ... on getVotingPower_200_response {
+              votingPower
+            }
+          }
         }
       }`,
       variables: {
@@ -39,7 +48,8 @@ export default class GraphqlAnticaptureClient {
       },
     })
 
-    console.log({ response });
-    return response.data.data.votingPower;
+    console.log({ response })
+
+    return response.data.votingPower;
   }
 }
