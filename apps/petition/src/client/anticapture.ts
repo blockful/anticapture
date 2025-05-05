@@ -14,17 +14,7 @@ export default class GraphqlAnticaptureClient {
   }
 
   async getDAOs() {
-    // const response = await this.client.post('', {
-    //   query: `
-    //     query GetDAOs {
-    //       daos {
-    //         items {
-    //           id
-    //         }
-    //       }
-    //     }
-    //   `,
-    // });
+    // TODO read all DAOs from the API Gateway #704
     return ["ENS", "UNI", "ARB"];
   }
 
