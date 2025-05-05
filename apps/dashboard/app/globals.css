@@ -45,6 +45,14 @@
     --chart-5: 27 87% 67%;
   }
 
+  a {
+    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
+  }
+
+  .link-tangerine {
+    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
+  }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -109,7 +117,7 @@
   }
 
   .btn-connect-wallet {
-    @apply flex w-full items-center justify-center gap-3 rounded-md border border-transparent bg-lightDark py-1 px-2 text-white hover:border hover:border-lightDark hover:bg-transparent;
+    @apply flex w-9 h-9 items-center justify-center gap-3 rounded-md border border-transparent bg-lightDark py-1 px-2 text-white hover:border hover:border-lightDark hover:bg-transparent;
   }
 
   .card-text-accordion {
