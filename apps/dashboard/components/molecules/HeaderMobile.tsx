@@ -77,7 +77,7 @@ export const HeaderMobile = () => {
       <div className="absolute left-0 right-0 top-0 z-50 border-b border-lightDark bg-darkest px-4 py-3">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex cursor-pointer">
-            <AnticaptureIcon />
+            <AnticaptureIcon className="size-11" />
           </Link>
           <div className="flex items-center gap-3">
             <ConnectWallet className="!px-3 !py-1.5" />
