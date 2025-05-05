@@ -11,6 +11,7 @@ import { ReactNode } from "react";
 import { PlusIcon } from "@/components/atoms";
 import { Stage } from "@/components/atoms/StageTag";
 import { StageTagSimplified } from "@/components/atoms/StageTagSimplified";
+import { cn } from "@/lib/client/utils";
 
 interface AccordionDataProps {
   subtitle: string;
@@ -132,10 +133,14 @@ export const StageAccordion = () => {
         <AccordionItem
           value={`item-${index}`}
           key={index}
-          className="flex h-full flex-col gap-3"
+          className="flex h-full flex-col gap-3 overflow-hidden transition-all duration-300 ease-in-out"
         >
           <>
-            <AccordionTrigger className="group flex w-full items-center justify-between">
+            <AccordionTrigger
+              className={cn(
+                "group flex w-full items-center justify-between transition-all duration-300 ease-in-out",
+              )}
+            >
               <div className="flex w-full items-center gap-2">
                 {item.title}
                 {item.subtitle && (
@@ -145,11 +150,19 @@ export const StageAccordion = () => {
                   {item.subtitle}
                 </p>
               </div>
-              <PlusIcon className="size-4 text-foreground transition-all duration-200 group-data-[state=open]:hidden" />
-              <MinusIcon className="hidden size-4 text-foreground transition-all duration-200 group-data-[state=open]:block" />
+              <PlusIcon className="size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
+              <MinusIcon className="hidden size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:block" />
             </AccordionTrigger>
-            <AccordionContent>{item.content}</AccordionContent>
-            <div className="h-px w-full border-b border-lightDark" />
+            <AccordionContent
+              className={cn(
+                "overflow-hidden transition-all duration-300 ease-in-out",
+                "data-[state=open]:animate-accordion-down",
+                "data-[state=closed]:animate-accordion-up",
+              )}
+            >
+              {item.content}
+            </AccordionContent>
+            <div className="h-px w-full border-b border-lightDark transition-opacity duration-300 ease-in-out" />
           </>
         </AccordionItem>
       ))}
