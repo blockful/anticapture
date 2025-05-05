@@ -6,12 +6,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@radix-ui/react-accordion";
-import { CheckCircle, MinusIcon } from "lucide-react";
+import { AlertTriangle, CheckCircle, MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { PlusIcon } from "@/components/atoms";
 import { Stage } from "@/components/atoms/StageTag";
 import { StageTagSimplified } from "@/components/atoms/StageTagSimplified";
 import { cn } from "@/lib/client/utils";
+import { DotFilledIcon } from "@radix-ui/react-icons";
 
 interface AccordionDataProps {
   subtitle: string;
@@ -26,7 +27,7 @@ const AccordionData: AccordionDataProps[] = [
     content: (
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="text-[13px] font-medium leading-[18px] tracking-[6%] text-white">
+          <h3 className="font-roboto text-[13px] font-medium uppercase leading-[18px] tracking-[6%] text-white">
             Critical Vulnerabilities
           </h3>
           <p className="text-sm font-normal text-foreground">
@@ -61,7 +62,7 @@ const AccordionData: AccordionDataProps[] = [
     content: (
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="text-[13px] font-medium leading-[18px] tracking-[6%] text-white">
+          <h3 className="font-roboto text-[13px] font-medium uppercase leading-[18px] tracking-[6%] text-white">
             Partial Risk Reduction
           </h3>
           <p className="text-sm font-normal text-foreground">
@@ -91,34 +92,54 @@ const AccordionData: AccordionDataProps[] = [
     ),
   },
   {
-    subtitle: "1 issue needs fixing",
+    subtitle: "3 issue needs fixing",
     title: <StageTagSimplified stage={Stage.TWO} isCompleted={false} />,
     content: (
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="text-[13px] font-medium leading-[18px] tracking-[6%] text-white">
-            Critical Vulnerabilities
+          <h3 className="font-roboto text-[13px] font-medium uppercase leading-[18px] tracking-[6%] text-white">
+            Minimal Risks
           </h3>
           <p className="text-sm font-normal text-foreground">
-            At least one High Risk issue identified
+            No High Risk issues, at least one Medium Risk issue remains
           </p>
         </div>
         <div className="flex flex-col gap-2">
-          <h4 className="text-xs font-medium tracking-[6%] text-white">
-            REQUIREMENTS
+          <h4 className="text-xs font-medium uppercase tracking-[6%] text-white">
+            issues that need to be fixed
           </h4>
-          <div className="flex flex-row gap-2">
-            <div className="flex items-start">
-              <CheckCircle className="size-4 text-success" />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="size-4 text-warning" />
+              <p className="text-sm font-normal text-warning">Voting Period</p>
             </div>
-            <p className="flex flex-wrap text-sm font-normal text-foreground">
-              All DAOs that have governor and timelock are considered at least{" "}
-              <span className="whitespace-nowrap text-white"> Stage 0.</span>
-              <span className="block">
-                At this stage, critical risks still be present and require
-                attention.
-              </span>
-            </p>
+            <div className="flex justify-start gap-2">
+              <div>
+                <DotFilledIcon className="size-4 text-[#52525B]" />
+              </div>
+              <p className="text-sm font-normal text-foreground">
+                The current voting period of 2 days is too short to allow for
+                aligned delegates to defend the DAO against an attack.
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-middleDark" />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="size-4 text-warning" />
+              <p className="text-sm font-normal text-warning">
+                Spam Prevention
+              </p>
+            </div>
+            <div className="flex justify-start gap-2">
+              <div>
+                <DotFilledIcon className="size-4 text-[#52525B]" />
+              </div>
+              <p className="text-sm font-normal text-foreground">
+                The DAO currently lacks sufficient protections against proposal
+                spamming, increasing the risk of governance attacks.
+              </p>
+            </div>
           </div>
         </div>
       </div>
