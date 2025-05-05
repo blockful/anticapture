@@ -38,7 +38,7 @@ export const RiskTooltipCard = ({
         </div>
         
         {/* Divider */}
-        <div className="h-px bg-lightDark mb-3"></div>
+        <div className="h-px bg-lightDark mb-3"/>
         
         <div className="text-sm text-foreground">
           {descriptionArray.map((paragraph, index) => (
