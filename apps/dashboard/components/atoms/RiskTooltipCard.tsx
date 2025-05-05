@@ -26,7 +26,7 @@ export const RiskTooltipCard = ({
     <div className="flex flex-col">
       {/* Arrow pointing up to the card */}
       <div className="flex justify-center">
-        <div className="w-0 h-0 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-lightDark" />
+        <div className="size-0 border-x-8  border-b-8 border-x-transparent border-b-lightDark" />
       </div>
       
       {/* Tooltip content */}
