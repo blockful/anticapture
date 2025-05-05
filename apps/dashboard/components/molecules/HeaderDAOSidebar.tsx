@@ -11,7 +11,7 @@ import {
   CrossHairIcon,
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { Lightbulb } from "lucide-react";
+import { BarChart, Gauge, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderDAOSidebar = () => {
@@ -51,6 +51,13 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
           )}
+          {daoConfig.riskAnalysis && (
+            <ButtonHeaderSidebar
+              anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
+              icon={Gauge}
+              label={SECTIONS_CONSTANTS.riskAnalysis.title}
+            />
+          )}
           {daoConfig.governanceImplementation && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
@@ -58,6 +65,13 @@ export const HeaderDAOSidebar = () => {
               label={
                 SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation
               }
+            />
+          )}
+          {daoConfig.resilienceStages && (
+            <ButtonHeaderSidebar
+              anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
+              icon={BarChart}
+              label={SECTIONS_CONSTANTS.resilienceStages.title}
             />
           )}
           {daoConfig.tokenDistribution && (
