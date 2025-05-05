@@ -7,6 +7,9 @@ export default class GraphqlAnticaptureClient {
   constructor(apiUrl: string) {
     this.client = axios.create({
       baseURL: apiUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   }
 
@@ -22,16 +25,13 @@ export default class GraphqlAnticaptureClient {
     //     }
     //   `,
     // });
-
-    // console.log({ response })
-
     return ["ENS", "UNI", "ARB"];
   }
 
-  async getSignersVotingPower(daoId: string, signers: Address[]) {
-    const response = await this.client.post('', {
+  async getSignersVotingPower(daoId: string, signers: Address[]): Promise<bigint> {
+    const { data } = await this.client.post('', {
       query: `
-        query MyQuery {
+        query getVotingPower($daoId: String!, $signers: [String!]!) {
           getVotingPower(
             accounts: $signers,
             daoId: $daoId
@@ -41,15 +41,12 @@ export default class GraphqlAnticaptureClient {
             }
           }
         }
-      }`,
+      `,
       variables: {
         daoId,
         signers,
       },
     })
-
-    console.log({ response })
-
-    return response.data.votingPower;
+    return BigInt(data.data.getVotingPower.votingPower);
   }
 }
