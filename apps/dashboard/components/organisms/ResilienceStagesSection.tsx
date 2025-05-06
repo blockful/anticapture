@@ -5,6 +5,7 @@ import {
   Stage,
   RiskLevelCard,
   StageTag,
+  StageAccordion,
   DaoAvatarIcon,
   StagesCardRequirements,
 } from "@/components/atoms";
@@ -75,54 +76,55 @@ export const ResilienceStagesSection = ({
       description={SECTIONS_CONSTANTS.resilienceStages.description}
       anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
     >
-      <div className="flex flex-col gap-2">
-        <div className="w-full py-6">
-          {/* Timeline Component */}
-          <div className="relative h-0.5 bg-middleDark">
-            {/* Horizontal Line */}
+      <div className="flex h-7 w-full items-center justify-center">
+        {/* Timeline Component */}
+        <div className="relative h-0.5 w-full bg-middleDark">
+          {/* Horizontal Line */}
+          <div
+            className={cn(
+              "absolute left-0 h-0.5",
+              StagesToLineStyle[currentDaoStage],
+            )}
+          ></div>
+
+          {/* Stage 0 */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-dark">
+            <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
+          </div>
+
+          {/* Stage 1 */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-dark">
+            <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
+          </div>
+
+          {/* Current Position Indicator */}
+          <div
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
+              StagesToDaoAvatarPosition[currentDaoStage],
+            )}
+          >
             <div
               className={cn(
-                "absolute left-0 h-0.5",
-                StagesToLineStyle[currentDaoStage],
-              )}
-            ></div>
-
-            {/* Stage 0 */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-dark">
-              <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
-            </div>
-
-            {/* Stage 1 */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-dark">
-              <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
-            </div>
-
-            {/* Current Position Indicator */}
-            <div
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
-                StagesToDaoAvatarPosition[currentDaoStage],
+                "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white",
+                StagesToBorderColor[currentDaoStage],
               )}
             >
-              <div
-                className={cn(
-                  "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white",
-                  StagesToBorderColor[currentDaoStage],
-                )}
-              >
-                <DaoAvatarIcon isRounded daoId={daoId} />
-              </div>
-            </div>
-
-            {/* Stage 2 */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
-              <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
+              <DaoAvatarIcon isRounded daoId={daoId} />
             </div>
           </div>
-        </div>
 
-        <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
+          <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
+          {/* Stage 2 */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
+            <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
+          </div>
+        </div>
       </div>
+
+      <StagesCardRequirements daoStage={currentDaoStage} />
+
+      <StageAccordion />
     </TheSectionLayout>
   );
 };
