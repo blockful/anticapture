@@ -225,7 +225,7 @@ export const RiskAreaCard = ({
       <div
         className={cn(
           "w-full p-1.5",
-          isActive && "border border-middleDark border-0.5 bg-darkest sm:bg-dark",
+          isActive && "border-[2px] border-middleDark bg-darkest sm:bg-dark",
         )}
       >
         <RiskAreaCardInternal
@@ -235,7 +235,7 @@ export const RiskAreaCard = ({
           variant={variant}
         />
       </div>
-      <div className="flex h-full w-[13px] items-center justify-center">
+      <div className="hidden sm:flex h-full w-[13px] items-center justify-center">
         {isActive && (
           <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
         )}
