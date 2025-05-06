@@ -4,7 +4,7 @@
  */
 export enum GovernanceImplementationEnum {
   SPAM_RESISTANCE = "Spam Resistance",
-  FLASH_LOAN_PROTECTION = "Flash Loan Protection",
+  FLASHLOAN_PROTECTION = "Flashloan Protection",
   PROPOSAL_THRESHOLD = "Proposal Threshold",
   CANCEL_FUNCTION = "Cancel Function",
   VOTING_PERIOD = "Voting Period",

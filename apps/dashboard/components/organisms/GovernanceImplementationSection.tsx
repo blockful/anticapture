@@ -11,6 +11,7 @@ import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { fieldsToArray } from "@/lib/dao-config/utils";
+import { sortByRiskLevel } from "@/lib/enums";
 
 export const GovernanceImplementationSection = ({
   daoId,
@@ -64,11 +65,9 @@ export const GovernanceImplementationSection = ({
           onClick={() => setOpenCardIds([])}
         />
 
-        {governanceImplementationFields?.map(
-          (
-            field,
-            index: number,
-          ) => {
+        {governanceImplementationFields
+          ?.sort((a, b) => sortByRiskLevel(a, b, "desc"))
+          .map((field, index: number) => {
             const cardId = field.name;
             const isOpen = openCardIds.includes(cardId);
 
@@ -82,8 +81,7 @@ export const GovernanceImplementationSection = ({
                 }}
               />
             );
-          },
-        )}
+          })}
       </div>
     </TheSectionLayout>
   );

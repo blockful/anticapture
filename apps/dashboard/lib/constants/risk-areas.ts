@@ -25,7 +25,7 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       "Means the system can be overwhelmed by fake or low-quality proposals. This clutters governance, wastes resources, and discourages real participation.",
     requirements: [
       GovernanceImplementationEnum.SPAM_RESISTANCE,
-      GovernanceImplementationEnum.FLASH_LOAN_PROTECTION,
+      GovernanceImplementationEnum.FLASHLOAN_PROTECTION,
       GovernanceImplementationEnum.PROPOSAL_THRESHOLD,
       GovernanceImplementationEnum.CANCEL_FUNCTION,
       GovernanceImplementationEnum.VOTING_PERIOD,
@@ -57,7 +57,7 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       "Vulnerability to exploits that could compromise the DAO's smart contracts or governance processes.",
     requirements: [
       GovernanceImplementationEnum.AUDITED_CONTRACTS,
-      GovernanceImplementationEnum.FLASH_LOAN_PROTECTION,
+      GovernanceImplementationEnum.FLASHLOAN_PROTECTION,
     ],
   },
   [RiskAreaEnum.RESPONSE_TIME]: {

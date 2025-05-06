@@ -52,7 +52,7 @@ export const ENS: DaoConfiguration = {
     fields: {
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           "The governance contract accepts changes to votes, even after they have been cast on-chain.",
         requirements: [
@@ -97,12 +97,12 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "Yes, unrestricted",
-        riskLevel: RiskLevel.HIGH,
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
         description:
           'The DAO can sponsor the gas costs of voting for its members, allowing them to essentially "vote for free". If done without restrictions can be exploited to spend DAO funds.',
       },
-      [GovernanceImplementationEnum.FLASH_LOAN_PROTECTION]: {
+      [GovernanceImplementationEnum.FLASHLOAN_PROTECTION]: {
         value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
@@ -115,14 +115,14 @@ export const ENS: DaoConfiguration = {
           "Waiting period between the approval of a proposal, prior to executing the automatic execution of a malicious proposal that negatively affects the DAO, allowing time for a Cancel or Veto function to act.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "DAO Approved",
+        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           "There is a mechanism approved by the DAO to cancel a proposal approved by governance after it has been voted.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
         value: "100k ENS",
-        riskLevel: RiskLevel.LOW,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           "Requires a minimum number of votes to submit a proposal to governance.",
         requirements: [
@@ -143,8 +143,8 @@ export const ENS: DaoConfiguration = {
           "Period in which wallets with delegated governance tokens have the opportunity to vote on proposals submitted to governance.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "DAO Only",
-        riskLevel: RiskLevel.LOW,
+        value: "No",
+        riskLevel: RiskLevel.MEDIUM,
         description:
           "Timelock administration can be transferred or shared with addresses other than the DAO itself. If this happens, the main piece of governance is put at risk.",
         requirements: [
@@ -153,8 +153,8 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.CANCEL_FUNCTION]: {
-        value: "Yes",
-        riskLevel: RiskLevel.LOW,
+        value: "No",
+        riskLevel: RiskLevel.MEDIUM,
         description:
           "An user can cancel a proposal they submitted themselves to the DAO at any point. Allows for proposal with unintentional mistakes to be taken down by a non-malicious actor.",
       },
@@ -163,6 +163,12 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.LOW,
         description:
           "The governance contract codes have been audited and approved by a security provider.",
+      },
+      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+        value: "~100M USD",
+        riskLevel: RiskLevel.LOW,
+        description:
+          "The amount of Non-governance tokens the DAO is currently holding.",
       },
     },
   },

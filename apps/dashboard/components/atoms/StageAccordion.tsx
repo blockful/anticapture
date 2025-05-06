@@ -18,8 +18,8 @@ import { RiskLevel } from "@/lib/enums";
 
 interface StageAccordionProps {
   daoStage: Stage;
-  highRiskFields: GovernanceImplementationField[];
-  mediumRiskFields: GovernanceImplementationField[];
+  highRiskFields: (GovernanceImplementationField & { name: string })[];
+  mediumRiskFields: (GovernanceImplementationField & { name: string })[];
 }
 
 export const StageAccordion = ({
@@ -84,7 +84,7 @@ export const StageAccordion = ({
 
 interface CustomAccordionItemProps {
   isCompleted: boolean;
-  riskFields: GovernanceImplementationField[];
+  riskFields: (GovernanceImplementationField & { name: string })[];
   stage: Stage;
   title: string;
   description: string;
@@ -94,7 +94,7 @@ interface CustomAccordionItemProps {
   isLastItem?: boolean;
 }
 
-const stageTwoEmptyContent: GovernanceImplementationField[] = [
+const stageTwoEmptyContent: (GovernanceImplementationField & { name: string })[] = [
   {
     name: "Fix all Stage 1 parameters and reduce their risk level to low",
     value: "no",
@@ -115,7 +115,6 @@ const CustomAccordionItem = ({
   content,
   isLastItem = false,
 }: CustomAccordionItemProps) => {
-  console.log("riskFields ", riskFields);
   return (
     <AccordionItem
       value={`stage-${stage}`}

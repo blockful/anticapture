@@ -26,28 +26,36 @@ export interface RiskAreaInfo {
  * @param daoId The ID of the DAO to analyze
  * @returns Record of risk areas with their risk levels and governance implementation items
  */
-export function getDaoRiskAreas(daoId: DaoIdEnum): Record<RiskAreaEnum, RiskAreaInfo> {
+export function getDaoRiskAreas(
+  daoId: DaoIdEnum,
+): Record<RiskAreaEnum, RiskAreaInfo> {
   const daoConfig = daoConfigByDaoId[daoId];
   const govImplFields = daoConfig.governanceImplementation?.fields || {};
-  
+
   // Initialize the result with all risk areas set to HIGH risk by default
-  const result: Record<RiskAreaEnum, RiskAreaInfo> = {} as Record<RiskAreaEnum, RiskAreaInfo>;
-  
+  const result: Record<RiskAreaEnum, RiskAreaInfo> = {} as Record<
+    RiskAreaEnum,
+    RiskAreaInfo
+  >;
+
   // For each risk area, evaluate its risk level based on the implementation of its requirements
   for (const riskArea of Object.values(RiskAreaEnum)) {
     // Get the governance implementation items required for this risk area
-    const requiredGovImplItems = RISK_AREAS[riskArea as RiskAreaEnum].requirements;
-    
+    const requiredGovImplItems =
+      RISK_AREAS[riskArea as RiskAreaEnum].requirements;
+
     // Filter the DAO's governance implementation fields to those related to this risk area
-    const govImplItems: { [key in GovernanceImplementationEnum]?: GovernanceImplementationField } = {};
+    const govImplItems: {
+      [key in GovernanceImplementationEnum]?: GovernanceImplementationField;
+    } = {};
     let highRiskCount = 0;
     let mediumRiskCount = 0;
     let lowRiskCount = 0;
-    
+
     for (const govImplItem of requiredGovImplItems) {
       if (govImplFields[govImplItem]) {
         govImplItems[govImplItem] = govImplFields[govImplItem];
-        
+
         // Count the risk levels of implemented items
         switch (govImplFields[govImplItem].riskLevel) {
           case RiskLevel.HIGH:
@@ -60,20 +68,25 @@ export function getDaoRiskAreas(daoId: DaoIdEnum): Record<RiskAreaEnum, RiskArea
             lowRiskCount++;
             break;
         }
+      } else {
+        lowRiskCount++;
       }
     }
-    
+
     // Determine the overall risk level for this area
     let riskLevel: RiskLevel;
-    
+
     // If all required items are implemented with LOW risk, the area is LOW risk
-    if (lowRiskCount === requiredGovImplItems.length && requiredGovImplItems.length > 0) {
+    if (
+      lowRiskCount === requiredGovImplItems.length &&
+      requiredGovImplItems.length > 0
+    ) {
       riskLevel = RiskLevel.LOW;
-    } 
+    }
     // If there are any HIGH risk implementations, the area is HIGH risk
     else if (highRiskCount > 0) {
       riskLevel = RiskLevel.HIGH;
-    } 
+    }
     // If there are any MEDIUM risk implementations and no HIGH risk, the area is MEDIUM risk
     else if (mediumRiskCount > 0) {
       riskLevel = RiskLevel.MEDIUM;
@@ -82,13 +95,13 @@ export function getDaoRiskAreas(daoId: DaoIdEnum): Record<RiskAreaEnum, RiskArea
     else {
       riskLevel = RiskLevel.HIGH;
     }
-    
+
     // Store the risk area information
     result[riskArea as RiskAreaEnum] = {
       riskLevel,
       govImplItems,
     };
   }
-  
+
   return result;
-} 
+}
