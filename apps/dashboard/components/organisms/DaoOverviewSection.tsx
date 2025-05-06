@@ -12,7 +12,7 @@ import {
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
-  RiskAreaCardWrapper,
+  RiskAreaCard,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -29,11 +29,15 @@ import {
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
 } from "@/lib/dao-config/utils";
+import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
+import { cn } from "@/lib/client/utils";
+import { MOCKED_RISK_AREAS_WITH_RISK } from "@/lib/constants/risk-areas";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
   const { isMobile, isDesktop } = useScreenSize();
+  const { scrollToSection, setActiveRisk } = useDaoPageInteraction();
   const { ref, inView } = useInView({
     threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
   });
@@ -86,23 +90,24 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   ];
 
-  // Mock data for risk areas
+  // Risk areas data using constants
   const riskAreas = {
     title: "RISK AREAS",
-    risks: [
-      { name: "SPAM VULNERABLE", level: RiskLevel.LOW },
-      { name: "EXTRACTABLE VALUE", level: RiskLevel.MEDIUM },
-      { name: "SAFEGUARDS", level: undefined },
-      { name: "HACKABLE", level: RiskLevel.HIGH },
-      { name: "GOV INTERFACES VULNERABILITY", level: RiskLevel.HIGH },
-      { name: "RESPONSE TIME", level: RiskLevel.LOW },
-    ],
+    risks: MOCKED_RISK_AREAS_WITH_RISK,
+  };
+
+  const handleRiskAreaClick = (riskName: string) => {
+    // First set the active risk
+    setActiveRisk(riskName);
+
+    // Then scroll to the risk analysis section
+    scrollToSection(SECTIONS_CONSTANTS.riskAnalysis.anchorId);
   };
 
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
+      className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-4 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:p-0"
       ref={ref}
     >
       <div
@@ -142,7 +147,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mb-3 mt-3 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-bold tracking-wider text-white">
+              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
               <InfoIcon className="size-4 text-foreground" />
@@ -167,12 +172,22 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
-          <RiskAreaCardWrapper
-            title={riskAreas.title}
-            risks={riskAreas.risks}
-            variant="dao-overview"
-            gridColumns="grid-cols-2"
-          />
+          <div className="flex w-full flex-col gap-1">
+            <h3 className="mb-3 font-mono text-xs font-medium tracking-wider text-white sm:text-sm">
+              {riskAreas.title}
+            </h3>
+
+            <div className={cn("grid grid-cols-2 gap-1 sm:gap-2")}>
+              {riskAreas.risks.map((risk, index) => (
+                <RiskAreaCard
+                  key={`${risk.name}-${index}`}
+                  riskArea={risk}
+                  variant="dao-overview"
+                  onClick={() => handleRiskAreaClick(risk.name)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="flex w-full flex-1"></div>
@@ -205,7 +220,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mb-3 mt-3 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-bold tracking-wider text-white">
+              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
               <InfoIcon className="size-4 text-foreground" />
@@ -259,11 +274,18 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
-        <RiskAreaCardWrapper
-          title={riskAreas.title}
-          risks={riskAreas.risks}
-          variant="dao-overview"
-        />
+        <div className="flex w-full flex-col gap-1">
+          <div className="grid grid-cols-1 gap-1">
+            {riskAreas.risks.map((risk, index) => (
+              <RiskAreaCard
+                key={`${risk.name}-${index}`}
+                riskArea={risk}
+                variant="dao-overview"
+                onClick={() => handleRiskAreaClick(risk.name)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
