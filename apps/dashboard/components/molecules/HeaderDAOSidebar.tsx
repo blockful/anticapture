@@ -13,6 +13,7 @@ import {
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { BarChart, Gauge, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/lib/dao-config";
+import { HEADER_SIDEBAR_WIDTH } from "@/components/molecules/HeaderSidebar";
 
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
@@ -26,7 +27,9 @@ export const HeaderDAOSidebar = () => {
   }
 
   return (
-    <aside className="fixed left-[72px] top-0 z-50 hidden h-screen w-[258px] border-r border-lightDark bg-darkest sm:block">
+    <aside
+      className={`left-[${HEADER_SIDEBAR_WIDTH}px] fixed top-0 z-50 hidden h-screen w-[258px] border-r border-lightDark bg-darkest sm:block`}
+    >
       <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex h-full flex-col gap-3 p-4">
