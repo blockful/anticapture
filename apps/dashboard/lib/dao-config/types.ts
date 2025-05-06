@@ -2,7 +2,6 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { RiskLevel } from "@/lib/enums";
-import { StaticImageData } from "next/image";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 
 // Existing types
@@ -98,6 +97,7 @@ export interface DaoConfiguration extends BaseInfo {
   daoOverview?: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
+  resilienceStages?: boolean;
   tokenDistribution?: boolean;
   governanceActivity?: boolean;
   showSupport?: boolean;

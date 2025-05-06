@@ -1,6 +1,5 @@
 import { DaoConfiguration } from "@/lib/dao-config/types";
 import { RiskLevel, sortByRiskLevel, SupportStageEnum } from "@/lib/enums";
-import ENSLogo from "@/public/logo/ENS.png";
 import { calculateMonthsBefore } from "@/lib/client/utils";
 
 export const ENS: DaoConfiguration = {
@@ -153,6 +152,7 @@ export const ENS: DaoConfiguration = {
       },
     ].sort((a, b) => sortByRiskLevel(a, b, "desc")),
   },
+  resilienceStages: true,
   tokenDistribution: true,
   governanceActivity: false,
   showSupport: false,
