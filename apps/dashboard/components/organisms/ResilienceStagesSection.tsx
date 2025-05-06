@@ -11,19 +11,45 @@ import {
 } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import daoConfigByDaoId from "@/lib/dao-config";
+import {
+  filterFieldsByRiskLevel,
+  getDaoStageFromFields,
+} from "@/lib/dao-config/utils";
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BarChart } from "lucide-react";
 
 interface ResilienceStagesSectionProps {
-  currentDaoStage: Stage;
   daoId: DaoIdEnum;
 }
 
 export const ResilienceStagesSection = ({
-  currentDaoStage,
   daoId,
 }: ResilienceStagesSectionProps) => {
+  const daoConfig = daoConfigByDaoId[daoId];
+
+  const currentDaoStage = getDaoStageFromFields(
+    daoConfig.governanceImplementation?.fields || [],
+  );
+
+  const highRiskItems = filterFieldsByRiskLevel(
+    daoConfig.governanceImplementation?.fields || [],
+    RiskLevel.HIGH,
+  );
+
+  const mediumRiskItems = filterFieldsByRiskLevel(
+    daoConfig.governanceImplementation?.fields || [],
+    RiskLevel.MEDIUM,
+  );
+
+  const issues =
+    highRiskItems.length > 0
+      ? highRiskItems.map((item) => item.name)
+      : mediumRiskItems.length > 0
+        ? mediumRiskItems.map((item) => item.name)
+        : undefined;
+
   const StagesToDaoAvatarPosition: Record<Stage, string> = {
     [Stage.ZERO]: "right-[75%]",
     [Stage.ONE]: "right-[25%]",
@@ -88,6 +114,7 @@ export const ResilienceStagesSection = ({
             </div>
           </div>
 
+          <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
           {/* Stage 2 */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />

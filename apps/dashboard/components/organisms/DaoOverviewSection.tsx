@@ -12,7 +12,8 @@ import {
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
-  RiskAreaCard
+  RiskAreaCard,
+  RiskAreaCardWrapper
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -28,6 +29,10 @@ import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
 import { cn } from "@/lib/client/utils";
 import { MOCKED_RISK_AREAS_WITH_RISK } from "@/lib/constants/risk-areas";
+import {
+  filterFieldsByRiskLevel,
+  getDaoStageFromFields,
+} from "@/lib/dao-config/utils";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -148,7 +153,23 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </h3>
               <InfoIcon className="size-4 text-foreground" />
             </div>
-            <StagesDaoOverview />
+            <StagesDaoOverview
+              currentStage={getDaoStageFromFields(
+                daoConfig.governanceImplementation?.fields || [],
+              )}
+              highRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.HIGH,
+              )}
+              mediumRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.MEDIUM,
+              )}
+              lowRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.LOW,
+              )}
+            />
           </div>
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
@@ -205,7 +226,23 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </h3>
               <InfoIcon className="size-4 text-foreground" />
             </div>
-            <StagesDaoOverview />
+            <StagesDaoOverview
+              currentStage={getDaoStageFromFields(
+                daoConfig.governanceImplementation?.fields || [],
+              )}
+              highRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.HIGH,
+              )}
+              mediumRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.MEDIUM,
+              )}
+              lowRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.LOW,
+              )}
+            />
           </div>
         </div>
       </div>
@@ -238,18 +275,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
-        <div className="flex w-full flex-col gap-1">
-          <div className="grid grid-cols-1 gap-1">
-            {riskAreas.risks.map((risk, index) => (
-              <RiskAreaCard
-                key={`${risk.name}-${index}`}
-                riskArea={risk}
-                variant="dao-overview"
-                onClick={() => handleRiskAreaClick(risk.name)}
-              />
-            ))}
-          </div>
-        </div>
+        <RiskAreaCardWrapper
+          title={riskAreas.title}
+          risks={riskAreas.risks}
+          variant="dao-overview"
+        />
       </div>
     </div>
   );
