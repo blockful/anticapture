@@ -76,6 +76,7 @@ export const StageAccordion = ({
         title="Partial Risk Reduction"
         description="No High or Medium Risk issues, only Low Risk items"
         subtitle="2 issues needs fixing"
+        isLastItem={true}
       />
     </Accordion>
   );
@@ -90,6 +91,7 @@ interface CustomAccordionItemProps {
   subtitle: string;
   key: number;
   content?: ReactNode;
+  isLastItem?: boolean;
 }
 
 const stageTwoEmptyContent: GovernanceImplementationField[] = [
@@ -111,6 +113,7 @@ const CustomAccordionItem = ({
   description,
   subtitle,
   content,
+  isLastItem = false,
 }: CustomAccordionItemProps) => {
   console.log("riskFields ", riskFields);
   return (
@@ -172,7 +175,9 @@ const CustomAccordionItem = ({
             />
           </AccordionContent>
         )}
-        <div className="h-px w-full border-b border-lightDark transition-opacity duration-300 ease-in-out" />
+        {!isLastItem && (
+          <div className="h-px w-full border-b border-lightDark transition-opacity duration-300 ease-in-out" />
+        )}
       </>
     </AccordionItem>
   );
