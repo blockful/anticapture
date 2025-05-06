@@ -14,7 +14,6 @@ const mockDb = {
 };
 
 const mockAnticaptureClient = {
-  getDAOs: vi.fn(),
   getSignersVotingPower: vi.fn(),
 };
 
@@ -36,9 +35,8 @@ describe("PetitionService", () => {
         message: "Sign this petition",
         signature: "0x123",
         accountId: "0xabc",
-      }
+      };
 
-      mockAnticaptureClient.getDAOs.mockResolvedValue(["DAO1"]);
       (verifyMessage as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
       await expect(service.signPetition(expected)).resolves.toMatchObject(expected);
@@ -51,9 +49,8 @@ describe("PetitionService", () => {
         message: "Sign this petition",
         signature: "0x123",
         accountId: "0xabc",
-      }
+      };
 
-      mockAnticaptureClient.getDAOs.mockResolvedValue(["DAO1"]);
       (verifyMessage as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(false);
 
       await expect(service.signPetition(expected)).rejects.toThrow("Invalid signature");

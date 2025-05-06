@@ -39,7 +39,7 @@ app.register(fastifySwaggerUi, {
   routePrefix: '/docs',
 });
 
-app.register(routes(petitionService, anticaptureClient));
+app.register(routes(petitionService));
 
 app.listen({ host: '::', port: env.PORT }, (err, address) => {
   if (err) {

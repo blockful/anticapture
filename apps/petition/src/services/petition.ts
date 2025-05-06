@@ -12,7 +12,6 @@ interface PetitionRepository {
 }
 
 interface AnticaptureClient {
-  getDAOs: () => Promise<string[]>;
   getSignersVotingPower: (daoId: string, signers: Address[]) => Promise<bigint>;
 }
 

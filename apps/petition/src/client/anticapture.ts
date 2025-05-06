@@ -13,11 +13,6 @@ export default class GraphqlAnticaptureClient {
     });
   }
 
-  async getDAOs() {
-    // TODO read all DAOs from the API Gateway #704
-    return ["ENS", "UNI", "ARB"];
-  }
-
   async getSignersVotingPower(daoId: string, signers: Address[]): Promise<bigint> {
     const { data } = await this.client.post('', {
       query: `
