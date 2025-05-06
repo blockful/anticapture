@@ -96,12 +96,12 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="relative z-50 inline-block h-[65px] w-full border-b border-lightDark"
+      className="relative z-50 inline-block h-[57px] w-full border-b border-lightDark sm:h-[65px]"
       ref={dropdownRef}
     >
-      <div className="flex h-full items-center justify-between p-2">
+      <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
         <button
-          className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-[#333] sm:rounded-md sm:p-1"
+          className="flex w-full items-center justify-between gap-2 rounded-md p-1 hover:bg-[#333] sm:rounded-md sm:p-1"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
@@ -120,24 +120,26 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="absolute z-50 mt-2 w-full rounded-lg border border-lightDark bg-dark p-2 shadow-lg"
+          className="absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border border-lightDark bg-dark shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (
             <button
               key={item.id}
               className={
-                "flex w-full items-center justify-between gap-2 rounded-lg p-2 hover:bg-[#333]"
+                "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-[#333]"
               }
               onClick={() => handleSelectItem(item.id, item.href)}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
-              <div className="flex w-full items-center gap-2">
-                <div>{item.icon}</div>
-                <h1 className="text-[18px] font-medium leading-6 text-[#FAFAFA]">
-                  {item.label}
-                </h1>
+              <div className="flex w-full items-center gap-1.5 sm:gap-2">
+                <DaoAvatarIcon
+                  daoId={item.name}
+                  className="size-icon-xxs sm:size-icon-sm"
+                  isRounded
+                />
+                <h1 className="text-sm font-normal text-white">{item.label}</h1>
               </div>
             </button>
           ))}
