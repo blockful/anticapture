@@ -23,7 +23,7 @@ import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
-import { DaoOverviewStageProgressBar } from "@/components/molecules";
+import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -138,18 +138,20 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mb-3 mt-3 flex h-full items-center gap-2">
-              <h3 className="hidden font-mono text-xs font-bold tracking-wider text-white sm:block">
+              <h3 className="font-mono text-xs font-bold tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
               <InfoIcon className="size-4 text-foreground" />
             </div>
-            <DaoOverviewStageProgressBar />
+            <StagesDaoOverview />
           </div>
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
           <RiskAreaCardWrapper
             title={riskAreas.title}
             risks={riskAreas.risks}
+            variant="dao-overview"
+            gridColumns="grid-cols-2"
           />
         </div>
 
@@ -181,7 +183,15 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               options={offChainOptions}
             />
           </div>
-          <DaoOverviewStageProgressBar />
+          <div className="flex w-full flex-col">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+              <h3 className="font-mono text-xs font-bold tracking-wider text-white">
+                CURRENT RESILIENCE STAGE
+              </h3>
+              <InfoIcon className="size-4 text-foreground" />
+            </div>
+            <StagesDaoOverview />
+          </div>
         </div>
       </div>
       <div className="hidden h-full w-full sm:flex">
@@ -213,7 +223,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
-        <RiskAreaCardWrapper title={riskAreas.title} risks={riskAreas.risks} />
+        <RiskAreaCardWrapper 
+          title={riskAreas.title} 
+          risks={riskAreas.risks} 
+          variant="dao-overview"
+        />
       </div>
     </div>
   );

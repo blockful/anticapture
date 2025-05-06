@@ -1,6 +1,6 @@
 export * from "@/components/molecules/AttackCostBarChart";
 export * from "@/components/molecules/ContractsCard";
-export * from "@/components/molecules/DaoOverviewStageProgressBar";
+export * from "@/components/molecules/StagesDaoOverview";
 export * from "@/components/molecules/GovernanceActivityTable";
 export * from "@/components/molecules/GovernanceImplementationCard";
 export * from "@/components/molecules/HeaderDAOSidebar";
@@ -19,3 +19,4 @@ export * from "@/components/molecules/TimelockCard";
 export * from "@/components/molecules/TokenDistributionTable";
 export * from "@/components/molecules/VoteCard";
 export * from "@/components/molecules/RiskAreaCard";
+export * from "@/components/molecules/RiskDescription";

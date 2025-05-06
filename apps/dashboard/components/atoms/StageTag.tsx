@@ -7,9 +7,9 @@ export enum Stage {
 }
 
 const STAGE_STYLES: Record<Stage, string> = {
-  [Stage.ZERO]: "border-red-500 text-red-500 bg-[#F87171]",
-  [Stage.ONE]: "border-yellow-500 text-yellow-500 bg-[#FACC15] ",
-  [Stage.TWO]: "border-green-500 text-green-500 bg-[#4ADE80]",
+  [Stage.ZERO]: "border-error text-error bg-error bg-opacity-[0.12]",
+  [Stage.ONE]: "border-warning text-warning bg-warning bg-opacity-[0.12]",
+  [Stage.TWO]: "border-success text-success bg-success bg-opacity-[0.12]",
 };
 
 interface StageTagProps {
@@ -26,14 +26,14 @@ export const StageTag = ({
   // Use gray colors when daoStage is less than tagStage
   const stageStyles =
     daoStage < tagStage
-      ? "border-gray-500 text-gray-500"
-      : STAGE_STYLES[tagStage] || "border-gray-500 text-gray-500";
+      ? "border-middleDark text-foreground"
+      : STAGE_STYLES[daoStage] || "border-middleDark text-foreground";
 
   return (
     <div
-      className={`inline-flex rounded-lg border bg-dark px-3 py-1 ${stageStyles} ${className}`}
+      className={`inline-flex rounded-lg border-[1px] bg-dark p-2 py-1 ${stageStyles} ${className}`}
     >
-      <span className="text-sm font-medium">
+      <span className="font-roboto text-[13px] font-medium leading-[18px]">
         <span className="hidden sm:inline">STAGE </span>
         {tagStage}
       </span>

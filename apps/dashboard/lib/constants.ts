@@ -39,7 +39,7 @@ export const SECTIONS_CONSTANTS = {
   },
   governanceImplementation: {
     title: "Governance Implementation",
-    titleAbbreviation: "Gov. Implementation",
+    titleAbbreviation: "Gov Implementation",
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
@@ -47,6 +47,18 @@ export const SECTIONS_CONSTANTS = {
     title: "Support DAOs",
     description: "",
     anchorId: "supportDaosSection",
+  },
+  riskAnalysis: {
+    title: "Risk Analysis",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus commodo condimentum gravida. Aenean rutrum iaculis mollis. Nullam sit amet quam nisl. Mauris sagittis tortor et turpis interdum commodo.",
+    anchorId: "riskAnalysisSection",
+  },
+  resilienceStages: {
+    title: "Resilience Stages",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus commodo condimentum gravida. Aenean rutrum iaculis mollis. Nullam sit amet quam nisl. Mauris sagittis tortor et turpis interdum commodo. ",
+    anchorId: "resilienceStagesSection",
   },
 };
 

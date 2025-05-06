@@ -36,3 +36,5 @@ export * from "@/components/atoms/TheTable";
 export * from "@/components/atoms/TokenDistributionCustomTooltip";
 export * from "@/components/atoms/TooltipInfo";
 export * from "@/components/atoms/ShowYourSupportStickyBar";
+export * from "@/components/atoms/CorneredBox";
+export { StagesCardRequirements } from "@/components/atoms/StagesCardRequirements";
