@@ -291,7 +291,6 @@ export const GovernanceActivityTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
-      onRowClick={() => {}}
     />
   );
 };

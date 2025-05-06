@@ -336,7 +336,6 @@ export const TokenDistributionTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
-      onRowClick={() => {}}
     />
   );
 };

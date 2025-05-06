@@ -111,7 +111,7 @@ export const TheTable = <TData, TValue>({
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "cursor-pointer hover:bg-lightDark" : ""}`}
+                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "cursor-pointer hover:bg-lightDark" : "cursor-default"}`}
                 onClick={() =>
                   !disableRowClick?.(row.original) && onRowClick?.(row.original)
                 }
