@@ -66,9 +66,13 @@ const RiskAreaCardInternal = ({
             : "h-[42px] px-1 py-2 sm:px-2",
           {
             "bg-lightDark": risk.level === undefined,
-            "bg-success": risk.level === RiskLevel.LOW,
-            "bg-warning": risk.level === RiskLevel.MEDIUM,
-            "bg-error": risk.level === RiskLevel.HIGH,
+            "bg-success shadow-success/30":
+              risk.level === RiskLevel.LOW,
+            "bg-warning shadow-warning/30":
+              risk.level === RiskLevel.MEDIUM,
+            "bg-error shadow-error/30":
+              risk.level === RiskLevel.HIGH,
+            "shadow-[0_0_20px_0]": isActive,
             "bg-opacity-[12%]": !isActive && risk.level !== undefined,
           },
         )}
@@ -183,7 +187,7 @@ export const RiskAreaCard = ({
       <div
         className={cn(
           "w-full p-1.5",
-          isActive && "border border-lightDark bg-darkest sm:bg-dark",
+          isActive && "border border-middleDark border-0.5 bg-darkest sm:bg-dark",
         )}
       >
         <RiskAreaCardInternal
@@ -193,11 +197,11 @@ export const RiskAreaCard = ({
           variant={variant}
         />
       </div>
-      {isActive && (
-        <div className="flex h-full items-center justify-center">
-          <div className="size-0 border-y-8 border-l-8 border-y-transparent border-l-middleDark" />
-        </div>
-      )}
+      <div className="flex h-full w-[13px] items-center justify-center">
+        {isActive && (
+          <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
+        )}
+      </div>
     </div>
   );
 };
@@ -224,7 +228,7 @@ export const RiskAreaCardWrapper = ({
       )}
 
       {/* Grid layout with configurable columns */}
-      <div className={`grid ${gridColumns} gap-1 sm:gap-2`}>
+      <div className={`grid ${gridColumns} gap-1`}>
         {risks.map((risk: RiskArea, index: number) => (
           <RiskAreaCard
             key={`${risk.name}-${index}`}

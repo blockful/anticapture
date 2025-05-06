@@ -17,10 +17,10 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const [activeRisk, setActiveRisk] = useState<string | undefined>(undefined);
+  const [activeRisk, setActiveRisk] = useState<string>("SPAM VULNERABLE");
 
   const handleRiskClick = (riskName: string) => {
-    setActiveRisk(activeRisk === riskName ? undefined : riskName);
+    setActiveRisk(riskName);
   };
 
   // Define the risk areas as shown in the reference image
@@ -33,11 +33,11 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     {
       name: "GOV INTERFACES VULNERABILITY",
       content: (
-        <span className="inline-flex flex-wrap align-baseline line-height-[0]">
+        <span className="line-height-[0] inline-flex flex-wrap align-baseline">
           <span className="inline-block">GOV INTERF</span>
           <span className="hidden sm:inline-block">ACES</span>
-          <span className="inline-block sm:hidden">.&nbsp;</span>
-          <span className="inline-block"> VULNERABILITY</span>
+          <span className="inline-block sm:hidden">.</span>
+          <span className="inline-block">&nbsp;VULNERABILITY</span>
         </span>
       ),
       level: RiskLevel.HIGH,
@@ -124,7 +124,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
       riskLevel={<RiskLevelCard status={RiskLevel.HIGH} />}
     >
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className="flex flex-col gap-[13px] md:flex-row">
         <div className="md:w-2/5">
           <RiskAreaCardWrapper
             title="Risk Areas"
