@@ -166,7 +166,7 @@ export const ENS: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
         value: "~100M USD",
-        riskLevel: RiskLevel.LOW,
+        riskLevel: RiskLevel.HIGH,
         description:
           "The amount of Non-governance tokens the DAO is currently holding.",
       },
