@@ -22,7 +22,10 @@ export const HeaderSidebar = () => {
         label: SECTIONS_CONSTANTS.panel.title,
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem("scrollToSection", SECTIONS_CONSTANTS.panel.anchorId);
+          sessionStorage.setItem(
+            "scrollToSection",
+            SECTIONS_CONSTANTS.panel.anchorId,
+          );
           router.push("/");
         },
       },
@@ -52,7 +55,7 @@ export const HeaderSidebar = () => {
                 anchorId={item.anchorId || ""}
                 icon={item.icon}
                 label={item.label}
-                className="flex-col gap-1"
+                className="flex-col gap-1 !text-xs !font-medium"
                 onClick={() => {
                   router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
                 }}
