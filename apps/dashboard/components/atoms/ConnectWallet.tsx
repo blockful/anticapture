@@ -56,7 +56,7 @@ export const ConnectWallet = ({
                     type="button"
                     className={cn("btn-connect-wallet", className)}
                   >
-                    <WalletIcon className="size-4" />
+                    <WalletIcon className="size-3.5 sm:size-4" />
                     {label}
                   </button>
                 );
