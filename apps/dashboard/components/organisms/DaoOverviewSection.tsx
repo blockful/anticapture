@@ -162,7 +162,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(
-                fieldsToArray(daoConfig.governanceImplementation?.fields)
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
               )}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -251,6 +251,19 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               )}
             />
           </div>
+          <div className="flex w-full flex-col">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
+                RISK AREAS
+              </h3>
+              <InfoIcon className="size-4 text-foreground" />
+            </div>
+            <RiskAreaCardWrapper
+              title={riskAreas.title}
+              riskAreas={riskAreas.risks}
+              variant="dao-overview"
+            />
+          </div>
         </div>
       </div>
       <div className="hidden h-full w-full sm:flex">
@@ -278,15 +291,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <QuorumCard />
         </div>
         <div className="w-full border-b border-lightDark sm:hidden" />
-      </div>
-
-      {/* Mobile risk areas without title */}
-      <div className="mt-4 sm:hidden">
-        <RiskAreaCardWrapper
-          title={riskAreas.title}
-          riskAreas={riskAreas.risks}
-          variant="dao-overview"
-        />
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ export enum GovernanceImplementationEnum {
   VOTING_SUBSIDY_UIS = "Voting Subsidy on UIs",
   AUDITED_CONTRACTS = "Audited Contracts",
   TIMELOCK_DELAY = "Timelock Delay",
+  TIMELOCK_ADMIN = "Timelock Admin",
   VOTING_DELAY = "Voting Delay",
   DNS_PROTECTION = "DNS Protection",
   VOTE_MUTABILITY = "Vote Mutability",

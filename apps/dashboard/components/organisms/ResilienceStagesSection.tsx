@@ -115,7 +115,6 @@ export const ResilienceStagesSection = ({
             </div>
           </div>
 
-          <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
           {/* Stage 2 */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
@@ -123,9 +122,13 @@ export const ResilienceStagesSection = ({
         </div>
       </div>
 
-      <StagesCardRequirements daoStage={currentDaoStage} />
+      <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
 
-      <StageAccordion />
+      <StageAccordion
+        daoStage={currentDaoStage}
+        highRiskFields={highRiskItems}
+        mediumRiskFields={mediumRiskItems}
+      />
     </TheSectionLayout>
   );
 };
