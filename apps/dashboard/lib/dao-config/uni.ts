@@ -1,6 +1,5 @@
 import { RiskLevel, SupportStageEnum } from "@/lib/enums";
 import { DaoConfiguration } from "@/lib/dao-config/types";
-import UNILogo from "@/public/logo/UNI.png";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
