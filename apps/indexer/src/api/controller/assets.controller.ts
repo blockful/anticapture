@@ -14,9 +14,13 @@ const app = new Hono();
 
 const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
 
-app.get("/dao/:daoId/total-assets",
+app.get(
+  "/dao/:daoId/total-assets",
   validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
-  validator("query", z.object({ days: caseInsensitiveEnum(DaysEnum).default(DaysEnum["90d"]) })),
+  validator(
+    "query",
+    z.object({ days: caseInsensitiveEnum(DaysEnum).default(DaysEnum["90d"]) }),
+  ),
   async (context) => {
     const { daoId } = context.req.valid("param");
     const { days } = context.req.valid("query");
@@ -25,6 +29,7 @@ app.get("/dao/:daoId/total-assets",
     const data = await assetsService.getTotalAssets(days);
 
     return context.json(data);
-  });
+  },
+);
 
 export default app;

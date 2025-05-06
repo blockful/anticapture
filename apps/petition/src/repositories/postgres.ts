@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, desc } from 'drizzle-orm';
+import { desc, ilike } from 'drizzle-orm';
 import { Hex, Address } from 'viem';
 
 import * as schema from './schema';
@@ -21,7 +21,7 @@ export class PostgresPetitionRepository {
     const signatures = await this.db
       .select()
       .from(schema.petitionSignatures)
-      .where(eq(schema.petitionSignatures.daoId, daoId))
+      .where(ilike(schema.petitionSignatures.daoId, daoId))
       .orderBy(desc(schema.petitionSignatures.timestamp));
 
     return signatures.map((signature) => ({
