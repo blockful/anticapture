@@ -79,7 +79,7 @@ export const TheTable = <TData, TValue>({
 
   return (
     <Table className="table-auto bg-darkest text-foreground md:table-fixed md:bg-dark">
-      <TableHeader className="bg-lightDark text-xs font-semibold text-foreground sm:font-medium">
+      <TableHeader className="text-xs font-semibold text-foreground sm:bg-lightDark sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-lightDark">
             {headerGroup.headers.map((header) => {

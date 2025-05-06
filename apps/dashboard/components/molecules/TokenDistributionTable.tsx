@@ -112,7 +112,9 @@ export const TokenDistributionTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start pl-4">Supply</div>
+        <div className="flex w-full items-start justify-start pl-4 text-xs font-semibold sm:font-medium">
+          Supply
+        </div>
       ),
     },
     {
@@ -146,10 +148,10 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-end"
+          className="w-full justify-end px-4 text-end text-xs font-semibold sm:font-medium"
           onClick={() => column.toggleSorting()}
         >
-          Current value ({daoId})
+          {String(daoId)?.toUpperCase()} Amount
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",
@@ -199,9 +201,9 @@ export const TokenDistributionTable = () => {
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+              <ChevronUp className="size-4 text-[#4ade80]" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="h-4 w-4 text-red-500" />
+              <ChevronDown className="size-4 text-red-500" />
             ) : null}
             {variation}%
           </p>
@@ -210,12 +212,12 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-end"
+          className="w-full justify-end px-4 text-end text-xs font-semibold sm:font-medium"
           onClick={() => column.toggleSorting()}
         >
           Variation
           <ArrowUpDown
-            props={{ className: "ml-2 h-4 w-4" }}
+            props={{ className: "ml-2 size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -262,7 +264,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-center justify-center pr-20">
+        <div className="flex w-full items-center justify-center pr-20 text-xs font-semibold sm:font-medium">
           Last {days.slice(0, -1)} days
         </div>
       ),
