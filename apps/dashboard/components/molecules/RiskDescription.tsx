@@ -30,7 +30,7 @@ export const RiskDescription = ({
   description,
   requirements = [],
   children,
-  riskLevel = RiskLevel.LOW,
+  riskLevel,
 }: RiskDescriptionProps) => {
   // Convert description to array if it's a string
   const descriptionArray = Array.isArray(description)
