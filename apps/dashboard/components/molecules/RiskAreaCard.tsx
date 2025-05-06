@@ -73,12 +73,7 @@ const RiskAreaCardInternal = ({
           },
         )}
       >
-        <div
-          className={cn(
-            "flex items-center",
-            !isRiskAnalysis && "max-w-[110px]",
-          )}
-        >
+        <div className="flex items-center">
           <span
             className={cn(
               "block font-mono text-xs font-medium sm:tracking-wider",
@@ -95,7 +90,7 @@ const RiskAreaCardInternal = ({
             {risk.content ? risk.content : risk.name}
           </span>
         </div>
-        <div className="flex items-center justify-center w-fit">
+        <div className="flex w-fit items-center justify-center">
           {risk.level === undefined ? (
             <div className="flex items-center justify-center font-mono text-xs">
               <CounterClockwiseClockIcon className="size-5 text-foreground" />
@@ -129,40 +124,31 @@ const RiskAreaCardInternal = ({
       >
         <div className="flex h-full flex-col gap-1">
           <div
-            className={cn(
-              isRiskAnalysis ? "h-full w-1.5" : "h-full w-1 lg:w-1.5",
-              {
-                "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
-                "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
-                "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
-                "bg-opacity-[12%]": !isActive && isBox3Filled,
-                "bg-lightDark": risk.level === undefined || !isBox3Filled,
-              },
-            )}
+            className={cn("h-full w-1", {
+              "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
+              "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
+              "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
+              "bg-opacity-[12%]": !isActive && isBox3Filled,
+              "bg-lightDark": risk.level === undefined || !isBox3Filled,
+            })}
           />
           <div
-            className={cn(
-              isRiskAnalysis ? "h-full w-1.5" : "h-full w-1 lg:w-1.5",
-              {
-                "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
-                "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
-                "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
-                "bg-opacity-[12%]": !isActive && isBox2Filled,
-                "bg-lightDark": risk.level === undefined || !isBox2Filled,
-              },
-            )}
+            className={cn("h-full w-1", {
+              "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
+              "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
+              "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
+              "bg-opacity-[12%]": !isActive && isBox2Filled,
+              "bg-lightDark": risk.level === undefined || !isBox2Filled,
+            })}
           />
           <div
-            className={cn(
-              isRiskAnalysis ? "h-full w-1.5" : "h-full w-1 lg:w-1.5",
-              {
-                "bg-success": risk.level === RiskLevel.LOW,
-                "bg-warning": risk.level === RiskLevel.MEDIUM,
-                "bg-error": risk.level === RiskLevel.HIGH,
-                "bg-opacity-[12%]": !isActive && risk.level !== undefined,
-                "bg-lightDark": risk.level === undefined,
-              },
-            )}
+            className={cn("h-full w-1", {
+              "bg-success": risk.level === RiskLevel.LOW,
+              "bg-warning": risk.level === RiskLevel.MEDIUM,
+              "bg-error": risk.level === RiskLevel.HIGH,
+              "bg-opacity-[12%]": !isActive && risk.level !== undefined,
+              "bg-lightDark": risk.level === undefined,
+            })}
           />
         </div>
       </div>
@@ -232,7 +218,7 @@ export const RiskAreaCardWrapper = ({
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
       {!hideTitle && (
-        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block sm:text-sm">
+        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block">
           {title}
         </h3>
       )}
