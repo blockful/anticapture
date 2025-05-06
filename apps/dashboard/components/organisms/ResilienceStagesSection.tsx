@@ -121,9 +121,13 @@ export const ResilienceStagesSection = ({
         </div>
       </div>
 
-      <StagesCardRequirements daoStage={currentDaoStage} />
+      <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
 
-      <StageAccordion />
+      <StageAccordion
+        daoStage={currentDaoStage}
+        highRiskFields={highRiskItems}
+        mediumRiskFields={mediumRiskItems}
+      />
     </TheSectionLayout>
   );
 };
