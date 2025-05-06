@@ -105,7 +105,6 @@ export const TheSectionLayout = ({
           {riskLevel && <div className="flex h-full w-full">{riskLevel}</div>}
         </div>
       </div>
-      {subtitle && <div className="border-b border-b-white/10" />}
 
       {!isSwitchDateLinear && switchDate && (
         <div
@@ -115,7 +114,7 @@ export const TheSectionLayout = ({
           )}
         >
           <div className="flex flex-col">
-            <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
+            <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
               {subtitle}
             </CardTitle>
             <p className="text-sm font-normal text-foreground">
