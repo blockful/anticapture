@@ -155,16 +155,16 @@ export const GovernanceActivityTable = () => {
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
-                ? "text-[#4ade80]"
+                ? "text-green-400"
                 : Number(variation) < 0
-                  ? "text-red-500"
+                  ? "text-red-400"
                   : ""
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="size-4 text-[#4ade80]" />
+              <ChevronUp className="size-4 text-green-400" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="size-4 text-red-500" />
+              <ChevronDown className="size-4 text-red-400" />
             ) : null}
             {variation}%
           </p>
