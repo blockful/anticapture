@@ -11,6 +11,7 @@ import { useAccount } from "wagmi";
 import { CheckCircle2, Pencil } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
+  PetitionResponse,
   submitPetitionSignature,
   usePetitionSignatures,
 } from "@/hooks/usePetition";
@@ -18,12 +19,21 @@ import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet, TelegramIcon, TwitterIcon } from "@/components/atoms";
 import { ANTICAPTURE_TELEGRAM, ANTICAPTURE_TWITTER } from "@/lib/constants";
+import { Address } from "viem";
 
-export const CardDaoSignature = () => {
+export const CardDaoSignature = ({
+  data,
+  loading,
+  isConnected,
+  address,
+}: {
+  data: PetitionResponse | null;
+  loading: boolean;
+  isConnected: boolean;
+  address: Address | undefined;
+}) => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const { isConnected, address } = useAccount();
-  const { data, loading } = usePetitionSignatures(daoIdEnum, address);
 
   const handleSubmit = async () => {
     if (!address) return;
@@ -47,7 +57,7 @@ export const CardDaoSignature = () => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 py-8 rounded-lg text-white sm:flex-row sm:gap-10 sm:border sm:border-lightDark sm:bg-lightDark sm:p-4">
+    <div className="flex w-full flex-col gap-6 rounded-lg py-8 text-white sm:flex-row sm:gap-10 sm:border sm:border-lightDark sm:bg-lightDark sm:p-4">
       <div className="order-1 flex sm:order-none">
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
@@ -95,7 +105,7 @@ export const CardDaoSignature = () => {
             <div className="flex">
               <ConnectWallet
                 label="Connect Wallet"
-                className="!w-fit !border-transparent !bg-[#FAFAFA] !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70 py-1"
+                className="!w-fit !border-transparent !bg-[#FAFAFA] py-1 !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
               />
             </div>
           )}

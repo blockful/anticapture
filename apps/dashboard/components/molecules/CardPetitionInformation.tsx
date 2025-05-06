@@ -4,14 +4,16 @@ import { TooltipInfo } from "@/components/atoms";
 import { Card } from "@/components/ui/card";
 import { SupportersCarroussel } from "@/components/atoms/SupportersCarroussel";
 import { useParams } from "next/navigation";
-import { usePetitionSignatures } from "@/hooks/usePetition";
+import { PetitionResponse, usePetitionSignatures } from "@/hooks/usePetition";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 
-export const CardPetitionInformation = () => {
-  const { daoId } = useParams();
-  const { data } = usePetitionSignatures(daoId as DaoIdEnum, "0x");
+export const CardPetitionInformation = ({
+  data,
+}: {
+  data: PetitionResponse | null;
+}) => {
   const supporters =
     data?.petitionSignatures.map((signature) => signature.accountId) ?? [];
   return (
@@ -34,9 +36,7 @@ export const CardPetitionInformation = () => {
           <p className="text-md text-white">
             {data?.totalSignaturesPower !== "0"
               ? formatNumberUserReadable(
-                  Number(
-                    formatEther(BigInt(data?.totalSignaturesPower ?? 0n)),
-                  ),
+                  Number(formatEther(BigInt(data?.totalSignaturesPower ?? 0n))),
                 )
               : "-"}
           </p>
