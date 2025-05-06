@@ -119,4 +119,8 @@
   .section-title-gap {
     @apply gap-4 sm:gap-6;
   }
+
+  .page-sections-gap {
+    @apply  sm:gap-3;
+  }
 }

@@ -98,7 +98,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-10 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:px-0 sm:pb-0 sm:pt-0"
+      className="flex h-full w-full flex-col gap-4 px-4 pb-8 pt-10 sm:gap-0 sm:bg-dark sm:p-0"
       ref={ref}
     >
       <div
@@ -223,9 +223,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
-        <RiskAreaCardWrapper 
-          title={riskAreas.title} 
-          risks={riskAreas.risks} 
+        <RiskAreaCardWrapper
+          title={riskAreas.title}
+          risks={riskAreas.risks}
           variant="dao-overview"
         />
       </div>
