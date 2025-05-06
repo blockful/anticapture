@@ -59,6 +59,9 @@ const config: Config = {
         "icon-lg": "48px",
         "icon-xl": "76px",
       },
+      fontSize: {
+        "alternative-sm": "13px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

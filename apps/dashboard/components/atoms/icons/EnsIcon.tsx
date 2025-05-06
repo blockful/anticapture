@@ -15,7 +15,7 @@ export const EnsIcon = ({ showBackground = true, ...props }: EnsIconProps) => {
       {...props}
     >
       {showBackground && <rect width="40" height="40" fill="#0080BC" />}
-      <g clip-path="url(#clip0_6662_10252)">
+      <g clipPath="url(#clip0_6662_10252)">
         <path
           d="M11.5781 17.636C11.8257 18.1613 12.4447 19.212 12.4447 19.212L19.532 7.5L12.6304 12.3208C12.228 12.5989 11.8876 12.9697 11.64 13.4023C10.9901 14.7311 10.9901 16.2763 11.5781 17.636Z"
           fill="#F6F6F6"

@@ -1,8 +1,12 @@
+"use client";
+
 import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { RiskTooltipCard } from "@/components/atoms";
+import { RISK_AREAS } from "@/lib/constants/risk-areas";
 
 export type RiskArea = {
   name: string;
@@ -53,6 +57,33 @@ const RiskAreaCardInternal = ({
   // Adjust styling based on variant
   const isRiskAnalysis = variant === "risk-analysis";
 
+  const riskLevelIcons = {
+    [RiskLevel.LOW]: (
+      <CheckCircle2
+        className={cn(
+          "size-4 sm:size-5",
+          isActive ? "text-darkest" : "text-success",
+        )}
+      />
+    ),
+    [RiskLevel.MEDIUM]: (
+      <Info
+        className={cn(
+          "size-4 sm:size-5",
+          isActive ? "text-darkest" : "text-warning",
+        )}
+      />
+    ),
+    [RiskLevel.HIGH]: (
+      <AlertTriangle
+        className={cn(
+          "size-4 sm:size-5",
+          isActive ? "text-darkest" : "text-error",
+        )}
+      />
+    ),
+  };
+
   return (
     <div
       className={cn("flex w-full flex-1 cursor-pointer items-center gap-1")}
@@ -62,7 +93,7 @@ const RiskAreaCardInternal = ({
         className={cn(
           "flex h-full flex-1 items-center justify-between",
           isRiskAnalysis
-            ? "h-[62px] px-1 py-2 sm:px-2"
+            ? "h-[48px] px-1 py-2 sm:h-[62px] sm:px-2"
             : "h-[42px] px-1 py-2 sm:px-2",
           {
             "bg-lightDark": risk.level === undefined,
@@ -80,51 +111,34 @@ const RiskAreaCardInternal = ({
           )}
         >
           <span
-            className={cn(
-              "block font-mono text-xs font-medium sm:tracking-wider",
-              {
-                "text-foreground": risk.level === undefined,
-                "text-success": risk.level === RiskLevel.LOW && !isActive,
-                "text-warning": risk.level === RiskLevel.MEDIUM && !isActive,
-                "text-error": risk.level === RiskLevel.HIGH && !isActive,
-                "text-darkest": isActive && risk.level !== undefined,
-              },
-            )}
+            className={cn("block font-mono font-medium sm:tracking-wider", {
+              "!text-foreground": risk.level === undefined,
+              "!text-success": risk.level === RiskLevel.LOW && !isActive,
+              "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive,
+              "!text-error": risk.level === RiskLevel.HIGH && !isActive,
+              "text-darkest": isActive && risk.level !== undefined,
+              "text-alternative-sm": isRiskAnalysis,
+              "text-xs": !isRiskAnalysis,
+            })}
             title={risk.name}
           >
             {risk.content ? risk.content : risk.name}
           </span>
         </div>
-        <div className="flex items-center justify-center w-fit">
-          {risk.level === undefined ? (
-            <div className="flex items-center justify-center font-mono text-xs">
-              <CounterClockwiseClockIcon className="size-5 text-foreground" />
-            </div>
-          ) : risk.level === RiskLevel.LOW ? (
-            <CheckCircle2
-              className={cn(
-                "size-5",
-                isActive ? "text-darkest" : "text-success",
-              )}
-            />
-          ) : risk.level === RiskLevel.MEDIUM ? (
-            <Info
-              className={cn(
-                "size-5",
-                isActive ? "text-darkest" : "text-warning",
-              )}
-            />
+        <div className="flex w-fit items-center justify-center">
+          {risk.level ? (
+            riskLevelIcons[risk.level as RiskLevel]
           ) : (
-            <AlertTriangle
-              className={cn("size-5", isActive ? "text-darkest" : "text-error")}
-            />
+            <div className="flex items-center justify-center font-mono text-xs">
+              <CounterClockwiseClockIcon className="size-4 text-foreground sm:size-5" />
+            </div>
           )}
         </div>
       </div>
       <div
         className={cn(
           "flex h-full items-center",
-          isRiskAnalysis ? "h-[62px]" : "h-[42px]",
+          isRiskAnalysis ? "h-[48px] sm:h-[62px]" : "h-[42px]",
         )}
       >
         <div className="flex h-full flex-col gap-1">
@@ -179,15 +193,38 @@ export const RiskAreaCard = ({
   onClick,
   variant = "dao-overview",
 }: RiskAreaCardProps) => {
-  // For dao-overview variant, return the internal component directly
+  const [showTooltip, setShowTooltip] = useState(false);
+  const riskName = risk.name;
+  const riskInfo = RISK_AREAS[riskName] || {
+    title: riskName,
+    description: "Risk description not available.",
+  };
+
+  // For dao-overview variant, return the internal component with optional tooltip
   if (variant === "dao-overview") {
     return (
-      <RiskAreaCardInternal
-        risk={risk}
-        isActive={isActive}
-        onClick={onClick}
-        variant={variant}
-      />
+      <div
+        className="relative"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <RiskAreaCardInternal
+          risk={risk}
+          isActive={isActive}
+          onClick={onClick}
+          variant={variant}
+        />
+
+        {showTooltip && (
+          <div className="absolute left-1/2 top-full z-50 mt-1 -translate-x-1/2 transform">
+            <RiskTooltipCard
+              title={riskInfo.title}
+              description={riskInfo.description}
+              riskLevel={risk.level}
+            />
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -227,7 +264,8 @@ export const RiskAreaCardWrapper = ({
   gridColumns = "grid-cols-2",
   variant = "dao-overview",
   hideTitle = false,
-}: RiskAreaCardWrapperProps) => {
+  withTooltip = true,
+}: RiskAreaCardWrapperProps & { withTooltip?: boolean }) => {
   return (
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
