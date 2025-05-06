@@ -30,7 +30,7 @@ export const RiskDescription = ({
   description,
   requirements = [],
   children,
-  riskLevel = RiskLevel.LOW,
+  riskLevel,
 }: RiskDescriptionProps) => {
   // Convert description to array if it's a string
   const descriptionArray = Array.isArray(description)
@@ -38,28 +38,30 @@ export const RiskDescription = ({
     : [description];
 
   return (
-    <CorneredBox className="p-5 bg-darkest sm:bg-dark gap-4">
-      {/* Header with title and risk level */}
-      <div className="flex items-center justify-start gap-2 w-full">
-        <h2 className="text-lg font-medium text-white">{title}</h2>
-        <RiskLevelCardSmall status={riskLevel} />
-      </div>
+    <CorneredBox className="bg-darkest p-4 sm:bg-dark">
+      <div className="flex flex-col gap-4">
+        {/* Header with title and risk level */}
+        <div className="flex w-full items-center justify-start gap-2">
+          <h2 className="text-lg font-medium text-white">{title}</h2>
+          <RiskLevelCardSmall status={riskLevel} />
+        </div>
 
-      {/* Description paragraphs */}
-      <div>
+        {/* Description paragraphs */}
         {descriptionArray.map((paragraph, index) => (
-          <p key={index} className="text-sm text-foreground mb-4">
+          <p key={index} className="text-sm text-foreground">
             {paragraph}
           </p>
         ))}
 
         {/* Requirements section with divider */}
         {requirements.length > 0 && (
-          <>
+          <div className="flex flex-col gap-4">
             {/* Thin divider line */}
-            <div className="h-px w-full bg-lightDark mb-4" />
+            <div className="h-px w-full bg-lightDark" />
 
-            <h3 className="font-mono text-sm font-medium tracking-wider text-white mb-4">
+            <h3 className="font-mono text-alternative-sm
+            
+            font-medium tracking-wider text-white">
               <span className="text-foreground">{`//`}</span> REQUIREMENTS
             </h3>
             <ul className="space-y-2">
@@ -72,9 +74,8 @@ export const RiskDescription = ({
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         )}
-
         {/* Any additional content */}
         {children}
       </div>
