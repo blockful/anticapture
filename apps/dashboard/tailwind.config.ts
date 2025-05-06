@@ -51,6 +51,9 @@ const config: Config = {
       fontFamily: {
         roboto: ["var(--font-roboto)"],
       },
+      letterSpacing: {
+        wider: "0.72px",
+      },
       size: {
         "icon-xxs": "16px",
         "icon-xs": "20px",

@@ -97,19 +97,18 @@ const RiskAreaCardInternal = ({
             : "h-[42px] px-1 py-2 sm:px-2",
           {
             "bg-lightDark": risk.level === undefined,
-            "bg-success": risk.level === RiskLevel.LOW,
-            "bg-warning": risk.level === RiskLevel.MEDIUM,
-            "bg-error": risk.level === RiskLevel.HIGH,
+            "bg-success shadow-success/30":
+              risk.level === RiskLevel.LOW,
+            "bg-warning shadow-warning/30":
+              risk.level === RiskLevel.MEDIUM,
+            "bg-error shadow-error/30":
+              risk.level === RiskLevel.HIGH,
+            "shadow-[0_0_20px_0]": isActive,
             "bg-opacity-[12%]": !isActive && risk.level !== undefined,
           },
         )}
       >
-        <div
-          className={cn(
-            "flex items-center",
-            !isRiskAnalysis && "max-w-[110px]",
-          )}
-        >
+        <div className="flex items-center">
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
               "!text-foreground": risk.level === undefined,
@@ -143,40 +142,31 @@ const RiskAreaCardInternal = ({
       >
         <div className="flex h-full flex-col gap-1">
           <div
-            className={cn(
-              isRiskAnalysis ? "h-full w-1.5" : "h-full w-1 lg:w-1.5",
-              {
-                "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
-                "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
-                "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
-                "bg-opacity-[12%]": !isActive && isBox3Filled,
-                "bg-lightDark": risk.level === undefined || !isBox3Filled,
-              },
-            )}
+            className={cn("h-full w-1", {
+              "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
+              "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
+              "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
+              "bg-opacity-[12%]": !isActive && isBox3Filled,
+              "bg-lightDark": risk.level === undefined || !isBox3Filled,
+            })}
           />
           <div
-            className={cn(
-              isRiskAnalysis ? "h-full w-1.5" : "h-full w-1 lg:w-1.5",
-              {
-                "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
-                "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
-                "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
-                "bg-opacity-[12%]": !isActive && isBox2Filled,
-                "bg-lightDark": risk.level === undefined || !isBox2Filled,
-              },
-            )}
+            className={cn("h-full w-1", {
+              "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
+              "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
+              "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
+              "bg-opacity-[12%]": !isActive && isBox2Filled,
+              "bg-lightDark": risk.level === undefined || !isBox2Filled,
+            })}
           />
           <div
-            className={cn(
-              isRiskAnalysis ? "h-full w-1.5" : "h-full w-1 lg:w-1.5",
-              {
-                "bg-success": risk.level === RiskLevel.LOW,
-                "bg-warning": risk.level === RiskLevel.MEDIUM,
-                "bg-error": risk.level === RiskLevel.HIGH,
-                "bg-opacity-[12%]": !isActive && risk.level !== undefined,
-                "bg-lightDark": risk.level === undefined,
-              },
-            )}
+            className={cn("h-full w-1", {
+              "bg-success": risk.level === RiskLevel.LOW,
+              "bg-warning": risk.level === RiskLevel.MEDIUM,
+              "bg-error": risk.level === RiskLevel.HIGH,
+              "bg-opacity-[12%]": !isActive && risk.level !== undefined,
+              "bg-lightDark": risk.level === undefined,
+            })}
           />
         </div>
       </div>
@@ -234,7 +224,7 @@ export const RiskAreaCard = ({
       <div
         className={cn(
           "w-full p-1.5",
-          isActive && "border border-lightDark bg-darkest sm:bg-dark",
+          isActive && "border border-middleDark border-0.5 bg-darkest sm:bg-dark",
         )}
       >
         <RiskAreaCardInternal
@@ -244,11 +234,11 @@ export const RiskAreaCard = ({
           variant={variant}
         />
       </div>
-      {isActive && (
-        <div className="flex h-full items-center justify-center">
-          <div className="size-0 border-y-8 border-l-8 border-y-transparent border-l-middleDark" />
-        </div>
-      )}
+      <div className="flex h-full w-[13px] items-center justify-center">
+        {isActive && (
+          <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
+        )}
+      </div>
     </div>
   );
 };
@@ -270,13 +260,13 @@ export const RiskAreaCardWrapper = ({
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
       {!hideTitle && (
-        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block sm:text-sm">
+        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block">
           {title}
         </h3>
       )}
 
       {/* Grid layout with configurable columns */}
-      <div className={`grid ${gridColumns} gap-1 sm:gap-2`}>
+      <div className={`grid ${gridColumns} gap-1`}>
         {risks.map((risk: RiskArea, index: number) => (
           <RiskAreaCard
             key={`${risk.name}-${index}`}

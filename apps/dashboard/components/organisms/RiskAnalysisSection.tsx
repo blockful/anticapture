@@ -19,22 +19,10 @@ import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
 import { MOCKED_RISK_AREAS_WITH_RISK, RISK_AREAS } from "@/lib/constants/risk-areas";
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const [activeRisk, setActiveRisk] = useState<string | undefined>(undefined);
-  const { activeRisk: contextActiveRisk, setActiveRisk: setContextActiveRisk } = useDaoPageInteraction();
-
-  // Sync the local state with the context
-  useEffect(() => {
-    if (contextActiveRisk && contextActiveRisk !== activeRisk) {
-      setActiveRisk(contextActiveRisk);
-    }
-  }, [contextActiveRisk, activeRisk]);
+  const { activeRisk, setActiveRisk } = useDaoPageInteraction();
 
   const handleRiskClick = (riskName: string) => {
-    const newActiveRisk = activeRisk === riskName ? undefined : riskName;
-    setActiveRisk(newActiveRisk);
-    if (newActiveRisk) {
-      setContextActiveRisk(newActiveRisk);
-    }
+    setActiveRisk(riskName);
   };
 
   // Customize the GOV INTERFACES VULNERABILITY for display
@@ -44,11 +32,11 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     customizedRiskAreas[govIndex] = {
       ...customizedRiskAreas[govIndex],
       content: (
-        <span className="inline-flex flex-wrap align-baseline line-height-[0]">
+        <span className="line-height-[0] inline-flex flex-wrap align-baseline">
           <span className="inline-block">GOV INTERF</span>
           <span className="hidden sm:inline-block">ACES</span>
-          <span className="inline-block sm:hidden">.&nbsp;</span>
-          <span className="inline-block"> VULNERABILITY</span>
+          <span className="inline-block sm:hidden">.</span>
+          <span className="inline-block">&nbsp;VULNERABILITY</span>
         </span>
       ),
     };
@@ -133,7 +121,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
       riskLevel={<RiskLevelCard status={RiskLevel.HIGH} />}
     >
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className="flex flex-col gap-[13px] md:flex-row">
         <div className="md:w-2/5">
           <RiskAreaCardWrapper
             title="Risk Areas"
