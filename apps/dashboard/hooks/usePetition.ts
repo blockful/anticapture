@@ -2,6 +2,7 @@ import { BACKEND_ENDPOINT, PETITION_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
 import { Address, Hex } from "viem";
+import _ from "lodash";
 
 /**
  * Interface for a single petition signature
@@ -45,7 +46,7 @@ const fetchPetitionSignatures = async (
   userAddress: Address | undefined,
 ): Promise<PetitionResponse> => {
   const response = await fetch(
-    `${PETITION_ENDPOINT}/petitions/${daoId}?userAddress=${userAddress}`,
+    `${PETITION_ENDPOINT}/petitions/${daoId}?` + parseQuery({ userAddress }),
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch petition data: ${response.statusText}`);
