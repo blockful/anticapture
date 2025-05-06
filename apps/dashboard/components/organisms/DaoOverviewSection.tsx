@@ -25,6 +25,10 @@ import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
 import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
+import {
+  filterFieldsByRiskLevel,
+  getDaoStageFromFields,
+} from "@/lib/dao-config/utils";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -143,7 +147,23 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </h3>
               <InfoIcon className="size-4 text-foreground" />
             </div>
-            <StagesDaoOverview />
+            <StagesDaoOverview
+              currentStage={getDaoStageFromFields(
+                daoConfig.governanceImplementation?.fields || [],
+              )}
+              highRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.HIGH,
+              )}
+              mediumRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.MEDIUM,
+              )}
+              lowRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.LOW,
+              )}
+            />
           </div>
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
@@ -190,7 +210,23 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </h3>
               <InfoIcon className="size-4 text-foreground" />
             </div>
-            <StagesDaoOverview />
+            <StagesDaoOverview
+              currentStage={getDaoStageFromFields(
+                daoConfig.governanceImplementation?.fields || [],
+              )}
+              highRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.HIGH,
+              )}
+              mediumRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.MEDIUM,
+              )}
+              lowRiskItems={filterFieldsByRiskLevel(
+                daoConfig.governanceImplementation?.fields || [],
+                RiskLevel.LOW,
+              )}
+            />
           </div>
         </div>
       </div>
@@ -223,9 +259,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
-        <RiskAreaCardWrapper 
-          title={riskAreas.title} 
-          risks={riskAreas.risks} 
+        <RiskAreaCardWrapper
+          title={riskAreas.title}
+          risks={riskAreas.risks}
           variant="dao-overview"
         />
       </div>
