@@ -51,6 +51,10 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.HIGH,
         description:
           "The governance contract accepts changes to votes, even after they have been cast on-chain.",
+        requirements: [
+          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
+          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through a single castVoteWithReasonAndParams call or equivalent.",
+        ],
       },
       {
         name: "DNS Protection",
@@ -65,6 +69,10 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.HIGH,
         description:
           "Waiting period between proposal submission and the snapshot to count for voting power and start the votes.",
+        requirements: [
+          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current one-block delay lets attackers rush proposals before token-holders or delegates can react.",
+          "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
+        ],
       },
       {
         name: "Proposer Balance Cancel",
@@ -72,6 +80,10 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.HIGH,
         description:
           "Once submitted to governance, a proposal may be canceled by anyone if the wallet that submitted it no longer has the number of governance tokens required to reach the proposal threshold.",
+        requirements: [
+          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer’s voting power drops below the proposal-creation threshold.",
+        ],
       },
       {
         name: "Spam Prevention",
@@ -79,6 +91,10 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.HIGH,
         description:
           "An attacker can submit several proposals at once to trick the organization members into approving a malicious proposal or to try a brute force battle with the delegates, similar to a DDOS attack on the governance level.",
+        requirements: [
+          "An attacker can swamp the system with simultaneous proposals, overwhelming voters to approve an attack through a war of attrition",
+          "The DAO should impose—and automatically enforce—a hard cap on the number of active proposals any single address can have at once.",
+        ],
       },
       {
         name: "Voting Subsidy",
@@ -114,6 +130,10 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.LOW,
         description:
           "Requires a minimum number of votes to submit a proposal to governance.",
+        requirements: [
+          "A low proposal threshold lets attackers or small coalitions submit governance actions too easily, forcing the DAO to vote on spam or malicious items.",
+          "The DAO should set the proposal threshold at ≥ 1 % of circulating market supply (CEX + DEX + lending pools) so that only wallets with meaningful economic stake can create proposals.",
+        ],
       },
       {
         name: "Security Council",
@@ -135,6 +155,10 @@ export const ENS: DaoConfiguration = {
         riskLevel: RiskLevel.LOW,
         description:
           "Timelock administration can be transferred or shared with addresses other than the DAO itself. If this happens, the main piece of governance is put at risk.",
+        requirements: [
+          "The timelock admin can control execution, canceling, upgrades or critical parameter changes; if this power sits outside audited, DAO-approved contracts, attackers or insiders can sidestep on-chain voting.",
+          "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
+        ],
       },
       {
         name: "Proposer Cancel",

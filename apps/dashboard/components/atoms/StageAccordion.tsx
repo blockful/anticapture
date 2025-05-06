@@ -165,7 +165,7 @@ const CustomAccordionItem = ({
                 riskFields.length > 0
                   ? riskFields.map((field) => ({
                       title: field.name,
-                      description: [field.description],
+                      description: field?.requirements ?? [],
                     }))
                   : stageTwoEmptyContent.map((field) => ({
                       title: field.name,
