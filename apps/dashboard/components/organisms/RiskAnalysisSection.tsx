@@ -8,26 +8,49 @@ import {
   RiskAreaCardWrapper,
   RiskArea,
 } from "@/components/molecules/RiskAreaCard";
+import { RiskDescription } from "@/components/molecules/RiskDescription";
 import {
-  RiskDescription,
-  Requirement,
-} from "@/components/molecules/RiskDescription";
-import { RiskLevel } from "@/lib/enums/RiskLevel";
+  RiskLevel,
+  RiskAreaEnum,
+  GovernanceImplementationEnum,
+} from "@/lib/enums";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
-import { MOCKED_RISK_AREAS_WITH_RISK, RISK_AREAS } from "@/lib/constants/risk-areas";
+import { RISK_AREAS } from "@/lib/constants/risk-areas";
+import { getDaoRiskAreas, RiskAreaInfo } from "@/lib/utils/risk-analysis";
+import { fieldsToArray } from "@/lib/dao-config/utils";
+import daoConfigByDaoId from "@/lib/dao-config";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
+
+// Define type for the risk area display items
+interface RiskAreaDisplayItem {
+  name: string;
+  level: RiskLevel;
+  content?: React.ReactNode;
+}
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { activeRisk, setActiveRisk } = useDaoPageInteraction();
+  const daoRiskAreas = getDaoRiskAreas(daoId);
 
   const handleRiskClick = (riskName: string) => {
     setActiveRisk(riskName);
   };
 
+  // Create risk areas array for the card display
+  const riskAreasWithLevel: RiskAreaDisplayItem[] = Object.entries(
+    daoRiskAreas,
+  ).map(([name, info]) => ({
+    name,
+    level: info.riskLevel,
+  }));
+
   // Customize the GOV INTERFACES VULNERABILITY for display
-  const customizedRiskAreas = [...MOCKED_RISK_AREAS_WITH_RISK];
-  const govIndex = customizedRiskAreas.findIndex(risk => risk.name === "GOV INTERFACES VULNERABILITY");
+  const customizedRiskAreas = [...riskAreasWithLevel];
+  const govIndex = customizedRiskAreas.findIndex(
+    (risk) => risk.name === RiskAreaEnum.GOV_INTERFACES_VULNERABILITY,
+  );
   if (govIndex !== -1) {
     customizedRiskAreas[govIndex] = {
       ...customizedRiskAreas[govIndex],
@@ -42,75 +65,58 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     };
   }
 
-  // Define the spam vulnerable requirements
-  const spamVulnerableRequirements: Requirement[] = [
-    { text: "Spam resistance" },
-    { text: "Flash loan protection" },
-    { text: "Proposal threshold" },
-    { text: "Cancel function" },
-    { text: "Voting period" },
-    { text: "Voting subsidy" },
-  ];
-
-  // Helper function to get risk level by name
-  const getRiskLevelByName = (name: string): RiskLevel | undefined => {
-    const area = customizedRiskAreas.find((area) => area.name === name);
-    return area?.level;
+  // Helper function to create requirements from governance implementation items
+  const createRequirementsFromGovImplItems = (
+    riskArea: RiskAreaEnum,
+  ): (GovernanceImplementationField & { name: string })[] => {
+    // Get requirements from the consolidated RISK_AREAS object
+    const govImplItems = RISK_AREAS[riskArea].requirements;
+    return fieldsToArray(
+      daoConfigByDaoId[daoId].governanceImplementation?.fields || {},
+    ).filter((field) => {
+      return govImplItems.includes(field.name as GovernanceImplementationEnum);
+    });
   };
 
-  // Risk area descriptions using the RiskDescription component
-  const riskDescriptions: Record<string, React.ReactNode> = {
-    "SPAM VULNERABLE": (
+  // Generate risk descriptions using the RiskDescription component and the RISK_AREAS object
+  const riskDescriptions: Record<string, React.ReactNode> = {};
+
+  // Create risk descriptions for each risk area using the mapping
+  Object.entries(RISK_AREAS).forEach(([riskAreaKey, riskAreaInfo]) => {
+    const riskArea = riskAreaKey as RiskAreaEnum;
+    const specialDescriptionForSpam =
+      riskArea === RiskAreaEnum.SPAM_VULNERABLE
+        ? [
+            "Means the system can be overwhelmed by malicious or low-quality proposals. This wastes resources, discourages real participation and exposes the DAO to a war of attrition.",
+            "It usually happens when there's no checks to submit proposals, or the implementation allows it to be ignored.",
+          ]
+        : riskAreaInfo.description;
+
+    riskDescriptions[riskArea] = (
       <RiskDescription
-        title={RISK_AREAS["SPAM VULNERABLE"].title}
-        description={[
-          "Means the system can be overwhelmed by malicious or low-quality proposals. This wastes resources, discourages real participation and exposes the DAO to a war of attrition.",
-          "It usually happens when there's no checks to submit proposals, or the implementation allows it to be ignored.",
-        ]}
-        requirements={spamVulnerableRequirements}
-        riskLevel={getRiskLevelByName("SPAM VULNERABLE")}
+        title={riskAreaInfo.title}
+        description={specialDescriptionForSpam}
+        requirements={createRequirementsFromGovImplItems(riskArea)}
+        riskLevel={daoRiskAreas[riskArea]?.riskLevel}
       />
-    ),
-    "EXTRACTABLE VALUE": (
-      <RiskDescription
-        title={RISK_AREAS["EXTRACTABLE VALUE"].title}
-        description={RISK_AREAS["EXTRACTABLE VALUE"].description}
-        requirements={[]}
-        riskLevel={getRiskLevelByName("EXTRACTABLE VALUE")}
-      />
-    ),
-    "SAFEGUARDS": (
-      <RiskDescription
-        title={RISK_AREAS["SAFEGUARDS"].title}
-        description={RISK_AREAS["SAFEGUARDS"].description}
-        requirements={[]}
-        riskLevel={getRiskLevelByName("SAFEGUARDS")}
-      />
-    ),
-    "HACKABLE": (
-      <RiskDescription
-        title={RISK_AREAS["HACKABLE"].title}
-        description={RISK_AREAS["HACKABLE"].description}
-        requirements={[]}
-        riskLevel={getRiskLevelByName("HACKABLE")}
-      />
-    ),
-    "RESPONSE TIME": (
-      <RiskDescription
-        title={RISK_AREAS["RESPONSE TIME"].title}
-        description={RISK_AREAS["RESPONSE TIME"].description}
-        requirements={[]}
-        riskLevel={getRiskLevelByName("RESPONSE TIME")}
-      />
-    ),
-    "GOV INTERFACES VULNERABILITY": (
-      <RiskDescription
-        title={RISK_AREAS["GOV INTERFACES VULNERABILITY"].title}
-        description={RISK_AREAS["GOV INTERFACES VULNERABILITY"].description}
-        requirements={[]}
-        riskLevel={getRiskLevelByName("GOV INTERFACES VULNERABILITY")}
-      />
-    ),
+    );
+  });
+
+  // Determine the highest risk level for the section header
+  const getHighestRiskLevel = (): RiskLevel => {
+    for (const riskAreaInfo of Object.values(daoRiskAreas)) {
+      if (riskAreaInfo.riskLevel === RiskLevel.HIGH) {
+        return RiskLevel.HIGH;
+      }
+    }
+
+    for (const riskAreaInfo of Object.values(daoRiskAreas)) {
+      if (riskAreaInfo.riskLevel === RiskLevel.MEDIUM) {
+        return RiskLevel.MEDIUM;
+      }
+    }
+
+    return RiskLevel.LOW;
   };
 
   return (
@@ -119,13 +125,13 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       icon={<Gauge className="size-6 text-foreground" />}
       description={SECTIONS_CONSTANTS.riskAnalysis.description}
       anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
-      riskLevel={<RiskLevelCard status={RiskLevel.HIGH} />}
+      riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}
     >
       <div className="flex flex-col gap-[13px] md:flex-row">
         <div className="md:w-2/5">
           <RiskAreaCardWrapper
             title="Risk Areas"
-            risks={customizedRiskAreas}
+            riskAreas={customizedRiskAreas}
             activeRiskId={activeRisk}
             onRiskClick={handleRiskClick}
             gridColumns="grid-cols-2 sm:grid-cols-1"

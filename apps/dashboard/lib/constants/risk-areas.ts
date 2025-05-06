@@ -1,60 +1,84 @@
+/**
+ * @file risk-areas.ts
+ * Central location for all risk area data including titles, descriptions and requirements
+ */
+
+import { RiskAreaEnum, GovernanceImplementationEnum } from "@/lib/enums";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 /**
- * Interface for risk description data
+ * Complete interface for risk area with title, description and requirements
  */
-export interface RiskAreaBasic {
+export interface RiskAreaConstants {
   title: string;
   description: string;
+  requirements: GovernanceImplementationEnum[];
 }
 
 /**
- * Interface for risk area data
+ * Complete mapping of risk areas with their titles, descriptions and requirements
  */
-export interface RiskAreaDao {
-  name: string;
-  level: RiskLevel | undefined;
-  content?: React.ReactNode;
-}
-
-/**
- * Standard risk descriptions for tooltips and detailed views
- */
-export const RISK_AREAS: Record<string, RiskAreaBasic> = {
-  "SPAM VULNERABLE": {
-    title: "Spam Vulnerable",
-    description: "Means the system can be overwhelmed by fake or low-quality proposals. This clutters governance, wastes resources, and discourages real participation."
+export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
+  [RiskAreaEnum.SPAM_VULNERABLE]: {
+    title: "SPAM VULNERABLE",
+    description:
+      "Means the system can be overwhelmed by fake or low-quality proposals. This clutters governance, wastes resources, and discourages real participation.",
+    requirements: [
+      GovernanceImplementationEnum.SPAM_RESISTANCE,
+      GovernanceImplementationEnum.FLASH_LOAN_PROTECTION,
+      GovernanceImplementationEnum.PROPOSAL_THRESHOLD,
+      GovernanceImplementationEnum.CANCEL_FUNCTION,
+      GovernanceImplementationEnum.VOTING_PERIOD,
+      GovernanceImplementationEnum.VOTING_SUBSIDY,
+    ],
   },
-  "EXTRACTABLE VALUE": {
-    title: "Extractable Value",
-    description: "It's the profit someone can take from a system by exploiting its design or timing. In DAOs, this might mean using voting power or insider info for personal gain."
+  [RiskAreaEnum.EXTRACTABLE_VALUE]: {
+    title: "EXTRACTABLE VALUE",
+    description:
+      "It's the profit someone can take from a system by exploiting its design or timing. In DAOs, this might mean using voting power or insider info for personal gain.",
+    requirements: [GovernanceImplementationEnum.EXTRACTABLE_VALUE],
   },
-  "SAFEGUARDS": {
-    title: "Safeguards",
-    description: "Protection mechanisms that prevent malicious actions or mistakes from causing harm to the DAO."
+  [RiskAreaEnum.SAFEGUARDS]: {
+    title: "SAFEGUARDS",
+    description:
+      "Protection mechanisms that prevent malicious actions or mistakes from causing harm to the DAO.",
+    requirements: [
+      GovernanceImplementationEnum.VETO_STRATEGY,
+      GovernanceImplementationEnum.SECURITY_COUNCIL,
+      GovernanceImplementationEnum.CANCEL_FUNCTION,
+      GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL,
+      GovernanceImplementationEnum.VOTING_SUBSIDY_CONTRACTS,
+      GovernanceImplementationEnum.VOTING_SUBSIDY_UIS,
+    ],
   },
-  "HACKABLE": {
-    title: "Hackable",
-    description: "Vulnerability to exploits that could compromise the DAO's smart contracts or governance processes."
+  [RiskAreaEnum.HACKABLE]: {
+    title: "HACKABLE",
+    description:
+      "Vulnerability to exploits that could compromise the DAO's smart contracts or governance processes.",
+    requirements: [
+      GovernanceImplementationEnum.AUDITED_CONTRACTS,
+      GovernanceImplementationEnum.FLASH_LOAN_PROTECTION,
+    ],
   },
-  "RESPONSE TIME": {
-    title: "Response Time",
-    description: "How quickly the DAO can react to threats, opportunities, or governance proposals."
+  [RiskAreaEnum.RESPONSE_TIME]: {
+    title: "RESPONSE TIME",
+    description:
+      "How quickly the DAO can react to threats, opportunities, or governance proposals.",
+    requirements: [
+      GovernanceImplementationEnum.TIMELOCK_DELAY,
+      GovernanceImplementationEnum.VOTING_DELAY,
+      GovernanceImplementationEnum.VOTING_PERIOD,
+    ],
   },
-  "GOV INTERFACES VULNERABILITY": {
-    title: "Gov Interfaces Vulnerability",
-    description: "Weaknesses in the interfaces used for governance participation that could be exploited or lead to governance failures."
-  }
+  [RiskAreaEnum.GOV_INTERFACES_VULNERABILITY]: {
+    title: "GOV INTERFACES VULNERABILITY",
+    description:
+      "Weaknesses in the interfaces used for governance participation that could be exploited or lead to governance failures.",
+    requirements: [
+      GovernanceImplementationEnum.DNS_PROTECTION,
+      GovernanceImplementationEnum.VOTE_MUTABILITY,
+      GovernanceImplementationEnum.CANCEL_FUNCTION,
+      GovernanceImplementationEnum.VETO_STRATEGY,
+    ],
+  },
 };
-
-/**
- * Default risk areas for DAO overview
- */
-export const MOCKED_RISK_AREAS_WITH_RISK: RiskAreaDao[] = [
-  { name: "SPAM VULNERABLE", level: RiskLevel.LOW },
-  { name: "EXTRACTABLE VALUE", level: RiskLevel.MEDIUM },
-  { name: "SAFEGUARDS", level: undefined },
-  { name: "HACKABLE", level: RiskLevel.HIGH },
-  { name: "GOV INTERFACES VULNERABILITY", level: RiskLevel.HIGH },
-  { name: "RESPONSE TIME", level: RiskLevel.LOW },
-]; 

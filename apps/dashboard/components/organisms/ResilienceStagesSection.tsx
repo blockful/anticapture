@@ -15,6 +15,7 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import {
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
+  fieldsToArray,
 } from "@/lib/dao-config/utils";
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -30,16 +31,16 @@ export const ResilienceStagesSection = ({
   const daoConfig = daoConfigByDaoId[daoId];
 
   const currentDaoStage = getDaoStageFromFields(
-    daoConfig.governanceImplementation?.fields || [],
+    fieldsToArray(daoConfig.governanceImplementation?.fields),
   );
 
   const highRiskItems = filterFieldsByRiskLevel(
-    daoConfig.governanceImplementation?.fields || [],
+    fieldsToArray(daoConfig.governanceImplementation?.fields),
     RiskLevel.HIGH,
   );
 
   const mediumRiskItems = filterFieldsByRiskLevel(
-    daoConfig.governanceImplementation?.fields || [],
+    fieldsToArray(daoConfig.governanceImplementation?.fields),
     RiskLevel.MEDIUM,
   );
 

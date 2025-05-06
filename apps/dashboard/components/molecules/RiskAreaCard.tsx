@@ -7,6 +7,7 @@ import { cn } from "@/lib/client/utils";
 import { ReactNode, useState } from "react";
 import { RiskTooltipCard } from "@/components/atoms";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
+import { RiskAreaEnum } from "@/lib/enums";
 
 export type RiskArea = {
   name: string;
@@ -25,7 +26,7 @@ type GridColumns = `${string}grid-cols-${number}${string}`;
 
 interface RiskAreaCardWrapperProps {
   title: string;
-  risks: RiskArea[];
+  riskAreas: RiskArea[];
   activeRiskId?: string;
   onRiskClick?: (riskName: string) => void;
   gridColumns?: GridColumns;
@@ -178,14 +179,14 @@ const RiskAreaCardInternal = ({
  * Individual card component for a single risk area
  */
 export const RiskAreaCard = ({
-  riskArea: risk,
+  riskArea,
   isActive = false,
   onClick,
   variant = "dao-overview",
 }: RiskAreaCardProps) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const riskName = risk.name;
-  const riskInfo = RISK_AREAS[riskName] || {
+  const riskName = riskArea.name;
+  const riskInfo = RISK_AREAS[riskName as RiskAreaEnum] || {
     title: riskName,
     description: "Risk description not available.",
   };
@@ -199,7 +200,7 @@ export const RiskAreaCard = ({
         onMouseLeave={() => setShowTooltip(false)}
       >
         <RiskAreaCardInternal
-          risk={risk}
+          risk={riskArea}
           isActive={isActive}
           onClick={onClick}
           variant={variant}
@@ -210,7 +211,7 @@ export const RiskAreaCard = ({
             <RiskTooltipCard
               title={riskInfo.title}
               description={riskInfo.description}
-              riskLevel={risk.level}
+              riskLevel={riskArea.level}
             />
           </div>
         )}
@@ -228,7 +229,7 @@ export const RiskAreaCard = ({
         )}
       >
         <RiskAreaCardInternal
-          risk={risk}
+          risk={riskArea}
           isActive={isActive}
           onClick={onClick}
           variant={variant}
@@ -248,7 +249,7 @@ export const RiskAreaCard = ({
  */
 export const RiskAreaCardWrapper = ({
   title,
-  risks,
+  riskAreas,
   activeRiskId,
   onRiskClick,
   gridColumns = "grid-cols-2",
@@ -267,7 +268,7 @@ export const RiskAreaCardWrapper = ({
 
       {/* Grid layout with configurable columns */}
       <div className={`grid ${gridColumns} gap-1`}>
-        {risks.map((risk: RiskArea, index: number) => (
+        {riskAreas.map((risk: RiskArea, index: number) => (
           <RiskAreaCard
             key={`${risk.name}-${index}`}
             riskArea={risk}

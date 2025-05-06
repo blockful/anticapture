@@ -13,7 +13,7 @@ import {
   TimelockCard,
   VoteCard,
   RiskAreaCard,
-  RiskAreaCardWrapper
+  RiskAreaCardWrapper,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -28,8 +28,11 @@ import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
 import { cn } from "@/lib/client/utils";
-import { MOCKED_RISK_AREAS_WITH_RISK } from "@/lib/constants/risk-areas";
+import { RiskAreaEnum } from "@/lib/enums";
+import { RISK_AREAS } from "@/lib/constants/risk-areas";
+import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import {
+  fieldsToArray,
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
 } from "@/lib/dao-config/utils";
@@ -91,16 +94,20 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   ];
 
-  // Risk areas data using constants
+  // Risk areas data using our utility function
+  const daoRiskAreas = getDaoRiskAreas(daoId);
   const riskAreas = {
     title: "RISK AREAS",
-    risks: MOCKED_RISK_AREAS_WITH_RISK,
+    risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
+      name,
+      level: info.riskLevel,
+    })),
   };
 
   const handleRiskAreaClick = (riskName: string) => {
     // First set the active risk
     setActiveRisk(riskName);
-    
+
     // Then scroll to the risk analysis section
     scrollToSection(SECTIONS_CONSTANTS.riskAnalysis.anchorId);
   };
@@ -155,18 +162,18 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields)
               )}
               highRiskItems={filterFieldsByRiskLevel(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.HIGH,
               )}
               mediumRiskItems={filterFieldsByRiskLevel(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.MEDIUM,
               )}
               lowRiskItems={filterFieldsByRiskLevel(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.LOW,
               )}
             />
@@ -228,18 +235,18 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
               )}
               highRiskItems={filterFieldsByRiskLevel(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.HIGH,
               )}
               mediumRiskItems={filterFieldsByRiskLevel(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.MEDIUM,
               )}
               lowRiskItems={filterFieldsByRiskLevel(
-                daoConfig.governanceImplementation?.fields || [],
+                fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.LOW,
               )}
             />
@@ -277,7 +284,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div className="mt-4 sm:hidden">
         <RiskAreaCardWrapper
           title={riskAreas.title}
-          risks={riskAreas.risks}
+          riskAreas={riskAreas.risks}
           variant="dao-overview"
         />
       </div>
