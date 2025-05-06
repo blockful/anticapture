@@ -30,11 +30,7 @@ export const ButtonHeaderDAOSidebarMobile = ({
       onValueChange={(value) => handleSectionClick(value)}
       className="w-fit min-w-full"
     >
-      <TabsList
-        className={cn(
-          "group flex border-b border-t border-b-white/10 border-t-white/10 pl-4",
-        )}
-      >
+      <TabsList className="group flex border-b border-b-white/10 pl-4">
         {options.map(
           (option) =>
             option.enabled && (
