@@ -13,9 +13,9 @@ interface StagesDaoOverviewProps {
   currentStage?: number;
   itemsToNextStage?: number;
   requirements?: string[];
-  highRiskItems?: GovernanceImplementationField[];
-  mediumRiskItems?: GovernanceImplementationField[];
-  lowRiskItems?: GovernanceImplementationField[];
+  highRiskItems?: (GovernanceImplementationField & { name: string })[];
+  mediumRiskItems?: (GovernanceImplementationField & { name: string })[];
+  lowRiskItems?: (GovernanceImplementationField & { name: string })[];
 }
 
 export const StagesDaoOverview = ({
