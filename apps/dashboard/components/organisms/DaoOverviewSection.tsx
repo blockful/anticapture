@@ -239,7 +239,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       {/* Mobile risk areas without title */}
       <div className="mt-4 sm:hidden">
         <div className="flex w-full flex-col gap-1">
-          <div className="grid grid-cols-1 gap-1">
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-1">
             {riskAreas.risks.map((risk, index) => (
               <RiskAreaCard
                 key={`${risk.name}-${index}`}
