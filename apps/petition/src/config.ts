@@ -8,6 +8,7 @@ export const baseConfig = {
   PORT: z.coerce.number().optional().default(5000),
   ANTICAPTURE_API_URL: z.string(),
   NODE_ENV: z.enum(["test", "production"]).optional().default("test"),
+  RAILWAY_PUBLIC_DOMAIN: z.string().transform((val) => `https://${val}`),
 };
 
 const testConfig = z.object({

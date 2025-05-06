@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { swaggerUI } from "@hono/swagger-ui";
 
+import { env } from "@/env";
+
 const app = new Hono();
 // Use the middleware to serve Swagger UI at /ui
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
@@ -27,6 +29,9 @@ app.get("/docs/json", (c) => {
       url: "https://github.com/blockful-io/anticapture",
     },
     servers: [
+      {
+        url: env.RAILWAY_PUBLIC_DOMAIN,
+      },
       {
         url: "http://localhost:42069",
       },

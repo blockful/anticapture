@@ -10,34 +10,42 @@ import { PetitionService } from "./services";
 import { GraphqlAnticaptureClient } from "./client";
 import { PostgresPetitionRepository } from "./repositories";
 
-(async () => {
+const db = new PostgresPetitionRepository(env.DATABASE_URL);
+const anticaptureClient = new GraphqlAnticaptureClient(env.ANTICAPTURE_API_URL);
+const petitionService = new PetitionService(db, anticaptureClient);
 
-  const db = new PostgresPetitionRepository(env.DATABASE_URL);
-  const anticaptureClient = new GraphqlAnticaptureClient(env.ANTICAPTURE_API_URL);
-  const petitionService = new PetitionService(db, anticaptureClient);
+const app = fastify({ logger: true });
 
-  const app = fastify();
-
-  app.setValidatorCompiler(validatorCompiler);
-  app.setSerializerCompiler(serializerCompiler);
-  app.register(fastifyCors, {
-    origin: '*',
-  });
-  app.register(fastifySwagger, {
-    openapi: {
-      info: {
-        title: 'Petition API',
-        version: '1.0.0',
-      }
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+app.register(fastifyCors, {
+  origin: '*',
+});
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Petition API',
+      version: '1.0.0',
     },
-    transform: jsonSchemaTransform,
-  });
-  app.register(fastifySwaggerUi, {
-    routePrefix: '/docs',
-  });
+    servers: [
+      {
+        url: env.RAILWAY_PUBLIC_DOMAIN,
+      },
+    ],
+  },
+  transform: jsonSchemaTransform,
+});
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+});
 
-  app.register(routes(petitionService, anticaptureClient));
+app.register(routes(petitionService, anticaptureClient));
 
-  app.listen({ port: env.PORT }, () => console.log(`HTTP server running on port ${env.PORT}!`));
+app.listen({ host: '::', port: env.PORT }, (err, address) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log(`HTTP server running on ${address}!`);
+});
 
-})()
