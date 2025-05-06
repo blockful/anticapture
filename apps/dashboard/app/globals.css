@@ -45,10 +45,6 @@
     --chart-5: 27 87% 67%;
   }
 
-  a {
-    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
-  }
-
   .link-tangerine {
     @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
   }
