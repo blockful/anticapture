@@ -114,7 +114,6 @@ export const ResilienceStagesSection = ({
             </div>
           </div>
 
-          <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
           {/* Stage 2 */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
