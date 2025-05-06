@@ -61,7 +61,7 @@ export function routes(
           daoId: z.string(),
         }),
         querystring: z.object({
-          userAddress: z.string().refine((addr) => isAddress(addr), {
+          userAddress: z.string().optional().refine((addr) => addr && isAddress(addr), {
             message: "Invalid user address",
           }).optional(),
         }),
