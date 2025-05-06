@@ -4,6 +4,7 @@ import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { useSectionObserver } from "@/lib/hooks/useSectionObserver";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import { useEffect } from "react";
 
 export const ButtonHeaderDAOSidebarMobile = ({
   options,
@@ -15,26 +16,38 @@ export const ButtonHeaderDAOSidebarMobile = ({
   }[];
   headerOffset?: number;
 }) => {
-  const MOBILE_DEFAULT_OFFSET = 120;
-
   const { activeSection, handleSectionClick } = useSectionObserver({
     initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
-    headerOffset: MOBILE_DEFAULT_OFFSET,
-    useWindowScrollTo: true,
   });
+
+  useEffect(() => {
+    const sectionId = sessionStorage.getItem("scrollToSection");
+    if (sectionId) {
+      const el = document.getElementById(sectionId);
+      handleSectionClick(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        sessionStorage.removeItem("scrollToSection");
+      }
+    }
+  }, [handleSectionClick]);
+
+  const handleTabChange = (value: string) => {
+    const section = document.getElementById(value);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+    handleSectionClick(value);
+  };
 
   return (
     <Tabs
       defaultValue={SECTIONS_CONSTANTS.daoOverview.anchorId}
       value={activeSection || SECTIONS_CONSTANTS.daoOverview.anchorId}
-      onValueChange={(value) => handleSectionClick(value)}
+      onValueChange={handleTabChange}
       className="w-fit min-w-full"
     >
-      <TabsList
-        className={cn(
-          "group flex border-b border-t border-b-white/10 border-t-white/10 pl-4",
-        )}
-      >
+      <TabsList className="group flex border-b border-b-white/10 pl-4">
         {options.map(
           (option) =>
             option.enabled && (
