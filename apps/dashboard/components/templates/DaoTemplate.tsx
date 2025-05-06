@@ -36,10 +36,10 @@ export const DaoTemplate = () => {
 
   return (
     <DaoPageInteractionProvider>
-      <div className="w-full gap-2 pt-4 px-4 sm:py-2 sm:px-3">
+      <div className="w-full gap-2 px-4 pt-4 sm:px-3 sm:py-2">
         <MessageStacker messages={messages} />
       </div>
-      <div className="flex flex-col w-full items-center sm:gap-6 pt-0 sm:px-3 sm:pb-3">
+      <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:px-3 sm:pb-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
         {daoConstants.showSupport && <ShowSupportSection />}
         {daoConstants.attackProfitability && (
@@ -52,21 +52,11 @@ export const DaoTemplate = () => {
         {daoConstants.governanceImplementation && (
           <GovernanceImplementationSection daoId={daoIdEnum} />
         )}
-        <ResilienceStagesSection
-          currentDaoStage={Stage.ZERO}
-          daoId={daoIdEnum}
-        />
-        <ResilienceStagesSection
-          currentDaoStage={Stage.ONE}
-          daoId={daoIdEnum}
-        />
-        <ResilienceStagesSection
-          currentDaoStage={Stage.TWO}
-          daoId={daoIdEnum}
-        />
-
-        {daoConstants.governanceImplementation && (
-          <GovernanceImplementationSection daoId={daoIdEnum} />
+        {daoConstants.resilienceStages && (
+          <ResilienceStagesSection
+            currentDaoStage={Stage.ZERO}
+            daoId={daoIdEnum}
+          />
         )}
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
         {daoConstants.governanceActivity && <GovernanceActivitySection />}

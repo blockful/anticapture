@@ -52,6 +52,7 @@ const config: Config = {
         roboto: ["var(--font-roboto)"],
       },
       size: {
+        "icon-xxs": "16px",
         "icon-xs": "20px",
         "icon-sm": "24px",
         "icon-md": "36px",

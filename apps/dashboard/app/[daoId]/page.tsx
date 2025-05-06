@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/lib/types/daos";
-import {
-  AnticaptureIcon,
-  BaseHeaderLayoutSidebar,
-  ConnectWallet,
-} from "@/components/atoms";
+import { BaseHeaderLayoutSidebar } from "@/components/atoms";
 import {
   HeaderDAOSidebar,
   StickyPageHeader,
   HeaderSidebar,
 } from "@/components/molecules";
 import { DaoTemplate } from "@/components/templates";
-import Link from "next/link";
 import { HeaderMobile } from "@/components/molecules/HeaderMobile";
 
 type Props = {
@@ -78,7 +73,7 @@ export default function DaoPage() {
       <main className="relative flex-1 overflow-auto lg:ml-[330px]">
         <div className="sm:hidden">
           <StickyPageHeader />
-            <HeaderMobile />
+          <HeaderMobile />
         </div>
         <div className="mx-auto flex flex-col items-center">
           <DaoTemplate />
