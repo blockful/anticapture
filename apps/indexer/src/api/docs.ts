@@ -583,7 +583,8 @@ app.get("/docs/json", (c) => {
         get: {
           tags: ["Token Distribution"],
           summary: "Get voting power",
-          description: "Returns the total voting power of the specified accounts for a DAO",
+          description:
+            "Returns the total voting power of the specified accounts for a DAO",
           operationId: "getVotingPower",
           parameters: [
             {
@@ -599,8 +600,8 @@ app.get("/docs/json", (c) => {
             {
               name: "accounts",
               in: "query",
-              description: "Ethereum addresses to check voting power for (can be single or multiple)",
-              required: true,
+              description:
+                "Ethereum addresses to check voting power for (can be single or multiple)",
               explode: true,
               schema: {
                 type: "array",
@@ -648,7 +649,6 @@ app.get("/docs/json", (c) => {
           },
         },
       },
-
     },
     components: {
       schemas: {
@@ -658,33 +658,36 @@ app.get("/docs/json", (c) => {
             id: {
               type: "string",
               example: "UNI",
-              description: "Unique identifier for the DAO"
+              description: "Unique identifier for the DAO",
             },
             proposalThreshold: {
               type: "string",
               example: "1000000000000000000000000",
-              description: "Minimum voting power needed to create a proposal (in wei)"
+              description:
+                "Minimum voting power needed to create a proposal (in wei)",
             },
             votingDelay: {
               type: "string",
               example: "13140",
-              description: "Delay between proposal submission and voting start"
+              description: "Delay between proposal submission and voting start",
             },
             votingPeriod: {
               type: "string",
               example: "40320",
-              description: "Duration of voting period (in blocks)"
+              description: "Duration of voting period (in blocks)",
             },
             quorum: {
               type: "string",
               example: "1000000000000000000000000",
-              description: "Minimum number of votes required for a proposal to pass"
+              description:
+                "Minimum number of votes required for a proposal to pass",
             },
             timelockDelay: {
               type: "string",
               example: "172800",
-              description: "Time delay before execution after a proposal is approved"
-            }
+              description:
+                "Time delay before execution after a proposal is approved",
+            },
           },
         },
         TotalSupplyCompare: {
