@@ -30,7 +30,7 @@ export const RiskTooltipCard = ({
       </div>
       
       {/* Tooltip content */}
-      <div className="w-[376px] bg-darkest border border-lightDark rounded-md shadow-lg p-3 text-left">
+      <div className="bg-darkest border border-lightDark rounded-md shadow-lg p-3 text-left">
         {/* Content */}
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-white font-medium uppercase font-mono tracking-wider">{title}</h4>

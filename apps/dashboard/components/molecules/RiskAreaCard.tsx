@@ -103,7 +103,8 @@ const RiskAreaCardInternal = ({
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
             "shadow-[0_0_20px_0]": isActive || isHovered,
-            "bg-opacity-[12%]": !isActive && risk.level !== undefined && !isHovered,
+            "bg-opacity-[12%]":
+              !isActive && risk.level !== undefined && !isHovered,
           },
         )}
       >
@@ -111,10 +112,14 @@ const RiskAreaCardInternal = ({
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
               "!text-foreground": risk.level === undefined,
-              "!text-success": risk.level === RiskLevel.LOW && !isActive && !isHovered,
-              "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-              "!text-error": risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "text-darkest": isActive && risk.level !== undefined || isHovered,
+              "!text-success":
+                risk.level === RiskLevel.LOW && !isActive && !isHovered,
+              "!text-warning":
+                risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
+              "!text-error":
+                risk.level === RiskLevel.HIGH && !isActive && !isHovered,
+              "text-darkest":
+                (isActive && risk.level !== undefined) || isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
             })}
@@ -158,7 +163,8 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW,
               "bg-warning": risk.level === RiskLevel.MEDIUM,
               "bg-error": risk.level === RiskLevel.HIGH,
-              "bg-opacity-[12%]": !isActive && risk.level !== undefined && !isHovered,
+              "bg-opacity-[12%]":
+                !isActive && risk.level !== undefined && !isHovered,
               "bg-lightDark": risk.level === undefined,
             })}
           />
@@ -200,7 +206,7 @@ export const RiskAreaCard = ({
         />
 
         {showTooltip && (
-          <div className="absolute left-1/2 top-full z-50 mt-1 -translate-x-1/2 transform">
+          <div className="fixed max-sm:left-0 sm:right-[150px] top-[520px] z-50 mt-1 w-screen sm:relative sm:top-0 sm:w-[376px]">
             <RiskTooltipCard
               title={riskInfo.title}
               description={riskInfo.description}
