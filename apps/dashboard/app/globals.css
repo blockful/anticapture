@@ -121,7 +121,7 @@
   }
 
   .link-tangerine {
-    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
+    @apply font-roboto tracking-wider text-tangerine hover:text-tangerine/80 uppercase leading-none text-[13px] font-medium;
   }
 
   .text-table-header {

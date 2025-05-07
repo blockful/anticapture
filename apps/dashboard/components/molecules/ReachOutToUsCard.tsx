@@ -18,19 +18,17 @@ export const ReachOutToUsCard = () => {
     >
       <div className="flex w-full justify-between">
         <div className="flex flex-row items-center">
-          <div className="flex items-center gap-1">
-            <div className="flex size-8 items-center justify-center rounded-full bg-lightDark">
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-full bg-lightDark sm:size-6">
               <SimpleGlobeIcon className="size-5 text-foreground" />
             </div>
-            <div className="flex flex-col items-start justify-start gap-0 pl-3 md:flex-row md:gap-2 md:pl-0">
-              <h3 className="md:text-md font-small pl-0 text-sm text-white md:pl-1">
+            <div className="flex flex-col justify-start lg:flex-row lg:items-center lg:gap-1.5">
+              <h3 className="text-sm font-medium text-white">
                 Don&apos;t see your DAO here?
               </h3>
-              <div className="flex items-center gap-1">
-                <h3 className="md:text-md font-small text-sm text-tangerine">
-                  Reach out to us
-                </h3>
-                <ArrowRightIcon className="size-4 pl-0 text-tangerine" />
+              <div className="flex h-full items-center gap-1">
+                <h3 className="link-tangerine uppercase">Reach out to us</h3>
+                <ArrowRightIcon className="size-4 text-tangerine" />
               </div>
             </div>
           </div>
