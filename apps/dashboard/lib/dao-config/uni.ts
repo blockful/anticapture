@@ -65,7 +65,7 @@ export const UNI: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
         value: "1M UNI",
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD

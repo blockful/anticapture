@@ -66,6 +66,11 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.DNS_PROTECTION
           ].description,
+        requirements: [
+          "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
+          "Currently, the DAO’s domains have no DNS-level protections (High Risk).",
+          "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
+        ],
       },
       [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
         value: "~100M USD",
