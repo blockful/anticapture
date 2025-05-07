@@ -109,7 +109,7 @@
   }
 
   .btn-connect-wallet {
-    @apply flex w-full items-center justify-center gap-3 rounded-md border border-transparent bg-lightDark py-1 px-2 text-white hover:border hover:border-lightDark hover:bg-transparent;
+    @apply flex size-9 items-center justify-center gap-3 rounded-md border border-transparent bg-lightDark py-1 px-2 text-white hover:border hover:border-lightDark hover:bg-transparent;
   }
 
   .card-text-accordion {
@@ -118,5 +118,10 @@
 
   .section-title-gap {
     @apply gap-4 sm:gap-6;
+  }
+
+
+  .link-tangerine {
+    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
   }
 }

@@ -8,7 +8,7 @@ import ArbitrumSupportedDao from "@/public/show-support/ArbitrumSupportedDao.png
 import ArbitrumSupportedDaoMobile from "@/public/show-support/ArbitrumSupportedDaoMobile.png";
 import { useParams } from "next/navigation";
 import { useAccount } from "wagmi";
-import { CheckCircle2, Pencil } from "lucide-react";
+import { ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   PetitionResponse,
@@ -17,9 +17,7 @@ import {
 } from "@/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
-import { ConnectWallet, TelegramIcon, TwitterIcon } from "@/components/atoms";
-import { ANTICAPTURE_TELEGRAM, ANTICAPTURE_TWITTER } from "@/lib/constants";
-import { Address } from "viem";
+import { ConnectWallet } from "@/components/atoms";
 
 export const CardDaoSignature = ({
   data,
@@ -131,11 +129,11 @@ export const CardDaoSignature = ({
         </div>
       )}
       {isSignedToSupportDao && (
-        <div className="flex w-full flex-col gap-6">
+        <div className="flex w-full flex-col gap-6 items-center justify-center">
           <div className="flex flex-col gap-1.5">
-            <div className="flex gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-300" />
-              <h3 className="flex text-[18px] font-medium leading-6 text-[#FAFAFA]">
+            <div className="flex gap-2 items-center">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <h3 className="flex text-[18px] font-medium leading-6 text-white">
                 Arbitrum DAO support confirmed
               </h3>
             </div>
@@ -145,27 +143,13 @@ export const CardDaoSignature = ({
               was only for this request.
             </p>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <p className="flex text-xs font-semibold uppercase text-foreground">
-              Follow anticapture and stay tuned for updates
+          <div className="flex w-full flex-col gap-1.5">
+            <p className="flex text-sm font-semibold text-foreground">
+              Want to continue the conversation on governance risks with other DAO decision-makers?
             </p>
-            <div className="flex gap-2.5">
-              <Link
-                href={ANTICAPTURE_TELEGRAM}
-                target="_blank"
-                className="flex items-center gap-1 text-tangerine"
-              >
-                <TelegramIcon className="text-tangerine" />
-                Telegram
-              </Link>
-              <div className="flex h-[75%] border border-white/10" />
-              <Link
-                href={ANTICAPTURE_TWITTER}
-                target="_blank"
-                className="flex items-center gap-1 text-tangerine"
-              >
-                <TwitterIcon /> Twitter
-              </Link>
+            <div className="flex gap-1 items-center">
+              <a className="link-tangerine text-sm">JOIN THE GOVERNANCE SECURITY CIRCLE</a>
+              <ArrowRight className="link-tangerine size-4" />
             </div>
           </div>
         </div>

@@ -10,6 +10,8 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { fieldsToArray } from "@/lib/dao-config/utils";
+import { sortByRiskLevel } from "@/lib/enums";
 
 export const GovernanceImplementationSection = ({
   daoId,
@@ -19,8 +21,9 @@ export const GovernanceImplementationSection = ({
   const { isDesktop, isTablet } = useScreenSize();
   const [openCardIds, setOpenCardIds] = useState<string[]>([]);
 
-  const governanceImplementationFields =
-    daoConfigByDaoId[daoId].governanceImplementation?.fields;
+  const governanceImplementationFields = fieldsToArray(
+    daoConfigByDaoId[daoId].governanceImplementation?.fields,
+  ) as (GovernanceImplementationField & { name: string })[];
 
   const handleToggle = (
     e: React.MouseEvent<Element, MouseEvent>,
@@ -62,8 +65,9 @@ export const GovernanceImplementationSection = ({
           onClick={() => setOpenCardIds([])}
         />
 
-        {governanceImplementationFields?.map(
-          (field: GovernanceImplementationField, index: number) => {
+        {governanceImplementationFields
+          ?.sort((a, b) => sortByRiskLevel(a, b, "desc"))
+          .map((field, index: number) => {
             const cardId = field.name;
             const isOpen = openCardIds.includes(cardId);
 
@@ -77,8 +81,7 @@ export const GovernanceImplementationSection = ({
                 }}
               />
             );
-          },
-        )}
+          })}
       </div>
     </TheSectionLayout>
   );

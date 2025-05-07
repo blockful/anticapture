@@ -52,7 +52,8 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "section-title-gap flex h-full w-full flex-col border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:bg-dark sm:px-5 sm:py-7",
+        "flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:bg-dark sm:px-5 sm:py-7",
+        isSwitchDateLinear && "mt-4 gap-4",
         className,
       )}
       id={anchorId}
@@ -73,14 +74,14 @@ export const TheSectionLayout = ({
                     {title}
                   </h1>
                 </div>
-                <div className="hidden items-center sm:flex">{switchDate}</div>
+                <div className="flex items-center">{switchDate}</div>
               </div>
             )}
             {!isSwitchDateLinear && (
               <>
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
-                    {icon}
+                    <div>{icon}</div>
                     <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
                       {title}
                     </h1>
@@ -105,7 +106,6 @@ export const TheSectionLayout = ({
           {riskLevel && <div className="flex h-full w-full">{riskLevel}</div>}
         </div>
       </div>
-      {subtitle && <div className="border-b border-b-white/10" />}
 
       {!isSwitchDateLinear && switchDate && (
         <div
@@ -115,7 +115,7 @@ export const TheSectionLayout = ({
           )}
         >
           <div className="flex flex-col">
-            <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
+            <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
               {subtitle}
             </CardTitle>
             <p className="text-sm font-normal text-foreground">

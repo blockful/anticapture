@@ -21,7 +21,7 @@ const MessageItem = ({
   onClose: () => void;
 }) => {
   return (
-    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine sm:rounded-lg">
+    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine">
       {message.content}
       <button
         onClick={onClose}
@@ -43,14 +43,16 @@ export const MessageStacker = ({ messages }: MessageStackerProps) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      {visibleMessages.map((message) => (
-        <MessageItem
-          key={message.id}
-          message={message}
-          onClose={() => handleCloseMessage(message.id)}
-        />
-      ))}
+    <div className="w-full gap-2 px-4 pt-4 sm:px-3 sm:py-2">
+      <div className="flex w-full flex-col gap-2">
+        {visibleMessages.map((message) => (
+          <MessageItem
+            key={message.id}
+            message={message}
+            onClose={() => handleCloseMessage(message.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 };

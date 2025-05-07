@@ -4,7 +4,7 @@ import { PanelSection } from "@/components/organisms";
 import { SupportDaosSection } from "@/components/organisms/SupportDaosSection";
 export const HomeTemplate = () => {
   return (
-    <main className="mx-auto flex flex-col items-center sm:gap-6 sm:p-3">
+    <main className="flex flex-col items-center">
       <PanelSection />
       <SupportDaosSection />
     </main>

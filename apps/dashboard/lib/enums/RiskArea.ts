@@ -1,0 +1,11 @@
+/**
+ * Enum representing all risk areas that can be analyzed for a DAO
+ */
+export enum RiskAreaEnum {
+  SPAM_VULNERABLE = "SPAM VULNERABLE",
+  EXTRACTABLE_VALUE = "EXTRACTABLE VALUE",
+  SAFEGUARDS = "SAFEGUARDS",
+  HACKABLE = "HACKABLE",
+  RESPONSE_TIME = "RESPONSE TIME",
+  GOV_INTERFACES_VULNERABILITY = "GOV INTERFACES VULNERABILITY",
+} 

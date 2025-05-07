@@ -111,6 +111,7 @@ export const TokenDistributionSection = () => {
           />
         )}
       </TheCardChartLayout>
+      <div className="w-full border-t border-lightDark" />
       <TokenDistributionTable />
     </TheSectionLayout>
   );

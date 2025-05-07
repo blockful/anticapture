@@ -87,7 +87,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start px-4">
+        <div className="flex w-full items-start justify-start px-4 text-xs font-semibold sm:font-medium">
           Metrics
         </div>
       ),
@@ -114,14 +114,12 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4"
+          className="w-full justify-end px-4 text-xs font-semibold sm:font-medium"
           onClick={() => column.toggleSorting()}
         >
           Average
           <ArrowUpDown
-            props={{
-              className: "ml-2 h-4 w-4",
-            }}
+            props={{ className: "ml-2 size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -157,16 +155,16 @@ export const GovernanceActivityTable = () => {
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
-                ? "text-[#4ade80]"
+                ? "text-green-400"
                 : Number(variation) < 0
-                  ? "text-red-500"
+                  ? "text-red-400"
                   : ""
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+              <ChevronUp className="size-4 text-green-400" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="h-4 w-4 text-red-500" />
+              <ChevronDown className="size-4 text-red-400" />
             ) : null}
             {variation}%
           </p>
@@ -175,12 +173,12 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4"
+          className="w-full justify-end px-4 text-xs font-semibold sm:font-medium"
           onClick={() => column.toggleSorting()}
         >
           Variation
           <ArrowUpDown
-            props={{ className: "ml-2 h-4 w-4" }}
+            props={{ className: "ml-2 size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -211,7 +209,7 @@ export const GovernanceActivityTable = () => {
         }
 
         return (
-          <div className="flex h-[52px] w-full items-start justify-start">
+          <div className="flex w-full justify-center py-2.5">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
               strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
@@ -220,7 +218,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-10">
+        <div className="flex w-full items-start justify-start px-10 text-xs font-semibold sm:font-medium">
           Last {days.slice(0, -1)} days
         </div>
       ),
@@ -291,7 +289,6 @@ export const GovernanceActivityTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
-      onRowClick={() => {}}
     />
   );
 };

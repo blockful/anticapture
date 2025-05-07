@@ -51,12 +51,19 @@ const config: Config = {
       fontFamily: {
         roboto: ["var(--font-roboto)"],
       },
+      letterSpacing: {
+        wider: "0.72px",
+      },
       size: {
+        "icon-xxs": "16px",
         "icon-xs": "20px",
         "icon-sm": "24px",
         "icon-md": "36px",
         "icon-lg": "48px",
         "icon-xl": "76px",
+      },
+      fontSize: {
+        "alternative-sm": "13px",
       },
     },
   },
