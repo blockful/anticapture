@@ -42,7 +42,7 @@ export const DaoTemplate = () => {
       <MessageStacker messages={messages} />
       <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:p-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
-        {daoConstants.showSupport && <ShowSupportSection />}
+        {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
         {daoConstants.attackProfitability && (
           <AttackProfitabilitySection
             daoId={daoIdEnum}
