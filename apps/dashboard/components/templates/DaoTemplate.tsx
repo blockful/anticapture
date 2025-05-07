@@ -1,6 +1,12 @@
 "use client";
 
 import {
+  Stage,
+  TelegramBotMessage,
+  ShowYourSupportStickyBar,
+} from "@/components/atoms";
+import { Message, MessageStacker } from "@/components/molecules";
+import {
   AttackProfitabilitySection,
   DaoOverviewSection,
   GovernanceActivitySection,
@@ -13,9 +19,6 @@ import {
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
-import { ShowYourSupportStickyBar } from "@/components/atoms/ShowYourSupportStickyBar";
-import { Message, MessageStacker } from "@/components/molecules";
-import { Stage, TelegramBotMessage } from "@/components/atoms";
 import { DaoPageInteractionProvider } from "@/contexts/DaoPageInteractionContext";
 
 export const DaoTemplate = () => {
@@ -36,9 +39,7 @@ export const DaoTemplate = () => {
 
   return (
     <DaoPageInteractionProvider>
-      <div className="w-full gap-2 px-4 pt-4 sm:px-3 sm:py-2">
-        <MessageStacker messages={messages} />
-      </div>
+      <MessageStacker messages={messages} />
       <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:px-3 sm:pb-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
         {daoConstants.showSupport && <ShowSupportSection />}

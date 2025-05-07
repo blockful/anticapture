@@ -43,14 +43,16 @@ export const MessageStacker = ({ messages }: MessageStackerProps) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      {visibleMessages.map((message) => (
-        <MessageItem
-          key={message.id}
-          message={message}
-          onClose={() => handleCloseMessage(message.id)}
-        />
-      ))}
+    <div className="w-full gap-2 px-4 pt-4 sm:px-3 sm:py-2">
+      <div className="flex w-full flex-col gap-2">
+        {visibleMessages.map((message) => (
+          <MessageItem
+            key={message.id}
+            message={message}
+            onClose={() => handleCloseMessage(message.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 };
