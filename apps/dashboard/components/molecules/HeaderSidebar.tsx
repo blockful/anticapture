@@ -12,8 +12,6 @@ import {
   TelegramIcon,
 } from "@/components/atoms";
 
-export const HEADER_SIDEBAR_WIDTH = 68;
-
 export const HeaderSidebar = () => {
   const router = useRouter();
 
@@ -42,7 +40,7 @@ export const HeaderSidebar = () => {
 
   return (
     <header
-      className={`fixed left-0 top-0 z-50 hidden h-screen w-[${HEADER_SIDEBAR_WIDTH}px] border-r border-lightDark bg-darkest sm:block`}
+      className={`fixed left-0 top-0 z-50 hidden h-screen w-[68px] border-r border-lightDark bg-darkest sm:block`}
     >
       <div className="flex h-full w-full flex-col items-start">
         <Link
