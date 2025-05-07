@@ -75,8 +75,8 @@ export default function DaoPage() {
           <StickyPageHeader />
           <HeaderMobile />
         </div>
-        <div className="flex flex-col items-center xl4k:justify-center">
-          <div className="xl4k:max-w-7xl">
+        <div className="flex w-full flex-col items-center xl4k:min-h-screen">
+          <div className="w-full xl4k:max-w-7xl">
             <DaoTemplate />
           </div>
         </div>

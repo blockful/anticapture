@@ -10,8 +10,8 @@ export default function Home() {
         <div className="sm:hidden">
           <HeaderMobile />
         </div>
-        <div className="flex w-full flex-col items-center xl4k:justify-center">
-          <div className="xl4k:max-w-7xl">
+        <div className="flex w-full flex-col items-center xl4k:min-h-screen">
+          <div className="w-full xl4k:max-w-7xl">
             <HomeTemplate />
           </div>
         </div>
