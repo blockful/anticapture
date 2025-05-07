@@ -95,7 +95,7 @@ const Title = ({
   return (
     <h3
       className={cn([
-        "mb-2 font-roboto text-xs font-medium uppercase leading-4 tracking-[0.72px]",
+        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]",
         STAGE_STYLES[daoStage],
       ])}
     >

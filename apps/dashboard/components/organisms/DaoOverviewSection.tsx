@@ -23,7 +23,7 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
@@ -120,7 +120,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         id="dao-info-header"
         className="hidden w-full flex-col sm:flex xl:flex-row"
       >
-        <div className="flex w-full flex-col items-start gap-4 p-4 xl:w-1/2">
+        <div className="flex w-full flex-col items-start gap-5 p-4 xl:w-1/2">
           <div className="flex gap-3.5">
             <div className="flex">
               <DaoAvatarIcon daoId={daoId} className="size-icon-xl" isRounded />
@@ -152,7 +152,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
           </div>
           <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+            <div className="mb-2 flex h-full items-center gap-2">
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
@@ -179,20 +179,14 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
         <div className="flex w-full p-4 xl:w-1/2">
           <div className="flex w-full flex-col gap-1">
-            <h3 className="mb-3 font-mono text-xs font-medium tracking-wider text-white sm:text-sm">
-              {riskAreas.title}
-            </h3>
-
-            <div className={cn("grid grid-cols-2 gap-1 sm:gap-2")}>
-              {riskAreas.risks.map((risk, index) => (
-                <RiskAreaCard
-                  key={`${risk.name}-${index}`}
-                  riskArea={risk}
-                  variant="dao-overview"
-                  onClick={() => handleRiskAreaClick(risk.name)}
-                />
-              ))}
-            </div>
+            <RiskAreaCardWrapper
+              title={riskAreas.title}
+              riskAreas={riskAreas.risks}
+              onRiskClick={(riskName) => {
+                handleRiskAreaClick(riskName);
+              }}
+              variant="dao-overview"
+            />
           </div>
         </div>
 
@@ -259,6 +253,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <RiskAreaCardWrapper
               title={riskAreas.title}
               riskAreas={riskAreas.risks}
+              onRiskClick={(riskName) => {
+                handleRiskAreaClick(riskName);
+              }}
               variant="dao-overview"
             />
           </div>

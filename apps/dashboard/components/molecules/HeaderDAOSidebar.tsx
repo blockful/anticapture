@@ -11,7 +11,7 @@ import {
   CrossHairIcon,
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { BarChart, Gauge, Lightbulb } from "lucide-react";
+import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/lib/dao-config";
 
 export const HeaderDAOSidebar = () => {
@@ -35,7 +35,7 @@ export const HeaderDAOSidebar = () => {
           {daoConfig.showSupport && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
-              icon={ActivityIcon}
+              icon={HeartIcon}
               label={SECTIONS_CONSTANTS.showSupport.title}
             />
           )}

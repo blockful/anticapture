@@ -118,7 +118,6 @@ const CustomAccordionItem = ({
   return (
     <AccordionItem
       value={`stage-${stage}`}
-      key={key}
       className="flex h-full flex-col gap-3 overflow-hidden transition-all duration-300 ease-in-out"
     >
       <>

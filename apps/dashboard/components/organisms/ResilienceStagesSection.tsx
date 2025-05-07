@@ -34,9 +34,15 @@ export const ResilienceStagesSection = ({
     fieldsToArray(daoConfig.governanceImplementation?.fields),
   );
 
+  const stageToRiskMapping = {
+    [Stage.ZERO]: RiskLevel.HIGH,
+    [Stage.ONE]: RiskLevel.MEDIUM,
+    [Stage.TWO]: RiskLevel.LOW,
+  };
+
   const highRiskItems = filterFieldsByRiskLevel(
     fieldsToArray(daoConfig.governanceImplementation?.fields),
-    RiskLevel.HIGH,
+    stageToRiskMapping[currentDaoStage],
   );
 
   const mediumRiskItems = filterFieldsByRiskLevel(
@@ -72,7 +78,7 @@ export const ResilienceStagesSection = ({
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.resilienceStages.title}
-      subHeader={<RiskLevelCard status={RiskLevel.LOW} />}
+      subHeader={<RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />}
       icon={<BarChart className="text-foreground" />}
       description={SECTIONS_CONSTANTS.resilienceStages.description}
       anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}

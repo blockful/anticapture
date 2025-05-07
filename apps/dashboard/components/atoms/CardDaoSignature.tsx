@@ -139,10 +139,8 @@ export const CardDaoSignature = () => {
               Want to continue the conversation on governance risks with other
               DAO decision-makers?
             </p>
-            <div className="flex items-center gap-1">
-              <a className="link-tangerine text-sm">
-                JOIN THE GOVERNANCE SECURITY CIRCLE
-              </a>
+            <div className="flex gap-1 items-center">
+              <a className="link-tangerine text-sm" href="https://t.me/+uZlI0EZS2WM5YzMx" target="_blank">JOIN THE GOVERNANCE SECURITY CIRCLE</a>
               <ArrowRight className="link-tangerine size-4" />
             </div>
           </div>

@@ -46,13 +46,13 @@ const RiskLabel = ({
 }) => (
   <div className="flex h-full flex-row gap-1 rounded-l-full">
     <p
-      className={`items-center gap-1 text-${color} hidden font-roboto text-xs font-medium md:flex`}
+      className={`items-center gap-1 text-${color} hidden font-mono text-xs font-medium md:flex`}
     >
       {status ?? "------"}
       {icon}
     </p>
     <p
-      className={`items-center gap-1 text-${color} flex font-roboto text-xs font-medium md:hidden`}
+      className={`items-center gap-1 text-${color} flex font-mono text-xs font-medium md:hidden`}
     >
       {icon}
     </p>

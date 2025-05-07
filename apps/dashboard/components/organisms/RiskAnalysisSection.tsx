@@ -32,6 +32,7 @@ interface RiskAreaDisplayItem {
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { activeRisk, setActiveRisk } = useDaoPageInteraction();
+  
   const daoRiskAreas = getDaoRiskAreas(daoId);
 
   const handleRiskClick = (riskName: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
@@ -54,7 +54,7 @@ const RiskAreaCardInternal = ({
   const isBox2Filled =
     risk.level === RiskLevel.MEDIUM || risk.level === RiskLevel.HIGH;
   const isBox3Filled = risk.level === RiskLevel.HIGH;
-
+  const [isHovered, setIsHovered] = useState(false);
   // Adjust styling based on variant
   const isRiskAnalysis = variant === "risk-analysis";
 
@@ -62,24 +62,24 @@ const RiskAreaCardInternal = ({
     [RiskLevel.LOW]: (
       <CheckCircle2
         className={cn(
-          "size-4 sm:size-5",
-          isActive ? "text-darkest" : "text-success",
+          "size-4",
+          isActive || isHovered ? "text-darkest" : "text-success",
         )}
       />
     ),
     [RiskLevel.MEDIUM]: (
-      <Info
+      <AlertCircle
         className={cn(
-          "size-4 sm:size-5",
-          isActive ? "text-darkest" : "text-warning",
+          "size-4",
+          isActive || isHovered ? "text-darkest" : "text-warning",
         )}
       />
     ),
     [RiskLevel.HIGH]: (
       <AlertTriangle
         className={cn(
-          "size-4 sm:size-5",
-          isActive ? "text-darkest" : "text-error",
+          "size-4",
+          isActive || isHovered ? "text-darkest" : "text-error",
         )}
       />
     ),
@@ -87,25 +87,24 @@ const RiskAreaCardInternal = ({
 
   return (
     <div
-      className={cn("flex w-full flex-1 cursor-pointer items-center gap-1")}
+      className={cn(
+        "flex h-full w-full flex-1 cursor-pointer items-center gap-1",
+      )}
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={cn(
-          "flex h-full flex-1 items-center justify-between",
-          isRiskAnalysis
-            ? "h-[48px] px-1 py-2 sm:h-[62px] sm:px-2"
-            : "h-[42px] px-1 py-2 sm:px-2",
+          "flex h-full flex-1 items-center justify-between px-1 py-2 sm:px-2",
           {
             "bg-lightDark": risk.level === undefined,
-            "bg-success shadow-success/30":
-              risk.level === RiskLevel.LOW,
-            "bg-warning shadow-warning/30":
-              risk.level === RiskLevel.MEDIUM,
-            "bg-error shadow-error/30":
-              risk.level === RiskLevel.HIGH,
-            "shadow-[0_0_20px_0]": isActive,
-            "bg-opacity-[12%]": !isActive && risk.level !== undefined,
+            "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
+            "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
+            "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
+            "shadow-[0_0_20px_0]": isActive || isHovered,
+            "bg-opacity-[12%]":
+              !isActive && risk.level !== undefined && !isHovered,
           },
         )}
       >
@@ -113,10 +112,14 @@ const RiskAreaCardInternal = ({
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
               "!text-foreground": risk.level === undefined,
-              "!text-success": risk.level === RiskLevel.LOW && !isActive,
-              "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive,
-              "!text-error": risk.level === RiskLevel.HIGH && !isActive,
-              "text-darkest": isActive && risk.level !== undefined,
+              "!text-success":
+                risk.level === RiskLevel.LOW && !isActive && !isHovered,
+              "!text-warning":
+                risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
+              "!text-error":
+                risk.level === RiskLevel.HIGH && !isActive && !isHovered,
+              "text-darkest":
+                (isActive && risk.level !== undefined) || isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
             })}
@@ -135,19 +138,14 @@ const RiskAreaCardInternal = ({
           )}
         </div>
       </div>
-      <div
-        className={cn(
-          "flex h-full items-center",
-          isRiskAnalysis ? "h-[48px] sm:h-[62px]" : "h-[42px]",
-        )}
-      >
+      <div className={cn("flex h-full items-center")}>
         <div className="flex h-full flex-col gap-1">
           <div
             className={cn("h-full w-1", {
               "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
               "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
               "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
-              "bg-opacity-[12%]": !isActive && isBox3Filled,
+              "bg-opacity-[12%]": !isActive && isBox3Filled && !isHovered,
               "bg-lightDark": risk.level === undefined || !isBox3Filled,
             })}
           />
@@ -156,7 +154,7 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
               "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
               "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
-              "bg-opacity-[12%]": !isActive && isBox2Filled,
+              "bg-opacity-[12%]": !isActive && isBox2Filled && !isHovered,
               "bg-lightDark": risk.level === undefined || !isBox2Filled,
             })}
           />
@@ -165,7 +163,8 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW,
               "bg-warning": risk.level === RiskLevel.MEDIUM,
               "bg-error": risk.level === RiskLevel.HIGH,
-              "bg-opacity-[12%]": !isActive && risk.level !== undefined,
+              "bg-opacity-[12%]":
+                !isActive && risk.level !== undefined && !isHovered,
               "bg-lightDark": risk.level === undefined,
             })}
           />
@@ -195,7 +194,7 @@ export const RiskAreaCard = ({
   if (variant === "dao-overview") {
     return (
       <div
-        className="relative"
+        className="relative h-[42px]"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
@@ -207,7 +206,7 @@ export const RiskAreaCard = ({
         />
 
         {showTooltip && (
-          <div className="absolute left-1/2 top-full z-50 mt-1 -translate-x-1/2 transform">
+          <div className="fixed max-sm:left-0 sm:right-[150px] top-[520px] z-50 mt-1 w-screen sm:relative sm:top-0 sm:w-[376px]">
             <RiskTooltipCard
               title={riskInfo.title}
               description={riskInfo.description}
@@ -221,7 +220,7 @@ export const RiskAreaCard = ({
 
   // For risk-analysis variant, wrap the internal component with additional styling
   return (
-    <div className="flex w-full">
+    <div className="flex h-[62px] w-full">
       <div
         className={cn(
           "w-full p-1.5",
@@ -235,7 +234,7 @@ export const RiskAreaCard = ({
           variant={variant}
         />
       </div>
-      <div className="hidden sm:flex h-full w-[13px] items-center justify-center">
+      <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
         {isActive && (
           <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
         )}
