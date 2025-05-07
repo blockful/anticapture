@@ -25,9 +25,9 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       "Means the system can be overwhelmed by fake or low-quality proposals. This clutters governance, wastes resources, and discourages real participation.",
     requirements: [
       GovernanceImplementationEnum.SPAM_RESISTANCE,
-      GovernanceImplementationEnum.FLASHLOAN_PROTECTION,
+      GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION,
+      GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION,
       GovernanceImplementationEnum.PROPOSAL_THRESHOLD,
-      GovernanceImplementationEnum.CANCEL_FUNCTION,
       GovernanceImplementationEnum.VOTING_PERIOD,
       GovernanceImplementationEnum.VOTING_SUBSIDY,
     ],
@@ -45,10 +45,8 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
     requirements: [
       GovernanceImplementationEnum.VETO_STRATEGY,
       GovernanceImplementationEnum.SECURITY_COUNCIL,
-      GovernanceImplementationEnum.CANCEL_FUNCTION,
       GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL,
-      GovernanceImplementationEnum.VOTING_SUBSIDY_CONTRACTS,
-      GovernanceImplementationEnum.VOTING_SUBSIDY_UIS,
+      GovernanceImplementationEnum.VOTING_SUBSIDY,
     ],
   },
   [RiskAreaEnum.HACKABLE]: {
@@ -57,7 +55,8 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       "Vulnerability to exploits that could compromise the DAO's smart contracts or governance processes.",
     requirements: [
       GovernanceImplementationEnum.AUDITED_CONTRACTS,
-      GovernanceImplementationEnum.FLASHLOAN_PROTECTION,
+      GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION,
+      GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION,
     ],
   },
   [RiskAreaEnum.RESPONSE_TIME]: {
@@ -77,7 +76,6 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
     requirements: [
       GovernanceImplementationEnum.DNS_PROTECTION,
       GovernanceImplementationEnum.VOTE_MUTABILITY,
-      GovernanceImplementationEnum.CANCEL_FUNCTION,
       GovernanceImplementationEnum.VETO_STRATEGY,
     ],
   },

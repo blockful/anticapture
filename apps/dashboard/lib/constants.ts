@@ -51,7 +51,7 @@ export const SECTIONS_CONSTANTS = {
   riskAnalysis: {
     title: "Risk Analysis",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus commodo condimentum gravida. Aenean rutrum iaculis mollis. Nullam sit amet quam nisl. Mauris sagittis tortor et turpis interdum commodo.",
+      "Assess critical vulnerabilities in your DAO’s governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
     anchorId: "riskAnalysisSection",
   },
   resilienceStages: {

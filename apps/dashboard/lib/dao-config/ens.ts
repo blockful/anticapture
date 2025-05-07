@@ -6,7 +6,7 @@ import {
   GovernanceImplementationEnum,
 } from "@/lib/enums";
 import { calculateMonthsBefore } from "@/lib/client/utils";
-
+import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/lib/constants/governance-implementations";
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
   supportStage: SupportStageEnum.FULL,
@@ -49,126 +49,177 @@ export const ENS: DaoConfiguration = {
   },
   riskAnalysis: true,
   governanceImplementation: {
+    // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
-      [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        value: "No",
-        riskLevel: RiskLevel.MEDIUM,
+      [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
         description:
-          "The governance contract accepts changes to votes, even after they have been cast on-chain.",
-        requirements: [
-          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
-          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through a single castVoteWithReasonAndParams call or equivalent.",
-        ],
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.AUDITED_CONTRACTS
+          ].description,
       },
       [GovernanceImplementationEnum.DNS_PROTECTION]: {
         value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
-          "DNS (Domain Name Service) is the name given to domains/websites on the Internet. They may be vulnerable to attacks, and it is up to the DAO to create mechanisms to protect against them.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.DNS_PROTECTION
+          ].description,
       },
-      [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "12 seconds",
+      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+        value: "~100M USD",
         riskLevel: RiskLevel.HIGH,
         description:
-          "Waiting period between proposal submission and the snapshot to count for voting power and start the votes.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.EXTRACTABLE_VALUE
+          ].description,
         requirements: [
-          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current one-block delay lets attackers rush proposals before token-holders or delegates can react.",
-          "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
+          "Once a proposal snapshot block has passed, if any single address or group has over 50% of the delegated supply, they can approve the proposal without the need of of any other support.",
+          "Currently, the active supply in ENS DAO - meaning the voting power of delegates who have voted in recent proposals - is a little below 20% of the delegated supply.",
+          "Even without 50% of the delegated supply, an address with over 50% of the active supply could present a big risk to the DAO if not for the Security Council, active until July 2026.",
+          "The DAO should dedicate effort to the increase of governance participation, aiming at an active supply worth at least double the amount of liquid assets under governance management.",
+        ],
+      },
+      [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
+          ].description,
+      },
+      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
+        value: "100k ENS",
+        riskLevel: RiskLevel.MEDIUM,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSAL_THRESHOLD
+          ].description,
+        requirements: [
+          "A low proposal threshold lets attackers or small coalitions submit governance actions too easily, forcing the DAO to vote on spam or malicious items.",
+          "The DAO should set the proposal threshold at ≥ 1 % of circulating market supply (CEX + DEX + lending pools) so that only wallets with meaningful economic stake can create proposals.",
+        ],
+      },
+      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
+        value: "No",
+        riskLevel: RiskLevel.HIGH,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
+          ].description,
+        requirements: [
+          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
         ],
       },
       [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
         value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
-          "Once submitted to governance, a proposal may be canceled by anyone if the wallet that submitted it no longer has the number of governance tokens required to reach the proposal threshold.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ].description,
         requirements: [
           "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
-          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer’s voting power drops below the proposal-creation threshold.",
-        ],
-      },
-      [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
-        riskLevel: RiskLevel.HIGH,
-        description:
-          "An attacker can submit several proposals at once to trick the organization members into approving a malicious proposal or to try a brute force battle with the delegates, similar to a DDOS attack on the governance level.",
-        requirements: [
-          "An attacker can swamp the system with simultaneous proposals, overwhelming voters to approve an attack through a war of attrition",
-          "The DAO should impose—and automatically enforce—a hard cap on the number of active proposals any single address can have at once.",
-        ],
-      },
-      [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "Yes",
-        riskLevel: RiskLevel.LOW,
-        description:
-          'The DAO can sponsor the gas costs of voting for its members, allowing them to essentially "vote for free". If done without restrictions can be exploited to spend DAO funds.',
-      },
-      [GovernanceImplementationEnum.FLASHLOAN_PROTECTION]: {
-        value: "Yes",
-        riskLevel: RiskLevel.LOW,
-        description:
-          "This security feature helps prevent users borrowing a flashloan to increase. For one block only, the number of votes/tokens in a wallet. Only the governance tokens held in the block preceding the submission/voting of the proposal count as voting power.",
-      },
-      [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "2 days",
-        riskLevel: RiskLevel.LOW,
-        description:
-          "Waiting period between the approval of a proposal, prior to executing the automatic execution of a malicious proposal that negatively affects the DAO, allowing time for a Cancel or Veto function to act.",
-      },
-      [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "Yes",
-        riskLevel: RiskLevel.LOW,
-        description:
-          "There is a mechanism approved by the DAO to cancel a proposal approved by governance after it has been voted.",
-      },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "100k ENS",
-        riskLevel: RiskLevel.MEDIUM,
-        description:
-          "Requires a minimum number of votes to submit a proposal to governance.",
-        requirements: [
-          "A low proposal threshold lets attackers or small coalitions submit governance actions too easily, forcing the DAO to vote on spam or malicious items.",
-          "The DAO should set the proposal threshold at ≥ 1 % of circulating market supply (CEX + DEX + lending pools) so that only wallets with meaningful economic stake can create proposals.",
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
         ],
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
-          "Group of people responsible for taking action to increase the DAO's security against harmful proposals, through a multisig administered by them. Ideally following L2Beat security council standard.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.SECURITY_COUNCIL
+          ].description,
       },
-      [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "7 days",
-        riskLevel: RiskLevel.LOW,
+      [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
+        value: "No",
+        riskLevel: RiskLevel.HIGH,
         description:
-          "Period in which wallets with delegated governance tokens have the opportunity to vote on proposals submitted to governance.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.SPAM_RESISTANCE
+          ].description,
+        requirements: [
+          "An attacker can swamp the system with simultaneous proposals, overwhelming voters to approve an attack through a war of attrition",
+          "The DAO should impose—and automatically enforce—a hard cap on the number of active proposals any single address can have at once.",
+        ],
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
-          "Timelock administration can be transferred or shared with addresses other than the DAO itself. If this happens, the main piece of governance is put at risk.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.TIMELOCK_ADMIN
+          ].description,
         requirements: [
           "The timelock admin can control execution, canceling, upgrades or critical parameter changes; if this power sits outside audited, DAO-approved contracts, attackers or insiders can sidestep on-chain voting.",
           "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
         ],
       },
-      [GovernanceImplementationEnum.CANCEL_FUNCTION]: {
-        value: "No",
-        riskLevel: RiskLevel.MEDIUM,
+      [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
+        value: "2 days",
+        riskLevel: RiskLevel.LOW,
         description:
-          "An user can cancel a proposal they submitted themselves to the DAO at any point. Allows for proposal with unintentional mistakes to be taken down by a non-malicious actor.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.TIMELOCK_DELAY
+          ].description,
       },
-      [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
+      [GovernanceImplementationEnum.VETO_STRATEGY]: {
         value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
-          "The governance contract codes have been audited and approved by a security provider.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VETO_STRATEGY
+          ].description,
       },
-      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
-        value: "~100M USD",
+      [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
+        value: "No",
+        riskLevel: RiskLevel.MEDIUM,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTE_MUTABILITY
+          ].description,
+        requirements: [
+          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
+          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through a single castVoteWithReasonAndParams call or equivalent.",
+        ],
+      },
+      [GovernanceImplementationEnum.VOTING_DELAY]: {
+        value: "12 seconds",
         riskLevel: RiskLevel.HIGH,
         description:
-          "The amount of Non-governance tokens the DAO is currently holding.",
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_DELAY
+          ].description,
+        requirements: [
+          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current one-block delay lets attackers rush proposals before token-holders or delegates can react.",
+          "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
+        ],
+      },
+      [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
+        value: "Yes(default)",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
+          ].description,
+      },
+      [GovernanceImplementationEnum.VOTING_PERIOD]: {
+        value: "7 days",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_PERIOD
+          ].description,
+      },
+      [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_SUBSIDY
+          ].description,
       },
     },
   },
