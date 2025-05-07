@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
@@ -68,7 +68,7 @@ const RiskAreaCardInternal = ({
       />
     ),
     [RiskLevel.MEDIUM]: (
-      <Info
+      <AlertCircle
         className={cn(
           "size-4 sm:size-5",
           isActive ? "text-darkest" : "text-warning",
@@ -87,23 +87,19 @@ const RiskAreaCardInternal = ({
 
   return (
     <div
-      className={cn("flex w-full flex-1 cursor-pointer items-center gap-1")}
+      className={cn(
+        "flex h-full w-full flex-1 cursor-pointer items-center gap-1",
+      )}
       onClick={onClick}
     >
       <div
         className={cn(
-          "flex h-full flex-1 items-center justify-between",
-          isRiskAnalysis
-            ? "h-[48px] px-1 py-2 sm:h-[62px] sm:px-2"
-            : "h-[42px] px-1 py-2 sm:px-2",
+          "flex h-full flex-1 items-center justify-between px-1 py-2 sm:px-2",
           {
             "bg-lightDark": risk.level === undefined,
-            "bg-success shadow-success/30":
-              risk.level === RiskLevel.LOW,
-            "bg-warning shadow-warning/30":
-              risk.level === RiskLevel.MEDIUM,
-            "bg-error shadow-error/30":
-              risk.level === RiskLevel.HIGH,
+            "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
+            "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
+            "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
             "shadow-[0_0_20px_0]": isActive,
             "bg-opacity-[12%]": !isActive && risk.level !== undefined,
           },
@@ -135,12 +131,7 @@ const RiskAreaCardInternal = ({
           )}
         </div>
       </div>
-      <div
-        className={cn(
-          "flex h-full items-center",
-          isRiskAnalysis ? "h-[48px] sm:h-[62px]" : "h-[42px]",
-        )}
-      >
+      <div className={cn("flex h-full items-center")}>
         <div className="flex h-full flex-col gap-1">
           <div
             className={cn("h-full w-1", {
@@ -195,7 +186,7 @@ export const RiskAreaCard = ({
   if (variant === "dao-overview") {
     return (
       <div
-        className="relative"
+        className="relative h-[42px]"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
@@ -221,7 +212,7 @@ export const RiskAreaCard = ({
 
   // For risk-analysis variant, wrap the internal component with additional styling
   return (
-    <div className="flex w-full">
+    <div className="flex h-[62px] w-full">
       <div
         className={cn(
           "w-full p-1.5",
@@ -235,7 +226,7 @@ export const RiskAreaCard = ({
           variant={variant}
         />
       </div>
-      <div className="hidden sm:flex h-full w-[13px] items-center justify-center">
+      <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
         {isActive && (
           <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
         )}

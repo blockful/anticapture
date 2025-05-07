@@ -57,7 +57,7 @@ export const SECTIONS_CONSTANTS = {
   resilienceStages: {
     title: "Resilience Stages",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus commodo condimentum gravida. Aenean rutrum iaculis mollis. Nullam sit amet quam nisl. Mauris sagittis tortor et turpis interdum commodo. ",
+      "Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression. ",
     anchorId: "resilienceStagesSection",
   },
 };
