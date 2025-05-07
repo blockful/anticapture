@@ -63,7 +63,7 @@ const RiskAreaCardInternal = ({
       <CheckCircle2
         className={cn(
           "size-4",
-          isActive ? "text-darkest" : "text-success",
+          isActive || isHovered ? "text-darkest" : "text-success",
         )}
       />
     ),
@@ -71,7 +71,7 @@ const RiskAreaCardInternal = ({
       <AlertCircle
         className={cn(
           "size-4",
-          isActive ? "text-darkest" : "text-warning",
+          isActive || isHovered ? "text-darkest" : "text-warning",
         )}
       />
     ),
@@ -79,7 +79,7 @@ const RiskAreaCardInternal = ({
       <AlertTriangle
         className={cn(
           "size-4",
-          isActive ? "text-darkest" : "text-error",
+          isActive || isHovered ? "text-darkest" : "text-error",
         )}
       />
     ),
