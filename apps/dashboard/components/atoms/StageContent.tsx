@@ -32,21 +32,21 @@ export const StageContent = ({
     <div className="flex w-full flex-col gap-2">
       <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="font-roboto text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white">
+          <h3 className="font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white">
             {title}
           </h3>
           <p className="text-sm font-normal text-foreground">{description}</p>
         </div>
         <div className="flex flex-col gap-4">
           {type === "requirements" && (
-            <h4 className="font-roboto text-xs font-medium uppercase tracking-wide text-white">
+            <h4 className="font-mono text-xs font-medium uppercase tracking-wide text-white">
               Requirements
             </h4>
           )}
           {type === "issues" && (
             <h4
               className={cn(
-                "font-roboto text-xs font-medium uppercase tracking-wide text-white",
+                "font-mono text-xs font-medium uppercase tracking-wide text-white",
                 stage === Stage.ONE && "text-error",
                 stage === Stage.TWO && "text-warning",
               )}

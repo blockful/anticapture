@@ -21,7 +21,7 @@ export const TheCardChartLayout = ({
       <CardContent className="flex h-full w-full flex-col gap-6 p-0">
         {title && (
           <div className="flex h-full w-full flex-col">
-            <CardTitle className="flex items-center font-roboto text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
+            <CardTitle className="flex items-center font-mono text-[13px] font-medium uppercase leading-[18px] text-[#fafafa] sm:gap-2.5">
               {title}
             </CardTitle>
             <p className="text-sm font-normal text-foreground">{subtitle}</p>

@@ -120,7 +120,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         id="dao-info-header"
         className="hidden w-full flex-col sm:flex xl:flex-row"
       >
-        <div className="flex w-full flex-col items-start gap-4 p-4 xl:w-1/2">
+        <div className="flex w-full flex-col items-start gap-5 p-4 xl:w-1/2">
           <div className="flex gap-3.5">
             <div className="flex">
               <DaoAvatarIcon daoId={daoId} className="size-icon-xl" isRounded />
@@ -152,7 +152,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
           </div>
           <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+            <div className="mb-2 flex h-full items-center gap-2">
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>

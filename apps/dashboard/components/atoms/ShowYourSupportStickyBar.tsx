@@ -52,7 +52,7 @@ export const ShowYourSupportStickyBar = () => {
               <span className="text-sm font-normal">{message}</span>
               <button
                 onClick={openConnectModal}
-                className="font-roboto flex items-center text-sm font-medium uppercase tracking-[0.06em] text-tangerine transition-colors hover:text-tangerine/90"
+                className="font-mono flex items-center text-sm font-medium uppercase tracking-[0.06em] text-tangerine transition-colors hover:text-tangerine/90"
               >
                 <span>{buttonText}</span>
                 <ChevronRight
