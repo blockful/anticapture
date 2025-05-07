@@ -186,7 +186,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           </h4>
           <ArrowUpDown
             props={{
-              className: "ml-2 h-4 w-4",
+              className: "ml-2 size-4",
             }}
             activeState={
               column.getIsSorted() === "asc"

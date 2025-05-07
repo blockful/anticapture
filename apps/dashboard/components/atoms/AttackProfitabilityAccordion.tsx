@@ -34,13 +34,13 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <CalculatorIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <CalculatorIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRightIcon className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
+            <ChevronRightIcon className="inline-flex size-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -54,7 +54,7 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRightIcon className="inline-flex h-4 w-4 items-center justify-center text-[#f97316]" />
+            <ChevronRightIcon className="inline-flex size-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -72,7 +72,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChartIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <PieChartIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -108,7 +108,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Turnout and Active Supply",
     icon: (
-      <UsersIcon className="h-4 w-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <UsersIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -146,7 +146,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarIcon className="h-4 w-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
+      <DollarIcon className="size-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -199,7 +199,7 @@ export const AttackProfitabilityAccordion = () => {
               {item.icon}
               {item.title}
             </div>
-            <PlusIcon className="h-4 w-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
+            <PlusIcon className="size-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
           <AccordionContent className="overflow-hidden px-3 pb-3 transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>

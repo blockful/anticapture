@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { RED_COLOR, GREEN_COLOR, sanitizeNumber } from "@/lib/client/utils";
-import { Holders, holdersData, IsDelegated } from "@/lib/mocked-data/mocked-data";
+import {
+  Holders,
+  holdersData,
+  IsDelegated,
+} from "@/lib/mocked-data/mocked-data";
 import { HandIcon } from "@/components/atoms";
 
 export const holdersColumns: ColumnDef<Holders>[] = [
@@ -65,7 +69,7 @@ export const holdersColumns: ColumnDef<Holders>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Amount | %
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },
@@ -79,7 +83,7 @@ export const holdersColumns: ColumnDef<Holders>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Delegated
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },
@@ -117,7 +121,7 @@ export const holdersColumns: ColumnDef<Holders>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Last Buy
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },

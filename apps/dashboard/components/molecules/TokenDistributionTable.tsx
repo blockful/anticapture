@@ -154,7 +154,7 @@ export const TokenDistributionTable = () => {
           {String(daoId)?.toUpperCase()} Amount
           <ArrowUpDown
             props={{
-              className: "ml-2 h-4 w-4",
+              className: "ml-2 size-4",
             }}
             activeState={
               column.getIsSorted() === "asc"
