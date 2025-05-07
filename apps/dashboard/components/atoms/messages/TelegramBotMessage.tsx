@@ -10,7 +10,7 @@ export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };
   return (
     <div className="flex items-center gap-3 tracking-wider sm:flex-row">
-      <Send className="size-4 text-white" />
+      <Send className="size-4 text-white hidden sm:block" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex gap-3">
           <span className="font-roboto font-normal text-white">
@@ -18,7 +18,7 @@ export const TelegramBotMessage = () => {
             {daoConfigByDaoId[
               daoId.toUpperCase() as DaoIdEnum
             ].name.toUpperCase()}{" "}
-            SECURITY UPDATES.
+            <span className="hidden sm:inline">SECURITY</span> UPDATES.
           </span>
         </div>
         <div className="flex items-center gap-3">

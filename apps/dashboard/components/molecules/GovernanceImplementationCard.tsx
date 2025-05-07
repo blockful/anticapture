@@ -12,7 +12,7 @@ export const GovernanceImplementationCard = ({
   isOpen,
   onToggle,
 }: {
-  field: GovernanceImplementationField;
+  field: GovernanceImplementationField & { name: string };
   isOpen: boolean;
   onToggle: (e: MouseEvent<HTMLDivElement>) => void;
 }) => {
