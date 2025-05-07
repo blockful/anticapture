@@ -108,7 +108,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             className="gap-2"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <h4 className="font-normal">#</h4>
+            <h4 className="text-table-header">#</h4>
             <ArrowUpDown
               props={{
                 className: "size-4",
@@ -137,8 +137,8 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
             <div
-              className={cn("flex w-5 items-center gap-2 md:w-64", {
-                "w-20": isMobile,
+              className={cn("flex w-full items-center gap-2 md:w-64", {
+                "whitespace-nowrap": isMobile,
                 "!w-fit": !isMobile && isInAnalysis,
               })}
             >
@@ -149,13 +149,16 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                   isRounded
                 />
               )}
-              {daoConfigByDaoId[dao as DaoIdEnum].name}
+              {daoConfigByDaoId[dao as DaoIdEnum].name ===
+              daoConfigByDaoId[DaoIdEnum.ENS].name
+                ? "ENS"
+                : daoConfigByDaoId[dao as DaoIdEnum].name}
             </div>
             {!isMobile && isInAnalysis && <BadgeInAnalysis />}
           </div>
         );
       },
-      header: () => <h4 className="pl-4 font-normal">DAO</h4>,
+      header: () => <h4 className="text-table-header pl-4">DAO</h4>,
     },
     {
       accessorKey: "delegatedSupply",
@@ -181,9 +184,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           className="w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="truncate text-xs font-semibold sm:font-medium">
-            Delegated Supply
-          </h4>
+          <h4 className="text-table-header">Delegated Supply</h4>
           <ArrowUpDown
             props={{
               className: "ml-2 size-4",

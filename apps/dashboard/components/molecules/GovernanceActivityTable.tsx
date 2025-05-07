@@ -87,7 +87,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start px-4 text-xs font-semibold sm:font-medium">
+        <div className="text-table-header flex w-full items-start justify-start px-4">
           Metrics
         </div>
       ),
@@ -114,7 +114,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-xs font-semibold sm:font-medium"
+          className="text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Average
@@ -173,7 +173,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-xs font-semibold sm:font-medium"
+          className="text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -218,7 +218,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-10 text-xs font-semibold sm:font-medium">
+        <div className="text-table-header flex w-full items-start justify-start px-10">
           Last {days.slice(0, -1)} days
         </div>
       ),

@@ -120,8 +120,11 @@
     @apply gap-4 sm:gap-6;
   }
 
-
   .link-tangerine {
     @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
+  }
+
+  .text-table-header {
+    @apply text-xs font-semibold sm:font-medium;
   }
 }

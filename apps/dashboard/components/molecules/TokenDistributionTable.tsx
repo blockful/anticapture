@@ -112,7 +112,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start pl-4 text-xs font-semibold sm:font-medium">
+        <div className="text-table-header flex w-full items-start justify-start pl-4">
           Supply
         </div>
       ),
@@ -148,7 +148,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-end text-xs font-semibold sm:font-medium"
+          className="text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           {String(daoId)?.toUpperCase()} Amount
@@ -212,7 +212,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-end text-xs font-semibold sm:font-medium"
+          className="text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -264,7 +264,7 @@ export const TokenDistributionTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-center justify-center pr-20 text-xs font-semibold sm:font-medium">
+        <div className="text-table-header flex w-full items-center justify-center pr-20">
           Last {days.slice(0, -1)} days
         </div>
       ),
