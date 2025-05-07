@@ -54,7 +54,7 @@ const RiskAreaCardInternal = ({
   const isBox2Filled =
     risk.level === RiskLevel.MEDIUM || risk.level === RiskLevel.HIGH;
   const isBox3Filled = risk.level === RiskLevel.HIGH;
-
+  const [isHovered, setIsHovered] = useState(false);
   // Adjust styling based on variant
   const isRiskAnalysis = variant === "risk-analysis";
 
@@ -62,7 +62,7 @@ const RiskAreaCardInternal = ({
     [RiskLevel.LOW]: (
       <CheckCircle2
         className={cn(
-          "size-4 sm:size-5",
+          "size-4",
           isActive ? "text-darkest" : "text-success",
         )}
       />
@@ -70,7 +70,7 @@ const RiskAreaCardInternal = ({
     [RiskLevel.MEDIUM]: (
       <AlertCircle
         className={cn(
-          "size-4 sm:size-5",
+          "size-4",
           isActive ? "text-darkest" : "text-warning",
         )}
       />
@@ -78,7 +78,7 @@ const RiskAreaCardInternal = ({
     [RiskLevel.HIGH]: (
       <AlertTriangle
         className={cn(
-          "size-4 sm:size-5",
+          "size-4",
           isActive ? "text-darkest" : "text-error",
         )}
       />
@@ -91,6 +91,8 @@ const RiskAreaCardInternal = ({
         "flex h-full w-full flex-1 cursor-pointer items-center gap-1",
       )}
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={cn(
@@ -100,8 +102,8 @@ const RiskAreaCardInternal = ({
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
-            "shadow-[0_0_20px_0]": isActive,
-            "bg-opacity-[12%]": !isActive && risk.level !== undefined,
+            "shadow-[0_0_20px_0]": isActive || isHovered,
+            "bg-opacity-[12%]": !isActive && risk.level !== undefined && !isHovered,
           },
         )}
       >
@@ -109,10 +111,10 @@ const RiskAreaCardInternal = ({
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
               "!text-foreground": risk.level === undefined,
-              "!text-success": risk.level === RiskLevel.LOW && !isActive,
-              "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive,
-              "!text-error": risk.level === RiskLevel.HIGH && !isActive,
-              "text-darkest": isActive && risk.level !== undefined,
+              "!text-success": risk.level === RiskLevel.LOW && !isActive && !isHovered,
+              "!text-warning": risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
+              "!text-error": risk.level === RiskLevel.HIGH && !isActive && !isHovered,
+              "text-darkest": isActive && risk.level !== undefined || isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
             })}
@@ -138,7 +140,7 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
               "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
               "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
-              "bg-opacity-[12%]": !isActive && isBox3Filled,
+              "bg-opacity-[12%]": !isActive && isBox3Filled && !isHovered,
               "bg-lightDark": risk.level === undefined || !isBox3Filled,
             })}
           />
@@ -147,7 +149,7 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
               "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
               "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
-              "bg-opacity-[12%]": !isActive && isBox2Filled,
+              "bg-opacity-[12%]": !isActive && isBox2Filled && !isHovered,
               "bg-lightDark": risk.level === undefined || !isBox2Filled,
             })}
           />
@@ -156,7 +158,7 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW,
               "bg-warning": risk.level === RiskLevel.MEDIUM,
               "bg-error": risk.level === RiskLevel.HIGH,
-              "bg-opacity-[12%]": !isActive && risk.level !== undefined,
+              "bg-opacity-[12%]": !isActive && risk.level !== undefined && !isHovered,
               "bg-lightDark": risk.level === undefined,
             })}
           />
