@@ -65,7 +65,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Amount | %
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },
@@ -83,7 +83,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Delegators
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },
@@ -102,7 +102,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Voted
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            <ArrowUpDown className="ml-2 size-4" />
           </Button>
 
           <VotedProposalsPercentageInfoIcon />
@@ -164,7 +164,7 @@ const VotedProposalsPercentageInfoIcon = () => {
         days.
       </div>
       <InfoIcon
-        className="ml-2 h-4 w-4 cursor-pointer"
+        className="ml-2 size-4 cursor-pointer"
         onMouseEnter={toggle}
         onMouseLeave={toggle}
       />

@@ -29,7 +29,7 @@ export const SwitcherChart = ({
 
   return isMobile ? (
     <div
-      className="relative min-w-[100px]"
+      className="relative"
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
           setIsOpen(false);
@@ -60,7 +60,7 @@ export const SwitcherChart = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
           {Object.values(options).map((metrics) => (
             <button
               key={metrics}

@@ -50,7 +50,7 @@ export const ButtonHeaderSidebar = ({
       {...props}
     >
       <Icon
-        className={cn("h-5 w-5", {
+        className={cn("size-5", {
           "text-darkest": isActive(anchorId),
           "text-foreground group-hover:text-[#FAFAFA]": !isActive(anchorId),
         })}

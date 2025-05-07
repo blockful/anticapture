@@ -46,7 +46,7 @@ export const CardDaoSignature = () => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 py-8 rounded-lg text-white sm:flex-row sm:gap-10 sm:border sm:border-lightDark sm:bg-lightDark sm:p-4">
+    <div className="flex w-full flex-col gap-6 rounded-lg py-8 text-white sm:flex-row sm:gap-10 sm:border sm:border-lightDark sm:bg-lightDark sm:p-4">
       <div className="order-1 flex sm:order-none">
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
@@ -94,7 +94,7 @@ export const CardDaoSignature = () => {
             <div className="flex">
               <ConnectWallet
                 label="Connect Wallet"
-                className="!w-fit !border-transparent !bg-[#FAFAFA] !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70 py-1"
+                className="!w-fit !border-transparent !bg-[#FAFAFA] py-1 !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
               />
             </div>
           )}
@@ -104,7 +104,7 @@ export const CardDaoSignature = () => {
                 onClick={handleSubmit}
                 className="btn-connect-wallet !w-fit !border-transparent !bg-[#FAFAFA] text-sm font-medium !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="size-4" />
                 Sign to support
               </button>
             </div>
@@ -112,7 +112,7 @@ export const CardDaoSignature = () => {
           {isConnected && isSignedToSupportDao && (
             <div className="flex">
               <button className="btn-connect-wallet !w-fit !border-transparent !bg-[#FAFAFA] text-sm font-medium !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70">
-                <CheckCircle2 className="h-4 w-4" />
+                <CheckCircle2 className="size-4" />
                 Signed
               </button>
             </div>
@@ -120,10 +120,10 @@ export const CardDaoSignature = () => {
         </div>
       )}
       {isSignedToSupportDao && (
-        <div className="flex w-full flex-col gap-6 items-center justify-center">
+        <div className="flex w-full flex-col items-center justify-center gap-6">
           <div className="flex flex-col gap-1.5">
-            <div className="flex gap-2 items-center">
-              <CheckCircle2 className="h-5 w-5 text-success" />
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="size-5 text-success" />
               <h3 className="flex text-[18px] font-medium leading-6 text-white">
                 Arbitrum DAO support confirmed
               </h3>
@@ -136,10 +136,13 @@ export const CardDaoSignature = () => {
           </div>
           <div className="flex w-full flex-col gap-1.5">
             <p className="flex text-sm font-semibold text-foreground">
-              Want to continue the conversation on governance risks with other DAO decision-makers?
+              Want to continue the conversation on governance risks with other
+              DAO decision-makers?
             </p>
-            <div className="flex gap-1 items-center">
-              <a className="link-tangerine text-sm">JOIN THE GOVERNANCE SECURITY CIRCLE</a>
+            <div className="flex items-center gap-1">
+              <a className="link-tangerine text-sm">
+                JOIN THE GOVERNANCE SECURITY CIRCLE
+              </a>
               <ArrowRight className="link-tangerine size-4" />
             </div>
           </div>
