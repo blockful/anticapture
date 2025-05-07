@@ -54,10 +54,7 @@ export const DaoTemplate = () => {
           <GovernanceImplementationSection daoId={daoIdEnum} />
         )}
         {daoConstants.resilienceStages && (
-          <ResilienceStagesSection
-            currentDaoStage={Stage.ZERO}
-            daoId={daoIdEnum}
-          />
+          <ResilienceStagesSection daoId={daoIdEnum} />
         )}
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
         {daoConstants.governanceActivity && <GovernanceActivitySection />}

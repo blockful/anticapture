@@ -57,9 +57,6 @@ export const StageContent = ({
 
           {type === "requirements" ? (
             <div className="flex flex-row gap-2">
-              <div className="flex items-start">
-                <CheckCircle className="size-4 text-success" />
-              </div>
               <p className="flex flex-wrap text-sm font-normal text-foreground">
                 {requirementText}
               </p>

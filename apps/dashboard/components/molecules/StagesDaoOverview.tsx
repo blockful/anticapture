@@ -7,17 +7,23 @@ import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
 import { BulletPoint } from "@/components/atoms/icons/BulletPoint";
 import { OutlinedBox } from "@/components/atoms/OutlinedBox";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 
 interface StagesDaoOverviewProps {
   currentStage?: number;
   itemsToNextStage?: number;
   requirements?: string[];
+  highRiskItems?: (GovernanceImplementationField & { name: string })[];
+  mediumRiskItems?: (GovernanceImplementationField & { name: string })[];
+  lowRiskItems?: (GovernanceImplementationField & { name: string })[];
 }
 
 export const StagesDaoOverview = ({
   currentStage = 1,
   itemsToNextStage = 3,
-  requirements = ["Nakamoto > 10", "Vote Mutability", "Non-profitable"],
+  highRiskItems = [],
+  mediumRiskItems = [],
+  lowRiskItems = [],
 }: StagesDaoOverviewProps) => {
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const { isMobile } = useScreenSize();
@@ -34,13 +40,21 @@ export const StagesDaoOverview = ({
       document.removeEventListener("click", handleClick);
     };
   }, [showTooltip]);
+
+  const requirements =
+    highRiskItems.length > 0
+      ? highRiskItems.map((item) => item.name)
+      : mediumRiskItems.length > 0
+        ? mediumRiskItems.map((item) => item.name)
+        : [];
+
   return (
-    <div className="relative w-full sm:w-max py-0">
+    <div className="relative w-full py-0 sm:w-max">
       <div
-        className="flex items-center justify-between gap-1 rounded-lg border-b border-lightDark bg-lightDark p-2 sm:py-0.5 sm:border-none"
+        className="flex items-center justify-between gap-1 rounded-lg border-b border-lightDark bg-lightDark p-2 sm:border-none sm:py-0.5"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
-        <div className="flex flex-col sm:items-center justify-start gap-1 sm:flex-row">
+        <div className="flex flex-col justify-start gap-1 sm:flex-row sm:items-center">
           {/* Stage indicator */}
           <div className="flex gap-2">
             <span
@@ -65,7 +79,10 @@ export const StagesDaoOverview = ({
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
               <span className="tracking-wider text-white group-hover:underline">
-                {itemsToNextStage} ITEMS
+                {highRiskItems.length ||
+                  mediumRiskItems.length ||
+                  lowRiskItems.length}{" "}
+                ITEMS
               </span>
               <span className="tracking-wider text-foreground group-hover:underline">
                 {" "}
@@ -74,14 +91,14 @@ export const StagesDaoOverview = ({
             </button>
           </div>
         </div>
-        <div className="flex gap-1 sm:gap-2 p-2 pr-0">
+        <div className="flex gap-1 p-2 pr-0 sm:gap-2">
           <OutlinedBox
             variant="error"
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">10</span>
+            <span className="font-mono">{highRiskItems.length}</span>
           </OutlinedBox>
           <OutlinedBox
             variant="warning"
@@ -89,7 +106,7 @@ export const StagesDaoOverview = ({
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">10</span>
+            <span className="font-mono">{mediumRiskItems.length}</span>
           </OutlinedBox>
           <OutlinedBox
             variant="success"
@@ -97,7 +114,7 @@ export const StagesDaoOverview = ({
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">10</span>
+            <span className="font-mono">{lowRiskItems.length}</span>
           </OutlinedBox>
         </div>
       </div>

@@ -49,7 +49,7 @@ export const HeaderSidebar = () => {
         >
           <AnticaptureIcon className="size-9" />
         </Link>
-        <div className="flex h-full w-full flex-col justify-between">
+        <div className="flex h-full w-full flex-col justify-between items-center">
           <div className="flex h-full flex-col gap-1.5 p-1.5">
             {headerItems.map((item) => (
               <ButtonHeaderSidebar

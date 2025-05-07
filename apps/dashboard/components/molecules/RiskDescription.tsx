@@ -1,15 +1,8 @@
-import { CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, TriangleAlert } from "lucide-react";
 import { ReactNode } from "react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { RiskLevelCardSmall, CorneredBox } from "@/components/atoms";
-
-/**
- * Interface for the requirements in RiskDescription
- */
-export interface Requirement {
-  text: string;
-  checked?: boolean;
-}
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 
 /**
  * Props for the RiskDescription component
@@ -17,7 +10,7 @@ export interface Requirement {
 export interface RiskDescriptionProps {
   title: string;
   description: string | string[];
-  requirements?: Requirement[];
+  requirements?: (GovernanceImplementationField & {name: string})[];
   children?: ReactNode;
   riskLevel?: RiskLevel;
 }
@@ -29,13 +22,18 @@ export const RiskDescription = ({
   title,
   description,
   requirements = [],
-  children,
   riskLevel,
 }: RiskDescriptionProps) => {
   // Convert description to array if it's a string
   const descriptionArray = Array.isArray(description)
     ? description
     : [description];
+
+  const iconsMapping: Record<RiskLevel, ReactNode> = {
+    [RiskLevel.LOW]: <CheckCircle2 className="size-5 text-success" />,
+    [RiskLevel.MEDIUM]: <AlertCircle className="size-5 text-warning" />,
+    [RiskLevel.HIGH]: <TriangleAlert className="size-5 text-error" />,
+  };
 
   return (
     <CorneredBox className="bg-darkest p-4 sm:bg-dark">
@@ -67,17 +65,15 @@ export const RiskDescription = ({
             <ul className="space-y-2">
               {requirements.map((requirement, index) => (
                 <li key={index} className="flex items-center gap-2">
-                  <CheckCircle2 className="size-5 text-success" />
+                  {iconsMapping[requirement.riskLevel]}
                   <span className="text-sm text-foreground">
-                    {requirement.text}
+                    {requirement.name}
                   </span>
                 </li>
               ))}
             </ul>
           </div>
         )}
-        {/* Any additional content */}
-        {children}
       </div>
     </CorneredBox>
   );
