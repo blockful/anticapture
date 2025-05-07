@@ -75,7 +75,7 @@ export default function DaoPage() {
           <StickyPageHeader />
           <HeaderMobile />
         </div>
-        <div className="page-sections-gap mx-auto flex flex-col items-center sm:p-3">
+        <div className="flex flex-col items-center">
           <DaoTemplate />
         </div>
       </main>

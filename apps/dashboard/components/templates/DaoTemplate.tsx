@@ -40,7 +40,7 @@ export const DaoTemplate = () => {
   return (
     <DaoPageInteractionProvider>
       <MessageStacker messages={messages} />
-      <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:px-3 sm:pb-3">
+      <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:p-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
         {daoConstants.showSupport && <ShowSupportSection />}
         {daoConstants.attackProfitability && (
