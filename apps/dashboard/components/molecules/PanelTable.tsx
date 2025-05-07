@@ -13,7 +13,7 @@ import {
   SkeletonRow,
   DaoAvatarIcon,
 } from "@/components/atoms";
-import { formatNumberUserReadable } from "@/lib/client/utils";
+import { cn, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/hooks";
@@ -87,8 +87,8 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         return (
-          <div className="flex items-center justify-center gap-3">
-            <p className="scrollbar-none items-centeroverflow-auto flex py-3 text-foreground">
+          <div className="flex min-h-[68px] items-center justify-center gap-3 sm:min-h-0">
+            <p className="scrollbar-none flex items-center overflow-auto py-3 text-foreground">
               {row.index + 1}
             </p>
             {isMobile && details && (
@@ -111,7 +111,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             <h4 className="font-normal">#</h4>
             <ArrowUpDown
               props={{
-                className: "h-4 w-4",
+                className: "size-4",
               }}
               activeState={
                 column.getIsSorted() === "asc"
@@ -135,8 +135,13 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none flex w-full items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
-            <div className="flex w-5 items-center gap-2 md:w-20">
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+            <div
+              className={cn("flex w-5 items-center gap-2 md:w-64", {
+                "w-20": isMobile,
+                "!w-fit": !isMobile && isInAnalysis,
+              })}
+            >
               {!isMobile && (
                 <DaoAvatarIcon
                   daoId={dao as DaoIdEnum}
@@ -144,7 +149,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                   isRounded
                 />
               )}
-              {dao}
+              {daoConfigByDaoId[dao as DaoIdEnum].name}
             </div>
             {!isMobile && isInAnalysis && <BadgeInAnalysis />}
           </div>
@@ -176,7 +181,9 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           className="w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="truncate font-normal">Delegated Supply</h4>
+          <h4 className="truncate text-xs font-semibold sm:font-medium">
+            Delegated Supply
+          </h4>
           <ArrowUpDown
             props={{
               className: "ml-2 h-4 w-4",

@@ -22,7 +22,10 @@ export const HeaderSidebar = () => {
         label: SECTIONS_CONSTANTS.panel.title,
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem("scrollToSection", SECTIONS_CONSTANTS.panel.anchorId);
+          sessionStorage.setItem(
+            "scrollToSection",
+            SECTIONS_CONSTANTS.panel.anchorId,
+          );
           router.push("/");
         },
       },
@@ -36,7 +39,9 @@ export const HeaderSidebar = () => {
   );
 
   return (
-    <header className="fixed left-0 top-0 z-50 hidden h-screen w-[72px] border-r border-lightDark bg-darkest sm:block">
+    <header
+      className={`fixed left-0 top-0 z-50 hidden h-screen w-[68px] border-r border-lightDark bg-darkest sm:block`}
+    >
       <div className="flex h-full w-full flex-col items-start">
         <Link
           href="/"
@@ -52,7 +57,7 @@ export const HeaderSidebar = () => {
                 anchorId={item.anchorId || ""}
                 icon={item.icon}
                 label={item.label}
-                className="flex-col gap-1"
+                className="flex-col gap-1 !text-xs !font-medium"
                 onClick={() => {
                   router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
                 }}

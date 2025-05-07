@@ -28,8 +28,6 @@ import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
 import { cn } from "@/lib/client/utils";
-import { RiskAreaEnum } from "@/lib/enums";
-import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import {
   fieldsToArray,
@@ -115,7 +113,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="flex h-full w-full flex-col gap-4 rounded-md px-4 pb-8 pt-4 sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:p-0"
+      className="flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:bg-dark sm:p-0"
       ref={ref}
     >
       <div

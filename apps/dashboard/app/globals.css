@@ -45,10 +45,6 @@
     --chart-5: 27 87% 67%;
   }
 
-  .link-tangerine {
-    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
-  }
-
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -122,5 +118,10 @@
 
   .section-title-gap {
     @apply gap-4 sm:gap-6;
+  }
+
+
+  .link-tangerine {
+    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80;
   }
 }
