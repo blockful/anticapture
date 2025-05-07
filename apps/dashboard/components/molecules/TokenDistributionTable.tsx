@@ -258,7 +258,7 @@ export const TokenDistributionTable = () => {
           <div className="flex w-full justify-center py-2.5">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
-              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+              strokeColor={cn([Number(variation) < 0 ? "#f87171" : "#4ADE80"])}
             />
           </div>
         );
