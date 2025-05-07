@@ -47,8 +47,6 @@ export const MultilineChartAttackProfitability = ({
   const { daoId }: { daoId: string } = useParams();
   const [mocked, setMocked] = useState<boolean>(false);
 
-  const selectedDays = parseInt(days.split("d")[0]);
-
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
     days,
@@ -91,9 +89,9 @@ export const MultilineChartAttackProfitability = ({
   const chartConfig = {
     treasuryNonDAO: {
       label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
-      color: "#22c55e",
+      color: "#4ade80",
     },
-    all: { label: "All", color: "#22c55e" },
+    all: { label: "All", color: "#4ade80" },
     quorum: { label: "Quorum", color: "#f87171" },
     delegated: { label: "Delegated", color: "#f87171" },
   } satisfies ChartConfig;
@@ -168,7 +166,7 @@ export const MultilineChartAttackProfitability = ({
       {mocked && (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg border border-lightDark bg-black/5 backdrop-blur-[6px]">
           <div className="flex items-center gap-2 rounded-full bg-[#1c1c1c] px-4 py-2 text-sm text-foreground">
-            <ClockwiseIcon className="h-5 w-5 text-foreground" />
+            <ClockwiseIcon className="size-5 text-foreground" />
             RESEARCH PENDING
           </div>
         </div>

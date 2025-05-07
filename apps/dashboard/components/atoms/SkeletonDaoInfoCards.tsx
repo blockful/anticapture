@@ -11,7 +11,7 @@ export const SkeletonDaoInfoCards = () => {
       >
         <div className="flex w-full items-center justify-start">
           <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase text-[#FAFAFA]">
-            <div className="h-4 w-4 animate-pulse rounded-full bg-gray-700/50" />
+            <div className="size-4 animate-pulse rounded-full bg-gray-700/50" />
             <div className="h-4 w-16 animate-pulse rounded bg-gray-700/50" />
           </CardTitle>
         </div>
@@ -27,7 +27,7 @@ export const SkeletonDaoInfoCards = () => {
               <h1 className="text-sm font-normal text-foreground">
                 <div className="h-4 w-16 animate-pulse rounded bg-gray-700/50" />
               </h1>
-              <div className="h-3 w-3 animate-pulse rounded-full bg-gray-700/50" />
+              <div className="size-3 animate-pulse rounded-full bg-gray-700/50" />
             </div>
 
             <div className="flex h-full w-full justify-end gap-2 sm:justify-start">

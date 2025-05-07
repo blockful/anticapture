@@ -26,9 +26,19 @@ export const HeaderNavMobile = () => {
       enabled: !!daoConfig.attackProfitability,
     },
     {
+      anchorId: SECTIONS_CONSTANTS.riskAnalysis.anchorId,
+      title: SECTIONS_CONSTANTS.riskAnalysis.title,
+      enabled: !!daoConfig.riskAnalysis,
+    },
+    {
       anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
       title: SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation,
       enabled: !!daoConfig.governanceImplementation,
+    },
+    {
+      anchorId: SECTIONS_CONSTANTS.resilienceStages.anchorId,
+      title: SECTIONS_CONSTANTS.resilienceStages.title,
+      enabled: !!daoConfig.resilienceStages,
     },
     {
       anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,

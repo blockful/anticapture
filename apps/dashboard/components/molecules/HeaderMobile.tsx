@@ -80,8 +80,8 @@ export const HeaderMobile = () => {
             <AnticaptureIcon className="size-11" />
           </Link>
           <div className="flex items-center gap-3">
-            <div>
-              <ConnectWallet className="!px-2 !py-1 !text-sm !font-medium" />
+            <div className="flex h-full w-full">
+              <ConnectWallet className="!rounded-md !px-2 !py-1 !text-sm !font-medium" />
             </div>
             <button className="p-1.5" onClick={onToggleMenu}>
               {isMenuOpen ? (
