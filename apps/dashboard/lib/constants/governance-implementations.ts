@@ -1,4 +1,4 @@
-import { GovernanceImplementationEnum } from "../enums/GovernanceImplementation";
+import { GovernanceImplementationEnum } from "@/lib/enums/GovernanceImplementation";
 
 export const GOVERNANCE_IMPLEMENTATION_CONSTANTS = {
     [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
