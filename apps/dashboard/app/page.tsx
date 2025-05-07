@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="flex h-screen overflow-hidden bg-darkest">
       <HeaderSidebar />
-      <main className="flex-1 overflow-auto sm:ml-[72px]">
+      <main className="flex-1 overflow-auto sm:ml-[72px] xl4k:max-w-7xl">
         <div className="sm:hidden">
           <HeaderMobile />
         </div>
