@@ -87,7 +87,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         return (
-          <div className="flex min-h-[68px] items-center justify-center gap-3">
+          <div className="flex min-h-[68px] items-center justify-center gap-3 sm:min-h-0">
             <p className="scrollbar-none flex items-center overflow-auto py-3 text-foreground">
               {row.index + 1}
             </p>
@@ -135,7 +135,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
             <div
               className={cn("flex w-5 items-center gap-2 md:w-64", {
                 "w-20": isMobile,
