@@ -5,15 +5,15 @@ import type { Metadata } from "next";
 import { GlobalProviders } from "@/components/providers/GlobalProviders";
 import { ReactNode } from "react";
 import HotjarScript from "@/hotjar";
-import { Inter, Roboto } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const roboto = Roboto({
+const roboto = Roboto_Mono({
   weight: ["400", "500", "700"],
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-roboto",
+  variable: "--font-mono",
 });
 
 const baseUrl =

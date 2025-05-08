@@ -12,6 +12,9 @@ const config: Config = {
       screens: {
         xl4k: "2000px",
       },
+      fontFamily: {
+        mono: ["var(--font-mono)"],
+      },
       colors: {
         darkest: "#09090B",
         dark: "#18181B",
