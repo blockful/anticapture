@@ -11,18 +11,27 @@ import { useAccount } from "wagmi";
 import { ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
+  PetitionResponse,
   submitPetitionSignature,
-  usePetitionSignatures,
 } from "@/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet } from "@/components/atoms";
+import { Address } from "viem";
 
-export const CardDaoSignature = () => {
+export const CardDaoSignature = ({
+  data,
+  loading,
+  isConnected,
+  address,
+}: {
+  data: PetitionResponse | null;
+  loading: boolean;
+  isConnected: boolean;
+  address: Address | undefined;
+}) => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const { isConnected, address } = useAccount();
-  const { data, loading } = usePetitionSignatures(daoIdEnum, address);
 
   const handleSubmit = async () => {
     if (!address) return;

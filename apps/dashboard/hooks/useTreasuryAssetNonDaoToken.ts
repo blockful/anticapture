@@ -16,7 +16,7 @@ export const fetchTreasuryAssetNonDaoToken = async ({
   days: string;
 }): Promise<TreasuryAssetNonDaoToken[]> => {
   const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/assets?days=${days}`,
+    `${BACKEND_ENDPOINT}/dao/${daoId}/total-assets?days=${days}`,
   );
 
   if (!response.ok) {
