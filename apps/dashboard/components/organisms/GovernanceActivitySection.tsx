@@ -21,6 +21,7 @@ export const GovernanceActivitySection = () => {
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
+          isSmall
         />
       }
       days={days}

@@ -11,12 +11,14 @@ interface SwitcherDateProps {
   setTimeInterval: (timeInterval: TimeInterval) => void;
   defaultValue: TimeInterval;
   disableRecentData?: boolean; // If true, the 7 days and 30 days tabs will not be shown
+  isSmall?: boolean;
 }
 
 export const SwitcherDate = ({
   setTimeInterval,
   defaultValue,
   disableRecentData = false,
+  isSmall = false,
 }: SwitcherDateProps) => {
   const { isMobile } = useScreenSize();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -98,7 +100,10 @@ export const SwitcherDate = ({
         {activeTimeIntervals.map((interval) => (
           <TabsTrigger
             key={interval}
-            className="min-w-[84px] px-3 py-1.5 text-sm font-medium"
+            className={cn(
+              "px-3 py-1.5 text-sm font-medium",
+              isSmall ? "w-fit" : "min-w-[84px]",
+            )}
             value={interval}
             onClick={() => setTimeInterval(interval)}
           >
