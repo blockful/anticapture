@@ -11,15 +11,15 @@ import {
 import { cn } from "@/lib/client/utils";
 import { X, Menu, BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export const HeaderMobile = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  const headerHeight = 87;
-
   const router = useRouter();
+
+  const pathname = usePathname();
 
   const menuItems = useMemo(
     () => [
@@ -101,7 +101,8 @@ export const HeaderMobile = () => {
       >
         <div
           className={cn(
-            `fixed left-0 right-0 top-[${headerHeight}px] z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            `fixed left-0 right-0 z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            pathname === "/" ? "top-[57px]" : "top-[98px]",
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
