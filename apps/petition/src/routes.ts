@@ -3,7 +3,8 @@ import { isHex } from "viem";
 import { isAddress } from "viem";
 
 import { PetitionService } from "./services";
-import { FastifyTypedInstance } from "./types";
+import { DAO_ID, FastifyTypedInstance } from "./types";
+import { caseInsensitiveEnum } from "./middlewares/enum";
 
 export function routes(
   petitionService: PetitionService,
@@ -23,7 +24,7 @@ export function routes(
           }),
         }),
         params: z.object({
-          daoId: z.string(),
+          daoId: caseInsensitiveEnum(DAO_ID),
         }),
         response: {
           201: z.object({
@@ -45,12 +46,19 @@ export function routes(
       const petition = request.body;
       const { daoId } = request.params;
 
-      const dbPetition = await petitionService.signPetition({
-        ...petition,
-        daoId
-      });
+      try {
+        const dbPetition = await petitionService.signPetition({
+          ...petition,
+          daoId
+        });
 
-      return response.status(201).send(dbPetition);
+        return response.status(201).send(dbPetition);
+      } catch (error) {
+        console.error({ error });
+        if (error.message.includes("duplicate key value violates")) {
+          return response.status(400).send({ message: "Unable to sign petition" });
+        }
+      }
     });
 
     app.get("/petitions/:daoId", {
@@ -58,7 +66,7 @@ export function routes(
         operationId: "readPetitions",
         tags: ["Petition"],
         params: z.object({
-          daoId: z.string(),
+          daoId: caseInsensitiveEnum(DAO_ID),
         }),
         querystring: z.object({
           userAddress: z.string().optional().refine((addr) => addr && isAddress(addr), {

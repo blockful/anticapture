@@ -11,7 +11,7 @@ import { GraphqlAnticaptureClient } from "./client";
 import { PostgresPetitionRepository } from "./repositories";
 
 const db = new PostgresPetitionRepository(env.DATABASE_URL);
-const anticaptureClient = new GraphqlAnticaptureClient(env.ANTICAPTURE_API_URL);
+const anticaptureClient = new GraphqlAnticaptureClient();
 const petitionService = new PetitionService(db, anticaptureClient);
 
 const app = fastify({ logger: true });
@@ -29,7 +29,7 @@ app.register(fastifySwagger, {
     },
     servers: [
       {
-        url: env.RAILWAY_PUBLIC_DOMAIN,
+        url: env.API_URL,
       },
     ],
   },
