@@ -142,8 +142,8 @@ export const HeaderDAOSidebarDropdown = () => {
             <button
               key={item.id}
               className={cn(
-                "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2",
-                item.isDisabled ? "text-foreground" : "hover:bg-[#333]",
+                "flex w-full items-center justify-between gap-2 px-3 py-2",
+                !item.isDisabled && "hover:bg-[#333]",
               )}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
@@ -159,7 +159,14 @@ export const HeaderDAOSidebarDropdown = () => {
                   )}
                   isRounded
                 />
-                <h1 className="text-sm font-normal text-white">{item.label}</h1>
+                <h1
+                  className={cn(
+                    "text-sm font-normal text-white",
+                    item.isDisabled && "text-foreground opacity-75",
+                  )}
+                >
+                  {item.label}
+                </h1>
                 {item.isDisabled && (
                   <BadgeInAnalysis
                     iconClassName="size-3"
