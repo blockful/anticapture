@@ -3,7 +3,7 @@ import { mainnet, arbitrum, optimism, scroll } from "viem/chains";
 
 import { DAO_ID } from "../types";
 
-export default class EthereumClient {
+export default class VotingPowerClient {
 
   async getSignersVotingPower(daoId: DAO_ID, signers: Address[]): Promise<bigint> {
     const client = createPublicClient({
