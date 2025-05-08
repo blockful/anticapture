@@ -1,12 +1,12 @@
 {
-  "id": "2ab2d37c-0e49-4cf2-925e-56c102221356",
+  "id": "b4aefd2e-c894-4cb2-b695-d93afcbfaa69",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "offchain.petition_signatures": {
+    "public.petition_signatures": {
       "name": "petition_signatures",
-      "schema": "offchain",
+      "schema": "",
       "columns": {
         "account_id": {
           "name": "account_id",
@@ -57,9 +57,7 @@
     }
   },
   "enums": {},
-  "schemas": {
-    "offchain": "offchain"
-  },
+  "schemas": {},
   "sequences": {},
   "roles": {},
   "policies": {},

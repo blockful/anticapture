@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "supergraph": "mesh-compose -o supergraph.graphql",
-    "start": "npm run supergraph && hive-gateway supergraph"
+    "start": "hive-gateway supergraph"
   },
   "keywords": [],
   "author": "",

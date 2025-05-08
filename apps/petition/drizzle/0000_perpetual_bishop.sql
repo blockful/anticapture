@@ -1,6 +1,4 @@
-CREATE SCHEMA "offchain";
---> statement-breakpoint
-CREATE TABLE "offchain"."petition_signatures" (
+CREATE TABLE "petition_signatures" (
 	"account_id" text NOT NULL,
 	"dao_id" text NOT NULL,
 	"signature" text NOT NULL,

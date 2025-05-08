@@ -3,17 +3,16 @@
   "version": "0.3.1",
   "private": true,
   "scripts": {
-    "dev": "ponder dev --schema public --config config/test.config.ts",
+    "dev": "ponder dev --schema public",
     "start": "ponder start --schema public",
-    "codegen": "ponder codegen",
-    "serve": "npm run setup-drizzle && ponder serve --schema public",
+    "serve": "ponder serve --schema public",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "typecheck": "tsc",
-    "setup-drizzle": "drizzle-kit migrate"
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
+    "@hono/zod-validator": "^0.5.0",
     "@viem/anvil": "^0.0.10",
     "drizzle-kit": "^0.31.0",
     "drizzle-orm": "^0.39.3",
