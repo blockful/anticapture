@@ -113,14 +113,16 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:bg-dark sm:p-0"
+      className="flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:bg-dark sm:p-5"
       ref={ref}
     >
       <div
         id="dao-info-header"
         className="hidden w-full flex-col sm:flex xl:flex-row"
       >
-        <div className="flex w-full flex-col items-start gap-5 p-4 xl:w-1/2">
+        {/* Desktop: DAO info and Risk Areas with vertical divider */}
+        <div className="flex w-full flex-col items-start gap-5 xl:w-1/2">
+          {/* DAO Info */}
           <div className="flex gap-3.5">
             <div className="flex">
               <DaoAvatarIcon daoId={daoId} className="size-icon-xl" isRounded />
@@ -177,7 +179,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
         </div>
-        <div className="flex w-full p-4 xl:w-1/2">
+        {/* Vertical divider for desktop layout */}
+        <div className="mx-5 hidden border-l border-neutral-800 xl:block" />
+        <div className="flex w-full xl:w-1/2">
           <div className="flex w-full flex-col gap-1">
             <RiskAreaCardWrapper
               title={riskAreas.title}
@@ -189,7 +193,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
         </div>
-
         <div className="flex w-full flex-1"></div>
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
@@ -261,16 +264,24 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       </div>
-      <div className="hidden h-full w-full sm:flex">
-        <SecurityCouncilCard daoOverview={daoOverview} />
-      </div>
-      <div className="mt-4 flex h-full w-full sm:hidden">
-        <SecurityCouncilCard daoOverview={daoOverview} />
-      </div>
-      <div className="border border-lightDark sm:hidden" />
+      {daoOverview.securityCouncil && (
+        <div className="w-full">
+          {/* Horizontal divider between main info/risk area and Security Council */}
+          <div>
+            <div className="my-5 w-full border-t border-lightDark" />
+          </div>
+          <div className="hidden h-full w-full sm:flex">
+            <SecurityCouncilCard daoOverview={daoOverview} />
+          </div>
+          <div className="mt-4 flex h-full w-full sm:hidden">
+            <SecurityCouncilCard daoOverview={daoOverview} />
+          </div>
+        </div>
+      )}
+      <div className="m-4 border border-lightDark sm:hidden" />
       <div
         id="dao-info-cards"
-        className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
+        className="mt-5 !pt-5 flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
       >
         <div className="flex w-full sm:border-r sm:border-lightDark">
           <VoteCard daoOverview={daoOverview} />
