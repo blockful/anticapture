@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { AlertTriangle, CheckCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
 import { Stage } from "@/components/atoms/StageTag";
@@ -66,13 +66,26 @@ export const StageContent = ({
               <div key={index}>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle
-                      className={cn(
-                        "size-4",
-                        stage === Stage.ONE && "text-error",
-                        stage === Stage.TWO && "text-warning",
-                      )}
-                    />
+                    {stage === Stage.ONE && (
+                      <div>
+                        <AlertTriangle
+                          className={cn(
+                            "size-4",
+                            stage === Stage.ONE && "text-error",
+                          )}
+                        />
+                      </div>
+                    )}
+                    {stage === Stage.TWO && (
+                      <div>
+                        <AlertCircle
+                          className={cn(
+                            "size-4",
+                            stage === Stage.TWO && "text-warning",
+                          )}
+                        />
+                      </div>
+                    )}
                     <p className="text-sm font-normal text-white">
                       {issue.title}
                     </p>
