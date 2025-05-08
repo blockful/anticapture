@@ -6,13 +6,13 @@ import {
   DaoInfoDropdown,
   DaoAvatarIcon,
   FocusIcon,
+  TooltipInfo,
 } from "@/components/atoms";
 import {
   QuorumCard,
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
-  RiskAreaCard,
   RiskAreaCardWrapper,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
@@ -158,7 +158,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
-              <InfoIcon className="size-4 text-foreground" />
+              <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(
@@ -226,7 +226,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
-              <InfoIcon className="size-4 text-foreground" />
+              <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(

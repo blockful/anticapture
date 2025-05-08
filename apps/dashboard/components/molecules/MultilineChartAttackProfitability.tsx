@@ -32,7 +32,7 @@ import {
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
-import { ClockwiseIcon } from "@/components/atoms/icons/ClockwiseIcon";
+import { ResearchPendingChartBlur } from "@/components/atoms/ResearchPendingChartBlur";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -163,14 +163,7 @@ export const MultilineChartAttackProfitability = ({
 
   return (
     <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
-      {mocked && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg border border-lightDark bg-black/5 backdrop-blur-[6px]">
-          <div className="flex items-center gap-2 rounded-full bg-[#1c1c1c] px-4 py-2 text-sm text-foreground">
-            <ClockwiseIcon className="size-5 text-foreground" />
-            RESEARCH PENDING
-          </div>
-        </div>
-      )}
+      {mocked && <ResearchPendingChartBlur />}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>
           <CartesianGrid vertical={false} stroke="#27272a" />

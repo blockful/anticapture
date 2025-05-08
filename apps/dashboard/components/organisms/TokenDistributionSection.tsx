@@ -80,6 +80,7 @@ export const TokenDistributionSection = () => {
         <SwitcherDate
           defaultValue={TimeInterval.ONE_YEAR}
           setTimeInterval={setDays}
+          isSmall
         />
       }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
