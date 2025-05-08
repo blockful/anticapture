@@ -10,7 +10,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { isConnected, address } = useAccount();
-  const { data, isLoading: loading } = usePetitionSignatures(
+  const { data, isLoading: loading, mutate: refreshData } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
     address,
   );
@@ -27,6 +27,7 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         loading={loading}
         isConnected={isConnected}
         address={address}
+        refreshData={refreshData}
       />
     </TheSectionLayout>
   );
