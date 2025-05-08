@@ -101,8 +101,10 @@ export const SwitcherDate = ({
           <TabsTrigger
             key={interval}
             className={cn(
-              "px-3 py-1.5 text-sm font-medium",
-              isSmall ? "w-fit" : "min-w-[84px]",
+              "text-sm font-medium",
+              isSmall
+                ? "min-w-[60px] px-1.5 py-0.5"
+                : "min-w-[84px] px-3 py-1.5",
             )}
             value={interval}
             onClick={() => setTimeInterval(interval)}

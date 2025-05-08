@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/components/atoms/icons";
 
 export enum Stage {
@@ -121,7 +121,12 @@ const Issue = ({
 }) => {
   return (
     <div className="flex items-center gap-[6px]">
-      <AlertCircle className={cn(["size-4", STAGE_STYLES[daoStage]])} />
+      {daoStage === Stage.ZERO && (
+        <AlertTriangle className="size-4 text-error" />
+      )}
+      {daoStage === Stage.ONE && (
+        <AlertCircle className="size-4 text-warning" />
+      )}
       <span className="font-inter text-sm font-normal leading-5 text-white">
         {children}
       </span>
