@@ -251,7 +251,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 RISK AREAS
               </h3>
-              <InfoIcon className="size-4 text-foreground" />
             </div>
             <RiskAreaCardWrapper
               title={riskAreas.title}
