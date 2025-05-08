@@ -1,13 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { MetricData, TokenDistributionContextProps } from "@/contexts/types";
+import { TokenDistributionContextProps } from "@/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { formatUnits } from "viem";
 import { useTimeSeriesData } from "@/hooks";
+import { formatUnits } from "viem";
 
 const initialTokenDistributionMetricData = {
   value: undefined,
@@ -19,207 +19,118 @@ export const TokenDistributionContext =
     days: TimeInterval.ONE_YEAR,
     setDays: () => {},
     totalSupply: initialTokenDistributionMetricData,
-    setTotalSupply: () => {},
     totalSupplyChart: [],
-    setTotalSupplyChart: () => {},
     circulatingSupply: initialTokenDistributionMetricData,
-    setCirculatingSupply: () => {},
     circulatingSupplyChart: [],
-    setCirculatingSupplyChart: () => {},
     delegatedSupply: initialTokenDistributionMetricData,
-    setDelegatedSupply: () => {},
     delegatedSupplyChart: [],
-    setDelegatedSupplyChart: () => {},
     cexSupply: initialTokenDistributionMetricData,
-    setCexSupply: () => {},
     cexSupplyChart: [],
-    setCexSupplyChart: () => {},
     dexSupply: initialTokenDistributionMetricData,
-    setDexSupply: () => {},
     dexSupplyChart: [],
-    setDexSupplyChart: () => {},
     lendingSupply: initialTokenDistributionMetricData,
-    setLendingSupply: () => {},
     lendingSupplyChart: [],
-    setLendingSupplyChart: () => {},
   });
+
+interface TokenDistributionProviderProps {
+  children: React.ReactNode;
+  daoId: DaoIdEnum;
+}
 
 export const TokenDistributionProvider = ({
   children,
   daoId,
-}: {
-  children: React.ReactNode;
-  daoId: DaoIdEnum;
-}) => {
+}: TokenDistributionProviderProps) => {
   const [days, setDays] = useState<TimeInterval>(TimeInterval.ONE_YEAR);
-  const [totalSupply, setTotalSupply] = useState<MetricData>(
-    initialTokenDistributionMetricData,
-  );
-  const [totalSupplyChart, setTotalSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
-  const [circulatingSupply, setCirculatingSupply] = useState<MetricData>(
-    initialTokenDistributionMetricData,
-  );
-  const [circulatingSupplyChart, setCirculatingSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
-  const [delegatedSupply, setDelegatedSupply] = useState<MetricData>(
-    initialTokenDistributionMetricData,
-  );
-  const [delegatedSupplyChart, setDelegatedSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
-  const [cexSupply, setCexSupply] = useState<MetricData>(
-    initialTokenDistributionMetricData,
-  );
-  const [cexSupplyChart, setCexSupplyChart] = useState<DaoMetricsDayBucket[]>(
-    [],
-  );
-  const [dexSupply, setDexSupply] = useState<MetricData>(
-    initialTokenDistributionMetricData,
-  );
-  const [dexSupplyChart, setDexSupplyChart] = useState<DaoMetricsDayBucket[]>(
-    [],
-  );
-  const [lendingSupply, setLendingSupply] = useState<MetricData>(
-    initialTokenDistributionMetricData,
-  );
-  const [lendingSupplyChart, setLendingSupplyChart] = useState<
-    DaoMetricsDayBucket[]
-  >([]);
 
-  const metricsWithCallBacks = useMemo(
-    () => [
-      {
-        type: MetricTypesEnum.TOTAL_SUPPLY,
-        setState: setTotalSupply,
-        setChart: setTotalSupplyChart,
-      },
-      {
-        type: MetricTypesEnum.DELEGATED_SUPPLY,
-        setState: setDelegatedSupply,
-        setChart: setDelegatedSupplyChart,
-      },
-      {
-        type: MetricTypesEnum.CIRCULATING_SUPPLY,
-        setState: setCirculatingSupply,
-        setChart: setCirculatingSupplyChart,
-      },
-      {
-        type: MetricTypesEnum.CEX_SUPPLY,
-        setState: setCexSupply,
-        setChart: setCexSupplyChart,
-      },
-      {
-        type: MetricTypesEnum.DEX_SUPPLY,
-        setState: setDexSupply,
-        setChart: setDexSupplyChart,
-      },
-      {
-        type: MetricTypesEnum.LENDING_SUPPLY,
-        setState: setLendingSupply,
-        setChart: setLendingSupplyChart,
-      },
-    ],
-    [],
-  );
+  const metricTypes = [
+    MetricTypesEnum.TOTAL_SUPPLY,
+    MetricTypesEnum.CIRCULATING_SUPPLY,
+    MetricTypesEnum.DELEGATED_SUPPLY,
+    MetricTypesEnum.CEX_SUPPLY,
+    MetricTypesEnum.DEX_SUPPLY,
+    MetricTypesEnum.LENDING_SUPPLY,
+  ];
 
-  const metricTypes = useMemo(
-    () =>
-      metricsWithCallBacks.map(
-        (metric) => metric.type.trim().replace(/^"|"$/g, "") as MetricTypesEnum,
-      ),
-    [metricsWithCallBacks],
-  );
+  const { data: timeSeriesData } = useTimeSeriesData(daoId, metricTypes, days, {
+    refreshInterval: 300000,
+    revalidateOnFocus: false,
+  });
 
-  const parsedDays = parseInt(days.split("d")[0]);
+  const calculateChangeRate = (data: DaoMetricsDayBucket[] = []): string | null => {
+    if (!data || data.length < 2) return null;
 
-  // Use the SWR hook to fetch data
-  const { data: allData, error } = useTimeSeriesData(
-    daoId,
-    metricTypes,
-    parsedDays,
-    {
-      refreshInterval: 300000, // Refresh every 5 minutes
-      revalidateOnFocus: false,
-    },
-  );
-
-  // Process the data when it changes
-  useEffect(() => {
-    if (error) {
-      console.error("Error fetching token distribution data:", error);
-      // Set default states on error
-      metricsWithCallBacks.forEach((metric) => {
-        metric.setState(initialTokenDistributionMetricData);
-        metric.setChart([]);
-      });
-      return;
-    }
-
-    if (!allData) return; // Skip if data is not loaded yet
-
-    // Process each metric with its data
-    metricsWithCallBacks.forEach((metric) => {
-      const metricType = metric.type
-        .trim()
-        .replace(/^"|"$/g, "") as MetricTypesEnum;
-      const data = allData[metricType] || [];
-
+    try {
       if (data.length > 0) {
-        let changeRate;
         const oldHigh = data[0].high ?? "0";
         const currentHigh = data[data.length - 1]?.high ?? "0";
         if (currentHigh === "0") {
-          changeRate = "0";
+          return "0";
         } else {
-          changeRate = formatUnits(
+          return formatUnits(
             (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
               BigInt(1e18),
             18,
           );
         }
-        metric.setState({ value: currentHigh, changeRate });
-        metric.setChart(data);
-      } else {
-        metric.setState(initialTokenDistributionMetricData);
-        metric.setChart([]);
       }
-    });
-  }, [allData, error, metricsWithCallBacks]);
+    } catch (e) {
+      return null;
+    }
+    return null;
+  };
+
+  const value: TokenDistributionContextProps = {
+    days,
+    setDays,
+    totalSupply: {
+      value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
+      changeRate: calculateChangeRate(
+        timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY],
+      ),
+    },
+    totalSupplyChart: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY] || [],
+    circulatingSupply: {
+      value: timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY]?.at(-1)?.high  ?? null,
+      changeRate: calculateChangeRate(
+        timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY],
+      ),
+    },
+    circulatingSupplyChart:
+      timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY] || [],
+    delegatedSupply: {
+      value: timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high  ?? null,
+      changeRate: calculateChangeRate(
+        timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
+      ),
+    },
+    delegatedSupplyChart:
+      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY] || [],
+    cexSupply: {
+      value: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY]?.at(-1)?.high ?? null,
+      changeRate: calculateChangeRate(
+        timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY],
+      ),
+    },
+    cexSupplyChart: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY] || [],
+    dexSupply: {
+      value: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY]?.at(-1)?.high ?? null,
+      changeRate: calculateChangeRate(
+        timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY],
+      ),
+    },
+    dexSupplyChart: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY] || [],
+    lendingSupply: {
+      value: timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY]?.at(-1)?.high ?? null,
+      changeRate: calculateChangeRate(
+        timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY],
+      ),
+    },
+    lendingSupplyChart: timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY] || [],
+  };
 
   return (
-    <TokenDistributionContext.Provider
-      value={{
-        days,
-        totalSupply,
-        totalSupplyChart,
-        circulatingSupply,
-        circulatingSupplyChart,
-        delegatedSupply,
-        delegatedSupplyChart,
-        cexSupply,
-        cexSupplyChart,
-        dexSupply,
-        dexSupplyChart,
-        lendingSupply,
-        lendingSupplyChart,
-        setDays,
-        setTotalSupply,
-        setTotalSupplyChart,
-        setCirculatingSupply,
-        setCirculatingSupplyChart,
-        setDelegatedSupply,
-        setDelegatedSupplyChart,
-        setCexSupply,
-        setCexSupplyChart,
-        setDexSupply,
-        setDexSupplyChart,
-        setLendingSupply,
-        setLendingSupplyChart,
-      }}
-    >
+    <TokenDistributionContext.Provider value={value}>
       {children}
     </TokenDistributionContext.Provider>
   );

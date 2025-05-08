@@ -1,8 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { WalletIcon } from "@/components/atoms";
+import { cn } from "@/lib/client/utils";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 
-export const ConnectWallet = () => {
+const Jazzicon = dynamic(
+  () => import("react-jazzicon").then((mod) => mod.default),
+  {
+    ssr: false,
+  },
+);
+
+export const ConnectWallet = ({
+  label = "Connect",
+  className,
+}: {
+  label?: string;
+  className?: string;
+}) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -14,8 +30,6 @@ export const ConnectWallet = () => {
         authenticationStatus,
         mounted,
       }) => {
-        // Note: If your app doesn't use authentication, you
-        // can remove all 'authenticationStatus' checks
         const ready = mounted && authenticationStatus !== "loading";
         const connected =
           ready &&
@@ -40,10 +54,10 @@ export const ConnectWallet = () => {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="btn-connect-wallet"
+                    className={cn("btn-connect-wallet", className)}
                   >
-                    <WalletIcon />
-                    Connect
+                    <WalletIcon className="size-3.5 sm:size-4" />
+                    {label}
                   </button>
                 );
               }
@@ -55,42 +69,31 @@ export const ConnectWallet = () => {
                 );
               }
               return (
-                <div
-                  style={{ display: "flex", gap: 12 }}
-                  className="btn-connect-wallet"
-                >
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={openChainModal}
-                    style={{ display: "flex", alignItems: "center" }}
+                    onClick={openAccountModal}
                     type="button"
+                    className="btn-connect-wallet flex items-center gap-2"
                   >
-                    {chain.hasIcon && (
-                      <div
-                        style={{
-                          background: chain.iconBackground,
-                          width: 12,
-                          height: 12,
-                          borderRadius: 999,
-                          overflow: "hidden",
-                          marginRight: 4,
-                        }}
-                      >
-                        {chain.iconUrl && (
-                          <img
-                            alt={chain.name ?? "Chain icon"}
-                            src={chain.iconUrl}
-                            style={{ width: 12, height: 12 }}
+                    {account.ensAvatar ? (
+                      <div className="relative size-6 overflow-hidden rounded-full">
+                        <Image
+                          src={account.ensAvatar}
+                          alt={account.displayName || "ENS Avatar"}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative size-6 overflow-hidden rounded-full">
+                        {account.address && (
+                          <Jazzicon
+                            diameter={24}
+                            seed={parseInt(account.address.slice(2, 10), 16)}
                           />
                         )}
                       </div>
                     )}
-                    {chain.name}
-                  </button>
-                  <button onClick={openAccountModal} type="button">
-                    {account.displayName}
-                    {/* {account.displayBalance
-                      ? ` (${account.displayBalance})`
-                      : ""} */}
                   </button>
                 </div>
               );

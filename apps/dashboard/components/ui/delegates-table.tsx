@@ -1,13 +1,13 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "./data-table";
-import { Button } from "./button";
+import { DataTable } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
 import { ArrowUpDown, InfoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
 import { sanitizeNumber } from "@/lib/client/utils";
-import { Delegates, delegatesData } from "@/lib/mocked-data";
+import { Delegates, delegatesData } from "@/lib/mocked-data/mocked-data";
 import { HeartIcon } from "@/components/atoms";
 
 export const delegatesColumns: ColumnDef<Delegates>[] = [
@@ -65,7 +65,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Amount | %
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },
@@ -83,7 +83,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Delegators
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       );
     },
@@ -102,7 +102,7 @@ export const delegatesColumns: ColumnDef<Delegates>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Voted
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            <ArrowUpDown className="ml-2 size-4" />
           </Button>
 
           <VotedProposalsPercentageInfoIcon />
@@ -164,7 +164,7 @@ const VotedProposalsPercentageInfoIcon = () => {
         days.
       </div>
       <InfoIcon
-        className="ml-2 h-4 w-4 cursor-pointer"
+        className="ml-2 size-4 cursor-pointer"
         onMouseEnter={toggle}
         onMouseLeave={toggle}
       />

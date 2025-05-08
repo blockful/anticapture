@@ -1,6 +1,13 @@
 export enum DaoIdEnum {
   UNI = "UNI",
   ENS = "ENS",
+  ARB = "ARB",
+}
+
+export enum NetworkEnum {
+  ETHEREUM = "ethereum",
+  ARBITRUM = "arbitrum",
+  ANVIL = "anvil",
 }
 
 export enum DaysEnum {

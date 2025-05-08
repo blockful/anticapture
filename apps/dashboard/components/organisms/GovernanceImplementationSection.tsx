@@ -1,6 +1,6 @@
 "use client";
 
-import daoConstantsByDaoId from "@/lib/dao-constants";
+import daoConfigByDaoId from "@/lib/dao-config";
 import { TheSectionLayout } from "@/components/atoms";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { GovernanceImplementationCard } from "@/components/molecules";
@@ -8,8 +8,10 @@ import { useState } from "react";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
-import { GovernanceImplementationField } from "@/lib/dao-constants/types";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { fieldsToArray } from "@/lib/dao-config/utils";
+import { sortByRiskLevel } from "@/lib/enums";
 
 export const GovernanceImplementationSection = ({
   daoId,
@@ -19,12 +21,9 @@ export const GovernanceImplementationSection = ({
   const { isDesktop, isTablet } = useScreenSize();
   const [openCardIds, setOpenCardIds] = useState<string[]>([]);
 
-  if (daoConstantsByDaoId[daoId].inAnalysis) {
-    return null;
-  }
-
-  const governanceImplementationFields =
-    daoConstantsByDaoId[daoId].governanceImplementation?.fields;
+  const governanceImplementationFields = fieldsToArray(
+    daoConfigByDaoId[daoId].governanceImplementation?.fields,
+  ) as (GovernanceImplementationField & { name: string })[];
 
   const handleToggle = (
     e: React.MouseEvent<Element, MouseEvent>,
@@ -54,7 +53,6 @@ export const GovernanceImplementationSection = ({
       icon={<Lightbulb className="text-foreground" />}
       description={SECTIONS_CONSTANTS.governanceImplementation.description}
       anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
-      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <div className="relative flex flex-wrap gap-4">
         <div
@@ -67,8 +65,9 @@ export const GovernanceImplementationSection = ({
           onClick={() => setOpenCardIds([])}
         />
 
-        {governanceImplementationFields?.map(
-          (field: GovernanceImplementationField, index: number) => {
+        {governanceImplementationFields
+          ?.sort((a, b) => sortByRiskLevel(a, b, "desc"))
+          .map((field, index: number) => {
             const cardId = field.name;
             const isOpen = openCardIds.includes(cardId);
 
@@ -82,8 +81,7 @@ export const GovernanceImplementationSection = ({
                 }}
               />
             );
-          },
-        )}
+          })}
       </div>
     </TheSectionLayout>
   );

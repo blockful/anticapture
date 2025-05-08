@@ -109,10 +109,26 @@
   }
 
   .btn-connect-wallet {
-    @apply flex w-full items-center justify-center gap-2 rounded-md border border-transparent bg-lightDark px-3 py-1.5 text-white hover:border hover:border-lightDark hover:bg-transparent;
+    @apply w-full flex size-9 items-center justify-center gap-1.5 rounded-md border border-transparent bg-lightDark py-1 px-2 text-white hover:border hover:border-lightDark hover:bg-transparent;
   }
 
   .card-text-accordion {
     @apply text-sm font-normal leading-normal text-foreground;
+  }
+
+  .section-title-gap {
+    @apply gap-4 sm:gap-6;
+  }
+
+  .link-tangerine {
+    @apply font-mono tracking-wider text-tangerine hover:text-tangerine/80 uppercase leading-none text-[13px] font-medium;
+  }
+
+  .text-table-header {
+    @apply text-xs font-semibold sm:font-medium;
+  }
+
+  .stage-tooltip-box-shadow {
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 8px 10px -6px rgba(0, 0, 0, 0.10);
   }
 }

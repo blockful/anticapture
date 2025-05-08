@@ -11,7 +11,7 @@ import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityConte
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const GovernanceActivitySection = () => {
-  const { setDays } = useGovernanceActivityContext();
+  const { setDays, days } = useGovernanceActivityContext();
 
   return (
     <TheSectionLayout
@@ -21,11 +21,12 @@ export const GovernanceActivitySection = () => {
         <SwitcherDate
           defaultValue={TimeInterval.NINETY_DAYS}
           setTimeInterval={setDays}
+          isSmall
         />
       }
+      days={days}
       description={SECTIONS_CONSTANTS.governanceActivity.description}
       anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
     >
       <GovernanceActivityTable />
     </TheSectionLayout>

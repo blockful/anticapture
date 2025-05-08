@@ -1,9 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { TokenDistribution } from "@/lib/mocked-data";
+import {
+  mockedTableChartMetrics,
+  TokenDistribution,
+} from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowState,
@@ -13,14 +16,14 @@ import {
   TheTable,
   TooltipInfo,
 } from "@/components/atoms";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
-import { useDaoDataContext } from "@/contexts/DaoDataContext";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import {
   cn,
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
+import { useParams } from "next/navigation";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
@@ -66,7 +69,7 @@ const metricDetails: Record<
 };
 
 export const TokenDistributionTable = () => {
-  const { daoData } = useDaoDataContext();
+  const [mounted, setMounted] = useState<boolean>(false);
   const {
     totalSupply,
     days,
@@ -82,15 +85,26 @@ export const TokenDistributionTable = () => {
     lendingSupply,
     lendingSupplyChart,
   } = useTokenDistributionContext();
+  const { daoId } = useParams();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const tokenDistributionColumns: ColumnDef<TokenDistribution>[] = [
     {
       accessorKey: "metric",
       cell: ({ row }) => {
         const metric: string = row.getValue("metric");
+        const currentValue = row.getValue("currentValue");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+          <p
+            className={cn(
+              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]",
+              { "blur-[4px]": currentValue === null },
+            )}
+          >
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
@@ -98,15 +112,16 @@ export const TokenDistributionTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start pl-4">Supply</div>
+        <div className="text-table-header flex w-full items-start justify-start pl-4">
+          Supply
+        </div>
       ),
     },
     {
       accessorKey: "currentValue",
       cell: ({ row }) => {
         const currentValue: number = row.getValue("currentValue");
-
-        if (currentValue === null) {
+        if (!mounted) {
           return (
             <SkeletonRow
               className="h-5 w-32"
@@ -114,7 +129,16 @@ export const TokenDistributionTable = () => {
             />
           );
         }
-
+        if (currentValue === null) {
+          const randomNumber = Math.floor(Math.random() * 999);
+          const randomValues = ["K", "M"];
+          return (
+            <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
+              {randomNumber}
+              {randomValues[randomNumber % 2]}
+            </div>
+          );
+        }
         return (
           <div className="flex items-center justify-end px-4 py-3 text-end">
             {currentValue && formatNumberUserReadable(currentValue)}
@@ -124,13 +148,13 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-end"
+          className="text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
-          Current value ({daoData?.id})
+          {String(daoId)?.toUpperCase()} Amount
           <ArrowUpDown
             props={{
-              className: "ml-2 h-4 w-4",
+              className: "ml-2 size-4",
             }}
             activeState={
               column.getIsSorted() === "asc"
@@ -149,8 +173,7 @@ export const TokenDistributionTable = () => {
       accessorKey: "variation",
       cell: ({ row }) => {
         const variation: string = row.getValue("variation");
-
-        if (variation === null) {
+        if (!mounted) {
           return (
             <div className="flex items-center justify-end">
               <SkeletonRow
@@ -160,21 +183,27 @@ export const TokenDistributionTable = () => {
             </div>
           );
         }
-
+        if (variation === null) {
+          return (
+            <div className="flex items-center justify-end text-green-400 blur-[4px]">
+              {(Math.random() * 100).toFixed(2)}%
+            </div>
+          );
+        }
         return (
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
-                ? "text-[#4ade80]"
+                ? "text-green-400"
                 : Number(variation) < 0
-                  ? "text-red-500"
+                  ? "text-red-400"
                   : ""
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+              <ChevronUp className="size-4 text-green-400" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="h-4 w-4 text-red-500" />
+              <ChevronDown className="size-4 text-red-400" />
             ) : null}
             {variation}%
           </p>
@@ -183,12 +212,12 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-end"
+          className="text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
           <ArrowUpDown
-            props={{ className: "ml-2 h-4 w-4" }}
+            props={{ className: "ml-2 size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -208,10 +237,20 @@ export const TokenDistributionTable = () => {
         const variation: string = row.getValue("variation");
         const chartLastDays: DaoMetricsDayBucket[] =
           row.getValue("chartLastDays") ?? [];
-        if (chartLastDays.length === 0) {
+        if (!mounted) {
           return (
             <div className="flex w-full justify-center">
               <SkeletonRow className="h-5 w-32" />
+            </div>
+          );
+        }
+        if (chartLastDays.length === 0) {
+          return (
+            <div className="flex w-full justify-center py-2.5 blur-[4px]">
+              <Sparkline
+                data={mockedTableChartMetrics.map((item) => Number(item.high))}
+                strokeColor={"#4ADE80"}
+              />
             </div>
           );
         }
@@ -219,13 +258,13 @@ export const TokenDistributionTable = () => {
           <div className="flex w-full justify-center py-2.5">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
-              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+              strokeColor={cn([Number(variation) < 0 ? "#f87171" : "#4ADE80"])}
             />
           </div>
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-center justify-center pr-20">
+        <div className="text-table-header flex w-full items-center justify-center pr-20">
           Last {days.slice(0, -1)} days
         </div>
       ),
@@ -238,68 +277,67 @@ export const TokenDistributionTable = () => {
       data={[
         {
           metric: "Total",
-          currentValue: totalSupply.value
+          currentValue: !!totalSupply.value
             ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
-            : null,
+            : totalSupply.value,
           variation: totalSupply.changeRate
             ? formatVariation(totalSupply.changeRate)
-            : null,
+            : totalSupply.changeRate,
           chartLastDays: totalSupplyChart,
         },
         {
           metric: "Delegated",
-          currentValue: delegatedSupply.value
+          currentValue: !!delegatedSupply.value
             ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
-            : null,
+            : delegatedSupply.value,
           variation: delegatedSupply.changeRate
             ? formatVariation(delegatedSupply.changeRate)
-            : null,
+            : delegatedSupply.changeRate,
           chartLastDays: delegatedSupplyChart,
         },
         {
           metric: "Circulating",
           currentValue: circulatingSupply.value
             ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))
-            : null,
+            : circulatingSupply.value,
           variation: circulatingSupply.changeRate
             ? formatVariation(circulatingSupply.changeRate)
-            : null,
+            : circulatingSupply.changeRate,
           chartLastDays: circulatingSupplyChart,
         },
         {
           metric: "CEX",
           currentValue: cexSupply.value
             ? String(BigInt(cexSupply.value) / BigInt(10 ** 18))
-            : null,
+            : cexSupply.value,
           variation: cexSupply.changeRate
             ? formatVariation(cexSupply.changeRate)
-            : null,
+            : cexSupply.changeRate,
           chartLastDays: cexSupplyChart,
         },
         {
           metric: "DEX",
           currentValue: dexSupply.value
             ? String(BigInt(dexSupply.value) / BigInt(10 ** 18))
-            : null,
+            : dexSupply.value,
           variation: dexSupply.changeRate
             ? formatVariation(dexSupply.changeRate)
-            : null,
+            : dexSupply.changeRate,
           chartLastDays: dexSupplyChart,
         },
         {
           metric: "Lending",
           currentValue: lendingSupply.value
             ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18))
-            : null,
+            : lendingSupply.value,
           variation: lendingSupply.changeRate
             ? formatVariation(lendingSupply.changeRate)
-            : null,
+            : lendingSupply.changeRate,
           chartLastDays: lendingSupplyChart,
         },
       ]}
       withPagination={true}
       withSorting={true}
-      onRowClick={() => {}}
     />
   );
 };

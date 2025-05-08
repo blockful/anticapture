@@ -23,7 +23,7 @@ export const QuorumCard = () => {
     totalSupply.value !== undefined &&
     formatEther(
       (BigInt(daoData.quorum) * BigInt(1e20)) /
-        BigInt(totalSupply.value as string),
+        BigInt(totalSupply.value ?? "1" as string),
     );
 
   const proposalThresholdPercentage =
@@ -31,7 +31,7 @@ export const QuorumCard = () => {
     totalSupply.value !== undefined &&
     formatEther(
       (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
-        BigInt(totalSupply.value as string),
+        BigInt(totalSupply.value ?? "1" as string),
     );
 
   const quorumValue = daoData.quorum

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { AnimatedNumber } from "./animated-number";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { SupplyIcon } from "@/components/atoms";
 

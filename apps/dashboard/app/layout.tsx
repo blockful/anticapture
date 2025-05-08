@@ -1,13 +1,20 @@
-import "./globals.css";
+import "@/app/globals.css";
 import "tailwindcss";
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { GlobalProviders } from "@/components/providers/GlobalProviders";
 import { ReactNode } from "react";
 import HotjarScript from "@/hotjar";
+import { Inter, Roboto_Mono } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
+
+const roboto = Roboto_Mono({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-mono",
+});
 
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -54,13 +61,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <HotjarScript />
       </head>
       <body
-        className={`${inter.className} overflow-x-hidden bg-darkest xl:overflow-hidden`}
+        className={`${inter.className} ${roboto.variable} overflow-x-hidden xl:overflow-hidden`}
       >
-        <GlobalProviders>
-          <div className="max-h-screen overflow-auto xl:ml-[330px]">
-            {children}
-          </div>
-        </GlobalProviders>
+        <GlobalProviders>{children}</GlobalProviders>
       </body>
     </html>
   );

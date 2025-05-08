@@ -1,9 +1,0 @@
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile.server"
-buildCommand = "docker build -f ./Dockerfile.server --build-arg DATABASE_URL=${DATABASE_URL} ."
-
-[deploy]
-numReplicas = 1
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 3

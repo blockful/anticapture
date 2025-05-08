@@ -13,57 +13,57 @@ import {
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/lib/client/utils";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { TokenDistributionCustomTooltip } from "@/components/atoms";
+import { ResearchPendingChartBlur } from "@/components/atoms/ResearchPendingChartBlur";
 
 interface MultilineChartTokenDistributionProps {
-  datasets: Record<string, DaoMetricsDayBucket[]>;
+  datasets: Record<string, DaoMetricsDayBucket[] | undefined>;
   chartConfig: Record<string, { label: string; color: string }>;
   filterData?: string;
+  mocked?: boolean;
 }
 
 export const MultilineChartTokenDistribution = ({
   datasets,
   chartConfig,
   filterData,
+  mocked = false,
 }: MultilineChartTokenDistributionProps) => {
+  if (!datasets || Object.keys(datasets).length === 0) {
+    return null;
+  }
+
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
-      dataset.map((item) => item.date),
+      dataset?.map((item) => item.date),
     ),
   );
 
-  const fillMissingData = (
-    dataset: DaoMetricsDayBucket[],
-    date: string,
-  ): number | null => {
-    const entry = dataset.find((item) => item.date === date);
-    return entry ? Number(entry.high) : null;
-  };
+  const chartData = Array.from(allDates)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((date) => {
+      const dataPoint: Record<string, number | null> = {
+        date: Number(date),
+      };
 
-  let lastKnownValues: Record<string, number | null> = {};
+      Object.keys(datasets).forEach((key) => {
+        const entry = datasets[key as keyof typeof datasets]?.find(
+          (item) => item.date === date,
+        );
+        dataPoint[key] = entry ? Number(entry.high) : null;
+      });
 
-  const chartData = Array.from(allDates).map((date) => {
-    const dataPoint: Record<string, any> = { date };
-
-    Object.keys(datasets).forEach((key) => {
-      const value = fillMissingData(
-        datasets[key as keyof typeof datasets],
-        date,
-      );
-      if (value !== null) lastKnownValues[key] = value;
-      dataPoint[key] = lastKnownValues[key] ?? null;
+      return dataPoint;
     });
 
-    return dataPoint;
-  });
-
-  const newDataSets = Object.keys(datasets).filter(
+  const visibleDataSets = Object.keys(datasets).filter(
     (item) => item !== filterData,
   );
 
   return (
-    <div className="flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark p-4 text-white">
+    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark text-white">
+      {mocked && <ResearchPendingChartBlur />}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>
           <CartesianGrid vertical={false} stroke="#27272a" />
@@ -91,7 +91,7 @@ export const MultilineChartTokenDistribution = ({
             }
           />
           {Object.keys(chartConfig)
-            .filter((item) => newDataSets.includes(item))
+            .filter((item) => visibleDataSets.includes(item))
             .map((key) => (
               <Line
                 key={key}

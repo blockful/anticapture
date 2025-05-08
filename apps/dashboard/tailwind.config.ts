@@ -12,16 +12,22 @@ const config: Config = {
       screens: {
         xl4k: "2000px",
       },
+      fontFamily: {
+        mono: ["var(--font-mono)"],
+      },
       colors: {
         darkest: "#09090B",
         dark: "#18181B",
         middleDark: "#3F3F46",
         lightDark: "#27272A",
         foreground: "#A1A1AA",
-        white: "#FFFFFF",
+        white: "#FAFAFA",
         colored: "#E66AE9",
         accentColored: "#332433",
         tangerine: "#EC762E",
+        error: "#f87171",
+        warning: "#facc15",
+        success: "#4ade80",
       },
       keyframes: {
         "accordion-down": {
@@ -44,6 +50,20 @@ const config: Config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      letterSpacing: {
+        wider: "0.72px",
+      },
+      size: {
+        "icon-xxs": "16px",
+        "icon-xs": "20px",
+        "icon-sm": "24px",
+        "icon-md": "36px",
+        "icon-lg": "48px",
+        "icon-xl": "76px",
+      },
+      fontSize: {
+        "alternative-sm": "13px",
       },
     },
   },

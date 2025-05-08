@@ -20,8 +20,7 @@ import {
   MetricTypesEnum,
   TREASURY_ADDRESSES,
 } from "./constants";
-import { zeroAddress } from "viem";
-import viemClient from "./viemClient";
+import { Address, zeroAddress } from "viem";
 import { DaoIdEnum } from "./enums";
 import {
   DaoDelegateChangedEvent,
@@ -175,11 +174,12 @@ export const tokenTransfer = async (
   event: DaoTransferEvent,
   context: Context,
   daoId: DaoIdEnum,
+  tokenAddress: Address,
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
-      { name: "value", daos: ["ENS", "SHU"] },
+      { name: "value", daos: ["ENS", "SHU", "ARB"] },
       { name: "amount", daos: ["COMP", "UNI"] },
     ],
     event.args,
@@ -203,18 +203,18 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  const tokenAddress = viemClient.daoConfigParams[daoId].tokenAddress;
-
-  // Create a new transfer record
-  await context.db.insert(transfers).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
-    daoId,
-    tokenId: tokenAddress,
-    amount: value,
-    fromAccountId: from,
-    toAccountId: to,
-    timestamp: event.block.timestamp,
-  });
+  await context.db
+    .insert(transfers)
+    .values({
+      id: [event.transaction.hash, event.log.logIndex].join("-"),
+      daoId,
+      tokenId: tokenAddress,
+      amount: value,
+      fromAccountId: from,
+      toAccountId: to,
+      timestamp: event.block.timestamp,
+    })
+    .onConflictDoNothing();
 
   // Update the to account's balance
   await context.db
@@ -242,9 +242,12 @@ export const tokenTransfer = async (
       balance: current.balance - value,
     }));
 
-  const currentLendingSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.lendingSupply;
+  const currentLendingSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.lendingSupply ?? BigInt(0);
 
   const lendingAddressList = Object.values(LendingAddresses[daoId]);
   const isToLending = lendingAddressList.includes(to);
@@ -269,9 +272,12 @@ export const tokenTransfer = async (
     );
   }
 
-  const currentCexSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.cexSupply;
+  const currentCexSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.cexSupply ?? BigInt(0);
 
   const cexAddressList = Object.values(CEXAddresses[daoId]);
   const isToCex = cexAddressList.includes(to);
@@ -294,9 +300,12 @@ export const tokenTransfer = async (
     );
   }
 
-  const currentDexSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.dexSupply;
+  const currentDexSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.dexSupply ?? BigInt(0);
 
   const dexAddressList = Object.values(DEXAddresses[daoId]);
   const isToDex = dexAddressList.includes(to);
@@ -319,9 +328,12 @@ export const tokenTransfer = async (
     );
   }
 
-  const currentTreasury = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.treasury;
+  const currentTreasury =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.treasury ?? BigInt(0);
 
   const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
   const isToTreasury = treasuryAddressList.includes(to);
@@ -347,9 +359,12 @@ export const tokenTransfer = async (
     );
   }
 
-  const currentTotalSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.totalSupply;
+  const currentTotalSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.totalSupply ?? BigInt(0);
 
   const burningAddressesAddressList = Object.values(BurningAddresses[daoId]);
   const isToBurningAddress = burningAddressesAddressList.includes(to);
@@ -378,9 +393,12 @@ export const tokenTransfer = async (
     );
   }
 
-  const currentCirculatingSupply = (await context.db.find(token, {
-    id: event.log.address,
-  }))!.circulatingSupply;
+  const currentCirculatingSupply =
+    (
+      await context.db.find(token, {
+        id: event.log.address,
+      })
+    )?.circulatingSupply ?? BigInt(0);
 
   const isCirculatingSupplyTransaction =
     isTotalSupplyTransaction || isTreasuryTransaction;

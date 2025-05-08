@@ -1,13 +1,23 @@
 export const SECTIONS_CONSTANTS = {
-  dashboard: {
-    title: "Dashboard",
+  panel: {
+    title: "Panel",
     description: undefined,
-    anchorId: "dashboardSection",
+    anchorId: "panel",
   },
-  daoInfo: {
-    title: "DAO Information",
+  alerts: {
+    title: "Alerts",
     description: undefined,
-    anchorId: "daoInfoSection",
+    anchorId: "alerts",
+  },
+  daoOverview: {
+    title: "DAO Overview",
+    description: undefined,
+    anchorId: "daoOverviewSection",
+  },
+  showSupport: {
+    title: "Show Support",
+    description: undefined,
+    anchorId: "showSupportSection",
   },
   attackProfitability: {
     title: "Attack Profitability",
@@ -29,7 +39,29 @@ export const SECTIONS_CONSTANTS = {
   },
   governanceImplementation: {
     title: "Governance Implementation",
+    titleAbbreviation: "Gov Implementation",
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
+  supportDaos: {
+    title: "Support DAOs",
+    description: "",
+    anchorId: "supportDaosSection",
+  },
+  riskAnalysis: {
+    title: "Risk Analysis",
+    description:
+      "Assess critical vulnerabilities in your DAO’s governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
+    anchorId: "riskAnalysisSection",
+  },
+  resilienceStages: {
+    title: "Resilience Stages",
+    description:
+      "Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression. ",
+    anchorId: "resilienceStagesSection",
+  },
 };
+
+export const ANTICAPTURE_TWITTER = "https://x.com/anticapture";
+export const ANTICAPTURE_TELEGRAM = "https://t.me/danimimm";
+export const ANTICAPTURE_TELEGRAM_BOT = "https://t.me/anticapture_bot";

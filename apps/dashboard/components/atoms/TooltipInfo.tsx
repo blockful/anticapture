@@ -5,14 +5,14 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { InfoIcon } from "@/components/atoms";
+import { InfoIcon } from "@/components/atoms/icons";
 import { cn } from "@/lib/client/utils";
 
 export function TooltipInfo({
-  text,
+  text = "",
   className,
 }: {
-  text: string;
+  text?: string;
   className?: string;
 }) {
   return (

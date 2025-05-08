@@ -1,20 +1,64 @@
-import { zeroAddress } from "viem";
-import { DaoIdEnum } from "./enums";
+import { Abi, Address, zeroAddress } from "viem";
+
+import { DaoIdEnum, NetworkEnum } from "./enums";
+import { UNITokenAbi } from "@/indexer/uni";
+import { ENSTokenAbi } from "@/indexer/ens";
+import { ARBTokenAbi } from "@/indexer/arb";
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;
 export const MILISECONDS_IN_DAY = SECONDS_IN_DAY * 1000;
 export const DAYS_IN_YEAR = 365;
 
-export const CONTRACT_ADDRESS_MAINNET = {
-  [DaoIdEnum.UNI]: {
-    token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-    governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+export const CONTRACT_ADDRESSES: Record<
+  NetworkEnum,
+  Partial<
+    Record<
+      DaoIdEnum,
+      {
+        token: { address: Address; decimals: number; abi: Abi };
+        governor?: Address;
+      }
+    >
+  >
+> = {
+  [NetworkEnum.ETHEREUM]: {
+    [DaoIdEnum.UNI]: {
+      token: {
+        address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        decimals: 18,
+        abi: UNITokenAbi,
+      },
+      governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+    },
+    [DaoIdEnum.ENS]: {
+      token: {
+        address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        decimals: 18,
+        abi: ENSTokenAbi,
+      },
+      governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+    },
   },
-  [DaoIdEnum.ENS]: {
-    token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-    governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+  [NetworkEnum.ARBITRUM]: {
+    [DaoIdEnum.ARB]: {
+      token: {
+        address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+        decimals: 18,
+        abi: ARBTokenAbi,
+      },
+    },
   },
-};
+  [NetworkEnum.ANVIL]: {
+    [DaoIdEnum.ENS]: {
+      token: {
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        decimals: 18,
+        abi: ENSTokenAbi,
+      },
+      governor: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    },
+  },
+} as const;
 
 export const TREASURY_ADDRESSES = {
   [DaoIdEnum.UNI]: {
@@ -30,6 +74,7 @@ export const TREASURY_ADDRESSES = {
     oldEthRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
     ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
+  [DaoIdEnum.ARB]: {},
 };
 
 export const CEXAddresses = {
@@ -90,6 +135,7 @@ export const CEXAddresses = {
     KuCoinColdWallet: "0x2933782B5A8d72f2754103D1489614F29bfA4625",
     UpbitColdWallet: "0x245445940B317E509002eb682E03f4429184059d",
   },
+  [DaoIdEnum.ARB]: {},
 };
 
 export const DEXAddresses = {
@@ -112,6 +158,7 @@ export const DEXAddresses = {
     Uniswap_ENS_5: "0x92560C178cE069CC014138eD3C2F5221Ba71f58a",
     SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d",
   },
+  [DaoIdEnum.ARB]: {},
 };
 
 export const LendingAddresses = {
@@ -124,6 +171,7 @@ export const LendingAddresses = {
     //After research using intel.arkm and defi llama token-usage page, I only found this lending address so far
     AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e",
   },
+  [DaoIdEnum.ARB]: {},
 };
 
 export const BurningAddresses = {
@@ -137,6 +185,11 @@ export const BurningAddresses = {
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+  },
+  [DaoIdEnum.ARB]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1",
   },
 };
 

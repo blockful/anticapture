@@ -3,38 +3,46 @@
 import { useState } from "react";
 import {
   CrossHairIcon,
-  ExtractableValueToggleHeader,
+  AttackProfitabilityToggleHeader,
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
   RiskLevelCard,
-  ExtractableValueAccordion,
+  AttackProfitabilityAccordion,
 } from "@/components/atoms";
 import {
-  MultilineChartExtractableValue,
+  MultilineChartAttackProfitability,
   AttackCostBarChart,
 } from "@/components/molecules";
 import { TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConstantsByDaoId from "@/lib/dao-constants";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { AttackProfitabilityConfig } from "@/lib/dao-config/types";
 
-export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
+export const AttackProfitabilitySection = ({
+  daoId,
+  attackProfitability,
+}: {
+  daoId: DaoIdEnum;
+  attackProfitability: AttackProfitabilityConfig;
+}) => {
   const defaultDays = TimeInterval.ONE_YEAR;
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
-
-  const daoConstants = daoConstantsByDaoId[daoId.toUpperCase() as DaoIdEnum];
-
-  if (daoConstants.inAnalysis) {
+  if (!attackProfitability) {
     return null;
   }
 
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
+      subtitle={"Cost of Attack vs Profit"}
       icon={<CrossHairIcon className="text-foreground" />}
+      description={SECTIONS_CONSTANTS.attackProfitability.description}
+      infoText={
+        "Treasury values above supply costs indicate high risk. And probably we can add something else here."
+      }
       switchDate={
         <SwitcherDate
           defaultValue={defaultDays}
@@ -42,46 +50,37 @@ export const AttackProfitabilitySection = ({ daoId }: { daoId: DaoIdEnum }) => {
           disableRecentData={true}
         />
       }
-      description={SECTIONS_CONSTANTS.attackProfitability.description}
+      days={days}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
-      riskLevel={
-        <RiskLevelCard status={daoConstants.attackProfitability.riskLevel} />
-      }
-      className="border-b-2 border-b-white/10 px-4 py-8 sm:px-0 sm:py-0"
+      riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <TheCardChartLayout
-        title="Cost of Attack vs Profit"
-        description="Treasury values above supply costs indicate high risk."
         headerComponent={
-          <ExtractableValueToggleHeader
-            treasuryMetric={treasuryMetric}
-            setTreasuryMetric={setTreasuryMetric}
-            costMetric={costMetric}
-            setCostMetric={setCostMetric}
-          />
+          <div className="flex w-full pt-3">
+            <AttackProfitabilityToggleHeader
+              treasuryMetric={treasuryMetric}
+              setTreasuryMetric={setTreasuryMetric}
+              costMetric={costMetric}
+              setCostMetric={setCostMetric}
+            />
+          </div>
         }
       >
-        <MultilineChartExtractableValue
+        <MultilineChartAttackProfitability
           days={days}
           filterData={[treasuryMetric, costMetric]}
         />
       </TheCardChartLayout>
-
-      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="w-full border-t border-lightDark" />
+      <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
         <TheCardChartLayout
-          title={
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Cost Comparison</span>
-              <span className="text-sm font-normal text-foreground">
-                Dollar value comparison of key security indicators.
-              </span>
-            </div>
-          }
+          title="Cost Comparison"
+          subtitle="Treasury values above supply costs indicate high risk."
         >
           <AttackCostBarChart />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">
-          <ExtractableValueAccordion />
+          <AttackProfitabilityAccordion />
         </div>
       </div>
     </TheSectionLayout>

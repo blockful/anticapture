@@ -1,14 +1,14 @@
-import { getApiConfig } from "@/api/config/config";
 import {
   CoingeckoHistoricalMarketData,
   CoingeckoTokenIdEnum,
   isCoingeckoHistoricalMarketData,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
+import { env } from "@/env";
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
-  constructor(private readonly coingeckoApiKey: string) {}
+  constructor(private readonly coingeckoApiKey: string) { }
 
   async getHistoricalTokenData(
     tokenId: CoingeckoTokenIdEnum,
@@ -30,5 +30,4 @@ export class CoingeckoService {
   }
 }
 
-const config = getApiConfig();
-export const coingeckoService = new CoingeckoService(config.coingeckoApiKey);
+export const coingeckoService = new CoingeckoService(env.COINGECKO_API_KEY);

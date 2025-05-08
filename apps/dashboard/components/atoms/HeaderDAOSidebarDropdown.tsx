@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { ArrowLeftIcon, DaoLogoIcon, DaoLogoVariant } from "@/components/atoms";
+import { DaoAvatarIcon } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
-import Link from "next/link";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -43,10 +42,10 @@ export const HeaderDAOSidebarDropdown = () => {
         id: 0,
         label: "Uniswap",
         icon: (
-          <DaoLogoIcon
+          <DaoAvatarIcon
             daoId={DaoIdEnum.UNISWAP}
-            variant={DaoLogoVariant.SECONDARY}
-            className="h-5 w-5 text-[#FC72FF]"
+            className="size-icon-md"
+            isRounded
           />
         ),
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
@@ -55,9 +54,28 @@ export const HeaderDAOSidebarDropdown = () => {
       {
         id: 1,
         label: "ENS",
-        icon: <DaoLogoIcon daoId={DaoIdEnum.ENS} className="h-5 w-5" />,
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.ENS}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
+      },
+      {
+        id: 2,
+        label: "Arbitrum",
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.ARBITRUM}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
+        href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
+        name: DaoIdEnum.ARBITRUM,
       },
     ],
     [],
@@ -77,59 +95,51 @@ export const HeaderDAOSidebarDropdown = () => {
   };
 
   return (
-    <div className="relative inline-block w-full" ref={dropdownRef}>
-      <div className="border-b border-b-lightDark p-3">
-        <Link
-          className="transition-color group flex gap-x-1.5 text-xs font-medium text-foreground duration-500 ease-in-out hover:text-white"
-          href={"/"}
-        >
-          <ArrowLeftIcon className="group-[hover]:text-white" />
-          Back to dashboard
-        </Link>
-      </div>
-      <div className="p-3">
+    <div
+      className="relative z-50 inline-block h-[57px] w-full border-b border-lightDark sm:h-[65px]"
+      ref={dropdownRef}
+    >
+      <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
         <button
-          className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-[#333]"
+          className="flex w-full items-center justify-between gap-2 rounded-md p-1 hover:bg-[#333] sm:rounded-md sm:p-1"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
           <div className="flex w-full items-center gap-2">
-            <div className="rounded-[6px] border border-lightDark bg-dark p-1.5">
-              {currentItem?.icon}
-            </div>
-            <h1 className="text-sm font-semibold text-white">
+            <div>{currentItem?.icon}</div>
+            <h1 className="text-[18px] font-medium leading-6 text-[#FAFAFA]">
               {currentItem?.label}
             </h1>
           </div>
           <div>
-            <ChevronsUpDown className="text-white" />
+            <ChevronsUpDown className="size-5 text-foreground" />
           </div>
         </button>
       </div>
 
       {isOpen && (
         <div
-          className="absolute z-50 mt-2 w-full rounded-lg border border-lightDark bg-dark p-2 shadow-lg"
+          className="absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border border-lightDark bg-dark shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (
             <button
               key={item.id}
               className={
-                "flex w-full items-center justify-between gap-2 rounded-lg p-2 hover:bg-[#333]"
+                "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-[#333]"
               }
               onClick={() => handleSelectItem(item.id, item.href)}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
-              <div className="flex w-full items-center gap-2">
-                <div className="rounded-[6px] border border-lightDark bg-dark p-1.5">
-                  {item.icon}
-                </div>
-                <h1 className="text-sm font-semibold text-white">
-                  {item.label}
-                </h1>
+              <div className="flex w-full items-center gap-1.5 sm:gap-2">
+                <DaoAvatarIcon
+                  daoId={item.name}
+                  className="size-icon-xxs sm:size-icon-sm"
+                  isRounded
+                />
+                <h1 className="text-sm font-normal text-white">{item.label}</h1>
               </div>
             </button>
           ))}

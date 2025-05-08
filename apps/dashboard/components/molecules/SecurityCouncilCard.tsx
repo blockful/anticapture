@@ -1,18 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
-import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import Link from "next/link";
+import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 
 export const SecurityCouncilCard = ({
-  daoConstants,
+  daoOverview,
 }: {
-  daoConstants: DaoConstantsFullySupported;
+  daoOverview: DaoOverviewConfig;
 }) => {
-  const { securityCouncil } = daoConstants;
+  const { securityCouncil } = daoOverview;
 
   const progress = useMemo(() => {
     if (!securityCouncil) return 0;
@@ -51,7 +51,7 @@ export const SecurityCouncilCard = ({
   if (!securityCouncil) return null;
 
   return (
-    <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5 sm:p-4">
+    <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5">
       <div className="flex w-full justify-between gap-5">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
@@ -85,16 +85,16 @@ export const SecurityCouncilCard = ({
                   href={securityCouncil.multisig.externalLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-1 border-b border-dashed border-foreground text-sm font-medium text-[#FAFAFA] duration-300 hover:border-[#FAFAFA]"
+                  className="group flex items-center gap-1 border-b border-dashed border-foreground text-sm font-medium text-white duration-300 hover:border-white"
                 >
                   <Key className="size-3.5 text-tangerine" />
                   {securityCouncil.multisig.threshold}/
                   {securityCouncil.multisig.signers}
-                  <span className="hidden text-foreground duration-300 group-hover:text-[#FAFAFA] sm:inline">
+                  <span className="hidden text-foreground duration-300 group-hover:text-white sm:inline">
                     {" "}
                     required for transactions
                   </span>
-                  <span className="inline text-foreground duration-300 group-hover:text-[#FAFAFA] sm:hidden">
+                  <span className="inline text-foreground duration-300 group-hover:text-white sm:hidden">
                     {" "}
                     required
                   </span>
@@ -108,14 +108,14 @@ export const SecurityCouncilCard = ({
             <div className="flex w-full items-center justify-between sm:hidden">
               <p className="text-sm font-medium text-foreground">Countdown:</p>
               <CountdownDaoInfo
-                daoConstants={daoConstants}
+                daoOverview={daoOverview}
                 className="border-none bg-dark"
               />
             </div>
           </div>
         </div>
         <div className="hidden sm:flex">
-          <CountdownDaoInfo daoConstants={daoConstants} />
+          <CountdownDaoInfo daoOverview={daoOverview} />
         </div>
       </div>
       <div className="flex">

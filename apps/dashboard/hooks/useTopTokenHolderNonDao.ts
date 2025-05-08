@@ -1,9 +1,8 @@
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
-import { DAO_ADDRESSES } from "@/lib/dao-constants/dao-addresses";
-import daoConstantsByDaoId from "@/lib/dao-constants";
-import { DaoConstantsFullySupported } from "@/lib/dao-constants/types";
+import { DAO_ADDRESSES } from "@/lib/dao-config/dao-addresses";
+import daoConfigByDaoId from "@/lib/dao-config";
 interface AccountBalance {
   accountId: string;
   balance: string;
@@ -21,10 +20,10 @@ const fetchTopTokenHolder = async (
   daoId: DaoIdEnum,
 ): Promise<AccountBalance | null> => {
   const daoAddresses = Object.values(DAO_ADDRESSES[daoId]);
-  const tokenAddress = (
-    daoConstantsByDaoId[daoId] as DaoConstantsFullySupported
-  ).contracts.token;
-
+  const tokenAddress = daoConfigByDaoId[daoId].daoOverview?.contracts?.token;
+  if (!tokenAddress) {
+    return null;
+  }
   const response = await fetch(`${BACKEND_ENDPOINT}`, {
     method: "POST",
     headers: {

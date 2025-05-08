@@ -2,7 +2,7 @@
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { GovernanceActivity } from "@/lib/mocked-data";
+import { GovernanceActivity } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpDown,
@@ -17,8 +17,9 @@ import {
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
-import { DaoMetricsDayBucket } from "@/lib/dao-constants/types";
+import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
+import { formatEther } from "viem";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -78,7 +79,7 @@ export const GovernanceActivityTable = () => {
         const details = metric ? metricDetails[metric] : null;
 
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
@@ -86,7 +87,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start px-4">
+        <div className="text-table-header flex w-full items-start justify-start px-4">
           Metrics
         </div>
       ),
@@ -94,7 +95,7 @@ export const GovernanceActivityTable = () => {
     {
       accessorKey: "average",
       cell: ({ row }) => {
-        const average: number = row.getValue("average");
+        const average: string = row.getValue("average");
 
         if (!average) {
           return (
@@ -106,21 +107,19 @@ export const GovernanceActivityTable = () => {
 
         return (
           <div className="flex items-center justify-end px-4 text-end">
-            {average && formatNumberUserReadable(average)}
+            {average}
           </div>
         );
       },
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4"
+          className="text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Average
           <ArrowUpDown
-            props={{
-              className: "ml-2 h-4 w-4",
-            }}
+            props={{ className: "ml-2 size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -156,16 +155,16 @@ export const GovernanceActivityTable = () => {
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
-                ? "text-[#4ade80]"
+                ? "text-green-400"
                 : Number(variation) < 0
-                  ? "text-red-500"
+                  ? "text-red-400"
                   : ""
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="h-4 w-4 text-[#4ade80]" />
+              <ChevronUp className="size-4 text-green-400" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="h-4 w-4 text-red-500" />
+              <ChevronDown className="size-4 text-red-400" />
             ) : null}
             {variation}%
           </p>
@@ -174,12 +173,12 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4"
+          className="text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Variation
           <ArrowUpDown
-            props={{ className: "ml-2 h-4 w-4" }}
+            props={{ className: "ml-2 size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -210,16 +209,16 @@ export const GovernanceActivityTable = () => {
         }
 
         return (
-          <div className="flex h-[52px] w-full items-start justify-start">
+          <div className="flex w-full justify-center py-2.5">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
-              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+              strokeColor={cn([Number(variation) < 0 ? "#f87171" : "#4ade80"])}
             />
           </div>
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-10">
+        <div className="text-table-header flex w-full items-start justify-start px-10">
           Last {days.slice(0, -1)} days
         </div>
       ),
@@ -232,7 +231,9 @@ export const GovernanceActivityTable = () => {
       data={[
         {
           metric: "Treasury",
-          average: treasury.value ? treasury.value : null,
+          average: treasury.value
+            ? formatNumberUserReadable(Number(treasury.value))
+            : null,
           variation: treasury.changeRate
             ? formatVariation(treasury.changeRate)
             : null,
@@ -240,7 +241,9 @@ export const GovernanceActivityTable = () => {
         },
         {
           metric: "Proposals",
-          average: proposals.value ?? null,
+          average: proposals.value
+            ? formatNumberUserReadable(Number(proposals.value), 0)
+            : null,
           variation:
             proposals.changeRate == "0"
               ? "0.00"
@@ -251,7 +254,9 @@ export const GovernanceActivityTable = () => {
         {
           metric: "Active Supply",
           average: activeSupply.value
-            ? String(BigInt(activeSupply.value) / BigInt(10 ** 18))
+            ? formatNumberUserReadable(
+                Number(formatEther(BigInt(activeSupply.value))),
+              )
             : null,
           variation: activeSupply.changeRate
             ? formatVariation(activeSupply.changeRate)
@@ -259,7 +264,9 @@ export const GovernanceActivityTable = () => {
         },
         {
           metric: "Votes",
-          average: votes.value ? votes.value : null,
+          average: votes.value
+            ? formatNumberUserReadable(Number(votes.value), 0)
+            : null,
           variation:
             votes.changeRate == "0"
               ? "0.00"
@@ -269,7 +276,9 @@ export const GovernanceActivityTable = () => {
         },
         {
           metric: "Average Turnout",
-          average: averageTurnout.value ? averageTurnout.value : null,
+          average: averageTurnout.value
+            ? formatNumberUserReadable(Number(averageTurnout.value), 2)
+            : null,
           variation:
             averageTurnout.changeRate == "0"
               ? "0.00"
@@ -280,7 +289,6 @@ export const GovernanceActivityTable = () => {
       ]}
       withPagination={true}
       withSorting={true}
-      onRowClick={() => {}}
     />
   );
 };

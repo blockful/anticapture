@@ -9,9 +9,9 @@ import {
   SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
 } from "@/components/atoms";
-import { formatBlocksToUserReadable, formatTimeUnit } from "@/lib/client/utils";
+import { formatBlocksToUserReadable, formatPlural } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
-import { DaoConstants } from "@/lib/dao-constants/types";
+import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import {
   Tooltip,
   TooltipContent,
@@ -19,13 +19,13 @@ import {
 } from "@/components/ui/tooltip";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 
-export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
+export const VoteCard = ({
+  daoOverview,
+}: {
+  daoOverview: DaoOverviewConfig;
+}) => {
   const { daoData } = useDaoDataContext();
   const { isMobile } = useScreenSize();
-
-  if (daoConstants.inAnalysis) {
-    return null;
-  }
 
   if (!daoData) {
     return <SkeletonDaoInfoCards />;
@@ -42,7 +42,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         items: [
           <SwitchCardDaoInfoItem
             key={"switch"}
-            switched={daoConstants.rules.delay}
+            switched={daoOverview.rules?.delay}
           />,
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
@@ -57,7 +57,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
               />
             </TooltipTrigger>
             <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">
-              {formatTimeUnit(Number(daoData.votingDelay), "block")}
+              {formatPlural(Number(daoData.votingDelay), "block")}
             </TooltipContent>
           </Tooltip>,
         ],
@@ -69,7 +69,7 @@ export const VoteCard = ({ daoConstants }: { daoConstants: DaoConstants }) => {
         items: [
           <SwitchCardDaoInfoItem
             key={"switch"}
-            switched={daoConstants.rules.changeVote}
+            switched={daoOverview.rules?.changeVote}
           />,
         ],
       },

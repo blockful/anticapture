@@ -1,15 +1,5 @@
-import governanceActivity from "./governance-activity/controller";
-import tokenDistribution from "./token-distribution/controller";
-import assets from "./assets.controller";
-import dao from "./dao.controller";
-import petition from "./petition/controller";
-import tokenHistoricalData from "./token-historical-data.controller";
-
-export {
-  governanceActivity,
-  tokenDistribution,
-  assets,
-  dao,
-  petition,
-  tokenHistoricalData,
-};
+export { default as governanceActivity } from "./governance-activity/controller";
+export { default as tokenDistribution } from "./token-distribution/controller";
+export { default as assets } from "./assets.controller";
+export { default as tokenHistoricalData } from "./token-historical-data.controller";
+export { default as votingPower } from "./votingPower";
