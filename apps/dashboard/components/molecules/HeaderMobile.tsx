@@ -33,11 +33,11 @@ export const HeaderMobile = () => {
           setIsMenuOpen(false);
         },
       },
-      {
-        anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
-        label: "Get Security Alerts",
-        icon: TelegramIcon,
-      },
+      // {
+      //   anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
+      //   label: "Get Security Alerts",
+      //   icon: TelegramIcon,
+      // },
     ],
     [router],
   );
