@@ -206,7 +206,7 @@ export const RiskAreaCard = ({
         />
 
         {showTooltip && (
-          <div className="fixed max-sm:left-0 sm:right-[150px] top-[520px] z-50 mt-1 w-screen sm:relative sm:top-0 sm:w-[376px]">
+          <div className="fixed top-[520px] z-50 mt-1 w-screen max-sm:left-0 sm:relative sm:right-[150px] sm:top-0 sm:w-[376px]">
             <RiskTooltipCard
               title={riskInfo.title}
               description={riskInfo.description}
