@@ -1,6 +1,7 @@
 import { Address, verifyMessage } from "viem";
 
 import {
+  DAO_ID,
   PetitionSignatureRequest,
   PetitionSignatureResponse
 } from "../types";
@@ -12,7 +13,7 @@ interface PetitionRepository {
 }
 
 interface AnticaptureClient {
-  getSignersVotingPower: (daoId: string, signers: Address[]) => Promise<bigint>;
+  getSignersVotingPower: (daoId: DAO_ID, signers: Address[]) => Promise<bigint>;
 }
 
 type PetitionResponse = {
@@ -45,15 +46,11 @@ export class PetitionService {
       ...petition,
       timestamp: BigInt(Date.now())
     }
-    try {
-      await this.db.newPetitionSignature(dbPetition);
-      return dbPetition;
-    } catch (error) {
-      throw new Error("Failed to save petition signature");
-    }
+    await this.db.newPetitionSignature(dbPetition);
+    return dbPetition;
   }
 
-  async readPetitions(daoId: string, userAddress?: string): Promise<PetitionResponse> {
+  async readPetitions(daoId: DAO_ID, userAddress?: string): Promise<PetitionResponse> {
     const petitionSignatures = await this.db.getPetitionSignatures(daoId);
 
     if (!petitionSignatures.length) {

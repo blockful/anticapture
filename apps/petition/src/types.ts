@@ -2,6 +2,14 @@ import { Address, Hex } from "viem";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import type { FastifyBaseLogger, FastifyInstance, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerDefault } from "fastify";
 
+export enum DAO_ID {
+  ENS = "ENS",
+  UNI = "UNI",
+  ARB = "ARB",
+  OP = "OP",
+  SCR = "SCR",
+  GTC = "GTC"
+}
 /**
  * FastifyTypedInstance type provides proper typing for Fastify with Zod integration.
  * 
@@ -24,7 +32,7 @@ export interface PetitionSignatureRequest {
   message: string;
   signature: Hex;
   accountId: Address;
-  daoId: string;
+  daoId: DAO_ID;
 }
 
 export interface PetitionSignatureResponse extends PetitionSignatureRequest {
