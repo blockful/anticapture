@@ -121,10 +121,10 @@ const Issue = ({
 }) => {
   return (
     <div className="flex items-center gap-[6px]">
-      {daoStage === Stage.ONE && (
+      {daoStage === Stage.ZERO && (
         <AlertTriangle className="size-4 text-error" />
       )}
-      {daoStage === Stage.TWO && (
+      {daoStage === Stage.ONE && (
         <AlertCircle className="size-4 text-warning" />
       )}
       <span className="font-inter text-sm font-normal leading-5 text-white">
