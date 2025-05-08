@@ -94,10 +94,11 @@ export const StageContent = ({
                       ))}
                     </div>
                   </div>
+                  {index < issues.length - 1 && (
+                    <div className="border-t border-middleDark" />
+                  )}
+                  {index === issues.length - 1 && <div className="pb-2" />}
                 </div>
-                {index < issues.length - 1 && (
-                  <div className="my-2 border-t border-middleDark" />
-                )}
               </div>
             ))
           )}
