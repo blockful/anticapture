@@ -278,10 +278,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       )}
-      <div className="m-4 border border-lightDark sm:hidden" />
+      <div className="my-4 border border-lightDark sm:hidden" />
       <div
         id="dao-info-cards"
-        className="mt-5 !pt-5 flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
+        className="flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:border-lightDark sm:px-2 sm:pt-5"
       >
         <div className="flex w-full sm:border-r sm:border-lightDark">
           <VoteCard daoOverview={daoOverview} />
