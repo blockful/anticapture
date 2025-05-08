@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { BulletPoint } from "@/components/atoms/icons/BulletPoint";
 import { OutlinedBox } from "@/components/atoms/OutlinedBox";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
+import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 interface StagesDaoOverviewProps {
   currentStage?: number;
@@ -48,13 +49,26 @@ export const StagesDaoOverview = ({
         ? mediumRiskItems.map((item) => item.name)
         : [];
 
+  const handleButtonClick = () => {
+    if (isMobile) {
+      setShowTooltip(!showTooltip);
+    } else {
+      const section = document.getElementById(
+        SECTIONS_CONSTANTS.resilienceStages.anchorId,
+      );
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
   return (
     <div className="relative w-full py-0 sm:w-full">
       <div
         className="flex items-center justify-between gap-1 rounded-lg border-b border-lightDark bg-lightDark p-2 sm:border-none sm:py-0.5"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
-        <div className="flex flex-col justify-start gap-1 sm:flex-row sm:items-center px-1">
+        <div className="flex flex-col justify-start gap-1 px-1 sm:flex-row sm:items-center">
           {/* Stage indicator */}
           <div className="flex gap-2">
             <span
@@ -74,8 +88,8 @@ export const StagesDaoOverview = ({
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="group font-mono text-sm font-medium border-b border-dashed border-foreground text-white duration-300 hover:border-white"
-              onClick={() => isMobile && setShowTooltip(!showTooltip)}
+              className="group border-b border-dashed border-foreground font-mono text-sm font-medium text-white duration-300 hover:border-white"
+              onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
               <span className="tracking-wider text-white duration-300">
