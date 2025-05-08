@@ -15,6 +15,7 @@ import { cn } from "@/lib/client/utils";
 import { StageContent } from "@/components/atoms/StageContent";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { RiskLevel } from "@/lib/enums";
+import { DotFilledIcon } from "@radix-ui/react-icons";
 
 interface StageAccordionProps {
   daoStage: Stage;
@@ -94,7 +95,9 @@ interface CustomAccordionItemProps {
   isLastItem?: boolean;
 }
 
-const stageTwoEmptyContent: (GovernanceImplementationField & { name: string })[] = [
+const stageTwoEmptyContent: (GovernanceImplementationField & {
+  name: string;
+})[] = [
   {
     name: "Fix all Stage 1 parameters and reduce their risk level to low",
     value: "no",
@@ -128,10 +131,14 @@ const CustomAccordionItem = ({
         >
           <div className="flex w-full items-center gap-2">
             <StageTagSimplified stage={stage} isCompleted={isCompleted} />
-            <p className="text-sm font-normal text-white">
-              {riskFields.length > 0 &&
-                `${riskFields.length} issues needs fixing`}
-            </p>
+            {riskFields.length > 0 && (
+              <div className="flex flex-row items-center gap-2">
+                <div className="size-1 rounded-full bg-middleDark" />
+                <p className="text-sm font-normal text-white">
+                  {`${riskFields.length} issues needs fixing`}
+                </p>
+              </div>
+            )}
           </div>
           <PlusIcon className="size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
           <MinusIcon className="hidden size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:block" />
