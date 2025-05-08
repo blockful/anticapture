@@ -74,7 +74,7 @@ export const ENS: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
         value: "~100M USD",
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.EXTRACTABLE_VALUE
