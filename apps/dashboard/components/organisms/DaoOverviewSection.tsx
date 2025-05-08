@@ -13,7 +13,6 @@ import {
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
-  RiskAreaCard,
   RiskAreaCardWrapper,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
