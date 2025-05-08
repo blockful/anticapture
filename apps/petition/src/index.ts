@@ -7,12 +7,12 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import { env } from "./config";
 import { routes } from "./routes";
 import { PetitionService } from "./services";
-import { GraphqlAnticaptureClient } from "./client";
+import { VotingPowerClient } from "./client";
 import { PostgresPetitionRepository } from "./repositories";
 
 const db = new PostgresPetitionRepository(env.DATABASE_URL);
-const anticaptureClient = new GraphqlAnticaptureClient(env.ANTICAPTURE_API_URL);
-const petitionService = new PetitionService(db, anticaptureClient);
+const votingPowerClient = new VotingPowerClient();
+const petitionService = new PetitionService(db, votingPowerClient);
 
 const app = fastify({ logger: true });
 
@@ -29,7 +29,7 @@ app.register(fastifySwagger, {
     },
     servers: [
       {
-        url: env.RAILWAY_PUBLIC_DOMAIN,
+        url: env.API_URL,
       },
     ],
   },

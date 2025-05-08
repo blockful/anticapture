@@ -1,11 +1,10 @@
 "use client";
 
 import {
-  Stage,
-  TelegramBotMessage,
+  // TelegramBotMessage,
   ShowYourSupportStickyBar,
 } from "@/components/atoms";
-import { Message, MessageStacker } from "@/components/molecules";
+// import { Message, MessageStacker } from "@/components/molecules";
 import {
   AttackProfitabilitySection,
   DaoOverviewSection,
@@ -30,16 +29,19 @@ export const DaoTemplate = () => {
     return null;
   }
 
+  /**
+   * Commented out because the telegram are not implemented yet
   const messages: Message[] = [
     {
       id: "telegram-bot",
       content: <TelegramBotMessage />,
     },
   ];
+  */
 
   return (
     <DaoPageInteractionProvider>
-      <MessageStacker messages={messages} />
+      {/* <MessageStacker messages={messages} /> */}
       <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:p-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}

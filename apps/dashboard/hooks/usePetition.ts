@@ -1,9 +1,9 @@
-import { BACKEND_ENDPOINT, PETITION_ENDPOINT } from "@/lib/server/utils";
+import { PETITION_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
 import { Address, Hex } from "viem";
 import _ from "lodash";
-
+import {parseQuery} from "@/lib/utils/parseQuery";
 /**
  * Interface for a single petition signature
  */
@@ -98,20 +98,14 @@ export const usePetitionSignatures = (
   daoId: DaoIdEnum,
   userAddress: Address | undefined,
 ) => {
-  const { data, error, isLoading, mutate } = useSWR<PetitionResponse>(
-    daoId ? `petitions/${daoId}?userAddress=${userAddress}` : null,
+  const key = daoId ? `petitions/${daoId}?userAddress=${userAddress}` : null;
+  return useSWR<PetitionResponse>(
+    key,
     () => {
       return fetchPetitionSignatures(daoId, userAddress);
     },
     {
       revalidateOnFocus: false,
-      revalidateOnReconnect: false,
     },
   );
-  return {
-    data: data || null,
-    loading: isLoading,
-    error: error || null,
-    refetch: () => mutate(),
-  };
 };

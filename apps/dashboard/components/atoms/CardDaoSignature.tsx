@@ -24,11 +24,13 @@ export const CardDaoSignature = ({
   loading,
   isConnected,
   address,
+  refreshData,
 }: {
   data: PetitionResponse | null;
   loading: boolean;
   isConnected: boolean;
   address: Address | undefined;
+  refreshData: () => void;
 }) => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -43,6 +45,7 @@ export const CardDaoSignature = ({
 
     try {
       await submitPetitionSignature(daoIdEnum, signature, address);
+      await refreshData();
     } catch (error) {
       console.error("Failed to submit signature:", error);
     }
@@ -129,7 +132,7 @@ export const CardDaoSignature = ({
         </div>
       )}
       {isSignedToSupportDao && (
-        <div className="flex w-full flex-col items-center justify-center gap-6">
+        <div className="flex w-full flex-col justify-center gap-6">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-5 text-success" />

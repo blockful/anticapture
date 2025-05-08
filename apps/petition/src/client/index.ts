@@ -1,1 +1,1 @@
-export { default as GraphqlAnticaptureClient } from "./anticapture";
+export { default as VotingPowerClient } from "./votingPower";
