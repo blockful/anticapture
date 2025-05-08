@@ -14,8 +14,6 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     daoId.toUpperCase() as DaoIdEnum,
     address,
   );
-
-  console.log("ShowSupportSection", { daoId, address, data });
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.showSupport.title}

@@ -45,9 +45,6 @@ const fetchPetitionSignatures = async (
   daoId: DaoIdEnum,
   userAddress: Address | undefined,
 ): Promise<PetitionResponse> => {
-  console.log(
-    `${PETITION_ENDPOINT}/petitions/${daoId}?` +  parseQuery({ userAddress }),
-  );
   const response = await fetch(
     `${PETITION_ENDPOINT}/petitions/${daoId}?` + parseQuery({ userAddress }),
   );
