@@ -10,10 +10,12 @@ import { DaoIdEnum } from "@/lib/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { isConnected, address } = useAccount();
-  const { data, loading } = usePetitionSignatures(
+  const { data, isLoading: loading } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
     address,
   );
+
+  console.log("ShowSupportSection", { daoId, address, data });
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.showSupport.title}
@@ -21,9 +23,9 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
       className="gap-5 sm:gap-4"
     >
-      <CardPetitionInformation data={data} />
+      <CardPetitionInformation data={data ?? null} />
       <CardDaoSignature
-        data={data}
+        data={data ?? null}
         loading={loading}
         isConnected={isConnected}
         address={address}
