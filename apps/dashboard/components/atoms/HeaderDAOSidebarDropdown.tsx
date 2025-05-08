@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { DaoAvatarIcon } from "@/components/atoms";
+import { BadgeInAnalysis, DaoAvatarIcon } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/client/utils";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -77,6 +78,20 @@ export const HeaderDAOSidebarDropdown = () => {
         href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
         name: DaoIdEnum.ARBITRUM,
       },
+      {
+        id: 3,
+        label: "Optimism",
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.OPTIMISM}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
+        href: `/${DaoIdEnum.OPTIMISM.toLowerCase()}`,
+        name: DaoIdEnum.OPTIMISM,
+        isDisabled: true,
+      },
     ],
     [],
   );
@@ -126,20 +141,31 @@ export const HeaderDAOSidebarDropdown = () => {
           {dropdownItems.map((item) => (
             <button
               key={item.id}
-              className={
-                "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-[#333]"
-              }
-              onClick={() => handleSelectItem(item.id, item.href)}
+              className={cn(
+                "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2",
+                item.isDisabled ? "text-foreground" : "hover:bg-[#333]",
+              )}
+              onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
+              disabled={item.isDisabled}
             >
               <div className="flex w-full items-center gap-1.5 sm:gap-2">
                 <DaoAvatarIcon
                   daoId={item.name}
-                  className="size-icon-xxs sm:size-icon-sm"
+                  className={cn(
+                    "size-icon-xxs sm:size-icon-sm",
+                    item.isDisabled && "opacity-75",
+                  )}
                   isRounded
                 />
                 <h1 className="text-sm font-normal text-white">{item.label}</h1>
+                {item.isDisabled && (
+                  <BadgeInAnalysis
+                    iconClassName="size-3"
+                    className="text-xs font-medium"
+                  />
+                )}
               </div>
             </button>
           ))}
