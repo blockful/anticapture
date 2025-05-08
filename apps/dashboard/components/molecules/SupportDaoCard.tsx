@@ -55,8 +55,8 @@ export const SupportDaoCard = ({
       <div className="flex flex-col items-center gap-1 md:flex-row">
         {votingPowerSupport > 0 && (
           <div className="flex flex-row items-center gap-2">
-            <TrendingUpIcon className="text-brandLightGreen h-4 w-4" />
-            <div className="text-brandLightGreen">
+            <TrendingUpIcon className="size-4 text-green-400" />
+            <div className="text-green-400">
               {formatNumberUserReadable(votingPowerSupport)} {daoId}
             </div>
           </div>
@@ -83,12 +83,12 @@ export const SupportDaoCard = ({
       className="flex w-full flex-row rounded-md border border-lightDark bg-dark p-3 shadow hover:cursor-pointer hover:bg-lightDark md:w-[calc(50%-10px)] xl4k:max-w-full"
       onClick={onClick}
     >
-      <div className="flex w-full flex-row justify-between gap-2">
+      <div className="flex h-full w-full flex-row justify-between gap-2">
         <div className="flex items-center gap-2">
           {daoIcon}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col sm:gap-2">
             <div className="flex items-center gap-2">
-              <h3 className="text-md font-small truncate text-center text-white">
+              <h3 className="truncate text-center text-sm font-medium text-white">
                 {daoName}
               </h3>
               <div

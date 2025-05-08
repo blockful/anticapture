@@ -6,13 +6,13 @@ import {
   DaoInfoDropdown,
   DaoAvatarIcon,
   FocusIcon,
+  TooltipInfo,
 } from "@/components/atoms";
 import {
   QuorumCard,
   SecurityCouncilCard,
   TimelockCard,
   VoteCard,
-  RiskAreaCard,
   RiskAreaCardWrapper,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
@@ -23,7 +23,7 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
@@ -113,14 +113,16 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:bg-dark sm:p-0"
+      className="flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:bg-dark sm:p-5"
       ref={ref}
     >
       <div
         id="dao-info-header"
         className="hidden w-full flex-col sm:flex xl:flex-row"
       >
-        <div className="flex w-full flex-col items-start gap-4 p-4 xl:w-1/2">
+        {/* Desktop: DAO info and Risk Areas with vertical divider */}
+        <div className="flex w-full flex-col items-start gap-5 xl:w-1/2">
+          {/* DAO Info */}
           <div className="flex gap-3.5">
             <div className="flex">
               <DaoAvatarIcon daoId={daoId} className="size-icon-xl" isRounded />
@@ -152,11 +154,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
           </div>
           <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+            <div className="mb-2 flex h-full items-center gap-2">
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
-              <InfoIcon className="size-4 text-foreground" />
+              <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(
@@ -177,25 +179,20 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
         </div>
-        <div className="flex w-full p-4 xl:w-1/2">
+        {/* Vertical divider for desktop layout */}
+        <div className="mx-5 hidden border-l border-neutral-800 xl:block" />
+        <div className="flex w-full xl:w-1/2">
           <div className="flex w-full flex-col gap-1">
-            <h3 className="mb-3 font-mono text-xs font-medium tracking-wider text-white sm:text-sm">
-              {riskAreas.title}
-            </h3>
-
-            <div className={cn("grid grid-cols-2 gap-1 sm:gap-2")}>
-              {riskAreas.risks.map((risk, index) => (
-                <RiskAreaCard
-                  key={`${risk.name}-${index}`}
-                  riskArea={risk}
-                  variant="dao-overview"
-                  onClick={() => handleRiskAreaClick(risk.name)}
-                />
-              ))}
-            </div>
+            <RiskAreaCardWrapper
+              title={riskAreas.title}
+              riskAreas={riskAreas.risks}
+              onRiskClick={(riskName) => {
+                handleRiskAreaClick(riskName);
+              }}
+              variant="dao-overview"
+            />
           </div>
         </div>
-
         <div className="flex w-full flex-1"></div>
       </div>
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
@@ -229,7 +226,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
-              <InfoIcon className="size-4 text-foreground" />
+              <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
               currentStage={getDaoStageFromFields(
@@ -259,21 +256,32 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <RiskAreaCardWrapper
               title={riskAreas.title}
               riskAreas={riskAreas.risks}
+              onRiskClick={(riskName) => {
+                handleRiskAreaClick(riskName);
+              }}
               variant="dao-overview"
             />
           </div>
         </div>
       </div>
-      <div className="hidden h-full w-full sm:flex">
-        <SecurityCouncilCard daoOverview={daoOverview} />
-      </div>
-      <div className="mt-4 flex h-full w-full sm:hidden">
-        <SecurityCouncilCard daoOverview={daoOverview} />
-      </div>
-      <div className="border border-lightDark sm:hidden" />
+      {daoOverview.securityCouncil && (
+        <div className="w-full">
+          {/* Horizontal divider between main info/risk area and Security Council */}
+          <div>
+            <div className="my-5 w-full border-t border-lightDark" />
+          </div>
+          <div className="hidden h-full w-full sm:flex">
+            <SecurityCouncilCard daoOverview={daoOverview} />
+          </div>
+          <div className="mt-4 flex h-full w-full sm:hidden">
+            <SecurityCouncilCard daoOverview={daoOverview} />
+          </div>
+        </div>
+      )}
+      <div className="my-4 border border-lightDark sm:hidden" />
       <div
         id="dao-info-cards"
-        className="flex w-full flex-col gap-2 p-0 sm:flex-row sm:border-t sm:border-lightDark sm:p-2"
+        className="flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:border-lightDark sm:px-2 sm:pt-5"
       >
         <div className="flex w-full sm:border-r sm:border-lightDark">
           <VoteCard daoOverview={daoOverview} />

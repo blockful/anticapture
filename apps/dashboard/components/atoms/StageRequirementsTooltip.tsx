@@ -37,9 +37,9 @@ export const StageRequirementsTooltip = ({
       onMouseLeave={onMouseLeave}
     >
       {/* Tooltip Arrow */}
-      <div className="sm:translate-x absolute left-1/2 top-[-5px] -mt-1 size-2 rotate-45 transform border-l border-t border-lightDark bg-darkest"/>
+      <div className="sm:translate-x absolute left-1/2 top-[-5px] -mt-1 size-0 border-x-[13px] border-b-[13px] border-x-transparent border-b-darkest"/>
 
-      <div className="relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border border-lightDark bg-darkest sm:w-[25vw]">
+      <div className="relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border border-lightDark bg-darkest sm:w-[25vw] stage-tooltip-box-shadow">
         {/* Header */}
         <div className="p-4">
           <div className="flex justify-start">
@@ -57,7 +57,7 @@ export const StageRequirementsTooltip = ({
           </div>
 
           {/* Title */}
-          <h3 className="text-start font-roboto text-base font-normal uppercase leading-5 tracking-wider text-white">
+          <h3 className="text-start font-mono text-base font-normal uppercase leading-5 tracking-wider text-white">
             HAS VECTORS THAT CAN MAKE IT VULNERABLE
           </h3>
         </div>

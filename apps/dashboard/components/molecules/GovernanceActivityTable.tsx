@@ -79,7 +79,7 @@ export const GovernanceActivityTable = () => {
         const details = metric ? metricDetails[metric] : null;
 
         return (
-          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]">
+          <p className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
@@ -87,7 +87,7 @@ export const GovernanceActivityTable = () => {
         );
       },
       header: () => (
-        <div className="flex w-full items-start justify-start px-4 text-xs font-semibold sm:font-medium">
+        <div className="text-table-header flex w-full items-start justify-start px-4">
           Metrics
         </div>
       ),
@@ -114,7 +114,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-xs font-semibold sm:font-medium"
+          className="text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Average
@@ -173,7 +173,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4 text-xs font-semibold sm:font-medium"
+          className="text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -212,13 +212,13 @@ export const GovernanceActivityTable = () => {
           <div className="flex w-full justify-center py-2.5">
             <Sparkline
               data={chartLastDays.map((item) => Number(item.high))}
-              strokeColor={cn([Number(variation) < 0 ? "#ef4444" : "#4ADE80"])}
+              strokeColor={cn([Number(variation) < 0 ? "#f87171" : "#4ade80"])}
             />
           </div>
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-start justify-start px-10 text-xs font-semibold sm:font-medium">
+        <div className="text-table-header flex w-full items-start justify-start px-10">
           Last {days.slice(0, -1)} days
         </div>
       ),

@@ -33,7 +33,7 @@ export const StageTag = ({
     <div
       className={`inline-flex rounded-lg border-[1px] bg-dark p-2 py-1 ${stageStyles} ${className}`}
     >
-      <span className="font-roboto text-[13px] font-medium leading-[18px]">
+      <span className="font-mono text-[13px] font-medium leading-[18px]">
         <span className="hidden sm:inline">STAGE </span>
         {tagStage}
       </span>

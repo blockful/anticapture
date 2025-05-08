@@ -13,7 +13,7 @@ export const TelegramBotMessage = () => {
       <Send className="size-4 text-white hidden sm:block" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex gap-3">
-          <span className="font-roboto font-normal text-white">
+          <span className="font-mono font-normal text-white">
             RECEIVE REAL-TIME{" "}
             {daoConfigByDaoId[
               daoId.toUpperCase() as DaoIdEnum

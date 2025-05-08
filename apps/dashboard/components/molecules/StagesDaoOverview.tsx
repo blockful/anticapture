@@ -49,17 +49,17 @@ export const StagesDaoOverview = ({
         : [];
 
   return (
-    <div className="relative w-full py-0 sm:w-max">
+    <div className="relative w-full py-0 sm:w-full">
       <div
         className="flex items-center justify-between gap-1 rounded-lg border-b border-lightDark bg-lightDark p-2 sm:border-none sm:py-0.5"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
-        <div className="flex flex-col justify-start gap-1 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-start gap-1 sm:flex-row sm:items-center px-1">
           {/* Stage indicator */}
           <div className="flex gap-2">
             <span
               className={cn(
-                "font-roboto text-sm font-medium uppercase tracking-wider",
+                "font-mono text-sm font-medium uppercase tracking-wider",
                 {
                   "text-error": currentStage === 0,
                   "text-warning": currentStage === 1,
@@ -74,17 +74,17 @@ export const StagesDaoOverview = ({
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="group font-roboto text-sm font-medium"
-              onClick={() => setShowTooltip(!showTooltip)}
+              className="group font-mono text-sm font-medium border-b border-dashed border-foreground text-white duration-300 hover:border-white"
+              onClick={() => isMobile && setShowTooltip(!showTooltip)}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
-              <span className="tracking-wider text-white group-hover:underline">
+              <span className="tracking-wider text-white duration-300">
                 {highRiskItems.length ||
                   mediumRiskItems.length ||
                   lowRiskItems.length}{" "}
                 ITEMS
               </span>
-              <span className="tracking-wider text-foreground group-hover:underline">
+              <span className="tracking-wider text-foreground duration-300 group-hover:text-white">
                 {" "}
                 TO STAGE {currentStage + 1}
               </span>
