@@ -16,8 +16,6 @@ export const StickyPageHeader = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  const headerHeight = 87;
-
   const router = useRouter();
 
   const menuItems = useMemo(
@@ -72,7 +70,7 @@ export const StickyPageHeader = () => {
   }, [lastScrollY]);
 
   return (
-    <div className="h-[107px]">
+    <div className="h-[98px]">
       <header
         className={cn(
           "fixed left-0 right-0 top-0 z-30 w-full bg-darkest shadow-md transition-transform duration-300",
@@ -90,7 +88,7 @@ export const StickyPageHeader = () => {
       >
         <div
           className={cn(
-            `fixed left-0 right-0 top-[${headerHeight}px] z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            `fixed left-0 right-0 top-[87px] z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
