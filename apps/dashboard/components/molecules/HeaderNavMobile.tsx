@@ -16,6 +16,11 @@ export const HeaderNavMobile = () => {
 
   const options = [
     {
+      anchorId: SECTIONS_CONSTANTS.showSupport.anchorId,
+      title: SECTIONS_CONSTANTS.showSupport.title,
+      enabled: daoConfig.showSupport,
+    },
+    {
       anchorId: SECTIONS_CONSTANTS.daoOverview.anchorId,
       title: SECTIONS_CONSTANTS.daoOverview.title,
       enabled: !!daoConfig.daoOverview,
@@ -49,11 +54,6 @@ export const HeaderNavMobile = () => {
       anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
       title: SECTIONS_CONSTANTS.governanceActivity.title,
       enabled: !!daoConfig.governanceActivity,
-    },
-    {
-      anchorId: SECTIONS_CONSTANTS.showSupport.anchorId,
-      title: SECTIONS_CONSTANTS.showSupport.title,
-      enabled: daoConfig.showSupport,
     },
   ];
 

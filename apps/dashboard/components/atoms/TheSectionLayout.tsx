@@ -118,7 +118,9 @@ export const TheSectionLayout = ({
             <CardTitle className="flex items-center font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
               {subtitle}
             </CardTitle>
-            <p className="text-sm font-normal text-foreground">
+            <p
+              className={`font-normal text-foreground ${subtitle ? "text-sm" : "text-base"}`}
+            >
               {getDateRange(days ?? "")}
             </p>
           </div>
@@ -128,7 +130,7 @@ export const TheSectionLayout = ({
       {infoText && (
         <CardDescription className="flex w-full items-start gap-2 rounded-lg bg-lightDark p-2 sm:items-center">
           <div className="mt-0.5 sm:mt-0">
-            <InfoIcon className="size-4 w-fit text-tangerine" />
+            <InfoIcon className="size-4 w-fit text-white" />
           </div>
           <p className="text-sm font-normal text-foreground">{infoText}</p>
         </CardDescription>
