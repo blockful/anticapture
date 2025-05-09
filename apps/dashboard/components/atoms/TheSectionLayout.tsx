@@ -118,7 +118,9 @@ export const TheSectionLayout = ({
             <CardTitle className="flex items-center font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
               {subtitle}
             </CardTitle>
-            <p className="text-sm font-normal text-foreground">
+            <p
+              className={`font-normal text-foreground ${subtitle ? "text-sm" : "text-base"}`}
+            >
               {getDateRange(days ?? "")}
             </p>
           </div>
