@@ -1,7 +1,7 @@
 "use client";
 
-import { PanelSection } from "@/components/organisms";
-import { SupportDaosSection } from "@/components/organisms/SupportDaosSection";
+import { PanelSection } from "@/features/panel";
+import { SupportDaosSection } from "@/features/support-dao/SupportDaosSection";
 export const HomeTemplate = () => {
   return (
     <>
