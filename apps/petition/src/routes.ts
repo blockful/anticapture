@@ -54,8 +54,7 @@ export function routes(
 
         return response.status(201).send(dbPetition);
       } catch (error) {
-        console.error({ error });
-        if (error.message.includes("duplicate key value violates")) {
+        if (error instanceof Error && error.message.includes("duplicate key value violates")) {
           return response.status(400).send({ message: "Unable to sign petition" });
         }
       }

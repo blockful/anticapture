@@ -1,7 +1,25 @@
+version: "3.8"
+
 services:
-  db:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - backend
+
+  contracts:
+    build:
+      context: apps/indexer/contracts
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
+    networks:
+      - backend
+
+  indexer-db:
     image: postgres:16.2
-    container_name: anticapture-db
     ports:
       - "5432:5432"
     restart: always
@@ -9,35 +27,51 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
-    tmpfs:
-      - /var/lib/postgresql/data # in memory volume
-
-  redis:
-    image: redis:latest
-    container_name: gateway-redis
-    ports:
-      - "6379:6379"
-    restart: always
-
-  contracts:
-    build:
-      context: apps/indexer/contracts
-      dockerfile: Dockerfile
-    container_name: anticapture-contracts
-    ports:
-      - "8545:8545"
+    networks:
+      - backend
 
   indexer:
     build:
       context: apps/indexer
-    container_name: anticapture-indexer
     environment:
-      - DATABASE_URL=postgres://postgres:admin@anticapture-db:5432/postgres
+      - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
-      - NETWORK=anvil
-      - RPC_URL=http://anticapture-contracts:8545
+      - NETWORK=ethereum
+      - RPC_URL=http://contracts:8545
     depends_on:
-      - db
+      - indexer-db
       - contracts
     ports:
       - "42069:42069"
+    networks:
+      - backend
+
+  petition-db:
+    image: postgres:16.2
+    ports:
+      - "5433:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - backend
+
+  petition:
+    build:
+      context: .
+      dockerfile: apps/petition/Dockerfile
+    ports:
+      - "3100:3100"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@petition-db:5432/postgres
+      - PORT=3100
+    depends_on:
+      - petition-db
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
