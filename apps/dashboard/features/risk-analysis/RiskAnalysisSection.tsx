@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Gauge, ShieldAlert } from "lucide-react";
+import { Gauge } from "lucide-react";
 import { TheSectionLayout, RiskLevelCard } from "@/components/atoms";
-import {
-  RiskAreaCard,
-  RiskAreaCardWrapper,
-  RiskArea,
-} from "@/components/molecules/RiskAreaCard";
-import { RiskDescription } from "@/components/molecules/RiskDescription";
+import { RiskAreaCardWrapper } from "@/components/molecules/RiskAreaCard";
+import { RiskDescription } from "@/features/risk-analysis/RiskDescription";
 import {
   RiskLevel,
   RiskAreaEnum,
@@ -18,7 +13,7 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
-import { getDaoRiskAreas, RiskAreaInfo } from "@/lib/utils/risk-analysis";
+import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import { fieldsToArray } from "@/lib/dao-config/utils";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
@@ -32,7 +27,7 @@ interface RiskAreaDisplayItem {
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { activeRisk, setActiveRisk } = useDaoPageInteraction();
-  
+
   const daoRiskAreas = getDaoRiskAreas(daoId);
 
   const handleRiskClick = (riskName: string) => {
