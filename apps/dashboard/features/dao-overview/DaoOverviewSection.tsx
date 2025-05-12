@@ -8,7 +8,6 @@ import {
   FocusIcon,
   TooltipInfo,
 } from "@/components/atoms";
-import { RiskAreaCardWrapper } from "@/components/molecules";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
@@ -33,6 +32,7 @@ import {
   TimelockCard,
   VoteCard,
 } from "@/features/dao-overview";
+import { RiskAreaCardWrapper } from "@/shared";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];

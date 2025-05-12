@@ -2,7 +2,7 @@
 
 import { Gauge } from "lucide-react";
 import { TheSectionLayout, RiskLevelCard } from "@/components/atoms";
-import { RiskAreaCardWrapper } from "@/components/molecules/RiskAreaCard";
+import { RiskAreaCardWrapper } from "@/shared/RiskAreaCard";
 import { RiskDescription } from "@/features/risk-analysis/RiskDescription";
 import {
   RiskLevel,

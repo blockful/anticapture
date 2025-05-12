@@ -6,11 +6,11 @@ import {
   HeaderDAOSidebarDropdown,
   TelegramIcon,
 } from "@/components/atoms";
-import { HeaderNavMobile } from "@/components/molecules";
 import { cn } from "@/lib/client/utils";
 import { BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
+import { HeaderNavMobile } from "@/widgets";
 
 export const StickyPageHeader = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);

@@ -1,7 +1,7 @@
 "use client";
 
 import { ShowYourSupportStickyBar } from "@/features/show-support";
-// import { Message, MessageStacker } from "@/components/molecules";
+// import { Message, MessageStacker } from "@/?";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
