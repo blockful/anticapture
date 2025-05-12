@@ -1,67 +1,25 @@
 import dotenv from "dotenv";
 
 import { processConfig } from '@graphql-mesh/config'
-// import { type YamlConfig } from "@graphql-mesh/types"
-import { loadGraphQLHTTPSubgraph, MeshComposeCLISubgraphConfig, } from '@graphql-mesh/compose-cli'
-import { loadOpenAPISubgraph } from '@omnigraph/openapi'
 
 dotenv.config();
-
-
-
-
-// const subgraphs = Object.entries(process.env).reduce((acc, [key, value]) => {
-//   const [match, chain] = key.match(/^DAO_API_(\w+)/) || []
-//   if (match) {
-//     // try {
-//     return [
-//       ...acc,
-//       {
-//         name: `graphql_${chain}`,
-//         handler: {
-//           graphql: {
-//             endpoint: value!,
-//           }
-//         }
-//       },
-//       // {
-//       //   sourceHandler: loadOpenAPISubgraph(`rest_${chain}`, {
-//       //     source: `${value!}/docs/json`,
-//       //   })
-//       // },
-//     ]
-//     // } catch (error) {
-//     //   console.error({ message: `Unable to load ${chain} DAO API`, error })
-//     // }
-//   }
-
-//   return acc
-// }, [])
-
-
-// if (process.env.PETITION_API_URL) {
-//   try {
-//     subgraphs.push({
-//       sourceHandler: loadOpenAPISubgraph("Petition", {
-//         source: process.env.PETITION_API_URL,
-//       }),
-//     })
-//   } catch (error) {
-//     console.error({ message: "Unable to load petition API", error })
-//   }
-// }
 
 export default processConfig({
   sources: [
     {
-      name: `ENS`,
+      name: `rest_ENS`,
+      handler: {
+        openapi: {
+          source: `${process.env.DAO_API_ENS!}/docs/json`,
+        },
+      }
+    },
+    {
+      name: `graphql_ENS`,
       handler: {
         graphql: {
           endpoint: process.env.DAO_API_ENS!,
-        },
-        // openapi: {
-        //   source: `${process.env.DAO_API_ENS!}/docs/json`,
-        // }
+        }
       }
     },
     {
@@ -70,10 +28,27 @@ export default processConfig({
         graphql: {
           endpoint: process.env.DAO_API_UNI!,
         },
-        // openapi: {
-        //   source: `${process.env.DAO_API_UNI!}/docs/json`,
-        // }
+        openapi: {
+          source: `${process.env.DAO_API_UNI!}/docs/json`,
+        }
       }
-    }
-  ],
-})
+    },
+    ...(process.env.PETITION_API_URL
+      ? [
+        {
+          name: 'petition',
+          handler: {
+            openapi: {
+              source: `${process.env.PETITION_API_URL}`,
+            }
+          }
+        }
+      ] : []),
+  ]
+},
+  {
+    dir: "./.mesh"
+  }
+)
+
+
