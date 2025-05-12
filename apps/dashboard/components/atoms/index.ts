@@ -1,8 +1,6 @@
 export * from "@/components/atoms/icons";
 export * from "@/components/atoms/messages";
 
-export * from "@/components/atoms/AttackProfitabilityCustomTooltip";
-export * from "@/components/atoms/AttackProfitabilityToggleHeader";
 export * from "@/components/atoms/Badge";
 export * from "@/components/atoms/BadgeCardDaoInfoItem";
 export * from "@/components/atoms/BadgeInAnalysis";
@@ -29,11 +27,9 @@ export * from "@/components/atoms/SupporterBadge";
 export * from "@/components/atoms/SwitchCardDaoInfoItem";
 export * from "@/components/atoms/SwitcherChart";
 export * from "@/components/atoms/SwitcherDate";
-export * from "@/components/atoms/TextCardDaoInfoItem";
 export * from "@/components/atoms/TheCardChartLayout";
 export * from "@/components/atoms/TheSectionLayout";
 export * from "@/components/atoms/TheTable";
-export * from "@/components/atoms/TokenDistributionCustomTooltip";
 export * from "@/components/atoms/TooltipInfo";
 export * from "@/components/atoms/CorneredBox";
 export { StagesCardRequirements } from "@/components/atoms/StagesCardRequirements";

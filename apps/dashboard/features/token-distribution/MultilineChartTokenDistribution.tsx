@@ -14,8 +14,8 @@ import {
   timestampToReadableDate,
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
-import { TokenDistributionCustomTooltip } from "@/components/atoms";
 import { ResearchPendingChartBlur } from "@/components/atoms/ResearchPendingChartBlur";
+import { TokenDistributionCustomTooltip } from "@/features/token-distribution";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;

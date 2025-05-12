@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   CrossHairIcon,
-  AttackProfitabilityToggleHeader,
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
@@ -17,6 +16,7 @@ import {
   AttackProfitabilityAccordion,
   MultilineChartAttackProfitability,
   AttackCostBarChart,
+  AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability";
 
 export const AttackProfitabilitySection = ({
