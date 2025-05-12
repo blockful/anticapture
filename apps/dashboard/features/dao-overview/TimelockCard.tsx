@@ -10,6 +10,7 @@ import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { Clock4 } from "lucide-react";
 import { Address } from "viem";
+
 export const TimelockCard = ({
   daoOverview,
 }: {

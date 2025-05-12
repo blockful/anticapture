@@ -8,13 +8,7 @@ import {
   FocusIcon,
   TooltipInfo,
 } from "@/components/atoms";
-import {
-  QuorumCard,
-  SecurityCouncilCard,
-  TimelockCard,
-  VoteCard,
-  RiskAreaCardWrapper,
-} from "@/components/molecules";
+import { RiskAreaCardWrapper } from "@/components/molecules";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
@@ -24,7 +18,6 @@ import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
-import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
@@ -33,6 +26,13 @@ import {
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
 } from "@/lib/dao-config/utils";
+import {
+  QuorumCard,
+  SecurityCouncilCard,
+  StagesDaoOverview,
+  TimelockCard,
+  VoteCard,
+} from "@/features/dao-overview";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];

@@ -4,14 +4,14 @@ import { HeartIcon } from "lucide-react";
 import { DaoAvatarIcon, TheSectionLayout } from "@/components/atoms";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { SupportDaoCard } from "@/components/molecules";
+import { SupportDaoCard } from "@/features/support-dao";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { DaoConfiguration } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 import { pickBy } from "lodash";
-import { ReachOutToUsCard } from "@/features/show-support";
+import { ReachOutToUsCard } from "@/features/support-dao";
 
 export const SupportDaosSection = () => {
   const router = useRouter();

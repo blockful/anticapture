@@ -9,7 +9,6 @@ import {
   AnticaptureIcon,
   ButtonHeaderSidebar,
   ConnectWallet,
-  TelegramIcon,
 } from "@/components/atoms";
 
 export const HeaderSidebar = () => {
