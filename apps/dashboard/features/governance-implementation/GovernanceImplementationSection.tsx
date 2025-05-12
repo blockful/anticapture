@@ -3,7 +3,6 @@
 import daoConfigByDaoId from "@/lib/dao-config";
 import { TheSectionLayout } from "@/components/atoms";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { GovernanceImplementationCard } from "@/components/molecules";
 import { useState } from "react";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -12,6 +11,7 @@ import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { fieldsToArray } from "@/lib/dao-config/utils";
 import { sortByRiskLevel } from "@/lib/enums";
+import { GovernanceImplementationCard } from "@/features/governance-implementation";
 
 export const GovernanceImplementationSection = ({
   daoId,
