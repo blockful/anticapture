@@ -1,10 +1,10 @@
 {
-  "name": "api-gateway",
+  "name": "@anticapture/api-gateway",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "supergraph": "mesh-compose -o supergraph.graphql",
+    "graph": "mesh-compose -o supergraph.graphql",
     "start": "hive-gateway supergraph"
   },
   "keywords": [],

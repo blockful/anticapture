@@ -6,6 +6,7 @@
     "dashboard": "dotenv -- pnpm run --filter=@anticapture/dashboard",
     "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
     "server": "dotenv -- pnpm run --filter=@anticapture/indexer",
+    "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
     "prepare": "husky"
