@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
-import { Stage } from "@/components/atoms/StageTag";
+import { Stage } from "@/features/resilience-stages/StageTag";
 
 interface Issue {
   title: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Stage } from "@/components/atoms/StageTag";
+import { Stage } from "@/features/resilience-stages/StageTag";
 import { cn } from "@/lib/client/utils";
 import { CheckCircle, XCircle } from "lucide-react";
 

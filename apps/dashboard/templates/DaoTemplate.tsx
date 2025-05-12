@@ -8,7 +8,6 @@ import {
 import {
   DaoOverviewSection,
   GovernanceActivitySection,
-  ResilienceStagesSection,
   TokenDistributionSection,
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
@@ -19,6 +18,7 @@ import { ShowSupportSection } from "@/features/show-support";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
+import { ResilienceStagesSection } from "@/features/resilience-stages";
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
