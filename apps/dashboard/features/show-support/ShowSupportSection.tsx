@@ -2,18 +2,22 @@
 
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { HeartIcon } from "lucide-react";
-import { CardDaoSignature, TheSectionLayout } from "@/components/atoms";
-import { CardPetitionInformation } from "@/components/molecules/CardPetitionInformation";
+import { TheSectionLayout } from "@/components/atoms";
+import {
+  CardPetitionInformation,
+  CardDaoSignature,
+} from "@/features/show-support";
 import { useAccount } from "wagmi";
 import { usePetitionSignatures } from "@/hooks/usePetition";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { isConnected, address } = useAccount();
-  const { data, isLoading: loading, mutate: refreshData } = usePetitionSignatures(
-    daoId.toUpperCase() as DaoIdEnum,
-    address,
-  );
+  const {
+    data,
+    isLoading: loading,
+    mutate: refreshData,
+  } = usePetitionSignatures(daoId.toUpperCase() as DaoIdEnum, address);
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.showSupport.title}

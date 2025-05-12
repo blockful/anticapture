@@ -12,14 +12,13 @@ import {
   GovernanceImplementationSection,
   RiskAnalysisSection,
   ResilienceStagesSection,
-  ShowSupportSection,
   TokenDistributionSection,
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { DaoPageInteractionProvider } from "@/contexts/DaoPageInteractionContext";
-
+import { ShowSupportSection } from "@/features/show-support";
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -44,7 +43,9 @@ export const DaoTemplate = () => {
       {/* <MessageStacker messages={messages} /> */}
       <div className="flex w-full flex-col items-center pt-0 sm:gap-6 sm:p-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
+
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
+
         {daoConstants.attackProfitability && (
           <AttackProfitabilitySection
             daoId={daoIdEnum}

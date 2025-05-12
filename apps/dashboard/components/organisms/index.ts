@@ -4,7 +4,6 @@ export * from "@/components/organisms/GovernanceActivitySection";
 export * from "@/components/organisms/GovernanceImplementationSection";
 export * from "@/components/organisms/PanelSection";
 export * from "@/components/organisms/RiskAnalysisSection";
-export * from "@/components/organisms/ShowSupportSection";
 export * from "@/components/organisms/SupportDaosSection";
 export * from "@/components/organisms/TokenDistributionSection";
 export * from "@/components/organisms/ResilienceStagesSection";

@@ -12,7 +12,7 @@ export * from "@/components/atoms/BaseHeaderLayoutSidebar";
 export * from "@/components/atoms/ButtonCardDaoInfoItem";
 export * from "@/components/atoms/ButtonHeaderSidebar";
 export * from "@/components/atoms/ButtonHeaderDAOSidebarMobile";
-export * from "@/components/atoms/CardDaoSignature";
+export * from "@/features/show-support/CardDaoSignature";
 export * from "@/components/atoms/ConnectWallet";
 export * from "@/components/atoms/CountdownDaoInfo";
 export * from "@/components/atoms/DaoInfoDropdown";

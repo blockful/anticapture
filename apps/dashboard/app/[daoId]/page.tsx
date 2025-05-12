@@ -6,7 +6,7 @@ import {
   StickyPageHeader,
   HeaderSidebar,
 } from "@/components/molecules";
-import { DaoTemplate } from "@/components/templates";
+import { DaoTemplate } from "@/templates";
 import { HeaderMobile } from "@/components/molecules/HeaderMobile";
 
 type Props = {
