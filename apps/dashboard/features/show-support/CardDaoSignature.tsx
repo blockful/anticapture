@@ -1,19 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import ArbitrumShowSupport from "@/public/show-support/ArbitrumShowSupport.png";
 import ArbitrumShowSupportMobile from "@/public/show-support/ArbitrumShowSupportMobile.png";
 import ArbitrumSupportedDao from "@/public/show-support/ArbitrumSupportedDao.png";
 import ArbitrumSupportedDaoMobile from "@/public/show-support/ArbitrumSupportedDaoMobile.png";
 import { useParams } from "next/navigation";
-import { useAccount } from "wagmi";
 import { ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
-import {
-  PetitionResponse,
-  submitPetitionSignature,
-} from "@/hooks/usePetition";
+import { PetitionResponse, submitPetitionSignature } from "@/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet } from "@/components/atoms";
@@ -151,8 +146,14 @@ export const CardDaoSignature = ({
               Want to continue the conversation on governance risks with other
               DAO decision-makers?
             </p>
-            <div className="flex gap-1 items-center">
-              <a className="link-tangerine text-sm" href="https://t.me/+uZlI0EZS2WM5YzMx" target="_blank">JOIN THE GOVERNANCE SECURITY CIRCLE</a>
+            <div className="flex items-center gap-1">
+              <a
+                className="link-tangerine text-sm"
+                href="https://t.me/+uZlI0EZS2WM5YzMx"
+                target="_blank"
+              >
+                JOIN THE GOVERNANCE SECURITY CIRCLE
+              </a>
               <ArrowRight className="link-tangerine size-4" />
             </div>
           </div>

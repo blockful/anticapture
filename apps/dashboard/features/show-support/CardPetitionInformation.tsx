@@ -3,9 +3,7 @@
 import { TooltipInfo } from "@/components/atoms";
 import { Card } from "@/components/ui/card";
 import { SupportersCarroussel } from "@/components/atoms/SupportersCarroussel";
-import { useParams } from "next/navigation";
 import { PetitionResponse } from "@/hooks/usePetition";
-import { DaoIdEnum } from "@/lib/types/daos";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 
