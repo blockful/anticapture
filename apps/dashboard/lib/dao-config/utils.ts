@@ -1,9 +1,6 @@
-import {
-  GovernanceImplementationField,
-  GovernanceImplementation,
-} from "@/lib/dao-config/types";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/lib/enums";
-import { Stage } from "@/components/atoms/StagesCardRequirements";
+import { Stage } from "@/components/atoms";
 
 /**
  * Converts any fields object to an array, with the key being set as a "name" parameter
@@ -11,13 +8,13 @@ import { Stage } from "@/components/atoms/StagesCardRequirements";
  * @returns Array<AnyField & { name: string }>
  */
 export const fieldsToArray = <T extends Record<string, any>>(
-  fields?: Partial<Record<GovernanceImplementationEnum, T>>
+  fields?: Partial<Record<GovernanceImplementationEnum, T>>,
 ): Array<T & { name: string }> => {
   if (!fields) return [];
-  
+
   return Object.entries(fields).map(([name, field]) => ({
     ...field,
-    name
+    name,
   })) as Array<T & { name: string }>;
 };
 
@@ -32,8 +29,7 @@ export const filterFieldsByRiskLevel = (
   riskLevel: RiskLevel,
 ): (GovernanceImplementationField & { name: string })[] => {
   // If fields is already an array, filter it directly
-return fields.filter((field) => field.riskLevel === riskLevel);
-
+  return fields.filter((field) => field.riskLevel === riskLevel);
 };
 
 /**
@@ -46,17 +42,21 @@ return fields.filter((field) => field.riskLevel === riskLevel);
  * Stage 2 (LOW RISK): No High or Medium Risk details
  */
 export const getDaoStageFromFields = (
-  fields: Partial<Record<GovernanceImplementationEnum, GovernanceImplementationField>> | GovernanceImplementationField[],
+  fields:
+    | Partial<
+        Record<GovernanceImplementationEnum, GovernanceImplementationField>
+      >
+    | GovernanceImplementationField[],
 ): Stage => {
   let fieldsArray: GovernanceImplementationField[];
-  
+
   // Convert to array if it's a record
   if (Array.isArray(fields)) {
     fieldsArray = fields;
   } else {
     fieldsArray = fieldsToArray<GovernanceImplementationField>(fields);
   }
-  
+
   const hasHighRisk = fieldsArray.some(
     (field) => field.riskLevel === RiskLevel.HIGH,
   );

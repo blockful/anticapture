@@ -14,6 +14,7 @@ import {
   TimelockCard,
   VoteCard,
   RiskAreaCardWrapper,
+  RiskAreaCardEnum,
 } from "@/components/molecules";
 import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -189,7 +190,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               onRiskClick={(riskName) => {
                 handleRiskAreaClick(riskName);
               }}
-              variant="dao-overview"
+              variant={RiskAreaCardEnum.DAO_OVERVIEW}
             />
           </div>
         </div>
@@ -258,7 +259,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               onRiskClick={(riskName) => {
                 handleRiskAreaClick(riskName);
               }}
-              variant="dao-overview"
+              variant={RiskAreaCardEnum.DAO_OVERVIEW}
             />
           </div>
         </div>

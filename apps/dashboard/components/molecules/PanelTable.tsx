@@ -20,6 +20,12 @@ import { useDelegatedSupply } from "@/hooks";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import { getDaoStageFromFields, fieldsToArray } from "@/lib/dao-config/utils";
+import {
+  RiskAreaCardWrapper,
+  RiskAreaCardEnum,
+} from "@/components/molecules/RiskAreaCard";
+import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 
 export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
@@ -159,6 +165,44 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         );
       },
       header: () => <h4 className="text-table-header pl-4">DAO</h4>,
+    },
+    {
+      accessorKey: "stage",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const daoConfig = daoConfigByDaoId[daoId];
+        if (!daoConfig.governanceImplementation) {
+          return <div>?</div>;
+        }
+        const stage = getDaoStageFromFields(
+          fieldsToArray(daoConfig.governanceImplementation?.fields),
+        );
+        return <div>{stage}</div>;
+      },
+      header: () => <h4 className="text-table-header pl-4">Stage</h4>,
+    },
+    {
+      accessorKey: "riskareas",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const daoRiskAreas = getDaoRiskAreas(daoId);
+        const riskAreas = {
+          risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
+            name,
+            level: info.riskLevel,
+          })),
+        };
+
+        return (
+          <div>
+            <RiskAreaCardWrapper
+              riskAreas={riskAreas.risks}
+              variant={RiskAreaCardEnum.PANEL_TABLE}
+            />
+          </div>
+        );
+      },
+      header: () => <h4 className="text-table-header pl-4">Risk Areas</h4>,
     },
     {
       accessorKey: "delegatedSupply",

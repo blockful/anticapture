@@ -7,7 +7,7 @@ import { cn } from "@/lib/client/utils";
 import { ReactNode, useState } from "react";
 import { RiskTooltipCard } from "@/components/atoms";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
-import { RiskAreaEnum } from "@/lib/enums";
+import { RiskAreaEnum } from "@/lib/enums/RiskArea";
 
 export type RiskArea = {
   name: string;
@@ -15,22 +15,28 @@ export type RiskArea = {
   level?: RiskLevel;
 };
 
+export enum RiskAreaCardEnum {
+  DAO_OVERVIEW = "dao-overview",
+  RISK_ANALYSIS = "risk-analysis",
+  PANEL_TABLE = "panel-table",
+}
+
 interface RiskAreaCardProps {
   riskArea: RiskArea;
   isActive?: boolean;
   onClick?: () => void;
-  variant?: "dao-overview" | "risk-analysis";
+  variant?: RiskAreaCardEnum;
 }
 
 type GridColumns = `${string}grid-cols-${number}${string}`;
 
 interface RiskAreaCardWrapperProps {
-  title: string;
+  title?: string;
   riskAreas: RiskArea[];
   activeRiskId?: string;
   onRiskClick?: (riskName: string) => void;
   gridColumns?: GridColumns;
-  variant?: "dao-overview" | "risk-analysis";
+  variant?: RiskAreaCardEnum;
   hideTitle?: boolean;
 }
 
@@ -38,7 +44,7 @@ interface RiskAreaCardInternalProps {
   risk: RiskArea;
   isActive: boolean;
   onClick?: () => void;
-  variant: "dao-overview" | "risk-analysis";
+  variant: RiskAreaCardEnum;
 }
 
 /**
@@ -181,18 +187,17 @@ export const RiskAreaCard = ({
   riskArea,
   isActive = false,
   onClick,
-  variant = "dao-overview",
+  variant = RiskAreaCardEnum.DAO_OVERVIEW,
 }: RiskAreaCardProps) => {
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const riskName = riskArea.name;
   const riskInfo = RISK_AREAS[riskName as RiskAreaEnum] || {
     title: riskName,
     description: "Risk description not available.",
   };
 
-  // For dao-overview variant, return the internal component with optional tooltip
-  if (variant === "dao-overview") {
-    return (
+  const riskAreaCard: Record<RiskAreaCardEnum, ReactNode> = {
+    [RiskAreaCardEnum.DAO_OVERVIEW]: (
       <div
         className="relative h-[42px]"
         onMouseEnter={() => setShowTooltip(true)}
@@ -215,18 +220,31 @@ export const RiskAreaCard = ({
           </div>
         )}
       </div>
-    );
-  }
-
-  // For risk-analysis variant, wrap the internal component with additional styling
-  return (
-    <div className="flex h-[62px] w-full">
-      <div
-        className={cn(
-          "w-full p-1.5",
-          isActive && "border-[2px] border-middleDark bg-darkest sm:bg-dark",
-        )}
-      >
+    ),
+    [RiskAreaCardEnum.RISK_ANALYSIS]: (
+      <div className="flex h-[62px] w-full">
+        <div
+          className={cn(
+            "w-full p-1.5",
+            isActive && "border-[2px] border-middleDark bg-darkest sm:bg-dark",
+          )}
+        >
+          <RiskAreaCardInternal
+            risk={riskArea}
+            isActive={isActive}
+            onClick={onClick}
+            variant={variant}
+          />
+        </div>
+        <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
+          {isActive && (
+            <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
+          )}
+        </div>
+      </div>
+    ),
+    [RiskAreaCardEnum.PANEL_TABLE]: (
+      <div className="flex h-[62px] w-full">
         <RiskAreaCardInternal
           risk={riskArea}
           isActive={isActive}
@@ -234,13 +252,10 @@ export const RiskAreaCard = ({
           variant={variant}
         />
       </div>
-      <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
-        {isActive && (
-          <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
-        )}
-      </div>
-    </div>
-  );
+    ),
+  };
+
+  return riskAreaCard[variant];
 };
 
 /**
@@ -252,7 +267,7 @@ export const RiskAreaCardWrapper = ({
   activeRiskId,
   onRiskClick,
   gridColumns = "grid-cols-2",
-  variant = "dao-overview",
+  variant = RiskAreaCardEnum.DAO_OVERVIEW,
   hideTitle = false,
   withTooltip = true,
 }: RiskAreaCardWrapperProps & { withTooltip?: boolean }) => {
