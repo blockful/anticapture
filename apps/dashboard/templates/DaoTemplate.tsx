@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  // TelegramBotMessage,
-  ShowYourSupportStickyBar,
-} from "@/components/atoms";
+import { ShowYourSupportStickyBar } from "@/features/show-support";
 // import { Message, MessageStacker } from "@/components/molecules";
-import {
-  DaoOverviewSection,
-  TokenDistributionSection,
-} from "@/components/organisms";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
@@ -19,6 +12,8 @@ import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
 import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
+import { DaoOverviewSection } from "@/features/dao-overview";
+import { TokenDistributionSection } from "@/features/token-distribution";
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;

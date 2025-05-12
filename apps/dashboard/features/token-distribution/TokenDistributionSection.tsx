@@ -6,15 +6,15 @@ import {
   SwitcherDate,
   TheCardChartLayout,
 } from "@/components/atoms";
-import {
-  MultilineChartTokenDistribution,
-  TokenDistributionTable,
-} from "@/components/molecules";
 import { useTokenDistributionContext } from "@/contexts";
 import { TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { mockedTokenMultineDatasets } from "@/lib/mocked-data/mocked-token-dist-datasets";
+import {
+  MultilineChartTokenDistribution,
+  TokenDistributionTable,
+} from "@/features/token-distribution";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {

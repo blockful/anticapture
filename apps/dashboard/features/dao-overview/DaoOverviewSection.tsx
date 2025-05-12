@@ -23,11 +23,10 @@ import daoConfigByDaoId from "@/lib/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { StagesDaoOverview } from "@/components/molecules";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
-import { cn } from "@/lib/client/utils";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import {
   fieldsToArray,
