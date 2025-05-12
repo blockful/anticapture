@@ -13,7 +13,11 @@
   "dependencies": {
     "@graphql-hive/gateway": "^1.13.6",
     "@graphql-mesh/compose-cli": "^1.4.7",
+    "@graphql-mesh/config": "^0.108.4",
+    "@graphql-mesh/http": "^0.106.3",
+    "@graphql-mesh/runtime": "^0.106.3",
     "@omnigraph/openapi": "^0.109.7",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3"
   }
 }

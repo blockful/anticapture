@@ -1,15 +1,8 @@
-import dotenv from "dotenv";
-
-import { processConfig } from '@graphql-mesh/config'
-// import { type YamlConfig } from "@graphql-mesh/types"
-import { loadGraphQLHTTPSubgraph, MeshComposeCLISubgraphConfig, } from '@graphql-mesh/compose-cli'
-import { loadOpenAPISubgraph } from '@omnigraph/openapi'
-
-dotenv.config();
-
-
-
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var dotenv_1 = require("dotenv");
+var config_1 = require("@graphql-mesh/config");
+dotenv_1.default.config();
 // const subgraphs = Object.entries(process.env).reduce((acc, [key, value]) => {
 //   const [match, chain] = key.match(/^DAO_API_(\w+)/) || []
 //   if (match) {
@@ -34,11 +27,8 @@ dotenv.config();
 //     //   console.error({ message: `Unable to load ${chain} DAO API`, error })
 //     // }
 //   }
-
 //   return acc
 // }, [])
-
-
 // if (process.env.PETITION_API_URL) {
 //   try {
 //     subgraphs.push({
@@ -50,30 +40,29 @@ dotenv.config();
 //     console.error({ message: "Unable to load petition API", error })
 //   }
 // }
-
-export default processConfig({
-  sources: [
-    {
-      name: `ENS`,
-      handler: {
-        graphql: {
-          endpoint: process.env.DAO_API_ENS!,
+exports.default = (0, config_1.processConfig)({
+    sources: [
+        {
+            name: "ENS",
+            handler: {
+                graphql: {
+                    endpoint: process.env.DAO_API_ENS,
+                },
+                openapi: {
+                    source: "".concat(process.env.DAO_API_ENS, "/docs/json"),
+                }
+            }
         },
-        // openapi: {
-        //   source: `${process.env.DAO_API_ENS!}/docs/json`,
-        // }
-      }
-    },
-    {
-      name: `UNI`,
-      handler: {
-        graphql: {
-          endpoint: process.env.DAO_API_UNI!,
-        },
-        // openapi: {
-        //   source: `${process.env.DAO_API_UNI!}/docs/json`,
-        // }
-      }
-    }
-  ],
-})
+        {
+            name: "UNI",
+            handler: {
+                graphql: {
+                    endpoint: process.env.DAO_API_UNI,
+                },
+                openapi: {
+                    source: "".concat(process.env.DAO_API_UNI, "/docs/json"),
+                }
+            }
+        }
+    ],
+});
