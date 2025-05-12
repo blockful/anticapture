@@ -1,7 +1,6 @@
 export * from "@/components/atoms/icons";
 export * from "@/components/atoms/messages";
 
-export * from "@/components/atoms/AttackProfitabilityAccordion";
 export * from "@/components/atoms/AttackProfitabilityCustomTooltip";
 export * from "@/components/atoms/AttackProfitabilityToggleHeader";
 export * from "@/components/atoms/Badge";

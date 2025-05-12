@@ -6,7 +6,6 @@ import {
 } from "@/components/atoms";
 // import { Message, MessageStacker } from "@/components/molecules";
 import {
-  AttackProfitabilitySection,
   DaoOverviewSection,
   GovernanceActivitySection,
   GovernanceImplementationSection,
@@ -19,6 +18,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { DaoPageInteractionProvider } from "@/contexts/DaoPageInteractionContext";
 import { ShowSupportSection } from "@/features/show-support";
+import { AttackProfitabilitySection } from "@/features/attack-profitability";
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;

@@ -1,4 +1,3 @@
-export * from "@/components/organisms/AttackProfitabilitySection";
 export * from "@/components/organisms/DaoOverviewSection";
 export * from "@/components/organisms/GovernanceActivitySection";
 export * from "@/components/organisms/GovernanceImplementationSection";

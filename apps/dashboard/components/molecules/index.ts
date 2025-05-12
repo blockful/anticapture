@@ -1,4 +1,3 @@
-export * from "@/components/molecules/AttackCostBarChart";
 export * from "@/components/molecules/ContractsCard";
 export * from "@/components/molecules/StagesDaoOverview";
 export * from "@/components/molecules/GovernanceActivityTable";
@@ -8,7 +7,6 @@ export * from "@/components/molecules/StickyPageHeader";
 export * from "@/components/molecules/HeaderNavMobile";
 export * from "@/components/molecules/HeaderSidebar";
 export * from "@/components/molecules/MessageStacker";
-export * from "@/components/molecules/MultilineChartAttackProfitability";
 export * from "@/components/molecules/MultilineChartTokenDistribution";
 export * from "@/components/molecules/PanelTable";
 export * from "@/components/molecules/QuorumCard";

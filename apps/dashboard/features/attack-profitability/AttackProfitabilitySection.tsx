@@ -8,16 +8,16 @@ import {
   TheCardChartLayout,
   SwitcherDate,
   RiskLevelCard,
-  AttackProfitabilityAccordion,
 } from "@/components/atoms";
-import {
-  MultilineChartAttackProfitability,
-  AttackCostBarChart,
-} from "@/components/molecules";
 import { TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { AttackProfitabilityConfig } from "@/lib/dao-config/types";
+import {
+  AttackProfitabilityAccordion,
+  MultilineChartAttackProfitability,
+  AttackCostBarChart,
+} from "@/features/attack-profitability";
 
 export const AttackProfitabilitySection = ({
   daoId,
