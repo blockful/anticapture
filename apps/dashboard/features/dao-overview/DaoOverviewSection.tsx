@@ -15,7 +15,7 @@ import {
   VoteCard,
   RiskAreaCardWrapper,
 } from "@/components/molecules";
-import { FilePenLine, LinkIcon, InfoIcon } from "lucide-react";
+import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
