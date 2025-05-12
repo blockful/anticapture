@@ -3,7 +3,6 @@
 import {
   TheSectionLayout,
   RiskLevelCard,
-  StageAccordion,
   DaoAvatarIcon,
   StagesCardRequirements,
 } from "@/components/atoms";
@@ -18,7 +17,7 @@ import {
 import { RiskLevel } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BarChart } from "lucide-react";
-import { Stage, StageTag } from "@/features/resilience-stages";
+import { Stage, StageAccordion, StageTag } from "@/features/resilience-stages";
 
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;

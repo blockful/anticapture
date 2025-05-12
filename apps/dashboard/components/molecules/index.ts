@@ -5,7 +5,6 @@ export * from "@/components/molecules/StickyPageHeader";
 export * from "@/components/molecules/HeaderNavMobile";
 export * from "@/components/molecules/HeaderSidebar";
 export * from "@/components/molecules/MessageStacker";
-export * from "@/components/molecules/PanelTable";
 export * from "@/components/molecules/QuorumCard";
 export * from "@/components/molecules/SecurityCouncilCard";
 export * from "@/components/molecules/SupportDaoCard";

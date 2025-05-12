@@ -6,7 +6,7 @@ import {
   SwitcherDate,
   TheSectionLayout,
 } from "@/components/atoms";
-import { PanelTable } from "@/components/molecules";
+import { PanelTable } from "@/features/panel";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 

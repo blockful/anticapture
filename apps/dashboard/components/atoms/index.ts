@@ -23,7 +23,6 @@ export * from "@/components/atoms/RiskTooltipCard";
 export * from "@/components/atoms/SkeletonDaoInfoCards";
 export * from "@/components/atoms/SkeletonRow";
 export * from "@/components/atoms/Sparkline";
-export * from "@/components/atoms/StageAccordion";
 export * from "@/components/atoms/StageTagSimplified";
 export * from "@/components/atoms/SupportersCarroussel";
 export * from "@/components/atoms/SupporterBadge";
