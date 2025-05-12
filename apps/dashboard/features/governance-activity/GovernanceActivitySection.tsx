@@ -5,7 +5,7 @@ import {
   TheSectionLayout,
   SwitcherDate,
 } from "@/components/atoms";
-import { GovernanceActivityTable } from "@/components/molecules";
+import { GovernanceActivityTable } from "@/features/governance-activity";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

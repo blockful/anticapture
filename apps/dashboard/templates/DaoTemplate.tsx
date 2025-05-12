@@ -7,7 +7,6 @@ import {
 // import { Message, MessageStacker } from "@/components/molecules";
 import {
   DaoOverviewSection,
-  GovernanceActivitySection,
   TokenDistributionSection,
 } from "@/components/organisms";
 import { useParams } from "next/navigation";
@@ -19,6 +18,7 @@ import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
 import { ResilienceStagesSection } from "@/features/resilience-stages";
+import { GovernanceActivitySection } from "@/features/governance-activity";
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;

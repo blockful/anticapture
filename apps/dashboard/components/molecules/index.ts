@@ -1,6 +1,5 @@
 export * from "@/components/molecules/ContractsCard";
 export * from "@/components/molecules/StagesDaoOverview";
-export * from "@/components/molecules/GovernanceActivityTable";
 export * from "@/components/molecules/HeaderDAOSidebar";
 export * from "@/components/molecules/StickyPageHeader";
 export * from "@/components/molecules/HeaderNavMobile";
