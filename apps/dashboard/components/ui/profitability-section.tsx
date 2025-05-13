@@ -3,7 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
-import { DollarIcon, InfoIcon } from "@/shared/icons";
+import { DollarIcon, InfoIcon } from "@/shared/components/icons";
 
 export const ProfitabilitySection = () => {
   return (

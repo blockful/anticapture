@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
-import { UncertaintyIcon } from "@/shared/icons";
+import { UncertaintyIcon } from "@/shared/components/icons";
 
 export const UncertaintySection = () => {
   const { daoData } = useDaoDataContext();

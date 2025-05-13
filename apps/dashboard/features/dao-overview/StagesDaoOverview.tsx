@@ -5,7 +5,7 @@ import { StageRequirementsTooltip } from "@/components/atoms/StageRequirementsTo
 import { useState } from "react";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
-import { BulletPoint } from "@/shared/icons/BulletPoint";
+import { BulletPoint } from "@/shared/components/icons/BulletPoint";
 import { OutlinedBox } from "@/components/atoms/OutlinedBox";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

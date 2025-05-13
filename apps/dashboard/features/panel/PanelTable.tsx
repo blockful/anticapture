@@ -13,7 +13,11 @@ import { useDelegatedSupply } from "@/hooks";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
-import { ArrowUpDown, ArrowState, DaoAvatarIcon } from "@/shared/icons";
+import {
+  ArrowUpDown,
+  ArrowState,
+  DaoAvatarIcon,
+} from "@/shared/components/icons";
 
 export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();

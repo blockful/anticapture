@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-import { BlocksIcon, ClickIcon } from "@/shared/icons";
+import { BlocksIcon, ClickIcon } from "@/shared/components/icons";
 export const VoteCard = ({
   daoOverview,
 }: {

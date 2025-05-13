@@ -12,7 +12,7 @@ import { DaoConfiguration } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 import { pickBy } from "lodash";
 import { ReachOutToUsCard } from "@/features/support-dao";
-import { DaoAvatarIcon } from "@/shared/icons";
+import { DaoAvatarIcon } from "@/shared/components/icons";
 
 export const SupportDaosSection = () => {
   const router = useRouter();

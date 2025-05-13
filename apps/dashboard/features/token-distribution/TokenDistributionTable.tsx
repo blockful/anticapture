@@ -22,7 +22,7 @@ import {
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
-import { ArrowState, ArrowUpDown } from "@/shared/icons";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,

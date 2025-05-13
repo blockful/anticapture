@@ -3,7 +3,10 @@
 import { cn } from "@/lib/client/utils";
 import { Badge } from "@/components/atoms";
 import { ReactNode } from "react";
-import { CircleCheckIcon, CircleNotCheckedIcon } from "@/shared/icons";
+import {
+  CircleCheckIcon,
+  CircleNotCheckedIcon,
+} from "@/shared/components/icons";
 
 interface SwitchItemProps {
   switched?: boolean;

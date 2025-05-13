@@ -6,7 +6,7 @@ import Link from "next/link";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { BarChart4 } from "lucide-react";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/components/atoms";
-import { AnticaptureIcon } from "@/shared/icons";
+import { AnticaptureIcon } from "@/shared/components/icons";
 export const HeaderSidebar = () => {
   const router = useRouter();
 

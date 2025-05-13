@@ -10,7 +10,7 @@ import { BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { HeaderNavMobile } from "@/widgets";
-import { TelegramIcon } from "@/shared/icons";
+import { TelegramIcon } from "@/shared/components/icons";
 export const StickyPageHeader = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);

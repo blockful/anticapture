@@ -7,7 +7,7 @@ import {
 } from "@/components/atoms";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
-import { ExternalLinkIcon } from "@/shared/icons";
+import { ExternalLinkIcon } from "@/shared/components/icons";
 import { Clock4 } from "lucide-react";
 import { Address } from "viem";
 

@@ -18,7 +18,7 @@ import {
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";
-import { ArrowUpDown, ArrowState } from "@/shared/icons";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

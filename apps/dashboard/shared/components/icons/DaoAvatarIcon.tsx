@@ -8,7 +8,7 @@ import {
   EnsIcon,
   ArbitrumIcon,
   OptimismIcon,
-} from "@/shared/icons";
+} from "@/shared/components/icons";
 
 export interface DaoAvatarIconProps extends ComponentProps<"svg"> {
   daoId: DaoIdEnum;

@@ -7,7 +7,7 @@ import { cn } from "@/lib/client/utils";
 import { X, Menu, BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { useRouter, usePathname } from "next/navigation";
-import { AnticaptureIcon } from "@/shared/icons";
+import { AnticaptureIcon } from "@/shared/components/icons";
 
 export const HeaderMobile = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);

@@ -21,7 +21,7 @@ import {
   PlusIcon,
   TokensIcon,
   UsersIcon,
-} from "@/shared/icons";
+} from "@/shared/components/icons";
 import { Badge } from "@/components/atoms/Badge";
 
 interface AccordionDataProps {

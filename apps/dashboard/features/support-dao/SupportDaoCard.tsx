@@ -8,7 +8,7 @@ import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/hooks/usePetition";
 import { ReactNode } from "react";
-import { TrendingUpIcon } from "@/shared/icons";
+import { TrendingUpIcon } from "@/shared/components/icons";
 
 export const SupportDaoCard = ({
   daoIcon,

@@ -1,7 +1,7 @@
 "use client";
 
 import { TheSectionLayout, SwitcherDate } from "@/components/atoms";
-import { ArrowLeftRight } from "@/shared/icons";
+import { ArrowLeftRight } from "@/shared/components/icons";
 import { GovernanceActivityTable } from "@/features/governance-activity";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";

@@ -17,7 +17,7 @@ import {
   AttackCostBarChart,
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability";
-import { CrossHairIcon } from "@/shared/icons";
+import { CrossHairIcon } from "@/shared/components/icons";
 
 export const AttackProfitabilitySection = ({
   daoId,

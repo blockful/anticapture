@@ -9,7 +9,7 @@ import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext, useTokenDistributionContext } from "@/contexts";
 import { TextCardDaoInfoItem } from "@/features/dao-overview";
-import { UsersIcon } from "@/shared/icons";
+import { UsersIcon } from "@/shared/components/icons";
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();

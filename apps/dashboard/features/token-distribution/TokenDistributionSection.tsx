@@ -14,7 +14,7 @@ import {
   MultilineChartTokenDistribution,
   TokenDistributionTable,
 } from "@/features/token-distribution";
-import { ArrowLeftRight } from "@/shared/icons";
+import { ArrowLeftRight } from "@/shared/components/icons";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {

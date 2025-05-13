@@ -1,5 +1,3 @@
-export * from "@/components/atoms/messages";
-
 export * from "@/components/atoms/Badge";
 export * from "@/components/atoms/BadgeCardDaoInfoItem";
 export * from "@/components/atoms/BadgeInAnalysis";

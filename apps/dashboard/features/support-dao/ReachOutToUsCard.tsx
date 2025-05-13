@@ -2,7 +2,7 @@
 
 import { ArrowRightIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { SimpleGlobeIcon } from "@/shared/icons";
+import { SimpleGlobeIcon } from "@/shared/components/icons";
 
 export const ReachOutToUsCard = () => {
   return (

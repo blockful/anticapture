@@ -31,7 +31,7 @@ import {
   CrownIcon,
   TokensIcon,
   FocusIcon,
-} from "@/shared/icons";
+} from "@/shared/components/icons";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
