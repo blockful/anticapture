@@ -1,3 +1,5 @@
+import { daosResolver } from "./daos";
+
 const daoItemQueries = [
   'account',
   'accountBalance',
@@ -43,8 +45,6 @@ const itemResolvers = daoItemQueries.reduce((acc, fieldName) => {
 
   return acc;
 }, {});
-
-
 
 const daoListQueries = [
   'accountBalances',
@@ -94,11 +94,11 @@ const listResolvers = daoListQueries.reduce((acc, fieldName) => {
 }, {});
 
 
-
 export default {
   Query: {
     ...listResolvers,
     ...itemResolvers,
+    daos: daosResolver
   }
 }
 
