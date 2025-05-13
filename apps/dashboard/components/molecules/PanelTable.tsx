@@ -145,12 +145,11 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
             <div
-              className={cn("flex w-full gap-3 md:w-64", {
-                "whitespace-nowrap": isMobile,
-                "!w-fit": !isMobile && isInAnalysis,
+              className={cn("flex w-full gap-3", {
+                "w-full flex-col lg:flex-row": isInAnalysis,
               })}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2">
                 {!isMobile && (
                   <DaoAvatarIcon
                     daoId={dao as DaoIdEnum}
@@ -163,10 +162,15 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                   ? "ENS"
                   : daoConfigByDaoId[dao as DaoIdEnum].name}
               </div>
-              {!isMobile && isInAnalysis && (
-                <div className="flex w-full">
-                  <BadgeInAnalysis />
-                </div>
+              {isInAnalysis && (
+                <>
+                  <div className="hidden w-full items-center lg:flex">
+                    <BadgeInAnalysis />
+                  </div>
+                  <div className="flex w-full items-center lg:hidden">
+                    <BadgeInAnalysis hasIcon={false} />
+                  </div>
+                </>
               )}
             </div>
           </div>

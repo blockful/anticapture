@@ -6,9 +6,11 @@ import { Clock2 } from "lucide-react";
 export const BadgeInAnalysis = ({
   className,
   iconClassName,
+  hasIcon = true,
 }: {
   className?: string;
   iconClassName?: string;
+  hasIcon?: boolean;
 }) => {
   return (
     <div
@@ -17,7 +19,7 @@ export const BadgeInAnalysis = ({
         className,
       )}
     >
-      <Clock2 className={cn("size-4", iconClassName)} />
+      {hasIcon && <Clock2 className={cn("size-4", iconClassName)} />}
       <p className="whitespace-nowrap">In analysis</p>
     </div>
   );
