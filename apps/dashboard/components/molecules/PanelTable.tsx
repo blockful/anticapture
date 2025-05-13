@@ -209,7 +209,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         };
 
         return (
-          <div className="scrollbar-none flex w-full items-center overflow-auto text-white">
+          <div className="scrollbar-none flex w-full items-center overflow-auto px-4 py-3 text-white">
             <RiskAreaCardWrapper
               riskAreas={riskAreas.risks}
               variant={RiskAreaCardEnum.PANEL_TABLE}
