@@ -1,24 +1,31 @@
 "use client";
 
 import { createContext, useState, useContext } from "react";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { RiskAreaEnum } from "@/lib/enums/RiskArea";
 
 interface DaoPageInteractionContextType {
-  activeRisk: string;
-  setActiveRisk: (riskName: string) => void;
+  activeRisk: RiskAreaEnum;
+  setActiveRisk: (risk: RiskAreaEnum) => void;
   scrollToSection: (anchorId: string) => void;
 }
 
 const DaoPageInteractionContext = createContext<DaoPageInteractionContextType>({
-  activeRisk: "",
+  activeRisk: RiskAreaEnum.SPAM_VULNERABLE,
   setActiveRisk: () => {},
   scrollToSection: () => {},
 });
 
-export const useDaoPageInteraction = () => useContext(DaoPageInteractionContext);
+export const useDaoPageInteraction = () =>
+  useContext(DaoPageInteractionContext);
 
-export const DaoPageInteractionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [activeRisk, setActiveRisk] = useState("SPAM VULNERABLE");
+export const DaoPageInteractionProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [activeRisk, setActiveRisk] = useState<RiskAreaEnum>(
+    RiskAreaEnum.SPAM_VULNERABLE,
+  );
 
   const scrollToSection = (anchorId: string) => {
     // Scroll to the specified section
@@ -29,7 +36,9 @@ export const DaoPageInteractionProvider = ({ children }: { children: React.React
   };
 
   return (
-    <DaoPageInteractionContext.Provider value={{ activeRisk, setActiveRisk, scrollToSection }}>
+    <DaoPageInteractionContext.Provider
+      value={{ activeRisk, setActiveRisk, scrollToSection }}
+    >
       {children}
     </DaoPageInteractionContext.Provider>
   );

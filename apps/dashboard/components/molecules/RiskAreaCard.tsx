@@ -4,10 +4,11 @@ import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { RiskTooltipCard } from "@/components/atoms";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { RiskAreaEnum } from "@/lib/enums/RiskArea";
+import { TooltipPortal } from "@/components/atoms/TooltipPortal";
 
 export type RiskArea = {
   name: string;
@@ -34,10 +35,11 @@ interface RiskAreaCardWrapperProps {
   title?: string;
   riskAreas: RiskArea[];
   activeRiskId?: string;
-  onRiskClick?: (riskName: string) => void;
+  onRiskClick?: (riskName: RiskAreaEnum) => void;
   gridColumns?: GridColumns;
+  className?: string;
   variant?: RiskAreaCardEnum;
-  hideTitle?: boolean;
+  withTitle?: boolean;
 }
 
 interface RiskAreaCardInternalProps {
@@ -60,9 +62,10 @@ const RiskAreaCardInternal = ({
   const isBox2Filled =
     risk.level === RiskLevel.MEDIUM || risk.level === RiskLevel.HIGH;
   const isBox3Filled = risk.level === RiskLevel.HIGH;
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
   // Adjust styling based on variant
-  const isRiskAnalysis = variant === "risk-analysis";
+  const isRiskAnalysis = variant === RiskAreaCardEnum.RISK_ANALYSIS;
+  const isPanelTable = variant === RiskAreaCardEnum.PANEL_TABLE;
 
   const riskLevelIcons = {
     [RiskLevel.LOW]: (
@@ -102,7 +105,8 @@ const RiskAreaCardInternal = ({
     >
       <div
         className={cn(
-          "flex h-full flex-1 items-center justify-between px-1 py-2 sm:px-2",
+          "flex h-full items-center px-1 py-2 sm:px-2",
+          !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
             "bg-lightDark": risk.level === undefined,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
@@ -114,7 +118,12 @@ const RiskAreaCardInternal = ({
           },
         )}
       >
-        <div className="flex items-center">
+        <div
+          className={cn(
+            "flex items-center",
+            isPanelTable && "w-full justify-center",
+          )}
+        >
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
               "!text-foreground": risk.level === undefined,
@@ -134,7 +143,12 @@ const RiskAreaCardInternal = ({
             {risk.content ? risk.content : risk.name}
           </span>
         </div>
-        <div className="flex w-fit items-center justify-center">
+        <div
+          className={cn(
+            "flex w-fit items-center justify-center",
+            isPanelTable && "hidden",
+          )}
+        >
           {risk.level ? (
             riskLevelIcons[risk.level as RiskLevel]
           ) : (
@@ -144,7 +158,7 @@ const RiskAreaCardInternal = ({
           )}
         </div>
       </div>
-      <div className={cn("flex h-full items-center")}>
+      <div className={cn("flex h-full items-center", isPanelTable && "hidden")}>
         <div className="flex h-full flex-col gap-1">
           <div
             className={cn("h-full w-1", {
@@ -189,11 +203,31 @@ export const RiskAreaCard = ({
   onClick,
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
 }: RiskAreaCardProps) => {
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+
+  const handleMouseEnter = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.bottom + 8,
+        left: rect.left,
+      });
+      setShowTooltip(true);
+    }
+  };
+
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const riskName = riskArea.name;
   const riskInfo = RISK_AREAS[riskName as RiskAreaEnum] || {
     title: riskName,
+    titleAbbreviation: RISK_AREAS[riskName as RiskAreaEnum].titleAbbreviation,
     description: "Risk description not available.",
+  };
+
+  const modifiedRiskArea = {
+    ...riskArea,
+    content: riskInfo.titleAbbreviation,
   };
 
   const riskAreaCard: Record<RiskAreaCardEnum, ReactNode> = {
@@ -244,13 +278,32 @@ export const RiskAreaCard = ({
       </div>
     ),
     [RiskAreaCardEnum.PANEL_TABLE]: (
-      <div className="flex h-[62px] w-full">
+      <div
+        className="flex size-5 sm:size-7"
+        ref={triggerRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
         <RiskAreaCardInternal
-          risk={riskArea}
+          risk={modifiedRiskArea}
           isActive={isActive}
           onClick={onClick}
           variant={variant}
         />
+        {showTooltip && (
+          <TooltipPortal>
+            <div
+              className="fixed left-1/2 z-50 w-80 -translate-x-1/2 text-white shadow-lg"
+              style={{ top: tooltipPos.top, left: tooltipPos.left }}
+            >
+              <RiskTooltipCard
+                title={riskInfo.title}
+                description={riskInfo.description}
+                riskLevel={riskArea.level}
+              />
+            </div>
+          </TooltipPortal>
+        )}
       </div>
     ),
   };
@@ -266,28 +319,27 @@ export const RiskAreaCardWrapper = ({
   riskAreas,
   activeRiskId,
   onRiskClick,
-  gridColumns = "grid-cols-2",
+  className,
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
-  hideTitle = false,
+  withTitle = true,
   withTooltip = true,
 }: RiskAreaCardWrapperProps & { withTooltip?: boolean }) => {
   return (
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
-      {!hideTitle && (
+      {withTitle && (
         <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block">
           {title}
         </h3>
       )}
 
-      {/* Grid layout with configurable columns */}
-      <div className={`grid ${gridColumns} gap-1`}>
+      <div className={cn("", className)}>
         {riskAreas.map((risk: RiskArea, index: number) => (
           <RiskAreaCard
             key={`${risk.name}-${index}`}
             riskArea={risk}
             isActive={activeRiskId === risk.name}
-            onClick={() => onRiskClick?.(risk.name)}
+            onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
             variant={variant}
           />
         ))}

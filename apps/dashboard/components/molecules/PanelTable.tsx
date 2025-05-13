@@ -12,6 +12,8 @@ import {
   TheTable,
   SkeletonRow,
   DaoAvatarIcon,
+  Stage,
+  StageTag,
 } from "@/components/atoms";
 import { cn, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
@@ -159,8 +161,12 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
               daoConfigByDaoId[DaoIdEnum.ENS].name
                 ? "ENS"
                 : daoConfigByDaoId[dao as DaoIdEnum].name}
+              {!isMobile && isInAnalysis && (
+                <div>
+                  <BadgeInAnalysis />
+                </div>
+              )}
             </div>
-            {!isMobile && isInAnalysis && <BadgeInAnalysis />}
           </div>
         );
       },
@@ -172,17 +178,26 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const daoConfig = daoConfigByDaoId[daoId];
         if (!daoConfig.governanceImplementation) {
-          return <div>?</div>;
+          return (
+            <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+              <StageTag daoStage={Stage.NONE} tagStage={Stage.NONE} />
+            </div>
+          );
         }
         const stage = getDaoStageFromFields(
           fieldsToArray(daoConfig.governanceImplementation?.fields),
         );
-        return <div>{stage}</div>;
+        return (
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+            <StageTag daoStage={stage} tagStage={stage} />
+          </div>
+        );
       },
       header: () => <h4 className="text-table-header pl-4">Stage</h4>,
     },
     {
       accessorKey: "riskareas",
+      size: 220,
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const daoRiskAreas = getDaoRiskAreas(daoId);
@@ -194,10 +209,12 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         };
 
         return (
-          <div>
+          <div className="scrollbar-none flex w-full items-center overflow-auto text-white">
             <RiskAreaCardWrapper
               riskAreas={riskAreas.risks}
               variant={RiskAreaCardEnum.PANEL_TABLE}
+              className="flex w-full flex-row gap-1"
+              withTitle={false}
             />
           </div>
         );
@@ -214,7 +231,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         if (isInAnalysis) {
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end">
-              {isMobile ? <BadgeInAnalysis /> : "-"}
+              {"-"}
             </div>
           );
         }
@@ -225,7 +242,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4"
+          className="flex w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Delegated Supply</h4>

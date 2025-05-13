@@ -4,12 +4,14 @@ export enum Stage {
   ZERO = 0,
   ONE = 1,
   TWO = 2,
+  NONE = "NONE",
 }
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "border-error text-error bg-error bg-opacity-[0.12]",
   [Stage.ONE]: "border-warning text-warning bg-warning bg-opacity-[0.12]",
   [Stage.TWO]: "border-success text-success bg-success bg-opacity-[0.12]",
+  [Stage.NONE]: "border-middleDark bg-lightDark text-foreground",
 };
 
 interface StageTagProps {
@@ -35,7 +37,7 @@ export const StageTag = ({
     >
       <span className="font-mono text-[13px] font-medium leading-[18px]">
         <span className="hidden sm:inline">STAGE </span>
-        {tagStage}
+        {tagStage === Stage.NONE ? "?" : tagStage}
       </span>
     </div>
   );

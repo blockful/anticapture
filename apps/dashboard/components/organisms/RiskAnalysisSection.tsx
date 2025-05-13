@@ -33,7 +33,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const daoRiskAreas = getDaoRiskAreas(daoId);
 
-  const handleRiskClick = (riskName: string) => {
+  const handleRiskClick = (riskName: RiskAreaEnum) => {
     setActiveRisk(riskName);
   };
 
@@ -133,9 +133,9 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             riskAreas={customizedRiskAreas}
             activeRiskId={activeRisk}
             onRiskClick={handleRiskClick}
-            gridColumns="grid-cols-2 sm:grid-cols-1"
+            className="grid-cols-2 sm:grid-cols-1"
             variant={RiskAreaCardEnum.RISK_ANALYSIS}
-            hideTitle={true}
+            withTitle={false}
           />
         </div>
 

@@ -35,6 +35,7 @@ import {
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
 } from "@/lib/dao-config/utils";
+import { RiskAreaEnum } from "@/lib/enums/RiskArea";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -103,7 +104,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     })),
   };
 
-  const handleRiskAreaClick = (riskName: string) => {
+  const handleRiskAreaClick = (riskName: RiskAreaEnum) => {
     // First set the active risk
     setActiveRisk(riskName);
 
@@ -191,6 +192,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 handleRiskAreaClick(riskName);
               }}
               variant={RiskAreaCardEnum.DAO_OVERVIEW}
+              className="grid grid-cols-2 gap-1"
             />
           </div>
         </div>
@@ -260,6 +262,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 handleRiskAreaClick(riskName);
               }}
               variant={RiskAreaCardEnum.DAO_OVERVIEW}
+              className="grid grid-cols-2 gap-1"
             />
           </div>
         </div>
