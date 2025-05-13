@@ -13,6 +13,7 @@
     "skipLibCheck": true,
     "moduleResolution": "node16",
     "outDir": "./dist",
+    "noImplicitAny": false
   },
   "exclude": [
     "node_modules",

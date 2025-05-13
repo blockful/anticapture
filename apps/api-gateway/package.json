@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "graph": "mesh-compose -o supergraph.graphql",
-    "start": "hive-gateway supergraph"
+    "start": "node src/index.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

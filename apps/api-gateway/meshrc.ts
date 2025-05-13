@@ -23,11 +23,16 @@ export default processConfig({
       }
     },
     {
-      name: `UNI`,
+      name: `graphql_UNI`,
       handler: {
         graphql: {
           endpoint: process.env.DAO_API_UNI!,
-        },
+        }
+      }
+    },
+    {
+      name: `rest_UNI`,
+      handler: {
         openapi: {
           source: `${process.env.DAO_API_UNI!}/docs/json`,
         }
@@ -44,11 +49,14 @@ export default processConfig({
           }
         }
       ] : []),
+  ],
+  additionalResolvers: [
+    "src/resolvers/index.ts",
   ]
 },
   {
-    dir: "./.mesh"
-  }
+    dir: __dirname,
+  },
 )
 
 
