@@ -6,10 +6,11 @@ import {
   AlertCircleIcon,
   AlertTriangleIcon,
 } from "lucide-react";
+import { Stage } from "@/components/atoms/StageTag";
 
 interface StageRequirementsTooltipProps {
-  currentStage: number;
-  nextStage: number;
+  currentStage: Stage;
+  nextStage: Stage;
   requirements: string[];
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -22,14 +23,17 @@ export const StageRequirementsTooltip = ({
   onMouseEnter,
   onMouseLeave,
 }: StageRequirementsTooltipProps) => {
-  const variantIcons = {
-    0: <AlertTriangleIcon className="size-4 text-error" />,
-    1: <AlertCircleIcon className="size-4 text-warning" />,
-    2: <CheckCircleIcon className="size-4 text-success" />,
+  const variantIcons: Record<Stage, React.ReactNode> = {
+    [Stage.ZERO]: <AlertTriangleIcon className="size-4 text-error" />,
+    [Stage.ONE]: <AlertCircleIcon className="size-4 text-warning" />,
+    [Stage.TWO]: <CheckCircleIcon className="size-4 text-success" />,
+    [Stage.NONE]: <></>,
   };
-  const nextStageTextColor = Array.from(["text-error", "text-warning", "text-success"])[
-    nextStage % 3
-  ] as "text-error" | "text-warning" | "text-success";
+  const nextStageTextColor = Array.from([
+    "text-error",
+    "text-warning",
+    "text-success",
+  ])[Number(nextStage) % 3] as "text-error" | "text-warning" | "text-success";
   return (
     <div
       className="sm:translate-x absolute left-0 top-[calc(100%-8px)] z-50 mt-2"
@@ -37,16 +41,16 @@ export const StageRequirementsTooltip = ({
       onMouseLeave={onMouseLeave}
     >
       {/* Tooltip Arrow */}
-      <div className="sm:translate-x absolute left-1/2 top-[-5px] -mt-1 size-0 border-x-[13px] border-b-[13px] border-x-transparent border-b-darkest"/>
+      <div className="sm:translate-x absolute left-1/2 top-[-5px] -mt-1 size-0 border-x-[13px] border-b-[13px] border-x-transparent border-b-darkest" />
 
-      <div className="relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border border-lightDark bg-darkest sm:w-[25vw] stage-tooltip-box-shadow">
+      <div className="stage-tooltip-box-shadow relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border border-lightDark bg-darkest sm:w-[25vw]">
         {/* Header */}
         <div className="p-4">
           <div className="flex justify-start">
             <OutlinedBox
               variant={
                 Array.from(["error", "warning", "success"])[
-                  currentStage % 3
+                  Number(currentStage) % 3
                 ] as "error" | "warning" | "success"
               }
               className="mb-2 p-1"
@@ -74,10 +78,8 @@ export const StageRequirementsTooltip = ({
           <div className="flex flex-col gap-2">
             {requirements.map((req, index) => (
               <div key={index} className="flex items-center gap-2">
-                {variantIcons[currentStage % 3 as keyof typeof variantIcons]}
-                <span className="text-sm text-foreground">
-                  {req}
-                </span>
+                {variantIcons[currentStage]}
+                <span className="text-sm text-foreground">{req}</span>
               </div>
             ))}
           </div>

@@ -10,7 +10,7 @@ import { GovernanceImplementationField } from "@/lib/dao-config/types";
 export interface RiskDescriptionProps {
   title: string;
   description: string | string[];
-  requirements?: (GovernanceImplementationField & {name: string})[];
+  requirements?: (GovernanceImplementationField & { name: string })[];
   children?: ReactNode;
   riskLevel?: RiskLevel;
 }
@@ -33,6 +33,7 @@ export const RiskDescription = ({
     [RiskLevel.LOW]: <CheckCircle2 className="size-5 text-success" />,
     [RiskLevel.MEDIUM]: <AlertCircle className="size-5 text-warning" />,
     [RiskLevel.HIGH]: <TriangleAlert className="size-5 text-error" />,
+    [RiskLevel.NONE]: <></>,
   };
 
   return (
@@ -57,9 +58,7 @@ export const RiskDescription = ({
             {/* Thin divider line */}
             <div className="h-px w-full bg-lightDark" />
 
-            <h3 className="font-mono text-alternative-sm
-            
-            font-medium tracking-wider text-white">
+            <h3 className="font-mono text-alternative-sm font-medium tracking-wider text-white">
               <span className="text-foreground">{`//`}</span> REQUIREMENTS
             </h3>
             <ul className="space-y-2">

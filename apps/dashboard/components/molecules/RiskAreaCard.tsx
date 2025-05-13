@@ -92,6 +92,7 @@ const RiskAreaCardInternal = ({
         )}
       />
     ),
+    [RiskLevel.NONE]: <></>,
   };
 
   return (

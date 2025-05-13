@@ -9,9 +9,9 @@ import { BulletPoint } from "@/components/atoms/icons/BulletPoint";
 import { OutlinedBox } from "@/components/atoms/OutlinedBox";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-
+import { Stage } from "@/components/atoms/StageTag";
 interface StagesDaoOverviewProps {
-  currentStage?: number;
+  currentStage?: Stage;
   itemsToNextStage?: number;
   requirements?: string[];
   highRiskItems?: (GovernanceImplementationField & { name: string })[];
@@ -20,7 +20,7 @@ interface StagesDaoOverviewProps {
 }
 
 export const StagesDaoOverview = ({
-  currentStage = 1,
+  currentStage = Stage.ONE,
   itemsToNextStage = 3,
   highRiskItems = [],
   mediumRiskItems = [],
@@ -75,9 +75,9 @@ export const StagesDaoOverview = ({
               className={cn(
                 "font-mono text-sm font-medium uppercase tracking-wider",
                 {
-                  "text-error": currentStage === 0,
-                  "text-warning": currentStage === 1,
-                  "text-success": currentStage === 2,
+                  "text-error": currentStage === Stage.ZERO,
+                  "text-warning": currentStage === Stage.ONE,
+                  "text-success": currentStage === Stage.TWO,
                 },
               )}
             >
@@ -100,7 +100,7 @@ export const StagesDaoOverview = ({
               </span>
               <span className="tracking-wider text-foreground duration-300 group-hover:text-white">
                 {" "}
-                TO STAGE {currentStage + 1}
+                TO STAGE {Number(currentStage) + 1}
               </span>
             </button>
           </div>
@@ -135,7 +135,7 @@ export const StagesDaoOverview = ({
       {showTooltip && (
         <StageRequirementsTooltip
           currentStage={currentStage}
-          nextStage={currentStage + 1}
+          nextStage={Number(currentStage) + 1}
           requirements={requirements}
           onMouseEnter={() => !isMobile && setShowTooltip(true)}
           onMouseLeave={() => !isMobile && setShowTooltip(false)}

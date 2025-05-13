@@ -34,10 +34,11 @@ export const ResilienceStagesSection = ({
     fieldsToArray(daoConfig.governanceImplementation?.fields),
   );
 
-  const stageToRiskMapping = {
+  const stageToRiskMapping: Record<Stage, RiskLevel> = {
     [Stage.ZERO]: RiskLevel.HIGH,
     [Stage.ONE]: RiskLevel.MEDIUM,
     [Stage.TWO]: RiskLevel.LOW,
+    [Stage.NONE]: RiskLevel.NONE,
   };
 
   const highRiskItems = filterFieldsByRiskLevel(
@@ -61,18 +62,21 @@ export const ResilienceStagesSection = ({
     [Stage.ZERO]: "right-[75%]",
     [Stage.ONE]: "right-[25%]",
     [Stage.TWO]: "right-0 hidden",
+    [Stage.NONE]: "",
   };
 
   const StagesToLineStyle: Record<Stage, string> = {
     [Stage.ZERO]: "w-[25%] bg-error",
     [Stage.ONE]: "w-[75%] bg-warning",
     [Stage.TWO]: "w-full bg-success",
+    [Stage.NONE]: "",
   };
 
   const StagesToBorderColor: Record<Stage, string> = {
     [Stage.ZERO]: "border-error",
     [Stage.ONE]: "border-warning",
     [Stage.TWO]: "border-success",
+    [Stage.NONE]: "",
   };
 
   return (

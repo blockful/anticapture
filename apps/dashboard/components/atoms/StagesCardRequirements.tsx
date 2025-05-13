@@ -3,23 +3,20 @@
 import { cn } from "@/lib/client/utils";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/components/atoms/icons";
-
-export enum Stage {
-  ZERO = 0,
-  ONE = 1,
-  TWO = 2,
-}
+import { Stage } from "@/components/atoms/StageTag";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
   [Stage.ONE]: "text-warning",
   [Stage.TWO]: "text-success",
+  [Stage.NONE]: "text-middleDark",
 };
 
 const STAGE_TITLES: Record<Stage, string> = {
   [Stage.ZERO]: "STAGE 0: HIGH RISK",
   [Stage.ONE]: "STAGE 1: MEDIUM RISK",
   [Stage.TWO]: "STAGE 2: LOW RISK",
+  [Stage.NONE]: "",
 };
 
 const STAGE_DESCRIPTIONS: Record<Stage, string> = {
@@ -29,12 +26,14 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
     "A Stage 1 DAO has no implementation details identified as at High Risk, but still has at least one identified as Medium Risk.",
   [Stage.TWO]:
     "A Stage 2 DAO has no implementation details identified as Medium or High Risk.",
+  [Stage.NONE]: "",
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
   [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-[1px]",
   [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-[1px]",
   [Stage.TWO]: "hidden",
+  [Stage.NONE]: "",
 };
 
 interface StagesCardRequirementsProps {
