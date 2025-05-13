@@ -7,9 +7,12 @@ import {
 } from "@/lib/enums";
 import { calculateMonthsBefore } from "@/lib/client/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/lib/constants/governance-implementations";
+import { EnsIcon } from "@/components/atoms/icons/EnsIcon";
+
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
   supportStage: SupportStageEnum.FULL,
+  icon: EnsIcon,
   daoOverview: {
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {

@@ -1,13 +1,9 @@
-import { ComponentProps } from "react";
-
-interface OptimismIconProps extends ComponentProps<"svg"> {
-  showBackground?: boolean;
-}
+import { DaoIconProps } from "@/components/atoms/DaoAvatarIcon";
 
 export const OptimismIcon = ({
   showBackground = true,
   ...props
-}: OptimismIconProps) => {
+}: DaoIconProps) => {
   return (
     <svg
       width="100%"

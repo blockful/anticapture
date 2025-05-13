@@ -1,7 +1,13 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { RiskLevel, SupportStageEnum, GovernanceImplementationEnum } from "@/lib/enums";
+import {
+  RiskLevel,
+  SupportStageEnum,
+  GovernanceImplementationEnum,
+} from "@/lib/enums";
+import { ReactNode } from "react";
+import { DaoIconProps } from "@/components/atoms/DaoAvatarIcon";
 
 // Existing types
 export enum ChainNameEnum {
@@ -36,7 +42,9 @@ export interface MultilineChartDataSetPoint {
 }
 
 export type GovernanceImplementation = {
-  fields?: Partial<Record<GovernanceImplementationEnum, GovernanceImplementationField>>;
+  fields?: Partial<
+    Record<GovernanceImplementationEnum, GovernanceImplementationField>
+  >;
 };
 
 export type GovernanceImplementationField = {
@@ -50,6 +58,7 @@ export type GovernanceImplementationField = {
 interface BaseInfo {
   name: string;
   supportStage: SupportStageEnum;
+  icon?: (props: DaoIconProps) => JSX.Element;
   disableDaoPage?: boolean;
 }
 

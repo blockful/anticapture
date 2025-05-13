@@ -4,9 +4,12 @@ import {
   GovernanceImplementationEnum,
 } from "@/lib/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/lib/constants/governance-implementations";
+import { UniswapIcon } from "@/components/atoms/icons/UniswapIcon";
+
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
   supportStage: SupportStageEnum.FULL,
+  icon: UniswapIcon,
   daoOverview: {
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
