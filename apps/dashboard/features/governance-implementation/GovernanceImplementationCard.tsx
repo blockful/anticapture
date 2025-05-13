@@ -2,7 +2,7 @@
 
 import { MouseEvent } from "react";
 import { cn } from "@/lib/client/utils";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/shared/components/ui/card";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { RiskLevelCardSmall } from "@/shared/components";

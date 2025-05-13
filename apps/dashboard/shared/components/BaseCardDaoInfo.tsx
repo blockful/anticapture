@@ -1,7 +1,12 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/shared/components/ui/card";
 import { TooltipInfo } from "@/shared/components/TooltipInfo";
 import { cn } from "@/lib/client/utils";
 

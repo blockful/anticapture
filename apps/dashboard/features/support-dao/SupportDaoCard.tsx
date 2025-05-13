@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { Card } from "@/shared/components/ui/card";
 import { formatNumberUserReadable, formatPlural } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";

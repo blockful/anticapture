@@ -8,7 +8,7 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-import { ChartContainer } from "@/components/ui/chart";
+import { ChartContainer } from "@/shared/components/ui/chart";
 import {
   formatNumberUserReadable,
   timestampToReadableDate,

@@ -4,7 +4,7 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
+} from "@/shared/components/ui/tooltip";
 import { InfoIcon } from "@/shared/components/icons";
 import { cn } from "@/lib/client/utils";
 import { useState } from "react";

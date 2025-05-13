@@ -4,7 +4,7 @@ import { cn, getDateRange } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { CardTitle, CardDescription } from "@/components/ui/card";
+import { CardTitle, CardDescription } from "@/shared/components/ui/card";
 import { InfoIcon } from "@/shared/components/icons";
 
 export const TheSectionLayout = ({

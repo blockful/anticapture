@@ -1,7 +1,7 @@
 "use client";
 
 import { TooltipInfo } from "@/shared/components";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/shared/components/ui/card";
 import { SupportersCarroussel } from "@/shared/components/SupportersCarroussel";
 import { PetitionResponse } from "@/hooks/usePetition";
 import { formatNumberUserReadable } from "@/lib/client/utils";

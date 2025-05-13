@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { ReactNode } from "react";
 
 interface TheCardChartLayoutProps {

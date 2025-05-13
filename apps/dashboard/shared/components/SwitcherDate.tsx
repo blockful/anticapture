@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { cn } from "@/lib/client/utils";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";

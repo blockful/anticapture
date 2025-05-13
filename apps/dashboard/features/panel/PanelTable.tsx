@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/lib/mocked-data/mocked-data";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/shared/components";
 import { cn, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";

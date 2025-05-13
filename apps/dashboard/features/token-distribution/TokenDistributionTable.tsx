@@ -7,7 +7,7 @@ import {
   mockedTableChartMetrics,
   TokenDistribution,
 } from "@/lib/mocked-data/mocked-data";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Sparkline,
   SkeletonRow,

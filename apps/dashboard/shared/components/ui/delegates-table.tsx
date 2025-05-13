@@ -1,20 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { DataTable } from "@/shared/components/ui/data-table";
+import { Button } from "@/shared/components/ui/button";
+import { ArrowUpDown, InfoIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { bulkGetEnsName, User } from "@/lib/server/utils";
-import { RED_COLOR, GREEN_COLOR, sanitizeNumber } from "@/lib/client/utils";
-import {
-  Holders,
-  holdersData,
-  IsDelegated,
-} from "@/lib/mocked-data/mocked-data";
-import { HandIcon } from "@/shared/components/icons";
+import { sanitizeNumber } from "@/lib/client/utils";
+import { Delegates, delegatesData } from "@/lib/mocked-data/mocked-data";
+import { HeartIcon } from "@/shared/components/icons";
 
-export const holdersColumns: ColumnDef<Holders>[] = [
+export const delegatesColumns: ColumnDef<Delegates>[] = [
   {
     accessorKey: "user",
     cell: ({ row }) => {
@@ -23,11 +19,11 @@ export const holdersColumns: ColumnDef<Holders>[] = [
       const ensName = user.ensName;
       const walletAddress = user.walletAddress;
 
-      const etherscanAddressURL = `https://etherscan.io/address/${user.walletAddress}`;
-      const ensDomainsAccountURL = `https://app.ens.domains/${ensName}`;
+      const etherscanAddressURL: string = `https://etherscan.io/address/${user.walletAddress}`;
+      const ensDomainsAccountURL: string = `https://app.ens.domains/${ensName}`;
 
       return (
-        <p className="scrollbar-none flex max-w-40 items-center space-x-1 overflow-auto text-white">
+        <p className="scrollbar-none flex max-w-40 items-center space-x-1 overflow-auto">
           {ensName ? (
             <>
               <a className="hover:underline" href={ensDomainsAccountURL}>
@@ -42,7 +38,7 @@ export const holdersColumns: ColumnDef<Holders>[] = [
         </p>
       );
     },
-    header: "Holder",
+    header: "Delegate",
   },
   {
     accessorKey: "amount",
@@ -75,67 +71,55 @@ export const holdersColumns: ColumnDef<Holders>[] = [
     },
   },
   {
-    accessorKey: "delegated",
+    accessorKey: "delegators",
+    cell: ({ row }) => {
+      const delegators: number = row.getValue("delegators");
+      return <p className="mr-4 text-center">{sanitizeNumber(delegators)}</p>;
+    },
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Delegated
+          Delegators
           <ArrowUpDown className="ml-2 size-4" />
         </Button>
-      );
-    },
-    cell: ({ row }) => {
-      return (
-        <div
-          className="flex items-center justify-center"
-          style={{
-            color:
-              row.getValue("delegated") === IsDelegated.No
-                ? RED_COLOR
-                : GREEN_COLOR,
-          }}
-        >
-          {row.getValue("delegated")}
-        </div>
       );
     },
   },
   {
-    accessorKey: "lastBuy",
+    accessorKey: "voted",
     cell: ({ row }) => {
-      const lastBuyDate: Date = row.getValue("lastBuy");
-
-      return (
-        <p className="mx-auto text-center">
-          {lastBuyDate.toLocaleString("en-US").split(",")[0]}
-        </p>
-      );
+      const delegators: number = row.getValue("voted");
+      return <div className="mr-8 text-center">{delegators * 100}%</div>;
     },
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Last Buy
-          <ArrowUpDown className="ml-2 size-4" />
-        </Button>
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Voted
+            <ArrowUpDown className="ml-2 size-4" />
+          </Button>
+
+          <VotedProposalsPercentageInfoIcon />
+        </div>
       );
     },
   },
 ];
 
-export const HoldersTable = () => {
-  const [data, setData] = useState<Holders[]>([]);
+export const DelegatesTable = () => {
+  const [data, setData] = useState<Delegates[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    bulkGetEnsName(holdersData.map((holder) => holder.user.walletAddress))
+    bulkGetEnsName(delegatesData.map((holder) => holder.user.walletAddress))
       .then((ensNames) => {
-        const data = holdersData.map((holder, idx) => {
+        const data = delegatesData.map((holder, idx) => {
           return {
             ...holder,
             user: {
@@ -152,14 +136,38 @@ export const HoldersTable = () => {
 
   return (
     <DataTable
-      title="Holders"
-      icon={<HandIcon />}
+      title="Delegates"
+      icon={<HeartIcon />}
       isLoading={isLoading}
       withSorting={true}
       withPagination={true}
       filterColumn={"ensNameAndAddress"}
-      columns={holdersColumns}
+      columns={delegatesColumns}
       data={data}
     />
+  );
+};
+
+const VotedProposalsPercentageInfoIcon = () => {
+  const [showInfo, setShowInfo] = useState(false);
+
+  const toggle = () => setShowInfo(!showInfo);
+
+  return (
+    <div className="relative z-40">
+      <div
+        className={`absolute right-0 top-5 w-[220px] rounded-md bg-black p-3 text-center text-white ${
+          showInfo ? "block" : "hidden"
+        }`}
+      >
+        This is the percentage of proposals voted by this wallet in the last 90
+        days.
+      </div>
+      <InfoIcon
+        className="ml-2 size-4 cursor-pointer"
+        onMouseEnter={toggle}
+        onMouseLeave={toggle}
+      />
+    </div>
   );
 };
