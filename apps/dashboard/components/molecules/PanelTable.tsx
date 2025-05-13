@@ -145,24 +145,26 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
             <div
-              className={cn("flex w-full items-center gap-2 md:w-64", {
+              className={cn("flex w-full gap-3 md:w-64", {
                 "whitespace-nowrap": isMobile,
                 "!w-fit": !isMobile && isInAnalysis,
               })}
             >
-              {!isMobile && (
-                <DaoAvatarIcon
-                  daoId={dao as DaoIdEnum}
-                  className="size-icon-sm"
-                  isRounded
-                />
-              )}
-              {daoConfigByDaoId[dao as DaoIdEnum].name ===
-              daoConfigByDaoId[DaoIdEnum.ENS].name
-                ? "ENS"
-                : daoConfigByDaoId[dao as DaoIdEnum].name}
+              <div className="flex items-center gap-2">
+                {!isMobile && (
+                  <DaoAvatarIcon
+                    daoId={dao as DaoIdEnum}
+                    className="size-icon-sm"
+                    isRounded
+                  />
+                )}
+                {daoConfigByDaoId[dao as DaoIdEnum].name ===
+                daoConfigByDaoId[DaoIdEnum.ENS].name
+                  ? "ENS"
+                  : daoConfigByDaoId[dao as DaoIdEnum].name}
+              </div>
               {!isMobile && isInAnalysis && (
-                <div>
+                <div className="flex w-full">
                   <BadgeInAnalysis />
                 </div>
               )}
@@ -174,6 +176,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     },
     {
       accessorKey: "stage",
+      size: 155,
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const daoConfig = daoConfigByDaoId[daoId];
