@@ -1,11 +1,11 @@
-import { getMesh as meshCode, type MeshInstance } from '@graphql-mesh/runtime';
+import { getMesh } from '@graphql-mesh/runtime';
 import { createMeshHTTPHandler } from '@graphql-mesh/http';
 import { createServer } from 'node:http';
 
 import config from '../meshrc';
 
 const bootstrap = async () => {
-  const mesh = await meshCode(await config)
+  const mesh = await getMesh(await config)
 
   const handler = createMeshHTTPHandler({
     baseDir: __dirname,

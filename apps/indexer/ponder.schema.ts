@@ -80,7 +80,7 @@ export const votingPowerHistory = onchainTable(
   }),
 );
 
-export const delegations = onchainTable(
+export const delegation = onchainTable(
   "delegations",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
@@ -96,7 +96,7 @@ export const delegations = onchainTable(
   }),
 );
 
-export const transfers = onchainTable(
+export const transfer = onchainTable(
   "transfers",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
@@ -162,7 +162,7 @@ export const metricType = onchainEnum(
   metricTypeArray as [string, ...string[]],
 );
 
-export const daoMetricsDayBuckets = onchainTable(
+export const daoMetricsDayBucket = onchainTable(
   "dao_metrics_day_buckets",
   (drizzle) => ({
     date: drizzle.bigint().notNull(),
