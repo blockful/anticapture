@@ -5,7 +5,7 @@ import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
 import { ReactNode, useState } from "react";
-import { RiskTooltipCard } from "@/components/atoms";
+import { RiskTooltipCard } from "@/shared/components";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { RiskAreaEnum } from "@/lib/enums";
 

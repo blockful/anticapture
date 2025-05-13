@@ -1,7 +1,7 @@
 "use client";
 
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { ButtonHeaderDAOSidebarMobile } from "@/components/atoms";
+import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";

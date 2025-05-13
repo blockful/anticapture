@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   ButtonHeaderSidebar,
   HeaderDAOSidebarDropdown,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { cn } from "@/lib/client/utils";
 import { BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

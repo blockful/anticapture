@@ -4,7 +4,7 @@ import {
   TheSectionLayout,
   RiskLevelCard,
   StagesCardRequirements,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import daoConfigByDaoId from "@/lib/dao-config";

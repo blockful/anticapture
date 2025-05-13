@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TooltipInfo } from "@/components/atoms/TooltipInfo";
+import { TooltipInfo } from "@/shared/components/TooltipInfo";
 import { cn } from "@/lib/client/utils";
 
 export interface CardSection {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { TooltipInfo } from "@/components/atoms/TooltipInfo";
+import { TooltipInfo } from "@/shared/components/TooltipInfo";
 import { Address } from "viem";
-import { SupporterBadge } from "@/components/atoms/SupporterBadge";
+import { SupporterBadge } from "@/shared/components/SupporterBadge";
 
 interface SupportersCarrousselProps {
   supporters: Address[];
@@ -55,7 +55,7 @@ export const SupportersCarroussel = ({
   }, [supporters.length]);
 
   return (
-    <div className="relative w-full overflow-hidden sm:rounded-b-lg bg-darkest p-4 sm:border-t border-b sm:border-b-0 border-lightDark sm:bg-dark">
+    <div className="relative w-full overflow-hidden border-b border-lightDark bg-darkest p-4 sm:rounded-b-lg sm:border-b-0 sm:border-t sm:bg-dark">
       <div className="flex w-full gap-2">
         <p className="text-md z-20 text-gray-400">Latest Supporters</p>
         <TooltipInfo text={"Latest 10 Supporters"} />

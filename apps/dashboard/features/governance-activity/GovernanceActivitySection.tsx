@@ -1,6 +1,6 @@
 "use client";
 
-import { TheSectionLayout, SwitcherDate } from "@/components/atoms";
+import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { ArrowLeftRight } from "@/shared/components/icons";
 import { GovernanceActivityTable } from "@/features/governance-activity";
 import { TimeInterval } from "@/lib/enums/TimeInterval";

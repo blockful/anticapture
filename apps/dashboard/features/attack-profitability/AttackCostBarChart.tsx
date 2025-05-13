@@ -22,7 +22,7 @@ import {
   Cell,
   LabelProps,
 } from "recharts";
-import { SkeletonRow } from "@/components/atoms";
+import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
@@ -199,7 +199,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   return (
     <div className={`relative w-full ${className || ""}`}>
       {mocked && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]"/>
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]" />
       )}
       <ResponsiveContainer width="100%" height={280}>
         <BarChart

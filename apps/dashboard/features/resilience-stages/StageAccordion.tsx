@@ -10,12 +10,11 @@ import { MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { PlusIcon } from "@/shared/components/icons";
 import { Stage } from "@/features/resilience-stages/StageTag";
-import { StageTagSimplified } from "@/components/atoms/StageTagSimplified";
+import { StageTagSimplified } from "@/shared/components/StageTagSimplified";
 import { cn } from "@/lib/client/utils";
-import { StageContent } from "@/components/atoms/StageContent";
+import { StageContent } from "@/shared/components/StageContent";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { RiskLevel } from "@/lib/enums";
-import { DotFilledIcon } from "@radix-ui/react-icons";
 
 interface StageAccordionProps {
   daoStage: Stage;

@@ -1,7 +1,7 @@
 "use client";
 
 import { HeartIcon } from "lucide-react";
-import { TheSectionLayout } from "@/components/atoms";
+import { TheSectionLayout } from "@/shared/components";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SupportDaoCard } from "@/features/support-dao";

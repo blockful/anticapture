@@ -2,7 +2,7 @@
 
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { HeartIcon } from "lucide-react";
-import { TheSectionLayout } from "@/components/atoms";
+import { TheSectionLayout } from "@/shared/components";
 import {
   CardPetitionInformation,
   CardDaoSignature,

@@ -1,8 +1,8 @@
 "use client";
 
-import { TooltipInfo } from "@/components/atoms";
+import { TooltipInfo } from "@/shared/components";
 import { Card } from "@/components/ui/card";
-import { SupportersCarroussel } from "@/components/atoms/SupportersCarroussel";
+import { SupportersCarroussel } from "@/shared/components/SupportersCarroussel";
 import { PetitionResponse } from "@/hooks/usePetition";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";

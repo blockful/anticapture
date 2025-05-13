@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { BaseHeaderLayoutSidebar } from "@/components/atoms";
+import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 
 import { DaoTemplate } from "@/templates";
 import { HeaderMobile } from "@/widgets/HeaderMobile";

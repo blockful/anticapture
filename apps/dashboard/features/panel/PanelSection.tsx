@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SwitcherDate, TheSectionLayout } from "@/components/atoms";
+import { SwitcherDate, TheSectionLayout } from "@/shared/components";
 import { PanelTable } from "@/features/panel";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

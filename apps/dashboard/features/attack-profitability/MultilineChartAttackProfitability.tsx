@@ -31,7 +31,7 @@ import {
 import { MetricTypesEnum } from "@/lib/client/constants";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
-import { ResearchPendingChartBlur } from "@/components/atoms/ResearchPendingChartBlur";
+import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability";
 
 interface MultilineChartAttackProfitabilityProps {

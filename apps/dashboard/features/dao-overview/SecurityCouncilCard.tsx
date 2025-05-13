@@ -4,8 +4,9 @@ import { useMemo } from "react";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import Link from "next/link";
-import { CountdownDaoInfo, ProgressBar, TooltipInfo } from "@/components/atoms";
+import { TooltipInfo } from "@/shared/components";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
+import { CountdownDaoInfo, ProgressBar } from "@/features/dao-overview";
 
 export const SecurityCouncilCard = ({
   daoOverview,

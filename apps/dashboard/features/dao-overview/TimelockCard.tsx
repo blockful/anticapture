@@ -4,7 +4,7 @@ import {
   BaseCardDaoInfo,
   CardData,
   SwitchCardDaoInfoItem,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { ExternalLinkIcon } from "@/shared/components/icons";

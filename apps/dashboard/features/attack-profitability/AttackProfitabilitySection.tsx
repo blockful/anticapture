@@ -6,7 +6,7 @@ import {
   TheCardChartLayout,
   SwitcherDate,
   RiskLevelCard,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { TimeInterval } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

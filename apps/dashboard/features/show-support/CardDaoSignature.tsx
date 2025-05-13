@@ -11,7 +11,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { PetitionResponse, submitPetitionSignature } from "@/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
-import { ConnectWallet } from "@/components/atoms";
+import { ConnectWallet } from "@/shared/components";
 import { Address } from "viem";
 
 export const CardDaoSignature = ({

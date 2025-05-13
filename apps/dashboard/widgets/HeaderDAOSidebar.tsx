@@ -5,7 +5,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/lib/dao-config";

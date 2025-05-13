@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import { StageRequirementsTooltip } from "@/components/atoms/StageRequirementsTooltip";
+import { StageRequirementsTooltip } from "@/features/dao-overview/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
 import { BulletPoint } from "@/shared/components/icons/BulletPoint";
-import { OutlinedBox } from "@/components/atoms/OutlinedBox";
+import { OutlinedBox } from "@/shared/components/OutlinedBox";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 

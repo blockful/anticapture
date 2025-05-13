@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ButtonHeaderSidebar, ConnectWallet } from "@/components/atoms";
+import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { cn } from "@/lib/client/utils";
 import { X, Menu, BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

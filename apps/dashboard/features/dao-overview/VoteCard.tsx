@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  BadgeCardDaoInfoItem,
   BaseCardDaoInfo,
   CardData,
   SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { formatBlocksToUserReadable, formatPlural } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/contexts/DaoDataContext";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
@@ -17,6 +16,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { BlocksIcon, ClickIcon } from "@/shared/components/icons";
+import { BadgeCardDaoInfoItem } from "@/features/dao-overview/BadgeCardDaoInfoItem";
+
 export const VoteCard = ({
   daoOverview,
 }: {

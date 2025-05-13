@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Badge } from "@/components/atoms";
+import { Badge } from "@/shared/components";
 
 interface BadgeItemProps {
   label?: string;

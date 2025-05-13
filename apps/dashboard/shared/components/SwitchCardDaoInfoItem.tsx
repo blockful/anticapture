@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import { Badge } from "@/components/atoms";
+import { Badge } from "@/shared/components";
 import { ReactNode } from "react";
 import {
   CircleCheckIcon,

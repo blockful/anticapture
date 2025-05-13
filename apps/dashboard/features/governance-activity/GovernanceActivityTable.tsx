@@ -9,7 +9,7 @@ import {
   TooltipInfo,
   Sparkline,
   SkeletonRow,
-} from "@/components/atoms";
+} from "@/shared/components";
 import {
   cn,
   formatNumberUserReadable,

@@ -1,7 +1,7 @@
 "use client";
 
 import daoConfigByDaoId from "@/lib/dao-config";
-import { TheSectionLayout } from "@/components/atoms";
+import { TheSectionLayout } from "@/shared/components";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useState } from "react";
 import { cn } from "@/lib/client/utils";

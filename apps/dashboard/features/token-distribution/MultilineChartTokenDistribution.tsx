@@ -14,7 +14,7 @@ import {
   timestampToReadableDate,
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
-import { ResearchPendingChartBlur } from "@/components/atoms/ResearchPendingChartBlur";
+import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution";
 
 interface MultilineChartTokenDistributionProps {

@@ -1,6 +1,6 @@
 "use client";
 
-import { DaoInfoDropdown, TooltipInfo } from "@/components/atoms";
+import { TooltipInfo } from "@/shared/components";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
@@ -19,6 +19,7 @@ import {
   getDaoStageFromFields,
 } from "@/lib/dao-config/utils";
 import {
+  DaoInfoDropdown,
   QuorumCard,
   SecurityCouncilCard,
   StagesDaoOverview,

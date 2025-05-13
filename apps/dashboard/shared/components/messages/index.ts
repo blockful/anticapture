@@ -1,1 +1,1 @@
-export * from "@/components/atoms/messages/TelegramBotMessage";
+export * from "@/shared/components/messages/TelegramBotMessage";

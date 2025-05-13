@@ -1,8 +1,9 @@
 import { AlertCircle, CheckCircle2, TriangleAlert } from "lucide-react";
 import { ReactNode } from "react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
-import { RiskLevelCardSmall, CorneredBox } from "@/components/atoms";
+import { RiskLevelCardSmall } from "@/shared/components";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
+import { CorneredBox } from "@/features/risk-analysis/CorneredBox";
 
 /**
  * Props for the RiskDescription component

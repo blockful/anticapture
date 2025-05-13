@@ -13,7 +13,7 @@ import {
   SkeletonRow,
   TheTable,
   TooltipInfo,
-} from "@/components/atoms";
+} from "@/shared/components";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import {
   cn,

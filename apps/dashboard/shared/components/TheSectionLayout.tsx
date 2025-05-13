@@ -6,6 +6,7 @@ import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { CardTitle, CardDescription } from "@/components/ui/card";
 import { InfoIcon } from "@/shared/components/icons";
+
 export const TheSectionLayout = ({
   icon,
   title,
