@@ -146,7 +146,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
             <div
               className={cn("flex w-full gap-3", {
-                "w-full flex-col lg:flex-row": isInAnalysis,
+                "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
               })}
             >
               <div className="flex w-full items-center gap-2">
