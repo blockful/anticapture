@@ -3,14 +3,13 @@
 import {
   BaseCardDaoInfo,
   CardData,
-  UsersIcon,
   SkeletonDaoInfoCards,
 } from "@/components/atoms";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext, useTokenDistributionContext } from "@/contexts";
 import { TextCardDaoInfoItem } from "@/features/dao-overview";
-
+import { UsersIcon } from "@/shared/icons";
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();

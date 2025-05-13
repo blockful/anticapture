@@ -4,11 +4,11 @@ import { ComponentProps } from "react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { cn } from "@/lib/client/utils";
 import {
-  ArbitrumIcon,
-  EnsIcon,
-  OptimismIcon,
   UniswapIcon,
-} from "@/components/atoms/icons";
+  EnsIcon,
+  ArbitrumIcon,
+  OptimismIcon,
+} from "@/shared/icons";
 
 export interface DaoAvatarIconProps extends ComponentProps<"svg"> {
   daoId: DaoIdEnum;

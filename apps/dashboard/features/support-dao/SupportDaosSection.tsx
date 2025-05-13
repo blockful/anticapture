@@ -1,7 +1,7 @@
 "use client";
 
 import { HeartIcon } from "lucide-react";
-import { DaoAvatarIcon, TheSectionLayout } from "@/components/atoms";
+import { TheSectionLayout } from "@/components/atoms";
 import { useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SupportDaoCard } from "@/features/support-dao";
@@ -12,6 +12,7 @@ import { DaoConfiguration } from "@/lib/dao-config/types";
 import { useMemo } from "react";
 import { pickBy } from "lodash";
 import { ReachOutToUsCard } from "@/features/support-dao";
+import { DaoAvatarIcon } from "@/shared/icons";
 
 export const SupportDaosSection = () => {
   const router = useRouter();

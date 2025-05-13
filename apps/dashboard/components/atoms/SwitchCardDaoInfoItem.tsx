@@ -1,12 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import {
-  Badge,
-  CircleCheckIcon,
-  CircleNotCheckedIcon,
-} from "@/components/atoms";
+import { Badge } from "@/components/atoms";
 import { ReactNode } from "react";
+import { CircleCheckIcon, CircleNotCheckedIcon } from "@/shared/icons";
 
 interface SwitchItemProps {
   switched?: boolean;
@@ -19,7 +16,10 @@ export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
     <Badge
       className={cn(
         "flex h-full w-full !gap-1.5 !bg-dark bg-opacity-20 !px-2.5 !py-1 sm:!bg-lightDark lg:w-fit",
-          { "!cursor-pointer transition-all duration-300 hover:!bg-middleDark": item.onClick },
+        {
+          "!cursor-pointer transition-all duration-300 hover:!bg-middleDark":
+            item.onClick,
+        },
       )}
       onClick={item.onClick}
     >

@@ -8,6 +8,7 @@ const config: Config = {
     "./features/**/*.{js,ts,jsx,tsx,mdx}",
     "./templates/**/*.{js,ts,jsx,tsx,mdx}",
     "./shared/**/*.{js,ts,jsx,tsx,mdx}",
+    "./widgets/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {

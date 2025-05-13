@@ -9,8 +9,6 @@ import {
 } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowState,
-  ArrowUpDown,
   Sparkline,
   SkeletonRow,
   TheTable,
@@ -24,6 +22,7 @@ import {
 } from "@/lib/client/utils";
 import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
+import { ArrowState, ArrowUpDown } from "@/shared/icons";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,

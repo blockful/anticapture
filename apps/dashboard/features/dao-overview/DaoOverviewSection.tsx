@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  CrownIcon,
-  TokensIcon,
-  DaoInfoDropdown,
-  DaoAvatarIcon,
-  FocusIcon,
-  TooltipInfo,
-} from "@/components/atoms";
+import { DaoInfoDropdown, TooltipInfo } from "@/components/atoms";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
@@ -33,6 +26,12 @@ import {
   VoteCard,
 } from "@/features/dao-overview";
 import { RiskAreaCardWrapper } from "@/shared";
+import {
+  DaoAvatarIcon,
+  CrownIcon,
+  TokensIcon,
+  FocusIcon,
+} from "@/shared/icons";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];

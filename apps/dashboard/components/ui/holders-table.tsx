@@ -12,7 +12,7 @@ import {
   holdersData,
   IsDelegated,
 } from "@/lib/mocked-data/mocked-data";
-import { HandIcon } from "@/components/atoms";
+import { HandIcon } from "@/shared/icons";
 
 export const holdersColumns: ColumnDef<Holders>[] = [
   {

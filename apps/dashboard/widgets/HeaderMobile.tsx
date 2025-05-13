@@ -2,16 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import {
-  AnticaptureIcon,
-  ButtonHeaderSidebar,
-  ConnectWallet,
-  TelegramIcon,
-} from "@/components/atoms";
+import { ButtonHeaderSidebar, ConnectWallet } from "@/components/atoms";
 import { cn } from "@/lib/client/utils";
 import { X, Menu, BarChart4 } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { useRouter, usePathname } from "next/navigation";
+import { AnticaptureIcon } from "@/shared/icons";
 
 export const HeaderMobile = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);

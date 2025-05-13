@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { InfoIcon } from "@/components/atoms/icons";
+import { InfoIcon } from "@/shared/icons";
 import { cn } from "@/lib/client/utils";
 import { useState } from "react";
 

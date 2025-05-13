@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { BadgeInAnalysis, DaoAvatarIcon } from "@/components/atoms";
+import { BadgeInAnalysis } from "@/components/atoms";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/client/utils";
+import { DaoAvatarIcon } from "@/shared/icons";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

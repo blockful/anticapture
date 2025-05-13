@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/client/utils";
 import { AlertCircle, AlertTriangle } from "lucide-react";
-import { PointerIcon } from "@/components/atoms/icons";
+import { PointerIcon } from "@/shared/icons";
 
 export enum Stage {
   ZERO = 0,

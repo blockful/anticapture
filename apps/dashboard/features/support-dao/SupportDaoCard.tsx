@@ -3,12 +3,12 @@
 import { Card } from "@/components/ui/card";
 import { formatNumberUserReadable, formatPlural } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { TrendingUpIcon } from "@/components/atoms";
 import { ChevronRight, TrendingUp } from "lucide-react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/hooks/usePetition";
 import { ReactNode } from "react";
+import { TrendingUpIcon } from "@/shared/icons";
 
 export const SupportDaoCard = ({
   daoIcon,

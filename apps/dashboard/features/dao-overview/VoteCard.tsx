@@ -3,9 +3,7 @@
 import {
   BadgeCardDaoInfoItem,
   BaseCardDaoInfo,
-  BlocksIcon,
   CardData,
-  ClickIcon,
   SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
 } from "@/components/atoms";
@@ -18,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
-
+import { BlocksIcon, ClickIcon } from "@/shared/icons";
 export const VoteCard = ({
   daoOverview,
 }: {

@@ -5,14 +5,7 @@ import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowUpDown,
-  ArrowState,
-  BadgeInAnalysis,
-  TheTable,
-  SkeletonRow,
-  DaoAvatarIcon,
-} from "@/components/atoms";
+import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/components/atoms";
 import { cn, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
@@ -20,6 +13,7 @@ import { useDelegatedSupply } from "@/hooks";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import { ArrowUpDown, ArrowState, DaoAvatarIcon } from "@/shared/icons";
 
 export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();

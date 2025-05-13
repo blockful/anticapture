@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
-import { ClockwiseIcon } from "@/components/atoms";
+import { ClockwiseIcon } from "@/shared/icons";
 
 type RiskConfig = {
   color: string;

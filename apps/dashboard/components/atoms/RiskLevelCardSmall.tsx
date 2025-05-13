@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
-import { ClockwiseIcon } from "@/components/atoms";
+import { ClockwiseIcon } from "@/shared/icons";
 
 type RiskConfig = {
   color: string;
@@ -81,7 +81,7 @@ export const RiskLevelCardSmall = ({
   return (
     <div
       className={cn(
-        "flex h-full w-fit rounded-full px-2 py-0.5 bg-lightDark gap-1",
+        "flex h-full w-fit gap-1 rounded-full bg-lightDark px-2 py-0.5",
         className,
       )}
     >

@@ -5,10 +5,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { GovernanceActivity } from "@/lib/mocked-data/mocked-data";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowUpDown,
   TheTable,
   TooltipInfo,
-  ArrowState,
   Sparkline,
   SkeletonRow,
 } from "@/components/atoms";
@@ -20,6 +18,7 @@ import {
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { useGovernanceActivityContext } from "@/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";
+import { ArrowUpDown, ArrowState } from "@/shared/icons";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

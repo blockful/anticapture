@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  BarChartIcon,
-  SwitcherDate,
-  TheSectionLayout,
-} from "@/components/atoms";
+import { SwitcherDate, TheSectionLayout } from "@/components/atoms";
 import { PanelTable } from "@/features/panel";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { BarChartIcon } from "@/shared/icons";
 
 export const PanelSection = () => {
   const [timeIntervalPanel, setTimeIntervalPanel] = useState<TimeInterval>(

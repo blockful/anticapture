@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeftRight,
   TheSectionLayout,
   SwitcherDate,
   TheCardChartLayout,
@@ -15,6 +14,7 @@ import {
   MultilineChartTokenDistribution,
   TokenDistributionTable,
 } from "@/features/token-distribution";
+import { ArrowLeftRight } from "@/shared/icons";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {

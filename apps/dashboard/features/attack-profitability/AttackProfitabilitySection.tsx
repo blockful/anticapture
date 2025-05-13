@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  CrossHairIcon,
   TheSectionLayout,
   TheCardChartLayout,
   SwitcherDate,
@@ -18,6 +17,7 @@ import {
   AttackCostBarChart,
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability";
+import { CrossHairIcon } from "@/shared/icons";
 
 export const AttackProfitabilitySection = ({
   daoId,

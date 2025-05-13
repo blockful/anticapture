@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowRightIcon } from "lucide-react";
-import { SimpleGlobeIcon } from "@/components/atoms";
 import { Card } from "@/components/ui/card";
+import { SimpleGlobeIcon } from "@/shared/icons";
 
 export const ReachOutToUsCard = () => {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { DaoIdEnum } from "@/lib/types/daos";
-import { DaoAvatarIcon } from "@/components/atoms";
+import { DaoAvatarIcon } from "@/shared/icons";
 
 interface TextItemProps {
   label?: string;

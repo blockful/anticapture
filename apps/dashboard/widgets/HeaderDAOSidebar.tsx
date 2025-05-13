@@ -3,17 +3,18 @@
 import { usePathname } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
-  ActivityIcon,
-  ArrowLeftRight,
-  PieChartIcon,
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
-  CrossHairIcon,
 } from "@/components/atoms";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/lib/dao-config";
-
+import {
+  ActivityIcon,
+  ArrowLeftRight,
+  PieChartIcon,
+  CrossHairIcon,
+} from "@/shared/icons";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
