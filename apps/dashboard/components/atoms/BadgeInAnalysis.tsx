@@ -18,7 +18,7 @@ export const BadgeInAnalysis = ({
       )}
     >
       <Clock2 className={cn("size-4", iconClassName)} />
-      {"In analysis"}
+      <p className="whitespace-nowrap">In analysis</p>
     </div>
   );
 };
