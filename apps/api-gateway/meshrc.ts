@@ -6,38 +6,31 @@ dotenv.config();
 
 export default processConfig({
   sources: [
-    {
-      name: `rest_ENS`,
-      handler: {
-        openapi: {
-          source: `${process.env.DAO_API_ENS!}/docs/json`,
-        },
-      }
-    },
-    {
-      name: `graphql_ENS`,
-      handler: {
-        graphql: {
-          endpoint: process.env.DAO_API_ENS!,
-        }
-      }
-    },
-    {
-      name: `graphql_UNI`,
-      handler: {
-        graphql: {
-          endpoint: process.env.DAO_API_UNI!,
-        }
-      }
-    },
-    {
-      name: `rest_UNI`,
-      handler: {
-        openapi: {
-          source: `${process.env.DAO_API_UNI!}/docs/json`,
-        }
-      }
-    },
+    ...Object.entries(process.env)
+      .filter(([key]) => key.startsWith('DAO_API_'))
+      .flatMap(([key, value]) => {
+        if (!value) return [];
+
+        const daoName = key.replace('DAO_API_', '');
+        return [
+          {
+            name: `graphql_${daoName}`,
+            handler: {
+              graphql: {
+                endpoint: value,
+              }
+            }
+          },
+          {
+            name: `rest_${daoName}`,
+            handler: {
+              openapi: {
+                source: `${value}/docs/json`,
+              }
+            }
+          }
+        ];
+      }),
     ...(process.env.PETITION_API_URL
       ? [
         {
