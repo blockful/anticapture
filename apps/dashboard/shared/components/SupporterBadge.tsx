@@ -1,4 +1,4 @@
-import { useEnsData } from "@/hooks/useEnsData";
+import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/lib/client/utils";
 import { Address } from "viem";
 import Image from "next/image";
@@ -14,7 +14,7 @@ export const SupporterBadge = ({ address }: { address: Address }) => {
       )}
     >
       {ensData?.avatar_url ? (
-        <div className="size-4 rounded-full bg-foreground overflow-hidden">
+        <div className="size-4 overflow-hidden rounded-full bg-foreground">
           <Image
             src={ensData.avatar_url}
             alt={ensData?.ens ?? address}

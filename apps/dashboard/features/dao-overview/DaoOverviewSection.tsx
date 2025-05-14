@@ -11,7 +11,7 @@ import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
-import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
+import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import {
   fieldsToArray,

@@ -20,7 +20,7 @@ import {
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
-import { useTokenDistributionContext } from "@/contexts/TokenDistributionContext";
+import { useTokenDistributionContext } from "@/shared/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 

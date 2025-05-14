@@ -3,7 +3,7 @@
 import { TooltipInfo } from "@/shared/components";
 import { Card } from "@/shared/components/ui/card";
 import { SupportersCarroussel } from "@/shared/components/SupportersCarroussel";
-import { PetitionResponse } from "@/hooks/usePetition";
+import { PetitionResponse } from "@/shared/hooks/usePetition";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
 

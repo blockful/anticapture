@@ -4,7 +4,10 @@ import { createContext, useContext, useState } from "react";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { MetricData, GovernanceActivityContextProps } from "@/contexts/types";
+import {
+  MetricData,
+  GovernanceActivityContextProps,
+} from "@/shared/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
 import {
   useActiveSupply,
@@ -12,7 +15,7 @@ import {
   useTimeSeriesData,
   useProposals,
   useVotes,
-} from "@/hooks";
+} from "@/shared/hooks";
 import { formatUnits } from "viem";
 
 const initialMetricData = {

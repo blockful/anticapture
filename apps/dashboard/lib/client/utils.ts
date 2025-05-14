@@ -1,4 +1,4 @@
-import { TreasuryAssetNonDaoToken } from "@/hooks";
+import { TreasuryAssetNonDaoToken } from "@/shared/hooks";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
@@ -112,9 +112,7 @@ function formatSecondsToReadable(
 
   // Add seconds only if we have no hours and minutes
   if (parts.length === 0 && seconds > 0) {
-    parts.push(
-      useAbbreviations ? `${seconds}s` : formatPlural(seconds, "sec"),
-    );
+    parts.push(useAbbreviations ? `${seconds}s` : formatPlural(seconds, "sec"));
   }
 
   return parts.join(useAbbreviations ? " " : ", ");

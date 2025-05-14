@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { AnimatedNumber } from "@/shared/components/ui/animated-number";
-import { useDaoDataContext } from "@/contexts/DaoDataContext";
+import { useDaoDataContext } from "@/shared/contexts/DaoDataContext";
 import { UncertaintyIcon } from "@/shared/components/icons";
 
 export const UncertaintySection = () => {

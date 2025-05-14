@@ -8,7 +8,10 @@ import ArbitrumSupportedDaoMobile from "@/public/show-support/ArbitrumSupportedD
 import { useParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { PetitionResponse, submitPetitionSignature } from "@/hooks/usePetition";
+import {
+  PetitionResponse,
+  submitPetitionSignature,
+} from "@/shared/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet } from "@/shared/components";

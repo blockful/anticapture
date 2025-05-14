@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { useDaoData } from "@/hooks";
+import { useDaoData } from "@/shared/hooks";
 import { DAO, DaoIdEnum } from "@/lib/types/daos";
 
 interface DaoDataContextProps {

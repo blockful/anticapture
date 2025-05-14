@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useMessageStack } from "@/hooks/useMessageStack";
+import { useMessageStack } from "@/shared/hooks/useMessageStack";
 
 export interface Message {
   id: string;

@@ -11,7 +11,7 @@ import {
 } from "@/lib/enums";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { useDaoPageInteraction } from "@/contexts/DaoPageInteractionContext";
+import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import { fieldsToArray } from "@/lib/dao-config/utils";

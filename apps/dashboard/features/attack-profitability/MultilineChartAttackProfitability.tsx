@@ -15,12 +15,12 @@ import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-config/types";
-import { useDaoDataContext } from "@/contexts";
+import { useDaoDataContext } from "@/shared/contexts";
 import {
   useDaoTokenHistoricalData,
   useTimeSeriesData,
   useTreasuryAssetNonDaoToken,
-} from "@/hooks";
+} from "@/shared/hooks";
 import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,

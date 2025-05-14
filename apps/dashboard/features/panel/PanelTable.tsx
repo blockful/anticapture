@@ -9,7 +9,7 @@ import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/shared/components";
 import { cn, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useDelegatedSupply } from "@/hooks";
+import { useDelegatedSupply } from "@/shared/hooks";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";

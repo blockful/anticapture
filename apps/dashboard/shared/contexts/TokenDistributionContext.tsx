@@ -4,9 +4,9 @@ import { createContext, useContext, useState } from "react";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { TokenDistributionContextProps } from "@/contexts/types";
+import { TokenDistributionContextProps } from "@/shared/contexts/types";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { useTimeSeriesData } from "@/hooks";
+import { useTimeSeriesData } from "@/shared/hooks";
 import { formatUnits } from "viem";
 
 const initialTokenDistributionMetricData = {
@@ -57,7 +57,9 @@ export const TokenDistributionProvider = ({
     revalidateOnFocus: false,
   });
 
-  const calculateChangeRate = (data: DaoMetricsDayBucket[] = []): string | null => {
+  const calculateChangeRate = (
+    data: DaoMetricsDayBucket[] = [],
+  ): string | null => {
     if (!data || data.length < 2) return null;
 
     try {
@@ -84,14 +86,17 @@ export const TokenDistributionProvider = ({
     days,
     setDays,
     totalSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
+      value:
+        timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY],
       ),
     },
     totalSupplyChart: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY] || [],
     circulatingSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY]?.at(-1)?.high  ?? null,
+      value:
+        timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY]?.at(-1)?.high ??
+        null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY],
       ),
@@ -99,7 +104,9 @@ export const TokenDistributionProvider = ({
     circulatingSupplyChart:
       timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY] || [],
     delegatedSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high  ?? null,
+      value:
+        timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high ??
+        null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
       ),
@@ -121,7 +128,8 @@ export const TokenDistributionProvider = ({
     },
     dexSupplyChart: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY] || [],
     lendingSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY]?.at(-1)?.high ?? null,
+      value:
+        timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY]?.at(-1)?.high ?? null,
       changeRate: calculateChangeRate(
         timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY],
       ),

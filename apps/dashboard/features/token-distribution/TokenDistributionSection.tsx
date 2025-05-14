@@ -5,7 +5,7 @@ import {
   SwitcherDate,
   TheCardChartLayout,
 } from "@/shared/components";
-import { useTokenDistributionContext } from "@/contexts";
+import { useTokenDistributionContext } from "@/shared/contexts";
 import { TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";

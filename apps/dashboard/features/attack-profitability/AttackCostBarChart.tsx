@@ -9,7 +9,7 @@ import {
   useTopTokenHolderNonDao,
   useTreasuryAssetNonDaoToken,
   useVetoCouncilVotingPower,
-} from "@/hooks";
+} from "@/shared/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   BarChart,

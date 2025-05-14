@@ -5,7 +5,7 @@ import { ShowYourSupportStickyBar } from "@/features/show-support";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
 import daoConfigByDaoId from "@/lib/dao-config";
-import { DaoPageInteractionProvider } from "@/contexts/DaoPageInteractionContext";
+import { DaoPageInteractionProvider } from "@/shared/contexts/DaoPageInteractionContext";
 import { ShowSupportSection } from "@/features/show-support";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";

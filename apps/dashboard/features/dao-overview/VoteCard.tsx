@@ -7,7 +7,7 @@ import {
   SwitchCardDaoInfoItem,
 } from "@/shared/components";
 import { formatBlocksToUserReadable, formatPlural } from "@/lib/client/utils";
-import { useDaoDataContext } from "@/contexts/DaoDataContext";
+import { useDaoDataContext } from "@/shared/contexts/DaoDataContext";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
 import {
   Tooltip,
