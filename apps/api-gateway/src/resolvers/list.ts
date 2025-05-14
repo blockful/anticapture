@@ -1,0 +1,47 @@
+
+const daoListQueries = [
+  'accountBalances',
+  'accountPowers',
+  'accounts',
+  'daoMetricsDayBuckets',
+  'delegations',
+  'proposalsOnchains',
+  'tokens',
+  'transfers',
+  'votesOnchains',
+  'votingPowerHistorys',
+]
+
+export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
+  acc[fieldName] = {
+    selectionSet: /* GraphQL */ `
+      {
+        where {
+          daoId
+        }
+      }
+    `,
+    resolve: async (root: any, args: any, context: any, info) => {
+      const daoId = args.where?.daoId;
+
+      if (!daoId) {
+        throw new Error(`Missing where.daoId in query for ${fieldName}`);
+      }
+
+      const targetClient = context[`graphql_${daoId}`]?.Query;
+
+      if (!targetClient || typeof targetClient[fieldName] !== 'function') {
+        throw new Error(`Unsupported daoId "${daoId}" or field "${fieldName}" not found in context`);
+      }
+
+      return targetClient[fieldName]({
+        root,
+        args,
+        context,
+        info,
+      });
+    },
+  };
+
+  return acc;
+}, {});
