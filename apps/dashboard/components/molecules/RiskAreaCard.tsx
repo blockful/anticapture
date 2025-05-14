@@ -203,22 +203,6 @@ export const RiskAreaCard = ({
   onClick,
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
 }: RiskAreaCardProps) => {
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
-  const [showTooltip, setShowTooltip] = useState<boolean>(false);
-
-  const handleMouseEnter = (event?: MouseEvent) => {
-    if (event) event.stopPropagation();
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setTooltipPos({
-        top: rect.bottom + 8,
-        left: rect.left,
-      });
-      setShowTooltip(true);
-    }
-  };
-
   const riskName = riskArea.name;
   const riskInfo = RISK_AREAS[riskName as RiskAreaEnum] || {
     title: riskName,
@@ -233,28 +217,20 @@ export const RiskAreaCard = ({
 
   const riskAreaCard: Record<RiskAreaCardEnum, ReactNode> = {
     [RiskAreaCardEnum.DAO_OVERVIEW]: (
-      <div
-        className="relative h-[42px]"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+      <RiskTooltipCard
+        title={riskInfo.title}
+        description={riskInfo.description}
+        riskLevel={riskArea.level}
       >
-        <RiskAreaCardInternal
-          risk={riskArea}
-          isActive={isActive}
-          onClick={onClick}
-          variant={variant}
-        />
-
-        {showTooltip && (
-          <div className="fixed top-[520px] z-50 mt-1 w-screen max-sm:left-0 sm:relative sm:right-[150px] sm:top-0 sm:w-[376px]">
-            <RiskTooltipCard
-              title={riskInfo.title}
-              description={riskInfo.description}
-              riskLevel={riskArea.level}
-            />
-          </div>
-        )}
-      </div>
+        <div className="relative h-[42px]">
+          <RiskAreaCardInternal
+            risk={riskArea}
+            isActive={isActive}
+            onClick={onClick}
+            variant={variant}
+          />
+        </div>
+      </RiskTooltipCard>
     ),
     [RiskAreaCardEnum.RISK_ANALYSIS]: (
       <div className="flex h-[62px] w-full">
@@ -278,36 +254,32 @@ export const RiskAreaCard = ({
         </div>
       </div>
     ),
-    [RiskAreaCardEnum.PANEL_TABLE]: (
-      <div
-        className="flex size-5 sm:size-7"
-        ref={triggerRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={() => setShowTooltip(false)}
-        onClick={handleMouseEnter}
-      >
-        <RiskAreaCardInternal
-          risk={modifiedRiskArea}
-          isActive={isActive}
-          onClick={() => {}}
-          variant={variant}
-        />
-        {showTooltip && riskArea.level !== RiskLevel.NONE && (
-          <TooltipPortal>
-            <div
-              className="fixed left-1/2 z-50 w-80 -translate-x-1/2 text-white shadow-lg"
-              style={{ top: tooltipPos.top, left: tooltipPos.left }}
-            >
-              <RiskTooltipCard
-                title={riskInfo.title}
-                description={riskInfo.description}
-                riskLevel={riskArea.level}
-              />
-            </div>
-          </TooltipPortal>
-        )}
-      </div>
-    ),
+    [RiskAreaCardEnum.PANEL_TABLE]:
+      riskArea.level !== RiskLevel.NONE ? (
+        <RiskTooltipCard
+          title={riskInfo.title}
+          description={riskInfo.description}
+          riskLevel={riskArea.level}
+        >
+          <div className="flex size-5 sm:size-7">
+            <RiskAreaCardInternal
+              risk={modifiedRiskArea}
+              isActive={isActive}
+              onClick={onClick}
+              variant={variant}
+            />
+          </div>
+        </RiskTooltipCard>
+      ) : (
+        <div className="flex size-5 sm:size-7">
+          <RiskAreaCardInternal
+            risk={modifiedRiskArea}
+            isActive={isActive}
+            onClick={onClick}
+            variant={variant}
+          />
+        </div>
+      ),
   };
 
   return riskAreaCard[variant];
