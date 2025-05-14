@@ -8,7 +8,6 @@ import { cn } from "@/lib/client/utils";
 import { RiskTooltipCard } from "@/components/atoms";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { RiskAreaEnum } from "@/lib/enums/RiskArea";
-import { TooltipPortal } from "@/components/atoms/TooltipPortal";
 
 export type RiskArea = {
   name: string;
