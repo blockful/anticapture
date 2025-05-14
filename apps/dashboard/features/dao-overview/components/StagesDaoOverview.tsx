@@ -3,7 +3,7 @@
 import { cn } from "@/lib/client/utils";
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { useState } from "react";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
 import { BulletPoint } from "@/shared/components/icons/BulletPoint";
 import { OutlinedBox } from "@/shared/components/OutlinedBox";

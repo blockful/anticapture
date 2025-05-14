@@ -1,7 +1,7 @@
 "use client";
 
 import { cn, getDateRange } from "@/lib/client/utils";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { CardTitle, CardDescription } from "@/shared/components/ui/card";

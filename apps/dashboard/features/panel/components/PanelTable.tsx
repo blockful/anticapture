@@ -11,7 +11,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { useDelegatedSupply } from "@/shared/hooks";
 import daoConfigByDaoId from "@/lib/dao-config";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 import {
   ArrowUpDown,

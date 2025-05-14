@@ -4,7 +4,7 @@ import { MouseEvent } from "react";
 import { cn } from "@/lib/client/utils";
 import { Card } from "@/shared/components/ui/card";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { RiskLevelCardSmall } from "@/shared/components";
 
 export const GovernanceImplementationCard = ({

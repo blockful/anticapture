@@ -1,7 +1,4 @@
-import {
-  GovernanceImplementationField,
-  GovernanceImplementation,
-} from "@/lib/dao-config/types";
+import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/lib/enums";
 import { Stage } from "@/shared/components/StagesCardRequirements";
 

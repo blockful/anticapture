@@ -23,7 +23,7 @@ import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { mockedAttackCostBarData } from "@/lib/mocked-data/mocked-attack-cost-bar-data";
 import {
   useDaoTokenHistoricalData,

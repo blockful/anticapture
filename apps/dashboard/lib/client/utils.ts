@@ -29,25 +29,6 @@ export const toggleScreenScroll = () => {
   }
 };
 
-export function sanitizeNumber(amount: number) {
-  const lookup = [
-    { value: 1, symbol: "" },
-    { value: 1e3, symbol: "k" },
-    { value: 1e6, symbol: "M" },
-    { value: 1e9, symbol: "B" },
-    { value: 1e12, symbol: "T" },
-    { value: 1e15, symbol: "Q" },
-  ];
-  const regexp = /\.0+$|(?<=\.[0-9]*[1-9])0+$/;
-  const item = lookup.findLast((item) => amount >= item.value);
-  return item
-    ? (amount / item.value).toFixed(1).replace(regexp, "").concat(item.symbol)
-    : "0";
-}
-
-export const RED_COLOR = "#FCA5A5";
-export const GREEN_COLOR = "#5BB98B";
-
 export function formatNumberUserReadable(
   num: number,
   fixed: number = 2,

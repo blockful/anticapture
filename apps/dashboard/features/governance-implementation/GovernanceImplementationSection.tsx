@@ -8,7 +8,7 @@ import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { fieldsToArray } from "@/lib/dao-config/utils";
 import { sortByRiskLevel } from "@/lib/enums";
 import { GovernanceImplementationCard } from "@/features/governance-implementation/components";

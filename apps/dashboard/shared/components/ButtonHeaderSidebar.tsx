@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { useSectionObserver } from "@/lib/hooks/useSectionObserver";
+import { useSectionObserver } from "@/shared/hooks";
 import { ButtonHTMLAttributes, useEffect } from "react";
 import { ElementType } from "react";
 

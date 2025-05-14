@@ -8,7 +8,7 @@ import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import daoConfigByDaoId from "@/lib/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";

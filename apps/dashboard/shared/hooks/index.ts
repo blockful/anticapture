@@ -5,3 +5,5 @@ export * from "@/shared/hooks/useDelegatedSupply";
 export * from "@/shared/hooks/useProposals";
 export * from "@/shared/hooks/useTimeSeriesData";
 export * from "@/shared/hooks/useVotes";
+export * from "@/shared/hooks/useScreenSize";
+export * from "@/shared/hooks/useSectionObserver";

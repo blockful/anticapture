@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/client/utils";
 import daoConfigByDaoId from "@/lib/dao-config";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ChevronRight } from "lucide-react";
@@ -52,7 +52,7 @@ export const ShowYourSupportStickyBar = () => {
               <span className="text-sm font-normal">{message}</span>
               <button
                 onClick={openConnectModal}
-                className="font-mono flex items-center text-sm font-medium uppercase tracking-[0.06em] text-tangerine transition-colors hover:text-tangerine/90"
+                className="flex items-center font-mono text-sm font-medium uppercase tracking-[0.06em] text-tangerine transition-colors hover:text-tangerine/90"
               >
                 <span>{buttonText}</span>
                 <ChevronRight

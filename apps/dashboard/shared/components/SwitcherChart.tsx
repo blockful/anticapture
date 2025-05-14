@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { cn } from "@/lib/client/utils";
-import { useScreenSize } from "@/lib/hooks/useScreenSize";
+import { useScreenSize } from "@/shared/hooks";
 import { ChevronDown, CheckIcon } from "lucide-react";
 
 interface SwitcherChartProps {
