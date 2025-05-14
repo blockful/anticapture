@@ -8,7 +8,7 @@ import {
   MetricData,
   GovernanceActivityContextProps,
 } from "@/shared/contexts/types";
-import { MetricTypesEnum } from "@/shared/constants/constants";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import {
   useActiveSupply,
   useAverageTurnout,

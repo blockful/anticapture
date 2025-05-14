@@ -1,4 +1,4 @@
-import { MILLISECONDS_PER_DAY } from "@/shared/constants/constants";
+import { MILLISECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 export enum TimeInterval {
   SEVEN_DAYS = "7d",

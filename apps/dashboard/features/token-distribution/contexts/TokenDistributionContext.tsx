@@ -5,7 +5,7 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenDistributionContextProps } from "@/shared/contexts/types";
-import { MetricTypesEnum } from "@/shared/constants/constants";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useTimeSeriesData } from "@/shared/hooks";
 import { formatUnits } from "viem";
 

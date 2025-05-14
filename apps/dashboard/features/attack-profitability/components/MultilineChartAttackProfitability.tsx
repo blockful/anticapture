@@ -24,7 +24,7 @@ import {
   timestampToReadableDate,
   filterPriceHistoryByTimeInterval,
 } from "@/shared/utils/utils";
-import { MetricTypesEnum } from "@/shared/constants/constants";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/shared/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";

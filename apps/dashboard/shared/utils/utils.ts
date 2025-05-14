@@ -12,7 +12,7 @@ import {
   SECONDS_PER_DAY,
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
-} from "@/shared/constants/constants";
+} from "@/shared/constants/time-related";
 import { TimeInterval, DAYS_IN_MILLISECONDS } from "@/shared/types/enums";
 
 export function cn(...inputs: ClassValue[]) {

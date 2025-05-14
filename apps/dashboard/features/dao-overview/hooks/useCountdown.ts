@@ -4,7 +4,7 @@ import {
   MILLISECONDS_PER_MINUTE,
   MILLISECONDS_PER_HOUR,
   MILLISECONDS_PER_DAY,
-} from "@/shared/constants/constants";
+} from "@/shared/constants/time-related";
 
 type CountdownTime = {
   days: number;

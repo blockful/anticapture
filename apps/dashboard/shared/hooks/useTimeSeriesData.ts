@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { MetricTypesEnum } from "@/shared/constants/constants";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
