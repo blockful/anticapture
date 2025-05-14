@@ -7,12 +7,10 @@ import {
 } from "@/shared/components";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { formatEther } from "viem";
-import {
-  useDaoDataContext,
-  useTokenDistributionContext,
-} from "@/shared/contexts";
+import { useDaoDataContext } from "@/shared/contexts";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
 import { UsersIcon } from "@/shared/components/icons";
+import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();

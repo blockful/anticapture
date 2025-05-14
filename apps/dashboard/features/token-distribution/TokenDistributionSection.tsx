@@ -5,7 +5,6 @@ import {
   SwitcherDate,
   TheCardChartLayout,
 } from "@/shared/components";
-import { useTokenDistributionContext } from "@/shared/contexts";
 import { TimeInterval } from "@/lib/enums";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
@@ -15,6 +14,7 @@ import {
   TokenDistributionTable,
 } from "@/features/token-distribution/components";
 import { ArrowLeftRight } from "@/shared/components/icons";
+import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {

@@ -4,7 +4,7 @@ import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { ArrowLeftRight } from "@/shared/components/icons";
 import { GovernanceActivityTable } from "@/features/governance-activity/components";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
-import { useGovernanceActivityContext } from "@/shared/contexts/GovernanceActivityContext";
+import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 export const GovernanceActivitySection = () => {

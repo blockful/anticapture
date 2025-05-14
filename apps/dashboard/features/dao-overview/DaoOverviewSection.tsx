@@ -1,6 +1,6 @@
 "use client";
 
-import { TooltipInfo } from "@/shared/components";
+import { RiskAreaCardWrapper, TooltipInfo } from "@/shared/components";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
@@ -26,7 +26,6 @@ import {
   TimelockCard,
   VoteCard,
 } from "@/features/dao-overview/components";
-import { RiskAreaCardWrapper } from "@/shared";
 import {
   DaoAvatarIcon,
   CrownIcon,

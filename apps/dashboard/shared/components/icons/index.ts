@@ -35,7 +35,6 @@ export * from "@/shared/components/icons/SupplyIcon";
 export * from "@/shared/components/icons/TelegramIcon";
 export * from "@/shared/components/icons/TokensIcon";
 export * from "@/shared/components/icons/TrendingUpIcon";
-export * from "@/shared/components/icons/UncertaintyIcon";
 export * from "@/shared/components/icons/UniswapIcon";
 export * from "@/shared/components/icons/UsersIcon";
 export * from "@/shared/components/icons/WalletIcon";
