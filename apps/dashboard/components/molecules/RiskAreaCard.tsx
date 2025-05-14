@@ -1,10 +1,10 @@
 "use client";
 
+import { ReactNode, useRef, useState, MouseEvent } from "react";
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/client/utils";
-import { ReactNode, useRef, useState } from "react";
 import { RiskTooltipCard } from "@/components/atoms";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { RiskAreaEnum } from "@/lib/enums/RiskArea";
@@ -29,14 +29,11 @@ interface RiskAreaCardProps {
   variant?: RiskAreaCardEnum;
 }
 
-type GridColumns = `${string}grid-cols-${number}${string}`;
-
 interface RiskAreaCardWrapperProps {
   title?: string;
   riskAreas: RiskArea[];
   activeRiskId?: string;
   onRiskClick?: (riskName: RiskAreaEnum) => void;
-  gridColumns?: GridColumns;
   className?: string;
   variant?: RiskAreaCardEnum;
   withTitle?: boolean;
@@ -99,6 +96,7 @@ const RiskAreaCardInternal = ({
     <div
       className={cn(
         "flex h-full w-full flex-1 cursor-pointer items-center gap-1",
+        isPanelTable && "cursor-default",
       )}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -109,13 +107,14 @@ const RiskAreaCardInternal = ({
           "flex h-full items-center px-1 py-2 sm:px-2",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
-            "bg-lightDark": risk.level === undefined,
+            "bg-lightDark": risk.level === RiskLevel.NONE,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
-            "shadow-[0_0_20px_0]": isActive || isHovered,
+            "shadow-[0_0_20px_0]":
+              (isActive || isHovered) && risk.level !== RiskLevel.NONE,
             "bg-opacity-[12%]":
-              !isActive && risk.level !== undefined && !isHovered,
+              !isActive && risk.level !== RiskLevel.NONE && !isHovered,
           },
         )}
       >
@@ -127,7 +126,7 @@ const RiskAreaCardInternal = ({
         >
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
-              "!text-foreground": risk.level === undefined,
+              "!text-foreground": risk.level === RiskLevel.NONE,
               "!text-success":
                 risk.level === RiskLevel.LOW && !isActive && !isHovered,
               "!text-warning":
@@ -206,8 +205,10 @@ export const RiskAreaCard = ({
 }: RiskAreaCardProps) => {
   const triggerRef = useRef<HTMLDivElement>(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (event?: MouseEvent) => {
+    if (event) event.stopPropagation();
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setTooltipPos({
@@ -218,7 +219,6 @@ export const RiskAreaCard = ({
     }
   };
 
-  const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const riskName = riskArea.name;
   const riskInfo = RISK_AREAS[riskName as RiskAreaEnum] || {
     title: riskName,
@@ -284,14 +284,15 @@ export const RiskAreaCard = ({
         ref={triggerRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setShowTooltip(false)}
+        onClick={handleMouseEnter}
       >
         <RiskAreaCardInternal
           risk={modifiedRiskArea}
           isActive={isActive}
-          onClick={onClick}
+          onClick={() => {}}
           variant={variant}
         />
-        {showTooltip && (
+        {showTooltip && riskArea.level !== RiskLevel.NONE && (
           <TooltipPortal>
             <div
               className="fixed left-1/2 z-50 w-80 -translate-x-1/2 text-white shadow-lg"

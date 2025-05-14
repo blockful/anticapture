@@ -76,11 +76,12 @@ export function getDaoRiskAreas(
     // Determine the overall risk level for this area
     let riskLevel: RiskLevel;
 
+    // If no implementations at all (empty govImplItems), it's NONE risk
+    if (Object.keys(govImplItems).length === 0) {
+      riskLevel = RiskLevel.NONE;
+    }
     // If all required items are implemented with LOW risk, the area is LOW risk
-    if (
-      lowRiskCount === requiredGovImplItems.length &&
-      requiredGovImplItems.length > 0
-    ) {
+    else if (lowRiskCount === requiredGovImplItems.length) {
       riskLevel = RiskLevel.LOW;
     }
     // If there are any HIGH risk implementations, the area is HIGH risk
@@ -91,7 +92,7 @@ export function getDaoRiskAreas(
     else if (mediumRiskCount > 0) {
       riskLevel = RiskLevel.MEDIUM;
     }
-    // If no implementations or insufficient, consider it HIGH risk
+    // If implementations are incomplete, consider it HIGH risk
     else {
       riskLevel = RiskLevel.HIGH;
     }
