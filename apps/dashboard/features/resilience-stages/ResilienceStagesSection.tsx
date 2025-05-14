@@ -5,8 +5,8 @@ import {
   RiskLevelCard,
   StagesCardRequirements,
 } from "@/shared/components";
-import { cn } from "@/lib/client/utils";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { cn } from "@/shared/utils/utils";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   filterFieldsByRiskLevel,
@@ -14,7 +14,7 @@ import {
   fieldsToArray,
 } from "@/shared/dao-config/utils";
 import { RiskLevel } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { BarChart } from "lucide-react";
 import {
   Stage,

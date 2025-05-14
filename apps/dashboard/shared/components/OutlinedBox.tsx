@@ -1,4 +1,4 @@
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { ComponentProps, ReactNode } from "react";
 

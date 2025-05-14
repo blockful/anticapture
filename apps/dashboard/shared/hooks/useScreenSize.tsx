@@ -3,7 +3,7 @@ import {
   TABLET_SCREEN_SIZE,
   DESKTOP_SCREEN_SIZE,
   WIDE_SCREEN_SIZE,
-} from "@/lib/utils/screenSize";
+} from "@/shared/utils/screenSize";
 
 export const useScreenSize = () => {
   const [isMobile, setIsMobile] = useState(false);

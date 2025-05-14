@@ -12,7 +12,7 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import {
   formatNumberUserReadable,
   timestampToReadableDate,
-} from "@/lib/client/utils";
+} from "@/shared/utils/utils";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";

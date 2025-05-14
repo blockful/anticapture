@@ -2,7 +2,7 @@
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { GovernanceActivity } from "@/lib/mocked-data/mocked-data";
+import { GovernanceActivity } from "@/shared/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   TheTable,
@@ -14,7 +14,7 @@ import {
   cn,
   formatNumberUserReadable,
   formatVariation,
-} from "@/lib/client/utils";
+} from "@/shared/utils/utils";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";

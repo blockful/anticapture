@@ -3,12 +3,12 @@
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
 import { useRouter } from "next/navigation";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   SupportDaoCard,
   ReachOutToUsCard,
 } from "@/features/support-dao/components";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoConfiguration } from "@/shared/dao-config/types";

@@ -1,5 +1,5 @@
-import { BACKEND_ENDPOINT } from "@/lib/server/utils";
-import { DAO, DaoIdEnum } from "@/lib/types/daos";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { DAO, DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
 
 export const fetchDaoData = async (daoId: DaoIdEnum): Promise<DAO> => {

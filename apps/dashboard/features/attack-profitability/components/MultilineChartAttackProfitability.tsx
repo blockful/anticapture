@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -23,10 +23,10 @@ import {
   normalizeDataset,
   timestampToReadableDate,
   filterPriceHistoryByTimeInterval,
-} from "@/lib/client/utils";
-import { MetricTypesEnum } from "@/lib/client/constants";
+} from "@/shared/utils/utils";
+import { MetricTypesEnum } from "@/shared/constants/constants";
 import { useEffect, useState } from "react";
-import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
+import { mockedAttackProfitabilityDatasets } from "@/shared/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {

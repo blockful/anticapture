@@ -1,4 +1,4 @@
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { ENS } from "@/shared/dao-config/ens";
 import { OP } from "@/shared/dao-config/op";
 import { DaoConfiguration } from "@/shared/dao-config/types";

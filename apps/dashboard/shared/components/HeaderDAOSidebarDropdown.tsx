@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { BadgeInAnalysis } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 
 export const HeaderDAOSidebarDropdown = () => {

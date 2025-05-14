@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { ChevronDown } from "lucide-react";
 
 interface Option {
@@ -38,9 +38,9 @@ export const DaoInfoDropdown = ({
         className={cn(
           "flex items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           {
-             "border-tangerine bg-[#26262A]": isOpen,
-             "border-transparent bg-lightDark": !isOpen
-          }
+            "border-tangerine bg-[#26262A]": isOpen,
+            "border-transparent bg-lightDark": !isOpen,
+          },
         )}
       >
         {defaultValue.icon}
@@ -50,7 +50,7 @@ export const DaoInfoDropdown = ({
         <ChevronDown
           className={cn(
             "size-3 flex-shrink-0 transition-transform duration-200",
-            {"rotate-180": isOpen},
+            { "rotate-180": isOpen },
           )}
         />
       </button>

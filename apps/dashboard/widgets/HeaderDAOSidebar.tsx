@@ -1,12 +1,12 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {

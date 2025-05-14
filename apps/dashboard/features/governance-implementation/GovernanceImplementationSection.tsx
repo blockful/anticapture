@@ -2,10 +2,10 @@
 
 import daoConfigByDaoId from "@/shared/dao-config";
 import { TheSectionLayout } from "@/shared/components";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
-import { cn } from "@/lib/client/utils";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { cn } from "@/shared/utils/utils";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks";

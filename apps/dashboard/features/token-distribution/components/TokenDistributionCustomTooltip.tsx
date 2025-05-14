@@ -3,7 +3,7 @@
 import {
   timestampToReadableDate,
   formatNumberUserReadable,
-} from "@/lib/client/utils";
+} from "@/shared/utils/utils";
 import { TooltipProps } from "recharts";
 
 export const TokenDistributionCustomTooltip: React.FC<

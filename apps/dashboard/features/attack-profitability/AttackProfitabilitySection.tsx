@@ -8,8 +8,8 @@ import {
   RiskLevelCard,
 } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,

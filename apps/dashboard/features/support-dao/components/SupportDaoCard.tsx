@@ -1,8 +1,8 @@
 "use client";
 
 import { Card } from "@/shared/components/ui/card";
-import { formatNumberUserReadable, formatPlural } from "@/lib/client/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { formatNumberUserReadable, formatPlural } from "@/shared/utils/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";

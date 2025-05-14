@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 
 import { DaoTemplate } from "@/templates";

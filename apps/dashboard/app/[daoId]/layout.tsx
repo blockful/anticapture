@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ALL_DAOS, DaoIdEnum } from "@/lib/types/daos";
+import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import { DaoDataProvider } from "@/shared/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { DaoPageInteractionProvider } from "@/shared/contexts";

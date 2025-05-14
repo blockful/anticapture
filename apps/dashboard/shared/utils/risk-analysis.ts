@@ -4,10 +4,10 @@
  */
 
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
-import { RISK_AREAS } from "@/lib/constants/risk-areas";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 

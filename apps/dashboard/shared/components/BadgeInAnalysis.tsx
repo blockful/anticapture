@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { Clock2 } from "lucide-react";
 
 export const BadgeInAnalysis = ({

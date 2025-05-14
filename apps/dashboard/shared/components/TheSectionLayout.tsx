@@ -1,6 +1,6 @@
 "use client";
 
-import { cn, getDateRange } from "@/lib/client/utils";
+import { cn, getDateRange } from "@/shared/utils/utils";
 import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";

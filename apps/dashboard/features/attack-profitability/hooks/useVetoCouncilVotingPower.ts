@@ -1,7 +1,16 @@
 import { DAO_VETO_COUNCIL_ADDRESSES } from "@/shared/dao-config/dao-addresses";
-import api from "@/lib/server/api";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
+import axios from "axios";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+
+const api = axios.create({
+  baseURL: BACKEND_ENDPOINT,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 interface VotingPowerResponse {
   data: {

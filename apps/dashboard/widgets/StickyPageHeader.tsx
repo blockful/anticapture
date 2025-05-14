@@ -5,9 +5,9 @@ import {
   ButtonHeaderSidebar,
   HeaderDAOSidebarDropdown,
 } from "@/shared/components";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { BarChart4 } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { useRouter } from "next/navigation";
 import { HeaderNavMobile } from "@/widgets";
 import { TelegramIcon } from "@/shared/components/icons";

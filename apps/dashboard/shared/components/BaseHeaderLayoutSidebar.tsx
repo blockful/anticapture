@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { toggleScreenScroll } from "@/lib/client/utils";
+import { toggleScreenScroll } from "@/shared/utils/utils";
 import { useScreenSize } from "@/shared/hooks";
 
 export const BaseHeaderLayoutSidebar = ({

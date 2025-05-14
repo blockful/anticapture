@@ -1,6 +1,6 @@
 import { Address } from "viem";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { MetricTypesEnum } from "@/lib/client/constants";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { MetricTypesEnum } from "@/shared/constants/constants";
 import {
   RiskLevel,
   SupportStageEnum,

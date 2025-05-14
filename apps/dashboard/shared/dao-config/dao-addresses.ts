@@ -1,4 +1,4 @@
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DaoAddresses {
   [DaoIdEnum.UNISWAP]: {

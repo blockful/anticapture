@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/client/utils";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { cn } from "@/shared/utils/utils";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { useSectionObserver } from "@/shared/hooks";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useEffect } from "react";

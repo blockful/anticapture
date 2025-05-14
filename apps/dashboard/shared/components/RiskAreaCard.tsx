@@ -3,10 +3,10 @@
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { ReactNode, useState } from "react";
 import { RiskTooltipCard } from "@/shared/components";
-import { RISK_AREAS } from "@/lib/constants/risk-areas";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
 
 export type RiskArea = {

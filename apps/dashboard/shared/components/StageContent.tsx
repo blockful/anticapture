@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { Stage } from "@/features/resilience-stages/components/StageTag";
 
 interface Issue {

@@ -6,7 +6,7 @@ import {
   SkeletonDaoInfoCards,
   SwitchCardDaoInfoItem,
 } from "@/shared/components";
-import { formatBlocksToUserReadable, formatPlural } from "@/lib/client/utils";
+import { formatBlocksToUserReadable, formatPlural } from "@/shared/utils/utils";
 import { useDaoDataContext } from "@/shared/contexts/DaoDataContext";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import {

@@ -9,11 +9,11 @@ import {
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
-import { RISK_AREAS } from "@/lib/constants/risk-areas";
-import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { fieldsToArray } from "@/shared/dao-config/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";

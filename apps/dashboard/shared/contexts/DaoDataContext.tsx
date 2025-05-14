@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import { useDaoData } from "@/shared/hooks";
-import { DAO, DaoIdEnum } from "@/lib/types/daos";
+import { DAO, DaoIdEnum } from "@/shared/types/daos";
 
 interface DaoDataContextProps {
   daoData: null | DAO;

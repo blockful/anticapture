@@ -1,5 +1,5 @@
-import { User } from "@/lib/server/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { User } from "@/shared/utils/server-utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   DaoMetricsDayBucket,
   TokenHistoricalDataMetrics,

@@ -1,5 +1,5 @@
-import { BACKEND_ENDPOINT } from "@/lib/server/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
 import { DAO_ADDRESSES } from "@/shared/dao-config/dao-addresses";
 import daoConfigByDaoId from "@/shared/dao-config";

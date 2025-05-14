@@ -1,4 +1,4 @@
-import { formatBlocksToUserReadable } from "@/lib/client/utils";
+import { formatBlocksToUserReadable } from "@/shared/utils/utils";
 
 describe("formatBlocksToUserReadable", () => {
   // Test zero blocks

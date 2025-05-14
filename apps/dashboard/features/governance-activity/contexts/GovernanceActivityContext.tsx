@@ -3,12 +3,12 @@
 import { createContext, useContext, useState } from "react";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   MetricData,
   GovernanceActivityContextProps,
 } from "@/shared/contexts/types";
-import { MetricTypesEnum } from "@/lib/client/constants";
+import { MetricTypesEnum } from "@/shared/constants/constants";
 import {
   useActiveSupply,
   useAverageTurnout,

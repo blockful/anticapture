@@ -11,7 +11,7 @@ import { ReactNode } from "react";
 import { PlusIcon } from "@/shared/components/icons";
 import { Stage } from "@/features/resilience-stages/components/StageTag";
 import { StageTagSimplified } from "@/shared/components/StageTagSimplified";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { StageContent } from "@/shared/components/StageContent";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";

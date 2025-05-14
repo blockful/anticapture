@@ -1,8 +1,8 @@
 "use client";
 
 import { ComponentProps } from "react";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { cn } from "@/lib/client/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils/utils";
 import {
   UniswapIcon,
   EnsIcon,

@@ -1,5 +1,5 @@
 import { useEnsData } from "@/shared/hooks/useEnsData";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { Address } from "viem";
 import Image from "next/image";
 

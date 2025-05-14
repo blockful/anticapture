@@ -7,7 +7,7 @@ import ArbitrumSupportedDao from "@/public/show-support/ArbitrumSupportedDao.png
 import ArbitrumSupportedDaoMobile from "@/public/show-support/ArbitrumSupportedDaoMobile.png";
 import { useParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, Pencil } from "lucide-react";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   PetitionResponse,
   submitPetitionSignature,

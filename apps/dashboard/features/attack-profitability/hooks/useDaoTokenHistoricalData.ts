@@ -1,6 +1,6 @@
 import useSWR, { SWRConfiguration } from "swr";
-import { BACKEND_ENDPOINT } from "@/lib/server/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type PriceEntry = [timestamp: number, value: number];
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 
 export const HeaderNavMobile = () => {

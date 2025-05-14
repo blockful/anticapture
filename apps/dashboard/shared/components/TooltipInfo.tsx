@@ -6,7 +6,7 @@ import {
   TooltipContent,
 } from "@/shared/components/ui/tooltip";
 import { InfoIcon } from "@/shared/components/icons";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { useState } from "react";
 
 export function TooltipInfo({

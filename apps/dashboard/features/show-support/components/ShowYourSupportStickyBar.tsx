@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ChevronRight } from "lucide-react";
 import { useParams } from "next/navigation";

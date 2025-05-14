@@ -2,9 +2,9 @@
 
 import { RiskAreaCardWrapper, TooltipInfo } from "@/shared/components";
 import { FilePenLine, LinkIcon } from "lucide-react";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
@@ -12,7 +12,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
-import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import {
   fieldsToArray,
   filterFieldsByRiskLevel,

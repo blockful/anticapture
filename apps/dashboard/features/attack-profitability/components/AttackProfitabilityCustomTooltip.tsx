@@ -1,6 +1,6 @@
 "use client";
 
-import { formatNumberUserReadable } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/shared/utils/utils";
 import { TooltipProps } from "recharts";
 
 export const AttackProfitabilityCustomTooltip: React.FC<

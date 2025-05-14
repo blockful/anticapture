@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { SwitcherChart } from "@/shared/components/SwitcherChart";
 
 export const AttackProfitabilityToggleHeader = ({

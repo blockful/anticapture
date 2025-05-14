@@ -7,8 +7,8 @@ import {
 } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { mockedTokenMultineDatasets } from "@/lib/mocked-data/mocked-token-dist-datasets";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { mockedTokenMultineDatasets } from "@/shared/mocked-data/mocked-token-dist-datasets";
 import {
   MultilineChartTokenDistribution,
   TokenDistributionTable,

@@ -1,6 +1,6 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
 import {
@@ -9,7 +9,7 @@ import {
 } from "@/features/show-support/components";
 import { useAccount } from "wagmi";
 import { usePetitionSignatures } from "@/features/show-support/hooks";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { isConnected, address } = useAccount();

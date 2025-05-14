@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 
 const Card = React.forwardRef<
   HTMLDivElement,

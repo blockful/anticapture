@@ -6,7 +6,7 @@ import {
   useAverageTurnout,
   useDelegatedSupply,
 } from "@/shared/hooks";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   BarChart,
   Bar,
@@ -22,9 +22,9 @@ import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
-import { formatNumberUserReadable } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/shared/utils/utils";
 import { useScreenSize } from "@/shared/hooks";
-import { mockedAttackCostBarData } from "@/lib/mocked-data/mocked-attack-cost-bar-data";
+import { mockedAttackCostBarData } from "@/shared/mocked-data/mocked-attack-cost-bar-data";
 import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,

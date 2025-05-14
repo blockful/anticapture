@@ -1,7 +1,7 @@
 "use client";
 
 import { useCountdown } from "@/features/dao-overview/hooks";
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { useMemo } from "react";
 

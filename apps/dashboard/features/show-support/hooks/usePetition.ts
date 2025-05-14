@@ -1,9 +1,9 @@
-import { PETITION_ENDPOINT } from "@/lib/server/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { PETITION_ENDPOINT } from "@/shared/utils/server-utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
 import { Address, Hex } from "viem";
 import _ from "lodash";
-import {parseQuery} from "@/lib/utils/parseQuery";
+import { parseQuery } from "@/shared/utils/parseQuery";
 /**
  * Interface for a single petition signature
  */

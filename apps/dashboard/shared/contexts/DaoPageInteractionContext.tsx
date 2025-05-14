@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, useContext } from "react";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 
 interface DaoPageInteractionContextType {
   activeRisk: string;
@@ -15,9 +15,14 @@ const DaoPageInteractionContext = createContext<DaoPageInteractionContextType>({
   scrollToSection: () => {},
 });
 
-export const useDaoPageInteraction = () => useContext(DaoPageInteractionContext);
+export const useDaoPageInteraction = () =>
+  useContext(DaoPageInteractionContext);
 
-export const DaoPageInteractionProvider = ({ children }: { children: React.ReactNode }) => {
+export const DaoPageInteractionProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [activeRisk, setActiveRisk] = useState("SPAM VULNERABLE");
 
   const scrollToSection = (anchorId: string) => {
@@ -29,7 +34,9 @@ export const DaoPageInteractionProvider = ({ children }: { children: React.React
   };
 
   return (
-    <DaoPageInteractionContext.Provider value={{ activeRisk, setActiveRisk, scrollToSection }}>
+    <DaoPageInteractionContext.Provider
+      value={{ activeRisk, setActiveRisk, scrollToSection }}
+    >
       {children}
     </DaoPageInteractionContext.Provider>
   );

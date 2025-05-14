@@ -3,8 +3,8 @@
 import { ArrowRight, Send } from "lucide-react";
 import { useParams } from "next/navigation";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/lib/constants";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/lib-constants";
 
 export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/client/utils";
+import { cn } from "@/shared/utils/utils";
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { BulletPoint } from "@/shared/components/icons/BulletPoint";
 import { OutlinedBox } from "@/shared/components/OutlinedBox";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { SECTIONS_CONSTANTS } from "@/lib/constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 
 interface StagesDaoOverviewProps {
   currentStage?: number;

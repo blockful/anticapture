@@ -5,7 +5,7 @@ import {
   CardData,
   SkeletonDaoInfoCards,
 } from "@/shared/components";
-import { formatNumberUserReadable } from "@/lib/client/utils";
+import { formatNumberUserReadable } from "@/shared/utils/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext } from "@/shared/contexts";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";

@@ -1,8 +1,8 @@
 import useSWR from "swr";
-import { MetricTypesEnum } from "@/lib/client/constants";
+import { MetricTypesEnum } from "@/shared/constants/constants";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { BACKEND_ENDPOINT } from "@/lib/server/utils";
-import { DaoIdEnum } from "@/lib/types/daos";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   DAYS_IN_MILLISECONDS,
   TIME_INTERVAL_TO_DAYS,
