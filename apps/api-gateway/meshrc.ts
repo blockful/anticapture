@@ -37,14 +37,14 @@ export default processConfig({
           name: 'petition',
           handler: {
             openapi: {
-              source: `${process.env.PETITION_API_URL}`,
+              source: process.env.PETITION_API_URL,
             }
           }
         }
       ] : []),
   ],
   additionalResolvers: [
-    "src/resolvers/index.ts",
+    "src/resolvers/index",
   ]
 },
   {

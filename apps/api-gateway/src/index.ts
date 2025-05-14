@@ -13,8 +13,9 @@ const bootstrap = async () => {
   });
 
   const server = createServer((req, res) => handler(req, res));
-  server.listen(4000, () => {
-    console.log('🚀 Mesh running at http://localhost:4000/graphql');
+  const port = process.env.PORT || 4000;
+  server.listen(port, () => {
+    console.log(`🚀 Mesh running at http://localhost:${port}/graphql`);
   });
 };
 
