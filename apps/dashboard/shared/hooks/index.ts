@@ -7,5 +7,4 @@ export * from "@/shared/hooks/useProposals";
 export * from "@/shared/hooks/useTimeSeriesData";
 export * from "@/shared/hooks/useTopTokenHolderNonDao";
 export * from "@/shared/hooks/useTreasuryAssetNonDaoToken";
-export * from "@/shared/hooks/useVetoCouncilVotingPower";
 export * from "@/shared/hooks/useVotes";

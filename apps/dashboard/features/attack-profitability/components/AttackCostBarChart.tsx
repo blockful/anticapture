@@ -8,7 +8,6 @@ import {
   useDelegatedSupply,
   useTopTokenHolderNonDao,
   useTreasuryAssetNonDaoToken,
-  useVetoCouncilVotingPower,
 } from "@/shared/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
@@ -29,6 +28,7 @@ import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { mockedAttackCostBarData } from "@/lib/mocked-data/mocked-attack-cost-bar-data";
+import { useVetoCouncilVotingPower } from "@/features/attack-profitability/hooks";
 
 interface StackedValue {
   value: number;
