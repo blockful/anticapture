@@ -11,7 +11,7 @@ import { GovernanceImplementationField } from "@/lib/dao-config/types";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { fieldsToArray } from "@/lib/dao-config/utils";
 import { sortByRiskLevel } from "@/lib/enums";
-import { GovernanceImplementationCard } from "@/features/governance-implementation";
+import { GovernanceImplementationCard } from "@/features/governance-implementation/components";
 
 export const GovernanceImplementationSection = ({
   daoId,

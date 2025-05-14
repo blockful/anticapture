@@ -11,7 +11,7 @@ import {
   useDaoDataContext,
   useTokenDistributionContext,
 } from "@/shared/contexts";
-import { TextCardDaoInfoItem } from "@/features/dao-overview";
+import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
 import { UsersIcon } from "@/shared/components/icons";
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();

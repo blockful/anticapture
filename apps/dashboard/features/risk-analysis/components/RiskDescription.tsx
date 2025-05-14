@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { RiskLevel } from "@/lib/enums/RiskLevel";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { GovernanceImplementationField } from "@/lib/dao-config/types";
-import { CorneredBox } from "@/features/risk-analysis/CorneredBox";
+import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
 
 /**
  * Props for the RiskDescription component

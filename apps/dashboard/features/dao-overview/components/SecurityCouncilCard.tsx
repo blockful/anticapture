@@ -6,7 +6,10 @@ import { cn } from "@/lib/client/utils";
 import Link from "next/link";
 import { TooltipInfo } from "@/shared/components";
 import { DaoOverviewConfig } from "@/lib/dao-config/types";
-import { CountdownDaoInfo, ProgressBar } from "@/features/dao-overview";
+import {
+  CountdownDaoInfo,
+  ProgressBar,
+} from "@/features/dao-overview/components";
 
 export const SecurityCouncilCard = ({
   daoOverview,

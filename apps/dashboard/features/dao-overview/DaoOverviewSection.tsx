@@ -25,7 +25,7 @@ import {
   StagesDaoOverview,
   TimelockCard,
   VoteCard,
-} from "@/features/dao-overview";
+} from "@/features/dao-overview/components";
 import { RiskAreaCardWrapper } from "@/shared";
 import {
   DaoAvatarIcon,

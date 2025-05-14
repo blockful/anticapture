@@ -1,6 +1,6 @@
 "use client";
 
-import { ShowYourSupportStickyBar } from "@/features/show-support";
+import { ShowYourSupportStickyBar } from "@/features/show-support/components";
 // import { Message, MessageStacker } from "@/?";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";

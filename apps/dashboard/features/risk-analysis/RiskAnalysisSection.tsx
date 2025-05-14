@@ -3,7 +3,7 @@
 import { Gauge } from "lucide-react";
 import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
 import { RiskAreaCardWrapper } from "@/shared/RiskAreaCard";
-import { RiskDescription } from "@/features/risk-analysis/RiskDescription";
+import { RiskDescription } from "@/features/risk-analysis/components/RiskDescription";
 import {
   RiskLevel,
   RiskAreaEnum,

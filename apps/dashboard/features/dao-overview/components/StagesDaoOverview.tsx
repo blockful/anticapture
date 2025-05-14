@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import { StageRequirementsTooltip } from "@/features/dao-overview/StageRequirementsTooltip";
+import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { useEffect } from "react";

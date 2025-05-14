@@ -15,7 +15,7 @@ import {
 } from "@/lib/client/utils";
 import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
-import { TokenDistributionCustomTooltip } from "@/features/token-distribution";
+import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;

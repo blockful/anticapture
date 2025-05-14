@@ -6,7 +6,7 @@ import { TheSectionLayout } from "@/shared/components";
 import {
   CardPetitionInformation,
   CardDaoSignature,
-} from "@/features/show-support";
+} from "@/features/show-support/components";
 import { useAccount } from "wagmi";
 import { usePetitionSignatures } from "@/shared/hooks/usePetition";
 import { DaoIdEnum } from "@/lib/types/daos";

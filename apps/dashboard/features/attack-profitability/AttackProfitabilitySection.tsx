@@ -16,7 +16,7 @@ import {
   MultilineChartAttackProfitability,
   AttackCostBarChart,
   AttackProfitabilityToggleHeader,
-} from "@/features/attack-profitability";
+} from "@/features/attack-profitability/components";
 import { CrossHairIcon } from "@/shared/components/icons";
 
 export const AttackProfitabilitySection = ({

@@ -16,7 +16,7 @@ import {
 } from "@/shared/components/ui/tooltip";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { BlocksIcon, ClickIcon } from "@/shared/components/icons";
-import { BadgeCardDaoInfoItem } from "@/features/dao-overview/BadgeCardDaoInfoItem";
+import { BadgeCardDaoInfoItem } from "@/features/dao-overview/components/BadgeCardDaoInfoItem";
 
 export const VoteCard = ({
   daoOverview,

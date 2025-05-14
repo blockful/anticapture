@@ -13,7 +13,7 @@ import { mockedTokenMultineDatasets } from "@/lib/mocked-data/mocked-token-dist-
 import {
   MultilineChartTokenDistribution,
   TokenDistributionTable,
-} from "@/features/token-distribution";
+} from "@/features/token-distribution/components";
 import { ArrowLeftRight } from "@/shared/components/icons";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
