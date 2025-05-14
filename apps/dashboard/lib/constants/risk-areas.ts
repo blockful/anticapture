@@ -3,7 +3,10 @@
  * Central location for all risk area data including titles, descriptions and requirements
  */
 
-import { RiskAreaEnum, GovernanceImplementationEnum } from "@/lib/enums";
+import {
+  RiskAreaEnum,
+  GovernanceImplementationEnum,
+} from "@/shared/types/enums";
 
 /**
  * Complete interface for risk area with title, description and requirements

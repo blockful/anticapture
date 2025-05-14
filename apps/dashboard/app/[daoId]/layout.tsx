@@ -3,7 +3,7 @@ import { ALL_DAOS, DaoIdEnum } from "@/lib/types/daos";
 import { DaoDataProvider } from "@/shared/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { DaoPageInteractionProvider } from "@/shared/contexts";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { TokenDistributionProvider } from "@/features/token-distribution/contexts";
 import { GovernanceActivityProvider } from "@/features/governance-activity/contexts";
 

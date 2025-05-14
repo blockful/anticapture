@@ -7,13 +7,13 @@ import {
 } from "@/shared/components";
 import { cn } from "@/lib/client/utils";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
   fieldsToArray,
-} from "@/lib/dao-config/utils";
-import { RiskLevel } from "@/lib/enums";
+} from "@/shared/dao-config/utils";
+import { RiskLevel } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { BarChart } from "lucide-react";
 import {

@@ -1,13 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/client/utils";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ChevronRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 
 export const ShowYourSupportStickyBar = () => {
   const { isDesktop } = useScreenSize();

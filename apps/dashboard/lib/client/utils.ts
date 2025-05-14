@@ -5,7 +5,7 @@ import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
-} from "@/lib/dao-config/types";
+} from "@/shared/dao-config/types";
 import {
   DAYS_PER_MONTH,
   MILLISECONDS_PER_DAY,
@@ -13,7 +13,7 @@ import {
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
 } from "@/lib/client/constants";
-import { TimeInterval, DAYS_IN_MILLISECONDS } from "@/lib/enums";
+import { TimeInterval, DAYS_IN_MILLISECONDS } from "@/shared/types/enums";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

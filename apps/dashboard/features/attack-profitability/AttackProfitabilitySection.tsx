@@ -7,10 +7,10 @@ import {
   SwitcherDate,
   RiskLevelCard,
 } from "@/shared/components";
-import { TimeInterval } from "@/lib/enums";
+import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { AttackProfitabilityConfig } from "@/lib/dao-config/types";
+import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,
   MultilineChartAttackProfitability,

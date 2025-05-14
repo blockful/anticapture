@@ -2,7 +2,7 @@
 
 import { ArrowRight, Send } from "lucide-react";
 import { useParams } from "next/navigation";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/lib/constants";
 
@@ -10,7 +10,7 @@ export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };
   return (
     <div className="flex items-center gap-3 tracking-wider sm:flex-row">
-      <Send className="size-4 text-white hidden sm:block" />
+      <Send className="hidden size-4 text-white sm:block" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex gap-3">
           <span className="font-mono font-normal text-white">

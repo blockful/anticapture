@@ -1,6 +1,6 @@
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
+import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 
 export const mockedTokenMultineDatasets: Record<string, DaoMetricsDayBucket[]> =
   {

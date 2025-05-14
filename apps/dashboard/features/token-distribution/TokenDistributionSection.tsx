@@ -5,8 +5,8 @@ import {
   SwitcherDate,
   TheCardChartLayout,
 } from "@/shared/components";
-import { TimeInterval } from "@/lib/enums";
-import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
+import { TimeInterval } from "@/shared/types/enums";
+import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { mockedTokenMultineDatasets } from "@/lib/mocked-data/mocked-token-dist-datasets";
 import {

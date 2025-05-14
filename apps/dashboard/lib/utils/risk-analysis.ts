@@ -3,13 +3,13 @@
  * Utility functions for risk analysis of DAOs
  */
 
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { RiskAreaEnum } from "@/lib/enums/RiskArea";
-import { GovernanceImplementationEnum } from "@/lib/enums/GovernanceImplementation";
+import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
-import { RiskLevel } from "@/lib/enums/RiskLevel";
-import { GovernanceImplementationField } from "@/lib/dao-config/types";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
 
 /**
  * Risk area information including risk level and governance implementation items

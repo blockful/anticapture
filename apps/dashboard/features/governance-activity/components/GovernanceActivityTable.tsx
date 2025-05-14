@@ -15,7 +15,7 @@ import {
   formatNumberUserReadable,
   formatVariation,
 } from "@/lib/client/utils";
-import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
+import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";

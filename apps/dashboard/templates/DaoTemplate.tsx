@@ -4,7 +4,7 @@ import { ShowYourSupportStickyBar } from "@/features/show-support/components";
 // import { Message, MessageStacker } from "@/?";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/lib/types/daos";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoPageInteractionProvider } from "@/shared/contexts/DaoPageInteractionContext";
 import { ShowSupportSection } from "@/features/show-support";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";

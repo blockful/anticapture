@@ -14,7 +14,7 @@ import {
   TheTable,
   TooltipInfo,
 } from "@/shared/components";
-import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
+import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import {
   cn,
   formatNumberUserReadable,

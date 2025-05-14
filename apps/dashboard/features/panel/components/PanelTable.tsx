@@ -8,11 +8,11 @@ import { Button } from "@/shared/components/ui/button";
 import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/shared/components";
 import { cn, formatNumberUserReadable } from "@/lib/client/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useDelegatedSupply } from "@/shared/hooks";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import {
   ArrowUpDown,
   ArrowState,

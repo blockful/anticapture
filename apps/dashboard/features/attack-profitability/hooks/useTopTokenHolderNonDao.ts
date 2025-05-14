@@ -1,8 +1,8 @@
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR from "swr";
-import { DAO_ADDRESSES } from "@/lib/dao-config/dao-addresses";
-import daoConfigByDaoId from "@/lib/dao-config";
+import { DAO_ADDRESSES } from "@/shared/dao-config/dao-addresses";
+import daoConfigByDaoId from "@/shared/dao-config";
 interface AccountBalance {
   accountId: string;
   balance: string;

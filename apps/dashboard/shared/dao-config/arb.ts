@@ -1,5 +1,5 @@
-import { DaoConfiguration } from "@/lib/dao-config/types";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 
 export const ARB: DaoConfiguration = {
   name: "Arbitrum",

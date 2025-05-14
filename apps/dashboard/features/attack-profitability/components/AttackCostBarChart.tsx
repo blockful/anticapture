@@ -19,7 +19,7 @@ import {
   LabelProps,
 } from "recharts";
 import { SkeletonRow } from "@/shared/components";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";

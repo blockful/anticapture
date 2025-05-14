@@ -1,4 +1,4 @@
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
@@ -50,9 +50,7 @@ export const useTreasuryAssetNonDaoToken = (
   });
 
   // Return default data (empty array) when liquid treasury is not supported
-  const finalData = supportsLiquidTreasuryCall
-    ? data
-    : [];
+  const finalData = supportsLiquidTreasuryCall ? data : [];
 
   return {
     data: finalData,

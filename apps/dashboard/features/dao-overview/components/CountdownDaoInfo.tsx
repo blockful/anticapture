@@ -2,7 +2,7 @@
 
 import { useCountdown } from "@/features/dao-overview/hooks";
 import { cn } from "@/lib/client/utils";
-import { DaoOverviewConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { useMemo } from "react";
 
 export const CountdownDaoInfo = ({

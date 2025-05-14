@@ -5,19 +5,19 @@ import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
-import { RiskLevel } from "@/lib/enums/RiskLevel";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
 import {
   fieldsToArray,
   filterFieldsByRiskLevel,
   getDaoStageFromFields,
-} from "@/lib/dao-config/utils";
+} from "@/shared/dao-config/utils";
 import {
   DaoInfoDropdown,
   QuorumCard,

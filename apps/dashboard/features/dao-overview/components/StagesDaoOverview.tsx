@@ -7,7 +7,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
 import { BulletPoint } from "@/shared/components/icons/BulletPoint";
 import { OutlinedBox } from "@/shared/components/OutlinedBox";
-import { GovernanceImplementationField } from "@/lib/dao-config/types";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 
 interface StagesDaoOverviewProps {

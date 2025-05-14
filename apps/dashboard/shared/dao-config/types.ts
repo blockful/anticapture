@@ -1,7 +1,11 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { RiskLevel, SupportStageEnum, GovernanceImplementationEnum } from "@/lib/enums";
+import {
+  RiskLevel,
+  SupportStageEnum,
+  GovernanceImplementationEnum,
+} from "@/shared/types/enums";
 
 // Existing types
 export enum ChainNameEnum {
@@ -36,7 +40,9 @@ export interface MultilineChartDataSetPoint {
 }
 
 export type GovernanceImplementation = {
-  fields?: Partial<Record<GovernanceImplementationEnum, GovernanceImplementationField>>;
+  fields?: Partial<
+    Record<GovernanceImplementationEnum, GovernanceImplementationField>
+  >;
 };
 
 export type GovernanceImplementationField = {

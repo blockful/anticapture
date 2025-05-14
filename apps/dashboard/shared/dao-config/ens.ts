@@ -1,10 +1,10 @@
-import { DaoConfiguration } from "@/lib/dao-config/types";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   sortByRiskLevel,
   SupportStageEnum,
   GovernanceImplementationEnum,
-} from "@/lib/enums";
+} from "@/shared/types/enums";
 import { calculateMonthsBefore } from "@/lib/client/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/lib/constants/governance-implementations";
 export const ENS: DaoConfiguration = {

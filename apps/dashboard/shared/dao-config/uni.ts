@@ -1,8 +1,6 @@
-import { RiskLevel, SupportStageEnum } from "@/lib/enums";
-import { DaoConfiguration } from "@/lib/dao-config/types";
-import {
-  GovernanceImplementationEnum,
-} from "@/lib/enums/GovernanceImplementation";
+import { RiskLevel, SupportStageEnum } from "@/shared/types/enums";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/lib/constants/governance-implementations";
 export const UNI: DaoConfiguration = {
   name: "Uniswap",

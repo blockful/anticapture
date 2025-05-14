@@ -9,9 +9,9 @@ import {
   ReachOutToUsCard,
 } from "@/features/support-dao/components";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
-import daoConfigByDaoId from "@/lib/dao-config";
-import { DaoConfiguration } from "@/lib/dao-config/types";
+import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import { useMemo } from "react";
 import { pickBy } from "lodash";
 import { DaoAvatarIcon } from "@/shared/components/icons";

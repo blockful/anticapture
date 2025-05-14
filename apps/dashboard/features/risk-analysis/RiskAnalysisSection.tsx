@@ -8,15 +8,15 @@ import {
   RiskLevel,
   RiskAreaEnum,
   GovernanceImplementationEnum,
-} from "@/lib/enums";
+} from "@/shared/types/enums";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/types/daos";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { RISK_AREAS } from "@/lib/constants/risk-areas";
 import { getDaoRiskAreas } from "@/lib/utils/risk-analysis";
-import { fieldsToArray } from "@/lib/dao-config/utils";
-import daoConfigByDaoId from "@/lib/dao-config";
-import { GovernanceImplementationField } from "@/lib/dao-config/types";
+import { fieldsToArray } from "@/shared/dao-config/utils";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
 
 // Define type for the risk area display items
 interface RiskAreaDisplayItem {

@@ -3,7 +3,7 @@
 import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { ArrowLeftRight } from "@/shared/components/icons";
 import { GovernanceActivityTable } from "@/features/governance-activity/components";
-import { TimeInterval } from "@/lib/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 

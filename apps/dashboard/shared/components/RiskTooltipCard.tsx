@@ -1,4 +1,4 @@
-import { RiskLevel } from "@/lib/enums/RiskLevel";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { RiskLevelCardSmall } from "@/shared/components";
 
 interface RiskTooltipCardProps {

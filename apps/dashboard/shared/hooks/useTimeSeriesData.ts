@@ -1,13 +1,13 @@
 import useSWR from "swr";
 import { MetricTypesEnum } from "@/lib/client/constants";
-import { DaoMetricsDayBucket } from "@/lib/dao-config/types";
+import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
   DAYS_IN_MILLISECONDS,
   TIME_INTERVAL_TO_DAYS,
   TimeInterval,
-} from "@/lib/enums/TimeInterval";
+} from "@/shared/types/enums/TimeInterval";
 
 const fetchTimeSeriesDataFromGraphQL = async (
   daoId: DaoIdEnum,

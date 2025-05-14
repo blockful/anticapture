@@ -5,7 +5,7 @@ import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import Link from "next/link";
 import { TooltipInfo } from "@/shared/components";
-import { DaoOverviewConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import {
   CountdownDaoInfo,
   ProgressBar,

@@ -5,7 +5,7 @@ import {
   CardData,
   SwitchCardDaoInfoItem,
 } from "@/shared/components";
-import { DaoOverviewConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { openEtherscanAddress } from "@/lib/utils/openEtherscanAddress";
 import { ExternalLinkIcon } from "@/shared/components/icons";
 import { Clock4 } from "lucide-react";

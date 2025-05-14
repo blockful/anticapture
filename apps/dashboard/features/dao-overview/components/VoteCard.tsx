@@ -8,7 +8,7 @@ import {
 } from "@/shared/components";
 import { formatBlocksToUserReadable, formatPlural } from "@/lib/client/utils";
 import { useDaoDataContext } from "@/shared/contexts/DaoDataContext";
-import { DaoOverviewConfig } from "@/lib/dao-config/types";
+import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import {
   Tooltip,
   TooltipContent,

@@ -13,8 +13,8 @@ import { Stage } from "@/features/resilience-stages/components/StageTag";
 import { StageTagSimplified } from "@/shared/components/StageTagSimplified";
 import { cn } from "@/lib/client/utils";
 import { StageContent } from "@/shared/components/StageContent";
-import { GovernanceImplementationField } from "@/lib/dao-config/types";
-import { RiskLevel } from "@/lib/enums";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { RiskLevel } from "@/shared/types/enums";
 
 interface StageAccordionProps {
   daoStage: Stage;

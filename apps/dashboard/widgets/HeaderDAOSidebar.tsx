@@ -8,7 +8,7 @@ import {
 } from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/lib/constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
-import daoConfigByDaoId from "@/lib/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   ActivityIcon,
   ArrowLeftRight,
