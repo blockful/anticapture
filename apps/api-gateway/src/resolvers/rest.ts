@@ -28,10 +28,10 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
         throw new Error(`Missing where.daoId in query for ${fieldName}`);
       }
 
-      const targetClient = context[`rest_${daoId}`]?.Query;
+      const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
 
       if (!targetClient || typeof targetClient[fieldName] !== 'function') {
-        throw new Error(`Unsupported daoId "${daoId}" or field "${fieldName}" not found in context`);
+        return {}
       }
 
       return targetClient[fieldName]({
