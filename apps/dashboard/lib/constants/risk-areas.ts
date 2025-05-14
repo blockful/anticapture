@@ -4,7 +4,6 @@
  */
 
 import { RiskAreaEnum, GovernanceImplementationEnum } from "@/lib/enums";
-import { RiskLevel } from "@/lib/enums/RiskLevel";
 
 /**
  * Complete interface for risk area with title, description and requirements

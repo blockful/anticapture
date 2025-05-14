@@ -6,7 +6,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
-import { usePetitionSignatures } from "@/shared/hooks/usePetition";
+import { usePetitionSignatures } from "@/features/show-support/hooks/usePetition";
 import { ReactNode } from "react";
 import { TrendingUpIcon } from "@/shared/components/icons";
 

@@ -8,7 +8,7 @@ import {
   CardDaoSignature,
 } from "@/features/show-support/components";
 import { useAccount } from "wagmi";
-import { usePetitionSignatures } from "@/shared/hooks/usePetition";
+import { usePetitionSignatures } from "@/features/show-support/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {

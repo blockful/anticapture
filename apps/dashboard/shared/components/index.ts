@@ -22,4 +22,6 @@ export * from "@/shared/components/TheCardChartLayout";
 export * from "@/shared/components/TheSectionLayout";
 export * from "@/shared/components/TheTable";
 export * from "@/shared/components/TooltipInfo";
+export * from "@/shared/components/RiskAreaCard";
+
 export { StagesCardRequirements } from "@/shared/components/StagesCardRequirements";

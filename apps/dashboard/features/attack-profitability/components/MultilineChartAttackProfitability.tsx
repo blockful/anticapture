@@ -16,11 +16,7 @@ import { useParams } from "next/navigation";
 import { TimeInterval } from "@/lib/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/lib/dao-config/types";
 import { useDaoDataContext } from "@/shared/contexts";
-import {
-  useDaoTokenHistoricalData,
-  useTimeSeriesData,
-  useTreasuryAssetNonDaoToken,
-} from "@/shared/hooks";
+import { useTimeSeriesData } from "@/shared/hooks";
 import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
@@ -33,6 +29,10 @@ import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/lib/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
+import {
+  useDaoTokenHistoricalData,
+  useTreasuryAssetNonDaoToken,
+} from "@/features/attack-profitability/hooks";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;

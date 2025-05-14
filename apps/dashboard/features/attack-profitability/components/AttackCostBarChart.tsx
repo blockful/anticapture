@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
-  useDaoTokenHistoricalData,
   useDelegatedSupply,
-  useTopTokenHolderNonDao,
-  useTreasuryAssetNonDaoToken,
 } from "@/shared/hooks";
 import { DaoIdEnum } from "@/lib/types/daos";
 import {
@@ -28,7 +25,12 @@ import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/lib/client/utils";
 import { useScreenSize } from "@/lib/hooks/useScreenSize";
 import { mockedAttackCostBarData } from "@/lib/mocked-data/mocked-attack-cost-bar-data";
-import { useVetoCouncilVotingPower } from "@/features/attack-profitability/hooks";
+import {
+  useDaoTokenHistoricalData,
+  useTopTokenHolderNonDao,
+  useTreasuryAssetNonDaoToken,
+  useVetoCouncilVotingPower,
+} from "@/features/attack-profitability/hooks";
 
 interface StackedValue {
   value: number;

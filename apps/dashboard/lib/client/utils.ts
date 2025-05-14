@@ -1,4 +1,4 @@
-import { TreasuryAssetNonDaoToken } from "@/shared/hooks";
+import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {

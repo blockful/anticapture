@@ -11,7 +11,7 @@ import { DaoIdEnum } from "@/lib/types/daos";
 import {
   PetitionResponse,
   submitPetitionSignature,
-} from "@/shared/hooks/usePetition";
+} from "@/features/show-support/hooks/usePetition";
 import { wagmiConfig } from "@/lib/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet } from "@/shared/components";
