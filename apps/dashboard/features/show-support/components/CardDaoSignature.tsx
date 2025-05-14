@@ -12,7 +12,7 @@ import {
   PetitionResponse,
   submitPetitionSignature,
 } from "@/features/show-support/hooks/usePetition";
-import { wagmiConfig } from "@/lib/wallet";
+import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import { signMessage } from "@wagmi/core";
 import { ConnectWallet } from "@/shared/components";
 import { Address } from "viem";
