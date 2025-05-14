@@ -18,12 +18,14 @@ interface StageTagProps {
   tagStage: Stage;
   daoStage: Stage;
   className?: string;
+  showStageText?: boolean;
 }
 
 export const StageTag = ({
   tagStage,
   daoStage,
   className = "",
+  showStageText = false,
 }: StageTagProps) => {
   // Use gray colors when daoStage is less than tagStage
   const stageStyles =
@@ -35,8 +37,10 @@ export const StageTag = ({
     <div
       className={`inline-flex rounded-lg border-[1px] bg-dark p-2 py-1 ${stageStyles} ${className}`}
     >
-      <span className="font-mono text-[13px] font-medium leading-[18px]">
+      <span className="whitespace-nowrap font-mono text-[13px] font-medium leading-[18px]">
         <span className="hidden sm:inline">STAGE </span>
+
+        {showStageText && <span className="inline sm:hidden">STAGE </span>}
         {tagStage === Stage.NONE ? "?" : tagStage}
       </span>
     </div>

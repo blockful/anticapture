@@ -187,7 +187,11 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         if (!daoConfig.governanceImplementation) {
           return (
             <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
-              <StageTag daoStage={Stage.NONE} tagStage={Stage.NONE} />
+              <StageTag
+                daoStage={Stage.NONE}
+                tagStage={Stage.NONE}
+                showStageText
+              />
             </div>
           );
         }
@@ -196,7 +200,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         );
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
-            <StageTag daoStage={stage} tagStage={stage} />
+            <StageTag daoStage={stage} tagStage={stage} showStageText />
           </div>
         );
       },
