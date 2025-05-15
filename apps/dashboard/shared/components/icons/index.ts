@@ -7,7 +7,6 @@ export * from "@/shared/components/icons/CrownIcon";
 export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/EnsIcon";
 export * from "@/shared/components/icons/FocusIcon";
-export * from "@/shared/components/icons/InfoIcon";
 export * from "@/shared/components/icons/OptimismIcon";
 export * from "@/shared/components/icons/PieChartIcon";
 export * from "@/shared/components/icons/PlusIcon";
