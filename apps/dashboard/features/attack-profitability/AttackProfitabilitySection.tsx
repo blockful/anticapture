@@ -17,7 +17,7 @@ import {
   AttackCostBarChart,
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
-import { CrossHairIcon } from "@/shared/components/icons";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -38,7 +38,7 @@ export const AttackProfitabilitySection = ({
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
       subtitle={"Cost of Attack vs Profit"}
-      icon={<CrossHairIcon className="text-foreground" />}
+      icon={<Crosshair2Icon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.attackProfitability.description}
       infoText={
         "Treasury values above supply costs indicate high risk. And probably we can add something else here."

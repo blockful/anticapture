@@ -9,8 +9,9 @@ import {
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { PieChartIcon, CrossHairIcon } from "@/shared/components/icons";
+import { PieChartIcon } from "@/shared/components/icons";
 import { ArrowLeftRight } from "lucide-react";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
@@ -46,7 +47,7 @@ export const HeaderDAOSidebar = () => {
           {daoConfig.attackProfitability && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
-              icon={CrossHairIcon}
+              icon={Crosshair2Icon}
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
           )}
