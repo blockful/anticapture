@@ -15,6 +15,7 @@ export function assets(app: Hono, service: AssetsClient) {
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "totalAssets",
       path: "/dao/{daoId}/total-assets",
       summary: "Get total assets",
       description: "Get total assets",

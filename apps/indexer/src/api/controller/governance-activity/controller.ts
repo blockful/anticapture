@@ -38,6 +38,7 @@ export function governanceActivity(
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "compareActiveSupply",
       path: "/dao/{daoId}/active-supply/compare",
       summary: "Get active token supply for DAO",
       tags: ["governance"],
@@ -76,6 +77,7 @@ export function governanceActivity(
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "compareProposals",
       path: "/dao/{daoId}/proposals/compare",
       summary: "Compare number of proposals between time periods",
       tags: ["governance"],
@@ -124,6 +126,7 @@ export function governanceActivity(
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "compareVotes",
       path: "/dao/{daoId}/votes/compare",
       summary: "Compare number of votes between time periods",
       tags: ["governance"],

@@ -97,6 +97,11 @@ export function tokenDistribution(
     app.openapi(
       createRoute({
         method: "get",
+        // camelCase
+        operationId: `compare${path
+          .split("-")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join("")}`,
         path: `/dao/{daoId}/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],

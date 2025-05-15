@@ -25,6 +25,7 @@ export function tokenHistoricalData(
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "historicalTokenData",
       path: "/token/{daoId}/historical-data",
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
