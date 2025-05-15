@@ -1,4 +1,3 @@
-export * from "@/shared/components/icons/ActivityIcon";
 export * from "@/shared/components/icons/AlertTriangleIcon";
 export * from "@/shared/components/icons/AnticaptureIcon";
 export * from "@/shared/components/icons/ArbitrumIcon";

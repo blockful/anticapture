@@ -7,10 +7,9 @@ import {
   ButtonHeaderSidebar,
 } from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
-import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
+import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
-  ActivityIcon,
   ArrowLeftRight,
   PieChartIcon,
   CrossHairIcon,
@@ -87,7 +86,7 @@ export const HeaderDAOSidebar = () => {
           {daoConfig.governanceActivity && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-              icon={ActivityIcon}
+              icon={Activity}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
             />
           )}
