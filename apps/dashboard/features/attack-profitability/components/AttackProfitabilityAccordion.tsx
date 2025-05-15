@@ -7,11 +7,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import {
-  AlertTriangleIcon,
-  TokensIcon,
-  UsersIcon,
-} from "@/shared/components/icons";
+import { AlertTriangleIcon, UsersIcon } from "@/shared/components/icons";
 import {
   ArrowDown,
   ArrowUp,
@@ -91,7 +87,6 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
-            <TokensIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Voting power in a proposal
             </p>
