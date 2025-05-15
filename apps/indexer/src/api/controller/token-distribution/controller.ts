@@ -99,7 +99,7 @@ export function tokenDistribution(
         method: "get",
         path: `/dao/{daoId}/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
-        tags: ["token"],
+        tags: ["tokens"],
         request: {
           params: z.object({
             daoId: caseInsensitiveEnum(DaoIdEnum),
