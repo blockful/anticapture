@@ -20,16 +20,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const toggleScreenScroll = () => {
-  const body = document.getElementsByTagName("body")[0];
-
-  if (body.classList.contains("no-scroll")) {
-    body.classList.remove("no-scroll");
-  } else {
-    body.classList.add("no-scroll");
-  }
-};
-
 export function formatNumberUserReadable(
   num: number,
   fixed: number = 2,
