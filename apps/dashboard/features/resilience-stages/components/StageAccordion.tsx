@@ -8,13 +8,13 @@ import {
 } from "@radix-ui/react-accordion";
 import { MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
-import { PlusIcon } from "@/shared/components/icons";
 import { Stage } from "@/features/resilience-stages/components/StageTag";
 import { StageTagSimplified } from "@/shared/components/StageTagSimplified";
 import { cn } from "@/shared/utils/utils";
 import { StageContent } from "@/shared/components/StageContent";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";
+import { Plus } from "lucide-react";
 
 interface StageAccordionProps {
   daoStage: Stage;
@@ -139,7 +139,7 @@ const CustomAccordionItem = ({
               </div>
             )}
           </div>
-          <PlusIcon className="size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
+          <Plus className="size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
           <MinusIcon className="hidden size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:block" />
         </AccordionTrigger>
         {content ? (

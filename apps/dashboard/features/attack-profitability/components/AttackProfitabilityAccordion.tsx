@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  PlusIcon,
   TokensIcon,
   UsersIcon,
 } from "@/shared/components/icons";
@@ -22,6 +21,7 @@ import {
   DollarSign,
   Equal,
   PieChart,
+  Plus,
 } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 
@@ -200,7 +200,7 @@ export const AttackProfitabilityAccordion = () => {
               {item.icon}
               {item.title}
             </div>
-            <PlusIcon className="size-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
+            <Plus className="size-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
           <AccordionContent className="overflow-hidden px-3 pb-3 transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>
