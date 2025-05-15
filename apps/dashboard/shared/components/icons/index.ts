@@ -6,7 +6,6 @@ export * from "@/shared/components/icons/BulletPoint";
 export * from "@/shared/components/icons/CrownIcon";
 export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/EnsIcon";
-export * from "@/shared/components/icons/EqualsIcon";
 export * from "@/shared/components/icons/ExternalLinkIcon";
 export * from "@/shared/components/icons/FocusIcon";
 export * from "@/shared/components/icons/HandIcon";

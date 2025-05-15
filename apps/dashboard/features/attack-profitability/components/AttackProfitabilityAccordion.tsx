@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  EqualsIcon,
   PieChartIcon,
   PlusIcon,
   TokensIcon,
@@ -22,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   DollarSign,
+  Equal,
 } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 
@@ -96,7 +96,7 @@ const AccordionData: AccordionDataProps[] = [
               Voting power in a proposal
             </p>
           </Badge>
-          <EqualsIcon />
+          <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Delegated cap at snapshot
@@ -133,7 +133,7 @@ const AccordionData: AccordionDataProps[] = [
               Lower Participation
             </p>
           </Badge>
-          <EqualsIcon />
+          <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
             <ArrowUp className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
@@ -169,7 +169,7 @@ const AccordionData: AccordionDataProps[] = [
               treasury funds
             </p>
           </Badge>
-          <EqualsIcon />
+          <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
             <AlertTriangleIcon className="text-white" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
