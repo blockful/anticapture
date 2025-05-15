@@ -11,5 +11,4 @@ export * from "@/shared/components/icons/OptimismIcon";
 export * from "@/shared/components/icons/TelegramIcon";
 export * from "@/shared/components/icons/TokensIcon";
 export * from "@/shared/components/icons/UniswapIcon";
-export * from "@/shared/components/icons/WalletIcon";
 export * from "@/shared/components/icons/PointerIcon";

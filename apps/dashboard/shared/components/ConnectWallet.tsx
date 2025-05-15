@@ -3,7 +3,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { cn } from "@/shared/utils/utils";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { WalletIcon } from "@/shared/components/icons/WalletIcon";
+import { Wallet } from "lucide-react";
 
 const Jazzicon = dynamic(
   () => import("react-jazzicon").then((mod) => mod.default),
@@ -56,7 +56,7 @@ export const ConnectWallet = ({
                     type="button"
                     className={cn("btn-connect-wallet", className)}
                   >
-                    <WalletIcon className="size-3.5 sm:size-4" />
+                    <Wallet className="size-3.5" />
                     {label}
                   </button>
                 );
