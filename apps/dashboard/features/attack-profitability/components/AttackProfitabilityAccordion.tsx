@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  ArrowDownIcon,
   ArrowUpIcon,
   BarChartSecondaryIcon,
   CalculatorIcon,
@@ -22,6 +21,7 @@ import {
   TokensIcon,
   UsersIcon,
 } from "@/shared/components/icons";
+import { ArrowDown } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 
 interface AccordionDataProps {
@@ -127,7 +127,7 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
-            <ArrowDownIcon />
+            <ArrowDown className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Lower Participation
             </p>
