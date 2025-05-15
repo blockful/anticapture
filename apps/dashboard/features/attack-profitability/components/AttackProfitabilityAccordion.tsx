@@ -143,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarSign className="size-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
+      <DollarSign className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
