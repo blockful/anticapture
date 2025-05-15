@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  BarChartSecondaryIcon,
   CalculatorIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -96,7 +95,6 @@ const AccordionData: AccordionDataProps[] = [
           </Badge>
           <EqualsIcon />
           <Badge className="group-hover:bg-dark">
-            <BarChartSecondaryIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Delegated cap at snapshot
             </p>
