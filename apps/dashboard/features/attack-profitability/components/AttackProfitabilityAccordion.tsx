@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import { AlertTriangleIcon, UsersIcon } from "@/shared/components/icons";
+import { AlertTriangleIcon } from "@/shared/components/icons";
 import {
   ArrowDown,
   ArrowUp,
@@ -18,6 +18,7 @@ import {
   Equal,
   PieChart,
   Plus,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 
@@ -104,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Turnout and Active Supply",
     icon: (
-      <UsersIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <Users className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">

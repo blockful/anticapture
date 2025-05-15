@@ -9,8 +9,8 @@ import { formatNumberUserReadable } from "@/shared/utils/utils";
 import { formatEther } from "viem";
 import { useDaoDataContext } from "@/shared/contexts";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
-import { UsersIcon } from "@/shared/components/icons";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
+import { Users } from "lucide-react";
 export const QuorumCard = () => {
   const { daoData } = useDaoDataContext();
   const { totalSupply } = useTokenDistributionContext();
@@ -54,7 +54,7 @@ export const QuorumCard = () => {
 
   const quorumData: CardData = {
     title: "Quorum",
-    icon: <UsersIcon className="text-foreground" />,
+    icon: <Users className="size-4 text-foreground" />,
     optionalHeaderValue: (
       <p className="flex text-sm text-tangerine">
         {quorumValue} {daoData.id || "Unknown ID"} {quorumPercentage}
