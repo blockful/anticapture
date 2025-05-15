@@ -1,7 +1,6 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
-  sortByRiskLevel,
   SupportStageEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";

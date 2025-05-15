@@ -10,7 +10,7 @@ import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks";
 import { fieldsToArray } from "@/shared/dao-config/utils";
-import { sortByRiskLevel } from "@/shared/types/enums";
+import { sortByRiskLevel } from "@/shared/utils/sortByRiskLevel";
 import { GovernanceImplementationCard } from "@/features/governance-implementation/components";
 
 export const GovernanceImplementationSection = ({

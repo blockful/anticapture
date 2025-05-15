@@ -7,13 +7,14 @@ import {
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import {
+  DAYS_IN_MILLISECONDS,
   DAYS_PER_MONTH,
   MILLISECONDS_PER_DAY,
   SECONDS_PER_DAY,
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
 } from "@/shared/constants/time-related";
-import { TimeInterval, DAYS_IN_MILLISECONDS } from "@/shared/types/enums";
+import { TimeInterval } from "@/shared/types/enums";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
