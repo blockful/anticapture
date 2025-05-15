@@ -18,9 +18,7 @@ import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
 import { useDaoDataContext } from "@/shared/contexts";
 import { useTimeSeriesData } from "@/shared/hooks";
 import {
-  normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
-  normalizeDataset,
   filterPriceHistoryByTimeInterval,
 } from "@/shared/utils/utils";
 
@@ -34,6 +32,10 @@ import {
   useTreasuryAssetNonDaoToken,
 } from "@/features/attack-profitability/hooks";
 import { timestampToReadableDate } from "@/shared/utils";
+import {
+  normalizeDataset,
+  normalizeDatasetTreasuryNonDaoToken,
+} from "@/features/attack-profitability/utils";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
