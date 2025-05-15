@@ -9,17 +9,21 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  DollarIcon,
   EqualsIcon,
   PieChartIcon,
   PlusIcon,
   TokensIcon,
   UsersIcon,
 } from "@/shared/components/icons";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Calculator,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+} from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
-import { Calculator, ChevronLeft } from "lucide-react";
-import { ChevronRight } from "lucide-react";
 
 interface AccordionDataProps {
   title: string;
@@ -143,7 +147,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarIcon className="size-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
+      <DollarSign className="size-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
