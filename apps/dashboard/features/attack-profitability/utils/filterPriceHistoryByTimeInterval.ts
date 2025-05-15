@@ -1,12 +1,6 @@
 import { PriceEntry } from "@/shared/dao-config/types";
-import {
-  DAYS_IN_MILLISECONDS,
-  DAYS_PER_MONTH,
-  MILLISECONDS_PER_DAY,
-  SECONDS_PER_DAY,
-} from "@/shared/constants/time-related";
+import { DAYS_IN_MILLISECONDS } from "@/shared/constants/time-related";
 import { TimeInterval } from "@/shared/types/enums";
-import { timestampToReadableDate } from "@/shared/utils";
 
 export type FilteredChartData = {
   full: PriceEntry[];
