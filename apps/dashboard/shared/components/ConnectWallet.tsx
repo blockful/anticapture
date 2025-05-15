@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { WalletIcon } from "@/shared/components/icons/WalletIcon";

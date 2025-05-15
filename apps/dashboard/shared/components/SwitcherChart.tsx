@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { useScreenSize } from "@/shared/hooks";
 import { ChevronDown, CheckIcon } from "lucide-react";
 

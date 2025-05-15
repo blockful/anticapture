@@ -1,7 +1,7 @@
 "use client";
 
 import { Stage } from "@/features/resilience-stages/components/StageTag";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { CheckCircle, XCircle } from "lucide-react";
 
 interface StageTagSimplifiedProps {

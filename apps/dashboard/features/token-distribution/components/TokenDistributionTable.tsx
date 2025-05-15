@@ -16,14 +16,13 @@ import {
 } from "@/shared/components";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import {
-  cn,
   formatNumberUserReadable,
   formatVariation,
 } from "@/shared/utils/utils";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
-
+import { cn } from "@/shared/utils";
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
   rowB: Row<TokenDistribution>,

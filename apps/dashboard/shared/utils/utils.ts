@@ -16,10 +16,6 @@ import {
 } from "@/shared/constants/time-related";
 import { TimeInterval } from "@/shared/types/enums";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 export function formatNumberUserReadable(
   num: number,
   fixed: number = 2,

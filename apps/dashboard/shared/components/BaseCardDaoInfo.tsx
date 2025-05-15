@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/shared/components/ui/card";
 import { TooltipInfo } from "@/shared/components/TooltipInfo";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 
 export interface CardSection {
   title: string;

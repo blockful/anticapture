@@ -5,7 +5,7 @@ import {
   RiskLevelCard,
   StagesCardRequirements,
 } from "@/shared/components";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {

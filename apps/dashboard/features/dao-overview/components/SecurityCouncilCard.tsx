@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import Link from "next/link";
 import { TooltipInfo } from "@/shared/components";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/shared/components/icons";
 

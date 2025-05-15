@@ -2,7 +2,7 @@
 
 import { ComponentProps } from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import {
   UniswapIcon,
   EnsIcon,

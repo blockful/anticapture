@@ -1,11 +1,12 @@
 "use client";
 
-import { cn, getDateRange } from "@/shared/utils/utils";
+import { getDateRange } from "@/shared/utils/utils";
 import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { CardTitle, CardDescription } from "@/shared/components/ui/card";
 import { InfoIcon } from "@/shared/components/icons";
+import { cn } from "@/shared/utils";
 
 export const TheSectionLayout = ({
   icon,

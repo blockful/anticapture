@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils";
 
 interface ProgressBarProps {
   startDate: string;

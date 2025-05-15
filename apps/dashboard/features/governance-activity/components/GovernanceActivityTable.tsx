@@ -11,7 +11,6 @@ import {
   SkeletonRow,
 } from "@/shared/components";
 import {
-  cn,
   formatNumberUserReadable,
   formatVariation,
 } from "@/shared/utils/utils";
@@ -19,6 +18,7 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { cn } from "@/shared/utils";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

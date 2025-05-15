@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { Badge } from "@/shared/components";
 import { ReactNode } from "react";
 import {

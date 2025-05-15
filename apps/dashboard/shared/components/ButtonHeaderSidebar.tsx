@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useSectionObserver } from "@/shared/hooks";
 import { ButtonHTMLAttributes, useEffect } from "react";

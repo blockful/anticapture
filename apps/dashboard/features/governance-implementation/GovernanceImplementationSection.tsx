@@ -4,7 +4,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { TheSectionLayout } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";

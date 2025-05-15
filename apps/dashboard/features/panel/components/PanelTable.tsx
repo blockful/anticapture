@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/shared/components";
-import { cn, formatNumberUserReadable } from "@/shared/utils/utils";
+import { formatNumberUserReadable } from "@/shared/utils/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useDelegatedSupply } from "@/shared/hooks";
@@ -18,6 +18,7 @@ import {
   ArrowState,
   DaoAvatarIcon,
 } from "@/shared/components/icons";
+import { cn } from "@/shared/utils";
 
 export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
