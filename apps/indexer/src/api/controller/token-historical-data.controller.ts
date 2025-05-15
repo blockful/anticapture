@@ -41,21 +41,9 @@ export function tokenHistoricalData(
           content: {
             "application/json": {
               schema: z.object({
-                historicalData: z.object({
-                  prices: z.array(z.tuple([z.number(), z.number()])),
-                  market_caps: z.array(z.tuple([z.number(), z.number()])),
-                  total_volumes: z.array(z.tuple([z.number(), z.number()])),
-                }),
-              }),
-            },
-          },
-        },
-        404: {
-          description: "No historical data found for this token",
-          content: {
-            "application/json": {
-              schema: z.object({
-                message: z.string(),
+                prices: z.array(z.tuple([z.number(), z.number()])),
+                market_caps: z.array(z.tuple([z.number(), z.number()])),
+                total_volumes: z.array(z.tuple([z.number(), z.number()])),
               }),
             },
           },
@@ -70,21 +58,7 @@ export function tokenHistoricalData(
         DAYS_IN_YEAR,
       );
 
-      if (!data || Object.keys(data).length === 0) {
-        return context.json(
-          {
-            message: "No historical data found for this token",
-          },
-          404,
-        );
-      }
-
-      return context.json(
-        {
-          historicalData: data,
-        },
-        200,
-      );
+      return context.json(data, 200);
     },
   );
 }
