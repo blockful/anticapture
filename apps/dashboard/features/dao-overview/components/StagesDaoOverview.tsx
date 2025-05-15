@@ -5,7 +5,7 @@ import { StageRequirementsTooltip } from "@/features/dao-overview/components/Sta
 import { useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
-import { BulletPoint } from "@/shared/components/icons/BulletPoint";
+import { BulletPoint } from "@/shared/components/icons";
 import { OutlinedBox } from "@/shared/components/OutlinedBox";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
