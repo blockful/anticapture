@@ -15,9 +15,9 @@ import {
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
 import { useScreenSize } from "@/shared/hooks";
-import { ClickIcon } from "@/shared/components/icons";
 import { BadgeCardDaoInfoItem } from "@/features/dao-overview/components/BadgeCardDaoInfoItem";
 import { CubeIcon } from "@radix-ui/react-icons";
+import { Pointer } from "lucide-react";
 
 export const VoteCard = ({
   daoOverview,
@@ -33,7 +33,7 @@ export const VoteCard = ({
 
   const voteData: CardData = {
     title: "Vote",
-    icon: <ClickIcon className="size-4 text-foreground" />,
+    icon: <Pointer className="size-4 text-foreground" />,
     sections: [
       {
         title: "Delay",
