@@ -1,6 +1,4 @@
 import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import {
   PriceEntry,
   DaoMetricsDayBucket,
@@ -15,22 +13,6 @@ import {
   SECONDS_PER_MINUTE,
 } from "@/shared/constants/time-related";
 import { TimeInterval } from "@/shared/types/enums";
-
-export function formatNumberUserReadable(
-  num: number,
-  fixed: number = 2,
-): string {
-  if (num >= 1e9) {
-    return (num / 1e9).toFixed(fixed).replace(/\.0$/, "") + "B";
-  }
-  if (num >= 1e6) {
-    return (num / 1e6).toFixed(fixed).replace(/\.0$/, "") + "M";
-  }
-  if (num >= 1e3) {
-    return (num / 1e3).toFixed(fixed).replace(/\.0$/, "") + "K";
-  }
-  return num.toFixed(fixed).toString();
-}
 
 export function formatBlocksToUserReadable(
   num: number,
