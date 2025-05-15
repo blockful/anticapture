@@ -8,7 +8,7 @@ import { Button } from "@/shared/components/ui/button";
 import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/shared/components";
 import { cn, formatNumberUserReadable } from "@/shared/utils/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/time-related";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useDelegatedSupply } from "@/shared/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";

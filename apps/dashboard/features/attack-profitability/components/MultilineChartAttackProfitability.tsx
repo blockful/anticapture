@@ -13,7 +13,7 @@ import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 
-import { TimeInterval } from "@/shared/types/enums/time-related";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
 import { useDaoDataContext } from "@/shared/contexts";
 import { useTimeSeriesData } from "@/shared/hooks";

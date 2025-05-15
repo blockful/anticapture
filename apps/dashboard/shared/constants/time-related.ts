@@ -1,4 +1,4 @@
-import { TimeInterval } from "@/shared/types/enums/time-related";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export const SECONDS_PER_MINUTE = 60;
 export const SECONDS_PER_HOUR = 3600;
