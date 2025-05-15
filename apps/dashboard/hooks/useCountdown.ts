@@ -74,7 +74,7 @@ function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
     };
   }
 
-  const targetMs = targetTimestamp * MILLISECONDS_PER_SECOND;
+  const targetMs = targetTimestamp;
   const now = Date.now();
   const diffMs = targetMs - now;
 
