@@ -6,7 +6,6 @@ import schema from "ponder:schema";
 import {
   governanceActivity,
   tokenDistribution,
-  votingPower,
   tokenHistoricalData,
   assets,
 } from "./controller";
@@ -14,6 +13,7 @@ import { docs } from "./docs";
 import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
+import { DrizzleRepository } from "./repositories";
 
 const app = new Hono();
 
@@ -30,8 +30,10 @@ if (env.COINGECKO_API_KEY) {
   tokenHistoricalData(app, coingeckoClient);
 }
 
-tokenDistribution(app);
-governanceActivity(app);
+const repo = new DrizzleRepository();
+
+tokenDistribution(app, repo);
+governanceActivity(app, repo);
 docs(app, env.API_URL!);
 
 export default app;

@@ -1,8 +1,6 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
-import { sql } from "ponder";
-import { db } from "ponder:api";
 import { formatUnits } from "viem";
 
 import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
@@ -10,7 +8,18 @@ import { MetricTypesEnum } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "@/api/middlewares";
 
-export function tokenDistribution(app: Hono) {
+interface TokenDistributionRepository {
+  getSupplyComparison(
+    daoId: string,
+    metricType: string,
+    oldTimestamp: bigint,
+  ): Promise<{ oldValue: string; currentValue: string }>;
+}
+
+export function tokenDistribution(
+  app: Hono,
+  repository: TokenDistributionRepository,
+) {
   const routes = [
     {
       path: "total-supply",
@@ -116,47 +125,24 @@ export function tokenDistribution(app: Hono) {
         const { days } = ctx.req.valid("query");
         const oldTimestamp = BigInt(Date.now()) - BigInt(days);
 
-        const query = sql`
-        WITH  "old_total_supply" as (
-          SELECT db.average as old_total_supply_amount from "dao_metrics_day_buckets" db 
-          WHERE db.dao_id=${daoId} 
-          AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
-          AND db."date">=CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
-          ORDER BY db."date" ASC LIMIT 1
-        ),
-        "current_total_supply"  AS (
-          SELECT db.average as current_total_supply_amount from "dao_metrics_day_buckets" db 
-          WHERE db.dao_id=${daoId} 
-          AND db."metricType"=${MetricTypesEnum.TOTAL_SUPPLY}
-          ORDER BY db."date" DESC LIMIT 1
-        )
-        SELECT COALESCE("old_total_supply"."old_total_supply_amount", 0) AS "oldTotalSupply", 
-        COALESCE("current_total_supply"."current_total_supply_amount", 0) AS "currentTotalSupply"
-        FROM "current_total_supply"
-        LEFT JOIN "old_total_supply" ON 1=1;
-        `;
+        const { oldValue, currentValue } = await repository.getSupplyComparison(
+          daoId,
+          metric,
+          oldTimestamp,
+        );
 
-        const result = (await db.execute(query)).rows[0] as Record<
-          string,
-          string
-        >;
-
-        const oldVal = result[`old${resultKey}`] || "0";
-        const currentVal = result[`current${resultKey}`] || "0";
-
-        const changeRate =
-          oldVal === "0"
-            ? "0"
-            : formatUnits(
-              (BigInt(currentVal) * BigInt(1e18)) / BigInt(oldVal) -
-              BigInt(1e18),
-              18,
-            );
+        const changeRate = !oldValue
+          ? "0"
+          : formatUnits(
+            (BigInt(currentValue) * BigInt(1e18)) / BigInt(oldValue) -
+            BigInt(1e18),
+            18,
+          );
 
         return ctx.json(
           {
-            [`old${resultKey}`]: oldVal,
-            [`current${resultKey}`]: currentVal,
+            [`old${resultKey}`]: oldValue || "0",
+            [`current${resultKey}`]: currentValue || "0",
             changeRate,
           } as unknown as z.infer<typeof resultSchema>,
           200,
