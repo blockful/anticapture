@@ -97,11 +97,7 @@ export function tokenDistribution(
     app.openapi(
       createRoute({
         method: "get",
-        // camelCase
-        operationId: `compare${path
-          .split("-")
-          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join("")}`,
+        operationId: `compare${resultKey}`,
         path: `/dao/{daoId}/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
@@ -149,7 +145,7 @@ export function tokenDistribution(
             [`old${resultKey}`]: oldValue || "0",
             [`current${resultKey}`]: currentValue || "0",
             changeRate,
-          } as unknown as z.infer<typeof resultSchema>,
+          } as z.infer<typeof resultSchema>,
           200,
         );
       },

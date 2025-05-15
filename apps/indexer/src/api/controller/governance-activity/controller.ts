@@ -174,6 +174,7 @@ export function governanceActivity(
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "compareAverageTurnout",
       path: "/dao/{daoId}/average-turnout/compare",
       summary: "Compare average turnout between time periods",
       tags: ["governance"],
