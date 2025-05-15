@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  ChevronRightIcon,
   DollarIcon,
   EqualsIcon,
   PieChartIcon,
@@ -20,6 +19,7 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 import { Calculator, ChevronLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface AccordionDataProps {
   title: string;
@@ -38,7 +38,7 @@ const AccordionData: AccordionDataProps[] = [
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRightIcon className="inline-flex size-4 items-center justify-center text-[#f97316]" />
+            <ChevronRight className="inline-flex size-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -52,7 +52,7 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRightIcon className="inline-flex size-4 items-center justify-center text-[#f97316]" />
+            <ChevronRight className="inline-flex size-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
