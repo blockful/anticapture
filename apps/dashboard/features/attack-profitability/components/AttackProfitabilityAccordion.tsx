@@ -29,6 +29,7 @@ interface AccordionDataProps {
   content: ReactNode;
 }
 
+//TODO: Adjust the layout of the accordion to be more consistent with the Figma Design
 const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
