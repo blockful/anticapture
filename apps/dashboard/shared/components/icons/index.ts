@@ -8,7 +8,6 @@ export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/EnsIcon";
 export * from "@/shared/components/icons/FocusIcon";
 export * from "@/shared/components/icons/OptimismIcon";
-export * from "@/shared/components/icons/SimpleGlobeIcon";
 export * from "@/shared/components/icons/SupplyIcon";
 export * from "@/shared/components/icons/TelegramIcon";
 export * from "@/shared/components/icons/TokensIcon";

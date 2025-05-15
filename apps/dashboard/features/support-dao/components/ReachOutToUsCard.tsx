@@ -1,8 +1,7 @@
 "use client";
 
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, Globe } from "lucide-react";
 import { Card } from "@/shared/components/ui/card";
-import { SimpleGlobeIcon } from "@/shared/components/icons";
 
 export const ReachOutToUsCard = () => {
   return (
@@ -19,8 +18,8 @@ export const ReachOutToUsCard = () => {
       <div className="flex w-full justify-between">
         <div className="flex flex-row items-center">
           <div className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-full bg-lightDark sm:size-6">
-              <SimpleGlobeIcon className="size-5 text-foreground" />
+            <div className="flex size-9 items-center justify-center rounded-full border border-middleDark bg-lightDark sm:size-6">
+              <Globe className="size-4 text-foreground text-opacity-70" />
             </div>
             <div className="flex flex-col justify-start lg:flex-row lg:items-center lg:gap-1.5">
               <h3 className="text-sm font-medium text-white">
