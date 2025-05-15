@@ -4,7 +4,7 @@ import {
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 
-import { findMostRecentValue } from "@/shared/utils/utils";
+import { findMostRecentValue } from "@/features/attack-profitability/utils";
 
 export function normalizeDataset(
   tokenPrices: PriceEntry[],

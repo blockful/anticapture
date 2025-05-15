@@ -5,7 +5,7 @@ import {
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 
-import { findMostRecentValue } from "@/shared/utils/utils";
+import { findMostRecentValue } from "@/features/attack-profitability/utils";
 
 // The idea of this function is to have a value per day of the governance token treasury * token price + assets
 // The problem is that the governance token treasury is not updated every day, so we need to normalize it
