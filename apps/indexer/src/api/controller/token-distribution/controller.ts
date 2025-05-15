@@ -1,6 +1,11 @@
-import { DaysEnum } from "@/lib/daysEnum";
+import { db } from "ponder:api";
+import { Hono } from "hono";
 import { sql } from "ponder";
 import { formatUnits } from "viem";
+import { zValidator as validator } from "@hono/zod-validator";
+import { z } from "zod";
+
+import { DaysEnum } from "@/lib/daysEnum";
 import {
   CexSupplyQueryResult,
   CirculatingSupplyQueryResult,
@@ -11,24 +16,29 @@ import {
   TreasuryQueryResult,
 } from "./types";
 import { MetricTypesEnum } from "@/lib/constants";
-import { db } from "ponder:api";
-import { Hono } from "hono";
+import { DaoIdEnum } from "@/lib/enums";
+import { caseInsensitiveEnum } from "@/api/middlewares";
 
-const app = new Hono();
+export function tokenDistribution(app: Hono) {
+  app.get(
+    "/dao/:daoId/total-supply/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      //Handling req query and params
+      const { daoId } = context.req.valid("param");
 
-app.get("/dao/:daoId/total-supply/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+      //Creating Timestamp
+      const { days } = context.req.valid("query");
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`         
+      //Running Query
+      const queryResult = await db.execute(sql`         
   WITH  "old_total_supply" as (
     SELECT db.average as old_total_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -46,35 +56,41 @@ app.get("/dao/:daoId/total-supply/compare", async (context) => {
   COALESCE("current_total_supply"."current_total_supply_amount", 0) AS "currentTotalSupply"
   FROM "current_total_supply"
   LEFT JOIN "old_total_supply" ON 1=1;`);
-  const totalSupplyCompare: TotalSupplyQueryResult = queryResult
-    .rows[0] as TotalSupplyQueryResult;
-  let changeRate;
-  if (totalSupplyCompare.oldTotalSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
-        BigInt(totalSupplyCompare.oldTotalSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
-  return context.json({ ...totalSupplyCompare, changeRate });
-});
+      const totalSupplyCompare = queryResult.rows[0] as TotalSupplyQueryResult;
+      let changeRate;
+      if (totalSupplyCompare.oldTotalSupply === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(totalSupplyCompare.currentTotalSupply) * BigInt(1e18)) /
+          BigInt(totalSupplyCompare.oldTotalSupply) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
+      return context.json({ ...totalSupplyCompare, changeRate });
+    },
+  );
 
-app.get("/dao/:daoId/delegated-supply/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  app.get(
+    "/dao/:daoId/delegated-supply/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+      const { days } = context.req.valid("query");
+      //Creating Timestamp
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`
+      //Running Query
+      const queryResult = await db.execute(sql`
   WITH  "old_delegated_supply" as (
     SELECT db.average as old_delegated_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -92,35 +108,42 @@ app.get("/dao/:daoId/delegated-supply/compare", async (context) => {
   COALESCE("current_delegated_supply"."current_delegated_supply_amount", 0) AS "currentDelegatedSupply"
   FROM "current_delegated_supply"
   LEFT JOIN "old_delegated_supply" ON 1=1;`);
-  const delegatedSupplyCompare: DelegatedSupplyQueryResult = queryResult
-    .rows[0] as DelegatedSupplyQueryResult;
-  let changeRate;
-  if (delegatedSupplyCompare.oldDelegatedSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
-        BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
-  return context.json({ ...delegatedSupplyCompare, changeRate });
-});
+      const delegatedSupplyCompare = queryResult
+        .rows[0] as DelegatedSupplyQueryResult;
+      let changeRate;
+      if (delegatedSupplyCompare.oldDelegatedSupply === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(delegatedSupplyCompare.currentDelegatedSupply) * BigInt(1e18)) /
+          BigInt(delegatedSupplyCompare.oldDelegatedSupply) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
+      return context.json({ ...delegatedSupplyCompare, changeRate });
+    },
+  );
 
-app.get("/dao/:daoId/circulating-supply/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  app.get(
+    "/dao/:daoId/circulating-supply/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+      const { days } = context.req.valid("query");
+      //Creating Timestamp
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`
+      //Running Query
+      const queryResult = await db.execute(sql`
     WITH  "old_supply" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
@@ -139,36 +162,43 @@ app.get("/dao/:daoId/circulating-supply/compare", async (context) => {
     FROM "current_supply"
     LEFT JOIN "old_supply" ON 1=1;
         `);
-  const circulatingSupplyCompare: CirculatingSupplyQueryResult = queryResult
-    .rows[0] as CirculatingSupplyQueryResult;
-  let changeRate;
-  if (circulatingSupplyCompare.oldCirculatingSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(circulatingSupplyCompare.currentCirculatingSupply) *
-        BigInt(1e18)) /
-        BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
-  return context.json({ ...circulatingSupplyCompare, changeRate });
-});
+      const circulatingSupplyCompare = queryResult
+        .rows[0] as CirculatingSupplyQueryResult;
+      let changeRate;
+      if (circulatingSupplyCompare.oldCirculatingSupply === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(circulatingSupplyCompare.currentCirculatingSupply) *
+            BigInt(1e18)) /
+          BigInt(circulatingSupplyCompare.oldCirculatingSupply) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
+      return context.json({ ...circulatingSupplyCompare, changeRate });
+    },
+  );
 
-app.get("/dao/:daoId/treasury/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  app.get(
+    "/dao/:daoId/treasury/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+      const { days } = context.req.valid("query");
+      //Creating Timestamp
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`
+      //Running Query
+      const queryResult = await db.execute(sql`
     WITH  "old_treasury" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
@@ -188,37 +218,43 @@ app.get("/dao/:daoId/treasury/compare", async (context) => {
     LEFT JOIN "old_treasury" ON 1=1;
   `);
 
-  //Calculating Change Rate
-  const treasuryCompare: TreasuryQueryResult = queryResult
-    .rows[0] as TreasuryQueryResult;
-  let changeRate;
-  if (treasuryCompare.oldTreasury === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(treasuryCompare.currentTreasury) * BigInt(1e18)) /
-        BigInt(treasuryCompare.oldTreasury) -
-        BigInt(1e18),
-      18,
-    );
-  }
-  // Returning response
-  return context.json({ ...treasuryCompare, changeRate });
-});
+      //Calculating Change Rate
+      const treasuryCompare = queryResult.rows[0] as TreasuryQueryResult;
+      let changeRate;
+      if (treasuryCompare.oldTreasury === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(treasuryCompare.currentTreasury) * BigInt(1e18)) /
+          BigInt(treasuryCompare.oldTreasury) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
+      // Returning response
+      return context.json({ ...treasuryCompare, changeRate });
+    },
+  );
 
-app.get("/dao/:daoId/cex-supply/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  app.get(
+    "/dao/:daoId/cex-supply/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+      const { days } = context.req.valid("query");
+      //Creating Timestamp
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`
+      //Running Query
+      const queryResult = await db.execute(sql`
   WITH  "old_cex_supply" as (
     SELECT db.average as old_cex_supply_amount from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -238,38 +274,44 @@ app.get("/dao/:daoId/cex-supply/compare", async (context) => {
   LEFT JOIN "old_cex_supply" ON 1=1;
 `);
 
-  //Calculating Change Rate
-  const cexSupplyCompare: CexSupplyQueryResult = queryResult
-    .rows[0] as CexSupplyQueryResult;
-  let changeRate;
-  if (cexSupplyCompare.oldCexSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(cexSupplyCompare.currentCexSupply) * BigInt(1e18)) /
-        BigInt(cexSupplyCompare.oldCexSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
+      //Calculating Change Rate
+      const cexSupplyCompare = queryResult.rows[0] as CexSupplyQueryResult;
+      let changeRate;
+      if (cexSupplyCompare.oldCexSupply === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(cexSupplyCompare.currentCexSupply) * BigInt(1e18)) /
+          BigInt(cexSupplyCompare.oldCexSupply) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
 
-  // Returning response
-  return context.json({ ...cexSupplyCompare, changeRate });
-});
+      // Returning response
+      return context.json({ ...cexSupplyCompare, changeRate });
+    },
+  );
 
-app.get("/dao/:daoId/dex-supply/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  app.get(
+    "/dao/:daoId/dex-supply/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+      const { days } = context.req.valid("query");
+      //Creating Timestamp
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`
+      //Running Query
+      const queryResult = await db.execute(sql`
     WITH  "old_supply" as (
       SELECT db.average as old_supply_amount from "dao_metrics_day_buckets" db 
       WHERE db.dao_id=${daoId} 
@@ -289,38 +331,44 @@ app.get("/dao/:daoId/dex-supply/compare", async (context) => {
     LEFT JOIN "old_supply" ON 1=1;
   `);
 
-  //Calculating Change Rate
-  const dexSupplyCompare: DexSupplyQueryResult = queryResult
-    .rows[0] as DexSupplyQueryResult;
-  let changeRate;
-  if (dexSupplyCompare.oldDexSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(dexSupplyCompare.currentDexSupply) * BigInt(1e18)) /
-        BigInt(dexSupplyCompare.oldDexSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
+      //Calculating Change Rate
+      const dexSupplyCompare = queryResult.rows[0] as DexSupplyQueryResult;
+      let changeRate;
+      if (dexSupplyCompare.oldDexSupply === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(dexSupplyCompare.currentDexSupply) * BigInt(1e18)) /
+          BigInt(dexSupplyCompare.oldDexSupply) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
 
-  // Returning response
-  return context.json({ ...dexSupplyCompare, changeRate });
-});
+      // Returning response
+      return context.json({ ...dexSupplyCompare, changeRate });
+    },
+  );
 
-app.get("/dao/:daoId/lending-supply/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+  app.get(
+    "/dao/:daoId/lending-supply/compare",
+    validator("param", z.object({ daoId: caseInsensitiveEnum(DaoIdEnum) })),
+    validator(
+      "query",
+      z.object({
+        days: z.nativeEnum(DaysEnum).optional().default(DaysEnum["90d"]),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+      const { days } = context.req.valid("query");
+      //Creating Timestamp
+      const oldTimestamp = BigInt(Date.now()) - BigInt(DaysEnum[days]);
 
-  //Running Query
-  const queryResult = await db.execute(sql`
+      //Running Query
+      const queryResult = await db.execute(sql`
   WITH  "old_lending_supply" as (
     SELECT db.average as "old_lending_supply_amount" from "dao_metrics_day_buckets" db 
     WHERE db.dao_id=${daoId} 
@@ -340,22 +388,24 @@ app.get("/dao/:daoId/lending-supply/compare", async (context) => {
   LEFT JOIN "old_lending_supply" ON 1=1;
   `);
 
-  //Calculating Change Rate
-  const lendingSupplyCompare: LendingSupplyQueryResult = queryResult
-    .rows[0] as LendingSupplyQueryResult;
-  let changeRate;
-  if (lendingSupplyCompare.oldLendingSupply === "0") {
-    changeRate = "0";
-  } else {
-    changeRate = formatUnits(
-      (BigInt(lendingSupplyCompare.currentLendingSupply) * BigInt(1e18)) /
-        BigInt(lendingSupplyCompare.oldLendingSupply) -
-        BigInt(1e18),
-      18,
-    );
-  }
-  // Returning response
-  return context.json({ ...lendingSupplyCompare, changeRate });
-});
-
-export default app;
+      //Calculating Change Rate
+      const lendingSupplyCompare = queryResult
+        .rows[0] as LendingSupplyQueryResult;
+      let changeRate;
+      if (lendingSupplyCompare.oldLendingSupply === "0") {
+        changeRate = "0";
+      } else {
+        /* eslint-disable */
+        changeRate = formatUnits(
+          (BigInt(lendingSupplyCompare.currentLendingSupply) * BigInt(1e18)) /
+          BigInt(lendingSupplyCompare.oldLendingSupply) -
+          BigInt(1e18),
+          18,
+        );
+        /* eslint-enable */
+      }
+      // Returning response
+      return context.json({ ...lendingSupplyCompare, changeRate });
+    },
+  );
+}

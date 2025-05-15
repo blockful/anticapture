@@ -14,7 +14,7 @@ export interface DuneResponse {
   next_offset: number;
 }
 
-export interface TotalAssetsByDay {
+interface TotalAssetsByDay {
   totalAssets: string;
   date: string;
 }

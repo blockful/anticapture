@@ -1,19 +1,52 @@
-import { DaoIdEnum } from "@/lib/enums";
-import { TokenHistoricalDataService } from "../services/token-historical-data/token-historical-data.service";
 import { Hono } from "hono";
-import { coingeckoService } from "../services/coingecko/coingecko.service";
-import { redisService } from "../services/cache/redis.service";
+import { z } from "zod";
+import { zValidator as validator } from "@hono/zod-validator";
 
-const app = new Hono();
+import { DaoIdEnum } from "@/lib/enums";
+import {
+  CoingeckoTokenId,
+  CoingeckoTokenIdEnum,
+  CoingeckoHistoricalMarketData,
+} from "../services/coingecko/types";
+import { DAYS_IN_YEAR } from "@/lib/constants";
 
-app.get("/token/:daoId/historical-data", async (context) => {
-  const daoId = context.req.param("daoId") as DaoIdEnum;
-  const tokenHistoricalDataService = new TokenHistoricalDataService(
-    coingeckoService,
-    redisService,
+interface TokenHistoricalDataClient {
+  getHistoricalTokenData(
+    tokenId: CoingeckoTokenId,
+    days: number,
+  ): Promise<CoingeckoHistoricalMarketData>;
+}
+
+export function tokenHistoricalData(
+  app: Hono,
+  client: TokenHistoricalDataClient,
+) {
+  app.get(
+    "/token/:daoId/historical-data",
+    validator(
+      "param",
+      z.object({
+        daoId: z.nativeEnum(DaoIdEnum),
+      }),
+    ),
+    async (context) => {
+      const { daoId } = context.req.valid("param");
+
+      const data = await client.getHistoricalTokenData(
+        CoingeckoTokenIdEnum[daoId],
+        DAYS_IN_YEAR,
+      );
+
+      if (!data || Object.keys(data).length === 0) {
+        return context.json(
+          {
+            message: "No historical data found for this token",
+          },
+          404,
+        );
+      }
+
+      return context.json({ historicalData: data });
+    },
   );
-  const data = await tokenHistoricalDataService.getHistoricalTokenPrice(daoId);
-  return context.json(data);
-});
-
-export default app;
+}
