@@ -1,13 +1,13 @@
-export * from "@/shared/components/Badge";
-export * from "@/shared/components/BadgeInAnalysis";
-export * from "@/shared/components/BaseCardDaoInfo";
+export * from "@/shared/components/badges/Badge/Badge";
+export * from "@/shared/components/badges/BadgeInAnalysis/BadgeInAnalysis";
+export * from "@/shared/components/cards/BaseCardDaoInfo/BaseCardDaoInfo";
 export * from "@/shared/components/BaseHeaderLayoutSidebar";
-export * from "@/shared/components/ButtonHeaderSidebar";
-export * from "@/shared/components/ButtonHeaderDAOSidebarMobile";
+export * from "@/shared/components/buttons/ButtonHeaderSidebar/ButtonHeaderSidebar";
+export * from "@/shared/components/buttons/ButtonHeaderDAOSidebarMobile/ButtonHeaderDAOSidebarMobile";
 export * from "@/shared/components/HeaderDAOSidebarDropdown";
 export * from "@/shared/components/ConnectWallet";
-export * from "@/shared/components/RiskLevelCard";
-export * from "@/shared/components/RiskLevelCardSmall";
+export * from "@/shared/components/cards/RiskLevelCard/RiskLevelCard";
+export * from "@/shared/components/cards/RiskLevelCardSmall/RiskLevelCardSmall";
 export * from "@/shared/components/RiskTooltipCard";
 export * from "@/shared/components/SkeletonDaoInfoCards";
 export * from "@/shared/components/SkeletonRow";
@@ -22,6 +22,6 @@ export * from "@/shared/components/TheCardChartLayout";
 export * from "@/shared/components/TheSectionLayout";
 export * from "@/shared/components/TheTable";
 export * from "@/shared/components/TooltipInfo";
-export * from "@/shared/components/RiskAreaCard";
+export * from "@/shared/components/cards/RiskAreaCard/RiskAreaCard";
 
 export { StagesCardRequirements } from "@/shared/components/StagesCardRequirements";
