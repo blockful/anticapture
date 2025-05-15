@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { graphql } from "ponder";
-import { Hono } from "hono";
+import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";
 
 import {
@@ -30,7 +30,6 @@ if (env.COINGECKO_API_KEY) {
   tokenHistoricalData(app, coingeckoClient);
 }
 
-votingPower(app);
 tokenDistribution(app);
 governanceActivity(app);
 docs(app, env.API_URL!);
