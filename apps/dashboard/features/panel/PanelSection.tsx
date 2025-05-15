@@ -5,7 +5,7 @@ import { SwitcherDate, TheSectionLayout } from "@/shared/components";
 import { PanelTable } from "@/features/panel/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
-import { BarChartIcon } from "@/shared/components/icons";
+import { BarChart3 } from "lucide-react";
 
 export const PanelSection = () => {
   const [timeIntervalPanel, setTimeIntervalPanel] = useState<TimeInterval>(
@@ -15,7 +15,7 @@ export const PanelSection = () => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.panel.title}
-      icon={<BarChartIcon className="size-6 text-foreground" />}
+      icon={<BarChart3 className="section-layout-icon" />}
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.ONE_YEAR}
