@@ -8,37 +8,6 @@ import {
 import { TimeInterval } from "@/shared/types/enums";
 import { timestampToReadableDate } from "@/shared/utils";
 
-export const calculateMonthsBefore = ({
-  timestamp,
-  monthsBeforeTimestamp,
-}: {
-  timestamp: number;
-  monthsBeforeTimestamp: number;
-}): number => {
-  const SECONDS_TO_SUBTRACT =
-    monthsBeforeTimestamp * DAYS_PER_MONTH * SECONDS_PER_DAY;
-  return timestamp - SECONDS_TO_SUBTRACT;
-};
-
-export const calculatePastTimestamp = (
-  lastTimestamp: number,
-  interval: TimeInterval,
-): number => lastTimestamp - DAYS_IN_MILLISECONDS[interval];
-
-export const getDateRange = (days: string) => {
-  if (!days) return "";
-
-  const numDays = parseInt(days.replace("d", ""));
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const endTimestamp = now.getTime();
-
-  const startTimestamp = endTimestamp - numDays * MILLISECONDS_PER_DAY;
-
-  return `${timestampToReadableDate(startTimestamp)} - ${timestampToReadableDate(endTimestamp)}`;
-};
-
 export type FilteredChartData = {
   full: PriceEntry[];
 } & Record<TimeInterval, PriceEntry[]>;
@@ -79,3 +48,8 @@ export const filterPriceHistoryByTimeInterval = (
     ),
   };
 };
+
+export const calculatePastTimestamp = (
+  lastTimestamp: number,
+  interval: TimeInterval,
+): number => lastTimestamp - DAYS_IN_MILLISECONDS[interval];

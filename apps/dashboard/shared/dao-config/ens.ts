@@ -4,7 +4,7 @@ import {
   SupportStageEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { calculateMonthsBefore } from "@/shared/utils/utils";
+import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
