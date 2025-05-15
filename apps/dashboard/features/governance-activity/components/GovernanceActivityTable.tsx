@@ -2,7 +2,7 @@
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { GovernanceActivity } from "@/shared/mocked-data/mocked-data";
+import { GovernanceActivity } from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   TheTable,

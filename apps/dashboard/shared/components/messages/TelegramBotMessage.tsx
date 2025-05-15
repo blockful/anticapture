@@ -4,7 +4,7 @@ import { ArrowRight, Send } from "lucide-react";
 import { useParams } from "next/navigation";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/lib-constants";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 
 export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { cn } from "@/shared/utils/utils";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/time-related";
 import { useScreenSize } from "@/shared/hooks";
 import { CheckIcon, ChevronDown } from "lucide-react";
 

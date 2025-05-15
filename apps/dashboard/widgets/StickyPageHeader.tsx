@@ -7,7 +7,7 @@ import {
 } from "@/shared/components";
 import { cn } from "@/shared/utils/utils";
 import { BarChart4 } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter } from "next/navigation";
 import { HeaderNavMobile } from "@/widgets";
 import { TelegramIcon } from "@/shared/components/icons";

@@ -4,7 +4,7 @@ import "tailwindcss";
 import type { Metadata } from "next";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import { ReactNode } from "react";
-import HotjarScript from "@/hotjar";
+import HotjarScript from "@/shared/services/hotjar";
 import { Inter, Roboto_Mono } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });

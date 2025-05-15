@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   mockedTableChartMetrics,
   TokenDistribution,
-} from "@/shared/mocked-data/mocked-data";
+} from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   Sparkline,

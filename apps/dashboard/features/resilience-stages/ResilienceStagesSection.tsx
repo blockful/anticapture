@@ -6,7 +6,7 @@ import {
   StagesCardRequirements,
 } from "@/shared/components";
 import { cn } from "@/shared/utils/utils";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   filterFieldsByRiskLevel,

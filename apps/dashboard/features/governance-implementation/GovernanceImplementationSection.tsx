@@ -5,7 +5,7 @@ import { TheSectionLayout } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
 import { cn } from "@/shared/utils/utils";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks";

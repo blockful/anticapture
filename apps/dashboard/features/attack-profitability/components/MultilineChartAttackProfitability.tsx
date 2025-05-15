@@ -13,7 +13,7 @@ import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/time-related";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
 import { useDaoDataContext } from "@/shared/contexts";
 import { useTimeSeriesData } from "@/shared/hooks";
@@ -26,7 +26,7 @@ import {
 } from "@/shared/utils/utils";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
-import { mockedAttackProfitabilityDatasets } from "@/shared/mocked-data/mocked-attack-profitability-datasets";
+import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {

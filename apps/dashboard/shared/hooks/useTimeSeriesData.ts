@@ -7,7 +7,7 @@ import {
   DAYS_IN_MILLISECONDS,
   TIME_INTERVAL_TO_DAYS,
   TimeInterval,
-} from "@/shared/types/enums/TimeInterval";
+} from "@/shared/types/enums/time-related";
 
 const fetchTimeSeriesDataFromGraphQL = async (
   daoId: DaoIdEnum,

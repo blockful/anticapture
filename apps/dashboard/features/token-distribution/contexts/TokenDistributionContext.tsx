@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/time-related";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenDistributionContextProps } from "@/shared/contexts/types";

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { SwitcherDate, TheSectionLayout } from "@/shared/components";
 import { PanelTable } from "@/features/panel/components";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { TimeInterval } from "@/shared/types/enums/time-related";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BarChartIcon } from "@/shared/components/icons";
 
 export const PanelSection = () => {

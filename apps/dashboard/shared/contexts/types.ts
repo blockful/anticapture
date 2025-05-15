@@ -1,4 +1,4 @@
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/time-related";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 
 export interface MetricData {

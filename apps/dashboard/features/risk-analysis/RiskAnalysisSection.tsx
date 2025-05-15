@@ -9,7 +9,7 @@ import {
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";

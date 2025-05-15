@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { BulletPoint } from "@/shared/components/icons/BulletPoint";
 import { OutlinedBox } from "@/shared/components/OutlinedBox";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 
 interface StagesDaoOverviewProps {
   currentStage?: number;

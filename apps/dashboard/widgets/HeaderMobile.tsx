@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { cn } from "@/shared/utils/utils";
 import { X, Menu, BarChart4 } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter, usePathname } from "next/navigation";
 import { AnticaptureIcon } from "@/shared/components/icons";
 

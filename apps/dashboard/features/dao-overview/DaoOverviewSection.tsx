@@ -4,7 +4,7 @@ import { RiskAreaCardWrapper, TooltipInfo } from "@/shared/components";
 import { FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Address } from "viem";
 import { useInView } from "react-intersection-observer";

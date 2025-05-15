@@ -3,9 +3,9 @@
 import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { ArrowLeftRight } from "@/shared/components/icons";
 import { GovernanceActivityTable } from "@/features/governance-activity/components";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { TimeInterval } from "@/shared/types/enums/time-related";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 
 export const GovernanceActivitySection = () => {
   const { setDays, days } = useGovernanceActivityContext();

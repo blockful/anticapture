@@ -6,7 +6,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {

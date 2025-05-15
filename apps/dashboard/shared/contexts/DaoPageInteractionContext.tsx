@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, useContext } from "react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 
 interface DaoPageInteractionContextType {
   activeRisk: string;
