@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  PieChartIcon,
   PlusIcon,
   TokensIcon,
   UsersIcon,
@@ -22,6 +21,7 @@ import {
   ChevronRight,
   DollarSign,
   Equal,
+  PieChart,
 } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 
@@ -74,7 +74,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChartIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <PieChart className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">

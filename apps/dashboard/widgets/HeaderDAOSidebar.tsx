@@ -9,8 +9,7 @@ import {
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { PieChartIcon } from "@/shared/components/icons";
-import { ArrowRightLeft } from "lucide-react";
+import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
@@ -40,7 +39,7 @@ export const HeaderDAOSidebar = () => {
           {daoConfig.daoOverview && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
-              icon={PieChartIcon}
+              icon={PieChart}
               label={SECTIONS_CONSTANTS.daoOverview.title}
             />
           )}
