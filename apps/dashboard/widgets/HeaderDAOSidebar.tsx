@@ -9,11 +9,8 @@ import {
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
-import {
-  ArrowLeftRight,
-  PieChartIcon,
-  CrossHairIcon,
-} from "@/shared/components/icons";
+import { PieChartIcon, CrossHairIcon } from "@/shared/components/icons";
+import { ArrowLeftRight } from "lucide-react";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 

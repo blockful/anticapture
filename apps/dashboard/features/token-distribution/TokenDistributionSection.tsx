@@ -13,8 +13,8 @@ import {
   MultilineChartTokenDistribution,
   TokenDistributionTable,
 } from "@/features/token-distribution/components";
-import { ArrowLeftRight } from "@/shared/components/icons";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
+import { ArrowLeftRight } from "lucide-react";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -75,7 +75,7 @@ export const TokenDistributionSection = () => {
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
       subtitle="Token Supply Distribution"
-      icon={<ArrowLeftRight className="text-foreground" />}
+      icon={<ArrowLeftRight className="section-layout-icon" />}
       switchDate={
         <SwitcherDate
           defaultValue={TimeInterval.ONE_YEAR}
