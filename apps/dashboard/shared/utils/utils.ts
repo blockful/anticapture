@@ -12,11 +12,6 @@ import {
 } from "@/shared/constants/time-related";
 import { TimeInterval } from "@/shared/types/enums";
 
-// Helper function to format a word with proper pluralization
-export function formatPlural(count: number, word: string): string {
-  return `${count} ${count === 1 ? word : word + "s"}`;
-}
-
 export const formatVariation = (rateRaw: string): string =>
   `${Number(Number(rateRaw) * 100).toFixed(2)}`;
 

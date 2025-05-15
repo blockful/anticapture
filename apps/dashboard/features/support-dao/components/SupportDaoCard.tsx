@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/shared/components/ui/card";
-import { formatPlural } from "@/shared/utils/utils";
+import { formatPlural } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";
 import { useAccount } from "wagmi";

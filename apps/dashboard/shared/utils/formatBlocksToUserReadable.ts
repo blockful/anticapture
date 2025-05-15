@@ -1,4 +1,4 @@
-import { formatPlural } from "@/shared/utils/utils";
+import { formatPlural } from "@/shared/utils";
 import {
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
