@@ -10,7 +10,7 @@ import {
   Sparkline,
   SkeletonRow,
 } from "@/shared/components";
-import { formatVariation } from "@/shared/utils/utils";
+import { formatVariation } from "@/shared/utils";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";

@@ -15,7 +15,7 @@ import {
   TooltipInfo,
 } from "@/shared/components";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { formatVariation } from "@/shared/utils/utils";
+import { formatVariation } from "@/shared/utils";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";

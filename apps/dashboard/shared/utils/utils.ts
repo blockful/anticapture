@@ -12,9 +12,6 @@ import {
 } from "@/shared/constants/time-related";
 import { TimeInterval } from "@/shared/types/enums";
 
-export const formatVariation = (rateRaw: string): string =>
-  `${Number(Number(rateRaw) * 100).toFixed(2)}`;
-
 export const timestampToReadableDate = (date: number) => {
   if (isNaN(date) || date === null || date === undefined) return "Invalid Date";
 
