@@ -17,10 +17,7 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
 import { useDaoDataContext } from "@/shared/contexts";
 import { useTimeSeriesData } from "@/shared/hooks";
-import {
-  normalizeDatasetAllTreasury,
-  filterPriceHistoryByTimeInterval,
-} from "@/shared/utils/utils";
+import { filterPriceHistoryByTimeInterval } from "@/shared/utils/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
@@ -35,6 +32,7 @@ import { timestampToReadableDate } from "@/shared/utils";
 import {
   normalizeDataset,
   normalizeDatasetTreasuryNonDaoToken,
+  normalizeDatasetAllTreasury,
 } from "@/features/attack-profitability/utils";
 
 interface MultilineChartAttackProfitabilityProps {

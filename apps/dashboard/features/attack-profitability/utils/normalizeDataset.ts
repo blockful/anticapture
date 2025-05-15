@@ -6,10 +6,6 @@ import {
 
 import { findMostRecentValue } from "@/shared/utils/utils";
 
-export function capitalizeFirstLetter(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
   key: string,
