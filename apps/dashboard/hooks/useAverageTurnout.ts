@@ -38,11 +38,11 @@ export const fetchAverageTurnout = async ({
 export const useAverageTurnout = (
   daoId: DaoIdEnum,
   days: string,
-  config?: Partial<SWRConfiguration<AverageTurnoutResponse, Error>>,
+  config?: Partial<SWRConfiguration<AverageTurnoutResponse | null, Error>>,
 ) => {
   const key = daoId && days ? [`averageTurnout`, daoId, days] : null;
 
-  return useSWR<AverageTurnoutResponse>(
+  return useSWR<AverageTurnoutResponse | null>(
     key,
     async () => {
       return await fetchAverageTurnout({ daoId, days });

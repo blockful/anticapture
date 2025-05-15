@@ -34,12 +34,12 @@ export const fetchDaoTokenHistoricalData = async ({
 
 export const useDaoTokenHistoricalData = (
   daoId: DaoIdEnum,
-  config?: Partial<SWRConfiguration<DaoTokenHistoricalDataResponse, Error>>,
+  config?: Partial<SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>>,
 ) => {
   const key = daoId ? [`daoTokenHistoricalData`, daoId] : null;
 
   const { data, error, isValidating, mutate } =
-    useSWR<DaoTokenHistoricalDataResponse>(
+    useSWR<DaoTokenHistoricalDataResponse | null>(
       key,
       () => fetchDaoTokenHistoricalData({ daoId }),
       { revalidateOnFocus: false, ...config },

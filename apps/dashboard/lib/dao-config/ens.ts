@@ -1,7 +1,6 @@
 import { DaoConfiguration } from "@/lib/dao-config/types";
 import {
   RiskLevel,
-  sortByRiskLevel,
   SupportStageEnum,
   GovernanceImplementationEnum,
 } from "@/lib/enums";

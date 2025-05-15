@@ -5,7 +5,7 @@ import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 
-interface DelegatedSupplyPromise {
+interface DelegatedSupplyResponse {
   oldDelegatedSupply: string;
   currentDelegatedSupply: string;
   changeRate: string;
@@ -18,7 +18,7 @@ export const fetchDelegatedSupply = async ({
 }: {
   daoId: DaoIdEnum;
   days: string;
-}): Promise<DelegatedSupplyPromise | null> => {
+}): Promise<DelegatedSupplyResponse | null> => {
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
@@ -39,11 +39,11 @@ export const fetchDelegatedSupply = async ({
 export const useDelegatedSupply = (
   daoId: DaoIdEnum,
   days: string,
-  config?: Partial<SWRConfiguration<DelegatedSupplyPromise, Error>>,
+  config?: Partial<SWRConfiguration<DelegatedSupplyResponse | null, Error>>,
 ) => {
   const key = daoId && days ? [`delegatedSupply`, daoId, days] : null;
 
-  return useSWR<DelegatedSupplyPromise>(
+  return useSWR<DelegatedSupplyResponse | null>(
     key,
     async () => {
       return await fetchDelegatedSupply({ daoId, days });

@@ -4,8 +4,6 @@ import useSWR from "swr";
 import { Address, Hex } from "viem";
 import _ from "lodash";
 import { parseQuery } from "@/lib/utils/parseQuery";
-import daoConfigByDaoId from "@/lib/dao-config";
-import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 /**
  * Interface for a single petition signature
  */
@@ -46,7 +44,7 @@ export interface PetitionSignatureRequest {
 const fetchPetitionSignatures = async (
   daoId: DaoIdEnum,
   userAddress: Address | undefined,
-): Promise<PetitionResponse | null> => {
+): Promise<PetitionResponse> => {
   const response = await fetch(
     `${PETITION_ENDPOINT}/petitions/${daoId}?` + parseQuery({ userAddress }),
   );
