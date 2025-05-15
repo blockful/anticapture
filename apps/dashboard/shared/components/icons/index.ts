@@ -2,7 +2,6 @@ export * from "@/shared/components/icons/AlertTriangleIcon";
 export * from "@/shared/components/icons/AnticaptureIcon";
 export * from "@/shared/components/icons/ArbitrumIcon";
 export * from "@/shared/components/icons/ArrowUpDown";
-export * from "@/shared/components/icons/ArrowUpIcon";
 export * from "@/shared/components/icons/BarChartIcon";
 export * from "@/shared/components/icons/BarChartSecondaryIcon";
 export * from "@/shared/components/icons/BlocksIcon";

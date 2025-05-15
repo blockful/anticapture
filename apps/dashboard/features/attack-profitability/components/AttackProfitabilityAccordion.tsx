@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  ArrowUpIcon,
   BarChartSecondaryIcon,
   CalculatorIcon,
   ChevronLeftIcon,
@@ -21,7 +20,7 @@ import {
   TokensIcon,
   UsersIcon,
 } from "@/shared/components/icons";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 
 interface AccordionDataProps {
@@ -134,7 +133,7 @@ const AccordionData: AccordionDataProps[] = [
           </Badge>
           <EqualsIcon />
           <Badge className="group-hover:bg-dark">
-            <ArrowUpIcon />
+            <ArrowUp className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Easier to attack
             </p>
