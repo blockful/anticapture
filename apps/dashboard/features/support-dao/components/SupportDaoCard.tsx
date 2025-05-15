@@ -8,7 +8,6 @@ import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/features/show-support/hooks/usePetition";
 import { ReactNode } from "react";
-import { TrendingUpIcon } from "@/shared/components/icons";
 
 export const SupportDaoCard = ({
   daoIcon,
@@ -55,7 +54,7 @@ export const SupportDaoCard = ({
       <div className="flex flex-col items-center gap-1 md:flex-row">
         {votingPowerSupport > 0 && (
           <div className="flex flex-row items-center gap-2">
-            <TrendingUpIcon className="size-4 text-green-400" />
+            <TrendingUp className="size-4 text-green-400" />
             <div className="text-green-400">
               {formatNumberUserReadable(votingPowerSupport)} {daoId}
             </div>

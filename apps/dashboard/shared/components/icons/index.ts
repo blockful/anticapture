@@ -10,7 +10,6 @@ export * from "@/shared/components/icons/FocusIcon";
 export * from "@/shared/components/icons/OptimismIcon";
 export * from "@/shared/components/icons/TelegramIcon";
 export * from "@/shared/components/icons/TokensIcon";
-export * from "@/shared/components/icons/TrendingUpIcon";
 export * from "@/shared/components/icons/UniswapIcon";
 export * from "@/shared/components/icons/UsersIcon";
 export * from "@/shared/components/icons/WalletIcon";
