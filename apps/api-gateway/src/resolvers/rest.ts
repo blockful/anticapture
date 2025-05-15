@@ -34,12 +34,16 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
         return {}
       }
 
-      return targetClient[fieldName]({
-        root,
-        args,
-        context,
-        info,
-      });
+      try {
+        return targetClient[fieldName]({
+          root,
+          args,
+          context,
+          info,
+        });
+      } catch (error) {
+        return {};
+      }
     },
   };
 
