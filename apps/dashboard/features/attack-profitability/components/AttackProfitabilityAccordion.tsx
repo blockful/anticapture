@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  CalculatorIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DollarIcon,
@@ -21,6 +20,7 @@ import {
 } from "@/shared/components/icons";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
+import { Calculator } from "lucide-react";
 
 interface AccordionDataProps {
   title: string;
@@ -33,7 +33,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <CalculatorIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <Calculator className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
