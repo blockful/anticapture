@@ -3,8 +3,7 @@
 import { cn } from "@/shared/utils/utils";
 import { Badge } from "@/shared/components";
 import { ReactNode } from "react";
-import { CircleNotCheckedIcon } from "@/shared/components/icons";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 interface SwitchItemProps {
   switched?: boolean;
@@ -27,7 +26,7 @@ export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
       {item.switched ? (
         <CheckCircle2 className="size-3.5 text-success" />
       ) : (
-        <CircleNotCheckedIcon className="text-error" />
+        <XCircle className="size-3.5 text-error" />
       )}
       <p
         className={cn([
