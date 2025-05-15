@@ -1,5 +1,16 @@
 export const daosResolver = {
   resolve: async (root: any, args: any, context: any, info) => {
+
+    if (args.where.id) {
+      const graphqlClient = context[`graphql_${args.where.id.toUpperCase()}`]?.Query;
+      return graphqlClient.daos({
+        root,
+        args,
+        context,
+        info,
+      });
+    }
+
     // Get all clients that start with 'graphql_'
     const graphqlClients = Object.keys(context)
       .filter(key => key.startsWith('graphql_'))
@@ -7,7 +18,7 @@ export const daosResolver = {
       .filter(Boolean);
 
     // Collect results from all clients
-    const results = await Promise.all(
+    const results = await Promise.allSettled(
       graphqlClients.map(client =>
         client.daos({
           root,
@@ -18,7 +29,7 @@ export const daosResolver = {
       )
     );
 
-    const items = results.map(result => result.items[0])
+    const items = results.map(result => result.status === 'fulfilled' && result.value.items[0]).filter(Boolean);
 
     return {
       items,

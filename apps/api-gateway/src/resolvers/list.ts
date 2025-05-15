@@ -34,6 +34,7 @@ export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
         return {}
       }
 
+      args.where.daoId = args.where.daoId.toUpperCase();
       return targetClient[fieldName]({
         root,
         args,
