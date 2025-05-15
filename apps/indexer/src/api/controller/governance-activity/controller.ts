@@ -38,7 +38,7 @@ export function governanceActivity(
   app.openapi(
     createRoute({
       method: "get",
-      path: "/dao/{daoId}/active-supply",
+      path: "/dao/{daoId}/active-supply/compare",
       summary: "Get active token supply for DAO",
       tags: ["governance"],
       request: {
