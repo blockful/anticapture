@@ -31,7 +31,6 @@ export const StageAccordion = ({
   return (
     <Accordion type="multiple" className="flex h-full flex-col gap-3">
       <CustomAccordionItem
-        key={0}
         riskFields={[]}
         isCompleted={true}
         stage={Stage.ZERO}
@@ -61,7 +60,6 @@ export const StageAccordion = ({
         }
       />
       <CustomAccordionItem
-        key={1}
         riskFields={highRiskFields}
         isCompleted={false}
         stage={Stage.ONE}
@@ -70,7 +68,6 @@ export const StageAccordion = ({
         subtitle="2 issues needs fixing"
       />
       <CustomAccordionItem
-        key={2}
         riskFields={mediumRiskFields}
         isCompleted={false}
         stage={Stage.TWO}
@@ -90,7 +87,6 @@ interface CustomAccordionItemProps {
   title: string;
   description: string;
   subtitle: string;
-  key: number;
   content?: ReactNode;
   isLastItem?: boolean;
 }
@@ -108,7 +104,6 @@ const stageTwoEmptyContent: (GovernanceImplementationField & {
 ];
 
 const CustomAccordionItem = ({
-  key,
   isCompleted,
   riskFields,
   stage,

@@ -1,3 +1,5 @@
+import daoConfigByDaoId from "@/lib/dao-config";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
@@ -13,7 +15,10 @@ export const fetchActiveSupply = async ({
 }: {
   daoId: DaoIdEnum;
   days: string;
-}): Promise<ActiveSupplyPromise> => {
+}): Promise<ActiveSupplyPromise | null> => {
+  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
+    return null;
+  }
   const response = await fetch(
     `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
     { next: { revalidate: 3600 } },

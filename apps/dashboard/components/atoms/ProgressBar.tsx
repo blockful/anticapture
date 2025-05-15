@@ -1,3 +1,5 @@
+"use client"
+
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 
@@ -5,7 +7,7 @@ interface ProgressBarProps {
   startDate: string;
   endDate: string;
   progress: number;
-  warning?: number;
+  warning: number;
   className?: string;
 }
 
@@ -24,7 +26,7 @@ export const ProgressBar = ({
             className="absolute z-10 h-full"
             style={{
               left: `calc(${warning}% + 4px)`,
-              width: `calc(${Math.max(0, 100 - warning)}% - 4px)`,
+              width: `calc(${100 - warning}% - 4px)`,
               backgroundImage: `repeating-linear-gradient(
                 45deg,
                 #F8717112 4px,

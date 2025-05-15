@@ -305,9 +305,9 @@ export const calculateMonthsBefore = ({
   timestamp: number;
   monthsBeforeTimestamp: number;
 }): number => {
-  const SECONDS_TO_SUBTRACT =
-    monthsBeforeTimestamp * DAYS_PER_MONTH * SECONDS_PER_DAY;
-  return timestamp - SECONDS_TO_SUBTRACT;
+  const MILLISECONDS_TO_SUBTRACT =
+    monthsBeforeTimestamp * DAYS_PER_MONTH * MILLISECONDS_PER_DAY;
+  return timestamp - MILLISECONDS_TO_SUBTRACT;
 };
 
 export const calculatePastTimestamp = (

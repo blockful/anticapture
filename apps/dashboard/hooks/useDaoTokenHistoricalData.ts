@@ -1,6 +1,8 @@
 import useSWR, { SWRConfiguration } from "swr";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
+import daoConfigByDaoId from "@/lib/dao-config";
 
 export type PriceEntry = [timestamp: number, value: number];
 
@@ -14,7 +16,10 @@ export const fetchDaoTokenHistoricalData = async ({
   daoId,
 }: {
   daoId: DaoIdEnum;
-}): Promise<DaoTokenHistoricalDataResponse> => {
+}): Promise<DaoTokenHistoricalDataResponse | null> => {
+  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
+    return null;
+  }
   const response = await fetch(
     `${BACKEND_ENDPOINT}/token/${daoId}/historical-data`,
     { next: { revalidate: 3600 } },

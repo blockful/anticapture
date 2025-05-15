@@ -1,3 +1,5 @@
+import daoConfigByDaoId from "@/lib/dao-config";
+import { SupportStageEnum } from "@/lib/enums/SupportStageEnum";
 import { BACKEND_ENDPOINT } from "@/lib/server/utils";
 import { DaoIdEnum } from "@/lib/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
@@ -15,7 +17,10 @@ export const fetchAverageTurnout = async ({
 }: {
   daoId: DaoIdEnum;
   days: string;
-}): Promise<AverageTurnoutResponse> => {
+}): Promise<AverageTurnoutResponse | null> => {
+  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
+    return null;
+  }
   const response: Response = await fetch(
     `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
     { next: { revalidate: 3600 } },

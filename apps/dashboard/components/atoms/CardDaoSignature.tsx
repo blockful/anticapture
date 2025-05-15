@@ -19,6 +19,7 @@ import { signMessage } from "@wagmi/core";
 import { ConnectWallet } from "@/components/atoms";
 import { Address } from "viem";
 
+//TODO: Change this card to be more generic and use the daoId to determine the images and texts
 export const CardDaoSignature = ({
   data,
   loading,
@@ -72,7 +73,6 @@ export const CardDaoSignature = ({
               width={156}
               height={156}
               className="h-[156px] w-[156px] flex-shrink-0 object-contain"
-              priority
             />
           </div>
         </div>
@@ -84,7 +84,7 @@ export const CardDaoSignature = ({
                 ? ArbitrumSupportedDaoMobile
                 : ArbitrumShowSupportMobile
             }
-            objectFit="cover"
+            style={{ objectFit: "cover" }}
           />
         </div>
       </div>
