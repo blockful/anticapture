@@ -21,9 +21,9 @@ import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
   normalizeDataset,
-  timestampToReadableDate,
   filterPriceHistoryByTimeInterval,
 } from "@/shared/utils/utils";
+
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
@@ -33,6 +33,7 @@ import {
   useDaoTokenHistoricalData,
   useTreasuryAssetNonDaoToken,
 } from "@/features/attack-profitability/hooks";
+import { timestampToReadableDate } from "@/shared/utils";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;

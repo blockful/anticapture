@@ -1,8 +1,10 @@
 "use client";
 
-import { timestampToReadableDate } from "@/shared/utils/utils";
 import { TooltipProps } from "recharts";
-import { formatNumberUserReadable } from "@/shared/utils";
+import {
+  formatNumberUserReadable,
+  timestampToReadableDate,
+} from "@/shared/utils";
 
 export const TokenDistributionCustomTooltip: React.FC<
   TooltipProps<number, string> & {
