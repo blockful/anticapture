@@ -9,7 +9,6 @@ import {
 } from "@radix-ui/react-accordion";
 import {
   AlertTriangleIcon,
-  ChevronLeftIcon,
   ChevronRightIcon,
   DollarIcon,
   EqualsIcon,
@@ -20,7 +19,7 @@ import {
 } from "@/shared/components/icons";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
-import { Calculator } from "lucide-react";
+import { Calculator, ChevronLeft } from "lucide-react";
 
 interface AccordionDataProps {
   title: string;
@@ -161,7 +160,7 @@ const AccordionData: AccordionDataProps[] = [
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
             </p>
-            <ChevronLeftIcon className="text-white" />
+            <ChevronLeft className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               treasury funds
             </p>
