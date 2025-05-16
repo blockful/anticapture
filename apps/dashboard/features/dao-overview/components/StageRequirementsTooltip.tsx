@@ -1,6 +1,6 @@
 "use client";
 
-import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox/OutlinedBox";
+import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
 import {
   CheckCircleIcon,
   AlertCircleIcon,

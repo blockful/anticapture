@@ -22,7 +22,7 @@ import {
   TokensIcon,
   UsersIcon,
 } from "@/shared/components/icons";
-import { Badge } from "@/shared/components/badges/Badge/Badge";
+import { Badge } from "@/shared/components/badges/Badge";
 
 interface AccordionDataProps {
   title: string;

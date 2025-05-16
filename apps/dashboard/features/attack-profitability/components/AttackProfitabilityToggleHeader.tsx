@@ -3,7 +3,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SwitcherChart } from "@/shared/components/charts/SwitcherChart/SwitcherChart";
+import { SwitcherChart } from "@/shared/components/charts/SwitcherChart";
 
 export const AttackProfitabilityToggleHeader = ({
   treasuryMetric,
