@@ -7,7 +7,7 @@ import {
   GovernanceImplementationEnum,
 } from "@/lib/enums";
 import { ReactNode } from "react";
-import { DaoIconProps } from "@/components/atoms/DaoAvatarIcon";
+import { DaoIconProps } from "@/components/atoms";
 
 // Existing types
 export enum ChainNameEnum {
