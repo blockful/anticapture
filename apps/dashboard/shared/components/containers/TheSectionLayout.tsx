@@ -5,7 +5,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { CardTitle, CardDescription } from "@/shared/components/ui/card";
-import { InfoIcon } from "@/shared/components/icons";
+import { Info } from "lucide-react";
 import { cn } from "@/shared/utils";
 
 export const TheSectionLayout = ({
@@ -131,7 +131,7 @@ export const TheSectionLayout = ({
       {infoText && (
         <CardDescription className="flex w-full items-start gap-2 rounded-lg bg-lightDark p-2 sm:items-center">
           <div className="mt-0.5 sm:mt-0">
-            <InfoIcon className="size-4 w-fit text-white" />
+            <Info className="size-4 w-fit text-white" />
           </div>
           <p className="text-sm font-normal text-foreground">{infoText}</p>
         </CardDescription>

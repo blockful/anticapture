@@ -8,20 +8,18 @@ import {
   AccordionContent,
 } from "@radix-ui/react-accordion";
 import {
-  AlertTriangleIcon,
-  ArrowDownIcon,
-  ArrowUpIcon,
-  BarChartSecondaryIcon,
-  CalculatorIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DollarIcon,
-  EqualsIcon,
-  PieChartIcon,
-  PlusIcon,
-  TokensIcon,
-  UsersIcon,
-} from "@/shared/components/icons";
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  Calculator,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  Equal,
+  PieChart,
+  Plus,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/shared/components/badges/Badge";
 
 interface AccordionDataProps {
@@ -30,17 +28,18 @@ interface AccordionDataProps {
   content: ReactNode;
 }
 
+//TODO: Adjust the layout of the accordion to be more consistent with the Figma Design
 const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <CalculatorIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <Calculator className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRightIcon className="inline-flex size-4 items-center justify-center text-[#f97316]" />
+            <ChevronRight className="inline-flex size-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -54,7 +53,7 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRightIcon className="inline-flex size-4 items-center justify-center text-[#f97316]" />
+            <ChevronRight className="inline-flex size-4 items-center justify-center text-[#f97316]" />
           </div>
           <div className="flex flex-col">
             <p className="flex text-xs font-semibold uppercase text-foreground">
@@ -72,7 +71,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChartIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <PieChart className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -89,14 +88,12 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
-            <TokensIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Voting power in a proposal
             </p>
           </Badge>
-          <EqualsIcon />
+          <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
-            <BarChartSecondaryIcon />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Delegated cap at snapshot
             </p>
@@ -108,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Turnout and Active Supply",
     icon: (
-      <UsersIcon className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
+      <Users className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -127,14 +124,14 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <Badge className="group-hover:bg-dark">
-            <ArrowDownIcon />
+            <ArrowDown className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Lower Participation
             </p>
           </Badge>
-          <EqualsIcon />
+          <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
-            <ArrowUpIcon />
+            <ArrowUp className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Easier to attack
             </p>
@@ -146,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarIcon className="size-4 text-foreground group-data-[state=open]/trigger:text-tangerine" />
+      <DollarSign className="size-4 text-[#71717A] group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -163,14 +160,14 @@ const AccordionData: AccordionDataProps[] = [
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               Cost to attack
             </p>
-            <ChevronLeftIcon className="text-white" />
+            <ChevronLeft className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               treasury funds
             </p>
           </Badge>
-          <EqualsIcon />
+          <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
-            <AlertTriangleIcon className="text-white" />
+            <AlertTriangle className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               DAO AT RISK
             </p>
@@ -199,7 +196,7 @@ export const AttackProfitabilityAccordion = () => {
               {item.icon}
               {item.title}
             </div>
-            <PlusIcon className="size-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
+            <Plus className="size-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
           <AccordionContent className="overflow-hidden px-3 pb-3 transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>

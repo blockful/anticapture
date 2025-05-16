@@ -6,15 +6,11 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
+import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
-import {
-  ActivityIcon,
-  ArrowLeftRight,
-  PieChartIcon,
-  CrossHairIcon,
-} from "@/shared/components/icons";
+import { ArrowRightLeft, PieChart } from "lucide-react";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
@@ -43,14 +39,14 @@ export const HeaderDAOSidebar = () => {
           {daoConfig.daoOverview && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
-              icon={PieChartIcon}
+              icon={PieChart}
               label={SECTIONS_CONSTANTS.daoOverview.title}
             />
           )}
           {daoConfig.attackProfitability && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
-              icon={CrossHairIcon}
+              icon={Crosshair2Icon}
               label={SECTIONS_CONSTANTS.attackProfitability.title}
             />
           )}
@@ -80,14 +76,14 @@ export const HeaderDAOSidebar = () => {
           {daoConfig.tokenDistribution && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
-              icon={ArrowLeftRight}
+              icon={ArrowRightLeft}
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
           {daoConfig.governanceActivity && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-              icon={ActivityIcon}
+              icon={Activity}
               label={SECTIONS_CONSTANTS.governanceActivity.title}
             />
           )}

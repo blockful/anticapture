@@ -21,7 +21,7 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.showSupport.title}
-      icon={<HeartIcon className="text-foreground" />}
+      icon={<HeartIcon className="section-layout-icon" />}
       anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
       className="gap-5 sm:gap-4"
     >

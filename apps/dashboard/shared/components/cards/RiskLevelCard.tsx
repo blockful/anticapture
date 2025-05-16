@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { ClockwiseIcon } from "@/shared/components/icons";
+import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 
 type RiskConfig = {
   color: string;
@@ -31,7 +31,7 @@ const riskConfigs: Record<RiskLevel | "undefined-risk-level", RiskConfig> = {
   "undefined-risk-level": {
     color: "foreground",
     pattern: ["bg-middleDark", "bg-middleDark", "bg-middleDark"],
-    icon: <ClockwiseIcon className="size-3.5 text-foreground" />,
+    icon: <CounterClockwiseClockIcon className="size-4 text-foreground" />,
   },
 } as const;
 

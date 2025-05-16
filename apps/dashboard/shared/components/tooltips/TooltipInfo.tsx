@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/shared/components/ui/tooltip";
-import { InfoIcon } from "@/shared/components/icons";
+import { Info } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { useState } from "react";
 
@@ -33,7 +33,7 @@ export function TooltipInfo({
         aria-label="tooltip-info"
         onClick={handleToggle}
       >
-        <InfoIcon className="cursor-pointer text-foreground" />
+        <Info className="size-3.5 cursor-pointer text-foreground" />
       </TooltipTrigger>
       <TooltipContent
         side="top"

@@ -94,7 +94,7 @@ export const SecurityCouncilCard = ({
                   <Key className="size-3.5 text-tangerine" />
                   {securityCouncil.multisig.threshold}/
                   {securityCouncil.multisig.signers}
-                  <span className="hidden text-foreground duration-300 group-hover:text-white sm:inline">
+                  <span className="hidden font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-foreground duration-300 group-hover:text-white sm:inline">
                     {" "}
                     required for transactions
                   </span>

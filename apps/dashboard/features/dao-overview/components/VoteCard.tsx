@@ -16,8 +16,9 @@ import {
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
 import { useScreenSize } from "@/shared/hooks";
-import { BlocksIcon, ClickIcon } from "@/shared/components/icons";
 import { BadgeCardDaoInfoItem } from "@/features/dao-overview/components/BadgeCardDaoInfoItem";
+import { CubeIcon } from "@radix-ui/react-icons";
+import { Pointer } from "lucide-react";
 
 export const VoteCard = ({
   daoOverview,
@@ -33,7 +34,7 @@ export const VoteCard = ({
 
   const voteData: CardData = {
     title: "Vote",
-    icon: <ClickIcon className="size-4 text-foreground" />,
+    icon: <Pointer className="size-4 text-foreground" />,
     sections: [
       {
         title: "Delay",
@@ -48,7 +49,7 @@ export const VoteCard = ({
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
                 className="cursor-default bg-dark text-white sm:bg-lightDark"
-                icon={<BlocksIcon />}
+                icon={<CubeIcon className="size-3.5 text-tangerine" />}
                 label={
                   isMobile
                     ? formatBlocksToUserReadable(daoData.votingDelay, true)

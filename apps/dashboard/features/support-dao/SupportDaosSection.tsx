@@ -32,7 +32,7 @@ export const SupportDaosSection = () => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.supportDaos.title}
-      icon={<HeartIcon className="text-foreground" />}
+      icon={<HeartIcon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.supportDaos.description}
       anchorId={SECTIONS_CONSTANTS.supportDaos.anchorId}
       className="!gap-4 !border-b-0 !bg-darkest"
