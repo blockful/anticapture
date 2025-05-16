@@ -1,11 +1,7 @@
 "use client";
 
 import { OutlinedBox } from "@/shared/components/OutlinedBox";
-import {
-  CheckCircleIcon,
-  AlertCircleIcon,
-  AlertTriangleIcon,
-} from "lucide-react";
+import { CheckCircleIcon, AlertCircleIcon, AlertTriangle } from "lucide-react";
 
 interface StageRequirementsTooltipProps {
   currentStage: number;
@@ -23,7 +19,7 @@ export const StageRequirementsTooltip = ({
   onMouseLeave,
 }: StageRequirementsTooltipProps) => {
   const variantIcons = {
-    0: <AlertTriangleIcon className="size-4 text-error" />,
+    0: <AlertTriangle className="size-4 text-error" />,
     1: <AlertCircleIcon className="size-4 text-warning" />,
     2: <CheckCircleIcon className="size-4 text-success" />,
   };

@@ -7,8 +7,8 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import { AlertTriangleIcon } from "@/shared/components/icons";
 import {
+  AlertTriangle,
   ArrowDown,
   ArrowUp,
   Calculator,
@@ -167,7 +167,7 @@ const AccordionData: AccordionDataProps[] = [
           </Badge>
           <Equal className="size-4 text-white" />
           <Badge className="group-hover:bg-dark">
-            <AlertTriangleIcon className="text-white" />
+            <AlertTriangle className="size-4 text-foreground" />
             <p className="text-xs font-semibold uppercase leading-none text-foreground">
               DAO AT RISK
             </p>
