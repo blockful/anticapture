@@ -6,8 +6,8 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";

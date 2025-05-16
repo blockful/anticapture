@@ -1,6 +1,6 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";

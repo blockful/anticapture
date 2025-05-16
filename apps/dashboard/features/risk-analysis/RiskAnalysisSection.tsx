@@ -2,14 +2,14 @@
 
 import { Gauge } from "lucide-react";
 import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
-import { RiskAreaCardWrapper } from "@/shared/components/RiskAreaCard";
+import { RiskAreaCardWrapper } from "@/shared/components/cards/RiskAreaCard";
 import { RiskDescription } from "@/features/risk-analysis/components/RiskDescription";
 import {
   RiskLevel,
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";

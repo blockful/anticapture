@@ -22,9 +22,9 @@ import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
-import { formatNumberUserReadable } from "@/shared/utils/utils";
+import { formatNumberUserReadable } from "@/shared/utils/";
 import { useScreenSize } from "@/shared/hooks";
-import { mockedAttackCostBarData } from "@/shared/mocked-data/mocked-attack-cost-bar-data";
+import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
 import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,

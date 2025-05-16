@@ -20,7 +20,7 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { Badge } from "@/shared/components/Badge";
+import { Badge } from "@/shared/components/badges/Badge";
 
 interface AccordionDataProps {
   title: string;

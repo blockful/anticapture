@@ -9,13 +9,11 @@ import {
   Tooltip,
 } from "recharts";
 import { ChartContainer } from "@/shared/components/ui/chart";
-import {
-  formatNumberUserReadable,
-  timestampToReadableDate,
-} from "@/shared/utils/utils";
+import { timestampToReadableDate } from "@/shared/utils";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
+import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;

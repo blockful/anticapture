@@ -1,13 +1,14 @@
 "use client";
 
 import { Card } from "@/shared/components/ui/card";
-import { formatNumberUserReadable, formatPlural } from "@/shared/utils/utils";
+import { formatPlural } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/features/show-support/hooks/usePetition";
 import { ReactNode } from "react";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const SupportDaoCard = ({
   daoIcon,

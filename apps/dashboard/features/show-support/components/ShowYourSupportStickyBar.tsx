@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";

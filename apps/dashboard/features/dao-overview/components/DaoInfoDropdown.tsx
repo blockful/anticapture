@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { ChevronDown } from "lucide-react";
 
 interface Option {

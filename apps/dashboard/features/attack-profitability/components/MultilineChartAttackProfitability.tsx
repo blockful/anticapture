@@ -17,22 +17,23 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
 import { useDaoDataContext } from "@/shared/contexts";
 import { useTimeSeriesData } from "@/shared/hooks";
-import {
-  normalizeDatasetTreasuryNonDaoToken,
-  normalizeDatasetAllTreasury,
-  normalizeDataset,
-  timestampToReadableDate,
-  filterPriceHistoryByTimeInterval,
-} from "@/shared/utils/utils";
+import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
+
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
-import { mockedAttackProfitabilityDatasets } from "@/shared/mocked-data/mocked-attack-profitability-datasets";
-import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
+import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
+import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,
   useTreasuryAssetNonDaoToken,
 } from "@/features/attack-profitability/hooks";
+import { timestampToReadableDate } from "@/shared/utils";
+import {
+  normalizeDataset,
+  normalizeDatasetTreasuryNonDaoToken,
+  normalizeDatasetAllTreasury,
+} from "@/features/attack-profitability/utils";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;

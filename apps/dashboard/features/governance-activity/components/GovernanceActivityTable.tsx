@@ -2,7 +2,7 @@
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { GovernanceActivity } from "@/shared/mocked-data/mocked-data";
+import { GovernanceActivity } from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   TheTable,
@@ -10,15 +10,12 @@ import {
   Sparkline,
   SkeletonRow,
 } from "@/shared/components";
-import {
-  cn,
-  formatNumberUserReadable,
-  formatVariation,
-} from "@/shared/utils/utils";
+import { formatVariation } from "@/shared/utils";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { useGovernanceActivityContext } from "@/features/governance-activity/contexts/GovernanceActivityContext";
 import { formatEther } from "viem";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,

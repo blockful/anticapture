@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   mockedTableChartMetrics,
   TokenDistribution,
-} from "@/shared/mocked-data/mocked-data";
+} from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   Sparkline,
@@ -15,15 +15,11 @@ import {
   TooltipInfo,
 } from "@/shared/components";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import {
-  cn,
-  formatNumberUserReadable,
-  formatVariation,
-} from "@/shared/utils/utils";
+import { formatVariation } from "@/shared/utils";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
-
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
   rowB: Row<TokenDistribution>,

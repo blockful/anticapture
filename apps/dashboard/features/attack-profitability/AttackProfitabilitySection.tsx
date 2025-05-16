@@ -9,7 +9,7 @@ import {
 } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,

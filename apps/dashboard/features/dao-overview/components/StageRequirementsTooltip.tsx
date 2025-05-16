@@ -1,7 +1,7 @@
 "use client";
 
-import { OutlinedBox } from "@/shared/components/OutlinedBox";
-import { CheckCircleIcon, AlertCircleIcon, AlertTriangle } from "lucide-react";
+import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
+import { CheckCircleIcon, AlertCircleIcon } from "lucide-react";
 
 interface StageRequirementsTooltipProps {
   currentStage: number;

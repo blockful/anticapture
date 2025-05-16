@@ -1,7 +1,7 @@
 "use client";
 
 import { MouseEvent } from "react";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 import { Card } from "@/shared/components/ui/card";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks";

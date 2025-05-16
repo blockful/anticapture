@@ -8,7 +8,7 @@ import {
   SupportDaoCard,
   ReachOutToUsCard,
 } from "@/features/support-dao/components";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoConfiguration } from "@/shared/dao-config/types";

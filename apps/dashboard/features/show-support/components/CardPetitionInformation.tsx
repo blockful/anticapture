@@ -2,9 +2,9 @@
 
 import { TooltipInfo } from "@/shared/components";
 import { Card } from "@/shared/components/ui/card";
-import { SupportersCarroussel } from "@/shared/components/SupportersCarroussel";
+import { SupportersCarroussel } from "@/shared/components/carroussels/SupportersCarroussel";
 import { PetitionResponse } from "@/features/show-support/hooks";
-import { formatNumberUserReadable } from "@/shared/utils/utils";
+import { formatNumberUserReadable } from "@/shared/utils/";
 import { formatEther } from "viem";
 
 export const CardPetitionInformation = ({

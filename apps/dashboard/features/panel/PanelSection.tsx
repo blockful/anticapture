@@ -4,8 +4,8 @@ import { useState } from "react";
 import { SwitcherDate, TheSectionLayout } from "@/shared/components";
 import { PanelTable } from "@/features/panel/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
 import { BarChart3 } from "lucide-react";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 
 export const PanelSection = () => {
   const [timeIntervalPanel, setTimeIntervalPanel] = useState<TimeInterval>(

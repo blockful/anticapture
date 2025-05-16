@@ -1,5 +1,5 @@
 import { ReactNode, CSSProperties } from "react";
-import { cn } from "@/shared/utils/utils";
+import { cn } from "@/shared/utils/";
 
 /**
  * Props for the CorneredBox component

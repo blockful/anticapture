@@ -1,6 +1,6 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
 import {

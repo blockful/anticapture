@@ -1,6 +1,6 @@
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
-import { Stage } from "@/shared/components/StagesCardRequirements";
+import { Stage } from "@/shared/components/cards/StagesCardRequirements";
 
 /**
  * Converts any fields object to an array, with the key being set as a "name" parameter

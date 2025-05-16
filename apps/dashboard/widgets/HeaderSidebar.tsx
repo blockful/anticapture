@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
+import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BarChart4 } from "lucide-react";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
