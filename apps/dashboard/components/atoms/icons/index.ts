@@ -21,7 +21,6 @@ export * from "@/components/atoms/icons/ClickIcon";
 export * from "@/components/atoms/icons/ClockwiseIcon";
 export * from "@/components/atoms/icons/CrossHairIcon";
 export * from "@/components/atoms/icons/CrownIcon";
-export * from "@/components/atoms/DaoAvatarIcon";
 export * from "@/components/atoms/icons/DollarIcon";
 export * from "@/components/atoms/icons/EnsIcon";
 export * from "@/components/atoms/icons/EqualsIcon";

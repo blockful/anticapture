@@ -15,6 +15,7 @@ export * from "@/components/atoms/ButtonHeaderDAOSidebarMobile";
 export * from "@/components/atoms/CardDaoSignature";
 export * from "@/components/atoms/ConnectWallet";
 export * from "@/components/atoms/CountdownDaoInfo";
+export * from "@/components/atoms/DaoAvatarIcon";
 export * from "@/components/atoms/DaoInfoDropdown";
 export * from "@/components/atoms/HeaderDAOSidebarDropdown";
 export * from "@/components/atoms/ProgressBar";
