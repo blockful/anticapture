@@ -1,8 +1,10 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
+import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import daoConfigByDaoId from "@/shared/dao-config";
 
-interface ActiveSupplyPromise {
+interface ActiveSupplyResponse {
   activeSupply: string;
 }
 
@@ -13,7 +15,10 @@ export const fetchActiveSupply = async ({
 }: {
   daoId: DaoIdEnum;
   days: string;
-}): Promise<ActiveSupplyPromise> => {
+}): Promise<ActiveSupplyResponse | null> => {
+  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
+    return null;
+  }
   const response = await fetch(
     `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
     { next: { revalidate: 3600 } },
@@ -31,11 +36,11 @@ export const fetchActiveSupply = async ({
 export const useActiveSupply = (
   daoId: DaoIdEnum,
   days: string,
-  config?: Partial<SWRConfiguration<ActiveSupplyPromise, Error>>,
+  config?: Partial<SWRConfiguration<ActiveSupplyResponse | null, Error>>,
 ) => {
   const key = daoId && days ? [`activeSupply`, daoId, days] : null;
 
-  return useSWR<ActiveSupplyPromise>(
+  return useSWR<ActiveSupplyResponse | null>(
     key,
     async () => {
       return await fetchActiveSupply({ daoId, days });

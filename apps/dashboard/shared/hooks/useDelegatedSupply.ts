@@ -1,8 +1,10 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 
-interface DelegatedSupplyPromise {
+interface DelegatedSupplyResponse {
   oldDelegatedSupply: string;
   currentDelegatedSupply: string;
   changeRate: string;
@@ -15,7 +17,10 @@ export const fetchDelegatedSupply = async ({
 }: {
   daoId: DaoIdEnum;
   days: string;
-}): Promise<DelegatedSupplyPromise> => {
+}): Promise<DelegatedSupplyResponse | null> => {
+  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
+    return null;
+  }
   const response = await fetch(
     `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
     { next: { revalidate: 3600 } },
@@ -33,11 +38,11 @@ export const fetchDelegatedSupply = async ({
 export const useDelegatedSupply = (
   daoId: DaoIdEnum,
   days: string,
-  config?: Partial<SWRConfiguration<DelegatedSupplyPromise, Error>>,
+  config?: Partial<SWRConfiguration<DelegatedSupplyResponse | null, Error>>,
 ) => {
   const key = daoId && days ? [`delegatedSupply`, daoId, days] : null;
 
-  return useSWR<DelegatedSupplyPromise>(
+  return useSWR<DelegatedSupplyResponse | null>(
     key,
     async () => {
       return await fetchDelegatedSupply({ daoId, days });

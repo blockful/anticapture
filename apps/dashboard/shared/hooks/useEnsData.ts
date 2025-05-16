@@ -17,9 +17,7 @@ export const fetchEnsData = async ({
 }: {
   address: Address;
 }): Promise<EnsData> => {
-  const response = await fetch(`${ensUrl}/${address}`, {
-    next: { revalidate: 3600 },
-  });
+  const response = await fetch(`${ensUrl}/${address}`);
   return response.json();
 };
 
@@ -27,6 +25,9 @@ export const useEnsData = (address: Address) => {
   const { data, error } = useSWR<EnsData>(
     address ? [`ensData`, address] : null,
     () => fetchEnsData({ address }),
+    {
+      revalidateOnFocus: false,
+    }
   );
   return {
     data,

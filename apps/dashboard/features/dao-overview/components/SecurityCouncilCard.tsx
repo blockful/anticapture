@@ -17,40 +17,23 @@ export const SecurityCouncilCard = ({
   daoOverview: DaoOverviewConfig;
 }) => {
   const { securityCouncil } = daoOverview;
-
-  const progress = useMemo(() => {
-    if (!securityCouncil) return 0;
+  const { progress, warning } = (function calculateProgressAndWarning() {
+    if (!securityCouncil) return { progress: 0, warning: 0 };
     const start = new Date(securityCouncil.expiration.startDate).getTime();
     const end = new Date(securityCouncil.expiration.date).getTime();
     const now = Date.now();
 
     const total = end - start;
-    const current = now - start;
-
-    return Math.min(Math.max((current / total) * 100, 0), 100);
-  }, [securityCouncil]);
-
-  const warning = useMemo(() => {
-    if (!securityCouncil) return 0;
-
-    const start = new Date(securityCouncil.expiration.startDate).getTime();
-    const end = new Date(securityCouncil.expiration.date).getTime();
-    const alertTimestamp = securityCouncil.expiration.alertExpiration;
-
-    // Convert alertTimestamp from seconds to milliseconds
-    const alertMs = alertTimestamp * 1000;
-
-    // Calculate the total duration of the progress bar
-    const totalDuration = end - start;
-
-    // Calculate the position of the warning as a percentage
-    const warningPosition = ((alertMs - start) / totalDuration) * 100;
-
-    // Return the warning percentage if it's a valid number
-    return isNaN(warningPosition)
-      ? 0
-      : Math.min(Math.max(warningPosition, 0), 100);
-  }, [securityCouncil]);
+    const current = Math.min(now - start, total);
+    const progress = Number(((current / total) * 100).toFixed(2));
+    const warning = Number(
+      (
+        ((securityCouncil.expiration.alertExpiration - start) / total) *
+        100
+      ).toFixed(2),
+    );
+    return { progress, warning };
+  })();
 
   if (!securityCouncil) return null;
 
