@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/shared/components/ui/card";
-import { TooltipInfo } from "@/shared/components/TooltipInfo";
+import { TooltipInfo } from "@/shared/components/tooltips/TooltipInfo/TooltipInfo";
 import { cn } from "@/shared/utils/";
 
 export interface CardSection {

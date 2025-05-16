@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { TooltipInfo } from "@/shared/components/TooltipInfo";
+import { TooltipInfo } from "@/shared/components/tooltips/TooltipInfo/TooltipInfo";
 import { Address } from "viem";
-import { SupporterBadge } from "@/shared/components/SupporterBadge";
+import { SupporterBadge } from "@/shared/components/badges/SupporterBadge/SupporterBadge";
 
 interface SupportersCarrousselProps {
   supporters: Address[];
