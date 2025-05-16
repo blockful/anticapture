@@ -4,7 +4,7 @@ import {
   GovernanceImplementationEnum,
 } from "@/lib/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/lib/constants/governance-implementations";
-import { UniswapIcon } from "@/components/atoms/icons/UniswapIcon";
+import { UniswapIcon } from "@/components/atoms";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
