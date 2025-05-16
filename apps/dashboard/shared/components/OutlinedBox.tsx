@@ -30,8 +30,8 @@ export const OutlinedBox = ({
 
   const variantIcons = {
     success: <CheckCircle2 className="size-4" />,
-    warning: <AlertTriangle className="size-4" />,
-    error: <AlertCircle className="size-4" />,
+    warning: <AlertCircle className="size-4" />,
+    error: <AlertTriangle className="size-4" />,
     lightDark: "",
   };
 
