@@ -6,6 +6,7 @@ import {
   SupportStageEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
+import { DaoIconProps } from "@/shared/components/icons/types";
 
 // Existing types
 export enum ChainNameEnum {
@@ -56,6 +57,7 @@ export type GovernanceImplementationField = {
 interface BaseInfo {
   name: string;
   supportStage: SupportStageEnum;
+  icon?: (props: DaoIconProps) => JSX.Element;
   disableDaoPage?: boolean;
 }
 
