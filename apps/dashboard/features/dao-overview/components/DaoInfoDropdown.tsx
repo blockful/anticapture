@@ -44,7 +44,7 @@ export const DaoInfoDropdown = ({
         )}
       >
         {defaultValue.icon}
-        <span className="whitespace-nowrap text-sm font-medium">
+        <span className="whitespace-nowrap text-sm font-normal">
           {defaultValue.value}
         </span>
         <ChevronDown

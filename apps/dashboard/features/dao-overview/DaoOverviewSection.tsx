@@ -1,7 +1,7 @@
 "use client";
 
 import { RiskAreaCardWrapper, TooltipInfo } from "@/shared/components";
-import { Crown, FilePenLine, LinkIcon } from "lucide-react";
+import { FilePenLine, LinkIcon, Shield } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
@@ -26,11 +26,8 @@ import {
   TimelockCard,
   VoteCard,
 } from "@/features/dao-overview/components";
-import {
-  DaoAvatarIcon,
-  TokensIcon,
-  FocusIcon,
-} from "@/shared/components/icons";
+import { DaoAvatarIcon } from "@/shared/components/icons";
+import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -58,13 +55,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const onChainOptions = [
     {
       value: "Governor",
-      icon: <Crown className="size-3.5 text-tangerine" />,
+      icon: <Shield className="size-4 text-tangerine" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.governor as Address),
     },
     {
       value: "Token",
-      icon: <TokensIcon className="size-3.5 text-tangerine" />,
+      icon: <TokensIcon className="size-4 text-tangerine" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
@@ -73,7 +70,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const offChainOptions = [
     {
       value: "Snapshot",
-      icon: <FocusIcon className="size-3.5 text-tangerine" />,
+      icon: <LightningBoltIcon className="size-4 text-tangerine" />,
       onClick: () =>
         window.open(
           daoOverview?.snapshot as string,
@@ -83,7 +80,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
     {
       value: "Token",
-      icon: <TokensIcon className="size-3.5 text-tangerine" />,
+      icon: <TokensIcon className="size-4 text-tangerine" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
