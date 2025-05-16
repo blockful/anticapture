@@ -50,7 +50,7 @@ export const GovernanceImplementationSection = ({
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.governanceImplementation.title}
-      icon={<Lightbulb className="text-foreground" />}
+      icon={<Lightbulb className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.governanceImplementation.description}
       anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
     >

@@ -118,7 +118,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.riskAnalysis.title}
-      icon={<Gauge className="size-6 text-foreground" />}
+      icon={<Gauge className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.riskAnalysis.description}
       anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
       riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}

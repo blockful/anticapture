@@ -133,6 +133,6 @@
   }
 
   .section-layout-icon {
-    @apply size-5 sm:size-6 text-foreground;
+    @apply size-6 text-foreground;
   }
 }

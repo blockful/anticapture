@@ -80,7 +80,7 @@ export const ResilienceStagesSection = ({
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.resilienceStages.title}
       riskLevel={<RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />}
-      icon={<BarChart className="text-foreground" />}
+      icon={<BarChart className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.resilienceStages.description}
       anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
     >
