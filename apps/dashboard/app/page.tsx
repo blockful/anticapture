@@ -1,6 +1,6 @@
-import { HeaderSidebar } from "@/components/molecules";
-import { HeaderMobile } from "@/components/molecules/HeaderMobile";
-import { HomeTemplate } from "@/components/templates";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { HomeTemplate } from "@/templates";
+import { HeaderSidebar } from "@/widgets";
 
 export default function Home() {
   return (

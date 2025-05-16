@@ -1,9 +1,11 @@
 import { ReactNode } from "react";
-import { ALL_DAOS, DaoIdEnum } from "@/lib/types/daos";
-import { DaoDataProvider } from "@/contexts/DaoDataContext";
+import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
+import { DaoDataProvider } from "@/shared/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
-import { DaoPageInteractionProvider, GovernanceActivityProvider , TokenDistributionProvider } from "@/contexts";
-import daoConfigByDaoId from "@/lib/dao-config";
+import { DaoPageInteractionProvider } from "@/shared/contexts";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { TokenDistributionProvider } from "@/features/token-distribution/contexts";
+import { GovernanceActivityProvider } from "@/features/governance-activity/contexts";
 
 interface DaoLayoutProps {
   children: ReactNode;
@@ -29,9 +31,7 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
     <DaoDataProvider daoId={daoId}>
       <TokenDistributionProvider daoId={daoId}>
         <GovernanceActivityProvider daoId={daoId}>
-          <DaoPageInteractionProvider>
-          {children}
-          </DaoPageInteractionProvider>
+          <DaoPageInteractionProvider>{children}</DaoPageInteractionProvider>
         </GovernanceActivityProvider>
       </TokenDistributionProvider>
     </DaoDataProvider>
