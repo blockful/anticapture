@@ -3,7 +3,6 @@ export * from "@/shared/components/icons/AnticaptureIcon";
 export * from "@/shared/components/icons/ArbitrumIcon";
 export * from "@/shared/components/icons/ArrowUpDown";
 export * from "@/shared/components/icons/BulletPoint";
-export * from "@/shared/components/icons/CrownIcon";
 export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/EnsIcon";
 export * from "@/shared/components/icons/FocusIcon";

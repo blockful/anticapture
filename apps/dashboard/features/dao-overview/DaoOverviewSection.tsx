@@ -1,7 +1,7 @@
 "use client";
 
 import { RiskAreaCardWrapper, TooltipInfo } from "@/shared/components";
-import { FilePenLine, LinkIcon } from "lucide-react";
+import { Crown, FilePenLine, LinkIcon } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/lib-constants";
@@ -28,7 +28,6 @@ import {
 } from "@/features/dao-overview/components";
 import {
   DaoAvatarIcon,
-  CrownIcon,
   TokensIcon,
   FocusIcon,
 } from "@/shared/components/icons";
@@ -59,13 +58,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const onChainOptions = [
     {
       value: "Governor",
-      icon: <CrownIcon className="text-tangerine" />,
+      icon: <Crown className="size-3.5 text-tangerine" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.governor as Address),
     },
     {
       value: "Token",
-      icon: <TokensIcon className="text-tangerine" />,
+      icon: <TokensIcon className="size-3.5 text-tangerine" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
@@ -74,7 +73,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const offChainOptions = [
     {
       value: "Snapshot",
-      icon: <FocusIcon className="text-tangerine" />,
+      icon: <FocusIcon className="size-3.5 text-tangerine" />,
       onClick: () =>
         window.open(
           daoOverview?.snapshot as string,
@@ -84,7 +83,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
     {
       value: "Token",
-      icon: <TokensIcon className="text-tangerine" />,
+      icon: <TokensIcon className="size-3.5 text-tangerine" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
