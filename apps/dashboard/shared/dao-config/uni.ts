@@ -2,9 +2,12 @@ import { RiskLevel, SupportStageEnum } from "@/shared/types/enums";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
+import { UniswapIcon } from "@/shared/components/icons";
+
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
   supportStage: SupportStageEnum.FULL,
+  icon: UniswapIcon,
   daoOverview: {
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",

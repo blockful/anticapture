@@ -1,10 +1,6 @@
-import { ComponentProps } from "react";
+import { DaoIconProps } from "@/shared/components/icons/types";
 
-interface EnsIconProps extends ComponentProps<"svg"> {
-  showBackground?: boolean;
-}
-
-export const EnsIcon = ({ showBackground = true, ...props }: EnsIconProps) => {
+export const EnsIcon = ({ showBackground = true, ...props }: DaoIconProps) => {
   return (
     <svg
       width="100%"

@@ -1,13 +1,6 @@
-import { ComponentProps } from "react";
+import { DaoIconProps } from "@/shared/components/icons/types";
 
-interface UniswapIconProps extends ComponentProps<"svg"> {
-  showBackground?: boolean;
-}
-
-export const UniswapIcon = ({
-  showBackground = true,
-  ...props
-}: UniswapIconProps) => {
+export const UniswapIcon = ({ showBackground = true, ...props }: DaoIconProps) => {
   return (
     <svg
       width="100%"

@@ -1,13 +1,10 @@
-import { ComponentProps } from "react";
 
-interface ArbitrumIconProps extends ComponentProps<"svg"> {
-  showBackground?: boolean;
-}
+import { DaoIconProps } from "@/shared/components/icons/types";
 
 export const ArbitrumIcon = ({
   showBackground = true,
   ...props
-}: ArbitrumIconProps) => {
+}: DaoIconProps) => {
   return (
     <svg
       width="100%"
