@@ -1,0 +1,45 @@
+"use client";
+
+import { cn } from "@/shared/utils/";
+import { Badge } from "@/shared/components";
+import { ReactNode } from "react";
+import {
+  CircleCheckIcon,
+  CircleNotCheckedIcon,
+} from "@/shared/components/icons";
+
+interface SwitchItemProps {
+  switched?: boolean;
+  icon?: ReactNode;
+  onClick?: () => void;
+}
+
+export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
+  return (
+    <Badge
+      className={cn(
+        "flex h-full w-full !gap-1.5 !bg-dark bg-opacity-20 !px-2.5 !py-1 sm:!bg-lightDark lg:w-fit",
+        {
+          "!cursor-pointer transition-all duration-300 hover:!bg-middleDark":
+            item.onClick,
+        },
+      )}
+      onClick={item.onClick}
+    >
+      {item.switched ? (
+        <CircleCheckIcon className="text-green-400" />
+      ) : (
+        <CircleNotCheckedIcon className="text-red-400" />
+      )}
+      <p
+        className={cn([
+          "text-sm font-medium leading-tight",
+          item.switched ? "text-green-400" : "text-red-400",
+        ])}
+      >
+        {item.switched ? "Yes" : "No"}
+      </p>
+      <span> {item.icon}</span>
+    </Badge>
+  );
+};

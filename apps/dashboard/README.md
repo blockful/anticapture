@@ -34,3 +34,61 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+# Folder structure
+
+```
+src/
+  ├── features/
+  │   ├── index.tsx
+  │   ├── governance-activity/
+  │   ├── token-distribution/
+  │   │   ├── utils/
+  │   │       ├── http-client/
+  │   ├── dao-info/
+  │   ├── attack-profitability/
+  │   ├── show-support/
+  │   │   ├── index.tsx <-- exports ShowSupport.tsx and ShowSupportStickyBar.tsx
+  │   │   ├── ShowSupport.tsx
+  │   │   ├── components/
+  │   │   │   └── ShowSupportStickyBar.tsx
+  │   │   ├── hooks/
+  │   │   ├── utils/
+  │   │   ├── types/
+  │   │   └── test/ -- Test folder inside feature
+  │   └── governance-implementation/
+  │       ├── GovernanceImplementation.tsx
+  │       ├── components/
+  │       │   └── GovernanceImplementationSideBarButton.tsx  <-- export <SidebarButton title="Governance Implementation" icon anchorId>
+  │       ├── hooks/
+  │       ├── utils/
+  │       └── test/
+  ├── templates/ <-- Page templates, imports features
+  │   ├── dao/
+  │   └── home/
+  ├── widgets/ <-- Components that are not a feature nor used by features or shared, widgets can also aggregate components of features
+  │   └── sidebar/
+  |       └──components/
+  ├── shared/ <-- Components that are used by features
+  │   ├── components/
+  │   │   ├── shadcn/
+  │   │   ├── ConnectCustom.tsx <-- Needs further discussion
+  │   │   ├── buttons/
+  │   │   │   └── SidebarButton.tsx
+  │   │   └── icons/
+  │   ├── contexts/
+  │   ├── hooks/
+  │   ├── client/
+  │   ├── types/ -- Types: Interfaces, Enums, etc.
+  │   │   └── dao.ts
+  │   └── utils/ -- Utilitary and Constants
+  │       └── dao-config/
+  ├── public/
+  └── app/
+      ├── layout/
+      └── routing/
+```
+
+kebab for folders
+pascal for components
+camel for functions
