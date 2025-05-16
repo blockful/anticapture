@@ -22,7 +22,7 @@ import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitabilit
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
-import { ResearchPendingChartBlur } from "@/shared/components/ResearchPendingChartBlur";
+import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,

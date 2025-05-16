@@ -10,7 +10,7 @@ import { MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { PlusIcon } from "@/shared/components/icons";
 import { Stage } from "@/features/resilience-stages/components/StageTag";
-import { StageTagSimplified } from "@/shared/components/StageTagSimplified";
+import { StageTagSimplified } from "@/shared/components/tags/StageTagSimplified";
 import { cn } from "@/shared/utils/";
 import { StageContent } from "@/features/resilience-stages/components/StageContent";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
