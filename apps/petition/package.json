@@ -1,14 +1,14 @@
 {
   "name": "@anticapture/petition",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "start": "node dist/src/index.js",
     "test": "vitest",
     "db:migrate": "npx drizzle-kit migrate",
-    "db:generate": "npx drizzle-kit generate"
+    "db:generate": "npx drizzle-kit generate",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
