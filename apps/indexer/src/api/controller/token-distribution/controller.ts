@@ -96,7 +96,7 @@ export function tokenDistribution(
       createRoute({
         method: "get",
         operationId: `compare${resultKey}`,
-        path: `/dao/:daoId/${path}/compare`,
+        path: `/dao/{daoId}/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
         request: {

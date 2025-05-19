@@ -14,7 +14,7 @@ export function assets(app: Hono, service: AssetsClient) {
     createRoute({
       method: "get",
       operationId: "totalAssets",
-      path: "/dao/:daoId/total-assets",
+      path: "/dao/{daoId}/total-assets",
       summary: "Get total assets",
       description: "Get total assets",
       tags: ["assets"],
