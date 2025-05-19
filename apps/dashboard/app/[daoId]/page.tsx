@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/lib/types/daos";
-import { BaseHeaderLayoutSidebar } from "@/components/atoms";
-import {
-  HeaderDAOSidebar,
-  StickyPageHeader,
-  HeaderSidebar,
-} from "@/components/molecules";
-import { DaoTemplate } from "@/components/templates";
-import { HeaderMobile } from "@/components/molecules/HeaderMobile";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { BaseHeaderLayoutSidebar } from "@/shared/components/";
+
+import { DaoTemplate } from "@/templates";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 
 type Props = {
   params: { daoId: string };
