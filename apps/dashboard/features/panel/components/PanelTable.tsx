@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
-import { BadgeInAnalysis, TheTable, SkeletonRow } from "@/shared/components";
+import {
+  BadgeInAnalysis,
+  TheTable,
+  SkeletonRow,
+  RiskAreaCardEnum,
+  RiskAreaCardWrapper,
+} from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useDelegatedSupply } from "@/shared/hooks";
@@ -18,6 +24,13 @@ import {
   DaoAvatarIcon,
 } from "@/shared/components/icons";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { StageTag } from "@/features/resilience-stages/components";
+import { Stage } from "@/shared/types/enums/Stage";
+import {
+  fieldsToArray,
+  getDaoStageFromFields,
+} from "@/shared/dao-config/utils";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
@@ -135,28 +148,92 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
             <div
-              className={cn("flex w-full items-center gap-2 md:w-64", {
-                "whitespace-nowrap": isMobile,
-                "!w-fit": !isMobile && isInAnalysis,
+              className={cn("flex w-full gap-3", {
+                "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
               })}
             >
-              {!isMobile && (
-                <DaoAvatarIcon
-                  daoId={dao as DaoIdEnum}
-                  className="size-icon-sm"
-                  isRounded
-                />
+              <div className="flex w-full items-center gap-2">
+                {!isMobile && (
+                  <DaoAvatarIcon
+                    daoId={dao as DaoIdEnum}
+                    className="size-icon-sm"
+                    isRounded
+                  />
+                )}
+                {daoConfigByDaoId[dao as DaoIdEnum].name ===
+                daoConfigByDaoId[DaoIdEnum.ENS].name
+                  ? "ENS"
+                  : daoConfigByDaoId[dao as DaoIdEnum].name}
+              </div>
+              {isInAnalysis && (
+                <>
+                  <div className="hidden w-full items-center lg:flex">
+                    <BadgeInAnalysis />
+                  </div>
+                  <div className="flex w-full items-center lg:hidden">
+                    <BadgeInAnalysis hasIcon={false} />
+                  </div>
+                </>
               )}
-              {daoConfigByDaoId[dao as DaoIdEnum].name ===
-              daoConfigByDaoId[DaoIdEnum.ENS].name
-                ? "ENS"
-                : daoConfigByDaoId[dao as DaoIdEnum].name}
             </div>
-            {!isMobile && isInAnalysis && <BadgeInAnalysis />}
           </div>
         );
       },
       header: () => <h4 className="text-table-header pl-4">DAO</h4>,
+    },
+    {
+      accessorKey: "stage",
+      size: 155,
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const daoConfig = daoConfigByDaoId[daoId];
+        if (!daoConfig.governanceImplementation) {
+          return (
+            <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+              <StageTag
+                daoStage={Stage.NONE}
+                tagStage={Stage.NONE}
+                showStageText
+              />
+            </div>
+          );
+        }
+        const stage = getDaoStageFromFields(
+          fieldsToArray(daoConfig.governanceImplementation?.fields),
+        );
+        return (
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+            <StageTag daoStage={stage} tagStage={stage} showStageText />
+          </div>
+        );
+      },
+      header: () => <h4 className="text-table-header pl-4">Stage</h4>,
+    },
+    {
+      accessorKey: "riskareas",
+      size: 220,
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const daoRiskAreas = getDaoRiskAreas(daoId);
+        const riskAreas = {
+          risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
+            name,
+            level: info.riskLevel,
+          })),
+        };
+
+        return (
+          <div className="scrollbar-none flex w-full items-center overflow-auto px-4 py-3 text-white">
+            <RiskAreaCardWrapper
+              riskAreas={riskAreas.risks}
+              variant={RiskAreaCardEnum.PANEL_TABLE}
+              className="flex w-full flex-row gap-1"
+              withTitle={false}
+            />
+          </div>
+        );
+      },
+      header: () => <h4 className="text-table-header pl-4">Risk Areas</h4>,
     },
     {
       accessorKey: "delegatedSupply",
@@ -168,7 +245,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         if (isInAnalysis) {
           return (
             <div className="flex items-center justify-end px-4 py-3 text-end">
-              {isMobile ? <BadgeInAnalysis /> : "-"}
+              {"-"}
             </div>
           );
         }
@@ -179,7 +256,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="w-full justify-end px-4"
+          className="flex w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Delegated Supply</h4>

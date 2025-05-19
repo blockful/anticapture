@@ -17,11 +17,11 @@ import { RiskLevel } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { BarChart } from "lucide-react";
 import {
-  Stage,
   StageAccordion,
   StageTag,
 } from "@/features/resilience-stages/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
+import { Stage } from "@/shared/types/enums/Stage";
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;
 }
@@ -35,10 +35,11 @@ export const ResilienceStagesSection = ({
     fieldsToArray(daoConfig.governanceImplementation?.fields),
   );
 
-  const stageToRiskMapping = {
+  const stageToRiskMapping: Record<Stage, RiskLevel> = {
     [Stage.ZERO]: RiskLevel.HIGH,
     [Stage.ONE]: RiskLevel.MEDIUM,
     [Stage.TWO]: RiskLevel.LOW,
+    [Stage.NONE]: RiskLevel.NONE,
   };
 
   const highRiskItems = filterFieldsByRiskLevel(
@@ -62,18 +63,21 @@ export const ResilienceStagesSection = ({
     [Stage.ZERO]: "right-[75%]",
     [Stage.ONE]: "right-[25%]",
     [Stage.TWO]: "right-0 hidden",
+    [Stage.NONE]: "",
   };
 
   const StagesToLineStyle: Record<Stage, string> = {
     [Stage.ZERO]: "w-[25%] bg-error",
     [Stage.ONE]: "w-[75%] bg-warning",
     [Stage.TWO]: "w-full bg-success",
+    [Stage.NONE]: "",
   };
 
   const StagesToBorderColor: Record<Stage, string> = {
     [Stage.ZERO]: "border-error",
     [Stage.ONE]: "border-warning",
     [Stage.TWO]: "border-success",
+    [Stage.NONE]: "",
   };
 
   return (

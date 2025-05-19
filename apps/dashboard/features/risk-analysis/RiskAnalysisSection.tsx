@@ -2,7 +2,10 @@
 
 import { Gauge } from "lucide-react";
 import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
-import { RiskAreaCardWrapper } from "@/shared/components/cards/RiskAreaCard";
+import {
+  RiskAreaCardEnum,
+  RiskAreaCardWrapper,
+} from "@/shared/components/cards/RiskAreaCard";
 import { RiskDescription } from "@/features/risk-analysis/components/RiskDescription";
 import {
   RiskLevel,
@@ -18,7 +21,6 @@ import { fieldsToArray } from "@/shared/dao-config/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 
-// Define type for the risk area display items
 interface RiskAreaDisplayItem {
   name: string;
   level: RiskLevel;
@@ -30,7 +32,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const daoRiskAreas = getDaoRiskAreas(daoId);
 
-  const handleRiskClick = (riskName: string) => {
+  const handleRiskClick = (riskName: RiskAreaEnum) => {
     setActiveRisk(riskName);
   };
 
@@ -130,9 +132,9 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             riskAreas={customizedRiskAreas}
             activeRiskId={activeRisk}
             onRiskClick={handleRiskClick}
-            gridColumns="grid-cols-2 sm:grid-cols-1"
-            variant="risk-analysis"
-            hideTitle={true}
+            className="grid-cols-2 sm:grid-cols-1"
+            variant={RiskAreaCardEnum.RISK_ANALYSIS}
+            withTitle={false}
           />
         </div>
 

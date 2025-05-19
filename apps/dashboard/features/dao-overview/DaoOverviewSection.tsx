@@ -1,6 +1,10 @@
 "use client";
 
-import { RiskAreaCardWrapper, TooltipInfo } from "@/shared/components";
+import {
+  RiskAreaCardEnum,
+  RiskAreaCardWrapper,
+  TooltipInfo,
+} from "@/shared/components";
 import { FilePenLine, LinkIcon, Shield } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
@@ -28,6 +32,7 @@ import {
 } from "@/features/dao-overview/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
+import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -96,7 +101,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     })),
   };
 
-  const handleRiskAreaClick = (riskName: string) => {
+  const handleRiskAreaClick = (riskName: RiskAreaEnum) => {
     // First set the active risk
     setActiveRisk(riskName);
 
@@ -183,7 +188,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               onRiskClick={(riskName) => {
                 handleRiskAreaClick(riskName);
               }}
-              variant="dao-overview"
+              variant={RiskAreaCardEnum.DAO_OVERVIEW}
+              className="grid grid-cols-2 gap-1"
             />
           </div>
         </div>
@@ -252,7 +258,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               onRiskClick={(riskName) => {
                 handleRiskAreaClick(riskName);
               }}
-              variant="dao-overview"
+              variant={RiskAreaCardEnum.DAO_OVERVIEW}
+              className="grid grid-cols-2 gap-1"
             />
           </div>
         </div>

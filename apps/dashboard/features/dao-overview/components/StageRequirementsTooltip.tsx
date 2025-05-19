@@ -1,11 +1,16 @@
 "use client";
 
+import { Stage } from "@/shared/types/enums/Stage";
 import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
-import { CheckCircleIcon, AlertCircleIcon, AlertTriangle } from "lucide-react";
+import {
+  CheckCircleIcon,
+  AlertCircleIcon,
+  AlertTriangleIcon,
+} from "lucide-react";
 
 interface StageRequirementsTooltipProps {
-  currentStage: number;
-  nextStage: number;
+  currentStage: Stage;
+  nextStage: Stage;
   requirements: string[];
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -18,16 +23,17 @@ export const StageRequirementsTooltip = ({
   onMouseEnter,
   onMouseLeave,
 }: StageRequirementsTooltipProps) => {
-  const variantIcons = {
-    0: <AlertTriangle className="size-4 text-error" />,
-    1: <AlertCircleIcon className="size-4 text-warning" />,
-    2: <CheckCircleIcon className="size-4 text-success" />,
+  const variantIcons: Record<Stage, React.ReactNode> = {
+    [Stage.ZERO]: <AlertTriangleIcon className="size-4 text-error" />,
+    [Stage.ONE]: <AlertCircleIcon className="size-4 text-warning" />,
+    [Stage.TWO]: <CheckCircleIcon className="size-4 text-success" />,
+    [Stage.NONE]: <></>,
   };
   const nextStageTextColor = Array.from([
     "text-error",
     "text-warning",
     "text-success",
-  ])[nextStage % 3] as "text-error" | "text-warning" | "text-success";
+  ])[Number(nextStage) % 3] as "text-error" | "text-warning" | "text-success";
   return (
     <div
       className="sm:translate-x absolute left-0 top-[calc(100%-8px)] z-50 mt-2"
@@ -44,7 +50,7 @@ export const StageRequirementsTooltip = ({
             <OutlinedBox
               variant={
                 Array.from(["error", "warning", "success"])[
-                  currentStage % 3
+                  Number(currentStage) % 3
                 ] as "error" | "warning" | "success"
               }
               className="mb-2 p-1"
@@ -72,7 +78,7 @@ export const StageRequirementsTooltip = ({
           <div className="flex flex-col gap-2">
             {requirements.map((req, index) => (
               <div key={index} className="flex items-center gap-2">
-                {variantIcons[(currentStage % 3) as keyof typeof variantIcons]}
+                {variantIcons[currentStage]}
                 <span className="text-sm text-foreground">{req}</span>
               </div>
             ))}

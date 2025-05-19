@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-accordion";
 import { MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
-import { Stage } from "@/features/resilience-stages/components/StageTag";
+import { Stage } from "@/shared/types/enums/Stage";
 import { StageTagSimplified } from "@/shared/components/tags/StageTagSimplified";
 import { cn } from "@/shared/utils/";
 import { StageContent } from "@/features/resilience-stages/components/StageContent";

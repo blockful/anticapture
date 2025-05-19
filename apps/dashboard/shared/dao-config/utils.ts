@@ -1,6 +1,6 @@
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
-import { Stage } from "@/shared/components/cards/StagesCardRequirements";
+import { Stage } from "@/shared/types/enums/Stage";
 
 /**
  * Converts any fields object to an array, with the key being set as a "name" parameter
@@ -40,6 +40,7 @@ export const filterFieldsByRiskLevel = (
  * Stage 0 (HIGH RISK): Has at least one implementation detail identified as High Risk
  * Stage 1 (MEDIUM RISK): No High Risk details, but has at least one Medium Risk detail
  * Stage 2 (LOW RISK): No High or Medium Risk details
+ * Stage NONE: No governance implementation fields
  */
 export const getDaoStageFromFields = (
   fields:

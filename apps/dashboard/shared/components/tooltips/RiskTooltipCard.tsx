@@ -1,10 +1,26 @@
+"use client";
+
+import { ReactNode } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@radix-ui/react-popover";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { RiskLevelCardSmall } from "@/shared/components";
+import { useScreenSize } from "@/shared/hooks";
+import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
+import { cn } from "@/shared/utils";
 
 interface RiskTooltipCardProps {
   title?: string;
   description?: string | string[];
   riskLevel?: RiskLevel;
+  children?: ReactNode;
 }
 
 /**
@@ -14,7 +30,9 @@ export const RiskTooltipCard = ({
   title,
   description,
   riskLevel = RiskLevel.LOW,
+  children,
 }: RiskTooltipCardProps) => {
+  const { isMobile } = useScreenSize();
   // Process description to handle both string and array of strings
   const descriptionArray = Array.isArray(description)
     ? description
@@ -22,37 +40,72 @@ export const RiskTooltipCard = ({
       ? [description]
       : [];
 
-  return (
-    <div className="flex flex-col">
-      {/* Arrow pointing up to the card */}
-      <div className="flex justify-center">
-        <div className="size-0 border-x-8 border-b-8 border-x-transparent border-b-lightDark" />
+  const content = (
+    <div onClick={(e) => e.stopPropagation()} className="flex flex-col">
+      <div className="mb-2 flex items-center gap-2">
+        <h4 className="font-mono text-[13px] font-medium uppercase tracking-wider text-white">
+          {title}
+        </h4>
+        {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
       </div>
-
-      {/* Tooltip content */}
-      <div className="rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg">
-        {/* Content */}
-        <div className="mb-2 flex items-center justify-between">
-          <h4 className="font-mono font-medium uppercase tracking-wider text-white">
-            {title}
-          </h4>
-          {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
-        </div>
-
-        {/* Divider */}
-        <div className="mb-3 h-px bg-lightDark" />
-
-        <div className="text-sm text-foreground">
-          {descriptionArray.map((paragraph, index) => (
-            <p
-              key={index}
-              className={index < descriptionArray.length - 1 ? "mb-2" : ""}
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
+      {/* Divider */}
+      <div className="mb-3 h-px bg-lightDark" />
+      <div className="text-sm font-normal leading-tight text-foreground">
+        {descriptionArray.map((paragraph, index) => (
+          <p
+            key={index}
+            className={index < descriptionArray.length - 1 ? "mb-2" : ""}
+          >
+            {paragraph}
+          </p>
+        ))}
       </div>
     </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <div
+            className="focus:outline-none focus:ring-0 data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:outline-none data-[state=open]:ring-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </div>
+        </PopoverTrigger>
+        <PopoverContent
+          side="top"
+          align="center"
+          sideOffset={10}
+          className={cn(
+            "z-50 rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg",
+            "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
+            "whitespace-normal break-words",
+          )}
+        >
+          {content}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger>{children}</TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="center"
+        sideOffset={10}
+        avoidCollisions={true}
+        className={cn(
+          "z-50 rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg",
+          "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
+          "whitespace-normal break-words",
+        )}
+      >
+        {content}
+      </TooltipContent>
+    </Tooltip>
   );
 };

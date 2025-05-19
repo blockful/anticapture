@@ -1,6 +1,6 @@
 "use client";
 
-import { Stage } from "@/features/resilience-stages/components/StageTag";
+import { Stage } from "@/shared/types/enums/Stage";
 import { cn } from "@/shared/utils/";
 import { CheckCircle, XCircle } from "lucide-react";
 

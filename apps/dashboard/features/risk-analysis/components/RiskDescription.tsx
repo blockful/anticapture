@@ -34,6 +34,7 @@ export const RiskDescription = ({
     [RiskLevel.LOW]: <CheckCircle2 className="size-5 text-success" />,
     [RiskLevel.MEDIUM]: <AlertCircle className="size-5 text-warning" />,
     [RiskLevel.HIGH]: <TriangleAlert className="size-5 text-error" />,
+    [RiskLevel.NONE]: <></>,
   };
 
   return (
