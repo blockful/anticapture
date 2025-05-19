@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Address } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -57,7 +58,7 @@ export type GovernanceImplementationField = {
 interface BaseInfo {
   name: string;
   supportStage: SupportStageEnum;
-  icon?: (props: DaoIconProps) => JSX.Element;
+  icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
 
