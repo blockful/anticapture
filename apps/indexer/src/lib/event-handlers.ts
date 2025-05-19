@@ -4,12 +4,12 @@ import {
   account,
   accountBalance,
   accountPower,
-  delegations,
+  delegation,
   proposalsOnchain,
-  transfers,
+  transfer,
   votesOnchain,
   votingPowerHistory,
-  daoMetricsDayBuckets,
+  daoMetricsDayBucket,
   token,
 } from "ponder:schema";
 import {
@@ -53,7 +53,7 @@ export const delegateChanged = async (
     .onConflictDoNothing();
 
   // Create a new delegation record
-  await context.db.insert(delegations).values({
+  await context.db.insert(delegation).values({
     id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
     delegateeAccountId: event.args.toDelegate,
@@ -204,7 +204,7 @@ export const tokenTransfer = async (
     .onConflictDoNothing();
 
   await context.db
-    .insert(transfers)
+    .insert(transfer)
     .values({
       id: [event.transaction.hash, event.log.logIndex].join("-"),
       daoId,
@@ -599,7 +599,7 @@ const storeDailyBucket = async (
       0,
     ) / 1000;
   await context.db
-    .insert(daoMetricsDayBuckets)
+    .insert(daoMetricsDayBucket)
     .values({
       date: BigInt(dayStartTimestampInSeconds),
       daoId,
