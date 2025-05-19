@@ -4,7 +4,7 @@ import { desc, ilike } from 'drizzle-orm';
 import { Hex, Address } from 'viem';
 
 import * as schema from './schema';
-import { PetitionSignatureResponse } from '../types';
+import { PetitionSignatureResponse, DAO_ID } from '../types';
 
 export class PostgresPetitionRepository {
   db: NodePgDatabase<Record<string, never>>;
@@ -26,6 +26,7 @@ export class PostgresPetitionRepository {
 
     return signatures.map((signature) => ({
       ...signature,
+      daoId: signature.daoId as DAO_ID,
       signature: signature.signature as Hex,
       accountId: signature.accountId as Address,
     }));

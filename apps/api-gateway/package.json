@@ -1,19 +1,27 @@
 {
-  "name": "api-gateway",
+  "name": "@anticapture/api-gateway",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "supergraph": "mesh-compose -o supergraph.graphql",
-    "start": "hive-gateway supergraph"
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "@graphql-mesh/cli": "^0.100.4",
+    "tsx": "^4.19.4"
+  },
   "dependencies": {
-    "@graphql-hive/gateway": "^1.13.6",
-    "@graphql-mesh/compose-cli": "^1.4.7",
-    "@omnigraph/openapi": "^0.109.7",
-    "dotenv": "^16.4.7"
+    "@graphql-mesh/config": "^0.108.4",
+    "@graphql-mesh/graphql": "^0.104.3",
+    "@graphql-mesh/http": "^0.106.3",
+    "@graphql-mesh/openapi": "^0.109.8",
+    "@graphql-mesh/runtime": "^0.106.3",
+    "@graphql-mesh/types": "^0.104.3",
+    "dotenv": "^16.5.0"
   }
 }

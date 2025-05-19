@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PetitionService } from "./petition";
 import { verifyMessage } from "viem";
-import { PetitionSignatureRequest } from "../types";
+import { PetitionSignatureRequest, DAO_ID } from "../types";
 
 // Mock viem's verifyMessage
 vi.mock("viem", () => ({
@@ -31,7 +31,7 @@ describe("PetitionService", () => {
   describe("signPetition", () => {
     it("signs a petition if DAO is supported and signature is valid", async () => {
       const expected: PetitionSignatureRequest = {
-        daoId: "DAO1",
+        daoId: DAO_ID.ENS,
         message: "Sign this petition",
         signature: "0x123",
         accountId: "0xabc",
@@ -45,7 +45,7 @@ describe("PetitionService", () => {
 
     it("throws if signature is invalid", async () => {
       const expected: PetitionSignatureRequest = {
-        daoId: "DAO1",
+        daoId: DAO_ID.ENS,
         message: "Sign this petition",
         signature: "0x123",
         accountId: "0xabc",
@@ -62,13 +62,13 @@ describe("PetitionService", () => {
     it("returns petition data and userSigned=true if user signed", async () => {
       const petitions: PetitionSignatureRequest[] = [
         {
-          daoId: "DAO1",
+          daoId: DAO_ID.ENS,
           message: "Sign this petition",
           signature: "0x123",
           accountId: "0xabc"
         },
         {
-          daoId: "DAO1",
+          daoId: DAO_ID.ENS,
           message: "Sign this petition",
           signature: "0x123",
           accountId: "0xdef"
@@ -77,7 +77,7 @@ describe("PetitionService", () => {
       mockDb.getPetitionSignatures.mockResolvedValue(petitions);
       mockAnticaptureClient.getSignersVotingPower.mockResolvedValue(123n);
 
-      const result = await service.readPetitions("DAO1", "0xabc");
+      const result = await service.readPetitions(DAO_ID.ENS, "0xabc");
       expect(result.petitionSignatures).toEqual(petitions);
       expect(result.totalSignatures).toBe(2);
       expect(result.totalSignaturesPower).toBe(123n);
@@ -88,7 +88,7 @@ describe("PetitionService", () => {
     it("returns userSigned=false if user did not sign", async () => {
       const petitions = [
         {
-          daoId: "DAO1",
+          daoId: DAO_ID.ENS,
           message: "Sign this petition",
           signature: "0x123",
           accountId: "0xdef"
@@ -97,7 +97,7 @@ describe("PetitionService", () => {
       mockDb.getPetitionSignatures.mockResolvedValue(petitions);
       mockAnticaptureClient.getSignersVotingPower.mockResolvedValue(1n);
 
-      const result = await service.readPetitions("DAO1", "0xabc");
+      const result = await service.readPetitions(DAO_ID.ENS, "0xabc");
       expect(result.userSigned).toBe(false);
     });
   });

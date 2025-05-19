@@ -1,42 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env", "test.ts", "./migrations"],
+  "globalEnv": [".env"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
-    },
-    "start": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"]
-    },
-    "start-raw": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"]
-    },
-    "install": {},
-    "dev": {
-      "persistent": true,
-      "cache": false
-    },
-    "serve": {
-      "cache": false,
-      "persistent": true
-    },
-    "restore-database": {},
-    "dump-database": {},
-    "lint:fix": {},
-    "drop-public": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"]
-    },
-    "drop-all-schemas": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"]
     }
   }
 }
