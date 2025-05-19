@@ -1,6 +1,4 @@
-import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { formatUnits } from "viem";
 
 import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
@@ -98,7 +96,7 @@ export function tokenDistribution(
       createRoute({
         method: "get",
         operationId: `compare${resultKey}`,
-        path: `/dao/{daoId}/${path}/compare`,
+        path: `/dao/:daoId/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
         request: {

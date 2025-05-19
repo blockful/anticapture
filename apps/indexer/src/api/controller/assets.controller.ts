@@ -1,6 +1,4 @@
-import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { DaysOpts } from "@/lib/daysEnum";
@@ -16,7 +14,7 @@ export function assets(app: Hono, service: AssetsClient) {
     createRoute({
       method: "get",
       operationId: "totalAssets",
-      path: "/dao/{daoId}/total-assets",
+      path: "/dao/:daoId/total-assets",
       summary: "Get total assets",
       description: "Get total assets",
       tags: ["assets"],

@@ -1,6 +1,4 @@
-import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
 import { DaoIdEnum } from "@/lib/enums";
@@ -39,17 +37,22 @@ export function governanceActivity(
     createRoute({
       method: "get",
       operationId: "compareActiveSupply",
-      path: "/dao/{daoId}/active-supply/compare",
+      path: "/dao/:daoId/active-supply/compare",
       summary: "Get active token supply for DAO",
       tags: ["governance"],
       request: {
         params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
+          daoId: caseInsensitiveEnum(DaoIdEnum).openapi({
+            example: "ens",
+          }),
         }),
         query: z.object({
           days: z
             .enum(DaysOpts)
             .default("90d")
+            .openapi({
+              example: "90d",
+            })
             .transform((val) => DaysEnum[val]),
         }),
       },
@@ -58,9 +61,15 @@ export function governanceActivity(
           description: "Active supply value",
           content: {
             "application/json": {
-              schema: z.object({
-                activeSupply: z.string(),
-              }),
+              schema: z
+                .object({
+                  activeSupply: z.string(),
+                })
+                .openapi({
+                  example: {
+                    activeSupply: "1000000000000000000000000",
+                  },
+                }),
             },
           },
         },
@@ -74,149 +83,149 @@ export function governanceActivity(
     },
   );
 
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "compareProposals",
-      path: "/dao/{daoId}/proposals/compare",
-      summary: "Compare number of proposals between time periods",
-      tags: ["governance"],
-      request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .transform((val) => DaysEnum[val]),
-        }),
-      },
-      responses: {
-        200: {
-          description: "Proposal comparison",
-          content: {
-            "application/json": {
-              schema: z.object({
-                currentProposalsLaunched: z.string(),
-                oldProposalsLaunched: z.string(),
-                changeRate: z.number(),
-              }),
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const { daoId } = context.req.valid("param");
-      const { days } = context.req.valid("query");
+  // app.openapi(
+  //   createRoute({
+  //     method: "get",
+  //     operationId: "compareProposals",
+  //     path: "/dao/:daoId/proposals/compare",
+  //     summary: "Compare number of proposals between time periods",
+  //     tags: ["governance"],
+  //     request: {
+  //       params: z.object({
+  //         daoId: caseInsensitiveEnum(DaoIdEnum),
+  //       }),
+  //       query: z.object({
+  //         days: z
+  //           .enum(DaysOpts)
+  //           .default("90d")
+  //           .transform((val) => DaysEnum[val]),
+  //       }),
+  //     },
+  //     responses: {
+  //       200: {
+  //         description: "Proposal comparison",
+  //         content: {
+  //           "application/json": {
+  //             schema: z.object({
+  //               currentProposalsLaunched: z.string(),
+  //               oldProposalsLaunched: z.string(),
+  //               changeRate: z.number(),
+  //             }),
+  //           },
+  //         },
+  //       },
+  //     },
+  //   }),
+  //   async (context) => {
+  //     const { daoId } = context.req.valid("param");
+  //     const { days } = context.req.valid("query");
 
-      const data = await repository.getProposalsCompare(daoId, days);
-      const changeRate =
-        data.oldProposalsLaunched === "0"
-          ? 0
-          : parseFloat(data.currentProposalsLaunched) /
-          parseFloat(data.oldProposalsLaunched) -
-          1;
+  //     const data = await repository.getProposalsCompare(daoId, days);
+  //     const changeRate =
+  //       data.oldProposalsLaunched === "0"
+  //         ? 0
+  //         : parseFloat(data.currentProposalsLaunched) /
+  //         parseFloat(data.oldProposalsLaunched) -
+  //         1;
 
-      return context.json({ ...data, changeRate });
-    },
-  );
+  //     return context.json({ ...data, changeRate });
+  //   },
+  // );
 
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "compareVotes",
-      path: "/dao/{daoId}/votes/compare",
-      summary: "Compare number of votes between time periods",
-      tags: ["governance"],
-      request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .transform((val) => DaysEnum[val]),
-        }),
-      },
-      responses: {
-        200: {
-          description: "Vote comparison",
-          content: {
-            "application/json": {
-              schema: z.object({
-                currentVotes: z.string(),
-                oldVotes: z.string(),
-                changeRate: z.number(),
-              }),
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const { daoId } = context.req.valid("param");
-      const { days } = context.req.valid("query");
+  // app.openapi(
+  //   createRoute({
+  //     method: "get",
+  //     operationId: "compareVotes",
+  //     path: "/dao/:daoId/votes/compare",
+  //     summary: "Compare number of votes between time periods",
+  //     tags: ["governance"],
+  //     request: {
+  //       params: z.object({
+  //         daoId: caseInsensitiveEnum(DaoIdEnum),
+  //       }),
+  //       query: z.object({
+  //         days: z
+  //           .enum(DaysOpts)
+  //           .default("90d")
+  //           .transform((val) => DaysEnum[val]),
+  //       }),
+  //     },
+  //     responses: {
+  //       200: {
+  //         description: "Vote comparison",
+  //         content: {
+  //           "application/json": {
+  //             schema: z.object({
+  //               currentVotes: z.string(),
+  //               oldVotes: z.string(),
+  //               changeRate: z.number(),
+  //             }),
+  //           },
+  //         },
+  //       },
+  //     },
+  //   }),
+  //   async (context) => {
+  //     const { daoId } = context.req.valid("param");
+  //     const { days } = context.req.valid("query");
 
-      const data = await repository.getVotesCompare(daoId, days);
+  //     const data = await repository.getVotesCompare(daoId, days);
 
-      const changeRate =
-        data.oldVotes === "0"
-          ? 0
-          : parseFloat(data.currentVotes) / parseFloat(data.oldVotes) - 1;
+  //     const changeRate =
+  //       data.oldVotes === "0"
+  //         ? 0
+  //         : parseFloat(data.currentVotes) / parseFloat(data.oldVotes) - 1;
 
-      return context.json({ ...data, changeRate }, 200);
-    },
-  );
+  //     return context.json({ ...data, changeRate }, 200);
+  //   },
+  // );
 
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "compareAverageTurnout",
-      path: "/dao/{daoId}/average-turnout/compare",
-      summary: "Compare average turnout between time periods",
-      tags: ["governance"],
-      request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .transform((val) => DaysEnum[val]),
-        }),
-      },
-      responses: {
-        200: {
-          description: "Average turnout comparison",
-          content: {
-            "application/json": {
-              schema: z.object({
-                currentAverageTurnout: z.string(),
-                oldAverageTurnout: z.string(),
-                changeRate: z.number(),
-              }),
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const { daoId } = context.req.valid("param");
-      const { days } = context.req.valid("query");
+  // app.openapi(
+  //   createRoute({
+  //     method: "get",
+  //     operationId: "compareAverageTurnout",
+  //     path: "/dao/:daoId/average-turnout/compare",
+  //     summary: "Compare average turnout between time periods",
+  //     tags: ["governance"],
+  //     request: {
+  //       params: z.object({
+  //         daoId: caseInsensitiveEnum(DaoIdEnum),
+  //       }),
+  //       query: z.object({
+  //         days: z
+  //           .enum(DaysOpts)
+  //           .default("90d")
+  //           .transform((val) => DaysEnum[val]),
+  //       }),
+  //     },
+  //     responses: {
+  //       200: {
+  //         description: "Average turnout comparison",
+  //         content: {
+  //           "application/json": {
+  //             schema: z.object({
+  //               currentAverageTurnout: z.string(),
+  //               oldAverageTurnout: z.string(),
+  //               changeRate: z.number(),
+  //             }),
+  //           },
+  //         },
+  //       },
+  //     },
+  //   }),
+  //   async (context) => {
+  //     const { daoId } = context.req.valid("param");
+  //     const { days } = context.req.valid("query");
 
-      const data = await repository.getAverageTurnoutCompare(daoId, days);
-      const changeRate =
-        data.oldAverageTurnout === "0"
-          ? 0
-          : parseFloat(data.currentAverageTurnout) /
-          parseFloat(data.oldAverageTurnout) -
-          1;
+  //     const data = await repository.getAverageTurnoutCompare(daoId, days);
+  //     const changeRate =
+  //       data.oldAverageTurnout === "0"
+  //         ? 0
+  //         : parseFloat(data.currentAverageTurnout) /
+  //         parseFloat(data.oldAverageTurnout) -
+  //         1;
 
-      return context.json({ ...data, changeRate });
-    },
-  );
+  //     return context.json({ ...data, changeRate });
+  //   },
+  // );
 }

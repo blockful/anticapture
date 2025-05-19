@@ -1,6 +1,4 @@
-import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
@@ -26,7 +24,7 @@ export function tokenHistoricalData(
     createRoute({
       method: "get",
       operationId: "historicalTokenData",
-      path: "/token/{daoId}/historical-data",
+      path: "/token/:daoId/historical-data",
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
       tags: ["tokens"],
