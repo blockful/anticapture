@@ -2,7 +2,7 @@
 
 import { ChevronRight, Globe } from "lucide-react";
 import { Card } from "@/shared/components/ui/card";
-import { DefaultLink } from "@/shared/components/design-system/links/DefaultLink.tsx/DefaultLink";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 export const ReachOutToUsCard = () => {
   return (
