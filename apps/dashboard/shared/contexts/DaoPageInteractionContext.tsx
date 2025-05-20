@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, ReactNode } from "react";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
 
 interface DaoPageInteractionContextType {
@@ -21,7 +21,7 @@ export const useDaoPageInteraction = () =>
 export const DaoPageInteractionProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
   const [activeRisk, setActiveRisk] = useState<RiskAreaEnum>(
     RiskAreaEnum.SPAM_VULNERABLE,

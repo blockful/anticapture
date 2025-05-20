@@ -1,6 +1,7 @@
 import { cn } from "@/shared/utils";
 import Link, { LinkProps } from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
+import { ReactNode } from "react";
 
 const defaultLinkVariants = cva(
   "flex h-full items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
@@ -19,7 +20,7 @@ const defaultLinkVariants = cva(
 
 type DefaultLinkProps = LinkProps &
   VariantProps<typeof defaultLinkVariants> & {
-    children?: React.ReactNode;
+    children?: ReactNode;
     openInNewTab: boolean;
     className?: string;
   };
