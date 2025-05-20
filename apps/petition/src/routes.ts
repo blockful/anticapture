@@ -54,10 +54,15 @@ export function routes(
 
         return response.status(201).send(dbPetition);
       } catch (error) {
-        console.error({ error });
-        if (error.message.includes("duplicate key value violates")) {
-          return response.status(400).send({ message: "Unable to sign petition" });
+        if (error instanceof Error) {
+          if (error.message.includes("duplicate key value violates")) {
+            return response.status(400).send({ message: "Unable to sign petition" });
+          }
+          if (error.message.includes("invalid signature")) {
+            return response.status(400).send({ message: "Invalid signature" });
+          }
         }
+        return response.status(500).send({ message: "Internal server error" });
       }
     });
 
