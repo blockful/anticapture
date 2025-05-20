@@ -23,7 +23,7 @@ export const TheSectionLayout = ({
   className,
   subHeader,
 }: {
-  icon?: JSX.Element;
+  icon?: ReactNode;
   title: string;
   subtitle?: string;
   description?: string;
