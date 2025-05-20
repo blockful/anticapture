@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   darkMode: ["class"],
@@ -25,6 +26,7 @@ const config: Config = {
         middleDark: "rgb(from var(--border) r g b / <alpha-value>)",
         lightDark: "rgb(from var(--muted) r g b / <alpha-value>)",
         foreground: "rgb(from var(--muted-foreground) r g b / <alpha-value>)",
+        iconSecondary: "rgb(from var(--ring) r g b / <alpha-value>)",
         white: "rgb(from var(--foreground) r g b / <alpha-value>)",
         tangerine: "rgb(from var(--brand) r g b / <alpha-value>)",
         error: "rgb(from var(--error) r g b / <alpha-value>)",

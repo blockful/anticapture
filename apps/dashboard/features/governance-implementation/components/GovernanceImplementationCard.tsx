@@ -50,11 +50,11 @@ export const GovernanceImplementationCard = ({
           </div>
           <div className="flex items-center gap-2 sm:flex-col md:flex-row md:text-center">
             {" "}
-            <h3 className="truncate text-sm font-medium leading-tight text-[#FAFAFA]">
+            <h3 className="truncate text-sm font-medium leading-tight text-white">
               {field.name}
             </h3>
             <div className="size-1 rounded-full bg-white bg-opacity-30" />
-            <span className="shrink-0 truncate text-sm font-medium leading-tight text-[#71717a]">
+            <span className="shrink-0 truncate text-sm font-medium leading-tight text-iconSecondary">
               {field.value || ""}
             </span>
           </div>

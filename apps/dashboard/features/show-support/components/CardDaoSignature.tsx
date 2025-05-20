@@ -89,7 +89,7 @@ export const CardDaoSignature = ({
       {!isSignedToSupportDao && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
-            <h3 className="flex text-[18px] font-medium leading-6 text-[#FAFAFA]">
+            <h3 className="flex text-[18px] font-medium leading-6 text-white">
               Sign to request Arbitrum DAO DATA
             </h3>
             <p className="flex text-sm font-normal text-foreground">

@@ -15,7 +15,7 @@ export const SkeletonDaoInfoCards = () => {
         className="min-h-[32px] !py-2 px-0 sm:p-2"
       >
         <div className="flex w-full items-center justify-start">
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase text-[#FAFAFA]">
+          <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase text-white">
             <div className="size-4 animate-pulse rounded-full bg-gray-700/50" />
             <div className="h-4 w-16 animate-pulse rounded bg-gray-700/50" />
           </CardTitle>
