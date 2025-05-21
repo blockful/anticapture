@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import { useDaoData } from "@/shared/hooks";
 import { DAO, DaoIdEnum } from "@/shared/types/daos";
 
@@ -16,7 +16,7 @@ export const DaoDataProvider = ({
   children,
   daoId,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   daoId: DaoIdEnum;
 }) => {
   const { data: daoData } = useDaoData(daoId);

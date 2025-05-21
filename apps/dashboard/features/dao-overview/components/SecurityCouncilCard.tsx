@@ -10,6 +10,7 @@ import {
   CountdownDaoInfo,
   ProgressBar,
 } from "@/features/dao-overview/components";
+import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link";
 
 export const SecurityCouncilCard = ({
   daoOverview,
@@ -68,24 +69,20 @@ export const SecurityCouncilCard = ({
                   </p>
                 </div>
                 <div className="size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
-                <Link
+                <UnderlinedLink
                   href={securityCouncil.multisig.externalLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-1 border-b border-dashed border-foreground text-sm font-medium text-white duration-300 hover:border-white"
+                  openInNewTab
                 >
                   <Key className="size-3.5 text-tangerine" />
-                  {securityCouncil.multisig.threshold}/
-                  {securityCouncil.multisig.signers}
-                  <span className="hidden font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-foreground duration-300 group-hover:text-white sm:inline">
-                    {" "}
+                  <span className="text-white">
+                    {securityCouncil.multisig.threshold}/
+                    {securityCouncil.multisig.signers}
+                  </span>
+                  <span className="hidden sm:inline">
                     required for transactions
                   </span>
-                  <span className="inline text-foreground duration-300 group-hover:text-white sm:hidden">
-                    {" "}
-                    required
-                  </span>
-                </Link>
+                  <span className="inline sm:hidden"> required</span>
+                </UnderlinedLink>
                 <div className="hidden sm:flex">
                   <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
                 </div>
