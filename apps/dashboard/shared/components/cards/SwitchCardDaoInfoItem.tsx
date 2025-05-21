@@ -15,7 +15,7 @@ export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
   return (
     <Badge
       className={cn(
-        "bg-dark/20! sm:bg-light-dark! flex h-full w-full gap-1.5! px-2.5! py-1! lg:w-fit",
+        "!bg-background-contrast/20 sm:bg-light-dark! flex h-full w-full gap-1.5! px-2.5! py-1! lg:w-fit",
         {
           "hover:bg-middle-dark! cursor-pointer! transition-all duration-300":
             item.onClick,

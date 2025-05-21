@@ -18,6 +18,7 @@
   --color-error: rgb(from var(--error) r g b);
   --color-warning: rgb(from var(--warning) r g b);
   --color-success: rgb(from var(--success) r g b);
+  --color-background-contrast: rgb(from var(--muted) r g b);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
