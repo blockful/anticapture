@@ -21,7 +21,7 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "border-b-light-dark! sm:border-light-dark sm:bg-dark xl4k:max-w-full flex w-full flex-col flex-wrap gap-3.5 rounded-t-lg rounded-b-none border-b! border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
+        "!border-b-light-dark sm:border-light-dark sm:bg-dark xl4k:max-w-full flex w-full flex-col flex-wrap gap-3.5 rounded-t-lg rounded-b-none border-b! border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
         isOpen
           ? "sm:border-middle-dark sm:bg-light-dark z-20 rounded-b-none"
           : "sm:hover:bg-middle-dark sm:rounded-b-lg",
