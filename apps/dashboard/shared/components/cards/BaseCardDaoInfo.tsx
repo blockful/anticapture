@@ -29,15 +29,15 @@ interface BaseCardDaoInfoProps {
 
 export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
   return (
-    <Card className="sm:bg-dark xl4k:max-w-full flex w-full! flex-col border-none sm:max-w-full">
-      <CardHeader id="daoinfo-basecard-header" className="px-0 py-2! sm:p-2">
+    <Card className="sm:bg-dark xl4k:max-w-full w-full! flex flex-col border-none sm:max-w-full">
+      <CardHeader id="daoinfo-basecard-header" className="py-2! px-0 sm:p-2">
         <div
           className={cn(
             "flex w-full items-center",
             data.optionalHeaderValue ? "justify-between" : "justify-start",
           )}
         >
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white uppercase">
+          <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase text-white">
             {data.icon}
             {data.title}
           </CardTitle>

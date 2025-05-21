@@ -44,7 +44,7 @@ export const DaoInfoDropdown = ({
         )}
       >
         {defaultValue.icon}
-        <span className="text-sm font-normal whitespace-nowrap">
+        <span className="whitespace-nowrap text-sm font-normal">
           {defaultValue.value}
         </span>
         <ChevronDown
@@ -55,7 +55,7 @@ export const DaoInfoDropdown = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
+        <div className="absolute right-0 top-full z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
           {options.map((option) => (
             <button
               key={option.value}
@@ -64,7 +64,7 @@ export const DaoInfoDropdown = ({
                 setIsOpen(false);
               }}
               className={cn(
-                "hover:bg-middle-dark flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal whitespace-nowrap text-white",
+                "hover:bg-middle-dark flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white",
               )}
             >
               <div className="flex items-center gap-1.5">

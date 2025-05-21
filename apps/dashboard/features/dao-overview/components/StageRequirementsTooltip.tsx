@@ -37,12 +37,12 @@ export const StageRequirementsTooltip = ({
   ])[Number(nextStage) % 3] as "text-error" | "text-warning" | "text-success";
   return (
     <div
-      className="sm:translate-x absolute top-[calc(100%-8px)] left-0 z-50 mt-2"
+      className="sm:translate-x absolute left-0 top-[calc(100%-8px)] z-50 mt-2"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {/* Tooltip Arrow */}
-      <div className="sm:translate-x border-b-darkest absolute top-[-5px] left-1/2 -mt-1 size-0 border-x-13 border-b-13 border-x-transparent" />
+      <div className="sm:translate-x border-b-darkest border-x-13 border-b-13 absolute left-1/2 top-[-5px] -mt-1 size-0 border-x-transparent" />
 
       <div className="stage-tooltip-box-shadow border-light-dark bg-darkest relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border sm:w-[25vw]">
         {/* Header */}
@@ -62,7 +62,7 @@ export const StageRequirementsTooltip = ({
           </div>
 
           {/* Title */}
-          <h3 className="text-start font-mono text-base leading-5 font-normal tracking-wider text-white uppercase">
+          <h3 className="text-start font-mono text-base font-normal uppercase leading-5 tracking-wider text-white">
             HAS VECTORS THAT CAN MAKE IT VULNERABLE
           </h3>
         </div>
