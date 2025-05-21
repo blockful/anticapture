@@ -20,17 +20,17 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
-    pattern: ["bg-warning", "bg-warning", "bg-middleDark"],
+    pattern: ["bg-warning", "bg-warning", "bg-middle-dark"],
     icon: <AlertCircle className="size-3.5 text-warning" />,
   },
   [RiskLevel.LOW]: {
     color: "success",
-    pattern: ["bg-success", "bg-middleDark", "bg-middleDark"],
+    pattern: ["bg-success", "bg-middle-dark", "bg-middle-dark"],
     icon: <CheckCircle2 className="size-3.5 text-success" />,
   },
   [RiskLevel.NONE]: {
     color: "foreground",
-    pattern: ["bg-middleDark", "bg-middleDark", "bg-middleDark"],
+    pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
     icon: <CounterClockwiseClockIcon className="size-4 text-foreground" />,
   },
 } as const;
@@ -44,12 +44,12 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="flex h-full flex-row gap-1 rounded-l-full bg-lightDark px-2">
+  <div className="flex h-full flex-row gap-1 rounded-l-full bg-light-dark px-2">
     <p className="flex items-center text-xs font-medium text-foreground">
       Risk level:
     </p>
     <p
-      className={`flex items-center gap-1 text-${color} font-mono text-[13px] font-medium leading-[18px] tracking-wide`}
+      className={`flex items-center gap-1 text-${color} font-mono text-alternative-sm font-medium leading-[18px] tracking-wide`}
     >
       {status ?? "------"}
       {icon}
@@ -58,7 +58,7 @@ const RiskLabel = ({
 );
 
 const RiskBar = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
-  <div className="flex items-center gap-1 rounded-r-full bg-lightDark p-1 pr-2">
+  <div className="flex items-center gap-1 rounded-r-full bg-light-dark p-1 pr-2">
     {pattern.map((bgClass, index) => (
       <div
         key={index}

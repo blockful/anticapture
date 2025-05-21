@@ -65,7 +65,7 @@ export const StagesDaoOverview = ({
   return (
     <div className="relative w-full py-0 sm:w-full">
       <div
-        className="flex items-center justify-between gap-1 rounded-lg border-b border-lightDark bg-lightDark p-2 sm:border-none sm:py-0.5"
+        className="flex items-center justify-between gap-1 rounded-lg border-b border-light-dark bg-light-dark p-2 sm:border-none sm:py-0.5"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
         <div className="flex flex-col justify-start gap-1 px-1 sm:flex-row sm:items-center">
@@ -84,7 +84,7 @@ export const StagesDaoOverview = ({
               Stage {currentStage}
             </span>
           </div>
-          <BulletPoint className="mb-1 hidden text-sm text-middleDark sm:block" />
+          <BulletPoint className="mb-1 hidden text-sm text-middle-dark sm:block" />
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button

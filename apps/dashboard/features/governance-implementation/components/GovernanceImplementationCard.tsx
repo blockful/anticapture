@@ -21,10 +21,10 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg !border-b border-x-transparent !border-b-lightDark border-t-transparent p-3 shadow transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-lightDark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg border-b! border-x-transparent border-b-light-dark! border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-light-dark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
         isOpen
-          ? "z-20 rounded-b-none sm:border-middleDark sm:bg-lightDark"
-          : "sm:rounded-b-lg sm:hover:bg-middleDark",
+          ? "z-20 rounded-b-none sm:border-middle-dark sm:bg-light-dark"
+          : "sm:rounded-b-lg sm:hover:bg-middle-dark",
       )}
       onClick={onToggle}
     >
@@ -54,7 +54,7 @@ export const GovernanceImplementationCard = ({
               {field.name}
             </h3>
             <div className="size-1 rounded-full bg-white bg-opacity-30" />
-            <span className="shrink-0 truncate text-sm font-medium leading-tight text-iconSecondary">
+            <span className="shrink-0 truncate text-sm font-medium leading-tight text-icon-secondary">
               {field.value || ""}
             </span>
           </div>
@@ -65,7 +65,7 @@ export const GovernanceImplementationCard = ({
       </div>
       <div
         className={cn(
-          "z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:border-middleDark sm:bg-lightDark sm:px-4",
+          "z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:border-middle-dark sm:bg-light-dark sm:px-4",
           "-left-px top-full w-[calc(100%+2px)]",
           isOpen
             ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"

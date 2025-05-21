@@ -39,7 +39,7 @@ export const DaoInfoDropdown = ({
           "flex items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
-            "border-transparent bg-lightDark": !isOpen,
+            "border-transparent bg-light-dark": !isOpen,
           },
         )}
       >
@@ -49,7 +49,7 @@ export const DaoInfoDropdown = ({
         </span>
         <ChevronDown
           className={cn(
-            "size-3 flex-shrink-0 transition-transform duration-200",
+            "size-3 shrink-0 transition-transform duration-200",
             { "rotate-180": isOpen },
           )}
         />
@@ -65,7 +65,7 @@ export const DaoInfoDropdown = ({
                 setIsOpen(false);
               }}
               className={cn(
-                "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white hover:bg-middleDark",
+                "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white hover:bg-middle-dark",
               )}
             >
               <div className="flex items-center gap-1.5">

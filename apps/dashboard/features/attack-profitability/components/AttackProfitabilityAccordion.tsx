@@ -33,7 +33,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <Calculator className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <Calculator className="size-4 text-icon-secondary group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -71,7 +71,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChart className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <PieChart className="size-4 text-icon-secondary group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -105,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Turnout and Active Supply",
     icon: (
-      <Users className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <Users className="size-4 text-icon-secondary group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -143,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarSign className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <DollarSign className="size-4 text-icon-secondary group-data-[state=open]/trigger:text-tangerine" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -189,7 +189,7 @@ export const AttackProfitabilityAccordion = () => {
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group flex w-full flex-col rounded-lg border border-lightDark bg-dark transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
+          className="group flex w-full flex-col rounded-lg border border-light-dark bg-dark transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
         >
           <AccordionTrigger className="group/trigger flex w-full items-center justify-between px-3 pt-3 data-[state=closed]:pb-3">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-white group-data-[state=open]/trigger:text-white">

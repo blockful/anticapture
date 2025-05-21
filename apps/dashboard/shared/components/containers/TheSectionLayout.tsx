@@ -116,7 +116,7 @@ export const TheSectionLayout = ({
           )}
         >
           <div className="flex flex-col">
-            <CardTitle className="flex items-center font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
+            <CardTitle className="flex items-center font-mono text-alternative-sm font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
               {subtitle}
             </CardTitle>
             <p
@@ -129,7 +129,7 @@ export const TheSectionLayout = ({
         </div>
       )}
       {infoText && (
-        <CardDescription className="flex w-full items-start gap-2 rounded-lg bg-lightDark p-2 sm:items-center">
+        <CardDescription className="flex w-full items-start gap-2 rounded-lg bg-light-dark p-2 sm:items-center">
           <div className="mt-0.5 sm:mt-0">
             <Info className="size-4 w-fit text-white" />
           </div>

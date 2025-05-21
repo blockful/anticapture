@@ -43,13 +43,13 @@ export const RiskTooltipCard = ({
   const content = (
     <div onClick={(e) => e.stopPropagation()} className="flex flex-col">
       <div className="mb-2 flex items-center gap-2">
-        <h4 className="font-mono text-[13px] font-medium uppercase tracking-wider text-white">
+        <h4 className="font-mono text-alternative-sm font-medium uppercase tracking-wider text-white">
           {title}
         </h4>
         {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
       </div>
       {/* Divider */}
-      <div className="mb-3 h-px bg-lightDark" />
+      <div className="mb-3 h-px bg-light-dark" />
       <div className="text-sm font-normal leading-tight text-foreground">
         {descriptionArray.map((paragraph, index) => (
           <p
@@ -68,7 +68,7 @@ export const RiskTooltipCard = ({
       <Popover>
         <PopoverTrigger asChild>
           <div
-            className="focus:outline-none focus:ring-0 data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:outline-none data-[state=open]:ring-0"
+            className="focus:outline-hidden focus:ring-0 data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:outline-hidden data-[state=open]:ring-0"
             onClick={(e) => e.stopPropagation()}
           >
             {children}
@@ -79,7 +79,7 @@ export const RiskTooltipCard = ({
           align="center"
           sideOffset={10}
           className={cn(
-            "z-50 rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg",
+            "z-50 rounded-md border border-light-dark bg-darkest p-3 text-left shadow-lg",
             "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
             "whitespace-normal break-words",
           )}
@@ -99,7 +99,7 @@ export const RiskTooltipCard = ({
         sideOffset={10}
         avoidCollisions={true}
         className={cn(
-          "z-50 rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg",
+          "z-50 rounded-md border border-light-dark bg-darkest p-3 text-left shadow-lg",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
           "whitespace-normal break-words",
         )}

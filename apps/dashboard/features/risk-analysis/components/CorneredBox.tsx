@@ -22,15 +22,15 @@ export const CorneredBox = ({
     <div
       className={cn(
         "relative h-full",
-        withBorder && "border border-lightDark bg-dark",
+        withBorder && "border border-light-dark bg-dark",
         className,
       )}
     >
       {/* Corner accents positioned outside the border */}
-      <div className="absolute -left-[2px] -top-[2px] z-10 size-2.5 border-l-2 border-t-2 border-middleDark" />
-      <div className="absolute -right-[2px] -top-[2px] z-10 size-2.5 border-r-2 border-t-2 border-middleDark" />
-      <div className="absolute -bottom-[2px] -left-[2px] z-10 size-2.5 border-b-2 border-l-2 border-middleDark" />
-      <div className="absolute -bottom-[2px] -right-[2px] z-10 size-2.5 border-b-2 border-r-2 border-middleDark" />
+      <div className="absolute -left-[2px] -top-[2px] z-10 size-2.5 border-l-2 border-t-2 border-middle-dark" />
+      <div className="absolute -right-[2px] -top-[2px] z-10 size-2.5 border-r-2 border-t-2 border-middle-dark" />
+      <div className="absolute -bottom-[2px] -left-[2px] z-10 size-2.5 border-b-2 border-l-2 border-middle-dark" />
+      <div className="absolute -bottom-[2px] -right-[2px] z-10 size-2.5 border-b-2 border-r-2 border-middle-dark" />
 
       {children}
     </div>

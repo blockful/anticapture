@@ -42,7 +42,7 @@ export const ButtonHeaderSidebar = ({
         `group flex w-full items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium`,
         {
           "cursor-default bg-white": isActive(anchorId),
-          "hover:border-lightDark hover:bg-lightDark": !isActive(anchorId),
+          "hover:border-light-dark hover:bg-light-dark": !isActive(anchorId),
         },
         className,
       )}

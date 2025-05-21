@@ -127,7 +127,7 @@ const CustomAccordionItem = ({
             <StageTagSimplified stage={stage} isCompleted={isCompleted} />
             {riskFields.length > 0 && (
               <div className="flex flex-row items-center gap-2">
-                <div className="size-1 rounded-full bg-middleDark" />
+                <div className="size-1 rounded-full bg-middle-dark" />
                 <p className="text-sm font-normal text-white">
                   {`${riskFields.length} issues needs fixing`}
                 </p>
@@ -175,7 +175,7 @@ const CustomAccordionItem = ({
           </AccordionContent>
         )}
         {!isLastItem && (
-          <div className="h-px w-full border-b border-lightDark transition-opacity duration-300 ease-in-out" />
+          <div className="h-px w-full border-b border-light-dark transition-opacity duration-300 ease-in-out" />
         )}
       </>
     </AccordionItem>

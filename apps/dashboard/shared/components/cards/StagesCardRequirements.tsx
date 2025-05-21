@@ -9,7 +9,7 @@ const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
   [Stage.ONE]: "text-warning",
   [Stage.TWO]: "text-success",
-  [Stage.NONE]: "text-middleDark",
+  [Stage.NONE]: "text-middle-dark",
 };
 
 const STAGE_TITLES: Record<Stage, string> = {
@@ -30,8 +30,8 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
-  [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-[1px]",
-  [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-[1px]",
+  [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-px",
+  [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-px",
   [Stage.TWO]: "hidden",
   [Stage.NONE]: "",
 };
@@ -48,21 +48,21 @@ export const StagesCardRequirements = ({
   className = "",
 }: StagesCardRequirementsProps) => {
   const stageStyles =
-    STAGE_STYLES[daoStage] || "border-middleDark text-foreground";
+    STAGE_STYLES[daoStage] || "border-middle-dark text-foreground";
 
   return (
     <div>
       <div className="relative w-full">
         <PointerIcon
           className={cn(
-            "absolute bottom-0 -translate-x-1/2 translate-y-[1px]",
+            "absolute bottom-0 -translate-x-1/2 translate-y-px",
             STAGE_POINTER_POSITIONS[daoStage],
           )}
         />
       </div>
 
       <div
-        className={`rounded-md bg-lightDark p-4 ${stageStyles} ${className}`}
+        className={`rounded-md bg-light-dark p-4 ${stageStyles} ${className}`}
       >
         <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
         <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
@@ -94,7 +94,7 @@ const Title = ({
   return (
     <h3
       className={cn([
-        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]",
+        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
         STAGE_STYLES[daoStage],
       ])}
     >

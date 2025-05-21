@@ -90,7 +90,7 @@ export const ResilienceStagesSection = ({
     >
       <div className="flex h-7 w-full items-center justify-center">
         {/* Timeline Component */}
-        <div className="relative h-0.5 w-full bg-middleDark">
+        <div className="relative h-0.5 w-full bg-middle-dark">
           {/* Horizontal Line */}
           <div
             className={cn(
@@ -118,7 +118,7 @@ export const ResilienceStagesSection = ({
           >
             <div
               className={cn(
-                "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white",
+                "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
                 StagesToBorderColor[currentDaoStage],
               )}
             >

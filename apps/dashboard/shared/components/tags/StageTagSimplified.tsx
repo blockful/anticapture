@@ -27,7 +27,7 @@ export const StageTagSimplified = ({
       {icon}
       <span
         className={cn(
-          "font-mono text-[13px] font-medium leading-[18px] tracking-[6%]",
+          "font-mono text-alternative-sm font-medium leading-[18px] tracking-[6%]",
           textColor,
         )}
       >

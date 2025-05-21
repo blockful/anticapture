@@ -29,8 +29,8 @@ interface BaseCardDaoInfoProps {
 
 export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
   return (
-    <Card className="flex !w-full flex-col border-none sm:max-w-full sm:bg-dark xl4k:max-w-full">
-      <CardHeader id="daoinfo-basecard-header" className="!py-2 px-0 sm:p-2">
+    <Card className="flex w-full! flex-col border-none sm:max-w-full sm:bg-dark xl4k:max-w-full">
+      <CardHeader id="daoinfo-basecard-header" className="py-2! px-0 sm:p-2">
         <div
           className={cn(
             "flex w-full items-center",

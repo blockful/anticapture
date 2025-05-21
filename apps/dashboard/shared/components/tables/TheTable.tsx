@@ -79,9 +79,9 @@ export const TheTable = <TData, TValue>({
 
   return (
     <Table className="table-auto bg-darkest text-foreground md:table-fixed md:bg-dark">
-      <TableHeader className="text-xs font-semibold text-foreground sm:bg-lightDark sm:font-medium">
+      <TableHeader className="text-xs font-semibold text-foreground sm:bg-light-dark sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="border-lightDark">
+          <TableRow key={headerGroup.id} className="border-light-dark">
             {headerGroup.headers.map((header) => {
               return (
                 <TableHead
@@ -111,7 +111,7 @@ export const TheTable = <TData, TValue>({
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "cursor-pointer hover:bg-lightDark" : "cursor-default"}`}
+                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "cursor-pointer hover:bg-light-dark" : "cursor-default"}`}
                 onClick={() =>
                   !disableRowClick?.(row.original) && onRowClick?.(row.original)
                 }

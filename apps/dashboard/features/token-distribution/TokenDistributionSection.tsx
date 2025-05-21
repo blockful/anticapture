@@ -44,7 +44,7 @@ const ChartLegend = ({
     {items.map((item) => (
       <div key={item.label} className="flex items-center gap-2">
         <span
-          className="size-2 rounded-sm"
+          className="size-2 rounded-xs"
           style={{ backgroundColor: item.color }}
         />
         <span className="text-sm font-medium text-foreground">
@@ -112,7 +112,7 @@ export const TokenDistributionSection = () => {
           />
         )}
       </TheCardChartLayout>
-      <div className="w-full border-t border-lightDark" />
+      <div className="w-full border-t border-light-dark" />
       <TokenDistributionTable />
     </TheSectionLayout>
   );

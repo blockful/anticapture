@@ -38,6 +38,7 @@
     "wagmi": "^2.12.25"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.7",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20",
@@ -48,8 +49,8 @@
     "jest": "^29.7.0",
     "postcss": "^8",
     "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.9",
-    "tailwindcss": "^3.4.1",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "tailwindcss": "^4.1.7",
     "ts-jest": "^29.2.6",
     "typescript": "^5"
   }

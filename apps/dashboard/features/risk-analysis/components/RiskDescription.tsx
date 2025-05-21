@@ -57,7 +57,7 @@ export const RiskDescription = ({
         {requirements.length > 0 && (
           <div className="flex flex-col gap-4">
             {/* Thin divider line */}
-            <div className="h-px w-full bg-lightDark" />
+            <div className="h-px w-full bg-light-dark" />
 
             <h3 className="font-mono text-alternative-sm font-medium tracking-wider text-white">
               <span className="text-foreground">{`//`}</span> REQUIREMENTS

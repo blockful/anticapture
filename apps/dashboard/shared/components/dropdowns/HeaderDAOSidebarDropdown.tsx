@@ -112,7 +112,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="relative z-50 inline-block h-[57px] w-full border-b border-lightDark sm:h-[65px]"
+      className="relative z-50 inline-block h-[57px] w-full border-b border-light-dark sm:h-[65px]"
       ref={dropdownRef}
     >
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
@@ -136,7 +136,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border border-lightDark bg-dark shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
+          className="absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border border-light-dark bg-dark shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (

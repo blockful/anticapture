@@ -57,7 +57,7 @@ export const CardDaoSignature = ({
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 rounded-lg py-8 text-white sm:flex-row sm:gap-10 sm:border sm:border-lightDark sm:bg-lightDark sm:p-4">
+    <div className="flex w-full flex-col gap-6 rounded-lg py-8 text-white sm:flex-row sm:gap-10 sm:border sm:border-light-dark sm:bg-light-dark sm:p-4">
       <div className="order-1 flex sm:order-none">
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
@@ -70,11 +70,11 @@ export const CardDaoSignature = ({
               }
               width={156}
               height={156}
-              className="h-[156px] w-[156px] flex-shrink-0 object-contain"
+              className="h-[156px] w-[156px] shrink-0 object-contain"
             />
           </div>
         </div>
-        <div className="flex w-full rounded-md border border-lightDark bg-dark py-2.5 pl-3.5 pr-[15px] sm:hidden">
+        <div className="flex w-full rounded-md border border-light-dark bg-dark py-2.5 pl-3.5 pr-[15px] sm:hidden">
           <Image
             alt={`${isSignedToSupportDao ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={
@@ -104,7 +104,7 @@ export const CardDaoSignature = ({
             <div className="flex">
               <ConnectWallet
                 label="Connect Wallet"
-                className="!w-fit !border-transparent !bg-[#FAFAFA] py-1 !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
+                className="w-fit! border-transparent! bg-[#FAFAFA]! py-1 text-dark! transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               />
             </div>
           )}
@@ -112,7 +112,7 @@ export const CardDaoSignature = ({
             <div className="flex">
               <button
                 onClick={handleSubmit}
-                className="btn-connect-wallet !w-fit !border-transparent !bg-[#FAFAFA] text-sm font-medium !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70"
+                className="btn-connect-wallet w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium text-dark! transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               >
                 <Pencil className="size-4" />
                 Sign to support
@@ -121,7 +121,7 @@ export const CardDaoSignature = ({
           )}
           {isConnected && isSignedToSupportDao && (
             <div className="flex">
-              <button className="btn-connect-wallet !w-fit !border-transparent !bg-[#FAFAFA] text-sm font-medium !text-dark !transition-all !duration-1000 !ease-in-out hover:!bg-white/70">
+              <button className="btn-connect-wallet w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium text-dark! transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
                 <CheckCircle2 className="size-4" />
                 Signed
               </button>

@@ -45,7 +45,7 @@ export const SwitcherChart = ({
           "flex items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
-            : "border-transparent bg-lightDark",
+            : "border-transparent bg-light-dark",
         )}
       >
         <span className="whitespace-nowrap text-sm font-medium">
@@ -53,7 +53,7 @@ export const SwitcherChart = ({
         </span>
         <ChevronDown
           className={cn(
-            "size-3 flex-shrink-0 transition-transform duration-200",
+            "size-3 shrink-0 transition-transform duration-200",
             isOpen && "rotate-180",
           )}
         />
@@ -66,13 +66,13 @@ export const SwitcherChart = ({
               key={metrics}
               className={cn(
                 "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white hover:bg-[#26262A]",
-                isSelected == metrics && "bg-middleDark",
+                isSelected == metrics && "bg-middle-dark",
               )}
               onClick={() => handleSelect(metrics)}
             >
               {metrics}
               {isSelected == metrics && (
-                <CheckIcon className="size-3.5 flex-shrink-0" />
+                <CheckIcon className="size-3.5 shrink-0" />
               )}
             </button>
           ))}

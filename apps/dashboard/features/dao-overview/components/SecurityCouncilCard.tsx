@@ -41,7 +41,7 @@ export const SecurityCouncilCard = ({
     <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5">
       <div className="flex w-full justify-between gap-5">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
+          <div className="flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-light-dark sm:p-2">
             <ShieldCheck className="size-4 text-foreground sm:size-6" />
             <h3 className="text-xs font-semibold uppercase text-white sm:hidden">
               Security Council
@@ -77,7 +77,7 @@ export const SecurityCouncilCard = ({
                   <Key className="size-3.5 text-tangerine" />
                   {securityCouncil.multisig.threshold}/
                   {securityCouncil.multisig.signers}
-                  <span className="hidden font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-foreground duration-300 group-hover:text-white sm:inline">
+                  <span className="hidden font-mono text-alternative-sm font-medium uppercase leading-[18px] tracking-wide text-foreground duration-300 group-hover:text-white sm:inline">
                     {" "}
                     required for transactions
                   </span>

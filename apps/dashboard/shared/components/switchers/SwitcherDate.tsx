@@ -62,7 +62,7 @@ export const SwitcherDate = ({
           "flex min-w-[49px] items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
-            : "border-transparent bg-lightDark",
+            : "border-transparent bg-light-dark",
         )}
       >
         <span className="font-medium- text-sm">
@@ -83,7 +83,7 @@ export const SwitcherDate = ({
               key={interval}
               className={cn(
                 "flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal text-white hover:bg-[#26262A]",
-                isSelected == interval && "bg-middleDark",
+                isSelected == interval && "bg-middle-dark",
               )}
               onClick={() => handleSelect(interval)}
             >

@@ -41,7 +41,7 @@ export function TooltipInfo({
         sideOffset={10}
         avoidCollisions={true}
         className={cn(
-          "z-50 rounded-lg border border-lightDark bg-dark p-3 text-center text-white shadow",
+          "z-50 rounded-lg border border-light-dark bg-dark p-3 text-center text-white shadow-sm",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
           "whitespace-normal break-words",
           className,

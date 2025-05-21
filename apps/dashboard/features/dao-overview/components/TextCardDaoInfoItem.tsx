@@ -18,13 +18,13 @@ export const TextCardDaoInfoItem = ({
 }) => {
   return (
     <div
-      className={`flex h-full w-full gap-1.5 rounded-lg bg-dark px-2 py-1 text-sm font-medium leading-tight text-white sm:bg-lightDark ${className}`}
+      className={`flex h-full w-full gap-1.5 rounded-lg bg-dark px-2 py-1 text-sm font-medium leading-tight text-white sm:bg-light-dark ${className}`}
     >
       {item.daoId && (
         <p className="flex items-center">
           <DaoAvatarIcon
             daoId={item.daoId}
-            className="size-icon-xs !bg-transparent text-tangerine"
+            className="size-icon-xs bg-transparent! text-tangerine"
             showBackground={false}
           />
         </p>

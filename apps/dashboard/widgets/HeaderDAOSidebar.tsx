@@ -24,7 +24,7 @@ export const HeaderDAOSidebar = () => {
 
   return (
     <aside
-      className={`fixed left-[68px] top-0 z-50 hidden h-screen w-[258px] border-r border-lightDark bg-darkest sm:block`}
+      className={`fixed left-[68px] top-0 z-50 hidden h-screen w-[258px] border-r border-light-dark bg-darkest sm:block`}
     >
       <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />

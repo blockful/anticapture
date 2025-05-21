@@ -268,7 +268,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="w-full">
           {/* Horizontal divider between main info/risk area and Security Council */}
           <div>
-            <div className="my-5 w-full border-t border-lightDark" />
+            <div className="my-5 w-full border-t border-light-dark" />
           </div>
           <div className="hidden h-full w-full sm:flex">
             <SecurityCouncilCard daoOverview={daoOverview} />
@@ -278,25 +278,25 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       )}
-      <div className="my-4 border border-lightDark sm:hidden" />
+      <div className="my-4 border border-light-dark sm:hidden" />
       <div
         id="dao-info-cards"
-        className="flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:border-lightDark sm:pt-5"
+        className="flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:border-light-dark sm:pt-5"
       >
-        <div className="flex w-full sm:border-r sm:border-lightDark">
+        <div className="flex w-full sm:border-r sm:border-light-dark">
           <VoteCard daoOverview={daoOverview} />
         </div>
-        <div className="w-full border-b border-lightDark sm:hidden" />
+        <div className="w-full border-b border-light-dark sm:hidden" />
 
-        <div className="flex w-full sm:border-r sm:border-lightDark">
+        <div className="flex w-full sm:border-r sm:border-light-dark">
           <TimelockCard daoOverview={daoOverview} />
         </div>
-        <div className="w-full border-b border-lightDark sm:hidden" />
+        <div className="w-full border-b border-light-dark sm:hidden" />
 
         <div className="flex w-full">
           <QuorumCard />
         </div>
-        <div className="w-full border-b border-lightDark sm:hidden" />
+        <div className="w-full border-b border-light-dark sm:hidden" />
       </div>
     </div>
   );

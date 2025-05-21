@@ -30,9 +30,9 @@ export const StageContent = ({
 }: StageContentProps) => {
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
+      <div className="flex w-full flex-col gap-4 rounded-md bg-light-dark p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white">
+          <h3 className="font-mono text-alternative-sm font-medium uppercase leading-[18px] tracking-wide text-white">
             {title}
           </h3>
           <p className="text-sm font-normal text-foreground">{description}</p>
@@ -108,7 +108,7 @@ export const StageContent = ({
                     </div>
                   </div>
                   {index < issues.length - 1 && (
-                    <div className="border-t border-middleDark" />
+                    <div className="border-t border-middle-dark" />
                   )}
                   {index === issues.length - 1 && <div className="pb-2" />}
                 </div>

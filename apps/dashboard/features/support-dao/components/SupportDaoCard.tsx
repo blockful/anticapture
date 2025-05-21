@@ -80,7 +80,7 @@ export const SupportDaoCard = ({
 
   return (
     <Card
-      className="flex w-full flex-row rounded-md border border-lightDark bg-dark p-3 shadow hover:cursor-pointer hover:bg-lightDark md:w-[calc(50%-10px)] xl4k:max-w-full"
+      className="flex w-full flex-row rounded-md border border-light-dark bg-dark p-3 shadow-sm hover:cursor-pointer hover:bg-light-dark md:w-[calc(50%-10px)] xl4k:max-w-full"
       onClick={onClick}
     >
       <div className="flex h-full w-full flex-row justify-between gap-2">
@@ -92,7 +92,7 @@ export const SupportDaoCard = ({
                 {daoName}
               </h3>
               <div
-                className={`mx-2 w-fit rounded-full bg-lightDark px-2 py-1 ${!userSupport && "hidden"}`}
+                className={`mx-2 w-fit rounded-full bg-light-dark px-2 py-1 ${!userSupport && "hidden"}`}
               >
                 <p className="text-xs text-white">Supported</p>
               </div>

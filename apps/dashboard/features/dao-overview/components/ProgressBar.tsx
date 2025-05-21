@@ -20,7 +20,7 @@ export const ProgressBar = ({
 }: ProgressBarProps) => {
   return (
     <div className={cn("flex w-full flex-col", className)}>
-      <div className="relative h-3 w-full bg-lightDark">
+      <div className="relative h-3 w-full bg-light-dark">
         {warning && warning > 0 && (
           <div
             className="absolute z-10 h-full"
@@ -49,7 +49,7 @@ export const ProgressBar = ({
 
         {warning && warning > 0 && (
           <div
-            className="absolute -right-1.5 -top-2.5 z-20 size-8 rounded-full border-2 border-darkest bg-lightDark p-2"
+            className="absolute -right-1.5 -top-2.5 z-20 size-8 rounded-full border-2 border-darkest bg-light-dark p-2"
             style={{ left: `${warning}%` }}
           >
             <AlertTriangle className="absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-red-500" />
@@ -59,7 +59,7 @@ export const ProgressBar = ({
 
       <div className="relative flex h-12 w-full border-l border-tangerine">
         <div
-          className="absolute h-12 border-r border-tangerine bg-gradient-to-r from-transparent to-tangerine/20"
+          className="absolute h-12 border-r border-tangerine bg-linear-to-r from-transparent to-tangerine/20"
           style={{ width: `calc(${progress}% - 4px)` }}
         ></div>
         <div className="flex w-full items-start justify-between px-2 py-3">

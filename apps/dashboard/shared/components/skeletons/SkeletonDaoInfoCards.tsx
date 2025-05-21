@@ -9,15 +9,15 @@ import {
 
 export const SkeletonDaoInfoCards = () => {
   return (
-    <Card className="flex !w-[342px] flex-col border-none sm:!w-full sm:max-w-full sm:bg-dark xl4k:max-w-full">
+    <Card className="flex w-[342px]! flex-col border-none sm:w-full! sm:max-w-full sm:bg-dark xl4k:max-w-full">
       <CardHeader
         id="daoinfo-basecard-header"
-        className="min-h-[32px] !py-2 px-0 sm:p-2"
+        className="min-h-[32px] py-2! px-0 sm:p-2"
       >
         <div className="flex w-full items-center justify-start">
           <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase text-white">
             <div className="size-4 animate-pulse rounded-full bg-gray-700/50" />
-            <div className="h-4 w-16 animate-pulse rounded bg-gray-700/50" />
+            <div className="h-4 w-16 animate-pulse rounded-sm bg-gray-700/50" />
           </CardTitle>
         </div>
       </CardHeader>
@@ -30,7 +30,7 @@ export const SkeletonDaoInfoCards = () => {
           >
             <div className="flex w-full items-center gap-1.5">
               <h1 className="text-sm font-normal text-foreground">
-                <div className="h-4 w-16 animate-pulse rounded bg-gray-700/50" />
+                <div className="h-4 w-16 animate-pulse rounded-sm bg-gray-700/50" />
               </h1>
               <div className="size-3 animate-pulse rounded-full bg-gray-700/50" />
             </div>

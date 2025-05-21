@@ -45,7 +45,7 @@ export const ShowYourSupportStickyBar = () => {
           <div className="fixed bottom-0 left-0 right-4 z-10">
             <div
               className={cn(
-                "flex flex-col gap-2 border-t border-lightDark bg-darkest py-3 pl-6 text-white sm:flex-row",
+                "flex flex-col gap-2 border-t border-light-dark bg-darkest py-3 pl-6 text-white sm:flex-row",
                 isDesktop ? "ml-[330px]" : "",
               )}
             >

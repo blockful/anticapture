@@ -25,7 +25,7 @@ export const OutlinedBox = ({
     error:
       "border-error bg-error bg-opacity-[12%] text-error font-mono text-sm font-medium",
     lightDark:
-      "border-foreground bg-lightDark text-foreground font-mono text-sm font-medium",
+      "border-foreground bg-light-dark text-foreground font-mono text-sm font-medium",
   };
 
   const variantIcons = {

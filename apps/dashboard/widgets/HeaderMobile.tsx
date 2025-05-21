@@ -70,14 +70,14 @@ export const HeaderMobile = () => {
 
   return (
     <>
-      <div className="absolute left-0 right-0 top-0 z-50 border-b border-lightDark bg-darkest px-4 py-1.5">
+      <div className="absolute left-0 right-0 top-0 z-50 border-b border-light-dark bg-darkest px-4 py-1.5">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex cursor-pointer">
             <AnticaptureIcon className="size-11" />
           </Link>
           <div className="flex items-center gap-3">
             <div className="flex h-full w-full">
-              <ConnectWallet className="!rounded-md !px-2 !py-1 !text-sm !font-medium" />
+              <ConnectWallet className="rounded-md! px-2! py-1! text-sm! font-medium!" />
             </div>
             <button className="p-1.5" onClick={onToggleMenu}>
               {isMenuOpen ? (
