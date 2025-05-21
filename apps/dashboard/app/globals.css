@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -32,6 +32,8 @@
   --size-icon-xl: 76px;
 
   --text-alternative-sm: 13px;
+  --text-alternative-sm--line-height: 18px;
+
 
   @keyframes accordion-down {
     from {
