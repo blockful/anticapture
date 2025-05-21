@@ -16,22 +16,22 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   [RiskLevel.HIGH]: {
     color: "error",
     pattern: ["bg-error", "bg-error", "bg-error"],
-    icon: <AlertTriangle className="size-3.5 text-error" />,
+    icon: <AlertTriangle className="text-error size-3.5" />,
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
     pattern: ["bg-warning", "bg-warning", "bg-middle-dark"],
-    icon: <AlertCircle className="size-3.5 text-warning" />,
+    icon: <AlertCircle className="text-warning size-3.5" />,
   },
   [RiskLevel.LOW]: {
     color: "success",
     pattern: ["bg-success", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CheckCircle2 className="size-3.5 text-success" />,
+    icon: <CheckCircle2 className="text-success size-3.5" />,
   },
   [RiskLevel.NONE]: {
     color: "foreground",
     pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CounterClockwiseClockIcon className="size-4 text-foreground" />,
+    icon: <CounterClockwiseClockIcon className="text-foreground size-4" />,
   },
 } as const;
 
@@ -44,12 +44,12 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="flex h-full flex-row gap-1 rounded-l-full bg-light-dark px-2">
-    <p className="flex items-center text-xs font-medium text-foreground">
+  <div className="bg-light-dark flex h-full flex-row gap-1 rounded-l-full px-2">
+    <p className="text-foreground flex items-center text-xs font-medium">
       Risk level:
     </p>
     <p
-      className={`flex items-center gap-1 text-${color} font-mono text-alternative-sm font-medium leading-[18px] tracking-wide`}
+      className={`flex items-center gap-1 text-${color} text-alternative-sm font-mono font-medium tracking-wide`}
     >
       {status ?? "------"}
       {icon}
@@ -58,7 +58,7 @@ const RiskLabel = ({
 );
 
 const RiskBar = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
-  <div className="flex items-center gap-1 rounded-r-full bg-light-dark p-1 pr-2">
+  <div className="bg-light-dark flex items-center gap-1 rounded-r-full p-1 pr-2">
     {pattern.map((bgClass, index) => (
       <div
         key={index}

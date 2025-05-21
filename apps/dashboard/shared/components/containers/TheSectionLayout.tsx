@@ -116,7 +116,7 @@ export const TheSectionLayout = ({
           )}
         >
           <div className="flex flex-col">
-            <CardTitle className="text-alternative-sm flex items-center font-mono leading-[18px] font-medium tracking-wide text-white uppercase sm:gap-2.5">
+            <CardTitle className="!text-alternative-sm flex items-center font-mono font-medium tracking-wide text-white uppercase sm:gap-2.5">
               {subtitle}
             </CardTitle>
             <p

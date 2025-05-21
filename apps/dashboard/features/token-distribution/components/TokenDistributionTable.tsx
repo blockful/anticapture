@@ -143,7 +143,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           {String(daoId)?.toUpperCase()} Amount
@@ -207,7 +207,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
