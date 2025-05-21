@@ -65,7 +65,7 @@ export const DaoInfoDropdown = ({
                 setIsOpen(false);
               }}
               className={cn(
-                "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-[#FAFAFA] hover:bg-middleDark",
+                "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white hover:bg-middleDark",
               )}
             >
               <div className="flex items-center gap-1.5">

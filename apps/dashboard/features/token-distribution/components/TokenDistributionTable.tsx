@@ -96,7 +96,7 @@ export const TokenDistributionTable = () => {
         return (
           <p
             className={cn(
-              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]",
+              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white",
               { "blur-[4px]": currentValue === null },
             )}
           >

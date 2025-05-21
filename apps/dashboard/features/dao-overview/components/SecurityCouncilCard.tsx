@@ -43,12 +43,12 @@ export const SecurityCouncilCard = ({
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
             <ShieldCheck className="size-4 text-foreground sm:size-6" />
-            <h3 className="text-xs font-semibold uppercase text-[#FAFAFA] sm:hidden">
+            <h3 className="text-xs font-semibold uppercase text-white sm:hidden">
               Security Council
             </h3>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
-            <h3 className="hidden text-xs font-semibold uppercase text-[#FAFAFA] sm:block">
+            <h3 className="hidden text-xs font-semibold uppercase text-white sm:block">
               Security Council
             </h3>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">

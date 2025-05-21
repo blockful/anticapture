@@ -71,7 +71,7 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
+                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
                     {title}
                   </h1>
                 </div>
@@ -83,7 +83,7 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-[#FAFAFA] sm:text-left">
+                    <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
                       {title}
                     </h1>
                   </div>

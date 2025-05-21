@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   darkMode: ["class"],
@@ -20,18 +21,17 @@ const config: Config = {
         mono: ["var(--font-mono)"],
       },
       colors: {
-        darkest: "#09090B",
-        dark: "#18181B",
-        middleDark: "#3F3F46",
-        lightDark: "#27272A",
-        foreground: "#A1A1AA",
-        white: "#FAFAFA",
-        colored: "#E66AE9",
-        accentColored: "#332433",
-        tangerine: "#EC762E",
-        error: "#f87171",
-        warning: "#facc15",
-        success: "#4ade80",
+        darkest: "rgb(from var(--background) r g b / <alpha-value>)",
+        dark: "rgb(from var(--card) r g b / <alpha-value>)",
+        middleDark: "rgb(from var(--border) r g b / <alpha-value>)",
+        lightDark: "rgb(from var(--muted) r g b / <alpha-value>)",
+        foreground: "rgb(from var(--muted-foreground) r g b / <alpha-value>)",
+        iconSecondary: "rgb(from var(--ring) r g b / <alpha-value>)",
+        white: "rgb(from var(--foreground) r g b / <alpha-value>)",
+        tangerine: "rgb(from var(--brand) r g b / <alpha-value>)",
+        error: "rgb(from var(--error) r g b / <alpha-value>)",
+        warning: "rgb(from var(--warning) r g b / <alpha-value>)",
+        success: "rgb(from var(--success) r g b / <alpha-value>)",
       },
       keyframes: {
         "accordion-down": {

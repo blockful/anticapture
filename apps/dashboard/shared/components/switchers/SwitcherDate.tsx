@@ -82,7 +82,7 @@ export const SwitcherDate = ({
             <button
               key={interval}
               className={cn(
-                "flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal text-[#FAFAFA] hover:bg-[#26262A]",
+                "flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal text-white hover:bg-[#26262A]",
                 isSelected == interval && "bg-middleDark",
               )}
               onClick={() => handleSelect(interval)}
