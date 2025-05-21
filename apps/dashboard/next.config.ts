@@ -7,9 +7,6 @@ const nextConfig = {
     config.externals.push("pino-pretty");
     return config;
   },
-  turbopack: {
-    resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-  },
   async headers() {
     return [
       {
