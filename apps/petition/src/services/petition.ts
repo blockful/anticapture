@@ -1,11 +1,10 @@
-import { Address, verifyMessage } from "viem";
+import { Address, Hex, size, verifyMessage } from "viem";
 
 import {
   DAO_ID,
   PetitionSignatureRequest,
   PetitionSignatureResponse
 } from "../types";
-
 
 interface PetitionRepository {
   newPetitionSignature: (petitionSignature: PetitionSignatureResponse) => Promise<void>;
@@ -34,13 +33,25 @@ export class PetitionService {
   }
 
   async signPetition(petition: PetitionSignatureRequest) {
-    const verifiedSignature = await verifyMessage({
-      message: petition.message,
-      signature: petition.signature,
-      address: petition.accountId,
-    });
+    if (size(petition.signature) > 130) { // multisig signature
+      const sigs = splitSafeSignatures(petition.signature)
+      const verifiedSigs = await Promise.any(sigs.map(async (sig) => {
+        return verifyMessage({
+          message: petition.message,
+          signature: sig,
+          address: petition.accountId,
+        })
+      }))
+      if (!verifiedSigs) throw new Error("Invalid signature")
+    } else {
+      const verifiedSignature = await verifyMessage({
+        message: petition.message,
+        signature: petition.signature,
+        address: petition.accountId,
+      });
 
-    if (!verifiedSignature) throw new Error("Invalid signature")
+      if (!verifiedSignature) throw new Error("Invalid signature")
+    }
 
     const dbPetition = {
       ...petition,
@@ -80,4 +91,22 @@ export class PetitionService {
 
     return response;
   }
+}
+
+/**
+ * Splits a concatenated Safe multisig signature into individual signatures
+ * 
+ * Safe multisig transactions combine multiple signatures into a single hex string.
+ * This function parses that combined signature and returns an array of individual signatures.
+ * 
+ * @param sig - The concatenated hex signature from a Safe transaction
+ * @returns An array of individual hex signatures
+ */
+function splitSafeSignatures(sig: Hex): Hex[] {
+  const sigs: Hex[] = [];
+  const sigBuffer = sig.slice(2)
+  for (let i = 0; i < sigBuffer.length; i += 130) {
+    sigs.push('0x' + sigBuffer.slice(i, i + 130) as Hex);
+  }
+  return sigs;
 }

@@ -58,7 +58,7 @@ export function routes(
           if (error.message.includes("duplicate key value violates")) {
             return response.status(400).send({ message: "Unable to sign petition" });
           }
-          if (error.message.includes("invalid signature")) {
+          if (error.message.includes("Invalid signature")) {
             return response.status(400).send({ message: "Invalid signature" });
           }
         }
