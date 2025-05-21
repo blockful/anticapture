@@ -3,12 +3,9 @@ const nextConfig = {
   images: {
     domains: ["euc.li"],
   },
-  webpack: (config: { externals: string[] }) => {
+  webpack: (config) => {
     config.externals.push("pino-pretty");
     return config;
-  },
-  turbopack: {
-    resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
   },
   async headers() {
     return [
