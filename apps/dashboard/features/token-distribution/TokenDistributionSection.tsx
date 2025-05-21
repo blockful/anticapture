@@ -47,7 +47,7 @@ const ChartLegend = ({
           className="size-2 rounded-xs"
           style={{ backgroundColor: item.color }}
         />
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-foreground text-sm font-medium">
           {item.label}
         </span>
       </div>
@@ -112,7 +112,7 @@ export const TokenDistributionSection = () => {
           />
         )}
       </TheCardChartLayout>
-      <div className="w-full border-t border-light-dark" />
+      <div className="border-light-dark w-full border-t" />
       <TokenDistributionTable />
     </TheSectionLayout>
   );

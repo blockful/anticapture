@@ -35,12 +35,12 @@ export const HeaderSidebar = () => {
 
   return (
     <header
-      className={`fixed left-0 top-0 z-50 hidden h-screen w-[68px] border-r border-light-dark bg-darkest sm:block`}
+      className={`border-light-dark bg-darkest fixed top-0 left-0 z-50 hidden h-screen w-[68px] border-r sm:block`}
     >
       <div className="flex h-full w-full flex-col items-start">
         <Link
           href="/"
-          className="flex w-full justify-center border-b border-b-light-dark p-3"
+          className="border-b-light-dark flex w-full justify-center border-b p-3"
         >
           <AnticaptureIcon className="size-9" />
         </Link>

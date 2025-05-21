@@ -17,7 +17,7 @@ export const UnderlinedLink = ({
       href={href}
       target={openInNewTab ? "_blank" : "_self"}
       rel="noopener noreferrer"
-      className="group flex items-center gap-1 border-b border-dashed border-foreground font-mono text-[13px] text-sm font-medium uppercase leading-[18px] tracking-wide text-foreground duration-300 hover:border-white hover:text-white"
+      className="group border-foreground text-foreground flex items-center gap-1 border-b border-dashed font-mono text-sm text-[13px] leading-[18px] font-medium tracking-wide uppercase duration-300 hover:border-white hover:text-white"
       {...props}
     >
       {children}

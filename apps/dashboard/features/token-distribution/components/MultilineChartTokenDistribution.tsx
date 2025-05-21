@@ -60,7 +60,7 @@ export const MultilineChartTokenDistribution = ({
   );
 
   return (
-    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg border-light-dark bg-dark text-white">
+    <div className="border-light-dark bg-dark relative flex h-[300px] w-full items-center justify-center rounded-lg text-white">
       {mocked && <ResearchPendingChartBlur />}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>

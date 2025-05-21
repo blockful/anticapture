@@ -16,22 +16,22 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   [RiskLevel.HIGH]: {
     color: "error",
     pattern: ["bg-error", "bg-error", "bg-error"],
-    icon: <AlertTriangle className="size-3.5 text-error" />,
+    icon: <AlertTriangle className="text-error size-3.5" />,
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
     pattern: ["bg-warning", "bg-warning", "bg-light-dark"],
-    icon: <AlertCircle className="size-3.5 text-warning" />,
+    icon: <AlertCircle className="text-warning size-3.5" />,
   },
   [RiskLevel.LOW]: {
     color: "success",
     pattern: ["bg-success", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CheckCircle2 className="size-3.5 text-success" />,
+    icon: <CheckCircle2 className="text-success size-3.5" />,
   },
   [RiskLevel.NONE]: {
     color: "foreground",
     pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CounterClockwiseClockIcon className="size-3.5 text-foreground" />,
+    icon: <CounterClockwiseClockIcon className="text-foreground size-3.5" />,
   },
 } as const;
 
@@ -81,7 +81,7 @@ export const RiskLevelCardSmall = ({
   return (
     <div
       className={cn(
-        "flex h-full w-fit gap-1 rounded-full bg-light-dark px-2 py-0.5",
+        "bg-light-dark flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
         className,
       )}
     >

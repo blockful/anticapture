@@ -34,7 +34,9 @@ export const fetchDaoTokenHistoricalData = async ({
 
 export const useDaoTokenHistoricalData = (
   daoId: DaoIdEnum,
-  config?: Partial<SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>>,
+  config?: Partial<
+    SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>
+  >,
 ) => {
   const key = daoId ? [`daoTokenHistoricalData`, daoId] : null;
 

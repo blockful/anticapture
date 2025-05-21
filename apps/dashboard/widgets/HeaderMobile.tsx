@@ -70,7 +70,7 @@ export const HeaderMobile = () => {
 
   return (
     <>
-      <div className="absolute left-0 right-0 top-0 z-50 border-b border-light-dark bg-darkest px-4 py-1.5">
+      <div className="border-light-dark bg-darkest absolute top-0 right-0 left-0 z-50 border-b px-4 py-1.5">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex cursor-pointer">
             <AnticaptureIcon className="size-11" />
@@ -92,12 +92,12 @@ export const HeaderMobile = () => {
 
       <div
         className={cn(
-          "sticky top-0 z-30 w-full bg-darkest transition-all duration-300",
+          "bg-darkest sticky top-0 z-30 w-full transition-all duration-300",
         )}
       >
         <div
           className={cn(
-            `fixed left-0 right-0 z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            `fixed right-0 left-0 z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
             pathname === "/" ? "top-[57px]" : "top-[98px]",
             isMenuOpen
               ? "pointer-events-auto opacity-100"

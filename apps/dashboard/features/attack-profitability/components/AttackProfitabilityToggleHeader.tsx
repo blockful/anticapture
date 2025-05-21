@@ -23,7 +23,7 @@ export const AttackProfitabilityToggleHeader = ({
       <div className="flex flex-row flex-wrap items-center gap-2 lg:gap-3">
         <div className="flex items-center gap-3">
           <div className="size-2 rounded-xs bg-green-400" />
-          <p className="hidden text-sm font-medium leading-normal text-foreground sm:flex">
+          <p className="text-foreground hidden text-sm leading-normal font-medium sm:flex">
             Treasury
           </p>
         </div>
@@ -33,12 +33,12 @@ export const AttackProfitabilityToggleHeader = ({
           options={[`Non-${daoId.toUpperCase() as DaoIdEnum}`, "All"]}
         />
       </div>
-      <div className="items-center border-r border-light-dark lg:flex" />
+      <div className="border-light-dark items-center border-r lg:flex" />
 
       <div className="flex flex-row flex-wrap items-center gap-2 lg:gap-3">
         <div className="flex items-center gap-3">
           <div className="size-2 rounded-xs bg-red-400" />
-          <p className="hidden text-sm font-medium leading-normal text-foreground sm:flex">
+          <p className="text-foreground hidden text-sm leading-normal font-medium sm:flex">
             Cost
           </p>
         </div>
