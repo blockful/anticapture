@@ -21,10 +21,10 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg border-b! border-x-transparent border-b-light-dark! border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-light-dark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "border-b-light-dark! sm:border-light-dark sm:bg-dark xl4k:max-w-full flex w-full flex-col flex-wrap gap-3.5 rounded-t-lg rounded-b-none border-b! border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
         isOpen
-          ? "z-20 rounded-b-none sm:border-middle-dark sm:bg-light-dark"
-          : "sm:rounded-b-lg sm:hover:bg-middle-dark",
+          ? "sm:border-middle-dark sm:bg-light-dark z-20 rounded-b-none"
+          : "sm:hover:bg-middle-dark sm:rounded-b-lg",
       )}
       onClick={onToggle}
     >
@@ -33,7 +33,7 @@ export const GovernanceImplementationCard = ({
           <div className="relative flex size-4 shrink-0 items-center justify-center sm:size-6">
             <span
               className={cn(
-                "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
+                "text-foreground absolute mb-1 text-3xl font-thin transition-all duration-300",
                 isOpen ? "rotate-90 opacity-0" : "opacity-100",
               )}
             >
@@ -41,7 +41,7 @@ export const GovernanceImplementationCard = ({
             </span>
             <span
               className={cn(
-                "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
+                "text-foreground absolute mb-1 text-3xl font-thin transition-all duration-300",
                 isOpen ? "opacity-100" : "rotate-90 opacity-0",
               )}
             >
@@ -50,11 +50,11 @@ export const GovernanceImplementationCard = ({
           </div>
           <div className="flex items-center gap-2 sm:flex-col md:flex-row md:text-center">
             {" "}
-            <h3 className="truncate text-sm font-medium leading-tight text-white">
+            <h3 className="truncate text-sm leading-tight font-medium text-white">
               {field.name}
             </h3>
-            <div className="size-1 rounded-full bg-white bg-opacity-30" />
-            <span className="shrink-0 truncate text-sm font-medium leading-tight text-icon-secondary">
+            <div className="size-1 rounded-full bg-white/30" />
+            <span className="text-icon-secondary shrink-0 truncate text-sm leading-tight font-medium">
               {field.value || ""}
             </span>
           </div>
@@ -65,8 +65,8 @@ export const GovernanceImplementationCard = ({
       </div>
       <div
         className={cn(
-          "z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:border-middle-dark sm:bg-light-dark sm:px-4",
-          "-left-px top-full w-[calc(100%+2px)]",
+          "sm:border-middle-dark sm:bg-light-dark z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:px-4",
+          "top-full -left-px w-[calc(100%+2px)]",
           isOpen
             ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"
             : "hidden transition-all duration-300 ease-in-out sm:invisible sm:h-0",
@@ -78,7 +78,7 @@ export const GovernanceImplementationCard = ({
         }}
       >
         <div className="pt-1">
-          <p className="text-sm text-foreground">{field.description}</p>
+          <p className="text-foreground text-sm">{field.description}</p>
         </div>
       </div>
     </Card>

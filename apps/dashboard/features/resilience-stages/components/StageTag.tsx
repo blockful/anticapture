@@ -3,9 +3,9 @@
 import { Stage } from "@/shared/types/enums/Stage";
 
 const STAGE_STYLES: Record<Stage, string> = {
-  [Stage.ZERO]: "border-error text-error bg-error bg-opacity-[0.12]",
-  [Stage.ONE]: "border-warning text-warning bg-warning bg-opacity-[0.12]",
-  [Stage.TWO]: "border-success text-success bg-success bg-opacity-[0.12]",
+  [Stage.ZERO]: "border-error text-error bg-error/12",
+  [Stage.ONE]: "border-warning text-warning bg-warning/12",
+  [Stage.TWO]: "border-success text-success bg-success/12",
   [Stage.NONE]: "border-middle-dark bg-light-dark text-foreground",
 };
 
@@ -30,9 +30,9 @@ export const StageTag = ({
 
   return (
     <div
-      className={`inline-flex rounded-lg border bg-dark p-2 py-1 ${stageStyles} ${className}`}
+      className={`bg-dark inline-flex rounded-lg border p-2 py-1 ${stageStyles} ${className}`}
     >
-      <span className="whitespace-nowrap font-mono text-alternative-sm font-medium leading-[18px]">
+      <span className="text-alternative-sm font-mono leading-[18px] font-medium whitespace-nowrap">
         <span className="hidden sm:inline">STAGE </span>
 
         {showStageText && <span className="inline sm:hidden">STAGE </span>}

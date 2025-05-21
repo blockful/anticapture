@@ -19,11 +19,10 @@ export const OutlinedBox = ({
 }: OutlinedBoxProps) => {
   const variantClasses = {
     success:
-      "border-success bg-success bg-opacity-[12%] text-success font-mono text-sm font-medium",
+      "border-success bg-success/12 text-success font-mono text-sm font-medium",
     warning:
-      "border-warning bg-warning bg-opacity-[12%] text-warning font-mono text-sm font-medium",
-    error:
-      "border-error bg-error bg-opacity-[12%] text-error font-mono text-sm font-medium",
+      "border-warning bg-warning/12 text-warning font-mono text-sm font-medium",
+    error: "border-error bg-error/12 text-error font-mono text-sm font-medium",
     lightDark:
       "border-foreground bg-light-dark text-foreground font-mono text-sm font-medium",
   };
