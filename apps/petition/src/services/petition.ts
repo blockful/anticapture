@@ -1,4 +1,4 @@
-import { Address, Hex, size, verifyMessage } from "viem";
+import { Address, Hex, verifyMessage } from "viem";
 
 import {
   DAO_ID,
@@ -33,7 +33,7 @@ export class PetitionService {
   }
 
   async signPetition(petition: PetitionSignatureRequest) {
-    if (size(petition.signature) > 130) { // multisig signature
+    if (petition.signature.length > 130) { // multisig signature
       const sigs = splitSafeSignatures(petition.signature)
       const verifiedSigs = await Promise.any(sigs.map(async (sig) => {
         return verifyMessage({

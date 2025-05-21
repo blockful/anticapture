@@ -1,12 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PetitionService } from "./petition";
-import { verifyMessage } from "viem";
+import { concat, Hex, verifyMessage } from "viem";
 import { PetitionSignatureRequest, DAO_ID } from "../types";
-
-// Mock viem's verifyMessage
-vi.mock("viem", () => ({
-  verifyMessage: vi.fn(),
-}));
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 const mockDb = {
   newPetitionSignature: vi.fn(),
@@ -30,28 +26,70 @@ describe("PetitionService", () => {
 
   describe("signPetition", () => {
     it("signs a petition if DAO is supported and signature is valid", async () => {
+      const account = privateKeyToAccount(generatePrivateKey())
+      const message = "Sign this petition"
       const expected: PetitionSignatureRequest = {
         daoId: DAO_ID.ENS,
-        message: "Sign this petition",
-        signature: "0x123",
-        accountId: "0xabc",
+        message,
+        signature: await account.signMessage({ message }),
+        accountId: account.address,
       };
 
-      (verifyMessage as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(true);
+      await expect(service.signPetition(expected)).resolves.toMatchObject(expected);
+      expect(mockDb.newPetitionSignature).toHaveBeenCalledWith(expect.objectContaining(expected));
+    });
+
+    it("signs a petition if DAO is supported and multisig signature is valid", async () => {
+      const acc1 = privateKeyToAccount(generatePrivateKey())
+      const acc2 = privateKeyToAccount(generatePrivateKey())
+      const message = "Sign this petition"
+
+      const sig1 = await acc1.signMessage({ message })
+      const sig2 = await acc2.signMessage({ message })
+
+      const multisigSignature = concat([sig1, sig2])
+
+      const expected: PetitionSignatureRequest = {
+        daoId: DAO_ID.ENS,
+        message,
+        signature: multisigSignature,
+        accountId: acc1.address,
+      };
 
       await expect(service.signPetition(expected)).resolves.toMatchObject(expected);
       expect(mockDb.newPetitionSignature).toHaveBeenCalledWith(expect.objectContaining(expected));
     });
 
     it("throws if signature is invalid", async () => {
+      const account = privateKeyToAccount(generatePrivateKey())
+      const message = "Sign this petition"
       const expected: PetitionSignatureRequest = {
         daoId: DAO_ID.ENS,
-        message: "Sign this petition",
-        signature: "0x123",
-        accountId: "0xabc",
+        message,
+        signature: await account.signMessage({ message: `invalid message: ${message}` }),
+        accountId: account.address,
       };
 
-      (verifyMessage as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(false);
+      await expect(service.signPetition(expected)).rejects.toThrow("Invalid signature");
+      expect(mockDb.newPetitionSignature).not.toHaveBeenCalled();
+    });
+
+    it("throws if multisig signature is invalid", async () => {
+      const acc1 = privateKeyToAccount(generatePrivateKey())
+      const acc2 = privateKeyToAccount(generatePrivateKey())
+      const message = "Sign this petition"
+
+      const sig1 = await acc1.signMessage({ message })
+      const sig2 = await acc2.signMessage({ message })
+      const multisigSignature = concat([sig1, sig2])
+      const invalidSig = multisigSignature.slice(0, -1) as Hex
+
+      const expected: PetitionSignatureRequest = {
+        daoId: DAO_ID.ENS,
+        message,
+        signature: invalidSig,
+        accountId: acc2.address,
+      };
 
       await expect(service.signPetition(expected)).rejects.toThrow("Invalid signature");
       expect(mockDb.newPetitionSignature).not.toHaveBeenCalled();
