@@ -130,13 +130,13 @@ const RiskAreaCardInternal = ({
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
               "text-foreground!": risk.level === RiskLevel.NONE,
-              "text-success!":
+              "!text-success":
                 risk.level === RiskLevel.LOW && !isActive && !isHovered,
-              "text-warning!":
+              "!text-warning":
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-              "text-error!":
+              "!text-error":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "text-darkest":
+              "!text-darkest":
                 (isActive && risk.level !== undefined) || isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
