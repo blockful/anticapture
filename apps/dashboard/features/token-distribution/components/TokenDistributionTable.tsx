@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -30,10 +30,7 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const metricDetails: Record<
-  string,
-  { icon: React.ReactNode; tooltip: string }
-> = {
+const metricDetails: Record<string, { icon: ReactNode; tooltip: string }> = {
   Total: {
     icon: undefined,
     tooltip: "The total number of tokens in existence.",

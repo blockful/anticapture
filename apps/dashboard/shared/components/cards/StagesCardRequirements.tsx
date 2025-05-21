@@ -4,6 +4,7 @@ import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
+import { ReactNode } from "react";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
@@ -88,7 +89,7 @@ const Title = ({
   children,
   daoStage,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   daoStage: Stage;
 }) => {
   return (
@@ -103,7 +104,7 @@ const Title = ({
   );
 };
 
-const Description = ({ children }: { children: React.ReactNode }) => {
+const Description = ({ children }: { children: ReactNode }) => {
   return (
     <p className="font-inter mb-4 text-sm font-normal leading-5 text-white">
       {children}
@@ -115,7 +116,7 @@ const Issue = ({
   children,
   daoStage,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   daoStage: Stage;
 }) => {
   return (

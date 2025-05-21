@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -33,7 +33,7 @@ export const TokenDistributionContext =
   });
 
 interface TokenDistributionProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   daoId: DaoIdEnum;
 }
 
