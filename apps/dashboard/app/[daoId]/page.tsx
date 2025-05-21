@@ -7,10 +7,11 @@ import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 
 type Props = {
-  params: { daoId: string };
+  params: Promise<{ daoId: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
   const baseUrl =
