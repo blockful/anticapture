@@ -34,6 +34,8 @@
   --text-alternative-sm: 13px;
   --text-alternative-sm--line-height: 18px;
 
+  --text-alternative-xs: 12px;
+  --text-alternative-xs--line-height: 16px;
 
   @keyframes accordion-down {
     from {
