@@ -59,10 +59,10 @@ export const SwitcherDate = ({
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex min-w-[49px] items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
+          "flex min-w-[49px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
-            : "border-transparent bg-light-dark",
+            : "bg-light-dark border-transparent",
         )}
       >
         <span className="font-medium- text-sm">
@@ -77,7 +77,7 @@ export const SwitcherDate = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+        <div className="absolute top-full right-0 z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
           {activeTimeIntervals.map((interval) => (
             <button
               key={interval}
@@ -101,7 +101,7 @@ export const SwitcherDate = ({
           <TabsTrigger
             key={interval}
             className={cn(
-              "text-sm font-medium",
+              "cursor-pointer text-sm font-medium",
               isSmall
                 ? "min-w-[60px] px-1.5 py-0.5"
                 : "min-w-[84px] px-3 py-1.5",

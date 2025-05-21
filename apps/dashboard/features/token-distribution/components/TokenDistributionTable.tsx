@@ -94,7 +94,7 @@ export const TokenDistributionTable = () => {
         const currentValue = row.getValue("currentValue");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p
+          <div
             className={cn(
               "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white",
               { "blur-xs": currentValue === null },
@@ -103,7 +103,7 @@ export const TokenDistributionTable = () => {
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
-          </p>
+          </div>
         );
       },
       header: () => (
