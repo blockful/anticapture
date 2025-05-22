@@ -2,10 +2,11 @@
 
 import { X } from "lucide-react";
 import { useMessageStack } from "@/shared/hooks/useMessageStack";
+import { ReactNode } from "react";
 
 export interface Message {
   id: string;
-  content: React.ReactNode;
+  content: ReactNode;
 }
 
 interface MessageStackerProps {

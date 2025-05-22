@@ -7,17 +7,22 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { TokenDistributionProvider } from "@/features/token-distribution/contexts";
 import { GovernanceActivityProvider } from "@/features/governance-activity/contexts";
 
+type DaoParams = {
+  daoId: string;
+};
+
 interface DaoLayoutProps {
   children: ReactNode;
-  params: { daoId: string };
+  params: Promise<DaoParams>;
 }
 
-export default function DaoLayout({ children, params }: DaoLayoutProps) {
-  const daoId = params.daoId.toUpperCase() as DaoIdEnum;
-  const daoConstants = daoConfigByDaoId[daoId];
+export default async function DaoLayout({ children, params }: DaoLayoutProps) {
+  const { daoId } = await params;
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConfigByDaoId[daoIdEnum];
 
   // Check if DAO exists and handle support stages
-  if (!ALL_DAOS.includes(daoId)) {
+  if (!ALL_DAOS.includes(daoIdEnum)) {
     return <NotFound reason="not_found" />;
   }
 
@@ -28,9 +33,9 @@ export default function DaoLayout({ children, params }: DaoLayoutProps) {
 
   // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
-    <DaoDataProvider daoId={daoId}>
-      <TokenDistributionProvider daoId={daoId}>
-        <GovernanceActivityProvider daoId={daoId}>
+    <DaoDataProvider daoId={daoIdEnum}>
+      <TokenDistributionProvider daoId={daoIdEnum}>
+        <GovernanceActivityProvider daoId={daoIdEnum}>
           <DaoPageInteractionProvider>{children}</DaoPageInteractionProvider>
         </GovernanceActivityProvider>
       </TokenDistributionProvider>

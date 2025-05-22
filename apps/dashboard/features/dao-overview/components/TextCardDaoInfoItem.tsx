@@ -18,7 +18,7 @@ export const TextCardDaoInfoItem = ({
 }) => {
   return (
     <div
-      className={`flex h-full w-full gap-1.5 rounded-lg bg-dark px-2 py-1 text-sm font-medium leading-tight text-[#FAFAFA] sm:bg-lightDark ${className}`}
+      className={`flex h-full w-full gap-1.5 rounded-lg bg-dark px-2 py-1 text-sm font-medium leading-tight text-white sm:bg-lightDark ${className}`}
     >
       {item.daoId && (
         <p className="flex items-center">

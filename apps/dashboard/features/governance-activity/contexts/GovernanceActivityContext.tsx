@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -41,7 +41,7 @@ export const GovernanceActivityProvider = ({
   children,
   daoId,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   daoId: DaoIdEnum;
 }) => {
   const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);

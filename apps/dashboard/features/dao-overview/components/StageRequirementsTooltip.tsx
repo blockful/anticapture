@@ -7,6 +7,7 @@ import {
   AlertCircleIcon,
   AlertTriangleIcon,
 } from "lucide-react";
+import { ReactNode } from "react";
 
 interface StageRequirementsTooltipProps {
   currentStage: Stage;
@@ -23,7 +24,7 @@ export const StageRequirementsTooltip = ({
   onMouseEnter,
   onMouseLeave,
 }: StageRequirementsTooltipProps) => {
-  const variantIcons: Record<Stage, React.ReactNode> = {
+  const variantIcons: Record<Stage, ReactNode> = {
     [Stage.ZERO]: <AlertTriangleIcon className="size-4 text-error" />,
     [Stage.ONE]: <AlertCircleIcon className="size-4 text-warning" />,
     [Stage.TWO]: <CheckCircleIcon className="size-4 text-success" />,

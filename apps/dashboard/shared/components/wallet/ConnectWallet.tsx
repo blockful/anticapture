@@ -1,4 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
+"use client";
+
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { cn } from "@/shared/utils/";
 import Image from "next/image";

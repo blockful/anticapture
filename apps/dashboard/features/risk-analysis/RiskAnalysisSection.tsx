@@ -20,11 +20,12 @@ import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { fieldsToArray } from "@/shared/dao-config/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { ReactNode } from "react";
 
 interface RiskAreaDisplayItem {
   name: string;
   level: RiskLevel;
-  content?: React.ReactNode;
+  content?: ReactNode;
 }
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -77,7 +78,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   };
 
   // Generate risk descriptions using the RiskDescription component and the RISK_AREAS object
-  const riskDescriptions: Record<string, React.ReactNode> = {};
+  const riskDescriptions: Record<string, ReactNode> = {};
 
   // Create risk descriptions for each risk area using the mapping
   Object.entries(RISK_AREAS).forEach(([riskAreaKey, riskAreaInfo]) => {

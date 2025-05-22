@@ -10,6 +10,7 @@ import {
   CountdownDaoInfo,
   ProgressBar,
 } from "@/features/dao-overview/components";
+import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link";
 
 export const SecurityCouncilCard = ({
   daoOverview,
@@ -43,12 +44,12 @@ export const SecurityCouncilCard = ({
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
             <ShieldCheck className="size-4 text-foreground sm:size-6" />
-            <h3 className="text-xs font-semibold uppercase text-[#FAFAFA] sm:hidden">
+            <h3 className="text-xs font-semibold uppercase text-white sm:hidden">
               Security Council
             </h3>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
-            <h3 className="hidden text-xs font-semibold uppercase text-[#FAFAFA] sm:block">
+            <h3 className="hidden text-xs font-semibold uppercase text-white sm:block">
               Security Council
             </h3>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
@@ -68,24 +69,20 @@ export const SecurityCouncilCard = ({
                   </p>
                 </div>
                 <div className="size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
-                <Link
+                <UnderlinedLink
                   href={securityCouncil.multisig.externalLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-1 border-b border-dashed border-foreground text-sm font-medium text-white duration-300 hover:border-white"
+                  openInNewTab
                 >
                   <Key className="size-3.5 text-tangerine" />
-                  {securityCouncil.multisig.threshold}/
-                  {securityCouncil.multisig.signers}
-                  <span className="hidden font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-foreground duration-300 group-hover:text-white sm:inline">
-                    {" "}
+                  <span className="text-white">
+                    {securityCouncil.multisig.threshold}/
+                    {securityCouncil.multisig.signers}
+                  </span>
+                  <span className="hidden sm:inline">
                     required for transactions
                   </span>
-                  <span className="inline text-foreground duration-300 group-hover:text-white sm:hidden">
-                    {" "}
-                    required
-                  </span>
-                </Link>
+                  <span className="inline sm:hidden"> required</span>
+                </UnderlinedLink>
                 <div className="hidden sm:flex">
                   <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
                 </div>

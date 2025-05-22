@@ -128,7 +128,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
+                <h2 className="text-[24px] font-semibold leading-8 text-white">
                   {daoConfig.name}
                 </h2>
               </div>
@@ -136,7 +136,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 <DaoInfoDropdown
                   defaultValue={{
                     value: "OnChain Gov",
-                    icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
+                    icon: <LinkIcon className="size-3.5 text-white" />,
                     onClick: () => {},
                   }}
                   options={onChainOptions}
@@ -144,7 +144,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 <DaoInfoDropdown
                   defaultValue={{
                     value: "OffChain Gov",
-                    icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
+                    icon: <FilePenLine className="size-3.5 text-white" />,
                     onClick: () => {},
                   }}
                   options={offChainOptions}
@@ -198,7 +198,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
           <DaoAvatarIcon daoId={daoId} className="size-icon-md" isRounded />
-          <h2 className="text-[24px] font-semibold leading-8 text-[#FAFAFA]">
+          <h2 className="text-[24px] font-semibold leading-8 text-white">
             {daoConfig.name}
           </h2>
         </div>
@@ -207,7 +207,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DaoInfoDropdown
               defaultValue={{
                 value: "OnChain Gov",
-                icon: <LinkIcon className="size-3.5 text-[#FAFAFA]" />,
+                icon: <LinkIcon className="size-3.5 text-white" />,
                 onClick: () => {},
               }}
               options={onChainOptions}
@@ -215,7 +215,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DaoInfoDropdown
               defaultValue={{
                 value: "OffChain Gov",
-                icon: <FilePenLine className="size-3.5 text-[#FAFAFA]" />,
+                icon: <FilePenLine className="size-3.5 text-white" />,
                 onClick: () => {},
               }}
               options={offChainOptions}

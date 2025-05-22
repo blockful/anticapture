@@ -4,8 +4,21 @@ const nextConfig = {
     domains: ["euc.li"],
   },
   webpack: (config) => {
-    config.externals.push('pino-pretty');
+    config.externals.push("pino-pretty");
     return config;
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+        ],
+      },
+    ];
   },
 };
 
