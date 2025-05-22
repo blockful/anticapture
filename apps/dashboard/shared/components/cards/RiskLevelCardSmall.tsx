@@ -33,7 +33,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
     pattern: ["bg-middleDark", "bg-middleDark", "bg-middleDark"],
     icon: <CounterClockwiseClockIcon className="size-3.5 text-foreground" />,
   },
-} as const;
+};
 
 const RiskLabel = ({
   status,
