@@ -1,60 +1,44 @@
 "use client";
 
 import Image from "next/image";
+import { Address } from "viem";
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { ArrowRight, CheckCircle2, Loader2, Pencil } from "lucide-react";
+
 import ArbitrumShowSupport from "@/public/show-support/ArbitrumShowSupport.png";
 import ArbitrumShowSupportMobile from "@/public/show-support/ArbitrumShowSupportMobile.png";
 import ArbitrumSupportedDao from "@/public/show-support/ArbitrumSupportedDao.png";
 import ArbitrumSupportedDaoMobile from "@/public/show-support/ArbitrumSupportedDaoMobile.png";
-import { useParams } from "next/navigation";
-import { ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  PetitionResponse,
-  submitPetitionSignature,
-} from "@/features/show-support/hooks/usePetition";
-import { wagmiConfig } from "@/shared/services/wallet/wallet";
-import { signMessage } from "@wagmi/core";
+import { usePetitionSignatures } from "@/features/show-support/hooks/usePetition";
 import { ConnectWallet } from "@/shared/components";
-import { Address } from "viem";
 
 //TODO: Change this card to be more generic and use the daoId to determine the images and texts
 export const CardDaoSignature = ({
-  data,
-  loading,
   isConnected,
   address,
-  refreshData,
 }: {
-  data: PetitionResponse | null;
-  loading: boolean;
   isConnected: boolean;
   address: Address | undefined;
-  refreshData: () => void;
 }) => {
   const { daoId }: { daoId: string } = useParams();
+  const [isSigned, setIsSigned] = useState(false);
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { signatures, isLoading, submitSignature } =
+    usePetitionSignatures(daoIdEnum);
 
   const handleSubmit = async () => {
     if (!address) return;
 
-    const signature = await signMessage(wagmiConfig, {
-      account: address,
-      message: "I support Arbitrum fully integrated into the Anticapture",
-    });
+    await submitSignature(address);
+    setIsSigned(signatures?.signers.includes(address) ?? false);
 
-    try {
-      await submitPetitionSignature(daoIdEnum, signature, address);
-      await refreshData();
-    } catch (error) {
-      console.error("Failed to submit signature:", error);
-    }
+    // try {
+    // } catch (error) {
+    //   console.error("Failed to submit signature:", error);
+    // }
   };
-
-  const isSignedToSupportDao: boolean = data?.userSigned || false;
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="sm:border-light-dark sm:bg-light-dark flex w-full flex-col gap-6 rounded-lg py-8 text-white sm:flex-row sm:gap-10 sm:border sm:p-4">
@@ -62,12 +46,8 @@ export const CardDaoSignature = ({
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
             <Image
-              alt={`${isSignedToSupportDao ? "Show Support Arbitrum" : "Dao Supported"}`}
-              src={
-                isSignedToSupportDao
-                  ? ArbitrumSupportedDao
-                  : ArbitrumShowSupport
-              }
+              alt={`${isSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
+              src={isSigned ? ArbitrumSupportedDao : ArbitrumShowSupport}
               width={156}
               height={156}
               className="h-[156px] w-[156px] shrink-0 object-contain"
@@ -76,17 +56,15 @@ export const CardDaoSignature = ({
         </div>
         <div className="border-light-dark bg-dark flex w-full rounded-md border py-2.5 pr-[15px] pl-3.5 sm:hidden">
           <Image
-            alt={`${isSignedToSupportDao ? "Show Support Arbitrum" : "Dao Supported"}`}
+            alt={`${isSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={
-              isSignedToSupportDao
-                ? ArbitrumSupportedDaoMobile
-                : ArbitrumShowSupportMobile
+              isSigned ? ArbitrumSupportedDaoMobile : ArbitrumShowSupportMobile
             }
             style={{ objectFit: "cover" }}
           />
         </div>
       </div>
-      {!isSignedToSupportDao && (
+      {!isSigned && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
             <h3 className="flex text-[18px] leading-6 font-medium text-white">
@@ -108,18 +86,27 @@ export const CardDaoSignature = ({
               />
             </div>
           )}
-          {isConnected && !isSignedToSupportDao && (
+          {isConnected && !isSigned && (
             <div className="flex">
               <button
                 onClick={handleSubmit}
                 className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               >
-                <Pencil className="size-4" />
-                Sign to support
+                {isLoading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Signing...
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="size-4" />
+                    Sign to support
+                  </>
+                )}
               </button>
             </div>
           )}
-          {isConnected && isSignedToSupportDao && (
+          {isConnected && isSigned && (
             <div className="flex">
               <button className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
                 <CheckCircle2 className="size-4" />
@@ -129,7 +116,7 @@ export const CardDaoSignature = ({
           )}
         </div>
       )}
-      {isSignedToSupportDao && (
+      {isSigned && (
         <div className="flex w-full flex-col justify-center gap-6">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">

@@ -1,92 +1,36 @@
-import { PETITION_ENDPOINT } from "@/shared/utils/server-utils";
-import { DaoIdEnum } from "@/shared/types/daos";
+"use client"
+
+import { Address, createPublicClient, custom, Hex, http, parseAbi } from "viem";
+import { Web3Provider } from "@ethersproject/providers";
+import snapshot from "@snapshot-labs/snapshot.js";
 import useSWR from "swr";
-import { Address, Hex } from "viem";
-import _ from "lodash";
-import { parseQuery } from "@/shared/utils/parseQuery";
-/**
- * Interface for a single petition signature
- */
-export interface PetitionSignature {
-  accountId: Address;
-  daoId: DaoIdEnum;
-  timestamp: string;
-  message: string;
-  signature: string;
-}
+import { multicall } from "viem/actions";
+
+import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfig from "@/shared/dao-config";
+import { getChain } from "@/shared/utils/chain";
+import { walletClient } from "@/shared/services/wallet/wallet";
 
 /**
+ * 
  * Interface for the petition API response
  */
 export interface PetitionResponse {
-  petitionSignatures: PetitionSignature[];
+  signers: Hex[];
   totalSignatures: number;
   totalSignaturesPower: string;
-  latestVoters: string[];
   userSigned: boolean;
 }
 
-/**
- * Interface for the petition signature request body
- */
-export interface PetitionSignatureRequest {
-  accountId: Address;
-  message: string;
-  signature: string;
-}
 
-/**
- * Fetches petition signatures for a specific DAO and user
- * @param daoId - The ID of the DAO to fetch signatures for
- * @param userAddress - The address of the user to check signature status
- * @returns Promise<PetitionResponse> - The petition data with signatures
- */
-const fetchPetitionSignatures = async (
-  daoId: DaoIdEnum,
-  userAddress: Address | undefined,
-): Promise<PetitionResponse> => {
-  const response = await fetch(
-    `${PETITION_ENDPOINT}/petitions/${daoId}?` + parseQuery({ userAddress }),
-  );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch petition data: ${response.statusText}`);
+const GET_SIGNERS_QUERY = /* GraphQL */ `
+  query Votes($proposal: String!) {
+    votes(where: { proposal: $proposal }) {
+      voter
+    }
   }
-  return response.json();
-};
+`;
 
-/**
- * Submits a new petition signature
- * @param daoId - The ID of the DAO to submit the signature for
- * @param signature - The signature to submit
- * @param userAddress - The address of the user submitting the signature
- * @returns Promise<PetitionResponse> - The updated petition data
- */
-export const submitPetitionSignature = async (
-  daoId: DaoIdEnum,
-  signature: Hex,
-  userAddress: Address,
-): Promise<PetitionResponse> => {
-  const requestBody: PetitionSignatureRequest = {
-    accountId: userAddress,
-    message: "I support Arbitrum fully integrated into the Anticapture",
-    signature,
-  };
-
-  const response = await fetch(`${PETITION_ENDPOINT}/petitions/${daoId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to submit petition signature: ${response.statusText}`,
-    );
-  }
-  return response.json();
-};
 
 /**
  * Hook for fetching petition signatures
@@ -96,16 +40,93 @@ export const submitPetitionSignature = async (
  */
 export const usePetitionSignatures = (
   daoId: DaoIdEnum,
-  userAddress: Address | undefined,
 ) => {
-  const key = daoId ? `petitions/${daoId}?userAddress=${userAddress}` : null;
-  return useSWR<PetitionResponse>(
-    key,
-    () => {
-      return fetchPetitionSignatures(daoId, userAddress);
-    },
-    {
-      revalidateOnFocus: false,
-    },
-  );
+
+  const { data: signatures, error, isLoading } = useSWR<PetitionResponse>(
+    "https://hub.snapshot.org/graphql",
+    () => fetchPetitionSignatures()
+  )
+  const snapshotClient = new snapshot.Client712("https://hub.snapshot.org");
+  const config = daoConfig[daoId];
+
+  const client = createPublicClient({
+    chain: getChain(config.daoOverview.chainId),
+    transport: custom(window.ethereum)
+  });
+  /**
+ * Fetches petition signatures for a specific DAO and user
+ * @returns Promise<PetitionResponse> - The petition data with signatures
+ */
+  const fetchPetitionSignatures = async (userAddress?: Address): Promise<PetitionResponse> => {
+    const response = await fetch("https://hub.snapshot.org/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: GET_SIGNERS_QUERY,
+        variables: {
+          proposal: config.showSupport?.snapshotProposal,
+        },
+      }),
+    });
+
+    const { data } = await response.json();
+    const signers = data.votes.map(({ voter }: any) => voter);
+    const tokenAddress = config.daoOverview.contracts.token;
+
+    const votePowers = await multicall(client, {
+      contracts:
+        signers.map((signer: Address) => ({
+          abi: parseAbi(['function getVotes(address account) view returns (uint256)']),
+          address: tokenAddress,
+          functionName: "getVotes",
+          args: [signer]
+        }))
+    })
+
+    const totalSignaturesPower = votePowers.reduce((acc, curr) => acc + Number(curr.result), 0).toString();
+
+    return {
+      signers,
+      totalSignatures: signers.length,
+      totalSignaturesPower,
+      userSigned: signers.includes(userAddress)
+    };
+  };
+
+  /**
+   * Submits a new petition signature through the snapshot API
+   */
+  const submitSignature = async (userAddress: Address) => {
+    const { snapshotProposal: proposal, snapshotSpace: space } = config.showSupport || {};
+    if (!proposal || !space) {
+      throw new Error("Proposal ID not found");
+    }
+
+    try {
+      const web3 = new Web3Provider(walletClient.transport);
+      debugger
+
+      await snapshotClient.vote(web3, userAddress, {
+        proposal,
+        type: "single-choice",
+        choice: "For",
+        space,
+        app: "Anticapture",
+        from: userAddress
+      });
+
+    } catch (error) {
+      console.error(error);
+      debugger
+    }
+  };
+
+  return {
+    signatures,
+    error,
+    isLoading,
+    submitSignature
+  }
 };

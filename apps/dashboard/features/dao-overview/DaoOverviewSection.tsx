@@ -62,13 +62,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Governor",
       icon: <Shield className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview?.contracts?.governor as Address),
+        openEtherscanAddress(daoOverview.contracts?.governor as Address),
     },
     {
       value: "Token",
       icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview?.contracts?.token as Address),
+        openEtherscanAddress(daoOverview.contracts?.token as Address),
     },
   ];
 
@@ -78,7 +78,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       icon: <LightningBoltIcon className="text-tangerine size-4" />,
       onClick: () =>
         window.open(
-          daoOverview?.snapshot as string,
+          daoOverview.snapshot as string,
           "_blank",
           "noopener,noreferrer",
         ),
@@ -87,7 +87,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Token",
       icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview?.contracts?.token as Address),
+        openEtherscanAddress(daoOverview.contracts?.token as Address),
     },
   ];
 
