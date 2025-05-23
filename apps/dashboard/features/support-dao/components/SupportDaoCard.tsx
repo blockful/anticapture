@@ -28,10 +28,9 @@ export const SupportDaoCard = ({
   totalCountSupport?: number;
 }) => {
   // Get petition data internally if not provided externally
-  const { address } = useAccount();
-  const { data: petitionData } = usePetitionSignatures(
+
+  const { signatures: petitionData } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
-    address,
   );
 
   // Use external data if provided, otherwise use petition data
