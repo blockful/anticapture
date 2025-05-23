@@ -117,6 +117,7 @@ export const usePetitionSignatures = (
         space,
         app: "Anticapture",
         from: userAddress,
+        reason: `I support ${config.name} fully integrated into the Anticapture`
       });
 
       mutate(swrKey);
