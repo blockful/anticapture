@@ -4,9 +4,9 @@ import { getDateRange } from "@/shared/utils";
 import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { CardTitle, CardDescription } from "@/shared/components/ui/card";
-import { Info } from "lucide-react";
+import { CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
+import InlineAlert from "../design-system/alerts/inline-alert/InlineAlert";
 
 export const TheSectionLayout = ({
   icon,
@@ -128,14 +128,7 @@ export const TheSectionLayout = ({
           <div className="flex items-center">{switchDate}</div>
         </div>
       )}
-      {infoText && (
-        <CardDescription className="flex w-full items-start gap-2 rounded-lg bg-lightDark p-2 sm:items-center">
-          <div className="mt-0.5 sm:mt-0">
-            <Info className="size-4 w-fit text-white" />
-          </div>
-          <p className="text-sm font-normal text-foreground">{infoText}</p>
-        </CardDescription>
-      )}
+      {infoText && <InlineAlert text={infoText} variant="info" />}
       {children}
     </div>
   );
