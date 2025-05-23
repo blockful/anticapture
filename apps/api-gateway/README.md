@@ -16,7 +16,6 @@ The gateway is configured through environment variables:
 - `DAO_API_*`:
   - URLs for DAO-specific APIs (e.g., `DAO_API_OP=https://api.optimism.dao`)
   - This is based on the `indexer` package which exposes both a graphql API at the root level, and a rest API on the `/docs` path
-- `PETITION_API_URL`: URL for the Petition REST API service
 
 ## Architecture
 

@@ -46,32 +46,6 @@ services:
     networks:
       - backend
 
-  petition-db:
-    image: postgres:16.2
-    ports:
-      - "5433:5432"
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    networks:
-      - backend
-
-  petition:
-    build:
-      context: .
-      dockerfile: apps/petition/Dockerfile
-    ports:
-      - "3100:3100"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@petition-db:5432/postgres
-      - PORT=3100
-    depends_on:
-      - petition-db
-    networks:
-      - backend
-
 networks:
   backend:
     driver: bridge

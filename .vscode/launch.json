@@ -28,28 +28,6 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "petition api",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/apps/petition/src/index.ts",
-      "runtimeExecutable": "tsx",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "env": {
-        "NODE_ENV": "production",
-        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
-        "ENV_FILE": "${workspaceFolder}/apps/petition/.env"
-      },
-      "outFiles": [
-        "${workspaceFolder}/**/*.js",
-        "!**/node_modules/**"
-      ],
-      "cwd": "${workspaceFolder}/apps/petition",
-    },
-    {
-      "type": "node",
-      "request": "launch",
       "name": "ponder api",
       "skipFiles": [
         "<node_internals>/**"
