@@ -1,7 +1,7 @@
 export const daosResolver = {
   resolve: async (root: any, args: any, context: any, info) => {
 
-    if (args.where.id) {
+    if (args?.where?.id) {
       const graphqlClient = context[`graphql_${args.where.id.toUpperCase()}`]?.Query;
       return graphqlClient.daos({
         root,
