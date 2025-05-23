@@ -8,11 +8,25 @@ import { useScreenSize } from "@/shared/hooks";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { RiskLevel } from "@/shared/types/enums";
 
-const riskColors: Record<RiskLevel, string> = {
+const riskBorderColors: Record<RiskLevel, string> = {
   [RiskLevel.HIGH]: "border-error",
   [RiskLevel.MEDIUM]: "border-warning",
   [RiskLevel.LOW]: "border-success",
   [RiskLevel.NONE]: "border-foreground",
+};
+
+const riskBoxStyles: Record<RiskLevel, string> = {
+  [RiskLevel.HIGH]: "bg-error bg-opacity-[12%]",
+  [RiskLevel.MEDIUM]: "bg-warning bg-opacity-[12%]",
+  [RiskLevel.LOW]: "bg-success bg-opacity-[12%]",
+  [RiskLevel.NONE]: "bg-foreground bg-opacity-[12%]",
+};
+
+const riskTextColors: Record<RiskLevel, string> = {
+  [RiskLevel.HIGH]: "text-error",
+  [RiskLevel.MEDIUM]: "text-warning",
+  [RiskLevel.LOW]: "text-success",
+  [RiskLevel.NONE]: "text-foreground",
 };
 
 export const GovernanceImplementationCard = ({
@@ -41,7 +55,7 @@ export const GovernanceImplementationCard = ({
         <div
           className={cn(
             "absolute left-0 top-0 size-3 -translate-x-[1px] -translate-y-[1px] border-l-2 border-t-2",
-            riskColors[field.riskLevel],
+            riskBorderColors[field.riskLevel],
           )}
         />
       )}
@@ -50,7 +64,7 @@ export const GovernanceImplementationCard = ({
         <div
           className={cn(
             "absolute right-0 top-0 size-3 -translate-y-[1px] translate-x-[1px] border-r-2 border-t-2",
-            riskColors[field.riskLevel],
+            riskBorderColors[field.riskLevel],
           )}
         />
       )}
@@ -109,19 +123,43 @@ export const GovernanceImplementationCard = ({
         <div
           className={cn(
             "absolute bottom-0 left-0 size-3 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2",
-            riskColors[field.riskLevel],
+            riskBorderColors[field.riskLevel],
           )}
         />
         {/* corner border */}
         <div
           className={cn(
             "absolute bottom-0 right-0 size-3 translate-x-[1px] translate-y-[1px] border-b-2 border-r-2",
-            riskColors[field.riskLevel],
+            riskBorderColors[field.riskLevel],
           )}
         />
 
-        <div className="pt-1">
-          <p className="text-sm text-foreground">{field.description}</p>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1 pt-1">
+            <p className="font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px] text-[#A1A1AA]">
+              Definition
+            </p>
+            <p className="text-sm text-white">{field.description}</p>
+          </div>
+
+          <div
+            className={cn(
+              "flex w-full flex-col gap-1 rounded-lg p-2",
+              riskBoxStyles[field.riskLevel],
+            )}
+          >
+            <p
+              className={cn(
+                "font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]",
+                riskTextColors[field.riskLevel],
+              )}
+            >
+              Risk explained
+            </p>
+            <p className="text-sm text-white">
+              Uniswap has no vote mutability, configuring high risk for the DAO.
+            </p>
+          </div>
         </div>
       </div>
     </Card>
