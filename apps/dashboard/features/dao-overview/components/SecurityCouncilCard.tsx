@@ -1,9 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
 import { CheckCheck, Key, ShieldCheck } from "lucide-react";
 import { cn } from "@/shared/utils/";
-import Link from "next/link";
 import { TooltipInfo } from "@/shared/components";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import {
@@ -42,19 +40,19 @@ export const SecurityCouncilCard = ({
     <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5">
       <div className="flex w-full justify-between gap-5">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:bg-lightDark sm:p-2">
-            <ShieldCheck className="size-4 text-foreground sm:size-6" />
-            <h3 className="text-xs font-semibold uppercase text-[#FAFAFA] sm:hidden">
+          <div className="sm:bg-light-dark flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
+            <ShieldCheck className="text-foreground size-4 sm:size-6" />
+            <h3 className="text-xs font-semibold text-white uppercase sm:hidden">
               Security Council
             </h3>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
-            <h3 className="hidden text-xs font-semibold uppercase text-[#FAFAFA] sm:block">
+            <h3 className="hidden text-xs font-semibold text-white uppercase sm:block">
               Security Council
             </h3>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
-              <p className="text-sm font-medium text-foreground">Multisig:</p>
-              <div className="flex items-center gap-1.5 rounded-lg bg-dark px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
+              <p className="text-foreground text-sm font-medium">Multisig:</p>
+              <div className="bg-dark flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
                 <div
                   className={cn(
                     "flex items-center gap-1.5",
@@ -73,7 +71,7 @@ export const SecurityCouncilCard = ({
                   href={securityCouncil.multisig.externalLink}
                   openInNewTab
                 >
-                  <Key className="size-3.5 text-tangerine" />
+                  <Key className="text-tangerine size-3.5" />
                   <span className="text-white">
                     {securityCouncil.multisig.threshold}/
                     {securityCouncil.multisig.signers}
@@ -90,10 +88,10 @@ export const SecurityCouncilCard = ({
             </div>
 
             <div className="flex w-full items-center justify-between sm:hidden">
-              <p className="text-sm font-medium text-foreground">Countdown:</p>
+              <p className="text-foreground text-sm font-medium">Countdown:</p>
               <CountdownDaoInfo
                 daoOverview={daoOverview}
-                className="border-none bg-dark"
+                className="bg-dark border-none"
               />
             </div>
           </div>

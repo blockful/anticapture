@@ -25,7 +25,7 @@ export default processConfig({
             name: `rest_${daoName}`,
             handler: {
               openapi: {
-                source: `${value}/docs/json`,
+                source: `${value}/docs`,
               }
             }
           }

@@ -22,7 +22,7 @@ const MessageItem = ({
   onClose: () => void;
 }) => {
   return (
-    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine">
+    <div className="text-tangerine flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm">
       {message.content}
       <button
         onClick={onClose}

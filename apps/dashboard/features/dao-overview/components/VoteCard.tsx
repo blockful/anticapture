@@ -34,7 +34,7 @@ export const VoteCard = ({
 
   const voteData: CardData = {
     title: "Vote",
-    icon: <Pointer className="size-4 text-foreground" />,
+    icon: <Pointer className="text-foreground size-4" />,
     sections: [
       {
         title: "Delay",
@@ -48,8 +48,8 @@ export const VoteCard = ({
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
-                className="cursor-default bg-dark text-white sm:bg-lightDark"
-                icon={<CubeIcon className="size-3.5 text-tangerine" />}
+                className="bg-dark sm:bg-light-dark cursor-default text-white"
+                icon={<CubeIcon className="text-tangerine size-3.5" />}
                 label={
                   isMobile
                     ? formatBlocksToUserReadable(daoData.votingDelay, true)
@@ -57,7 +57,7 @@ export const VoteCard = ({
                 }
               />
             </TooltipTrigger>
-            <TooltipContent className="max-w-md rounded-lg border border-lightDark bg-dark text-center text-white shadow">
+            <TooltipContent className="border-light-dark bg-dark max-w-md rounded-lg border text-center text-white shadow-sm">
               {formatPlural(Number(daoData.votingDelay), "block")}
             </TooltipContent>
           </Tooltip>,

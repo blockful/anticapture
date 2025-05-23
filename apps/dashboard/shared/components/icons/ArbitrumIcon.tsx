@@ -1,4 +1,3 @@
-
 import { DaoIconProps } from "@/shared/components/icons/types";
 
 export const ArbitrumIcon = ({
