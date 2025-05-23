@@ -28,7 +28,7 @@ export const TimelockCard = ({
             switched={daoOverview.rules?.timelock}
             icon={<ExternalLink className="text-foreground size-3.5" />}
             onClick={() =>
-              openEtherscanAddress(daoOverview.contracts?.timelock)
+              openEtherscanAddress(daoOverview.contracts?.timelock as Address)
             }
             key={"switch"}
           />,

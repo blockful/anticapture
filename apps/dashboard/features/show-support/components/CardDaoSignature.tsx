@@ -53,7 +53,7 @@ export const CardDaoSignature = ({
             />
           </div>
         </div>
-        <div className="border-light-dark bg-dark flex w-full rounded-md border py-2.5 pl-3.5 pr-[15px] sm:hidden">
+        <div className="border-light-dark bg-dark flex w-full rounded-md border py-2.5 pr-[15px] pl-3.5 sm:hidden">
           <Image
             alt={`${signatures?.userSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={
@@ -68,7 +68,7 @@ export const CardDaoSignature = ({
       {!signatures?.userSigned && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
-            <h3 className="flex text-[18px] font-medium leading-6 text-white">
+            <h3 className="flex text-[18px] leading-6 font-medium text-white">
               Sign to request Arbitrum DAO DATA
             </h3>
             <p className="text-foreground flex text-sm font-normal">
@@ -83,7 +83,7 @@ export const CardDaoSignature = ({
             <div className="flex">
               <ConnectWallet
                 label="Connect Wallet"
-                className="text-dark! w-fit! border-transparent! bg-[#FAFAFA]! transition-all! duration-1000! ease-in-out! hover:bg-white/70! py-1"
+                className="text-dark! w-fit! border-transparent! bg-[#FAFAFA]! py-1 transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               />
             </div>
           )}
@@ -91,7 +91,7 @@ export const CardDaoSignature = ({
             <div className="flex">
               <button
                 onClick={handleSubmit}
-                className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! transition-all! duration-1000! ease-in-out! hover:bg-white/70! text-sm font-medium"
+                className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               >
                 {isLoading ? (
                   <>
@@ -109,7 +109,7 @@ export const CardDaoSignature = ({
           )}
           {isConnected && signatures?.userSigned && (
             <div className="flex">
-              <button className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! transition-all! duration-1000! ease-in-out! hover:bg-white/70! text-sm font-medium">
+              <button className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
                 <CheckCircle2 className="size-4" />
                 Signed
               </button>
@@ -122,7 +122,7 @@ export const CardDaoSignature = ({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="text-success size-5" />
-              <h3 className="flex text-[18px] font-medium leading-6 text-white">
+              <h3 className="flex text-[18px] leading-6 font-medium text-white">
                 Arbitrum DAO support confirmed
               </h3>
             </div>
