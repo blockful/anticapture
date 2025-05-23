@@ -3,16 +3,16 @@ export type ActiveSupplyQueryResult = {
 };
 
 export type ProposalsCompareQueryResult = {
-  currentProposalsLaunched: string;
-  oldProposalsLaunched: string;
+  currentProposalsLaunched: number;
+  oldProposalsLaunched: number;
 };
 
 export type VotesCompareQueryResult = {
-  currentVotes: string;
-  oldVotes: string;
+  currentVotes: number;
+  oldVotes: number;
 };
 
 export type AverageTurnoutCompareQueryResult = {
-  currentAverageTurnout: string;
-  oldAverageTurnout: string;
+  currentAverageTurnout: number;
+  oldAverageTurnout: number;
 };

@@ -1,7 +1,11 @@
-export enum CoingeckoTokenIdEnum {
-  ENS = "ethereum-name-service",
-  UNI = "uniswap",
-}
+export const CoingeckoTokenIdEnum = {
+  ENS: "ethereum-name-service",
+  UNI: "uniswap",
+  ARB: "arbitrum",
+} as const;
+
+export type CoingeckoTokenId =
+  (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum];
 
 export interface CoingeckoHistoricalMarketData {
   prices: [number, number][];
