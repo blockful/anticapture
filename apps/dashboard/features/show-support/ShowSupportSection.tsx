@@ -13,7 +13,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { isConnected, address } = useAccount();
-  const { signatures } = usePetitionSignatures(daoId);
+  const { signatures } = usePetitionSignatures(daoId, address);
 
   return (
     <TheSectionLayout
