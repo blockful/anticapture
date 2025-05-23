@@ -130,6 +130,7 @@ export function tokenDistribution(
           oldTimestamp,
         );
 
+        /* eslint-disable */
         const changeRate = !oldValue
           ? "0"
           : formatUnits(
@@ -137,6 +138,7 @@ export function tokenDistribution(
             BigInt(1e18),
             18,
           );
+        /* eslint-enable */
 
         return ctx.json(
           {

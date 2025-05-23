@@ -2,7 +2,7 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
 import { DaoIdEnum } from "@/lib/enums";
-import { caseInsensitiveEnum } from "../../middlewares";
+import { caseInsensitiveEnum } from "@/api/middlewares";
 import {
   ActiveSupplyQueryResult,
   ProposalsCompareQueryResult,
@@ -107,8 +107,8 @@ export function governanceActivity(
           content: {
             "application/json": {
               schema: z.object({
-                currentProposalsLaunched: z.string(),
-                oldProposalsLaunched: z.string(),
+                currentProposalsLaunched: z.number(),
+                oldProposalsLaunched: z.number(),
                 changeRate: z.number(),
               }),
             },
@@ -122,11 +122,9 @@ export function governanceActivity(
 
       const data = await repository.getProposalsCompare(daoId, days);
       const changeRate =
-        data.oldProposalsLaunched === "0"
+        data.oldProposalsLaunched === 0
           ? 0
-          : parseFloat(data.currentProposalsLaunched) /
-          parseFloat(data.oldProposalsLaunched) -
-          1;
+          : data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
 
       return context.json({ ...data, changeRate });
     },
@@ -156,8 +154,8 @@ export function governanceActivity(
           content: {
             "application/json": {
               schema: z.object({
-                currentVotes: z.string(),
-                oldVotes: z.string(),
+                currentVotes: z.number(),
+                oldVotes: z.number(),
                 changeRate: z.number(),
               }),
             },
@@ -172,9 +170,7 @@ export function governanceActivity(
       const data = await repository.getVotesCompare(daoId, days);
 
       const changeRate =
-        data.oldVotes === "0"
-          ? 0
-          : parseFloat(data.currentVotes) / parseFloat(data.oldVotes) - 1;
+        data.oldVotes === 0 ? 0 : data.currentVotes / data.oldVotes - 1;
 
       return context.json({ ...data, changeRate }, 200);
     },
@@ -204,8 +200,8 @@ export function governanceActivity(
           content: {
             "application/json": {
               schema: z.object({
-                currentAverageTurnout: z.string(),
-                oldAverageTurnout: z.string(),
+                currentAverageTurnout: z.number(),
+                oldAverageTurnout: z.number(),
                 changeRate: z.number(),
               }),
             },
@@ -219,11 +215,9 @@ export function governanceActivity(
 
       const data = await repository.getAverageTurnoutCompare(daoId, days);
       const changeRate =
-        data.oldAverageTurnout === "0"
+        data.oldAverageTurnout === 0
           ? 0
-          : parseFloat(data.currentAverageTurnout) /
-          parseFloat(data.oldAverageTurnout) -
-          1;
+          : data.currentAverageTurnout / data.oldAverageTurnout - 1;
 
       return context.json({ ...data, changeRate });
     },

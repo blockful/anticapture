@@ -1,12 +1,18 @@
 import { sql } from "ponder";
 import { db } from "ponder:api";
+import {
+  ActiveSupplyQueryResult,
+  AverageTurnoutCompareQueryResult,
+  ProposalsCompareQueryResult,
+  VotesCompareQueryResult,
+} from "../controller/governance-activity/types";
 
 export class DrizzleRepository {
   async getSupplyComparison(
     daoId: string,
     metricType: string,
     oldTimestamp: bigint,
-  ): Promise<{ oldValue: string; currentValue: string }> {
+  ) {
     const query = sql`
       WITH old_data AS (
         SELECT db.average as old_amount
@@ -29,8 +35,10 @@ export class DrizzleRepository {
       LEFT JOIN old_data ON 1=1;
     `;
 
-    const result = await db.execute(query);
-    return result.rows[0] as { oldValue: string; currentValue: string };
+    const result = await db.execute<{ oldValue: string; currentValue: string }>(
+      query,
+    );
+    return result.rows[0];
   }
 
   async getActiveSupply(daoId: string, since: number) {
@@ -40,8 +48,8 @@ export class DrizzleRepository {
       WHERE ap."last_vote_timestamp" > CAST(${since.toString().slice(0, 10)} as bigint)
       AND ap."dao_id" = ${daoId};
     `;
-    const result = await db.execute(query);
-    return result.rows[0] as { activeSupply: string };
+    const result = await db.execute<ActiveSupplyQueryResult>(query);
+    return result.rows[0];
   }
 
   async getProposalsCompare(daoId: string, days: number) {
@@ -65,11 +73,8 @@ export class DrizzleRepository {
       SELECT * FROM current_proposals
       JOIN old_proposals ON 1=1;
     `;
-    const result = await db.execute(query);
-    return result.rows[0] as {
-      oldProposalsLaunched: string;
-      currentProposalsLaunched: string;
-    };
+    const result = await db.execute<ProposalsCompareQueryResult>(query);
+    return result.rows[0];
   }
 
   async getVotesCompare(daoId: string, days: number) {
@@ -92,11 +97,8 @@ export class DrizzleRepository {
       SELECT * FROM current_votes
       JOIN old_votes ON 1=1;
     `;
-    const result = await db.execute(query);
-    return result.rows[0] as {
-      oldVotes: string;
-      currentVotes: string;
-    };
+    const result = await db.execute<VotesCompareQueryResult>(query);
+    return result.rows[0];
   }
 
   async getAverageTurnoutCompare(daoId: string, days: number) {
@@ -122,10 +124,7 @@ export class DrizzleRepository {
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;
     `;
-    const result = await db.execute(query);
-    return result.rows[0] as {
-      oldAverageTurnout: string;
-      currentAverageTurnout: string;
-    };
+    const result = await db.execute<AverageTurnoutCompareQueryResult>(query);
+    return result.rows[0];
   }
 }
