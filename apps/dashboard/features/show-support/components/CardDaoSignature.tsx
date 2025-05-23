@@ -32,12 +32,7 @@ export const CardDaoSignature = ({
     if (!address) return;
 
     await submitSignature(address);
-    setIsSigned(signatures?.signers.includes(address) ?? false);
-
-    // try {
-    // } catch (error) {
-    //   console.error("Failed to submit signature:", error);
-    // }
+    setIsSigned(!!signatures?.signers.includes(address));
   };
 
   return (

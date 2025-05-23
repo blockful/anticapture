@@ -1,15 +1,16 @@
 "use client"
 
-import { Address, createPublicClient, custom, Hex, http, parseAbi } from "viem";
+import { useState } from "react";
+import { Address, createPublicClient, Hex, http, parseAbi } from "viem";
 import { Web3Provider } from "@ethersproject/providers";
 import snapshot from "@snapshot-labs/snapshot.js";
 import useSWR from "swr";
 import { multicall } from "viem/actions";
+import { useWalletClient } from "wagmi";
 
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
 import { getChain } from "@/shared/utils/chain";
-import { walletClient } from "@/shared/services/wallet/wallet";
 
 /**
  * 
@@ -42,6 +43,8 @@ export const usePetitionSignatures = (
   daoId: DaoIdEnum,
 ) => {
 
+  const { data: walletClient } = useWalletClient();
+  const [writeError, setWriteError] = useState<string | null>(null);
   const { data: signatures, error, isLoading } = useSWR<PetitionResponse>(
     "https://hub.snapshot.org/graphql",
     () => fetchPetitionSignatures()
@@ -51,7 +54,7 @@ export const usePetitionSignatures = (
 
   const client = createPublicClient({
     chain: getChain(config.daoOverview.chainId),
-    transport: custom(window.ethereum)
+    transport: http()
   });
   /**
  * Fetches petition signatures for a specific DAO and user
@@ -101,31 +104,29 @@ export const usePetitionSignatures = (
   const submitSignature = async (userAddress: Address) => {
     const { snapshotProposal: proposal, snapshotSpace: space } = config.showSupport || {};
     if (!proposal || !space) {
-      throw new Error("Proposal ID not found");
+      return setWriteError("Proposal ID not found");
     }
 
-    try {
-      const web3 = new Web3Provider(walletClient.transport);
-      debugger
+    if (!walletClient) return setWriteError("Wallet not connected");
 
+    const web3 = new Web3Provider(walletClient.transport);
+    try {
       await snapshotClient.vote(web3, userAddress, {
         proposal,
         type: "single-choice",
-        choice: "For",
+        choice: 1,
         space,
         app: "Anticapture",
         from: userAddress
       });
-
     } catch (error) {
-      console.error(error);
-      debugger
+      return setWriteError("Failed to submit signature");
     }
   };
 
   return {
     signatures,
-    error,
+    error: error || writeError,
     isLoading,
     submitSignature
   }
