@@ -108,7 +108,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4"
+          className="!text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Average
@@ -167,7 +167,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4"
+          className="!text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Variation

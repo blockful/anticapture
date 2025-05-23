@@ -42,21 +42,21 @@ export const ShowYourSupportStickyBar = () => {
           return null;
         }
         return (
-          <div className="fixed bottom-0 left-0 right-4 z-10">
+          <div className="fixed right-4 bottom-0 left-0 z-10">
             <div
               className={cn(
-                "flex flex-col gap-2 border-t border-lightDark bg-darkest py-3 pl-6 text-white sm:flex-row",
+                "border-light-dark bg-darkest flex flex-col gap-2 border-t py-3 pl-6 text-white sm:flex-row",
                 isDesktop ? "ml-[330px]" : "",
               )}
             >
               <span className="text-sm font-normal">{message}</span>
               <button
                 onClick={openConnectModal}
-                className="flex items-center font-mono text-sm font-medium uppercase tracking-[0.06em] text-tangerine transition-colors hover:text-tangerine/90"
+                className="text-tangerine hover:text-tangerine/90 flex items-center font-mono text-sm font-medium tracking-[0.06em] uppercase transition-colors"
               >
                 <span>{buttonText}</span>
                 <ChevronRight
-                  className="ml-1 size-4 text-tangerine"
+                  className="text-tangerine ml-1 size-4"
                   strokeWidth={2}
                 />
               </button>

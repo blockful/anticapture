@@ -60,13 +60,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const onChainOptions = [
     {
       value: "Governor",
-      icon: <Shield className="size-4 text-tangerine" />,
+      icon: <Shield className="text-tangerine size-4" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.governor as Address),
     },
     {
       value: "Token",
-      icon: <TokensIcon className="size-4 text-tangerine" />,
+      icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
@@ -75,7 +75,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const offChainOptions = [
     {
       value: "Snapshot",
-      icon: <LightningBoltIcon className="size-4 text-tangerine" />,
+      icon: <LightningBoltIcon className="text-tangerine size-4" />,
       onClick: () =>
         window.open(
           daoOverview?.snapshot as string,
@@ -85,7 +85,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
     {
       value: "Token",
-      icon: <TokensIcon className="size-4 text-tangerine" />,
+      icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
         openEtherscanAddress(daoOverview?.contracts?.token as Address),
     },
@@ -112,7 +112,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:bg-dark sm:p-5"
+      className="sm:bg-dark flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:p-5"
       ref={ref}
     >
       <div
@@ -128,7 +128,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <h2 className="text-[24px] font-semibold leading-8 text-white">
+                <h2 className="text-[24px] leading-8 font-semibold text-white">
                   {daoConfig.name}
                 </h2>
               </div>
@@ -198,7 +198,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
           <DaoAvatarIcon daoId={daoId} className="size-icon-md" isRounded />
-          <h2 className="text-[24px] font-semibold leading-8 text-white">
+          <h2 className="text-[24px] leading-8 font-semibold text-white">
             {daoConfig.name}
           </h2>
         </div>
@@ -222,7 +222,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
           <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+            <div className="mt-3 mb-3 flex h-full items-center gap-2">
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 CURRENT RESILIENCE STAGE
               </h3>
@@ -247,7 +247,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
           <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
+            <div className="mt-3 mb-3 flex h-full items-center gap-2">
               <h3 className="font-mono text-xs font-medium tracking-wider text-white">
                 RISK AREAS
               </h3>
@@ -268,7 +268,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="w-full">
           {/* Horizontal divider between main info/risk area and Security Council */}
           <div>
-            <div className="my-5 w-full border-t border-lightDark" />
+            <div className="border-light-dark my-5 w-full border-t" />
           </div>
           <div className="hidden h-full w-full sm:flex">
             <SecurityCouncilCard daoOverview={daoOverview} />
@@ -278,25 +278,25 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
         </div>
       )}
-      <div className="my-4 border border-lightDark sm:hidden" />
+      <div className="border-light-dark my-4 border sm:hidden" />
       <div
         id="dao-info-cards"
-        className="flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:border-lightDark sm:pt-5"
+        className="sm:border-light-dark flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:pt-5"
       >
-        <div className="flex w-full sm:border-r sm:border-lightDark">
+        <div className="sm:border-light-dark flex w-full sm:border-r">
           <VoteCard daoOverview={daoOverview} />
         </div>
-        <div className="w-full border-b border-lightDark sm:hidden" />
+        <div className="border-light-dark w-full border-b sm:hidden" />
 
-        <div className="flex w-full sm:border-r sm:border-lightDark">
+        <div className="sm:border-light-dark flex w-full sm:border-r">
           <TimelockCard daoOverview={daoOverview} />
         </div>
-        <div className="w-full border-b border-lightDark sm:hidden" />
+        <div className="border-light-dark w-full border-b sm:hidden" />
 
         <div className="flex w-full">
           <QuorumCard />
         </div>
-        <div className="w-full border-b border-lightDark sm:hidden" />
+        <div className="border-light-dark w-full border-b sm:hidden" />
       </div>
     </div>
   );

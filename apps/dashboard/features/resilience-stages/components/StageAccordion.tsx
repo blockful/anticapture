@@ -120,22 +120,22 @@ const CustomAccordionItem = ({
       <>
         <AccordionTrigger
           className={cn(
-            "group flex w-full items-center justify-between transition-all duration-300 ease-in-out",
+            "group flex w-full cursor-pointer items-center justify-between transition-all duration-300 ease-in-out",
           )}
         >
           <div className="flex w-full items-center gap-2">
             <StageTagSimplified stage={stage} isCompleted={isCompleted} />
             {riskFields.length > 0 && (
               <div className="flex flex-row items-center gap-2">
-                <div className="size-1 rounded-full bg-middleDark" />
+                <div className="bg-middle-dark size-1 rounded-full" />
                 <p className="text-sm font-normal text-white">
                   {`${riskFields.length} issues needs fixing`}
                 </p>
               </div>
             )}
           </div>
-          <Plus className="size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
-          <MinusIcon className="hidden size-4 text-foreground transition-all duration-300 ease-in-out group-data-[state=open]:block" />
+          <Plus className="text-foreground size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
+          <MinusIcon className="text-foreground hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
         </AccordionTrigger>
         {content ? (
           <AccordionContent
@@ -175,7 +175,7 @@ const CustomAccordionItem = ({
           </AccordionContent>
         )}
         {!isLastItem && (
-          <div className="h-px w-full border-b border-lightDark transition-opacity duration-300 ease-in-out" />
+          <div className="border-light-dark h-px w-full border-b transition-opacity duration-300 ease-in-out" />
         )}
       </>
     </AccordionItem>
