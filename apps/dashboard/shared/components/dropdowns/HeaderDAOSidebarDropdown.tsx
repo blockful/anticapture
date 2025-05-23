@@ -124,7 +124,7 @@ export const HeaderDAOSidebarDropdown = () => {
         >
           <div className="flex w-full items-center gap-2">
             <div>{currentItem?.icon}</div>
-            <h1 className="text-[18px] font-medium leading-6 text-[#FAFAFA]">
+            <h1 className="text-[18px] font-medium leading-6 text-white">
               {currentItem?.label}
             </h1>
           </div>

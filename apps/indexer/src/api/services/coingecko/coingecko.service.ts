@@ -1,17 +1,16 @@
 import {
   CoingeckoHistoricalMarketData,
-  CoingeckoTokenIdEnum,
+  CoingeckoTokenId,
   isCoingeckoHistoricalMarketData,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
-import { env } from "@/env";
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
   constructor(private readonly coingeckoApiKey: string) { }
 
   async getHistoricalTokenData(
-    tokenId: CoingeckoTokenIdEnum,
+    tokenId: CoingeckoTokenId,
     days: number = DAYS_IN_YEAR,
   ): Promise<CoingeckoHistoricalMarketData> {
     const response = await fetch(
@@ -29,5 +28,3 @@ export class CoingeckoService {
     return data as CoingeckoHistoricalMarketData;
   }
 }
-
-export const coingeckoService = new CoingeckoService(env.COINGECKO_API_KEY);

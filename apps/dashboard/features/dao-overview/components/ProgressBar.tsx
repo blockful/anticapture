@@ -65,11 +65,11 @@ export const ProgressBar = ({
         <div className="flex w-full items-start justify-between px-2 py-3">
           <div className="flex flex-col justify-center">
             <p className="text-xs font-medium text-foreground">Start</p>
-            <p className="text-sm font-normal text-[#FAFAFA]">{startDate}</p>
+            <p className="text-sm font-normal text-white">{startDate}</p>
           </div>
           <div className="flex flex-col items-end justify-center">
             <p className="text-xs font-medium text-foreground">Expiration</p>
-            <p className="text-sm font-normal text-[#FAFAFA]">{endDate}</p>
+            <p className="text-sm font-normal text-white">{endDate}</p>
           </div>
         </div>
       </div>

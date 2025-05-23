@@ -95,7 +95,7 @@ export const StageContent = ({
                       {issue.description.map((desc, i) => (
                         <div key={i} className="flex flex-row gap-2">
                           <div>
-                            <DotFilledIcon className="size-4 text-[#52525B]" />
+                            <DotFilledIcon className="size-4 text-zinc-600" />
                           </div>
                           <p
                             key={i}
