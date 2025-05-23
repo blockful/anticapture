@@ -23,16 +23,16 @@ export const CardDaoSignature = ({
   address: Address | undefined;
 }) => {
   const { daoId }: { daoId: string } = useParams();
-  const [isSigned, setIsSigned] = useState(false);
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const { signatures, isLoading, submitSignature } =
-    usePetitionSignatures(daoIdEnum);
+  const { signatures, isLoading, submitSignature } = usePetitionSignatures(
+    daoIdEnum,
+    address,
+  );
 
   const handleSubmit = async () => {
     if (!address) return;
 
     await submitSignature(address);
-    setIsSigned(!!signatures?.signers.includes(address));
   };
 
   return (
@@ -41,8 +41,12 @@ export const CardDaoSignature = ({
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
             <Image
-              alt={`${isSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
-              src={isSigned ? ArbitrumSupportedDao : ArbitrumShowSupport}
+              alt={`${signatures?.userSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
+              src={
+                signatures?.userSigned
+                  ? ArbitrumSupportedDao
+                  : ArbitrumShowSupport
+              }
               width={156}
               height={156}
               className="h-[156px] w-[156px] shrink-0 object-contain"
@@ -51,15 +55,17 @@ export const CardDaoSignature = ({
         </div>
         <div className="border-light-dark bg-dark flex w-full rounded-md border py-2.5 pr-[15px] pl-3.5 sm:hidden">
           <Image
-            alt={`${isSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
+            alt={`${signatures?.userSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={
-              isSigned ? ArbitrumSupportedDaoMobile : ArbitrumShowSupportMobile
+              signatures?.userSigned
+                ? ArbitrumSupportedDaoMobile
+                : ArbitrumShowSupportMobile
             }
             style={{ objectFit: "cover" }}
           />
         </div>
       </div>
-      {!isSigned && (
+      {!signatures?.userSigned && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
             <h3 className="flex text-[18px] leading-6 font-medium text-white">
@@ -81,7 +87,7 @@ export const CardDaoSignature = ({
               />
             </div>
           )}
-          {isConnected && !isSigned && (
+          {isConnected && !signatures?.userSigned && (
             <div className="flex">
               <button
                 onClick={handleSubmit}
@@ -101,7 +107,7 @@ export const CardDaoSignature = ({
               </button>
             </div>
           )}
-          {isConnected && isSigned && (
+          {isConnected && signatures?.userSigned && (
             <div className="flex">
               <button className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
                 <CheckCircle2 className="size-4" />
@@ -111,7 +117,7 @@ export const CardDaoSignature = ({
           )}
         </div>
       )}
-      {isSigned && (
+      {signatures?.userSigned && (
         <div className="flex w-full flex-col justify-center gap-6">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
