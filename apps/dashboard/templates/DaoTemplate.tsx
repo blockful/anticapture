@@ -36,7 +36,7 @@ export const DaoTemplate = () => {
   return (
     <DaoPageInteractionProvider>
       {/* <MessageStacker messages={messages} /> */}
-      <div className="flex w-full flex-col items-center gap-5 py-4 sm:gap-2 sm:p-3">
+      <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
