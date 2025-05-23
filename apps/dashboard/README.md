@@ -92,3 +92,5 @@ src/
 kebab for folders
 pascal for components
 camel for functions
+
+storybook
