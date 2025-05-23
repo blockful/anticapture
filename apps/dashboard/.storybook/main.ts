@@ -21,7 +21,15 @@ const config: StorybookConfig = {
     getAbsolutePath("@chromatic-com/storybook"),
     getAbsolutePath("@storybook/experimental-addon-test"),
   ],
-  framework: "@storybook/nextjs",
+  framework: {
+    name: "@storybook/nextjs",
+    options: {
+      nextConfigPath: join(__dirname, "../next.config.ts"),
+      builder: {
+        useSWC: true,
+      },
+    },
+  },
   staticDirs: ["../public"],
 };
 export default config;
