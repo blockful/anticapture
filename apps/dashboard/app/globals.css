@@ -38,6 +38,20 @@
   --text-alternative-xs: 12px;
   --text-alternative-xs--line-height: 16px;
 
+
+  --text-xl: 18px;
+  --text-xl--line-height: 24px;
+
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+
+  --text-md: 14px;
+  --text-md--line-height: 20px;
+
+  --text-sm: 12px;
+  --text-sm--line-height: 16px;
+
+
   @keyframes accordion-down {
     from {
       height: 0;
@@ -72,6 +86,26 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  h1 {
+    @apply text-[40px] leading-[48px] ;
+  }
+
+  h2 {
+    @apply text-[30px] leading-[36px];
+  }
+
+  h3 {
+    @apply text-[24px] leading-[32px];
+  }
+
+  h4 {
+    @apply text-[20px] leading-[28px];
+  }
+
+
+
+
 }
 
 @utility card-container-about {

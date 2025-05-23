@@ -7,10 +7,10 @@ import { ReactNode } from "react";
 import HotjarScript from "@/shared/services/hotjar";
 import { Inter, Roboto_Mono } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
 const roboto = Roboto_Mono({
-  weight: ["400", "500", "700"],
+  weight: ["500"],
   subsets: ["latin"],
   display: "swap",
   variable: "--font-mono",
