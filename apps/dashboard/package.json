@@ -10,7 +10,7 @@
     "test": "jest",
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build --disable-telemetry -o storybook-static"
+    "build-storybook": "storybook build --disable-telemetry -o storybook-static && cp .next/routes-manifest.json storybook-static/"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",

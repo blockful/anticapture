@@ -6,6 +6,9 @@
 .pnp.js
 .yarn/install-state.gz
 
+# Storybook static
+storybook-static/*
+
 # testing
 /coverage
 
