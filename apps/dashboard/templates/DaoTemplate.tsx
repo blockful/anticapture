@@ -14,6 +14,12 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
+import { TelegramBotMessage } from "@/shared/components/messages";
+import { Message, MessageStacker } from "@/widgets";
+import BannerAlert from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { Send } from "lucide-react";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -23,20 +29,34 @@ export const DaoTemplate = () => {
     return null;
   }
 
-  /**
-   * Commented out because the telegram are not implemented yet
+  // Commented out because the telegram are not implemented yet
   const messages: Message[] = [
     {
       id: "telegram-bot",
       content: <TelegramBotMessage />,
     },
   ];
-  */
+
+  const bannerAlertMessage =
+    "RECEIVE REAL-TIME " +
+    daoConstants.name.toUpperCase() +
+    " SECURITY UPDATES.";
 
   return (
     <DaoPageInteractionProvider>
-      {/* <MessageStacker messages={messages} /> */}
+      <MessageStacker messages={messages} />
+
       <div className="flex w-full flex-col items-center gap-5 px-3 py-4 sm:gap-6 sm:p-3">
+        <BannerAlert
+          icon={<Send className="hidden size-4 text-white sm:block" />}
+          text={bannerAlertMessage}
+          link={{
+            url: ANTICAPTURE_TELEGRAM_BOT,
+            text: "JOIN OUR TELEGRAM BOT",
+          }}
+          storageKey={`banner-dismissed-${daoIdEnum}`}
+        />
+
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
