@@ -11,7 +11,7 @@ interface TokenDistributionRepository {
     daoId: string,
     metricType: string,
     oldTimestamp: bigint,
-  ): Promise<{ oldValue: string; currentValue: string }>;
+  ): Promise<{ oldValue: string; currentValue: string } | undefined>;
 }
 
 export function tokenDistribution(
@@ -117,6 +117,12 @@ export function tokenDistribution(
               "application/json": { schema: resultSchema },
             },
           },
+          404: {
+            description: "No data found",
+            content: {
+              "application/json": { schema: z.object({ error: z.string() }) },
+            },
+          },
         },
       }),
       async (ctx) => {
@@ -124,11 +130,17 @@ export function tokenDistribution(
         const { days } = ctx.req.valid("query");
         const oldTimestamp = BigInt(Date.now()) - BigInt(days);
 
-        const { oldValue, currentValue } = await repository.getSupplyComparison(
+        const result = await repository.getSupplyComparison(
           daoId,
           metric,
           oldTimestamp,
         );
+
+        if (!result) {
+          return ctx.json({ error: "No data found" }, 404);
+        }
+
+        const { oldValue, currentValue } = result;
 
         /* eslint-disable */
         const changeRate = !oldValue
