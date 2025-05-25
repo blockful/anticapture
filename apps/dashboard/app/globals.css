@@ -35,10 +35,11 @@
 
   --text-alternative-sm: 13px;
   --text-alternative-sm--line-height: 18px;
+  --text-alternative-sm--letter-spacing: 6%;
 
   --text-alternative-xs: 12px;
   --text-alternative-xs--line-height: 16px;
-
+  --text-alternative-xs--letter-spacing: 6%;
 
   --text-xl: 18px;
   --text-xl--line-height: 24px;
@@ -51,6 +52,7 @@
 
   --text-sm: 12px;
   --text-sm--line-height: 16px;
+
 
 
   @keyframes accordion-down {
@@ -89,24 +91,20 @@
   }
 
   h1 {
-    @apply text-[40px] leading-[48px] ;
+    @apply text-[40px] leading-[44px] tracking-[-1.2%];
   }
 
   h2 {
-    @apply text-[30px] leading-[36px];
+    @apply text-[30px] leading-[36px] tracking-[-0.75%];
   }
 
   h3 {
-    @apply text-[24px] leading-[32px];
+    @apply text-[24px] leading-[32px] tracking-[-0.6%];
   }
 
   h4 {
-    @apply text-[20px] leading-[28px];
+    @apply text-[20px] leading-[28px] tracking-[-0.5%];
   }
-
-
-
-
 }
 
 @utility card-container-about {
