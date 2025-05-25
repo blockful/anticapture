@@ -10,7 +10,7 @@ export function routes(
   petitionService: PetitionService,
 ): (app: FastifyTypedInstance) => void {
   return (app: FastifyTypedInstance) => {
-    app.post(`/petitions/:daoId`, {
+    app.post(`/petitions/{daoId}`, {
       schema: {
         operationId: "signPetition",
         tags: ["Petition"],
@@ -66,7 +66,7 @@ export function routes(
       }
     });
 
-    app.get("/petitions/:daoId", {
+    app.get("/petitions/{daoId}", {
       schema: {
         operationId: "readPetitions",
         tags: ["Petition"],

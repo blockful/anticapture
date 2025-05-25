@@ -15,22 +15,22 @@ export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
   return (
     <Badge
       className={cn(
-        "flex h-full w-full !gap-1.5 !bg-dark bg-opacity-20 !px-2.5 !py-1 sm:!bg-lightDark lg:w-fit",
+        "!bg-background-contrast/20 sm:bg-light-dark! flex h-full w-full gap-1.5! px-2.5! py-1! lg:w-fit",
         {
-          "!cursor-pointer transition-all duration-300 hover:!bg-middleDark":
+          "hover:bg-middle-dark! cursor-pointer! transition-all duration-300":
             item.onClick,
         },
       )}
       onClick={item.onClick}
     >
       {item.switched ? (
-        <CheckCircle2 className="size-3.5 text-success" />
+        <CheckCircle2 className="text-success size-3.5" />
       ) : (
-        <XCircle className="size-3.5 text-error" />
+        <XCircle className="text-error size-3.5" />
       )}
       <p
         className={cn([
-          "text-sm font-medium leading-tight",
+          "text-sm leading-tight font-medium",
           item.switched ? "text-success" : "text-error",
         ])}
       >

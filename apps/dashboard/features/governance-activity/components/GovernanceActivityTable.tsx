@@ -16,6 +16,7 @@ import { useGovernanceActivityContext } from "@/features/governance-activity/con
 import { formatEther } from "viem";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { ReactNode } from "react";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -27,10 +28,7 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const metricDetails: Record<
-  string,
-  { icon: React.ReactNode; tooltip: string }
-> = {
+const metricDetails: Record<string, { icon: ReactNode; tooltip: string }> = {
   Treasury: {
     icon: undefined,
     tooltip:
@@ -110,7 +108,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4"
+          className="!text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Average
@@ -169,7 +167,7 @@ export const GovernanceActivityTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4"
+          className="!text-table-header w-full justify-end px-4"
           onClick={() => column.toggleSorting()}
         >
           Variation

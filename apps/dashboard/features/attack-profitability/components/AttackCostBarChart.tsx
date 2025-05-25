@@ -375,7 +375,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
   return (
     <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
-      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
+      <p className="flex pb-2 text-xs leading-[14px] font-medium text-neutral-50">
         {label}
       </p>
       {item.type === BarChartEnum.STACKED && item.stackedValues ? (
@@ -443,7 +443,7 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
         dy={10}
         textAnchor="middle"
         fill="#A1A1AA"
-        className="text-[12px] font-medium leading-4 sm:text-xs"
+        className="text-[12px] leading-4 font-medium sm:text-xs"
       >
         {firstLine}
       </text>
@@ -454,7 +454,7 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
           dy={28}
           textAnchor="middle"
           fill="#A1A1AA"
-          className="text-[12px] font-medium leading-4 sm:text-xs"
+          className="text-[12px] leading-4 font-medium sm:text-xs"
         >
           {secondLine}
         </text>

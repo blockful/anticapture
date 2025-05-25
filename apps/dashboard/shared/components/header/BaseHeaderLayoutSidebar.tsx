@@ -23,21 +23,21 @@ export const BaseHeaderLayoutSidebar = ({
       {isTablet && !isDesktop && (
         <button
           onClick={toggleSidebar}
-          className={`group fixed left-6 top-6 z-[100] rounded-full border border-lightDark bg-darkest p-2 text-xs transition hover:bg-dark xl:hidden ${
+          className={`group border-light-dark bg-darkest hover:bg-dark fixed top-6 left-6 z-100 rounded-full border p-2 text-xs transition xl:hidden ${
             displaySidebar ? "translate-x-[284px]" : ""
           }`}
         >
           {displaySidebar ? (
-            <ChevronLeft className="size-4 text-middleDark group-hover:text-foreground" />
+            <ChevronLeft className="text-middle-dark group-hover:text-foreground size-4" />
           ) : (
-            <ChevronRight className="size-4 text-middleDark group-hover:text-foreground" />
+            <ChevronRight className="text-middle-dark group-hover:text-foreground size-4" />
           )}
         </button>
       )}
       <div
         className={`${
           isTablet && !isDesktop
-            ? `fixed left-0 top-0 z-[90] h-screen transition-transform xl:absolute xl:translate-x-0 ${
+            ? `fixed top-0 left-0 z-90 h-screen transition-transform xl:absolute xl:translate-x-0 ${
                 displaySidebar ? "translate-x-0" : "-translate-x-[354px]"
               }`
             : "relative"

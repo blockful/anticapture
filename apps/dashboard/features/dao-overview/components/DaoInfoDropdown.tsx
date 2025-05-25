@@ -39,24 +39,23 @@ export const DaoInfoDropdown = ({
           "flex items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
-            "border-transparent bg-lightDark": !isOpen,
+            "bg-light-dark border-transparent": !isOpen,
           },
         )}
       >
         {defaultValue.icon}
-        <span className="whitespace-nowrap text-sm font-normal">
+        <span className="text-sm font-normal whitespace-nowrap">
           {defaultValue.value}
         </span>
         <ChevronDown
-          className={cn(
-            "size-3 flex-shrink-0 transition-transform duration-200",
-            { "rotate-180": isOpen },
-          )}
+          className={cn("size-3 shrink-0 transition-transform duration-200", {
+            "rotate-180": isOpen,
+          })}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
+        <div className="absolute top-full right-0 z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
           {options.map((option) => (
             <button
               key={option.value}
@@ -65,7 +64,7 @@ export const DaoInfoDropdown = ({
                 setIsOpen(false);
               }}
               className={cn(
-                "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-[#FAFAFA] hover:bg-middleDark",
+                "hover:bg-middle-dark flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal whitespace-nowrap text-white",
               )}
             >
               <div className="flex items-center gap-1.5">
