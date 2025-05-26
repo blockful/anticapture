@@ -95,8 +95,7 @@ export const usePetitionSignatures = (
     };
   };
 
-  const swrKey = userAddress ? ["petitionSignatures", userAddress] : null;
-
+  const swrKey: [string, Address?] = ["petitionSignatures", userAddress];
   const { data: signatures, error, isLoading } = useSWR<PetitionResponse>(
     swrKey,
     fetchPetitionSignatures
