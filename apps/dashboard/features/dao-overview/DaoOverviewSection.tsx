@@ -62,7 +62,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Governor",
       icon: <Shield className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview.contracts?.governor as Address),
+        openEtherscanAddress(daoOverview.contracts?.governor),
     },
     {
       value: "Token",
@@ -78,7 +78,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       icon: <LightningBoltIcon className="text-tangerine size-4" />,
       onClick: () =>
         window.open(
-          daoOverview.snapshot as string,
+          daoOverview.snapshot,
           "_blank",
           "noopener,noreferrer",
         ),
