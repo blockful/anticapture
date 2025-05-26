@@ -32,6 +32,7 @@ import {
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { Address } from "viem";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
