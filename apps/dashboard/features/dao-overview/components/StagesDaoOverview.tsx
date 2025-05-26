@@ -73,7 +73,7 @@ export const StagesDaoOverview = ({
           <div className="flex gap-2">
             <span
               className={cn(
-                "font-mono text-sm font-medium tracking-wider uppercase",
+                "font-mono text-sm font-medium uppercase tracking-wider",
                 {
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
@@ -88,7 +88,7 @@ export const StagesDaoOverview = ({
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="group border-foreground cursor-pointer border-b border-dashed font-mono text-sm font-medium text-white duration-300 hover:border-white"
+              className="border-foreground group cursor-pointer border-b border-dashed font-mono text-sm font-medium text-white duration-300 hover:border-white"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >

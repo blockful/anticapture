@@ -77,7 +77,7 @@ export const SwitcherDate = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
           {activeTimeIntervals.map((interval) => (
             <button
               key={interval}

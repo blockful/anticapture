@@ -132,9 +132,9 @@ const RiskAreaCardInternal = ({
               "text-foreground!": risk.level === RiskLevel.NONE,
               "!text-success":
                 risk.level === RiskLevel.LOW && !isActive && !isHovered,
-              "!text-warning":
+              "text-warning!":
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-              "!text-error":
+              "text-error!":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
               "!text-darkest":
                 (isActive && risk.level !== undefined) || isHovered,
@@ -284,7 +284,7 @@ export const RiskAreaCard = ({
         </div>
         <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
           {isActive && (
-            <div className="border-l-middle-dark size-0 border-y-13 border-l-13 border-y-transparent" />
+            <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
         </div>
       </div>

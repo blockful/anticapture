@@ -12,8 +12,8 @@ export default class VotingPowerClient {
     })
     const calls = signers.map((signer) => ({
       address: this.getTokenAddress(daoId),
-      abi: parseAbi(["function balanceOf(address) returns (uint256)"]),
-      functionName: "balanceOf",
+      abi: parseAbi(["function getVotes(address) returns (uint256)"]),
+      functionName: "getVotes",
       args: [signer]
     }));
 
