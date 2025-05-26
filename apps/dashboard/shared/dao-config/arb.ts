@@ -13,10 +13,13 @@ export const ARB: DaoConfiguration = {
   icon: ArbitrumIcon,
   supportStage: SupportStageEnum.ELECTION,
   tokenDistribution: true,
-  showSupport: {
-    snapshotProposal: "0x1247f90c1a13e6a4075611d01902b148e067994a4d4c83882dd0d79553192eb2",
-    snapshotSpace: "pikonha.eth",
-  },
+  showSupport:
+    process.env.NEXT_PUBLIC_ARB_SNAPSHOT_PROPOSAL && process.env.NEXT_PUBLIC_ARB_SNAPSHOT_SPACE
+      ? {
+        snapshotProposal: process.env.NEXT_PUBLIC_ARB_SNAPSHOT_PROPOSAL,
+        snapshotSpace: process.env.NEXT_PUBLIC_ARB_SNAPSHOT_SPACE,
+      }
+      : undefined,
   attackProfitability: {
     riskLevel: undefined,
   },
