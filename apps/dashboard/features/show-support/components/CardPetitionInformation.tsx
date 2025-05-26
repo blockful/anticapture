@@ -10,10 +10,9 @@ import { formatEther } from "viem";
 export const CardPetitionInformation = ({
   data,
 }: {
-  data: PetitionResponse | null;
+  data?: PetitionResponse;
 }) => {
-  const supporters =
-    data?.petitionSignatures.map((signature) => signature.accountId) ?? [];
+  const supporters = data?.signers ?? [];
   return (
     <Card className="border-light-dark sm:bg-dark mb-10 h-[156px] w-full border max-sm:border-0 sm:mb-0 sm:border">
       <div className="flex w-full flex-col sm:flex-row">

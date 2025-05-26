@@ -13,6 +13,7 @@ export const ENS: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
+    chainId: 1,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -233,5 +234,4 @@ export const ENS: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   governanceActivity: false,
-  showSupport: false,
 };
