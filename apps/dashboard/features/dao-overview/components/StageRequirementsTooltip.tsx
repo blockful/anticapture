@@ -25,9 +25,9 @@ export const StageRequirementsTooltip = ({
   onMouseLeave,
 }: StageRequirementsTooltipProps) => {
   const variantIcons: Record<Stage, ReactNode> = {
-    [Stage.ZERO]: <AlertTriangleIcon className="size-4 text-error" />,
-    [Stage.ONE]: <AlertCircleIcon className="size-4 text-warning" />,
-    [Stage.TWO]: <CheckCircleIcon className="size-4 text-success" />,
+    [Stage.ZERO]: <AlertTriangleIcon className="text-error size-4" />,
+    [Stage.ONE]: <AlertCircleIcon className="text-warning size-4" />,
+    [Stage.TWO]: <CheckCircleIcon className="text-success size-4" />,
     [Stage.NONE]: <></>,
   };
   const nextStageTextColor = Array.from([
@@ -42,9 +42,9 @@ export const StageRequirementsTooltip = ({
       onMouseLeave={onMouseLeave}
     >
       {/* Tooltip Arrow */}
-      <div className="sm:translate-x absolute left-1/2 top-[-5px] -mt-1 size-0 border-x-[13px] border-b-[13px] border-x-transparent border-b-darkest" />
+      <div className="sm:translate-x border-b-darkest border-x-13 border-b-13 absolute left-1/2 top-[-5px] -mt-1 size-0 border-x-transparent" />
 
-      <div className="stage-tooltip-box-shadow relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border border-lightDark bg-darkest sm:w-[25vw]">
+      <div className="stage-tooltip-box-shadow border-light-dark bg-darkest relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border sm:w-[25vw]">
         {/* Header */}
         <div className="p-4">
           <div className="flex justify-start">
@@ -68,7 +68,7 @@ export const StageRequirementsTooltip = ({
         </div>
 
         {/* Divider */}
-        <div className="h-px w-full bg-lightDark" />
+        <div className="bg-light-dark h-px w-full" />
 
         {/* Requirements List */}
         <div className="p-4 font-normal">
@@ -80,7 +80,7 @@ export const StageRequirementsTooltip = ({
             {requirements.map((req, index) => (
               <div key={index} className="flex items-center gap-2">
                 {variantIcons[currentStage]}
-                <span className="text-sm text-foreground">{req}</span>
+                <span className="text-foreground text-sm">{req}</span>
               </div>
             ))}
           </div>

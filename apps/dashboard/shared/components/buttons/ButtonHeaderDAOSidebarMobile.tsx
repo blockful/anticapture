@@ -53,9 +53,9 @@ export const ButtonHeaderDAOSidebarMobile = ({
             option.enabled && (
               <TabsTrigger
                 className={cn(
-                  "relative gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium text-foreground",
+                  "text-foreground relative cursor-pointer gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium",
                   "data-[state=active]:text-tangerine",
-                  "after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[1px] after:bg-transparent after:content-['']",
+                  "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
                   "data-[state=active]:after:bg-tangerine",
                 )}
                 key={option.anchorId}

@@ -30,12 +30,12 @@ export const StageContent = ({
 }: StageContentProps) => {
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="flex w-full flex-col gap-4 rounded-md bg-lightDark p-3 sm:flex-row">
+      <div className="bg-light-dark flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white">
+          <h3 className="text-alternative-sm font-mono font-medium uppercase tracking-wide text-white">
             {title}
           </h3>
-          <p className="text-sm font-normal text-foreground">{description}</p>
+          <p className="text-foreground text-sm font-normal">{description}</p>
         </div>
         <div className="flex flex-col gap-4">
           {type === "requirements" && (
@@ -57,7 +57,7 @@ export const StageContent = ({
 
           {type === "requirements" ? (
             <div className="flex flex-row gap-2">
-              <p className="flex flex-wrap text-sm font-normal text-foreground">
+              <p className="text-foreground flex flex-wrap text-sm font-normal">
                 {requirementText}
               </p>
             </div>
@@ -99,7 +99,7 @@ export const StageContent = ({
                           </div>
                           <p
                             key={i}
-                            className="text-sm font-normal text-foreground"
+                            className="text-foreground text-sm font-normal"
                           >
                             {desc}
                           </p>
@@ -108,7 +108,7 @@ export const StageContent = ({
                     </div>
                   </div>
                   {index < issues.length - 1 && (
-                    <div className="border-t border-middleDark" />
+                    <div className="border-middle-dark border-t" />
                   )}
                   {index === issues.length - 1 && <div className="pb-2" />}
                 </div>

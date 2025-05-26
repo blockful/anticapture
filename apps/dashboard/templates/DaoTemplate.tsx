@@ -44,9 +44,10 @@ export const DaoTemplate = () => {
 
   return (
     <DaoPageInteractionProvider>
-      <MessageStacker messages={messages} />
+      {/* <MessageStacker messages={messages} /> */}
 
-      <div className="flex w-full flex-col items-center gap-5 px-3 py-4 sm:gap-6 sm:p-3">
+      {/* <MessageStacker messages={messages} /> */}
+      <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
         <BannerAlert
           icon={<Send className="hidden size-4 text-white sm:block" />}
           text={bannerAlertMessage}
@@ -56,7 +57,6 @@ export const DaoTemplate = () => {
           }}
           storageKey={`banner-dismissed-${daoIdEnum}`}
         />
-
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
