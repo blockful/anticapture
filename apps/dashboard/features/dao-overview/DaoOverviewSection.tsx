@@ -68,7 +68,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Token",
       icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview.contracts?.token as Address),
+        openEtherscanAddress(daoOverview.contracts?.token),
     },
   ];
 
@@ -87,7 +87,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Token",
       icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview.contracts?.token as Address),
+        openEtherscanAddress(daoOverview.contracts?.token),
     },
   ];
 
