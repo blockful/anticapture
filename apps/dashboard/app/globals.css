@@ -7,19 +7,19 @@
 
   --font-mono: var(--font-mono);
 
-  --color-darkest: rgb(from var(--background) r g b);
-  --color-dark: rgb(from var(--card) r g b);
-  --color-middle-dark: rgb(from var(--border) r g b);
-  --color-light-dark: rgb(from var(--muted) r g b);
-  --color-foreground: rgb(from var(--muted-foreground) r g b);
-  --color-icon-secondary: rgb(from var(--ring) r g b);
-  --color-white: rgb(from var(--foreground) r g b);
-  --color-tangerine: rgb(from var(--brand) r g b);
-  --color-error: rgb(from var(--error) r g b);
-  --color-warning: rgb(from var(--warning) r g b);
-  --color-success: rgb(from var(--success) r g b);
-  --color-background-contrast: rgb(from var(--muted) r g b);
-  --color-text-primary: rgb(from var(--primary) r g b);
+  --color-darkest: var(--background);
+  --color-dark: var(--card);
+  --color-middle-dark: var(--border);
+  --color-light-dark: var(--muted);
+  --color-foreground: var(--muted-foreground);
+  --color-icon-secondary: var(--ring);
+  --color-white: var(--foreground);
+  --color-tangerine: var(--brand);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-background-contrast: var(--muted);
+  --color-text-primary: var(--primary);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -191,22 +191,25 @@
     --radius: 0.625rem;
     --background: #ffffff;
     --foreground: #09090b;
-    --muted: #f5f5f6;
-    --muted-foreground: #737373;
+    --muted: #F4F4F5;
+    --muted-foreground: #71717A;
     --card: #ffffff;
     --card-foreground: #09090b;
-    --popover: #ffffff;
-    --popover-foreground: #09090b;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
     --primary: #18181b;
     --primary-foreground: #fafafa;
-    --secondary: #f5f5f6;
+    --secondary: #F4F4F5;
     --secondary-foreground: #18181b;
     --accent: #f4f4f5;
     --accent-foreground: #18181b;
     --destructive: #ef4444;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #a1a1aa;
+    --destructive-foreground: #FAFAFA;
+    --ring: #71717A;
+
+
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
     --sidebar: #fafafa;
     --sidebar-foreground: #09090b;
     --sidebar-primary: #18181b;
@@ -230,12 +233,14 @@
   .dark {
     --background: #09090b;
     --foreground: #fafafa;
-    --muted: #27272a;
+    --muted: #27272A;
     --muted-foreground: #a1a1aa;
-    --card: #18181b;
+    --card: #09090B;
     --card-foreground: #fafafa;
-    --popover: #18181b;
+    --popover: #09090B;
     --popover-foreground: #fafafa;
+    --border: #3f3f46;
+    --input: #3f3f46;
     --primary: #fafafa;
     --primary-foreground: #18181b;
     --secondary: #27272a;
@@ -243,9 +248,11 @@
     --accent: #27272a;
     --accent-foreground: #fafafa;
     --destructive: #7f1d1d;
-    --border: #3f3f46;
-    --input: #3f3f46;
-    --ring: #71717a;
+    --destructive-foreground: #FAFAFA;
+    --ring: #A1A1AA;
+
+
+
     --chart-1: #3b82f6;
     --chart-2: #ec4899;
     --chart-3: #f59e0b;
