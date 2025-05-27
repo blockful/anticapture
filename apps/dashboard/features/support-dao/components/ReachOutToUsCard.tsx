@@ -11,7 +11,7 @@ export const ReachOutToUsCard = () => {
         <div className="flex flex-row items-center">
           <div className="flex items-center gap-2">
             <div className="border-middle-dark bg-light-dark flex size-9 items-center justify-center rounded-full border sm:size-6">
-              <Globe className="text-foreground/70 size-4" />
+              <Globe className="text-secondary/70 size-4" />
             </div>
             <div className="flex flex-col justify-start lg:flex-row lg:items-center lg:gap-1.5">
               <h3 className="text-primary text-sm font-medium">

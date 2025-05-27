@@ -52,13 +52,13 @@ export const ButtonHeaderSidebar = ({
       <Icon
         className={cn("size-4", {
           "text-darkest": isActive(anchorId),
-          "text-foreground group-hover:text-primary": !isActive(anchorId),
+          "text-secondary group-hover:text-primary": !isActive(anchorId),
         })}
       />
       <p
         className={cn("", {
           "text-darkest": isActive(anchorId),
-          "text-foreground group-hover:text-primary": !isActive(anchorId),
+          "text-secondary group-hover:text-primary": !isActive(anchorId),
         })}
       >
         {label}

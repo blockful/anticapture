@@ -33,7 +33,7 @@ export const GovernanceImplementationCard = ({
           <div className="relative flex size-4 shrink-0 items-center justify-center sm:size-6">
             <span
               className={cn(
-                "text-foreground absolute mb-1 text-3xl font-thin transition-all duration-300",
+                "text-secondary absolute mb-1 text-3xl font-thin transition-all duration-300",
                 isOpen ? "rotate-90 opacity-0" : "opacity-100",
               )}
             >
@@ -41,7 +41,7 @@ export const GovernanceImplementationCard = ({
             </span>
             <span
               className={cn(
-                "text-foreground absolute mb-1 text-3xl font-thin transition-all duration-300",
+                "text-secondary absolute mb-1 text-3xl font-thin transition-all duration-300",
                 isOpen ? "opacity-100" : "rotate-90 opacity-0",
               )}
             >
@@ -78,7 +78,7 @@ export const GovernanceImplementationCard = ({
         }}
       >
         <div className="pt-1">
-          <p className="text-foreground text-sm">{field.description}</p>
+          <p className="text-secondary text-sm">{field.description}</p>
         </div>
       </div>
     </Card>

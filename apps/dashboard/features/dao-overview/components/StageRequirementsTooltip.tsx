@@ -80,7 +80,7 @@ export const StageRequirementsTooltip = ({
             {requirements.map((req, index) => (
               <div key={index} className="flex items-center gap-2">
                 {variantIcons[currentStage]}
-                <span className="text-foreground text-sm">{req}</span>
+                <span className="text-secondary text-sm">{req}</span>
               </div>
             ))}
           </div>

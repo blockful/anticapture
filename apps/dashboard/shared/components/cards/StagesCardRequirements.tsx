@@ -49,7 +49,7 @@ export const StagesCardRequirements = ({
   className = "",
 }: StagesCardRequirementsProps) => {
   const stageStyles =
-    STAGE_STYLES[daoStage] || "border-middle-dark text-foreground";
+    STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
 
   return (
     <div>

@@ -98,7 +98,7 @@ export const StagesDaoOverview = ({
                   lowRiskItems.length}{" "}
                 ITEMS
               </span>
-              <span className="text-foreground group-hover:text-primary tracking-wider duration-300">
+              <span className="text-secondary group-hover:text-primary tracking-wider duration-300">
                 {" "}
                 TO STAGE {Number(currentStage) + 1}
               </span>

@@ -39,28 +39,28 @@ export const CountdownDaoInfo = ({
         <span className="m:text-[16px] text-primary text-[14px] leading-5 font-medium">
           {formattedCountdown.days}
         </span>
-        <span className="text-foreground text-xs font-medium">days</span>
+        <span className="text-secondary text-xs font-medium">days</span>
       </div>
       <div className="border-middle-dark h-[85%] items-center border" />
       <div className="s flex items-center gap-1 sm:flex-col sm:gap-0">
         <span className="text-primary text-[14px] leading-5 font-medium sm:text-[16px]">
           {formattedCountdown.hours}
         </span>
-        <span className="text-foreground text-xs font-medium">hours</span>
+        <span className="text-secondary text-xs font-medium">hours</span>
       </div>
       <div className="border-middle-dark h-[85%] items-center border" />
       <div className="s flex items-center gap-1 px-1 sm:flex-col sm:gap-0">
         <span className="text-primary text-[14px] leading-5 font-medium sm:text-[16px]">
           {formattedCountdown.minutes}
         </span>
-        <span className="text-foreground text-xs font-medium">min</span>
+        <span className="text-secondary text-xs font-medium">min</span>
       </div>
       <div className="border-middle-dark h-[85%] items-center border" />
       <div className="s flex items-center gap-1 pr-2 pl-1 sm:flex-col sm:gap-0">
         <span className="text-primary text-[14px] leading-5 font-medium sm:text-[16px]">
           {formattedCountdown.seconds}
         </span>
-        <span className="text-foreground text-xs font-medium">sec</span>
+        <span className="text-secondary text-xs font-medium">sec</span>
       </div>
     </div>
   );

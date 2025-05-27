@@ -33,7 +33,7 @@ export function TooltipInfo({
         aria-label="tooltip-info"
         onClick={handleToggle}
       >
-        <Info className="text-foreground size-3.5 cursor-pointer" />
+        <Info className="text-secondary size-3.5 cursor-pointer" />
       </TooltipTrigger>
       <TooltipContent
         side="top"

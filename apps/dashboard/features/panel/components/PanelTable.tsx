@@ -99,7 +99,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         return (
           <div className="flex min-h-[68px] items-center justify-center gap-3 sm:min-h-0">
-            <p className="scrollbar-none text-foreground flex items-center overflow-auto py-3">
+            <p className="scrollbar-none text-secondary flex items-center overflow-auto py-3">
               {row.index + 1}
             </p>
             {isMobile && details && (

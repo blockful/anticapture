@@ -31,7 +31,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   [RiskLevel.NONE]: {
     color: "foreground",
     pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CounterClockwiseClockIcon className="text-foreground size-3.5" />,
+    icon: <CounterClockwiseClockIcon className="text-secondary size-3.5" />,
   },
 } as const;
 

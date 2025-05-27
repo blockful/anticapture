@@ -87,7 +87,7 @@ export const SupportDaoCard = ({
         <div className="flex flex-row items-center gap-2">
           <div className="hidden sm:flex">{supportersInfo}</div>
           <div className="flex flex-row items-center p-2">
-            <ChevronRight className="text-foreground size-4" />
+            <ChevronRight className="text-secondary size-4" />
           </div>
         </div>
       </div>

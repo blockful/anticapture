@@ -129,7 +129,7 @@ export const HeaderDAOSidebarDropdown = () => {
             </h1>
           </div>
           <div>
-            <ChevronsUpDown className="text-foreground size-5" />
+            <ChevronsUpDown className="text-secondary size-5" />
           </div>
         </button>
       </div>
@@ -163,7 +163,7 @@ export const HeaderDAOSidebarDropdown = () => {
                 <h1
                   className={cn(
                     "text-primary text-sm font-normal",
-                    item.isDisabled && "text-foreground opacity-75",
+                    item.isDisabled && "text-secondary opacity-75",
                   )}
                 >
                   {item.label}

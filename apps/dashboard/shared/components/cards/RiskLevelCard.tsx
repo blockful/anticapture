@@ -31,7 +31,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   [RiskLevel.NONE]: {
     color: "foreground",
     pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CounterClockwiseClockIcon className="text-foreground size-4" />,
+    icon: <CounterClockwiseClockIcon className="text-secondary size-4" />,
   },
 } as const;
 
@@ -45,7 +45,7 @@ const RiskLabel = ({
   icon: ReactNode;
 }) => (
   <div className="bg-light-dark flex h-full flex-row gap-1 rounded-l-full px-2">
-    <p className="text-foreground flex items-center text-xs font-medium">
+    <p className="text-secondary flex items-center text-xs font-medium">
       Risk level:
     </p>
     <p

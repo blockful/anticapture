@@ -41,7 +41,7 @@ export const SecurityCouncilCard = ({
       <div className="flex w-full justify-between gap-5">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="sm:bg-light-dark flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
-            <ShieldCheck className="text-foreground size-4 sm:size-6" />
+            <ShieldCheck className="text-secondary size-4 sm:size-6" />
             <p className="text-primary text-xs font-semibold uppercase sm:hidden">
               Security Council
             </p>
@@ -51,7 +51,7 @@ export const SecurityCouncilCard = ({
               Security Council
             </h3>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
-              <p className="text-foreground text-sm font-medium">Multisig:</p>
+              <p className="text-secondary text-sm font-medium">Multisig:</p>
               <div className="flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
                 <div
                   className={cn(
@@ -88,7 +88,7 @@ export const SecurityCouncilCard = ({
             </div>
 
             <div className="flex w-full items-center justify-between sm:hidden">
-              <p className="text-foreground text-sm font-medium">Countdown:</p>
+              <p className="text-secondary text-sm font-medium">Countdown:</p>
               <CountdownDaoInfo
                 daoOverview={daoOverview}
                 className="bg-dark border-none"

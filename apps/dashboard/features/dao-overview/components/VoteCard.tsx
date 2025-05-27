@@ -34,7 +34,7 @@ export const VoteCard = ({
 
   const voteData: CardData = {
     title: "Vote",
-    icon: <Pointer className="text-foreground size-4" />,
+    icon: <Pointer className="text-secondary size-4" />,
     sections: [
       {
         title: "Delay",

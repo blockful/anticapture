@@ -137,8 +137,8 @@ const CustomAccordionItem = ({
               </div>
             )}
           </div>
-          <Plus className="text-foreground size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
-          <MinusIcon className="text-foreground hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
+          <Plus className="text-secondary size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
+          <MinusIcon className="text-secondary hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
         </AccordionTrigger>
         {content ? (
           <AccordionContent

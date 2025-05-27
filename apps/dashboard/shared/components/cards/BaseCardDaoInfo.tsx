@@ -49,7 +49,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
         {data.sections.map((section, index) => (
           <div key={index} className="flex justify-between gap-2 sm:flex-col">
             <div className="flex w-full items-center gap-1.5">
-              <p className="text-foreground text-sm font-normal">
+              <p className="text-secondary text-sm font-normal">
                 {section.title}
               </p>
               {section.tooltip && <TooltipInfo text={section.tooltip} />}

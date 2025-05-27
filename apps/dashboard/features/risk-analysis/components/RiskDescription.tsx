@@ -48,7 +48,7 @@ export const RiskDescription = ({
 
         {/* Description paragraphs */}
         {descriptionArray.map((paragraph, index) => (
-          <p key={index} className="text-foreground text-sm">
+          <p key={index} className="text-secondary text-sm">
             {paragraph}
           </p>
         ))}
@@ -60,13 +60,13 @@ export const RiskDescription = ({
             <div className="bg-light-dark h-px w-full" />
 
             <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wider">
-              <span className="text-foreground">{`//`}</span> REQUIREMENTS
+              <span className="text-secondary">{`//`}</span> REQUIREMENTS
             </h3>
             <ul className="space-y-2">
               {requirements.map((requirement, index) => (
                 <li key={index} className="flex items-center gap-2">
                   {iconsMapping[requirement.riskLevel]}
-                  <span className="text-foreground text-sm">
+                  <span className="text-secondary text-sm">
                     {requirement.name}
                   </span>
                 </li>

@@ -35,7 +35,7 @@ export const StageContent = ({
           <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wide uppercase">
             {title}
           </h3>
-          <p className="text-foreground text-sm font-normal">{description}</p>
+          <p className="text-secondary text-sm font-normal">{description}</p>
         </div>
         <div className="flex flex-col gap-4">
           {type === "requirements" && (
@@ -57,7 +57,7 @@ export const StageContent = ({
 
           {type === "requirements" ? (
             <div className="flex flex-row gap-2">
-              <p className="text-foreground flex flex-wrap text-sm font-normal">
+              <p className="text-secondary flex flex-wrap text-sm font-normal">
                 {requirementText}
               </p>
             </div>
@@ -99,7 +99,7 @@ export const StageContent = ({
                           </div>
                           <p
                             key={i}
-                            className="text-foreground text-sm font-normal"
+                            className="text-secondary text-sm font-normal"
                           >
                             {desc}
                           </p>

@@ -18,16 +18,16 @@ export const CardPetitionInformation = ({
       <div className="flex w-full flex-col sm:flex-row">
         <div className="border-light-dark flex w-full justify-between gap-2 border border-t border-l-0 p-4 max-sm:border-r-0 max-sm:border-b sm:w-1/2 sm:border-t-0 sm:border-r sm:border-b-0">
           <div className="flex items-center gap-2">
-            <p className="text-md text-foreground">Total Supporters</p>
+            <p className="text-md text-secondary">Total Supporters</p>
             <TooltipInfo text="The total number of supporters who have voted in the petition." />
           </div>
-          <p className="text-md text-foreground">
+          <p className="text-md text-secondary">
             {data?.totalSignatures ?? "-"}
           </p>
         </div>
         <div className="border-light-dark flex w-full justify-between gap-2 border border-t-0 border-r-0 border-b border-l-0 p-4 sm:w-1/2 sm:border-b-0">
           <div className="flex items-center gap-2">
-            <p className="text-md text-foreground">Supporters Voting Power</p>
+            <p className="text-md text-secondary">Supporters Voting Power</p>
             <TooltipInfo text="The total voting power of all supporters who have voted in the petition." />
           </div>
           <p className="text-md text-primary">

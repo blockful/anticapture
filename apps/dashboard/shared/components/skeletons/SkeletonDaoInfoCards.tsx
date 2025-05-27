@@ -29,7 +29,7 @@ export const SkeletonDaoInfoCards = () => {
             className="flex min-h-[32px] justify-between gap-2 sm:flex-col"
           >
             <div className="flex w-full items-center gap-1.5">
-              <h1 className="text-foreground text-sm font-normal">
+              <h1 className="text-secondary text-sm font-normal">
                 <div className="h-4 w-16 animate-pulse rounded-sm bg-gray-700/50" />
               </h1>
               <div className="size-3 animate-pulse rounded-full bg-gray-700/50" />

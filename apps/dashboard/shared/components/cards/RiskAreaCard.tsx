@@ -130,7 +130,7 @@ const RiskAreaCardInternal = ({
         >
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
-              "!text-foreground": risk.level === RiskLevel.NONE,
+              "!text-secondary": risk.level === RiskLevel.NONE,
               "!text-success":
                 risk.level === RiskLevel.LOW && !isActive && !isHovered,
               "!text-warning":
@@ -157,7 +157,7 @@ const RiskAreaCardInternal = ({
             riskLevelIcons[risk.level as RiskLevel]
           ) : (
             <div className="flex items-center justify-center font-mono text-xs">
-              <CounterClockwiseClockIcon className="text-foreground size-4 sm:size-5" />
+              <CounterClockwiseClockIcon className="text-secondary size-4 sm:size-5" />
             </div>
           )}
         </div>

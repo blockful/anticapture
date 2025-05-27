@@ -71,7 +71,7 @@ export const CardDaoSignature = ({
             <h3 className="text-primary flex text-[18px] leading-6 font-medium">
               Sign to request Arbitrum DAO DATA
             </h3>
-            <p className="text-foreground flex text-sm font-normal">
+            <p className="text-secondary flex text-sm font-normal">
               By signing, we do not collect any information, and the only
               signature involved is related to a message, which carries no risk.
               This helps us understand how many members and delegates are
@@ -126,14 +126,14 @@ export const CardDaoSignature = ({
                 Arbitrum DAO support confirmed
               </h3>
             </div>
-            <p className="text-foreground flex text-sm font-normal">
+            <p className="text-secondary flex text-sm font-normal">
               Thanks for your support, it helps us track interest in Arbitrum
               DAO data. No personal information was collected, and the signature
               was only for this request.
             </p>
           </div>
           <div className="flex w-full flex-col gap-1.5">
-            <p className="text-foreground flex text-sm font-semibold">
+            <p className="text-secondary flex text-sm font-semibold">
               Want to continue the conversation on governance risks with other
               DAO decision-makers?
             </p>
