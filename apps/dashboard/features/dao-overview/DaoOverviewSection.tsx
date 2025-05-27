@@ -10,7 +10,6 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { Address } from "viem";
 import { useInView } from "react-intersection-observer";
 import { useScreenSize } from "@/shared/hooks";
 import { useEffect } from "react";
@@ -33,6 +32,7 @@ import {
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { Address } from "viem";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -62,13 +62,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Governor",
       icon: <Shield className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview?.contracts?.governor as Address),
+        openEtherscanAddress(daoOverview.contracts?.governor as Address),
     },
     {
       value: "Token",
       icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview?.contracts?.token as Address),
+        openEtherscanAddress(daoOverview.contracts?.token as Address),
     },
   ];
 
@@ -78,7 +78,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       icon: <LightningBoltIcon className="text-tangerine size-4" />,
       onClick: () =>
         window.open(
-          daoOverview?.snapshot as string,
+          daoOverview.snapshot as string,
           "_blank",
           "noopener,noreferrer",
         ),
@@ -87,7 +87,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       value: "Token",
       icon: <TokensIcon className="text-tangerine size-4" />,
       onClick: () =>
-        openEtherscanAddress(daoOverview?.contracts?.token as Address),
+        openEtherscanAddress(daoOverview.contracts?.token as Address),
     },
   ];
 

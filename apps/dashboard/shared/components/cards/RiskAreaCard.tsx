@@ -8,6 +8,7 @@ import { cn } from "@/shared/utils/";
 import { RiskTooltipCard } from "@/shared/components";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
+import { useScreenSize } from "@/shared/hooks";
 
 export type RiskArea = {
   name: string;
@@ -129,7 +130,7 @@ const RiskAreaCardInternal = ({
         >
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
-              "text-foreground!": risk.level === RiskLevel.NONE,
+              "!text-foreground": risk.level === RiskLevel.NONE,
               "!text-success":
                 risk.level === RiskLevel.LOW && !isActive && !isHovered,
               "!text-warning":
@@ -245,6 +246,8 @@ export const RiskAreaCard = ({
     description: "Risk description not available.",
   };
 
+  const { isTablet } = useScreenSize();
+
   const modifiedRiskArea = {
     ...riskArea,
     content: riskInfo.titleAbbreviation,
@@ -261,7 +264,7 @@ export const RiskAreaCard = ({
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
-            onClick={onClick}
+            onClick={isTablet ? onClick : () => {}}
             variant={variant}
           />
         </div>
@@ -284,7 +287,7 @@ export const RiskAreaCard = ({
         </div>
         <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
           {isActive && (
-            <div className="border-l-middle-dark size-0 border-y-13 border-l-13 border-y-transparent" />
+            <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
         </div>
       </div>

@@ -7,7 +7,6 @@ export type User = {
 };
 
 export const BACKEND_ENDPOINT = process.env.NEXT_PUBLIC_BASE_URL;
-export const PETITION_ENDPOINT = process.env.NEXT_PUBLIC_PETITION_URL;
 
 export const bulkGetEnsName = async (addresses: Address[]) => {
   const names = [];

@@ -8,7 +8,7 @@ import {
   CountdownDaoInfo,
   ProgressBar,
 } from "@/features/dao-overview/components";
-import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link";
+import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
 
 export const SecurityCouncilCard = ({
   daoOverview,

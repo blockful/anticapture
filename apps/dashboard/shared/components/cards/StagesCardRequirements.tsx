@@ -95,7 +95,7 @@ const Title = ({
   return (
     <h3
       className={cn([
-        "mb-2 font-mono text-xs leading-4 font-medium tracking-wider uppercase",
+        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
         STAGE_STYLES[daoStage],
       ])}
     >
@@ -106,7 +106,7 @@ const Title = ({
 
 const Description = ({ children }: { children: ReactNode }) => {
   return (
-    <p className="font-inter mb-4 text-sm leading-5 font-normal text-white">
+    <p className="font-inter mb-4 text-sm font-normal leading-5 text-white">
       {children}
     </p>
   );
@@ -127,7 +127,7 @@ const Issue = ({
       {daoStage === Stage.ONE && (
         <AlertCircle className="text-warning size-4" />
       )}
-      <span className="font-inter text-sm leading-5 font-normal text-white">
+      <span className="font-inter text-sm font-normal leading-5 text-white">
         {children}
       </span>
     </div>

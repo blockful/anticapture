@@ -32,7 +32,7 @@ export const StageTag = ({
     <div
       className={`bg-surface-contrast inline-flex rounded-lg border p-2 py-1 ${stageStyles} ${className}`}
     >
-      <span className="text-alternative-sm font-mono leading-[18px] font-medium whitespace-nowrap">
+      <span className="text-alternative-sm whitespace-nowrap font-mono font-medium leading-[18px]">
         <span className="hidden sm:inline">STAGE </span>
 
         {showStageText && <span className="inline sm:hidden">STAGE </span>}

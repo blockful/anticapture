@@ -44,7 +44,7 @@ const ChartLegend = ({
     {items.map((item) => (
       <div key={item.label} className="flex items-center gap-2">
         <span
-          className="size-2 rounded-xs"
+          className="rounded-xs size-2"
           style={{ backgroundColor: item.color }}
         />
         <span className="text-foreground text-sm font-medium">
