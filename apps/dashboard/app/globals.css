@@ -15,11 +15,16 @@
  * - base-warning: Warning state color
  * - base-success: Success state color
  * 
+ * Icon Colors:
+ * Follow the same color as the text color except for the following:
+ * - dimmed: --color-icon-secondary
+ * - highlight: --color-icon-primary
+ * 
  * Design System Integration
  * ------------------------
  * The default shadcn-ui colors have been modified to align with our design system.
  * 
- * @dev TODO: 
+ * @dev TODO when adding new colors: 
  * - Review and update colors against Figma design system
  * - Ensure color consistency across all components
  * - Document any color modifications from default shadcn-ui
@@ -39,9 +44,6 @@
   --color-light-dark: var(--base-muted);
   --color-icon-secondary: var(--base-ring);
   --color-tangerine: var(--base-brand);
-  /* --color-error: var(--base-error); */
-  /* --color-warning: var(--base-warning); */
-  /* --color-success: var(--base-success); */
   --color-background-contrast: var(--base-muted);
   --color-text-primary: var(--base-primary);
 
@@ -55,7 +57,35 @@
   --color-error: var(--base-error);
   --color-link: var(--base-brand);
   --color-link-hover: var(--base-brand);
-  
+
+  /* Icon Colors*/
+  --color-dimmed: var(--base-dimmed);
+  --color-highlight: var(--base-brand);
+
+  /* Surface Colors */
+  --color-surface-background: var(--base-background);
+  --color-surface-default: var(--base-primary-foreground);
+  --color-surface-contrast: var(--base-muted);
+  --color-surface-hover: var(--base-border);
+  --color-surface-action: var(--base-primary);
+  --color-surface-action-hover: var(--base-primary-opacity);
+  --color-surface-destructive: var(--base-destructive);
+  --color-surface-destructive-hover: var(--base-destructive-hover);
+  --color-surface-disabled: var(--base-muted);
+
+  /* Light Surface Colors */
+  --color-surface-success: var(--base-success-opacity);
+  --color-surface-warning: var(--base-warning-opacity);
+  --color-surface-error: var(--base-error-opacity);
+  --color-surface-brand: var(--base-brand-opacity);
+  --color-surface-opacity: var(--base-primary-opacity);
+
+  /* Dark Surface Colors */
+  --color-surface-success: var(--base-success-opacity);
+  --color-surface-warning: var(--base-warning-opacity);
+  --color-surface-error: var(--base-error-opacity);
+  --color-surface-brand: var(--base-brand-opacity);
+
 
   /* Icon Sizes */
   --size-icon-xxs: 16px;
@@ -86,16 +116,6 @@
   --text-sm: 12px;
   --text-sm--line-height: 16px;
 
-  /* Surface Colors */
-  --color-surface-background: var(--base-background);
-  --color-surface-default: var(--base-primary-foreground);
-  --color-surface-contrast: var(--base-muted);
-  --color-surface-hover: var(--base-border);
-  --color-surface-action: var(--base-primary);
-  --color-surface-action-hover: var(--base-white/90);
-  --color-surface-success: var(--base-success/12);
-  --color-surface-warning: var(--base-warning/12);  
-  --color-surface-error: var(--base-error/12);
   
 
   @keyframes accordion-down {
@@ -254,8 +274,6 @@
     --base-destructive: #ef4444;
     --base-destructive-foreground: #FAFAFA;
     --base-ring: #71717A;
-
-
     --base-popover: #ffffff;
     --base-popover-foreground: #09090b;
     --base-sidebar: #fafafa;
@@ -273,10 +291,23 @@
     --base-chart-5: #10b981;
     --base-chart-6: #06b6d4;
     --base-chart-7: #fbbf24;
-    --base-error: #f87171;
-    --base-warning: #facc15;
-    --base-success: #4ade80;
+
+    /* Custom Colors */
+    --base-primary-opacity: #FAFAFA1F;
+    --base-primary-opacity-darker: #FAFAFAB3;
     --base-brand: #ec762e;
+    --base-brand-lighter: #FB8F4D;
+    --base-brand-opacity: #FB8F4D1F;
+    --base-success: #4ade80;
+    --base-success-opacity: #4ade801F;
+    --base-warning: #facc15;
+    --base-warning-opacity: #facc151F;
+    --base-error: #f87171;
+    --base-error-opacity: #f871711F;
+    --base-destructive-hover: #F87171;
+    --base-dimmed: #A1A1AA;
+
+
   }
 
   .dark {
@@ -300,8 +331,6 @@
     --base-destructive-foreground: #FAFAFA;
     --base-ring: #A1A1AA;
 
-
-
     --base-chart-1: #3b82f6;
     --base-chart-2: #ec4899;
     --base-chart-3: #f59e0b;
@@ -309,9 +338,21 @@
     --base-chart-5: #10b981;
     --base-chart-6: #06b6d4;
     --base-chart-7: #fbbf24;
-    --base-error: #f87171;
-    --base-warning: #facc15;
-    --base-success: #4ade80;
+
+    /* Custom Colors */
+    --base-primary-opacity: #FAFAFA1F;
+    --base-primary-opacity-darker: #FAFAFAB3;
     --base-brand: #ec762e;
+    --base-brand-lighter: #FB8F4D;
+    --base-brand-opacity: #FB8F4D1F;
+    --base-success: #4ade80;
+    --base-success-opacity: #4ade801F;
+    --base-warning: #facc15;
+    --base-warning-opacity: #facc151F;
+    --base-error: #f87171;
+    --base-error-opacity: #f871711F;
+    --base-destructive-hover: #991B1B;
+    --base-dimmed: #52525B;
+
   }
 }
