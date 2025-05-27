@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* 
+ * Theme Configuration
+ * ==================
+ * 
+ * Base Theme: Zinc (shadcn/ui)
+ * Documentation: https://ui.shadcn.com/docs/theming#zinc
+ * 
+ * Custom Color Extensions
+ * ----------------------
+ * The following colors extend the default shadcn/ui palette:
+ * - base-brand: Primary brand color
+ * - base-error: Error state color
+ * - base-warning: Warning state color
+ * - base-success: Success state color
+ * 
+ * Design System Integration
+ * ------------------------
+ * The default shadcn-ui colors have been modified to align with our design system.
+ * 
+ * @dev TODO: 
+ * - Review and update colors against Figma design system
+ * - Ensure color consistency across all components
+ * - Document any color modifications from default shadcn-ui
+ */
+ 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -18,13 +43,23 @@
   --color-icon-secondary: var(--base-ring);
   --color-white: var(--base-foreground);
   --color-tangerine: var(--base-brand);
-  --color-error: var(--base-error);
-  --color-warning: var(--base-warning);
-  --color-success: var(--base-success);
+  /* --color-error: var(--base-error); */
+  /* --color-warning: var(--base-warning); */
+  /* --color-success: var(--base-success); */
   --color-background-contrast: var(--base-muted);
   --color-text-primary: var(--base-primary);
 
 
+  /* Design System Colors */
+  --color-primary: var(--base-primary);
+  --color-secondary: var(--base-muted-foreground);
+  --color-inverted: var(--base-background);
+  --color-success: var(--base-success);
+  --color-warning: var(--base-warning);
+  --color-error: var(--base-error);
+  --color-link: var(--base-brand);
+  --color-link-hover: var(--base-brand);
+  
 
   /* Icon Sizes */
   --size-icon-xxs: 16px;
