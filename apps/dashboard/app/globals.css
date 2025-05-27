@@ -41,7 +41,6 @@
   --color-light-dark: var(--base-muted);
   --color-foreground: var(--base-muted-foreground);
   --color-icon-secondary: var(--base-ring);
-  --color-white: var(--base-foreground);
   --color-tangerine: var(--base-brand);
   /* --color-error: var(--base-error); */
   /* --color-warning: var(--base-warning); */
@@ -172,7 +171,7 @@
   }
 
   .btn-connect-wallet {
-    @apply bg-light-dark hover:border-light-dark flex size-9 w-full items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-white hover:border hover:bg-transparent;
+    @apply bg-light-dark hover:border-light-dark flex size-9 w-full items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-primary hover:border hover:bg-transparent;
   }
 
   .card-text-accordion {
