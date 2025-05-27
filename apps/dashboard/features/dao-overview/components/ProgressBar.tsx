@@ -42,14 +42,14 @@ export const ProgressBar = ({
           className="bg-tangerine group absolute left-0 z-20 h-full transition-all duration-300"
           style={{ width: `${progress}%` }}
         >
-          <div className="border-darkest bg-tangerine absolute -top-[5px] -right-1.5 size-[21px] rounded-full border-2 p-2">
+          <div className="bg-tangerine absolute -top-[5px] -right-1.5 size-[21px] rounded-full border-2 border-[#18181B] p-2">
             <div className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border bg-white" />
           </div>
         </div>
 
         {warning && warning > 0 && (
           <div
-            className="border-darkest bg-light-dark absolute -top-2.5 -right-1.5 z-20 size-8 rounded-full border-2 p-2"
+            className="bg-light-dark absolute -top-2.5 -right-1.5 z-20 size-8 rounded-full border-2 border-[#18181B] p-2"
             style={{ left: `${warning}%` }}
           >
             <AlertTriangle className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-red-500" />

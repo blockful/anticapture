@@ -41,9 +41,6 @@ export const StageRequirementsTooltip = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Tooltip Arrow */}
-      <div className="sm:translate-x border-b-darkest absolute top-[-5px] left-1/2 -mt-1 size-0 border-x-13 border-b-13 border-x-transparent" />
-
       <div className="stage-tooltip-box-shadow border-light-dark bg-surface-background relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border sm:w-[25vw]">
         {/* Header */}
         <div className="p-4">

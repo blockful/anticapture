@@ -35,7 +35,6 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
   /* Old System Colors */
-  --color-darkest: var(--base-background);
   --color-dark: var(--base-card);
   --color-middle-dark: var(--base-border);
   --color-light-dark: var(--base-muted);
