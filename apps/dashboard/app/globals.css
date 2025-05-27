@@ -35,7 +35,6 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
   /* Old System Colors */
-  --color-dark: var(--base-card);
   --color-middle-dark: var(--base-border);
   --color-light-dark: var(--base-muted);
   --color-icon-secondary: var(--base-ring);
@@ -137,7 +136,7 @@
   }
 
   .card-container-about {
-    @apply border-light-dark bg-dark xl4k:max-w-full flex flex-col rounded-lg border shadow-sm sm:max-w-full lg:max-w-[250px];
+    @apply border-light-dark bg-surface-default xl4k:max-w-full flex flex-col rounded-lg border shadow-sm sm:max-w-full lg:max-w-[250px];
   }
 
   .card-header-about {
