@@ -43,14 +43,14 @@ export const RiskTooltipCard = ({
   const content = (
     <div onClick={(e) => e.stopPropagation()} className="flex flex-col">
       <div className="mb-2 flex items-center gap-2">
-        <h4 className="text-alternative-sm font-mono font-medium tracking-wider text-white uppercase">
+        <h4 className="text-alternative-sm font-mono font-medium uppercase tracking-wider text-white">
           {title}
         </h4>
         {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
       </div>
       {/* Divider */}
       <div className="bg-light-dark mb-3 h-px" />
-      <div className="text-foreground text-sm leading-tight font-normal">
+      <div className="text-foreground text-sm font-normal leading-tight">
         {descriptionArray.map((paragraph, index) => (
           <p
             key={index}
@@ -68,7 +68,7 @@ export const RiskTooltipCard = ({
       <Popover>
         <PopoverTrigger asChild>
           <div
-            className="focus:ring-0 focus:outline-hidden data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:ring-0 data-[state=open]:outline-hidden"
+            className="focus:outline-hidden data-[state=open]:outline-hidden focus:ring-0 data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:ring-0"
             onClick={(e) => e.stopPropagation()}
           >
             {children}
@@ -81,7 +81,7 @@ export const RiskTooltipCard = ({
           className={cn(
             "border-light-dark bg-darkest z-50 rounded-md border p-3 text-left shadow-lg",
             "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-            "break-words whitespace-normal",
+            "whitespace-normal break-words",
           )}
         >
           {content}
@@ -101,7 +101,7 @@ export const RiskTooltipCard = ({
         className={cn(
           "border-light-dark bg-darkest z-50 rounded-md border p-3 text-left shadow-lg",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "break-words whitespace-normal",
+          "whitespace-normal break-words",
         )}
       >
         {content}

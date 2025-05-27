@@ -100,19 +100,19 @@ export const ResilienceStagesSection = ({
           ></div>
 
           {/* Stage 0 */}
-          <div className="bg-dark absolute top-1/2 left-0 -translate-y-1/2">
+          <div className="bg-dark absolute left-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
           </div>
 
           {/* Stage 1 */}
-          <div className="bg-dark absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="bg-dark absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
           </div>
 
           {/* Current Position Indicator */}
           <div
             className={cn(
-              "absolute top-1/2 translate-x-1/2 -translate-y-1/2",
+              "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
               StagesToDaoAvatarPosition[currentDaoStage],
             )}
           >
@@ -127,7 +127,7 @@ export const ResilienceStagesSection = ({
           </div>
 
           {/* Stage 2 */}
-          <div className="bg-dark absolute top-1/2 right-0 -translate-y-1/2">
+          <div className="bg-dark absolute right-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
           </div>
         </div>

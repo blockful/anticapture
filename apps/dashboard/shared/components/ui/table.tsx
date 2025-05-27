@@ -23,7 +23,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b",
+      "font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b",
       // "[&_th:first-child]:shadow-[2px_0px_8px_2px_rgba(0,0,0,1.00)] sm:[&_th:first-child]:shadow-none",
       className,
     )}

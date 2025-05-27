@@ -43,7 +43,7 @@ export function TooltipInfo({
         className={cn(
           "border-light-dark bg-dark z-50 rounded-lg border p-3 text-center text-white shadow-sm",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "break-words whitespace-normal",
+          "whitespace-normal break-words",
           className,
         )}
       >
