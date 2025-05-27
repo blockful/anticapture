@@ -84,7 +84,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="flex items-center justify-end px-4 py-3 text-end text-white">
+      <div className="text-primary flex items-center justify-end px-4 py-3 text-end">
         {formattedSupply}
       </div>
     );
@@ -146,7 +146,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+          <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
             <div
               className={cn("flex w-full gap-3", {
                 "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
@@ -189,7 +189,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const daoConfig = daoConfigByDaoId[daoId];
         if (!daoConfig.governanceImplementation) {
           return (
-            <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+            <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
               <StageTag
                 daoStage={Stage.NONE}
                 tagStage={Stage.NONE}
@@ -202,7 +202,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           fieldsToArray(daoConfig.governanceImplementation?.fields),
         );
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+          <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
             <StageTag daoStage={stage} tagStage={stage} showStageText />
           </div>
         );
@@ -223,7 +223,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         };
 
         return (
-          <div className="scrollbar-none flex w-full items-center overflow-auto px-4 py-3 text-white">
+          <div className="scrollbar-none text-primary flex w-full items-center overflow-auto px-4 py-3">
             <RiskAreaCardWrapper
               riskAreas={riskAreas.risks}
               variant={RiskAreaCardEnum.PANEL_TABLE}

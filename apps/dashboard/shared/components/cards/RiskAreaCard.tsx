@@ -287,7 +287,7 @@ export const RiskAreaCard = ({
         </div>
         <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
           {isActive && (
-            <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
+            <div className="border-l-middle-dark size-0 border-y-13 border-l-13 border-y-transparent" />
           )}
         </div>
       </div>
@@ -340,7 +340,7 @@ export const RiskAreaCardWrapper = ({
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
       {withTitle && (
-        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block">
+        <h3 className="text-primary mb-3 hidden font-mono text-xs font-medium tracking-wider sm:block">
           {title}
         </h3>
       )}

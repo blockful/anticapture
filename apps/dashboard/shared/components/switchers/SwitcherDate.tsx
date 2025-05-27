@@ -59,7 +59,7 @@ export const SwitcherDate = ({
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex min-w-[49px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
+          "text-primary flex min-w-[49px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
             : "bg-light-dark border-transparent",
@@ -77,12 +77,12 @@ export const SwitcherDate = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+        <div className="absolute top-full right-0 z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
           {activeTimeIntervals.map((interval) => (
             <button
               key={interval}
               className={cn(
-                "flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal text-white hover:bg-[#26262A]",
+                "text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal hover:bg-[#26262A]",
                 isSelected == interval && "bg-middle-dark",
               )}
               onClick={() => handleSelect(interval)}

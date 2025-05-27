@@ -30,7 +30,7 @@ export const CardPetitionInformation = ({
             <p className="text-md text-foreground">Supporters Voting Power</p>
             <TooltipInfo text="The total voting power of all supporters who have voted in the petition." />
           </div>
-          <p className="text-md text-white">
+          <p className="text-md text-primary">
             {data?.totalSignaturesPower !== "0"
               ? formatNumberUserReadable(
                   Number(formatEther(BigInt(data?.totalSignaturesPower ?? 0n))),

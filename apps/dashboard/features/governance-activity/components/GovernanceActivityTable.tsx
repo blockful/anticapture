@@ -73,7 +73,7 @@ export const GovernanceActivityTable = () => {
         const details = metric ? metricDetails[metric] : null;
 
         return (
-          <div className="scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white">
+          <div className="scrollbar-none text-primary flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3">
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}

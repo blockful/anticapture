@@ -42,13 +42,13 @@ export const SwitcherChart = ({
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
+          "text-primary flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
             : "bg-light-dark border-transparent",
         )}
       >
-        <span className="whitespace-nowrap text-sm font-medium">
+        <span className="text-sm font-medium whitespace-nowrap">
           {isSelected}
         </span>
         <ChevronDown
@@ -60,12 +60,12 @@ export const SwitcherChart = ({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
+        <div className="text-primary absolute top-full left-0 z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
           {Object.values(options).map((metrics) => (
             <button
               key={metrics}
               className={cn(
-                "flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white hover:bg-[#26262A]",
+                "text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal whitespace-nowrap hover:bg-[#26262A]",
                 isSelected == metrics && "bg-middle-dark",
               )}
               onClick={() => handleSelect(metrics)}

@@ -42,12 +42,12 @@ export const SecurityCouncilCard = ({
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="sm:bg-light-dark flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
             <ShieldCheck className="text-foreground size-4 sm:size-6" />
-            <p className="text-xs font-semibold text-white uppercase sm:hidden">
+            <p className="text-primary text-xs font-semibold uppercase sm:hidden">
               Security Council
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
-            <h3 className="hidden text-xs font-semibold text-white uppercase sm:block">
+            <h3 className="text-primary hidden text-xs font-semibold uppercase sm:block">
               Security Council
             </h3>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
@@ -72,7 +72,7 @@ export const SecurityCouncilCard = ({
                   openInNewTab
                 >
                   <Key className="text-tangerine size-3.5" />
-                  <span className="text-white">
+                  <span className="text-primary">
                     {securityCouncil.multisig.threshold}/
                     {securityCouncil.multisig.signers}
                   </span>

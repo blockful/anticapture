@@ -42,7 +42,7 @@ export const RiskDescription = ({
       <div className="flex flex-col gap-4">
         {/* Header with title and risk level */}
         <div className="flex w-full items-center justify-start gap-2">
-          <h2 className="text-lg font-medium text-white">{title}</h2>
+          <h2 className="text-primary text-lg font-medium">{title}</h2>
           <RiskLevelCardSmall status={riskLevel} />
         </div>
 
@@ -59,7 +59,7 @@ export const RiskDescription = ({
             {/* Thin divider line */}
             <div className="bg-light-dark h-px w-full" />
 
-            <h3 className="text-alternative-sm font-mono font-medium tracking-wider text-white">
+            <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wider">
               <span className="text-foreground">{`//`}</span> REQUIREMENTS
             </h3>
             <ul className="space-y-2">

@@ -72,13 +72,13 @@ export const SupportDaoCard = ({
           {daoIcon}
           <div className="flex flex-col sm:gap-2">
             <div className="flex items-center gap-2">
-              <h3 className="truncate text-center text-sm font-medium text-white">
+              <h3 className="text-primary truncate text-center text-sm font-medium">
                 {daoName}
               </h3>
               <div
                 className={`bg-light-dark mx-2 w-fit rounded-full px-2 py-1 ${!userSupport && "hidden"}`}
               >
-                <p className="text-xs text-white">Supported</p>
+                <p className="text-primary text-xs">Supported</p>
               </div>
             </div>
             <div className="flex justify-start sm:hidden">{supportersInfo}</div>

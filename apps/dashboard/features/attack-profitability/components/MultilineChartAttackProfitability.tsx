@@ -163,7 +163,7 @@ export const MultilineChartAttackProfitability = ({
     });
 
   return (
-    <div className="sm:border-light-dark sm:bg-surface-default relative flex h-[300px] w-full items-center justify-center rounded-lg text-white">
+    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>

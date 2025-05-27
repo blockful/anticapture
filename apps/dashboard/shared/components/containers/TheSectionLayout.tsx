@@ -71,7 +71,7 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
+                  <h1 className="text-primary text-xl leading-7 font-medium tracking-[-0.5%] sm:text-left">
                     {title}
                   </h1>
                 </div>
@@ -83,7 +83,7 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
+                    <h1 className="text-primary text-xl leading-7 font-medium tracking-[-0.5%] sm:text-left">
                       {title}
                     </h1>
                   </div>
@@ -98,7 +98,7 @@ export const TheSectionLayout = ({
             )}
           </div>
           <div className="flex w-full">
-            <p className="text-foreground flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] sm:text-sm">
+            <p className="text-foreground flex w-full flex-col text-justify text-[12px] leading-[18px] font-normal sm:text-sm">
               {description}
             </p>
           </div>
@@ -116,7 +116,7 @@ export const TheSectionLayout = ({
           )}
         >
           <div className="flex flex-col">
-            <CardTitle className="!text-alternative-sm flex items-center font-mono font-medium uppercase tracking-wide text-white sm:gap-2.5">
+            <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
               {subtitle}
             </CardTitle>
             <p
@@ -131,7 +131,7 @@ export const TheSectionLayout = ({
       {infoText && (
         <CardDescription className="bg-light-dark flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
           <div className="mt-0.5 sm:mt-0">
-            <Info className="size-4 w-fit text-white" />
+            <Info className="text-primary size-4 w-fit" />
           </div>
           <p className="text-foreground text-sm font-normal">{infoText}</p>
         </CardDescription>

@@ -36,7 +36,7 @@ export const CardDaoSignature = ({
   };
 
   return (
-    <div className="sm:border-light-dark sm:bg-light-dark flex w-full flex-col gap-6 rounded-lg py-8 text-white sm:flex-row sm:gap-10 sm:border sm:p-4">
+    <div className="sm:border-light-dark sm:bg-light-dark text-primary flex w-full flex-col gap-6 rounded-lg py-8 sm:flex-row sm:gap-10 sm:border sm:p-4">
       <div className="order-1 flex sm:order-none">
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">
@@ -68,7 +68,7 @@ export const CardDaoSignature = ({
       {!signatures?.userSigned && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
-            <h3 className="flex text-[18px] leading-6 font-medium text-white">
+            <h3 className="text-primary flex text-[18px] leading-6 font-medium">
               Sign to request Arbitrum DAO DATA
             </h3>
             <p className="text-foreground flex text-sm font-normal">
@@ -122,7 +122,7 @@ export const CardDaoSignature = ({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="text-success size-5" />
-              <h3 className="flex text-[18px] leading-6 font-medium text-white">
+              <h3 className="text-primary flex text-[18px] leading-6 font-medium">
                 Arbitrum DAO support confirmed
               </h3>
             </div>

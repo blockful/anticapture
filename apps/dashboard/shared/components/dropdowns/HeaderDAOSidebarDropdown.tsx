@@ -124,7 +124,7 @@ export const HeaderDAOSidebarDropdown = () => {
         >
           <div className="flex w-full items-center gap-2">
             <div>{currentItem?.icon}</div>
-            <h1 className="text-[18px] font-medium leading-6 text-white">
+            <h1 className="text-primary text-[18px] leading-6 font-medium">
               {currentItem?.label}
             </h1>
           </div>
@@ -136,7 +136,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="border-light-dark bg-dark absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
+          className="border-light-dark bg-dark absolute right-0 left-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (
@@ -162,7 +162,7 @@ export const HeaderDAOSidebarDropdown = () => {
                 />
                 <h1
                   className={cn(
-                    "text-sm font-normal text-white",
+                    "text-primary text-sm font-normal",
                     item.isDisabled && "text-foreground opacity-75",
                   )}
                 >

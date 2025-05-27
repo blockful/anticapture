@@ -21,7 +21,7 @@ export const StageTagSimplified = ({
     <XCircle className="text-error" size={14} />
   );
 
-  const textColor = isCompleted ? "text-white" : "text-foreground";
+  const textColor = isCompleted ? "text-primary" : "text-foreground";
   return (
     <div className={cn("flex items-center gap-2", className)}>
       {icon}

@@ -37,7 +37,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
             data.optionalHeaderValue ? "justify-between" : "justify-start",
           )}
         >
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white uppercase">
+          <CardTitle className="text-primary flex items-center gap-2 text-xs font-semibold uppercase">
             {data.icon}
             {data.title}
           </CardTitle>

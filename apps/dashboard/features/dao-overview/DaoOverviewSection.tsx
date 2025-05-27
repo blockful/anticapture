@@ -128,7 +128,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <h2 className="text-[24px] leading-8 font-semibold text-white">
+                <h2 className="text-primary text-[24px] leading-8 font-semibold">
                   {daoConfig.name}
                 </h2>
               </div>
@@ -136,7 +136,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 <DaoInfoDropdown
                   defaultValue={{
                     value: "OnChain Gov",
-                    icon: <LinkIcon className="size-3.5 text-white" />,
+                    icon: <LinkIcon className="text-primary size-3.5" />,
                     onClick: () => {},
                   }}
                   options={onChainOptions}
@@ -144,7 +144,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 <DaoInfoDropdown
                   defaultValue={{
                     value: "OffChain Gov",
-                    icon: <FilePenLine className="size-3.5 text-white" />,
+                    icon: <FilePenLine className="text-primary size-3.5" />,
                     onClick: () => {},
                   }}
                   options={offChainOptions}
@@ -154,7 +154,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mb-2 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
+              <h3 className="text-primary font-mono text-xs font-medium tracking-wider">
                 CURRENT RESILIENCE STAGE
               </h3>
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
@@ -198,7 +198,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
           <DaoAvatarIcon daoId={daoId} className="size-icon-md" isRounded />
-          <h2 className="text-[24px] leading-8 font-semibold text-white">
+          <h2 className="text-primary text-[24px] leading-8 font-semibold">
             {daoConfig.name}
           </h2>
         </div>
@@ -207,7 +207,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DaoInfoDropdown
               defaultValue={{
                 value: "OnChain Gov",
-                icon: <LinkIcon className="size-3.5 text-white" />,
+                icon: <LinkIcon className="text-primary size-3.5" />,
                 onClick: () => {},
               }}
               options={onChainOptions}
@@ -215,7 +215,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DaoInfoDropdown
               defaultValue={{
                 value: "OffChain Gov",
-                icon: <FilePenLine className="size-3.5 text-white" />,
+                icon: <FilePenLine className="text-primary size-3.5" />,
                 onClick: () => {},
               }}
               options={offChainOptions}
@@ -223,7 +223,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mt-3 mb-3 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
+              <h3 className="text-primary font-mono text-xs font-medium tracking-wider">
                 CURRENT RESILIENCE STAGE
               </h3>
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
@@ -248,7 +248,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mt-3 mb-3 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
+              <h3 className="text-primary font-mono text-xs font-medium tracking-wider">
                 RISK AREAS
               </h3>
             </div>

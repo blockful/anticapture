@@ -36,7 +36,7 @@ export const DaoInfoDropdown = ({
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-1 rounded-lg border px-2 py-1 text-white transition-all duration-200",
+          "text-primary flex items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
             "bg-light-dark border-transparent": !isOpen,
@@ -44,7 +44,7 @@ export const DaoInfoDropdown = ({
         )}
       >
         {defaultValue.icon}
-        <span className="whitespace-nowrap text-sm font-normal">
+        <span className="text-sm font-normal whitespace-nowrap">
           {defaultValue.value}
         </span>
         <ChevronDown
@@ -55,7 +55,7 @@ export const DaoInfoDropdown = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1 text-white">
+        <div className="text-primary absolute top-full right-0 z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
           {options.map((option) => (
             <button
               key={option.value}
@@ -64,7 +64,7 @@ export const DaoInfoDropdown = ({
                 setIsOpen(false);
               }}
               className={cn(
-                "hover:bg-middle-dark flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal text-white",
+                "hover:bg-middle-dark text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal whitespace-nowrap",
               )}
             >
               <div className="flex items-center gap-1.5">

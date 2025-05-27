@@ -32,21 +32,21 @@ export const StageContent = ({
     <div className="flex w-full flex-col gap-2">
       <div className="bg-light-dark flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="text-alternative-sm font-mono font-medium uppercase tracking-wide text-white">
+          <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wide uppercase">
             {title}
           </h3>
           <p className="text-foreground text-sm font-normal">{description}</p>
         </div>
         <div className="flex flex-col gap-4">
           {type === "requirements" && (
-            <h4 className="font-mono text-xs font-medium uppercase tracking-wide text-white">
+            <h4 className="text-primary font-mono text-xs font-medium tracking-wide uppercase">
               Requirements
             </h4>
           )}
           {type === "issues" && (
             <h4
               className={cn(
-                "font-mono text-xs font-medium uppercase tracking-wide text-white",
+                "text-primary font-mono text-xs font-medium tracking-wide uppercase",
                 stage === Stage.ONE && "text-error",
                 stage === Stage.TWO && "text-warning",
               )}
@@ -86,7 +86,7 @@ export const StageContent = ({
                         />
                       </div>
                     )}
-                    <p className="text-sm font-normal text-white">
+                    <p className="text-primary text-sm font-normal">
                       {issue.title}
                     </p>
                   </div>

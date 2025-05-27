@@ -92,7 +92,7 @@ const AccordionData: AccordionDataProps[] = [
               Voting power in a proposal
             </p>
           </Badge>
-          <Equal className="size-4 text-white" />
+          <Equal className="text-primary size-4" />
           <Badge className="group-hover:bg-dark">
             <p className="text-foreground text-xs leading-none font-semibold uppercase">
               Delegated cap at snapshot
@@ -129,7 +129,7 @@ const AccordionData: AccordionDataProps[] = [
               Lower Participation
             </p>
           </Badge>
-          <Equal className="size-4 text-white" />
+          <Equal className="text-primary size-4" />
           <Badge className="group-hover:bg-dark">
             <ArrowUp className="text-foreground size-4" />
             <p className="text-foreground text-xs leading-none font-semibold uppercase">
@@ -165,7 +165,7 @@ const AccordionData: AccordionDataProps[] = [
               treasury funds
             </p>
           </Badge>
-          <Equal className="size-4 text-white" />
+          <Equal className="text-primary size-4" />
           <Badge className="group-hover:bg-dark">
             <AlertTriangle className="text-foreground size-4" />
             <p className="text-foreground text-xs leading-none font-semibold uppercase">
@@ -183,7 +183,7 @@ export const AttackProfitabilityAccordion = () => {
     <Accordion
       type="single"
       defaultValue="item-0"
-      className="flex h-full w-full flex-col gap-2 text-white sm:gap-3"
+      className="text-primary flex h-full w-full flex-col gap-2 sm:gap-3"
     >
       {AccordionData.map((item, index) => (
         <AccordionItem
@@ -192,7 +192,7 @@ export const AttackProfitabilityAccordion = () => {
           className="group border-light-dark bg-surface-default flex w-full flex-col rounded-lg border transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
         >
           <AccordionTrigger className="group/trigger flex w-full cursor-pointer items-center justify-between px-3 pt-3 data-[state=closed]:pb-3">
-            <div className="text-foreground flex items-center gap-2 text-sm font-medium group-hover:text-white group-data-[state=open]/trigger:text-white">
+            <div className="text-foreground group-hover:text-primary group-data-[state=open]/trigger:text-primary flex items-center gap-2 text-sm font-medium">
               {item.icon}
               {item.title}
             </div>
