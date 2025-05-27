@@ -71,7 +71,7 @@ export const SecurityCouncilCard = ({
                   href={securityCouncil.multisig.externalLink}
                   openInNewTab
                 >
-                  <Key className="text-tangerine size-3.5" />
+                  <Key className="text-brand size-3.5" />
                   <span className="text-primary">
                     {securityCouncil.multisig.threshold}/
                     {securityCouncil.multisig.signers}

@@ -26,7 +26,7 @@ export const TelegramBotMessage = () => {
             href={ANTICAPTURE_TELEGRAM_BOT}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-tangerine/80 font-normal"
+            className="hover:text-brand/80 font-normal"
           >
             JOIN OUR TELEGRAM BOT
           </a>

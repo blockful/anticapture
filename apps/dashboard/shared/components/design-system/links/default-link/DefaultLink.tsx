@@ -9,7 +9,7 @@ const defaultLinkVariants = cva(
     variants: {
       variant: {
         default: "text-secondary hover:text-primary",
-        highlight: "text-tangerine hover:text-tangerine/80",
+        highlight: "text-brand hover:text-brand/80",
       },
     },
     defaultVariants: {

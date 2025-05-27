@@ -49,7 +49,7 @@ export const VoteCard = ({
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
                 className="bg-surface-default sm:bg-light-dark text-primary cursor-default"
-                icon={<CubeIcon className="text-tangerine size-3.5" />}
+                icon={<CubeIcon className="text-brand size-3.5" />}
                 label={
                   isMobile
                     ? formatBlocksToUserReadable(daoData.votingDelay, true)
