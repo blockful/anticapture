@@ -1,5 +1,7 @@
 "use client";
 
+import { useAccount } from "wagmi";
+
 import { Card } from "@/shared/components/ui/card";
 import { formatPlural } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -20,11 +22,13 @@ export const SupportDaoCard = ({
   daoId: DaoIdEnum;
   onClick: () => void;
 }) => {
+  const { address } = useAccount();
   const { signatures: petitionData } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
+    address,
   );
 
-  const userSupport = petitionData?.userSigned || false;
+  const userSupport = petitionData?.userSigned;
   const totalCountSupport = petitionData?.totalSignatures || 0;
   const votingPowerSupport = Number(
     formatEther(BigInt(petitionData?.totalSignaturesPower || 0)),
