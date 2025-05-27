@@ -1,7 +1,6 @@
 "use client";
 
 import { ShowYourSupportStickyBar } from "@/features/show-support/components";
-// import { Message, MessageStacker } from "@/?";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -14,8 +13,6 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
-import { TelegramBotMessage } from "@/shared/components/messages";
-import { Message, MessageStacker } from "@/widgets";
 import BannerAlert from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import { Send } from "lucide-react";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
@@ -29,14 +26,6 @@ export const DaoTemplate = () => {
     return null;
   }
 
-  // Commented out because the telegram are not implemented yet
-  const messages: Message[] = [
-    {
-      id: "telegram-bot",
-      content: <TelegramBotMessage />,
-    },
-  ];
-
   const bannerAlertMessage =
     "RECEIVE REAL-TIME " +
     daoConstants.name.toUpperCase() +
@@ -44,9 +33,6 @@ export const DaoTemplate = () => {
 
   return (
     <DaoPageInteractionProvider>
-      {/* <MessageStacker messages={messages} /> */}
-
-      {/* <MessageStacker messages={messages} /> */}
       <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
         <BannerAlert
           icon={<Send className="hidden size-4 text-white sm:block" />}
@@ -57,6 +43,7 @@ export const DaoTemplate = () => {
           }}
           storageKey={`banner-dismissed-${daoIdEnum}`}
         />
+
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
