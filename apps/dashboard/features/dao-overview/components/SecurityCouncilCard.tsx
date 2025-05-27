@@ -91,7 +91,7 @@ export const SecurityCouncilCard = ({
               <p className="text-secondary text-sm font-medium">Countdown:</p>
               <CountdownDaoInfo
                 daoOverview={daoOverview}
-                className="bg-dark border-none"
+                className="bg-surface-default border-none"
               />
             </div>
           </div>

@@ -136,7 +136,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="border-light-dark bg-dark absolute right-0 left-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
+          className="border-light-dark bg-surface-default absolute right-0 left-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (

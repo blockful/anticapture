@@ -87,13 +87,13 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <Badge className="group-hover:bg-dark">
+          <Badge className="group-hover:bg-surface-default">
             <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Voting power in a proposal
             </p>
           </Badge>
           <Equal className="text-primary size-4" />
-          <Badge className="group-hover:bg-dark">
+          <Badge className="group-hover:bg-surface-default">
             <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Delegated cap at snapshot
             </p>
@@ -123,14 +123,14 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <Badge className="group-hover:bg-dark">
+          <Badge className="group-hover:bg-surface-default">
             <ArrowDown className="text-secondary size-4" />
             <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Lower Participation
             </p>
           </Badge>
           <Equal className="text-primary size-4" />
-          <Badge className="group-hover:bg-dark">
+          <Badge className="group-hover:bg-surface-default">
             <ArrowUp className="text-secondary size-4" />
             <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Easier to attack
@@ -156,7 +156,7 @@ const AccordionData: AccordionDataProps[] = [
           capture.
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <Badge className="group-hover:bg-dark">
+          <Badge className="group-hover:bg-surface-default">
             <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Cost to attack
             </p>
@@ -166,7 +166,7 @@ const AccordionData: AccordionDataProps[] = [
             </p>
           </Badge>
           <Equal className="text-primary size-4" />
-          <Badge className="group-hover:bg-dark">
+          <Badge className="group-hover:bg-surface-default">
             <AlertTriangle className="text-secondary size-4" />
             <p className="text-secondary text-xs leading-none font-semibold uppercase">
               DAO AT RISK

@@ -48,7 +48,7 @@ export const VoteCard = ({
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
-                className="bg-dark sm:bg-light-dark text-primary cursor-default"
+                className="bg-surface-default sm:bg-light-dark text-primary cursor-default"
                 icon={<CubeIcon className="text-tangerine size-3.5" />}
                 label={
                   isMobile
@@ -57,7 +57,7 @@ export const VoteCard = ({
                 }
               />
             </TooltipTrigger>
-            <TooltipContent className="border-light-dark bg-dark text-primary max-w-md rounded-lg border text-center shadow-sm">
+            <TooltipContent className="border-light-dark bg-surface-default text-primary max-w-md rounded-lg border text-center shadow-sm">
               {formatPlural(Number(daoData.votingDelay), "block")}
             </TooltipContent>
           </Tooltip>,

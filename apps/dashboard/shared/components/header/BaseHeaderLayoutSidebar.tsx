@@ -23,7 +23,7 @@ export const BaseHeaderLayoutSidebar = ({
       {isTablet && !isDesktop && (
         <button
           onClick={toggleSidebar}
-          className={`border-light-dark bg-surface-background hover:bg-dark group fixed top-6 left-6 z-100 rounded-full border p-2 text-xs transition xl:hidden ${
+          className={`border-light-dark bg-surface-background hover:bg-surface-default group fixed top-6 left-6 z-100 rounded-full border p-2 text-xs transition xl:hidden ${
             displaySidebar ? "translate-x-[284px]" : ""
           }`}
         >

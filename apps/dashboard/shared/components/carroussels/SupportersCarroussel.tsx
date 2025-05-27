@@ -55,7 +55,7 @@ export const SupportersCarroussel = ({
   }, [supporters.length]);
 
   return (
-    <div className="border-light-dark bg-surface-background sm:bg-dark relative w-full overflow-hidden border-b p-4 sm:rounded-b-lg sm:border-t sm:border-b-0">
+    <div className="border-light-dark bg-surface-background sm:bg-surface-default relative w-full overflow-hidden border-b p-4 sm:rounded-b-lg sm:border-t sm:border-b-0">
       <div className="flex w-full gap-2">
         <p className="text-md z-20 text-gray-400">Latest Supporters</p>
         <TooltipInfo text={"Latest 10 Supporters"} />

@@ -143,7 +143,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {activeRisk ? (
             riskDescriptions[activeRisk]
           ) : (
-            <div className="border-light-dark bg-dark flex h-full items-center justify-center border p-5">
+            <div className="border-light-dark bg-surface-default flex h-full items-center justify-center border p-5">
               <p className="text-secondary text-center">
                 Select a risk area to view details
               </p>
