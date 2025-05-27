@@ -40,9 +40,7 @@ export const AttackProfitabilitySection = ({
       subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.attackProfitability.description}
-      infoText={
-        "Treasury values above supply costs indicate high risk. And probably we can add something else here."
-      }
+      infoText={"Treasury values above supply costs indicate high risk."}
       switchDate={
         <SwitcherDate
           defaultValue={defaultDays}
@@ -71,7 +69,7 @@ export const AttackProfitabilitySection = ({
           filterData={[treasuryMetric, costMetric]}
         />
       </TheCardChartLayout>
-      <div className="w-full border-t border-lightDark" />
+      <div className="border-lightDark w-full border-t" />
       <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
         <TheCardChartLayout
           title="Cost Comparison"
