@@ -174,7 +174,7 @@
   }
 
   .card-text-accordion {
-    @apply text-foreground text-sm leading-normal font-normal;
+    @apply text-secondary text-sm leading-normal font-normal;
   }
 
   .section-title-gap {
@@ -196,7 +196,7 @@
   }
 
   .section-layout-icon {
-    @apply text-foreground size-6;
+    @apply text-secondary size-6;
   }
 
 }
