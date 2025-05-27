@@ -39,7 +39,6 @@
   --color-dark: var(--base-card);
   --color-middle-dark: var(--base-border);
   --color-light-dark: var(--base-muted);
-  --color-foreground: var(--base-muted-foreground);
   --color-icon-secondary: var(--base-ring);
   --color-tangerine: var(--base-brand);
   /* --color-error: var(--base-error); */
