@@ -69,7 +69,7 @@ const RiskAreaCardInternal = ({
       <CheckCircle2
         className={cn(
           "size-4",
-          isActive || isHovered ? "text-darkest" : "text-success",
+          isActive || isHovered ? "text-inverted" : "text-success",
         )}
       />
     ),
@@ -77,7 +77,7 @@ const RiskAreaCardInternal = ({
       <AlertCircle
         className={cn(
           "size-4",
-          isActive || isHovered ? "text-darkest" : "text-warning",
+          isActive || isHovered ? "text-inverted" : "text-warning",
         )}
       />
     ),
@@ -85,7 +85,7 @@ const RiskAreaCardInternal = ({
       <AlertTriangle
         className={cn(
           "size-4",
-          isActive || isHovered ? "text-darkest" : "text-error",
+          isActive || isHovered ? "text-inverted" : "text-error",
         )}
       />
     ),
@@ -137,7 +137,7 @@ const RiskAreaCardInternal = ({
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "!text-error":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "!text-darkest":
+              "!text-inverted":
                 (isActive && risk.level !== undefined) || isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
