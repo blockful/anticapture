@@ -9,7 +9,7 @@ import {
 
 export const SkeletonDaoInfoCards = () => {
   return (
-    <Card className="sm:bg-dark xl4k:max-w-full flex w-[342px]! flex-col border-none sm:w-full! sm:max-w-full">
+    <Card className="sm:bg-surface-default xl4k:max-w-full flex w-[342px]! flex-col border-none sm:w-full! sm:max-w-full">
       <CardHeader
         id="daoinfo-basecard-header"
         className="min-h-[32px] px-0 py-2! sm:p-2"

@@ -42,9 +42,9 @@ export const SecurityCouncilCard = ({
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="sm:bg-light-dark flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
             <ShieldCheck className="text-foreground size-4 sm:size-6" />
-            <h3 className="text-xs font-semibold text-white uppercase sm:hidden">
+            <p className="text-xs font-semibold text-white uppercase sm:hidden">
               Security Council
-            </h3>
+            </p>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
             <h3 className="hidden text-xs font-semibold text-white uppercase sm:block">
@@ -52,7 +52,7 @@ export const SecurityCouncilCard = ({
             </h3>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
               <p className="text-foreground text-sm font-medium">Multisig:</p>
-              <div className="bg-dark flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
+              <div className="flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
                 <div
                   className={cn(
                     "flex items-center gap-1.5",

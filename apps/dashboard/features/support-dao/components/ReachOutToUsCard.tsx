@@ -6,7 +6,7 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 
 export const ReachOutToUsCard = () => {
   return (
-    <Card className="!border-light-dark bg-dark xl4k:max-w-full flex w-full rounded-lg border px-3 py-3 shadow sm:w-[calc(50%-10px)] md:px-4">
+    <Card className="!border-light-dark bg-surface-default xl4k:max-w-full flex w-full rounded-lg border px-3 py-3 shadow sm:w-[calc(50%-10px)] md:px-4">
       <div className="flex w-full justify-between">
         <div className="flex flex-row items-center">
           <div className="flex items-center gap-2">

@@ -189,7 +189,7 @@ export const AttackProfitabilityAccordion = () => {
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group border-light-dark bg-dark flex w-full flex-col rounded-lg border transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
+          className="group border-light-dark bg-surface-default flex w-full flex-col rounded-lg border transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
         >
           <AccordionTrigger className="group/trigger flex w-full cursor-pointer items-center justify-between px-3 pt-3 data-[state=closed]:pb-3">
             <div className="text-foreground flex items-center gap-2 text-sm font-medium group-hover:text-white group-data-[state=open]/trigger:text-white">

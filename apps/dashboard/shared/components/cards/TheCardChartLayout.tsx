@@ -17,7 +17,7 @@ export const TheCardChartLayout = ({
   headerComponent,
 }: TheCardChartLayoutProps) => {
   return (
-    <Card className="sm:border-light-dark sm:bg-dark xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border sm:shadow-sm">
+    <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border sm:shadow-sm">
       <CardContent className="flex h-full w-full flex-col gap-6 p-0">
         {title && (
           <div className="flex h-full w-full flex-col">

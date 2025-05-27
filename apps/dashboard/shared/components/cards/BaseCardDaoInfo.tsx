@@ -29,7 +29,7 @@ interface BaseCardDaoInfoProps {
 
 export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
   return (
-    <Card className="sm:bg-dark xl4k:max-w-full flex w-full! flex-col border-none sm:max-w-full">
+    <Card className="sm:bg-surface-default xl4k:max-w-full flex w-full! flex-col border-none sm:max-w-full">
       <CardHeader id="daoinfo-basecard-header" className="px-0 py-2! sm:p-2">
         <div
           className={cn(
@@ -49,9 +49,9 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
         {data.sections.map((section, index) => (
           <div key={index} className="flex justify-between gap-2 sm:flex-col">
             <div className="flex w-full items-center gap-1.5">
-              <h1 className="text-foreground text-sm font-normal">
+              <p className="text-foreground text-sm font-normal">
                 {section.title}
-              </h1>
+              </p>
               {section.tooltip && <TooltipInfo text={section.tooltip} />}
             </div>
 

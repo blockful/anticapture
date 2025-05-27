@@ -112,7 +112,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div
       id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="sm:bg-dark flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:p-5"
+      className="sm:bg-surface-default flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:p-5"
       ref={ref}
     >
       <div

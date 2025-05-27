@@ -53,7 +53,7 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "sm:bg-dark flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:px-5 sm:py-7",
+        "sm:bg-surface-default flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:px-5 sm:py-7",
         isSwitchDateLinear && "mt-4 gap-4",
         className,
       )}
