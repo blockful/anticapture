@@ -79,7 +79,7 @@ export const RiskTooltipCard = ({
           align="center"
           sideOffset={10}
           className={cn(
-            "border-light-dark bg-darkest z-50 rounded-md border p-3 text-left shadow-lg",
+            "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
             "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
             "break-words whitespace-normal",
           )}
@@ -99,7 +99,7 @@ export const RiskTooltipCard = ({
         sideOffset={10}
         avoidCollisions={true}
         className={cn(
-          "border-light-dark bg-darkest z-50 rounded-md border p-3 text-left shadow-lg",
+          "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
           "break-words whitespace-normal",
         )}

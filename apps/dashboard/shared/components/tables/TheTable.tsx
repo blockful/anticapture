@@ -78,7 +78,7 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table className="bg-darkest text-secondary md:bg-surface-default table-auto md:table-fixed">
+    <Table className="bg-surface-background text-secondary md:bg-surface-default table-auto md:table-fixed">
       <TableHeader className="text-secondary sm:bg-light-dark text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="border-light-dark">

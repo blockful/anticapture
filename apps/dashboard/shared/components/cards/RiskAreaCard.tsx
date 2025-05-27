@@ -275,7 +275,8 @@ export const RiskAreaCard = ({
         <div
           className={cn(
             "w-full p-1.5",
-            isActive && "border-middle-dark bg-darkest sm:bg-dark border-2",
+            isActive &&
+              "border-middle-dark bg-surface-background sm:bg-dark border-2",
           )}
         >
           <RiskAreaCardInternal

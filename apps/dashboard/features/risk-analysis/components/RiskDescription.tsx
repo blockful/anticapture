@@ -38,7 +38,7 @@ export const RiskDescription = ({
   };
 
   return (
-    <CorneredBox className="bg-darkest sm:bg-surface-default p-4">
+    <CorneredBox className="bg-surface-background sm:bg-surface-default p-4">
       <div className="flex flex-col gap-4">
         {/* Header with title and risk level */}
         <div className="flex w-full items-center justify-start gap-2">

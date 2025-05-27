@@ -55,14 +55,14 @@ export const SupportersCarroussel = ({
   }, [supporters.length]);
 
   return (
-    <div className="border-light-dark bg-darkest sm:bg-dark relative w-full overflow-hidden border-b p-4 sm:rounded-b-lg sm:border-b-0 sm:border-t">
+    <div className="border-light-dark bg-surface-background sm:bg-dark relative w-full overflow-hidden border-b p-4 sm:rounded-b-lg sm:border-t sm:border-b-0">
       <div className="flex w-full gap-2">
         <p className="text-md z-20 text-gray-400">Latest Supporters</p>
         <TooltipInfo text={"Latest 10 Supporters"} />
       </div>
 
       {/* Left shadow overlay */}
-      <div className="from-darkest sm:from-dark bg-linear-to-r absolute left-3 top-0 z-10 h-full w-24 to-transparent" />
+      <div className="from-darkest sm:from-dark absolute top-0 left-3 z-10 h-full w-24 bg-linear-to-r to-transparent" />
 
       <div className="relative rounded-lg pt-2">
         <div
@@ -76,7 +76,7 @@ export const SupportersCarroussel = ({
       </div>
 
       {/* Right shadow overlay */}
-      <div className="from-darkest sm:from-dark bg-linear-to-l absolute right-4 top-0 z-10 h-full w-24 to-transparent" />
+      <div className="from-darkest sm:from-dark absolute top-0 right-4 z-10 h-full w-24 bg-linear-to-l to-transparent" />
     </div>
   );
 };
