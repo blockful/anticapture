@@ -75,8 +75,6 @@ export const usePetitionSignatures = (
       userSigned: false,
     };
 
-    debugger;
-
     const { data } = await response.json();
     const signers = data.votes.map(({ voter }: any) => voter);
     const tokenAddress = config.daoOverview.contracts.token;
