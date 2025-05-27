@@ -8,6 +8,7 @@ import { cn } from "@/shared/utils/";
 import { RiskTooltipCard } from "@/shared/components";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
+import { useScreenSize } from "@/shared/hooks";
 
 export type RiskArea = {
   name: string;
@@ -245,6 +246,8 @@ export const RiskAreaCard = ({
     description: "Risk description not available.",
   };
 
+  const { isTablet } = useScreenSize();
+
   const modifiedRiskArea = {
     ...riskArea,
     content: riskInfo.titleAbbreviation,
@@ -261,7 +264,7 @@ export const RiskAreaCard = ({
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
-            onClick={onClick}
+            onClick={isTablet ? onClick : () => {}}
             variant={variant}
           />
         </div>
