@@ -88,7 +88,7 @@ export const usePetitionSignatures = (
         functionName: "getVotes",
         args: [signer],
       })),
-    });
+    }) as [{ result: bigint }];
 
     const totalSignaturesPower = votePowers
       .reduce((acc, curr) => acc + curr.result, 0n)
