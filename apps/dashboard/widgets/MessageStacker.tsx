@@ -22,11 +22,11 @@ const MessageItem = ({
   onClose: () => void;
 }) => {
   return (
-    <div className="text-tangerine flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm">
+    <div className="text-brand flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm">
       {message.content}
       <button
         onClick={onClose}
-        className="text-tangerine hover:text-tangerine/80"
+        className="text-brand hover:text-brand/80"
         aria-label="Close message"
       >
         <X className="size-4" />
