@@ -1,5 +1,6 @@
-import { ArrowRight, X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 interface BannerAlertProps {
   icon: ReactNode;
@@ -30,28 +31,21 @@ const BannerAlert = ({ icon, text, link, storageKey }: BannerAlertProps) => {
   if (isVisible === null || isVisible === false) return null;
 
   return (
-    <div className="flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm text-tangerine">
-      <div className="flex items-center gap-3 tracking-wider sm:flex-row">
+    <div className="text-tangerine flex w-full items-center justify-between gap-2 bg-[#2C1810] p-2 text-sm">
+      <div className="flex items-center gap-2 tracking-wider sm:flex-row">
         {icon}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="flex gap-3 text-white">{text}</div>
-          <div className="flex items-center gap-3">
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-normal hover:text-tangerine/80"
-            >
-              {link.text}
-            </a>
-            <ArrowRight className="size-4" />
-          </div>
+        <div className="flex flex-col items-center gap-1 sm:flex-row">
+          <div className="flex gap-3 text-xs text-white">{text}</div>
+          <DefaultLink href={link.url} openInNewTab variant="highlight">
+            {link.text}
+            <ChevronRight className="size-4" />
+          </DefaultLink>
         </div>
       </div>
 
       <button
         onClick={onClose}
-        className="text-tangerine hover:text-tangerine/80"
+        className="text-tangerine hover:text-tangerine/80 p-1 hover:cursor-pointer"
         aria-label="Close message"
       >
         <X className="size-4" />
