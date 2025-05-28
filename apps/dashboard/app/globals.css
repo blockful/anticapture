@@ -81,10 +81,10 @@
   --color-surface-opacity: var(--base-primary-opacity);
 
   /* Dark Surface Colors */
-  --color-surface-success: var(--base-success-opacity);
-  --color-surface-warning: var(--base-warning-opacity);
-  --color-surface-error: var(--base-error-opacity);
-  --color-surface-brand: var(--base-brand-opacity);
+  --color-surface-success: var(--base-success);
+  --color-surface-warning: var(--base-warning);
+  --color-surface-error: var(--base-error);
+  --color-surface-brand: var(--base-brand);
 
 
   /* Icon Sizes */
