@@ -15,8 +15,7 @@ import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
-import { useDaoDataContext } from "@/shared/contexts";
-import { useTimeSeriesData } from "@/shared/hooks";
+import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -44,8 +43,8 @@ export const MultilineChartAttackProfitability = ({
   filterData,
   days,
 }: MultilineChartAttackProfitabilityProps) => {
-  const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
+  const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
   const [mocked, setMocked] = useState<boolean>(false);
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
