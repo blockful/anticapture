@@ -62,7 +62,7 @@ export const WithImageUrl: Story = {
     imageUrl: "https://euc.li/duds.eth",
     size: "md",
     variant: "rounded",
-    alt: "GitHub Avatar",
+    alt: "ENS Avatar",
   },
 };
 
@@ -164,13 +164,53 @@ export const LoadingStates: Story = {
   ),
 };
 
-// Fallback state (no image)
+// Fallback state (UserIcon fallback)
 export const Fallback: Story = {
   args: {
     address: "0x0000000000000000000000000000000000000000", // Invalid address
     size: "lg",
     variant: "rounded",
   },
+};
+
+// Fallback states for different sizes
+export const FallbackStates: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
+        <EnsAvatar size="xs" variant="rounded" />
+        <span className="text-xs text-gray-400">XS Fallback</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <EnsAvatar size="sm" variant="rounded" />
+        <span className="text-xs text-gray-400">SM Fallback</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <EnsAvatar size="md" variant="rounded" />
+        <span className="text-xs text-gray-400">MD Fallback</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <EnsAvatar size="lg" variant="rounded" />
+        <span className="text-xs text-gray-400">LG Fallback</span>
+      </div>
+    </div>
+  ),
+};
+
+// Fallback with different shapes
+export const FallbackShapes: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
+        <EnsAvatar size="lg" variant="rounded" />
+        <span className="text-xs text-gray-400">Rounded Fallback</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <EnsAvatar size="lg" variant="square" />
+        <span className="text-xs text-gray-400">Square Fallback</span>
+      </div>
+    </div>
+  ),
 };
 
 // With custom className

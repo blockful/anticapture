@@ -5,6 +5,7 @@ import { cn } from "@/shared/utils/cn";
 import { Address } from "viem";
 import Image from "next/image";
 import { useState } from "react";
+import { UserIcon } from "@/shared/components/icons/UserIcon";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -24,6 +25,13 @@ const sizeClasses: Record<AvatarSize, string> = {
   sm: "size-6", // 24px
   md: "size-9", // 36px
   lg: "size-12", // 48px
+};
+
+const iconSizes: Record<AvatarSize, string> = {
+  xs: "size-3", // 12px
+  sm: "size-4", // 16px
+  md: "size-6", // 24px
+  lg: "size-8", // 32px
 };
 
 const variantClasses: Record<AvatarVariant, string> = {
@@ -82,10 +90,10 @@ export const EnsAvatar = ({
     );
   }
 
-  // Fallback: show empty avatar with background
+  // Fallback: show user icon
   return (
     <div className={baseClasses}>
-      <div className="size-full bg-gray-600" />
+      <UserIcon className={iconSizes[size]} />
     </div>
   );
 };
