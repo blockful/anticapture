@@ -198,32 +198,104 @@ export const accountBalanceRelations = relations(
   accountBalance,
   ({ one, many }) => ({
     // Relation to the delegate's power
-    delegatePower: one(accountPower),
+    delegatePower: one(accountPower, {
+      fields: [accountBalance.delegate],
+      references: [accountPower.accountId],
+      relationName: "delegatePower",
+    }),
     // Relations to transfers
     sentTransfers: many(transfer),
     receivedTransfers: many(transfer),
+    account: one(account, {
+      fields: [accountBalance.accountId],
+      references: [account.id],
+      relationName: "account",
+    }),
   }),
 );
 
-export const accountPowerRelations = relations(accountPower, ({ many }) => ({
-  // All balances delegated to this account
-  delegatedBalances: many(accountBalance),
+export const transferRelations = relations(transfer, ({ one, many }) => ({
+  fromAccountBalance: one(accountBalance, {
+    fields: [transfer.fromAccountId],
+    references: [accountBalance.accountId],
+    relationName: "fromAccountBalance",
+  }),
+  toAccountBalance: one(accountBalance, {
+    fields: [transfer.toAccountId],
+    references: [accountBalance.accountId],
+    relationName: "toAccountBalance",
+  }),
+  fromAccount: one(account, {
+    fields: [transfer.fromAccountId],
+    references: [account.id],
+    relationName: "fromAccount",
+  }),
+  toAccount: one(account, {
+    fields: [transfer.toAccountId],
+    references: [account.id],
+    relationName: "toAccount",
+  }),
 }));
+
+export const accountPowerRelations = relations(
+  accountPower,
+  ({ many, one }) => ({
+    // All balances delegated to this account
+    delegatedBalances: many(accountBalance, {
+      relationName: "delegatePower",
+    }),
+    account: one(account, {
+      fields: [accountPower.accountId],
+      references: [account.id],
+      relationName: "account",
+    }),
+  }),
+);
 
 // Proposals and Votes relations
 export const proposalsOnchainRelations = relations(
   proposalsOnchain,
   ({ many }) => ({
-    votes: many(votesOnchain),
+    proposalVotes: many(votesOnchain, {
+      relationName: "proposalVotes",
+    }),
   }),
 );
 
 export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({
-  proposal: one(proposalsOnchain),
+  proposal: one(proposalsOnchain, {
+    fields: [votesOnchain.proposalId],
+    references: [proposalsOnchain.id],
+    relationName: "proposalVotes",
+  }),
 }));
 
-// Transfers and AccountBalance relations
-export const transferRelations = relations(transfer, ({ one }) => ({
-  fromAccountBalance: one(accountBalance),
-  toAccountBalance: one(accountBalance),
+export const delegationsRelations = relations(delegation, ({ one }) => ({
+  delegatee: one(account, {
+    fields: [delegation.delegateeAccountId],
+    references: [account.id],
+    relationName: "delegatee",
+  }),
+  delegator: one(account, {
+    fields: [delegation.delegatorAccountId],
+    references: [account.id],
+    relationName: "delegator",
+  }),
+}));
+
+export const accountRelations = relations(account, ({ many }) => ({
+  balances: many(accountBalance),
+  powers: many(accountPower),
+  delegatorDelegations: many(delegation, {
+    relationName: "delegator",
+  }),
+  delegateeDelegations: many(delegation, {
+    relationName: "delegatee",
+  }),
+  sentTransfers: many(transfer, {
+    relationName: "fromAccount",
+  }),
+  receivedTransfers: many(transfer, {
+    relationName: "toAccount",
+  }),
 }));
