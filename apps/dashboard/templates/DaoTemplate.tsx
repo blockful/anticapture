@@ -14,6 +14,7 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
+
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;

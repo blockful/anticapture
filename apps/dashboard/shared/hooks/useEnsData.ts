@@ -22,7 +22,7 @@ export const fetchEnsData = async ({
 };
 
 export const useEnsData = (address: Address) => {
-  const { data, error } = useSWR<EnsData>(
+  const { data, error, isLoading } = useSWR<EnsData>(
     address ? [`ensData`, address] : null,
     () => fetchEnsData({ address }),
     {
@@ -32,5 +32,6 @@ export const useEnsData = (address: Address) => {
   return {
     data,
     error,
+    isLoading,
   };
 };
