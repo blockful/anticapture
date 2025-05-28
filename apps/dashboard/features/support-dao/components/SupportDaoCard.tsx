@@ -1,10 +1,11 @@
 "use client";
 
+import { useAccount } from "wagmi";
+
 import { Card } from "@/shared/components/ui/card";
 import { formatPlural } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";
-import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/features/show-support/hooks/usePetition";
 import { ReactNode } from "react";
@@ -15,39 +16,23 @@ export const SupportDaoCard = ({
   daoName,
   daoId,
   onClick,
-  userSupport: externalUserSupport,
-  votingPowerSupport: externalVotingPowerSupport,
-  totalCountSupport: externalTotalCountSupport,
 }: {
   daoIcon: ReactNode;
   daoName: string;
   daoId: DaoIdEnum;
   onClick: () => void;
-  userSupport?: boolean;
-  votingPowerSupport?: number;
-  totalCountSupport?: number;
 }) => {
-  // Get petition data internally if not provided externally
-
+  const { address } = useAccount();
   const { signatures: petitionData } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
+    address,
   );
 
-  // Use external data if provided, otherwise use petition data
-  const userSupport =
-    externalUserSupport !== undefined
-      ? externalUserSupport
-      : petitionData?.userSigned || false;
-
-  const totalCountSupport =
-    externalTotalCountSupport !== undefined
-      ? externalTotalCountSupport
-      : petitionData?.totalSignatures || 0;
-
-  const votingPowerSupport =
-    externalVotingPowerSupport !== undefined
-      ? externalVotingPowerSupport
-      : Number(formatEther(BigInt(petitionData?.totalSignaturesPower || 0)));
+  const userSupport = petitionData?.userSigned;
+  const totalCountSupport = petitionData?.totalSignatures || 0;
+  const votingPowerSupport = Number(
+    formatEther(BigInt(petitionData?.totalSignaturesPower || 0)),
+  );
 
   const supportersInfo = (
     <div className="text-xs text-gray-400">
