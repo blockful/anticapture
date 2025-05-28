@@ -39,12 +39,12 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  /* DEV: TODO: Remove these colors once the new design system is fully implemented. Check the border colors and gradients as well.*/
   /* Old System Colors */
   --color-middle-dark: var(--base-border);
   --color-light-dark: var(--base-muted);
   --color-icon-secondary: var(--base-ring);
   --color-tangerine: var(--base-brand);
-  --color-background-contrast: var(--base-muted);
   --color-text-primary: var(--base-primary);
 
 
