@@ -35,7 +35,7 @@ const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
         )}
       >
         <div className="mt-0.5 sm:mt-0">{mapVariantToIcon[variant].icon}</div>
-        <p className="text-foreground text-sm font-normal uppercase">{text}</p>
+        <p className="text-foreground text-sm font-normal">{text}</p>
       </CardDescription>
     </div>
   );
