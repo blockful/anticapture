@@ -1,18 +1,31 @@
 import { ChevronRight, X } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { cn } from "@/shared/utils";
 
 interface BannerAlertProps {
   icon: ReactNode;
   text: string;
-  link: {
+  link?: {
     url: string;
     text: string;
   };
   storageKey: string;
+  variant?: "default" | "highlight";
 }
 
-const BannerAlert = ({ icon, text, link, storageKey }: BannerAlertProps) => {
+const mapVariantToColor = {
+  default: "bg-[#2C1810]",
+  highlight: "bg-[#18181B] ",
+};
+
+const BannerAlert = ({
+  icon,
+  text,
+  link,
+  storageKey,
+  variant = "default",
+}: BannerAlertProps) => {
   // Initialize as null to prevent rendering during hydration
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
 
@@ -31,21 +44,28 @@ const BannerAlert = ({ icon, text, link, storageKey }: BannerAlertProps) => {
   if (isVisible === null || isVisible === false) return null;
 
   return (
-    <div className="text-tangerine flex w-full items-center justify-between gap-2 bg-[#2C1810] p-2 text-sm">
+    <div
+      className={cn(
+        "text-tangerine flex w-full items-center justify-between gap-2 p-2 text-sm",
+        mapVariantToColor[variant],
+      )}
+    >
       <div className="flex items-center gap-2 tracking-wider sm:flex-row">
         {icon}
         <div className="flex flex-col items-center gap-1 sm:flex-row">
           <div className="flex gap-3 text-xs text-white">{text}</div>
-          <DefaultLink href={link.url} openInNewTab variant="highlight">
-            {link.text}
-            <ChevronRight className="size-4" />
-          </DefaultLink>
+          {link && (
+            <DefaultLink href={link.url} openInNewTab variant="highlight">
+              {link.text}
+              <ChevronRight className="size-4" />
+            </DefaultLink>
+          )}
         </div>
       </div>
 
       <button
         onClick={onClose}
-        className="text-tangerine hover:text-tangerine/80 p-1 hover:cursor-pointer"
+        className="hover:text-tangerine/80 p-1 text-white transition-colors duration-300 hover:cursor-pointer"
         aria-label="Close message"
       >
         <X className="size-4" />
