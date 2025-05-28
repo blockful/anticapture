@@ -30,7 +30,7 @@ const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
     <div className="w-full overflow-hidden rounded-md bg-[#18181B]">
       <CardDescription
         className={cn(
-          "flex w-full items-start gap-2 rounded-lg p-2 sm:items-center",
+          "flex w-full items-center gap-2 rounded-lg p-2 sm:items-center",
           mapVariantToIcon[variant].bgColor,
         )}
       >
