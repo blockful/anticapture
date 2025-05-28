@@ -51,8 +51,8 @@ const BannerAlert = ({
       )}
     >
       <div className="flex items-center gap-2 tracking-wider sm:flex-row">
-        {icon}
-        <div className="flex flex-col items-center gap-1 sm:flex-row">
+        <div className="flex-shrink-0">{icon}</div>
+        <div className="flex flex-wrap items-center gap-1 sm:flex-row">
           <div className="flex gap-3 font-mono text-xs text-white uppercase">
             {text}
           </div>
