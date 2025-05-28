@@ -53,7 +53,9 @@ const BannerAlert = ({
       <div className="flex items-center gap-2 tracking-wider sm:flex-row">
         {icon}
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <div className="flex gap-3 text-xs text-white uppercase">{text}</div>
+          <div className="flex gap-3 font-mono text-xs text-white uppercase">
+            {text}
+          </div>
           {link && (
             <DefaultLink href={link.url} openInNewTab variant="highlight">
               {link.text}
