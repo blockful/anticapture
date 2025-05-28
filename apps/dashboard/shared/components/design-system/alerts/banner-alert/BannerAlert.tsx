@@ -46,7 +46,7 @@ const BannerAlert = ({
   return (
     <div
       className={cn(
-        "text-tangerine flex w-full items-center justify-between gap-2 p-2 text-sm",
+        "text-tangerine flex w-full items-center justify-between gap-2 px-3 py-2 text-sm",
         mapVariantToColor[variant],
       )}
     >
