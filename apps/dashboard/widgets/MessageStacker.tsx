@@ -22,11 +22,11 @@ const MessageItem = ({
   onClose: () => void;
 }) => {
   return (
-    <div className="text-brand flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm">
+    <div className="text-link flex w-full items-center justify-between gap-2 bg-[#2C1810] px-4 py-3 text-sm">
       {message.content}
       <button
         onClick={onClose}
-        className="text-brand hover:text-brand/80"
+        className="text-link hover:text-link/80"
         aria-label="Close message"
       >
         <X className="size-4" />

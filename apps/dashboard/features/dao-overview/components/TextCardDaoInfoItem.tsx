@@ -24,7 +24,7 @@ export const TextCardDaoInfoItem = ({
         <p className="flex items-center">
           <DaoAvatarIcon
             daoId={item.daoId}
-            className="size-icon-xs text-brand bg-transparent!"
+            className="size-icon-xs text-link bg-transparent!"
             showBackground={false}
           />
         </p>

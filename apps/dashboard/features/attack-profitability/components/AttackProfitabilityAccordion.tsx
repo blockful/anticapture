@@ -33,13 +33,13 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <Calculator className="text-icon-secondary group-data-[state=open]/trigger:text-brand size-4" />
+      <Calculator className="text-icon-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRight className="text-brand inline-flex size-4 items-center justify-center" />
+            <ChevronRight className="text-link inline-flex size-4 items-center justify-center" />
           </div>
           <div className="flex flex-col">
             <p className="text-secondary flex text-xs font-semibold uppercase">
@@ -53,7 +53,7 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRight className="text-brand inline-flex size-4 items-center justify-center" />
+            <ChevronRight className="text-link inline-flex size-4 items-center justify-center" />
           </div>
           <div className="flex flex-col">
             <p className="text-secondary flex text-xs font-semibold uppercase">
@@ -71,7 +71,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChart className="text-icon-secondary group-data-[state=open]/trigger:text-brand size-4" />
+      <PieChart className="text-icon-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -105,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Turnout and Active Supply",
     icon: (
-      <Users className="text-icon-secondary group-data-[state=open]/trigger:text-brand size-4" />
+      <Users className="text-icon-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -143,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarSign className="text-icon-secondary group-data-[state=open]/trigger:text-brand size-4" />
+      <DollarSign className="text-icon-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">

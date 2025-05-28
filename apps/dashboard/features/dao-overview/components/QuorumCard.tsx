@@ -56,7 +56,7 @@ export const QuorumCard = () => {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,
     optionalHeaderValue: (
-      <p className="text-brand flex text-sm">
+      <p className="text-link flex text-sm">
         {quorumValue} {daoData.id || "Unknown ID"} {quorumPercentage}
       </p>
     ),
