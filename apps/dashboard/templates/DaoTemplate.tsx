@@ -34,7 +34,8 @@ export const DaoTemplate = () => {
   return (
     <DaoPageInteractionProvider>
       <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
-        <BannerAlert
+        {/* Commented out while TelegramBot is not ready to be added to the DAO */}
+        {/* <BannerAlert
           icon={<Send className="hidden size-4 text-white sm:block" />}
           text={bannerAlertMessage}
           link={{
@@ -48,7 +49,7 @@ export const DaoTemplate = () => {
           text={bannerAlertMessage}
           storageKey={`banner-dismissed-${daoIdEnum}`}
           variant="highlight"
-        />
+        /> */}
 
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
