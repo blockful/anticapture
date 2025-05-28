@@ -54,7 +54,7 @@ export const GovernanceImplementationCard = ({
               {field.name}
             </h3>
             <div className="size-1 rounded-full bg-white/30" />
-            <span className="text-icon-secondary shrink-0 truncate text-sm leading-tight font-medium">
+            <span className="text-secondary shrink-0 truncate text-sm leading-tight font-medium">
               {field.value || ""}
             </span>
           </div>
