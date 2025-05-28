@@ -48,7 +48,7 @@ export const VoteCard = ({
           <Tooltip key={"delay-tooltip"}>
             <TooltipTrigger>
               <BadgeCardDaoInfoItem
-                className="bg-surface-default sm:bg-light-dark text-primary cursor-default"
+                className="bg-surface-default sm:bg-surface-contrast text-primary cursor-default"
                 icon={<CubeIcon className="text-brand size-3.5" />}
                 label={
                   isMobile

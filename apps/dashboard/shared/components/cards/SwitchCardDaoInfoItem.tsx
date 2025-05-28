@@ -15,7 +15,7 @@ export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
   return (
     <Badge
       className={cn(
-        "!bg-background-contrast/20 sm:bg-light-dark! gap-1.5! px-2.5! py-1! flex h-full w-full lg:w-fit",
+        "!bg-background-contrast/20 sm:bg-surface-contrast! flex h-full w-full gap-1.5! px-2.5! py-1! lg:w-fit",
         {
           "hover:bg-middle-dark! cursor-pointer! transition-all duration-300":
             item.onClick,
@@ -30,7 +30,7 @@ export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
       )}
       <p
         className={cn([
-          "text-sm font-medium leading-tight",
+          "text-sm leading-tight font-medium",
           item.switched ? "text-success" : "text-error",
         ])}
       >

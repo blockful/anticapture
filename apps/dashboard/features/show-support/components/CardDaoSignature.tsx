@@ -36,7 +36,7 @@ export const CardDaoSignature = ({
   };
 
   return (
-    <div className="sm:border-light-dark sm:bg-light-dark text-primary flex w-full flex-col gap-6 rounded-lg py-8 sm:flex-row sm:gap-10 sm:border sm:p-4">
+    <div className="sm:border-light-dark sm:bg-surface-contrast text-primary flex w-full flex-col gap-6 rounded-lg py-8 sm:flex-row sm:gap-10 sm:border sm:p-4">
       <div className="order-1 flex sm:order-none">
         <div className="hidden sm:flex">
           <div className="flex h-[156px] w-[156px] items-center justify-center">

@@ -45,7 +45,7 @@ export const SwitcherChart = ({
           "text-primary flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
-            : "bg-light-dark border-transparent",
+            : "bg-surface-contrast border-transparent",
         )}
       >
         <span className="text-sm font-medium whitespace-nowrap">

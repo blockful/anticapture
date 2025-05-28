@@ -62,7 +62,7 @@ export const SwitcherDate = ({
           "text-primary flex min-w-[49px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           isOpen
             ? "border-tangerine bg-[#26262A]"
-            : "bg-light-dark border-transparent",
+            : "bg-surface-contrast border-transparent",
         )}
       >
         <span className="font-medium- text-sm">

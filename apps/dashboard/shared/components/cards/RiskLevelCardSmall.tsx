@@ -20,7 +20,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
-    pattern: ["bg-warning", "bg-warning", "bg-light-dark"],
+    pattern: ["bg-warning", "bg-warning", "bg-surface-contrast"],
     icon: <AlertCircle className="text-warning size-3.5" />,
   },
   [RiskLevel.LOW]: {
@@ -81,7 +81,7 @@ export const RiskLevelCardSmall = ({
   return (
     <div
       className={cn(
-        "bg-light-dark flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
+        "bg-surface-contrast flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
         className,
       )}
     >

@@ -63,7 +63,7 @@ export const StagesCardRequirements = ({
       </div>
 
       <div
-        className={`bg-light-dark rounded-md p-4 ${stageStyles} ${className}`}
+        className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
       >
         <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
         <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>

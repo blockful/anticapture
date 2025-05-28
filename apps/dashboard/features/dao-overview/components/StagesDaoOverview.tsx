@@ -65,7 +65,7 @@ export const StagesDaoOverview = ({
   return (
     <div className="relative w-full py-0 sm:w-full">
       <div
-        className="border-light-dark bg-light-dark flex items-center justify-between gap-1 rounded-lg border-b p-2 sm:border-none sm:py-0.5"
+        className="border-light-dark bg-surface-contrast flex items-center justify-between gap-1 rounded-lg border-b p-2 sm:border-none sm:py-0.5"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
         <div className="flex flex-col justify-start gap-1 px-1 sm:flex-row sm:items-center">

@@ -20,7 +20,7 @@ export const ProgressBar = ({
 }: ProgressBarProps) => {
   return (
     <div className={cn("flex w-full flex-col", className)}>
-      <div className="bg-light-dark relative h-3 w-full">
+      <div className="bg-surface-contrast relative h-3 w-full">
         {warning && warning > 0 && (
           <div
             className="absolute z-10 h-full"
@@ -49,7 +49,7 @@ export const ProgressBar = ({
 
         {warning && warning > 0 && (
           <div
-            className="bg-light-dark absolute -top-2.5 -right-1.5 z-20 size-8 rounded-full border-2 border-[#18181B] p-2"
+            className="bg-surface-contrast absolute -top-2.5 -right-1.5 z-20 size-8 rounded-full border-2 border-[#18181B] p-2"
             style={{ left: `${warning}%` }}
           >
             <AlertTriangle className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-red-500" />

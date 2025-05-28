@@ -23,7 +23,7 @@ export const GovernanceImplementationCard = ({
       className={cn(
         "!border-b-light-dark sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex w-full flex-col flex-wrap gap-3.5 rounded-t-lg rounded-b-none border-b! border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
         isOpen
-          ? "sm:border-middle-dark sm:bg-light-dark z-20 rounded-b-none"
+          ? "sm:border-middle-dark sm:bg-surface-contrast z-20 rounded-b-none"
           : "sm:hover:bg-middle-dark sm:rounded-b-lg",
       )}
       onClick={onToggle}
@@ -65,7 +65,7 @@ export const GovernanceImplementationCard = ({
       </div>
       <div
         className={cn(
-          "sm:border-middle-dark sm:bg-light-dark z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:px-4",
+          "sm:border-middle-dark sm:bg-surface-contrast z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:px-4",
           "top-full -left-px w-[calc(100%+2px)]",
           isOpen
             ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"

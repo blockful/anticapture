@@ -65,7 +65,7 @@ export const StageRequirementsTooltip = ({
         </div>
 
         {/* Divider */}
-        <div className="bg-light-dark h-px w-full" />
+        <div className="bg-surface-contrast h-px w-full" />
 
         {/* Requirements List */}
         <div className="p-4 font-normal">

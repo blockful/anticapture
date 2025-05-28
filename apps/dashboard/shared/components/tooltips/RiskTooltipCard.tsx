@@ -49,7 +49,7 @@ export const RiskTooltipCard = ({
         {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
       </div>
       {/* Divider */}
-      <div className="bg-light-dark mb-3 h-px" />
+      <div className="bg-surface-contrast mb-3 h-px" />
       <div className="text-secondary text-sm leading-tight font-normal">
         {descriptionArray.map((paragraph, index) => (
           <p

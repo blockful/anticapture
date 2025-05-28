@@ -30,7 +30,7 @@ export const StageContent = ({
 }: StageContentProps) => {
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="bg-light-dark flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
+      <div className="bg-surface-contrast flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
           <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wide uppercase">
             {title}

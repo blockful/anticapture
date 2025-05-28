@@ -31,7 +31,7 @@ export const CountdownDaoInfo = ({
   return (
     <div
       className={cn(
-        "border-light-dark bg-light-dark flex h-full w-fit gap-1.5 rounded-lg border px-2 py-1 sm:w-full sm:gap-3 sm:px-1.5",
+        "border-light-dark bg-surface-contrast flex h-full w-fit gap-1.5 rounded-lg border px-2 py-1 sm:w-full sm:gap-3 sm:px-1.5",
         className,
       )}
     >

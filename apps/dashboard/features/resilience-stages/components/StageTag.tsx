@@ -6,7 +6,7 @@ const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "border-error text-error bg-error/12",
   [Stage.ONE]: "border-warning text-warning bg-warning/12",
   [Stage.TWO]: "border-success text-success bg-success/12",
-  [Stage.NONE]: "border-middle-dark bg-light-dark text-secondary",
+  [Stage.NONE]: "border-middle-dark bg-surface-contrast text-secondary",
 };
 
 interface StageTagProps {

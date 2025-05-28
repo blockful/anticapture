@@ -39,7 +39,7 @@ export const DaoInfoDropdown = ({
           "text-primary flex items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
-            "bg-light-dark border-transparent": !isOpen,
+            "bg-surface-contrast border-transparent": !isOpen,
           },
         )}
       >

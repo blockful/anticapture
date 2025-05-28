@@ -107,7 +107,7 @@ const RiskAreaCardInternal = ({
           "flex h-full items-center px-1 py-2 sm:px-2",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
-            "bg-light-dark": risk.level === RiskLevel.NONE,
+            "bg-surface-contrast": risk.level === RiskLevel.NONE,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
@@ -184,7 +184,7 @@ const RiskAreaCardInternal = ({
                 !isActive &&
                 isBox3Filled &&
                 !isHovered,
-              "bg-light-dark": risk.level === undefined || !isBox3Filled,
+              "bg-surface-contrast": risk.level === undefined || !isBox3Filled,
             })}
           />
           <div
@@ -207,7 +207,7 @@ const RiskAreaCardInternal = ({
                 !isActive &&
                 isBox2Filled &&
                 !isHovered,
-              "bg-light-dark": risk.level === undefined || !isBox2Filled,
+              "bg-surface-contrast": risk.level === undefined || !isBox2Filled,
             })}
           />
           <div
@@ -221,7 +221,7 @@ const RiskAreaCardInternal = ({
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "bg-error/12":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "bg-light-dark": risk.level === undefined,
+              "bg-surface-contrast": risk.level === undefined,
             })}
           />
         </div>
