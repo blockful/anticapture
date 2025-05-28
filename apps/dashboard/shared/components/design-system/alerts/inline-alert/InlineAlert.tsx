@@ -14,12 +14,12 @@ const mapVariantToIcon = {
     bgColor: "bg-lightDark",
   },
   warning: {
-    icon: <AlertTriangle className="size-4 text-warning" />,
+    icon: <AlertTriangle className="text-warning size-4" />,
     color: "text-warning",
     bgColor: "bg-warning/10",
   },
   error: {
-    icon: <AlertCircle className="size-4 text-error" />,
+    icon: <AlertCircle className="text-error size-4" />,
     color: "text-error",
     bgColor: "bg-error/10",
   },
@@ -27,15 +27,17 @@ const mapVariantToIcon = {
 
 const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
   return (
-    <CardDescription
-      className={cn(
-        "flex w-full items-start gap-2 rounded-lg p-2 sm:items-center",
-        mapVariantToIcon[variant].bgColor,
-      )}
-    >
-      <div className="mt-0.5 sm:mt-0">{mapVariantToIcon[variant].icon}</div>
-      <p className="text-sm font-normal text-foreground">{text}</p>
-    </CardDescription>
+    <div className="w-full overflow-hidden rounded-md bg-[#18181B]">
+      <CardDescription
+        className={cn(
+          "flex w-full items-start gap-2 rounded-lg p-2 sm:items-center",
+          mapVariantToIcon[variant].bgColor,
+        )}
+      >
+        <div className="mt-0.5 sm:mt-0">{mapVariantToIcon[variant].icon}</div>
+        <p className="text-foreground text-sm font-normal uppercase">{text}</p>
+      </CardDescription>
+    </div>
   );
 };
 
