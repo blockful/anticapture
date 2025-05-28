@@ -63,12 +63,13 @@ export const delegateChanged = async (
 
   // Update the delegator's delegate
   await context.db
-    .insert(accountPower)
+    .insert(accountBalance)
     .values({
-      id: [event.args.delegator, daoId].join("-"),
+      id: [event.args.delegator, event.log.address].join("-"),
       accountId: event.args.delegator,
-      daoId,
+      tokenId: event.log.address,
       delegate: event.args.toDelegate,
+      balance: BigInt(0),
     })
     .onConflictDoUpdate({
       delegate: event.args.toDelegate,
@@ -221,9 +222,11 @@ export const tokenTransfer = async (
     .insert(accountBalance)
     .values({
       id: [to, tokenAddress].join("-"),
+      daoId,
       tokenId: tokenAddress,
       accountId: to,
       balance: value,
+      delegate: zeroAddress,
     })
     .onConflictDoUpdate((current) => ({
       balance: current.balance + value,
@@ -234,9 +237,11 @@ export const tokenTransfer = async (
     .insert(accountBalance)
     .values({
       id: [from, tokenAddress].join("-"),
+      daoId,
       tokenId: tokenAddress,
       accountId: from,
       balance: -value,
+      delegate: zeroAddress,
     })
     .onConflictDoUpdate((current) => ({
       balance: current.balance - value,
@@ -516,7 +521,7 @@ export const proposalCreated = async (
     daoId,
     proposerAccountId: event.args.proposer,
     targets: JSON.stringify(event.args.targets),
-    values: JSON.stringify(event.args.values.map((v) => v.toString())),
+    values: JSON.stringify(event.args.values.map((v: bigint) => v.toString())),
     signatures: JSON.stringify(event.args.signatures),
     calldatas: JSON.stringify(event.args.calldatas),
     startBlock: event.args.startBlock.toString(),

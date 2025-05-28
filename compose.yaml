@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   redis:
     image: redis:latest
@@ -17,6 +15,12 @@ services:
       - "8545:8545"
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   indexer-db:
     image: postgres:16.2
@@ -32,15 +36,22 @@ services:
 
   indexer:
     build:
-      context: apps/indexer
+      context: .
+      dockerfile: docker/indexer/Dockerfile.indexer
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
-      - NETWORK=ethereum
+      - NETWORK=anvil
       - RPC_URL=http://contracts:8545
+      - CHAIN_ID=31337
+      - MAX_REQUESTS_PER_SECOND=10
+      - POLLING_INTERVAL=1000
+      - PORT=42069
     depends_on:
-      - indexer-db
-      - contracts
+      indexer-db:
+        condition: service_started
+      contracts:
+        condition: service_healthy
     ports:
       - "42069:42069"
     networks:
