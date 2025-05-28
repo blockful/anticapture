@@ -44,8 +44,7 @@
   --color-middle-dark: var(--base-border);
   --color-light-dark: var(--base-muted);
   --color-icon-secondary: var(--base-ring);
-  --color-tangerine: var(--base-brand);
-  --color-text-primary: var(--base-primary);
+  --color-tangerine: var(--base-brand); 
 
 
   /* Design System Colors */
