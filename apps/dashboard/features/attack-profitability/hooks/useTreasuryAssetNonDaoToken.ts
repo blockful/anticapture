@@ -15,17 +15,24 @@ export const fetchTreasuryAssetNonDaoToken = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<TreasuryAssetNonDaoToken[]> => {
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/total-assets?days=${days}`,
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch Treasury Non Dao Token data: ${response.statusText}`,
-    );
+  const query = `
+  query getTotalAssets {
+  totalAssets(daoId:${daoId}, days:_${days}){
+    totalAssets
+    date
   }
-
-  return response.json();
+}`;
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { totalAssets } = (await response.json()) as {
+    totalAssets: TreasuryAssetNonDaoToken[];
+  };
+  return totalAssets as TreasuryAssetNonDaoToken[];
 };
 
 export const useTreasuryAssetNonDaoToken = (

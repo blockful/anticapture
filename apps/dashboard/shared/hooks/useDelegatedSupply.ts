@@ -21,11 +21,24 @@ export const fetchDelegatedSupply = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query DelegatedSupply {
+    compareDelegatedSupply(daoId: ${daoId}, days: _${days}) {
+      oldDelegatedSupply
+      currentDelegatedSupply
+      changeRate
+    }
+  }`;
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { compareDelegatedSupply } = (await response.json()) as {
+    compareDelegatedSupply: DelegatedSupplyResponse;
+  };
+  return compareDelegatedSupply;
 };
 
 /**

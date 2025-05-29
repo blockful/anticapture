@@ -16,11 +16,24 @@ export const fetchProposals = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<ProposalsResponse> => {
-  const response: Response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/proposals/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query Proposals {
+    compareProposals(daoId: ${daoId}, days: _${days}) {
+        currentProposalsLaunched
+        oldProposalsLaunched
+        changeRate
+    }
+  }`;
+  const response = await fetch(`${BACKEND_ENDPOINT}`, { 
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { compareProposals } = (await response.json()) as {
+    compareProposals: ProposalsResponse;
+  };
+  return compareProposals;
 };
 
 /**

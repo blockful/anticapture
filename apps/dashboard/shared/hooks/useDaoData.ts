@@ -3,11 +3,27 @@ import { DAO, DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
 
 export const fetchDaoData = async (daoId: DaoIdEnum): Promise<DAO> => {
-  const response = await fetch(`${BACKEND_ENDPOINT}/dao/${daoId}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch DAO data: ${response.statusText}`);
-  }
-  return response.json();
+  const query = `query GetDaoData {
+    dao(id: ${daoId}) {
+      id
+      quorum
+      proposalThreshold
+      votingDelay
+      votingPeriod  
+      timelockDelay
+    }
+  }`;
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { dao } = (await response.json()) as {
+    dao: DAO;
+  };
+  return dao;
 };
 
 interface UseDaoDataResult {

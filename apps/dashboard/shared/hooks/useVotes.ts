@@ -16,11 +16,22 @@ export const fetchVotes = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<VotesResponse> => {
-  const response: Response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/votes/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query Votes {
+    compareVotes(daoId: ${daoId}, days: _${days}) {
+      votes
+    }
+  }`;
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { compareVotes } = (await response.json()) as {
+    compareVotes: VotesResponse;
+  };
+  return compareVotes;
 };
 
 /**

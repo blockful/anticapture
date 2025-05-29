@@ -21,11 +21,24 @@ export const fetchAverageTurnout = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response: Response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query AverageTurnout {
+    compareAverageTurnout(daoId: ${daoId}, days: _${days}) {
+        currentAverageTurnout
+        oldAverageTurnout
+        changeRate
+    }
+  }`;
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+      method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { compareAverageTurnout } = (await response.json()) as {
+    compareAverageTurnout: AverageTurnoutResponse;
+  };
+  return compareAverageTurnout;
 };
 
 /**

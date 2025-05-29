@@ -16,14 +16,26 @@ export const fetchActiveSupply = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<ActiveSupplyResponse | null> => {
+  const query = `query ActiveSupply {
+    compareActiveSupply(daoId: ${daoId}, days: _${days}) {
+      activeSupply
+    }
+  }`;
+
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: query,
+    }),
+  });
+  const { compareActiveSupply } = (await response.json()) as {
+    compareActiveSupply: ActiveSupplyResponse;
+  };
+  return compareActiveSupply as ActiveSupplyResponse;
 };
 
 /**

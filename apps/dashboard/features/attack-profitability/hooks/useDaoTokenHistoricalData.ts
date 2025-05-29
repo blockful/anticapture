@@ -20,16 +20,30 @@ export const fetchDaoTokenHistoricalData = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/token/${daoId}/historical-data`,
-    { next: { revalidate: 3600 } },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch token data: ${response.statusText}`);
+  const query = `query GetHistoricalTokenData {
+  historicalTokenData(daoId: ${daoId}) {
+    total_volumes
+    market_caps
+    prices {
+      timestamp
+      value
+    }
   }
-
-  return response.json();
+}`;
+  const response = await fetch(
+    `${BACKEND_ENDPOINT}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: query,
+      }),
+    },
+  );
+  const { historicalTokenData } = (await response.json()) as {
+    historicalTokenData: DaoTokenHistoricalDataResponse;
+  };
+  return historicalTokenData as DaoTokenHistoricalDataResponse;
 };
 
 export const useDaoTokenHistoricalData = (
