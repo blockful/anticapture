@@ -88,16 +88,16 @@ export const usePetitionSignatures = (
         functionName: "getVotes",
         args: [signer],
       })),
-    });
+    }) as [{ result: bigint }];
 
     const totalSignaturesPower = votePowers
-      .reduce((acc, curr) => acc + Number(curr.result), 0)
+      .reduce((acc, curr) => acc + curr.result, 0n)
       .toString();
 
     return {
       signers,
       totalSignatures: signers.length,
-      totalSignaturesPower,
+      totalSignaturesPower: totalSignaturesPower.toString(),
       userSigned: signers.includes(userAddress),
     };
   };

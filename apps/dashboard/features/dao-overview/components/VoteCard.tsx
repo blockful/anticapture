@@ -8,24 +8,26 @@ import {
 } from "@/shared/components";
 import { formatPlural } from "@/shared/utils";
 import { formatBlocksToUserReadable } from "@/shared/utils";
-import { useDaoDataContext } from "@/shared/contexts/DaoDataContext";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
-import { useScreenSize } from "@/shared/hooks";
+import { useDaoData, useScreenSize } from "@/shared/hooks";
 import { BadgeCardDaoInfoItem } from "@/features/dao-overview/components/BadgeCardDaoInfoItem";
 import { CubeIcon } from "@radix-ui/react-icons";
 import { Pointer } from "lucide-react";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const VoteCard = ({
   daoOverview,
 }: {
   daoOverview: DaoOverviewConfig;
 }) => {
-  const { daoData } = useDaoDataContext();
+  const { daoId }: { daoId: string } = useParams();
+  const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
   const { isMobile } = useScreenSize();
 
   if (!daoData) {
