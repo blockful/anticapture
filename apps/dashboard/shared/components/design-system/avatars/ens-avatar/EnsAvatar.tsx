@@ -3,14 +3,15 @@
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
 import { Address } from "viem";
-import Image from "next/image";
+import Image, { ImageProps } from "next/image";
 import { useState } from "react";
-import { UserIcon } from "@/shared/components/icons/UserIcon";
+import { UserIcon } from "@/shared/components/icons";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
 
-interface EnsAvatarProps {
+interface EnsAvatarProps
+  extends Omit<ImageProps, "src" | "alt" | "fill" | "className" | "loading"> {
   address?: Address;
   imageUrl?: string;
   size?: AvatarSize;
@@ -47,8 +48,9 @@ export const EnsAvatar = ({
   loading = false,
   className,
   alt,
+  ...imageProps
 }: EnsAvatarProps) => {
-  const [imageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState<boolean>(false);
 
   // Only fetch ENS data if we have an address and no imageUrl provided
   const addressToFetch = address && !imageUrl ? address : undefined;
@@ -85,6 +87,7 @@ export const EnsAvatar = ({
           fill
           className="object-cover"
           onError={() => setImageError(true)}
+          {...imageProps}
         />
       </div>
     );
