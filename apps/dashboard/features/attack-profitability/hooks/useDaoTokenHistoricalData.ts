@@ -3,6 +3,7 @@ import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import axios from "axios";
 
 export type PriceEntry = [timestamp: number, value: number];
 
@@ -20,16 +21,22 @@ export const fetchDaoTokenHistoricalData = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/token/${daoId}/historical-data`,
-    { next: { revalidate: 3600 } },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch token data: ${response.statusText}`);
+  const query = `query GetHistoricalTokenData {
+  historicalTokenData(daoId: ${daoId}) {
+    total_volumes
+    market_caps
+    prices
   }
-
-  return response.json();
+}`;
+  const response: {
+    data: { data: { historicalTokenData: DaoTokenHistoricalDataResponse } };
+  } = await axios.post(`${BACKEND_ENDPOINT}`, {
+    query,
+  });
+  const { historicalTokenData } = response.data.data as {
+    historicalTokenData: DaoTokenHistoricalDataResponse;
+  };
+  return historicalTokenData as DaoTokenHistoricalDataResponse;
 };
 
 export const useDaoTokenHistoricalData = (
