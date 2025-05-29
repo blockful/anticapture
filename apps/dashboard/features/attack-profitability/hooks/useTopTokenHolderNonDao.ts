@@ -34,7 +34,6 @@ const fetchTopTokenHolder = async (
         query GetAccountBalances {
           accountBalances(
             where: {
-              daoId: ${daoId},
               tokenId: "${tokenAddress}",
               accountId_not_in: ${JSON.stringify(daoAddresses)}
             }

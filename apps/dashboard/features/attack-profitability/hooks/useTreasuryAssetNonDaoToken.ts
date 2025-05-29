@@ -2,7 +2,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
-
+import axios from "axios";
 export interface TreasuryAssetNonDaoToken {
   date: string;
   totalAssets: string;
@@ -22,17 +22,13 @@ export const fetchTreasuryAssetNonDaoToken = async ({
     date
   }
 }`;
-  const response = await fetch(`${BACKEND_ENDPOINT}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: query,
-    }),
+  const response = await axios.post(`${BACKEND_ENDPOINT}`, {
+    query,
   });
-  const { totalAssets } = (await response.json()) as {
+  const { totalAssets } = response.data.data as {
     totalAssets: TreasuryAssetNonDaoToken[];
   };
-  return totalAssets as TreasuryAssetNonDaoToken[];
+  return totalAssets;
 };
 
 export const useTreasuryAssetNonDaoToken = (

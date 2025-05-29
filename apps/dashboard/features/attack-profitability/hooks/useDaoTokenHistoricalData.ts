@@ -3,6 +3,7 @@ import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import axios from "axios";
 
 export type PriceEntry = [timestamp: number, value: number];
 
@@ -24,23 +25,15 @@ export const fetchDaoTokenHistoricalData = async ({
   historicalTokenData(daoId: ${daoId}) {
     total_volumes
     market_caps
-    prices {
-      timestamp
-      value
-    }
+    prices
   }
 }`;
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: query,
-      }),
-    },
-  );
-  const { historicalTokenData } = (await response.json()) as {
+  const response: {
+    data: { data: { historicalTokenData: DaoTokenHistoricalDataResponse } };
+  } = await axios.post(`${BACKEND_ENDPOINT}`, {
+    query,
+  });
+  const { historicalTokenData } = response.data.data as {
     historicalTokenData: DaoTokenHistoricalDataResponse;
   };
   return historicalTokenData as DaoTokenHistoricalDataResponse;
@@ -48,7 +41,9 @@ export const fetchDaoTokenHistoricalData = async ({
 
 export const useDaoTokenHistoricalData = (
   daoId: DaoIdEnum,
-  config?: Partial<SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>>,
+  config?: Partial<
+    SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>
+  >,
 ) => {
   const key = daoId ? [`daoTokenHistoricalData`, daoId] : null;
 

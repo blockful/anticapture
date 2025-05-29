@@ -1,6 +1,7 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
+import axios from "axios";
 
 interface ProposalsResponse {
   currentProposalsLaunched: string;
@@ -23,17 +24,14 @@ export const fetchProposals = async ({
         changeRate
     }
   }`;
-  const response = await fetch(`${BACKEND_ENDPOINT}`, { 
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: query,
-    }),
-  });
-  const { compareProposals } = (await response.json()) as {
+  const response: { data: { data: { compareProposals: ProposalsResponse } } } = await axios.post(`${BACKEND_ENDPOINT}`, {
+      query,
+    },
+  );
+  const { compareProposals } = response.data.data as {
     compareProposals: ProposalsResponse;
   };
-  return compareProposals;
+  return compareProposals as ProposalsResponse;
 };
 
 /**

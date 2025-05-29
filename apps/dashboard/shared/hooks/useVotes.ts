@@ -1,6 +1,7 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
+import axios from "axios";
 
 interface VotesResponse {
   currentVotes: string;
@@ -18,20 +19,19 @@ export const fetchVotes = async ({
 }): Promise<VotesResponse> => {
   const query = `query Votes {
     compareVotes(daoId: ${daoId}, days: _${days}) {
-      votes
+      currentVotes
+      oldVotes
+      changeRate
     }
   }`;
-  const response = await fetch(`${BACKEND_ENDPOINT}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: query,
-    }),
-  });
-  const { compareVotes } = (await response.json()) as {
+  const response: { data: { data: { compareVotes: VotesResponse } } } = await axios.post(`${BACKEND_ENDPOINT}`, {
+      query,
+    },
+  );
+  const { compareVotes } = response.data.data as {
     compareVotes: VotesResponse;
   };
-  return compareVotes;
+  return compareVotes as VotesResponse;
 };
 
 /**

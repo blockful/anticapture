@@ -1,10 +1,11 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DAO, DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
+import axios from "axios";
 
 export const fetchDaoData = async (daoId: DaoIdEnum): Promise<DAO> => {
   const query = `query GetDaoData {
-    dao(id: ${daoId}) {
+    dao(id: "${daoId}") {
       id
       quorum
       proposalThreshold
@@ -13,17 +14,14 @@ export const fetchDaoData = async (daoId: DaoIdEnum): Promise<DAO> => {
       timelockDelay
     }
   }`;
-  const response = await fetch(`${BACKEND_ENDPOINT}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: query,
-    }),
-  });
-  const { dao } = (await response.json()) as {
+  const response: { data: { data: { dao: DAO } } } = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    { query },
+  );
+  const { dao } = response.data.data as {
     dao: DAO;
   };
-  return dao;
+  return dao as DAO;
 };
 
 interface UseDaoDataResult {
