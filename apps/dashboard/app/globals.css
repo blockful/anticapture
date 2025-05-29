@@ -5,7 +5,7 @@
 @theme {
   --breakpoint-xl4k: 2000px;
 
-  --font-mono: var(--font-mono);
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
 
   --color-darkest: rgb(from var(--background) r g b);
   --color-dark: rgb(from var(--card) r g b);
