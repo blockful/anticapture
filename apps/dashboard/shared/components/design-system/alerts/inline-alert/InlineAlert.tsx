@@ -11,7 +11,7 @@ const mapVariantToIcon = {
   info: {
     icon: <Info className="size-4 text-white" />,
     color: "text-info",
-    bgColor: "bg-lightDark",
+    bgColor: "bg-[#27272A]",
   },
   warning: {
     icon: <AlertTriangle className="text-warning size-4" />,
@@ -25,7 +25,7 @@ const mapVariantToIcon = {
   },
 };
 
-const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
+export const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
   return (
     <div className="w-full overflow-hidden rounded-md bg-[#18181B]">
       <CardDescription
@@ -40,5 +40,3 @@ const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
     </div>
   );
 };
-
-export default InlineAlert;

@@ -13,9 +13,9 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
-import BannerAlert from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
-import { Info, Send } from "lucide-react";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+// import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+// import { Info, Send } from "lucide-react";
+// import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -26,10 +26,10 @@ export const DaoTemplate = () => {
     return null;
   }
 
-  const bannerAlertMessage =
-    "RECEIVE REAL-TIME " +
-    daoConstants.name.toUpperCase() +
-    " SECURITY UPDATES.";
+  // const bannerAlertMessage =
+  //   "RECEIVE REAL-TIME " +
+  //   daoConstants.name.toUpperCase() +
+  //   " SECURITY UPDATES.";
 
   return (
     <DaoPageInteractionProvider>

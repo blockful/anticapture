@@ -21,7 +21,7 @@ const mapVariantToColor = {
   highlight: "bg-[#18181B] ",
 };
 
-const BannerAlert = ({
+export const BannerAlert = ({
   icon,
   text,
   link,
@@ -77,5 +77,3 @@ const BannerAlert = ({
     </div>
   );
 };
-
-export default BannerAlert;

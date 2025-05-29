@@ -7,7 +7,7 @@ import {
   HeartIcon,
 } from "lucide-react";
 
-import BannerAlert from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 
 const meta = {
   title: "Design System/Alerts/BannerAlert",

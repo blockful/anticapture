@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import InlineAlert from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 
 const meta = {
   title: "Design System/Alerts/InlineAlert",
