@@ -54,16 +54,23 @@ export const BannerAlert = ({
     >
       <div className="flex items-center gap-2 tracking-wider sm:flex-row">
         <div className="flex flex-wrap items-center gap-1 sm:flex-row">
-          <div className="flex gap-3 font-mono text-xs text-white uppercase">
+          <div className="flex gap-2 font-mono text-xs text-white uppercase">
             <div className="flex-shrink-0">{icon}</div>
-            {text}
+            <div className="flex flex-wrap gap-1">
+              {text}
+              {link && (
+                <DefaultLink
+                  href={link.url}
+                  openInNewTab
+                  variant="highlight"
+                  className="flex items-center gap-1"
+                >
+                  {link.text}
+                  <ChevronRight className="size-4" />
+                </DefaultLink>
+              )}
+            </div>
           </div>
-          {link && (
-            <DefaultLink href={link.url} openInNewTab variant="highlight">
-              {link.text}
-              <ChevronRight className="size-4" />
-            </DefaultLink>
-          )}
         </div>
       </div>
 
