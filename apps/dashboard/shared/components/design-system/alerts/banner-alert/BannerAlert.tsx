@@ -53,9 +53,9 @@ export const BannerAlert = ({
       )}
     >
       <div className="flex items-center gap-2 tracking-wider sm:flex-row">
-        <div className="flex-shrink-0">{icon}</div>
         <div className="flex flex-wrap items-center gap-1 sm:flex-row">
           <div className="flex gap-3 font-mono text-xs text-white uppercase">
+            <div className="flex-shrink-0">{icon}</div>
             {text}
           </div>
           {link && (
