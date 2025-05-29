@@ -1,3 +1,5 @@
+"use client";
+
 import { ChevronRight, X } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
