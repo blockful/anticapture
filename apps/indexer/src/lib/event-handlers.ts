@@ -75,6 +75,8 @@ export const delegateChanged = async (
       delegate: event.args.toDelegate,
     });
 
+
+    
   // Update the old delegatee's delegations count
   if (event.args.fromDelegate != zeroAddress) {
     await context.db
@@ -145,9 +147,13 @@ export const delegatedVotesChanged = async (
       daoId,
       votingPower: newBalance,
     })
-    .onConflictDoUpdate({
+    .onConflictDoUpdate((current) => ({
       votingPower: newBalance,
-    });
+      delegationsCount: current.delegationsCount,
+      votesCount: current.votesCount,
+      proposalsCount: current.proposalsCount,
+      lastVoteTimestamp: current.lastVoteTimestamp,
+    }));
 
   const currentDelegatedSupply = (await context.db.find(token, {
     id: event.log.address,
@@ -232,20 +238,22 @@ export const tokenTransfer = async (
       balance: current.balance + value,
     }));
 
-  // Update the from account's balance
-  await context.db
-    .insert(accountBalance)
-    .values({
-      id: [from, tokenAddress].join("-"),
-      daoId,
-      tokenId: tokenAddress,
-      accountId: from,
-      balance: -value,
-      delegate: zeroAddress,
-    })
-    .onConflictDoUpdate((current) => ({
-      balance: current.balance - value,
-    }));
+  // Update the from account's balance (skip if minting from zero address)
+  if (from !== zeroAddress) {
+    await context.db
+      .insert(accountBalance)
+      .values({
+        id: [from, tokenAddress].join("-"),
+        daoId,
+        tokenId: tokenAddress,
+        accountId: from,
+        balance: -value,
+        delegate: zeroAddress,
+      })
+      .onConflictDoUpdate((current) => ({
+        balance: current.balance - value,
+      }));
+  }
 
   const currentLendingSupply =
     (
@@ -537,7 +545,7 @@ export const proposalCreated = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: event.args.proposer,
+      id: [event.args.proposer, daoId].join("-"),
       daoId,
       accountId: event.args.proposer,
       proposalsCount: 1,

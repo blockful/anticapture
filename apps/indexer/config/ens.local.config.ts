@@ -25,13 +25,13 @@ export default createConfig({
       network: "anvil",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.token.address,
-      startBlock: 2,
+      startBlock: 1,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       network: "anvil",
       address: CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.governor,
-      startBlock: 2,
+      startBlock: 1,
     },
   },
 });

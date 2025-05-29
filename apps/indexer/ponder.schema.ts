@@ -197,10 +197,10 @@ export const daoMetricsDayBucket = onchainTable(
 export const accountBalanceRelations = relations(
   accountBalance,
   ({ one, many }) => ({
-    // Relation to the delegate's power
+    // Relation to the delegate's power - fixed to use composite matching
     delegatePower: one(accountPower, {
-      fields: [accountBalance.delegate],
-      references: [accountPower.accountId],
+      fields: [accountBalance.delegate, accountBalance.daoId],
+      references: [accountPower.accountId, accountPower.daoId],
       relationName: "delegatePower",
     }),
     // Relations to transfers
