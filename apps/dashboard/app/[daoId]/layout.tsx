@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
-import { DaoDataProvider } from "@/shared/contexts/DaoDataContext";
 import NotFound from "@/app/[daoId]/not-found";
 import { DaoPageInteractionProvider } from "@/shared/contexts";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -33,12 +32,10 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
 
   // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
-    <DaoDataProvider daoId={daoIdEnum}>
-      <TokenDistributionProvider daoId={daoIdEnum}>
-        <GovernanceActivityProvider daoId={daoIdEnum}>
-          <DaoPageInteractionProvider>{children}</DaoPageInteractionProvider>
-        </GovernanceActivityProvider>
-      </TokenDistributionProvider>
-    </DaoDataProvider>
+    <TokenDistributionProvider daoId={daoIdEnum}>
+      <GovernanceActivityProvider daoId={daoIdEnum}>
+        <DaoPageInteractionProvider>{children}</DaoPageInteractionProvider>
+      </GovernanceActivityProvider>
+    </TokenDistributionProvider>
   );
 }
