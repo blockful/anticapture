@@ -31,6 +31,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
+    tmpfs:
+      - /var/lib/postgresql/data:rw,noexec,nosuid
     networks:
       - backend
 
