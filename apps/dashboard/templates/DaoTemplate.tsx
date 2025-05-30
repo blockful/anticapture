@@ -14,6 +14,8 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
+import { Info } from "lucide-react";
+import { BannerAlert } from "@/shared/components/alerts/BannerAlert";
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -37,6 +39,12 @@ export const DaoTemplate = () => {
     <DaoPageInteractionProvider>
       {/* <MessageStacker messages={messages} /> */}
       <div className="flex w-full flex-col items-center gap-5 px-3 py-4 sm:gap-6 sm:p-3">
+        <BannerAlert
+          icon={<Info className="size-4" />}
+          text={"Currently in beta. Some data inconconsistencies may occur."}
+          storageKey={`beta-banner-dismissed-${daoIdEnum}`}
+        />
+
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
         {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
