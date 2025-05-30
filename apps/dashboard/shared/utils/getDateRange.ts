@@ -1,4 +1,4 @@
-import { MILLISECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { timestampToReadableDate } from "@/shared/utils";
 
 export const getDateRange = (days: string) => {
@@ -10,7 +10,7 @@ export const getDateRange = (days: string) => {
   now.setHours(0, 0, 0, 0);
   const endTimestamp = now.getTime();
 
-  const startTimestamp = endTimestamp - numDays * MILLISECONDS_PER_DAY;
+  const startTimestamp = endTimestamp - numDays * SECONDS_PER_DAY;
 
   return `${timestampToReadableDate(startTimestamp)} - ${timestampToReadableDate(endTimestamp)}`;
 };

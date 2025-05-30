@@ -1,10 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  MILLISECONDS_PER_SECOND,
-  MILLISECONDS_PER_MINUTE,
-  MILLISECONDS_PER_HOUR,
-  MILLISECONDS_PER_DAY,
-} from "@/shared/constants/time-related";
 
 type CountdownTime = {
   days: number;
@@ -54,7 +48,7 @@ export function useCountdown(targetTimestamp?: number): CountdownTime {
     updateCountdown();
 
     // Update every second
-    const interval = setInterval(updateCountdown, MILLISECONDS_PER_SECOND);
+    const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval);
   }, [targetTimestamp, updateCountdown, isClient]);
@@ -89,15 +83,15 @@ function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
     };
   }
 
-  const days = Math.floor(diffMs / MILLISECONDS_PER_DAY);
+  const days = Math.floor(diffMs / 1000);
   const hours = Math.floor(
-    (diffMs % MILLISECONDS_PER_DAY) / MILLISECONDS_PER_HOUR,
+    (diffMs % 1000) / 1000,
   );
   const minutes = Math.floor(
-    (diffMs % MILLISECONDS_PER_HOUR) / MILLISECONDS_PER_MINUTE,
+    (diffMs % 1000) / 1000,
   );
   const seconds = Math.floor(
-    (diffMs % MILLISECONDS_PER_MINUTE) / MILLISECONDS_PER_SECOND,
+    (diffMs % 1000) / 1000,
   );
 
   return {

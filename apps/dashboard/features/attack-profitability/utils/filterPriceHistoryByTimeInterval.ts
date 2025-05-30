@@ -1,5 +1,5 @@
 import { PriceEntry } from "@/shared/dao-config/types";
-import { DAYS_IN_MILLISECONDS } from "@/shared/constants/time-related";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { TimeInterval } from "@/shared/types/enums";
 
 export type FilteredChartData = {
@@ -46,4 +46,4 @@ export const filterPriceHistoryByTimeInterval = (
 export const calculatePastTimestamp = (
   lastTimestamp: number,
   interval: TimeInterval,
-): number => lastTimestamp - DAYS_IN_MILLISECONDS[interval];
+): number => lastTimestamp - DAYS_IN_SECONDS[interval];
