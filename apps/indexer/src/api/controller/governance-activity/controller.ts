@@ -14,19 +14,19 @@ interface GovernanceActivityRepository {
   getActiveSupply(
     daoId: string,
     days: number,
-  ): Promise<ActiveSupplyQueryResult>;
+  ): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
     daoId: string,
     days: number,
-  ): Promise<ProposalsCompareQueryResult>;
+  ): Promise<ProposalsCompareQueryResult | undefined>;
   getVotesCompare(
     daoId: string,
     days: number,
-  ): Promise<VotesCompareQueryResult>;
+  ): Promise<VotesCompareQueryResult | undefined>;
   getAverageTurnoutCompare(
     daoId: string,
     days: number,
-  ): Promise<AverageTurnoutCompareQueryResult>;
+  ): Promise<AverageTurnoutCompareQueryResult | undefined>;
 }
 
 export function governanceActivity(
@@ -73,13 +73,22 @@ export function governanceActivity(
             },
           },
         },
+        404: {
+          description: "No data found",
+          content: {
+            "application/json": { schema: z.object({ error: z.string() }) },
+          },
+        },
       },
     }),
     async (context) => {
       const { daoId } = context.req.valid("param");
       const { days } = context.req.valid("query");
       const data = await repository.getActiveSupply(daoId, days);
-      return context.json({ activeSupply: data.activeSupply });
+      if (!data) {
+        return context.json({ error: "No data found" }, 404);
+      }
+      return context.json({ activeSupply: data.activeSupply }, 200);
     },
   );
 
@@ -114,6 +123,12 @@ export function governanceActivity(
             },
           },
         },
+        404: {
+          description: "No data found",
+          content: {
+            "application/json": { schema: z.object({ error: z.string() }) },
+          },
+        },
       },
     }),
     async (context) => {
@@ -121,12 +136,15 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getProposalsCompare(daoId, days);
+      if (!data) {
+        return context.json({ error: "No data found" }, 404);
+      }
       const changeRate =
         data.oldProposalsLaunched === 0
           ? 0
           : data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
 
-      return context.json({ ...data, changeRate });
+      return context.json({ ...data, changeRate }, 200);
     },
   );
 
@@ -161,6 +179,12 @@ export function governanceActivity(
             },
           },
         },
+        404: {
+          description: "No data found",
+          content: {
+            "application/json": { schema: z.object({ error: z.string() }) },
+          },
+        },
       },
     }),
     async (context) => {
@@ -168,7 +192,9 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getVotesCompare(daoId, days);
-
+      if (!data) {
+        return context.json({ error: "No data found" }, 404);
+      }
       const changeRate =
         data.oldVotes === 0 ? 0 : data.currentVotes / data.oldVotes - 1;
 
@@ -207,6 +233,12 @@ export function governanceActivity(
             },
           },
         },
+        404: {
+          description: "No data found",
+          content: {
+            "application/json": { schema: z.object({ error: z.string() }) },
+          },
+        },
       },
     }),
     async (context) => {
@@ -214,12 +246,15 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getAverageTurnoutCompare(daoId, days);
+      if (!data) {
+        return context.json({ error: "No data found" }, 404);
+      }
       const changeRate =
         data.oldAverageTurnout === 0
           ? 0
           : data.currentAverageTurnout / data.oldAverageTurnout - 1;
 
-      return context.json({ ...data, changeRate });
+      return context.json({ ...data, changeRate }, 200);
     },
   );
 }

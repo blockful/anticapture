@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { UnderlinedLink } from "./UnderlinedLink";
+import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
 import { ExternalLinkIcon } from "lucide-react";
 
 const meta = {

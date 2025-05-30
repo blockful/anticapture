@@ -3,6 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import axios from "axios";
 
 interface DelegatedSupplyResponse {
   oldDelegatedSupply: string;
@@ -21,11 +22,21 @@ export const fetchDelegatedSupply = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/delegated-supply/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query DelegatedSupply {
+    compareDelegatedSupply(daoId: ${daoId}, days: _${days}) {
+      oldDelegatedSupply
+      currentDelegatedSupply
+      changeRate
+    }
+  }`;
+  const response: { data: { data: { compareDelegatedSupply: DelegatedSupplyResponse } } } =
+    await axios.post(`${BACKEND_ENDPOINT}`, {
+      query,
+    });
+  const { compareDelegatedSupply } = response.data.data as {
+    compareDelegatedSupply: DelegatedSupplyResponse;
+  };
+  return compareDelegatedSupply;
 };
 
 /**
