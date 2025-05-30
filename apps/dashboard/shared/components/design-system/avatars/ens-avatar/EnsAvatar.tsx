@@ -36,7 +36,7 @@ const iconSizes: Record<AvatarSize, string> = {
 };
 
 const variantClasses: Record<AvatarVariant, string> = {
-  square: "rounded-sm",
+  square: "rounded-md",
   rounded: "rounded-full",
 };
 
