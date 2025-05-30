@@ -31,7 +31,7 @@ const fetchTopTokenHolder = async (
     },
     body: JSON.stringify({
       query: `
-        query DaoMetricsDayBuckets {
+        query GetAccountBalances {
           accountBalances(
             where: {
               tokenId: "${tokenAddress}",
