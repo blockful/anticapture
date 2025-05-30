@@ -59,7 +59,6 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     days: TimeInterval;
   }) => {
     const { data: supplyData } = useDelegatedSupply(daoId, String(days));
-
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (supplyData) {

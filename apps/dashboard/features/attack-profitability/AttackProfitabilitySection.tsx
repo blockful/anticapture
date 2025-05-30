@@ -40,9 +40,7 @@ export const AttackProfitabilitySection = ({
       subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.attackProfitability.description}
-      infoText={
-        "Treasury values above supply costs indicate high risk. And probably we can add something else here."
-      }
+      infoText={"Treasury values above supply costs indicate high risk."}
       switchDate={
         <SwitcherDate
           defaultValue={defaultDays}
