@@ -13,6 +13,8 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
+import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { Info } from "lucide-react";
 // import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 // import { Info, Send } from "lucide-react";
 // import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
@@ -43,13 +45,13 @@ export const DaoTemplate = () => {
             text: "JOIN OUR TELEGRAM BOT",
           }}
           storageKey={`banner-dismissed-${daoIdEnum}`}
-        />
+        /> */}
+
         <BannerAlert
           icon={<Info className="hidden size-4 text-white sm:block" />}
-          text={bannerAlertMessage}
-          storageKey={`banner-dismissed-${daoIdEnum}`}
-          variant="highlight"
-        /> */}
+          text={"Currently in beta. Some data inconconsistencies may occur."}
+          storageKey={`beta-banner-dismissed-${daoIdEnum}`}
+        />
 
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
