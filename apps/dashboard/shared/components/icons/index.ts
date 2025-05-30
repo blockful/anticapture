@@ -7,5 +7,6 @@ export * from "@/shared/components/icons/OptimismIcon";
 export * from "@/shared/components/icons/TelegramIcon";
 export * from "@/shared/components/icons/UniswapIcon";
 export * from "@/shared/components/icons/PointerIcon";
+export * from "@/shared/components/icons/UserIcon";
 // THE IMPORT OF DAO AVATAR ICON MUST BE LAST
 export * from "@/shared/components/icons/DaoAvatarIcon";
