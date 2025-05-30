@@ -16,8 +16,27 @@ contract CreateProposal is Script {
     ENSGovernor ensGovernor;
     ENSToken ensToken;
 
+    /**
+     * @dev Label addresses for better readability in logs
+     */
+    function labelAddresses() internal {
+        // Label user addresses
+        vm.label(Constants.ALICE, "Alice");
+        vm.label(Constants.BOB, "Bob");
+        vm.label(Constants.CHARLIE, "Charlie");
+        vm.label(Constants.DAVID, "David");
+        
+        // Label contract addresses
+        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
+        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
+        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
+    }
+
     function run() public {
         console.log("=== Governance Proposal Creation Script ===");
+        
+        // Label addresses for better readability in logs
+        labelAddresses();
         
         // Initialize contracts
         ensGovernor = ENSGovernor(payable(Constants.ENS_GOVERNOR_ADDRESS));

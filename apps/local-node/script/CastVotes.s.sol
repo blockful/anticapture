@@ -17,8 +17,27 @@ contract CastVotes is Script {
     ENSToken ensToken;
     uint256 proposalId;
 
+    /**
+     * @dev Label addresses for better readability in logs
+     */
+    function labelAddresses() internal {
+        // Label user addresses
+        vm.label(Constants.ALICE, "Alice");
+        vm.label(Constants.BOB, "Bob");
+        vm.label(Constants.CHARLIE, "Charlie");
+        vm.label(Constants.DAVID, "David");
+        
+        // Label contract addresses
+        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
+        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
+        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
+    }
+
     function run() public {
         console.log("=== Governance Voting Script ===");
+        
+        // Label addresses for better readability in logs
+        labelAddresses();
         
         // Initialize contracts
         ensGovernor = ENSGovernor(payable(Constants.ENS_GOVERNOR_ADDRESS));
@@ -34,9 +53,9 @@ contract CastVotes is Script {
         displayVoterInfo();
         
         // Cast votes from each account
-        castAliceVote();    // Vote FOR
-        castBobVote();      // Vote AGAINST  
-        castCharlieVote();  // Vote ABSTAIN
+        castVote("Alice", Constants.ALICE_PRIVATE_KEY, Constants.FOR);      // Vote FOR
+        castVote("Bob", Constants.BOB_PRIVATE_KEY, Constants.AGAINST);      // Vote AGAINST  
+        castVote("Charlie", Constants.CHARLIE_PRIVATE_KEY, Constants.ABSTAIN); // Vote ABSTAIN
         
         // Display final voting results
         displayVotingResults();
@@ -91,36 +110,20 @@ contract CastVotes is Script {
     }
     
     /**
-     * @dev Alice votes FOR the proposal
+     * @dev Cast a vote on the proposal
+     * @param voterName Human-readable name of the voter for logging
+     * @param privateKey Private key of the voter
+     * @param voteChoice Vote choice (FOR, AGAINST, or ABSTAIN)
      */
-    function castAliceVote() internal {
-        console.log("Alice casting vote FOR...");
-        vm.startBroadcast(Constants.ALICE_PRIVATE_KEY);
-        ensGovernor.castVote(proposalId, Constants.FOR);
+    function castVote(string memory voterName, uint256 privateKey, uint8 voteChoice) internal {
+        string memory voteString = getVoteString(voteChoice);
+        console.log(string.concat(voterName, " casting vote ", voteString, "..."));
+        
+        vm.startBroadcast(privateKey);
+        ensGovernor.castVote(proposalId, voteChoice);
         vm.stopBroadcast();
-        console.log("SUCCESS: Alice voted FOR");
-    }
-    
-    /**
-     * @dev Bob votes AGAINST the proposal
-     */
-    function castBobVote() internal {
-        console.log("Bob casting vote AGAINST...");
-        vm.startBroadcast(Constants.BOB_PRIVATE_KEY);
-        ensGovernor.castVote(proposalId, Constants.AGAINST);
-        vm.stopBroadcast();
-        console.log("SUCCESS: Bob voted AGAINST");
-    }
-    
-    /**
-     * @dev Charlie votes ABSTAIN on the proposal
-     */
-    function castCharlieVote() internal {
-        console.log("Charlie casting vote ABSTAIN...");
-        vm.startBroadcast(Constants.CHARLIE_PRIVATE_KEY);
-        ensGovernor.castVote(proposalId, Constants.ABSTAIN);
-        vm.stopBroadcast();
-        console.log("SUCCESS: Charlie voted ABSTAIN");
+        
+        console.log(string.concat("SUCCESS: ", voterName, " voted ", voteString));
     }
     
     /**
@@ -158,5 +161,15 @@ contract CastVotes is Script {
         if (state == 6) return "Expired";
         if (state == 7) return "Executed";
         return "Unknown";
+    }
+    
+    /**
+     * @dev Convert vote choice to readable string
+     */
+    function getVoteString(uint8 voteChoice) internal pure returns (string memory) {
+        if (voteChoice == Constants.FOR) return "FOR";
+        if (voteChoice == Constants.AGAINST) return "AGAINST";
+        if (voteChoice == Constants.ABSTAIN) return "ABSTAIN";
+        return "UNKNOWN";
     }
 } 

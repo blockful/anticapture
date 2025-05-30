@@ -20,8 +20,27 @@ contract SimpleDelegation is Script {
         ensGovernor = ENSGovernor(payable(Constants.ENS_GOVERNOR_ADDRESS));
     }
     
+    /**
+     * @dev Label addresses for better readability in logs
+     */
+    function labelAddresses() internal {
+        // Label user addresses
+        vm.label(Constants.ALICE, "Alice");
+        vm.label(Constants.BOB, "Bob");
+        vm.label(Constants.CHARLIE, "Charlie");
+        vm.label(Constants.DAVID, "David");
+        
+        // Label contract addresses
+        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
+        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
+        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
+    }
+    
     function run() external {
         setUp();
+        
+        // Label addresses for better readability in logs
+        labelAddresses();
         
         console.log("=== Simple Delegation Script ===");
         console.log("Alice's token balance:", ensToken.balanceOf(Constants.ALICE));

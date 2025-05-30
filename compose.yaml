@@ -9,7 +9,7 @@ services:
 
   contracts:
     build:
-      context: apps/indexer/contracts
+      context: apps/local-node
       dockerfile: Dockerfile
     ports:
       - "8545:8545"
@@ -40,6 +40,7 @@ services:
     build:
       context: .
       dockerfile: docker/indexer/Dockerfile.indexer
+    command: ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
