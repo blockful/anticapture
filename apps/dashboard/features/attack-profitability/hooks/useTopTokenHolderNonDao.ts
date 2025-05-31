@@ -25,6 +25,7 @@ const fetchTopTokenHolder = async (
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "anticapture-dao-id": daoId,
     },
     body: JSON.stringify({
       query: `
