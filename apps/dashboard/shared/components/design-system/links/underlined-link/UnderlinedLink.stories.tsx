@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
 import { ExternalLinkIcon } from "lucide-react";
+import { Key } from "lucide-react";
 
 const meta = {
   title: "Design System/Links/UnderlinedLink",
@@ -44,6 +45,21 @@ export const WithIcon: Story = {
       <>
         External Link
         <ExternalLinkIcon className="h-4 w-4" />
+      </>
+    ),
+  },
+};
+
+export const WithIconAndResponsiveText: Story = {
+  args: {
+    href: "https://example.com/multisig",
+    openInNewTab: true,
+    children: (
+      <>
+        <Key className="text-tangerine size-3.5" />
+        <span className="text-white">3/5</span>
+        <span className="hidden sm:inline">required for transactions</span>
+        <span className="inline sm:hidden"> required</span>
       </>
     ),
   },
