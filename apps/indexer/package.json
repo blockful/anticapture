@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": true,
   "scripts": {
-    "dev": "ponder dev --schema public",
+    "dev": "ponder dev --schema public --config config/ens.local.config.ts",
     "start": "ponder start --schema public",
     "serve": "ponder serve --schema public",
     "lint": "eslint . --ext .ts",

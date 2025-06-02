@@ -14,8 +14,8 @@ export function historicalBalances(app: Hono) {
 
   app.openapi(
     createRoute({
-      method: "post",
-      operationId: "getHistoricalBalances",
+      method: "get",
+      operationId: "historicalBalances",
       path: "/historical-balances/{daoId}",
       summary: "Get historical token balances",
       description:
@@ -25,30 +25,10 @@ export function historicalBalances(app: Hono) {
         params: z.object({
           daoId: caseInsensitiveEnum(DaoIdEnum),
         }),
-        body: {
-          content: {
-            "application/json": {
-              schema: z.object({
-                addresses: z
-                  .array(
-                    z
-                      .string()
-                      .regex(
-                        /^0x[a-fA-F0-9]{40}$/,
-                        "Invalid Ethereum address format",
-                      ),
-                  )
-                  .min(1, "At least one address is required")
-                  .max(100, "Maximum 100 addresses allowed"),
-                blockNumber: z
-                  .number()
-                  .int()
-                  .positive("Block number must be positive")
-                  .max(Number.MAX_SAFE_INTEGER, "Block number too large"),
-              }),
-            },
-          },
-        },
+        query: z.object({
+          addresses: z.string().min(1, "At least one address is required"),
+          blockNumber: z.coerce.number().int().positive("Block number must be positive"),
+        }),
       },
       responses: {
         200: {
@@ -102,7 +82,45 @@ export function historicalBalances(app: Hono) {
     async (context) => {
       try {
         const { daoId } = context.req.valid("param");
-        const { addresses, blockNumber } = context.req.valid("json");
+        const { addresses: addressesStr, blockNumber } = context.req.valid("query");
+
+        // Parse comma-separated addresses
+        const addresses = addressesStr.split(',').map(addr => addr.trim()) as Address[];
+        
+        // Validate addresses
+        if (addresses.length === 0) {
+          return context.json(
+            {
+              error: "Validation Error",
+              message: "At least one address is required",
+            },
+            400,
+          );
+        }
+        
+        if (addresses.length > 100) {
+          return context.json(
+            {
+              error: "Validation Error", 
+              message: "Maximum 100 addresses allowed",
+            },
+            400,
+          );
+        }
+        
+        // Validate address format
+        const addressRegex = /^0x[a-fA-F0-9]{40}$/;
+        for (const address of addresses) {
+          if (!addressRegex.test(address)) {
+            return context.json(
+              {
+                error: "Validation Error",
+                message: `Invalid Ethereum address format: ${address}`,
+              },
+              400,
+            );
+          }
+        }
 
         // Additional validation: check if block number is not too far in the future
         const currentBlockNumber = await service.getCurrentBlockNumber();
@@ -129,7 +147,7 @@ export function historicalBalances(app: Hono) {
         }
 
         const request: HistoricalBalancesRequest = {
-          addresses: addresses as Address[],
+          addresses: addresses,
           blockNumber,
           daoId,
         };
