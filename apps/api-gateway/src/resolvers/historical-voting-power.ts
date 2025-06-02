@@ -1,4 +1,4 @@
-export const historicalBalancesResolver = {
+export const historicalVotingPowerResolver = {
   selectionSet: /* GraphQL */ `
     {
       daoId
@@ -29,8 +29,8 @@ export const historicalBalancesResolver = {
       // addresses is already a comma-separated string from the GraphQL schema
       const addressesParam = addresses.trim();
       
-      // Call the historical balances GET endpoint with query parameters
-      const response = await fetch(`http://localhost:42069/historical-balances/${upperCaseDaoId}?addresses=${addressesParam}&blockNumber=${blockNumber}`, {
+      // Call the historical voting power GET endpoint with query parameters
+      const response = await fetch(`http://localhost:42069/historical-voting-power/${upperCaseDaoId}?addresses=${addressesParam}&blockNumber=${blockNumber}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -45,11 +45,11 @@ export const historicalBalancesResolver = {
       const data = await response.json();
       return {
         ...data,
-        __typename: 'historicalBalances_200_response'
+        __typename: 'historicalVotingPower_200_response'
       };
     } catch (error) {
-      console.error('Error fetching historical balances:', error);
-      throw new Error(`Failed to fetch historical balances: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error fetching historical voting power:', error);
+      throw new Error(`Failed to fetch historical voting power: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   },
 }; 
