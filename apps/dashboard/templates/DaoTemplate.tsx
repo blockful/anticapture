@@ -41,7 +41,7 @@ export const DaoTemplate = () => {
       <div className="flex w-full flex-col items-center gap-5 px-3 py-4 sm:gap-6 sm:p-3">
         <BannerAlert
           icon={<Info className="size-4" />}
-          text={"Currently in beta. Some data inconconsistencies may occur."}
+          text={"Currently in beta. Some data inconsistencies may occur."}
           storageKey={`beta-banner-dismissed-${daoIdEnum}`}
         />
 
