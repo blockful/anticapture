@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Address } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -57,16 +58,17 @@ export type GovernanceImplementationField = {
 interface BaseInfo {
   name: string;
   supportStage: SupportStageEnum;
-  icon?: (props: DaoIconProps) => JSX.Element;
+  icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
 
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  contracts?: {
-    governor: Address;
+  chainId: number;
+  contracts: {
     token: Address;
-    timelock: Address;
+    governor?: Address;
+    timelock?: Address;
   };
   cancelFunction?: string;
   snapshot?: string;
@@ -97,16 +99,19 @@ export interface AttackProfitabilityConfig {
   supportsLiquidTreasuryCall?: boolean;
 }
 export interface GovernanceImplementationConfig
-  extends GovernanceImplementation {}
+  extends GovernanceImplementation { }
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
-  daoOverview?: DaoOverviewConfig;
+  daoOverview: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
   governanceActivity?: boolean;
-  showSupport?: boolean;
+  showSupport?: {
+    snapshotProposal: string;
+    snapshotSpace: string;
+  };
   riskAnalysis?: boolean;
 }

@@ -8,6 +8,7 @@ import { cn } from "@/shared/utils/";
 import { RiskTooltipCard } from "@/shared/components";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
+import { useScreenSize } from "@/shared/hooks";
 
 export type RiskArea = {
   name: string;
@@ -106,14 +107,18 @@ const RiskAreaCardInternal = ({
           "flex h-full items-center px-1 py-2 sm:px-2",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
-            "bg-lightDark": risk.level === RiskLevel.NONE,
+            "bg-light-dark": risk.level === RiskLevel.NONE,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
             "shadow-[0_0_20px_0]":
               (isActive || isHovered) && risk.level !== RiskLevel.NONE,
-            "bg-opacity-[12%]":
-              !isActive && risk.level !== RiskLevel.NONE && !isHovered,
+            "bg-success/12":
+              !isActive && risk.level === RiskLevel.LOW && !isHovered,
+            "bg-warning/12":
+              !isActive && risk.level === RiskLevel.MEDIUM && !isHovered,
+            "bg-error/12":
+              !isActive && risk.level === RiskLevel.HIGH && !isHovered,
           },
         )}
       >
@@ -132,7 +137,7 @@ const RiskAreaCardInternal = ({
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "!text-error":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "text-darkest":
+              "!text-darkest":
                 (isActive && risk.level !== undefined) || isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
@@ -152,7 +157,7 @@ const RiskAreaCardInternal = ({
             riskLevelIcons[risk.level as RiskLevel]
           ) : (
             <div className="flex items-center justify-center font-mono text-xs">
-              <CounterClockwiseClockIcon className="size-4 text-foreground sm:size-5" />
+              <CounterClockwiseClockIcon className="text-foreground size-4 sm:size-5" />
             </div>
           )}
         </div>
@@ -164,8 +169,22 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW && isBox3Filled,
               "bg-warning": risk.level === RiskLevel.MEDIUM && isBox3Filled,
               "bg-error": risk.level === RiskLevel.HIGH && isBox3Filled,
-              "bg-opacity-[12%]": !isActive && isBox3Filled && !isHovered,
-              "bg-lightDark": risk.level === undefined || !isBox3Filled,
+              "bg-success/12":
+                risk.level === RiskLevel.LOW &&
+                !isActive &&
+                isBox3Filled &&
+                !isHovered,
+              "bg-warning/12":
+                risk.level === RiskLevel.MEDIUM &&
+                !isActive &&
+                isBox3Filled &&
+                !isHovered,
+              "bg-error/12":
+                risk.level === RiskLevel.HIGH &&
+                !isActive &&
+                isBox3Filled &&
+                !isHovered,
+              "bg-light-dark": risk.level === undefined || !isBox3Filled,
             })}
           />
           <div
@@ -173,8 +192,22 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW && isBox2Filled,
               "bg-warning": risk.level === RiskLevel.MEDIUM && isBox2Filled,
               "bg-error": risk.level === RiskLevel.HIGH && isBox2Filled,
-              "bg-opacity-[12%]": !isActive && isBox2Filled && !isHovered,
-              "bg-lightDark": risk.level === undefined || !isBox2Filled,
+              "bg-success/12":
+                risk.level === RiskLevel.LOW &&
+                !isActive &&
+                isBox2Filled &&
+                !isHovered,
+              "bg-warning/12":
+                risk.level === RiskLevel.MEDIUM &&
+                !isActive &&
+                isBox2Filled &&
+                !isHovered,
+              "bg-error/12":
+                risk.level === RiskLevel.HIGH &&
+                !isActive &&
+                isBox2Filled &&
+                !isHovered,
+              "bg-light-dark": risk.level === undefined || !isBox2Filled,
             })}
           />
           <div
@@ -182,9 +215,13 @@ const RiskAreaCardInternal = ({
               "bg-success": risk.level === RiskLevel.LOW,
               "bg-warning": risk.level === RiskLevel.MEDIUM,
               "bg-error": risk.level === RiskLevel.HIGH,
-              "bg-opacity-[12%]":
-                !isActive && risk.level !== undefined && !isHovered,
-              "bg-lightDark": risk.level === undefined,
+              "bg-success/12":
+                risk.level === RiskLevel.LOW && !isActive && !isHovered,
+              "bg-warning/12":
+                risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
+              "bg-error/12":
+                risk.level === RiskLevel.HIGH && !isActive && !isHovered,
+              "bg-light-dark": risk.level === undefined,
             })}
           />
         </div>
@@ -209,6 +246,8 @@ export const RiskAreaCard = ({
     description: "Risk description not available.",
   };
 
+  const { isTablet } = useScreenSize();
+
   const modifiedRiskArea = {
     ...riskArea,
     content: riskInfo.titleAbbreviation,
@@ -225,7 +264,7 @@ export const RiskAreaCard = ({
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
-            onClick={onClick}
+            onClick={isTablet ? onClick : () => {}}
             variant={variant}
           />
         </div>
@@ -236,7 +275,7 @@ export const RiskAreaCard = ({
         <div
           className={cn(
             "w-full p-1.5",
-            isActive && "border-[2px] border-middleDark bg-darkest sm:bg-dark",
+            isActive && "border-middle-dark bg-darkest sm:bg-dark border-2",
           )}
         >
           <RiskAreaCardInternal
@@ -248,7 +287,7 @@ export const RiskAreaCard = ({
         </div>
         <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
           {isActive && (
-            <div className="size-0 border-y-[13px] border-l-[13px] border-y-transparent border-l-middleDark" />
+            <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
         </div>
       </div>

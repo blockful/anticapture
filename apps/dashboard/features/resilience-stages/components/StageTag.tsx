@@ -3,10 +3,10 @@
 import { Stage } from "@/shared/types/enums/Stage";
 
 const STAGE_STYLES: Record<Stage, string> = {
-  [Stage.ZERO]: "border-error text-error bg-error bg-opacity-[0.12]",
-  [Stage.ONE]: "border-warning text-warning bg-warning bg-opacity-[0.12]",
-  [Stage.TWO]: "border-success text-success bg-success bg-opacity-[0.12]",
-  [Stage.NONE]: "border-middleDark bg-lightDark text-foreground",
+  [Stage.ZERO]: "border-error text-error bg-error/12",
+  [Stage.ONE]: "border-warning text-warning bg-warning/12",
+  [Stage.TWO]: "border-success text-success bg-success/12",
+  [Stage.NONE]: "border-middle-dark bg-light-dark text-foreground",
 };
 
 interface StageTagProps {
@@ -25,14 +25,14 @@ export const StageTag = ({
   // Use gray colors when daoStage is less than tagStage
   const stageStyles =
     daoStage < tagStage
-      ? "border-middleDark text-foreground"
-      : STAGE_STYLES[daoStage] || "border-middleDark text-foreground";
+      ? "border-middle-dark text-foreground"
+      : STAGE_STYLES[daoStage] || "border-middle-dark text-foreground";
 
   return (
     <div
-      className={`inline-flex rounded-lg border-[1px] bg-dark p-2 py-1 ${stageStyles} ${className}`}
+      className={`bg-dark inline-flex rounded-lg border p-2 py-1 ${stageStyles} ${className}`}
     >
-      <span className="whitespace-nowrap font-mono text-[13px] font-medium leading-[18px]">
+      <span className="text-alternative-sm whitespace-nowrap font-mono font-medium leading-[18px]">
         <span className="hidden sm:inline">STAGE </span>
 
         {showStageText && <span className="inline sm:hidden">STAGE </span>}

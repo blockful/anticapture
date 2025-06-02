@@ -7,12 +7,16 @@ import {
 } from "@/shared/components";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { formatEther } from "viem";
-import { useDaoDataContext } from "@/shared/contexts";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 import { Users } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useDaoData } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+
 export const QuorumCard = () => {
-  const { daoData } = useDaoDataContext();
+  const { daoId }: { daoId: string } = useParams();
+  const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
   const { totalSupply } = useTokenDistributionContext();
   if (!daoData) {
     return <SkeletonDaoInfoCards />;
@@ -54,9 +58,9 @@ export const QuorumCard = () => {
 
   const quorumData: CardData = {
     title: "Quorum",
-    icon: <Users className="size-4 text-foreground" />,
+    icon: <Users className="text-foreground size-4" />,
     optionalHeaderValue: (
-      <p className="flex text-sm text-tangerine">
+      <p className="text-tangerine flex text-sm">
         {quorumValue} {daoData.id || "Unknown ID"} {quorumPercentage}
       </p>
     ),

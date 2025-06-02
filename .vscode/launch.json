@@ -7,6 +7,27 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "api gateway",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/apps/api-gateway/src/index.ts",
+      "runtimeExecutable": "tsx",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "ENV_FILE": "${workspaceFolder}/apps/api-gateway/.env"
+      },
+      "outFiles": [
+        "${workspaceFolder}/**/*.js",
+        "!**/node_modules/**"
+      ],
+      "cwd": "${workspaceFolder}/apps/api-gateway",
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "petition api",
       "skipFiles": [
         "<node_internals>/**"

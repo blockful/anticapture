@@ -69,7 +69,7 @@ export const AttackProfitabilitySection = ({
           filterData={[treasuryMetric, costMetric]}
         />
       </TheCardChartLayout>
-      <div className="border-lightDark w-full border-t" />
+      <div className="border-light-dark w-full border-t" />
       <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
         <TheCardChartLayout
           title="Cost Comparison"

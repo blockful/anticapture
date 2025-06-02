@@ -1,10 +1,11 @@
 "use client";
 
+import { useAccount } from "wagmi";
+
 import { Card } from "@/shared/components/ui/card";
 import { formatPlural } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronRight, TrendingUp } from "lucide-react";
-import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePetitionSignatures } from "@/features/show-support/hooks/usePetition";
 import { ReactNode } from "react";
@@ -15,40 +16,23 @@ export const SupportDaoCard = ({
   daoName,
   daoId,
   onClick,
-  userSupport: externalUserSupport,
-  votingPowerSupport: externalVotingPowerSupport,
-  totalCountSupport: externalTotalCountSupport,
 }: {
   daoIcon: ReactNode;
   daoName: string;
   daoId: DaoIdEnum;
   onClick: () => void;
-  userSupport?: boolean;
-  votingPowerSupport?: number;
-  totalCountSupport?: number;
 }) => {
-  // Get petition data internally if not provided externally
   const { address } = useAccount();
-  const { data: petitionData } = usePetitionSignatures(
+  const { signatures: petitionData } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
     address,
   );
 
-  // Use external data if provided, otherwise use petition data
-  const userSupport =
-    externalUserSupport !== undefined
-      ? externalUserSupport
-      : petitionData?.userSigned || false;
-
-  const totalCountSupport =
-    externalTotalCountSupport !== undefined
-      ? externalTotalCountSupport
-      : petitionData?.totalSignatures || 0;
-
-  const votingPowerSupport =
-    externalVotingPowerSupport !== undefined
-      ? externalVotingPowerSupport
-      : Number(formatEther(BigInt(petitionData?.totalSignaturesPower || 0)));
+  const userSupport = petitionData?.userSigned;
+  const totalCountSupport = petitionData?.totalSignatures || 0;
+  const votingPowerSupport = Number(
+    formatEther(BigInt(petitionData?.totalSignaturesPower || 0)),
+  );
 
   const supportersInfo = (
     <div className="text-xs text-gray-400">
@@ -67,8 +51,8 @@ export const SupportDaoCard = ({
         <div className="flex flex-row gap-1 text-gray-400">
           {totalCountSupport > 0 && (
             <div className="flex flex-row items-center gap-1.5">
-              <TrendingUp className="size-4 text-success" />
-              <p className="text-sm font-normal text-success">
+              <TrendingUp className="text-success size-4" />
+              <p className="text-success text-sm font-normal">
                 {formatPlural(totalCountSupport, "supporter")}
               </p>
             </div>
@@ -80,7 +64,7 @@ export const SupportDaoCard = ({
 
   return (
     <Card
-      className="flex w-full flex-row rounded-md border border-lightDark bg-dark p-3 shadow hover:cursor-pointer hover:bg-lightDark md:w-[calc(50%-10px)] xl4k:max-w-full"
+      className="border-light-dark bg-dark hover:bg-light-dark xl4k:max-w-full flex w-full flex-row rounded-md border p-3 shadow-sm hover:cursor-pointer md:w-[calc(50%-10px)]"
       onClick={onClick}
     >
       <div className="flex h-full w-full flex-row justify-between gap-2">
@@ -92,7 +76,7 @@ export const SupportDaoCard = ({
                 {daoName}
               </h3>
               <div
-                className={`mx-2 w-fit rounded-full bg-lightDark px-2 py-1 ${!userSupport && "hidden"}`}
+                className={`bg-light-dark mx-2 w-fit rounded-full px-2 py-1 ${!userSupport && "hidden"}`}
               >
                 <p className="text-xs text-white">Supported</p>
               </div>
@@ -103,7 +87,7 @@ export const SupportDaoCard = ({
         <div className="flex flex-row items-center gap-2">
           <div className="hidden sm:flex">{supportersInfo}</div>
           <div className="flex flex-row items-center p-2">
-            <ChevronRight className="size-4 text-foreground" />
+            <ChevronRight className="text-foreground size-4" />
           </div>
         </div>
       </div>
