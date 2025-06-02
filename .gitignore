@@ -148,3 +148,6 @@ dist
 .pnp.*
 
 **/storybook-static/*
+
+# sst
+.sst

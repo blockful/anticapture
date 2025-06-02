@@ -1,0 +1,15 @@
+FROM node:20-slim AS base
+
+FROM base AS builder
+WORKDIR /app
+RUN apt-get update && apt-get install -y curl && npm install -g pnpm
+COPY apps/indexer/ .
+COPY pnpm-lock.yaml pnpm-lock.yaml
+RUN pnpm install
+
+FROM base AS runner
+WORKDIR /app
+COPY --from=builder /app .
+RUN npm install -g pnpm
+EXPOSE 42069
+CMD ["pnpm", "run", "serve", "--config", "config/ens.config.ts"]

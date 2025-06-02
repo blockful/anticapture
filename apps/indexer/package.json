@@ -7,8 +7,7 @@
     "start": "ponder start --schema public",
     "serve": "ponder serve --schema public",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "typecheck": "tsc"
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "dependencies": {
     "@hono/zod-openapi": "^0.19.6",
@@ -24,6 +23,8 @@
   "devDependencies": {
     "@types/node": "^20.16.5",
     "@types/pg": "^8.11.10",
+    "sst": "3.17.0",
+    "@types/aws-lambda": "8.10.149",
     "dotenv": "^16.5.0",
     "eslint": "^8.53.0",
     "eslint-config-ponder": "^0.5.6",

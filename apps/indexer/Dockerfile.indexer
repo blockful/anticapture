@@ -33,4 +33,7 @@ RUN npm install -g pnpm
 
 EXPOSE 42069
 
-ENTRYPOINT ["pnpm", "run", "serve"]
+ARG CONFIG_FILE
+ENV CONFIG_FILE=${CONFIG_FILE}
+
+CMD ["sh", "-c", "pnpm indexer serve --config $CONFIG_FILE"]

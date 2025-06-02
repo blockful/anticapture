@@ -4,3 +4,6 @@ dist
 .turbo
 .env
 .env.local
+
+# sst
+.sst

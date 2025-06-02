@@ -1,5 +1,6 @@
 import { createConfig } from "ponder";
 import { http } from "viem";
+
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
