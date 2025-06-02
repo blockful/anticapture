@@ -70,10 +70,19 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
           --broadcast
         
         echo "✅ Governance simulation completed successfully"
+        echo "📋 Deploying Multicall3 for efficient batch calls..."
+        
+        # Deploy Multicall3 after all governance setup is complete
+        forge script script/DeployMulticall3.sol:DeployMulticall3 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY && {
+            echo "✅ Multicall3 deployed successfully" 
+            echo "📍 Multicall3 address: 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+        } || echo "❌ Multicall3 deployment failed"
+        
         echo "📊 Development environment ready with:"
         echo "   - Token distributions to Alice, Bob, Charlie"
         echo "   - Delegations set up"
         echo "   - 1 active proposal with votes from all parties"
+        echo "   - Multicall3 contract for efficient batch calls"
     } || {
         echo "❌ One of the governance setup steps failed"
         echo "Please check the logs above to identify which step failed"
