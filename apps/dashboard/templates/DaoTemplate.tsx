@@ -13,6 +13,7 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
+
 // import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 // import { Info, Send } from "lucide-react";
 // import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
@@ -33,6 +34,12 @@ export const DaoTemplate = () => {
 
   return (
     <DaoPageInteractionProvider>
+      {/* <MessageStacker messages={messages} /> */}
+      {/* <BannerAlert
+          icon={<Info className="size-4" />}
+          text={"Currently in beta. Some data inconsistencies may occur."}
+          storageKey={`beta-banner-dismissed-${daoIdEnum}`}
+        /> */}
       <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
         {/* Commented out while TelegramBot is not ready to be added to the DAO */}
         {/* <BannerAlert
