@@ -3,6 +3,8 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {Test} from "forge-std/Test.sol";
+import {BaseScript} from "./BaseScript.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {Constants} from "./Constants.sol";
 
@@ -11,29 +13,13 @@ import {Constants} from "./Constants.sol";
  * @dev Script to distribute ENS tokens to Bob and Charlie
  *      Replaces the cast send commands with proper Solidity script
  */
-contract TransferTokens is Script {
+contract TransferTokens is BaseScript, Test {
     ENSToken ensToken;
-
-    /**
-     * @dev Label addresses for better readability in logs
-     */
-    function labelAddresses() internal {
-        // Label user addresses
-        vm.label(Constants.ALICE, "Alice");
-        vm.label(Constants.BOB, "Bob");
-        vm.label(Constants.CHARLIE, "Charlie");
-        vm.label(Constants.DAVID, "David");
-        
-        // Label contract addresses
-        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
-        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
-        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
-    }
 
     function run() public {
         console.log("=== Token Transfer Script ===");
         
-        // Label addresses for better readability in logs
+        // Label addresses for better readability in logs (inherited from BaseScript)
         labelAddresses();
         
         // Initialize the ENS token contract
@@ -41,6 +27,15 @@ contract TransferTokens is Script {
         
         // Display initial balances
         displayBalances("Initial");
+        
+        // Assert Alice has enough tokens for transfers
+        uint256 totalTransferAmount = Constants.BOB_TOKEN_TRANSFER + Constants.CHARLIE_TOKEN_TRANSFER;
+        assertGe(ensToken.balanceOf(Constants.ALICE), totalTransferAmount, "Alice must have enough tokens for both transfers");
+        
+        // Store initial balances for validation
+        uint256 aliceInitialBalance = ensToken.balanceOf(Constants.ALICE);
+        uint256 bobInitialBalance = ensToken.balanceOf(Constants.BOB);
+        uint256 charlieInitialBalance = ensToken.balanceOf(Constants.CHARLIE);
         
         // Start broadcasting transactions (Alice is the sender)
         vm.startBroadcast(Constants.ALICE_PRIVATE_KEY);
@@ -54,6 +49,11 @@ contract TransferTokens is Script {
         ensToken.transfer(Constants.CHARLIE, Constants.CHARLIE_TOKEN_TRANSFER);
         
         vm.stopBroadcast();
+        
+        // Assert transfers were successful
+        assertEq(ensToken.balanceOf(Constants.ALICE), aliceInitialBalance - totalTransferAmount, "Alice's balance should decrease by total transfer amount");
+        assertEq(ensToken.balanceOf(Constants.BOB), bobInitialBalance + Constants.BOB_TOKEN_TRANSFER, "Bob's balance should increase by transfer amount");
+        assertEq(ensToken.balanceOf(Constants.CHARLIE), charlieInitialBalance + Constants.CHARLIE_TOKEN_TRANSFER, "Charlie's balance should increase by transfer amount");
         
         // Display final balances
         displayBalances("Final");

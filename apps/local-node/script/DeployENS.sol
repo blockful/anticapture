@@ -2,33 +2,18 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {BaseScript} from "./BaseScript.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {ENSGovernor, TimelockController} from "../src/ENSGovernor.sol";
 import {Constants} from "./Constants.sol";
 
-contract DeployENS is Script {
+contract DeployENS is BaseScript {
     uint256 public constant VOTING_DELAY = 1;
     uint256 public constant VOTING_PERIOD = 50400;
     uint256 public constant PROPOSAL_THRESHOLD = 1;
 
-    /**
-     * @dev Label addresses for better readability in logs
-     */
-    function labelAddresses() internal {
-        // Label user addresses
-        vm.label(Constants.ALICE, "Alice");
-        vm.label(Constants.BOB, "Bob");
-        vm.label(Constants.CHARLIE, "Charlie");
-        vm.label(Constants.DAVID, "David");
-        
-        // Label contract addresses (will be set after deployment)
-        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
-        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
-        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
-    }
-
     function run() external {
-        // Label addresses for better readability in logs
+        // Label addresses for better readability in logs (inherited from BaseScript)
         labelAddresses();
         
         uint256 tokensFreeSupply = 100 ether;

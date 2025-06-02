@@ -3,6 +3,8 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {Test} from "forge-std/Test.sol";
+import {BaseScript} from "./BaseScript.sol";
 import {ENSGovernor} from "../src/ENSGovernor.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {Constants} from "./Constants.sol";
@@ -12,31 +14,15 @@ import {Constants} from "./Constants.sol";
  * @dev Script to cast votes on the governance proposal
  *      Replaces the cast send voting commands with proper Solidity script
  */
-contract CastVotes is Script {
+contract CastVotes is BaseScript, Test {
     ENSGovernor ensGovernor;
     ENSToken ensToken;
     uint256 proposalId;
 
-    /**
-     * @dev Label addresses for better readability in logs
-     */
-    function labelAddresses() internal {
-        // Label user addresses
-        vm.label(Constants.ALICE, "Alice");
-        vm.label(Constants.BOB, "Bob");
-        vm.label(Constants.CHARLIE, "Charlie");
-        vm.label(Constants.DAVID, "David");
-        
-        // Label contract addresses
-        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
-        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
-        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
-    }
-
     function run() public {
         console.log("=== Governance Voting Script ===");
         
-        // Label addresses for better readability in logs
+        // Label addresses for better readability in logs (inherited from BaseScript)
         labelAddresses();
         
         // Initialize contracts
@@ -48,14 +34,39 @@ contract CastVotes is Script {
         
         console.log("Proposal ID:", proposalId);
         
+        // Assert proposal ID is valid
+        assertGt(proposalId, 0, "Proposal ID should be greater than zero");
+        
         // Display pre-voting information
         displayProposalInfo();
         displayVoterInfo();
+        
+        // Assert voters have voting power before casting votes
+        assertGt(ensToken.getVotes(Constants.ALICE), 0, "Alice must have voting power");
+        assertGt(ensToken.getVotes(Constants.BOB), 0, "Bob must have voting power");
+        assertGt(ensToken.getVotes(Constants.CHARLIE), 0, "Charlie must have voting power");
+        
+        // Assert proposal is in Active state (can be voted on)
+        assertEq(uint8(ensGovernor.state(proposalId)), 1, "Proposal must be in Active state to vote");
+        
+        // Store initial vote counts
+        (uint256 initialAgainst, uint256 initialFor, uint256 initialAbstain) = ensGovernor.proposalVotes(proposalId);
         
         // Cast votes from each account
         castVote("Alice", Constants.ALICE_PRIVATE_KEY, Constants.FOR);      // Vote FOR
         castVote("Bob", Constants.BOB_PRIVATE_KEY, Constants.AGAINST);      // Vote AGAINST  
         castVote("Charlie", Constants.CHARLIE_PRIVATE_KEY, Constants.ABSTAIN); // Vote ABSTAIN
+        
+        // Assert all users have voted
+        assert(ensGovernor.hasVoted(proposalId, Constants.ALICE));
+        assert(ensGovernor.hasVoted(proposalId, Constants.BOB));
+        assert(ensGovernor.hasVoted(proposalId, Constants.CHARLIE));
+        
+        // Assert vote counts increased appropriately
+        (uint256 finalAgainst, uint256 finalFor, uint256 finalAbstain) = ensGovernor.proposalVotes(proposalId);
+        assertGt(finalFor, initialFor, "FOR votes should have increased");
+        assertGt(finalAgainst, initialAgainst, "AGAINST votes should have increased");
+        assertGt(finalAbstain, initialAbstain, "ABSTAIN votes should have increased");
         
         // Display final voting results
         displayVotingResults();

@@ -3,6 +3,8 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {Test} from "forge-std/Test.sol";
+import {BaseScript} from "./BaseScript.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {Constants} from "./Constants.sol";
 
@@ -11,29 +13,13 @@ import {Constants} from "./Constants.sol";
  * @dev Script to set up delegation for Bob and Charlie
  *      Each account delegates to themselves to activate their voting power
  */
-contract DelegateTokens is Script {
+contract DelegateTokens is BaseScript, Test {
     ENSToken ensToken;
-
-    /**
-     * @dev Label addresses for better readability in logs
-     */
-    function labelAddresses() internal {
-        // Label user addresses
-        vm.label(Constants.ALICE, "Alice");
-        vm.label(Constants.BOB, "Bob");
-        vm.label(Constants.CHARLIE, "Charlie");
-        vm.label(Constants.DAVID, "David");
-        
-        // Label contract addresses
-        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
-        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
-        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
-    }
 
     function run() public {
         console.log("=== Delegation Setup Script ===");
         
-        // Label addresses for better readability in logs
+        // Label addresses for better readability in logs (inherited from BaseScript)
         labelAddresses();
         
         // Initialize the ENS token contract
@@ -42,6 +28,11 @@ contract DelegateTokens is Script {
         // Display initial voting power
         displayVotingPower("Initial");
         
+        // Assert Bob has token balance before delegation
+        assertGt(ensToken.balanceOf(Constants.BOB), 0, "Bob must have token balance before delegation");
+        // Assert Bob has no voting power before delegation
+        assertEq(ensToken.getVotes(Constants.BOB), 0, "Bob should have no voting power before delegation");
+        
         // Bob delegates to himself
         console.log("Setting up Bob's delegation...");
         vm.startBroadcast(Constants.BOB_PRIVATE_KEY);
@@ -49,12 +40,23 @@ contract DelegateTokens is Script {
         vm.stopBroadcast();
         console.log("SUCCESS: Bob delegated to himself");
         
+        // Assert Bob now has voting power equal to his token balance
+        assertEq(ensToken.getVotes(Constants.BOB), ensToken.balanceOf(Constants.BOB), "Bob's voting power should equal his token balance after delegation");
+        
+        // Assert Charlie has token balance before delegation
+        assertGt(ensToken.balanceOf(Constants.CHARLIE), 0, "Charlie must have token balance before delegation");
+        // Assert Charlie has no voting power before delegation
+        assertEq(ensToken.getVotes(Constants.CHARLIE), 0, "Charlie should have no voting power before delegation");
+        
         // Charlie delegates to himself
         console.log("Setting up Charlie's delegation...");
         vm.startBroadcast(Constants.CHARLIE_PRIVATE_KEY);
         ensToken.delegate(Constants.CHARLIE);
         vm.stopBroadcast();
         console.log("SUCCESS: Charlie delegated to himself");
+        
+        // Assert Charlie now has voting power equal to his token balance
+        assertEq(ensToken.getVotes(Constants.CHARLIE), ensToken.balanceOf(Constants.CHARLIE), "Charlie's voting power should equal his token balance after delegation");
         
         // Display final voting power
         displayVotingPower("Final");

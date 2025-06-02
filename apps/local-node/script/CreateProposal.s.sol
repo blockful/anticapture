@@ -3,6 +3,8 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {Test} from "forge-std/Test.sol";
+import {BaseScript} from "./BaseScript.sol";
 import {ENSGovernor} from "../src/ENSGovernor.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {Constants} from "./Constants.sol";
@@ -12,30 +14,14 @@ import {Constants} from "./Constants.sol";
  * @dev Script to create a governance proposal for transferring ENS tokens
  *      Replaces the cast send proposal creation command
  */
-contract CreateProposal is Script {
+contract CreateProposal is BaseScript, Test {
     ENSGovernor ensGovernor;
     ENSToken ensToken;
-
-    /**
-     * @dev Label addresses for better readability in logs
-     */
-    function labelAddresses() internal {
-        // Label user addresses
-        vm.label(Constants.ALICE, "Alice");
-        vm.label(Constants.BOB, "Bob");
-        vm.label(Constants.CHARLIE, "Charlie");
-        vm.label(Constants.DAVID, "David");
-        
-        // Label contract addresses
-        vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
-        vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
-        vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
-    }
 
     function run() public {
         console.log("=== Governance Proposal Creation Script ===");
         
-        // Label addresses for better readability in logs
+        // Label addresses for better readability in logs (inherited from BaseScript)
         labelAddresses();
         
         // Initialize contracts
@@ -44,6 +30,10 @@ contract CreateProposal is Script {
         
         // Display proposal creator info
         displayProposerInfo();
+        
+        // Assert Alice has enough voting power to create proposals
+        uint256 proposalThreshold = ensGovernor.proposalThreshold();
+        assertGe(ensToken.getVotes(Constants.ALICE), proposalThreshold, "Alice must have enough voting power to create proposals");
         
         // Prepare proposal parameters
         address[] memory targets = new address[](1);
@@ -77,11 +67,17 @@ contract CreateProposal is Script {
         
         vm.stopBroadcast();
         
+        // Assert proposal was created successfully (proposalId should be non-zero)
+        assertGt(proposalId, 0, "Proposal ID should be greater than zero");
+        
         console.log("SUCCESS: Proposal created!");
         console.log("Proposal ID:", proposalId);
         
         // Display post-creation info
         displayProposalState(proposalId);
+        
+        // Assert proposal is in Pending state initially
+        assertEq(uint8(ensGovernor.state(proposalId)), 0, "Proposal should be in Pending state initially");
     }
     
     /**
