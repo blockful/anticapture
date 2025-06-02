@@ -11,14 +11,14 @@ import {
 } from "./types";
 
 interface GovernanceActivityRepository {
-  getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult> | undefined;
+  getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
     days: DaysEnum,
-  ): Promise<ProposalsCompareQueryResult> | undefined;
-  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult> | undefined;
+  ): Promise<ProposalsCompareQueryResult | undefined>;
+  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
   getAverageTurnoutCompare(
     days: DaysEnum,
-  ): Promise<AverageTurnoutCompareQueryResult> | undefined;
+  ): Promise<AverageTurnoutCompareQueryResult | undefined>;
 }
 
 export function governanceActivity(
