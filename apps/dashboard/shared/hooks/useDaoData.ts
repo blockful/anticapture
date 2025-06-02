@@ -1,13 +1,27 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DAO, DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
+import axios from "axios";
 
 export const fetchDaoData = async (daoId: DaoIdEnum): Promise<DAO> => {
-  const response = await fetch(`${BACKEND_ENDPOINT}/dao/${daoId}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch DAO data: ${response.statusText}`);
-  }
-  return response.json();
+  const query = `query GetDaoData {
+    dao(id: "${daoId}") {
+      id
+      quorum
+      proposalThreshold
+      votingDelay
+      votingPeriod  
+      timelockDelay
+    }
+  }`;
+  const response: { data: { data: { dao: DAO } } } = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    { query },
+  );
+  const { dao } = response.data.data as {
+    dao: DAO;
+  };
+  return dao as DAO;
 };
 
 interface UseDaoDataResult {

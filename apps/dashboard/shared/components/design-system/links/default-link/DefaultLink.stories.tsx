@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { DefaultLink } from "./DefaultLink";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
 
 const meta = {
   title: "Design System/Links/DefaultLink",

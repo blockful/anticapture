@@ -6,4 +6,10 @@ export const OP: DaoConfiguration = {
   icon: OptimismIcon,
   supportStage: SupportStageEnum.ANALYSIS,
   disableDaoPage: true,
+  daoOverview: {
+    chainId: 10,
+    contracts: {
+      token: "0x4200000000000000000000000000000000000042",
+    },
+  },
 };

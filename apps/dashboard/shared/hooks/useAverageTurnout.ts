@@ -3,6 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import axios from "axios";
 
 interface AverageTurnoutResponse {
   currentAverageTurnout: string;
@@ -21,11 +22,19 @@ export const fetchAverageTurnout = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response: Response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/average-turnout/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query AverageTurnout {
+    compareAverageTurnout(daoId: ${daoId}, days: _${days}) {
+        currentAverageTurnout
+        oldAverageTurnout
+        changeRate
+    }
+  }`;
+  const response: { data: { data: { compareAverageTurnout: AverageTurnoutResponse } } } =
+    await axios.post(`${BACKEND_ENDPOINT}`, { query });
+  const { compareAverageTurnout } = response.data.data as {
+    compareAverageTurnout: AverageTurnoutResponse;
+  };
+  return compareAverageTurnout as AverageTurnoutResponse;
 };
 
 /**

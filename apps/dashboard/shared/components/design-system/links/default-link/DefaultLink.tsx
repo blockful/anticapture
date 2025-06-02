@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { ReactNode } from "react";
 
 const defaultLinkVariants = cva(
-  "flex h-full items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
+  "flex items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
   {
     variants: {
       variant: {
