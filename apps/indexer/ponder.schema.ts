@@ -67,11 +67,16 @@ export const accountPower = onchainTable(
       .bigint("last_vote_timestamp")
       .default(BigInt(0))
       .notNull(),
+    firstVoteTimestamp: drizzle
+      .bigint("first_vote_timestamp")
+      .default(BigInt(0))
+      .notNull(),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
+    firstVoteTimestamp: index().on(table.firstVoteTimestamp),
   }),
 );
 
