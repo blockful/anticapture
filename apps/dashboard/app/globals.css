@@ -34,7 +34,7 @@
 
 @theme {
   --breakpoint-xl4k: 2000px;
-  --font-mono: var(--font-mono);
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
   --tracking-wider: 0.72px;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;

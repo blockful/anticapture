@@ -4,9 +4,9 @@ import { getDateRange } from "@/shared/utils";
 import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { CardTitle, CardDescription } from "@/shared/components/ui/card";
-import { Info } from "lucide-react";
+import { CardDescription, CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
+import { Info } from "lucide-react";
 
 export const TheSectionLayout = ({
   icon,

@@ -20,7 +20,7 @@ const fetchTimeSeriesDataFromGraphQL = async (
   const whereConditions = metricTypes
     .map(
       (metricType) => `
-      ${metricType}: daoMetricsDayBucketss(
+      ${metricType}: daoMetricsDayBuckets(
         where: {
           metricType: ${metricType},
           date_gte: "${oneYearAgo}",

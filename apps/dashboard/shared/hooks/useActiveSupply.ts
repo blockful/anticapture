@@ -3,6 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import daoConfigByDaoId from "@/shared/dao-config";
+import axios from "axios";
 
 interface ActiveSupplyResponse {
   activeSupply: string;
@@ -16,14 +17,21 @@ export const fetchActiveSupply = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<ActiveSupplyResponse | null> => {
+  const query = `query ActiveSupply {
+    compareActiveSupply(daoId: ${daoId}, days: _${days}) {
+      activeSupply
+    }
+  }`;
+
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/active-supply?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const response: { data: { data: { compareActiveSupply: ActiveSupplyResponse } } } =
+    await axios.post(`${BACKEND_ENDPOINT}`, { query });
+  const { compareActiveSupply } = response.data.data as {
+    compareActiveSupply: ActiveSupplyResponse;
+  };
+  return compareActiveSupply as ActiveSupplyResponse;
 };
 
 /**

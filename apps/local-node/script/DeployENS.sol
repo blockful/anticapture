@@ -2,29 +2,34 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {BaseScript} from "./BaseScript.sol";
 import {ENSToken} from "../src/ENSToken.sol";
 import {ENSGovernor, TimelockController} from "../src/ENSGovernor.sol";
+import {Constants} from "./Constants.sol";
 
-contract DeployENS is Script {
+contract DeployENS is BaseScript {
+    uint256 public constant VOTING_DELAY = 1;
+    uint256 public constant VOTING_PERIOD = 50400;
+    uint256 public constant PROPOSAL_THRESHOLD = 1;
+
     function run() external {
+        // Label addresses for better readability in logs (inherited from BaseScript)
+        labelAddresses();
+        
         uint256 tokensFreeSupply = 100 ether;
         uint256 airdropSupply = 200 ether;
         uint256 claimPeriodEnds = block.timestamp + 40 days;
 
         address[] memory anvilAddresses = new address[](4);
-        for (uint16 i = 0; i < 4; i++) {
-            anvilAddresses[i] = [
-                address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266),
-                address(0x70997970C51812dc3A010C7d01b50e0d17dc79C8),
-                address(0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC),
-                address(0x90F79bf6EB2c4f870365E785982E1f101E93b906)
-            ][i];
-        }
+        anvilAddresses[0] = Constants.ALICE;
+        anvilAddresses[1] = Constants.BOB; 
+        anvilAddresses[2] = Constants.CHARLIE;
+        anvilAddresses[3] = Constants.DAVID;
 
         address[] memory proposers = anvilAddresses;
         address[] memory executors = anvilAddresses;
 
-        vm.startBroadcast();
+        vm.startBroadcast(Constants.ALICE_PRIVATE_KEY);
 
         ENSToken ensToken = new ENSToken(tokensFreeSupply, airdropSupply, claimPeriodEnds);
 
