@@ -1,10 +1,9 @@
 import { DaoIdEnum } from "@/shared/types/daos";
-
-import { ENS } from "./ens";
-import { OP } from "./op";
-import { UNI } from "./uni";
-import { ARB } from "./arb";
-import { DaoConfiguration } from "./types";
+import { ENS } from "@/shared/dao-config/ens";
+import { OP } from "@/shared/dao-config/op";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { UNI } from "@/shared/dao-config/uni";
+import { ARB } from "@/shared/dao-config/arb";
 
 export type DaoConfigByDaoId = {
   [key in DaoIdEnum]: DaoConfiguration;

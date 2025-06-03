@@ -25,10 +25,10 @@ export const TimelockCard = ({
           "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoOverview.rules?.timelock}
+            switched={daoOverview?.rules?.timelock}
             icon={<ExternalLink className="text-foreground size-3.5" />}
             onClick={() =>
-              openEtherscanAddress(daoOverview.contracts?.timelock as Address)
+              openEtherscanAddress(daoOverview?.contracts?.timelock as Address)
             }
             key={"switch"}
           />,
@@ -40,7 +40,7 @@ export const TimelockCard = ({
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
         items: [
           <SwitchCardDaoInfoItem
-            switched={daoOverview.rules?.cancelFunction}
+            switched={daoOverview?.rules?.cancelFunction}
             icon={<ExternalLink className="text-foreground size-3.5" />}
             onClick={() =>
               window.open(

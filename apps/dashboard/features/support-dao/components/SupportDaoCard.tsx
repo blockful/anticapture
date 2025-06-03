@@ -22,8 +22,9 @@ export const SupportDaoCard = ({
   daoId: DaoIdEnum;
   onClick: () => void;
 }) => {
+  // Get petition data internally if not provided externally
   const { address } = useAccount();
-  const { signatures: petitionData } = usePetitionSignatures(
+  const { data: petitionData } = usePetitionSignatures(
     daoId.toUpperCase() as DaoIdEnum,
     address,
   );

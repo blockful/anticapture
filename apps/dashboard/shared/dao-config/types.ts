@@ -64,11 +64,10 @@ interface BaseInfo {
 
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  chainId: number;
-  contracts: {
+  contracts?: {
+    governor: Address;
     token: Address;
-    governor?: Address;
-    timelock?: Address;
+    timelock: Address;
   };
   cancelFunction?: string;
   snapshot?: string;
@@ -99,19 +98,16 @@ export interface AttackProfitabilityConfig {
   supportsLiquidTreasuryCall?: boolean;
 }
 export interface GovernanceImplementationConfig
-  extends GovernanceImplementation { }
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
-  daoOverview: DaoOverviewConfig;
+  daoOverview?: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
   governanceActivity?: boolean;
-  showSupport?: {
-    snapshotProposal: string;
-    snapshotSpace: string;
-  };
+  showSupport?: boolean;
   riskAnalysis?: boolean;
 }

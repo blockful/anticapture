@@ -4,22 +4,10 @@ import { ArbitrumIcon } from "@/shared/components/icons";
 
 export const ARB: DaoConfiguration = {
   name: "Arbitrum",
-  daoOverview: {
-    chainId: 42161,
-    contracts: {
-      token: "0x912CE59144191C1204E64559FE8253a0e49E6548",
-    },
-  },
   icon: ArbitrumIcon,
   supportStage: SupportStageEnum.ELECTION,
   tokenDistribution: true,
-  showSupport:
-    process.env.NEXT_PUBLIC_ARB_SNAPSHOT_PROPOSAL && process.env.NEXT_PUBLIC_ARB_SNAPSHOT_SPACE
-      ? {
-        snapshotProposal: process.env.NEXT_PUBLIC_ARB_SNAPSHOT_PROPOSAL,
-        snapshotSpace: process.env.NEXT_PUBLIC_ARB_SNAPSHOT_SPACE,
-      }
-      : undefined,
+  showSupport: true,
   attackProfitability: {
     riskLevel: undefined,
   },

@@ -18,7 +18,7 @@ export const HeaderNavMobile = () => {
     {
       anchorId: SECTIONS_CONSTANTS.showSupport.anchorId,
       title: SECTIONS_CONSTANTS.showSupport.title,
-      enabled: !!daoConfig.showSupport,
+      enabled: daoConfig.showSupport,
     },
     {
       anchorId: SECTIONS_CONSTANTS.daoOverview.anchorId,
