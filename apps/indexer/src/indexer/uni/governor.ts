@@ -8,7 +8,8 @@ export class UNIGovernor<
   TTransport extends Transport = Transport,
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
-> implements Governor {
+> implements Governor
+{
   private client: Client<TTransport, TChain, TAccount>;
   private abi: typeof UNIGovernorAbi;
   private address: Address;

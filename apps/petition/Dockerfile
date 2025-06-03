@@ -33,7 +33,11 @@ RUN chmod +x apps/petition/entrypoint.sh
 RUN npm install -g pnpm
 
 RUN addgroup --system --gid 1001 expressjs
-RUN adduser --system --uid 1001 expressjs
+RUN adduser --system --uid 1001 expressjs --home /home/expressjs --shell /bin/sh
+RUN mkdir -p /home/expressjs/.local/share/pnpm
+RUN chown -R expressjs:expressjs /home/expressjs
+RUN chown -R expressjs:expressjs /app
+
 USER expressjs
 
 EXPOSE 3100

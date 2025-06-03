@@ -15,6 +15,8 @@ export default createConfig({
     anvil: {
       chainId: 31337,
       transport: http(env.RPC_URL),
+      maxRequestsPerSecond: 10,
+      pollingInterval: 1000,
     },
   },
   contracts: {
@@ -23,13 +25,13 @@ export default createConfig({
       network: "anvil",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.token.address,
-      startBlock: 0,
+      startBlock: 1,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       network: "anvil",
       address: CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.governor,
-      startBlock: 0,
+      startBlock: 1,
     },
   },
 });

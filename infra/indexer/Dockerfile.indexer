@@ -1,15 +1,15 @@
 # Use Node.js 20 as base
 FROM node:20-slim
 
-# Install curl and pnpm
-RUN apt-get update && apt-get install -y curl && npm install -g pnpm
+# Install curl
+RUN apt-get update && apt-get install -y curl
 
 WORKDIR /app
 
-COPY ./package.json .
+# Copy all files first
+COPY apps/indexer/ .
 
-RUN pnpm install
+# Install dependencies with npm for simpler module resolution
+RUN npm install
 
-COPY . .
-
-ENTRYPOINT ["pnpm", "run", "start"]
+ENTRYPOINT ["npm", "run", "start"]
