@@ -29,8 +29,8 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
     icon: <CheckCircle2 className="text-success size-3.5" />,
   },
   [RiskLevel.NONE]: {
-    color: "foreground",
-    pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
+    color: "secondary",
+    pattern: ["bg-surface-hover", "bg-surface-hover", "bg-surface-hover"],
     icon: <CounterClockwiseClockIcon className="text-secondary size-4" />,
   },
 } as const;

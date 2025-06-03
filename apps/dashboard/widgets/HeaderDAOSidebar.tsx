@@ -29,18 +29,18 @@ export const HeaderDAOSidebar = () => {
       <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex h-full flex-col gap-3 p-4">
-          {daoConfig.showSupport && (
-            <ButtonHeaderSidebar
-              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
-              icon={HeartIcon}
-              label={SECTIONS_CONSTANTS.showSupport.title}
-            />
-          )}
           {daoConfig.daoOverview && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
               icon={PieChart}
               label={SECTIONS_CONSTANTS.daoOverview.title}
+            />
+          )}
+          {daoConfig.showSupport && (
+            <ButtonHeaderSidebar
+              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
+              icon={HeartIcon}
+              label={SECTIONS_CONSTANTS.showSupport.title}
             />
           )}
           {daoConfig.attackProfitability && (

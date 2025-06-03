@@ -83,7 +83,7 @@ export const CardDaoSignature = ({
             <div className="flex">
               <ConnectWallet
                 label="Connect Wallet"
-                className="text-dark! w-fit! border-transparent! bg-[#FAFAFA]! py-1 transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
+                className="text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! py-1 transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               />
             </div>
           )}
@@ -91,7 +91,7 @@ export const CardDaoSignature = ({
             <div className="flex">
               <button
                 onClick={handleSubmit}
-                className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
+                className="btn-connect-wallet text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
               >
                 {isLoading ? (
                   <>
@@ -109,7 +109,7 @@ export const CardDaoSignature = ({
           )}
           {isConnected && signatures?.userSigned && (
             <div className="flex">
-              <button className="btn-connect-wallet text-dark! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
+              <button className="btn-connect-wallet text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
                 <CheckCircle2 className="size-4" />
                 Signed
               </button>
