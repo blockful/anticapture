@@ -138,7 +138,7 @@ const RiskAreaCardInternal = ({
               "!text-error":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
               "!text-inverted":
-                (isActive && risk.level !== undefined) || isHovered,
+                isActive && risk.level !== RiskLevel.NONE && isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
             })}
