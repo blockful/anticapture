@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      sst:
-        specifier: 3.17.0
-        version: 3.17.0
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.5.0
@@ -27,6 +23,9 @@ importers:
       husky:
         specifier: ^9.1.6
         version: 9.1.7
+      sst:
+        specifier: ^3.17.0
+        version: 3.17.0
       turbo:
         specifier: ^2.3.1
         version: 2.5.4
@@ -258,6 +257,9 @@ importers:
         specifier: ^3.4.1
         version: 3.4.1(zod@3.25.51)
     devDependencies:
+      '@types/aws-lambda':
+        specifier: 8.10.149
+        version: 8.10.149
       '@types/node':
         specifier: ^20.16.5
         version: 20.17.57
@@ -282,6 +284,9 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
+      sst:
+        specifier: 3.17.0
+        version: 3.17.0
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.17.57)(typescript@5.8.3)

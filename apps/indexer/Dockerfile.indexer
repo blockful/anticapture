@@ -2,38 +2,14 @@ FROM node:20-slim AS base
 
 FROM base AS builder
 WORKDIR /app
-COPY . .
-RUN npx turbo@2.3.1 prune @anticapture/indexer --docker
-
-# Add lockfile and package.json's of isolated subworkspace
-FROM base AS installer
-
 RUN apt-get update && apt-get install -y curl && npm install -g pnpm
-
-WORKDIR /app
-# First install dependencies (as they change less often)
-COPY .gitignore .gitignore
-COPY package.json package.json
+COPY apps/indexer/ .
 COPY pnpm-lock.yaml pnpm-lock.yaml
-COPY --from=builder /app/out/json/ .
 RUN pnpm install
-
-# Build the project and its dependencies
-COPY --from=builder /app/out/full/ .
-COPY turbo.json turbo.json
-RUN pnpm run indexer build
 
 FROM base AS runner
 WORKDIR /app
-
-# Copy everything from installer (includes node_modules and built code)
-COPY --from=installer /app .
-
+COPY --from=builder /app .
 RUN npm install -g pnpm
-
 EXPOSE 42069
-
-ARG CONFIG_FILE
-ENV CONFIG_FILE=${CONFIG_FILE}
-
-CMD ["sh", "-c", "pnpm indexer serve --config $CONFIG_FILE"]
+CMD ["pnpm", "run", "start", "--config", "config/ens.config.ts"]
