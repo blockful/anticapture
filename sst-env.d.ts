@@ -16,6 +16,11 @@ declare module "sst" {
     "anticapture-vpc": {
       "type": "sst.aws.Vpc"
     }
+    "api-gateway": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
     "ens-indexer": {
       "service": string
       "type": "sst.aws.Service"

@@ -23,7 +23,7 @@ export default $config({
       },
     });
 
-    new sst.aws.Service("ens-indexer", {
+    const indexer = new sst.aws.Service("ens-indexer", {
       cluster,
       memory: "1 GB",
       cpu: "0.5 vCPU",
@@ -36,6 +36,7 @@ export default $config({
         NETWORK: "ethereum",
         DAO_ID: "ENS",
         CHAIN_ID: "1",
+        NODE_ENV: $dev ? "development" : "production",
       },
       retry: 1,
       scaling: {
@@ -52,7 +53,35 @@ export default $config({
         rules: [{ listen: "80/http", forward: "42069/http" }],
       },
       dev: {
-        command: "pnpm indexer serve --config config/ens.config.ts",
+        command: "pnpm indexer start --config config/ens.config.ts",
+      },
+    });
+
+    new sst.aws.Service("api-gateway", {
+      cluster,
+      memory: "0.5 GB",
+      cpu: "0.25 vCPU",
+      link: [
+        indexer
+      ],
+      environment: {
+        NODE_ENV: $dev ? "development" : "production",
+      },
+      scaling: {
+        min: 1,
+        max: 2,
+        cpuUtilization: 50,
+        memoryUtilization: 80,
+      },
+      image: {
+        context: ".",
+        dockerfile: "apps/api-gateway/Dockerfile",
+      },
+      loadBalancer: {
+        rules: [{ listen: "80/http", forward: "4000/http" }],
+      },
+      dev: {
+        command: "pnpm gateway dev",
       },
     });
   },

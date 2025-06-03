@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@graphql-mesh/cli": "^0.100.4",
+    "sst": "^3.17.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
