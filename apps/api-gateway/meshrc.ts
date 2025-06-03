@@ -12,7 +12,7 @@ const env =
     ? process.env
     : {
       ...Object.entries(Resource)
-        .filter(([key]) => key.endsWith('-indexer'))
+        .filter(([key]) => key.endsWith('-indexer-api'))
         .reduce((acc, [key, value]) => ({
           ...acc,
           [`DAO_API_${key.split('-')[0].toUpperCase()}`]: value.url

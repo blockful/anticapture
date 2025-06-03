@@ -13,7 +13,7 @@ export default $config({
     const vpc = new sst.aws.Vpc("anticapture-vpc");
     const cluster = new sst.aws.Cluster("anticapture-cluster", { vpc });
 
-    const ethereumRpc = new sst.aws.Secret("EthereumRPC", "http://localhost:8545")
+    const ethereumRpc = new sst.Secret("EthereumRPC", "http://localhost:8545")
 
     const db = new sst.aws.Postgres("anticapture-db", {
       vpc,
@@ -25,7 +25,36 @@ export default $config({
       },
     });
 
-    const indexer = new sst.aws.Service("ens-indexer", {
+    // new sst.aws.Service("ens-indexer", {
+    //   cluster,
+    //   memory: "1 GB",
+    //   cpu: "0.5 vCPU",
+    //   link: [db],
+    //   retries: 1,
+    //   environment: {
+    //     RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
+    //     POLLING_INTERVAL: "1000",
+    //     MAX_REQUESTS_PER_SECOND: "20",
+    //     NETWORK: "ethereum",
+    //     DAO_ID: "ENS",
+    //     CHAIN_ID: "1",
+    //     NODE_ENV: $dev ? "development" : "production",
+    //   },
+    //   retry: 1,
+    //   image: {
+    //     context: ".",
+    //     dockerfile: "apps/indexer/Dockerfile.indexer",
+    //   },
+    //   dev: {
+    //     command: "pnpm indexer start --config config/ens.config.ts",
+    //   },
+    // });
+
+    const duneApiUrl = new sst.Secret("DuneAPIUrl")
+    const duneApiKey = new sst.Secret("DuneAPIKey")
+    const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
+
+    const indexerAPI = new sst.aws.Service("ens-indexer-api", {
       cluster,
       memory: "1 GB",
       cpu: "0.5 vCPU",
@@ -33,12 +62,13 @@ export default $config({
       retries: 1,
       environment: {
         RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
-        POLLING_INTERVAL: "1000",
-        MAX_REQUESTS_PER_SECOND: "20",
         NETWORK: "ethereum",
         DAO_ID: "ENS",
         CHAIN_ID: "1",
         NODE_ENV: $dev ? "development" : "production",
+        DUNE_API_URL: duneApiUrl.value,
+        DUNE_API_KEY: duneApiKey.value,
+        COINGECKO_API_KEY: coingeckoApiKey.value,
       },
       retry: 1,
       scaling: {
@@ -49,13 +79,13 @@ export default $config({
       },
       image: {
         context: ".",
-        dockerfile: "apps/indexer/Dockerfile.indexer",
+        dockerfile: "apps/indexer/Dockerfile.api",
       },
       loadBalancer: {
         rules: [{ listen: "80/http", forward: "42069/http" }],
       },
       dev: {
-        command: "pnpm indexer start --config config/ens.config.ts",
+        command: "pnpm indexer serve --config config/ens.config.ts",
       },
     });
 
@@ -64,7 +94,7 @@ export default $config({
       memory: "0.5 GB",
       cpu: "0.25 vCPU",
       link: [
-        indexer
+        indexerAPI
       ],
       environment: {
         NODE_ENV: $dev ? "development" : "production",

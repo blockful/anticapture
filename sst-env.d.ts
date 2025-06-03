@@ -5,6 +5,22 @@
 
 declare module "sst" {
   export interface Resource {
+    "CoingeckoAPIKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DuneAPIKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DuneAPIUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "EthereumRPC": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "anticapture-db": {
       "database": string
       "host": string
@@ -21,7 +37,7 @@ declare module "sst" {
       "type": "sst.aws.Service"
       "url": string
     }
-    "ens-indexer": {
+    "ens-indexer-api": {
       "service": string
       "type": "sst.aws.Service"
       "url": string
