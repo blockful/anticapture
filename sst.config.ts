@@ -13,6 +13,8 @@ export default $config({
     const vpc = new sst.aws.Vpc("anticapture-vpc");
     const cluster = new sst.aws.Cluster("anticapture-cluster", { vpc });
 
+    const ethereumRpc = new sst.aws.Secret("EthereumRPC", "http://localhost:8545")
+
     const db = new sst.aws.Postgres("anticapture-db", {
       vpc,
       dev: {
@@ -30,7 +32,7 @@ export default $config({
       link: [db],
       retries: 1,
       environment: {
-        RPC_URL: "http://localhost:8545",
+        RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
         POLLING_INTERVAL: "1000",
         MAX_REQUESTS_PER_SECOND: "20",
         NETWORK: "ethereum",
