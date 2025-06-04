@@ -9,7 +9,7 @@ const defaultLinkVariants = cva(
     variants: {
       variant: {
         default: "text-foreground hover:text-white",
-        highlight: "text-tangerine hover:text-tangerine/80",
+        highlight: "text-tangerine hover:text-[#FB8F4D]",
       },
     },
     defaultVariants: {
