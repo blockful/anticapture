@@ -77,8 +77,8 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       GovernanceImplementationEnum.VOTING_PERIOD,
     ],
   },
-  [RiskAreaEnum.GOV_INTERFACES_VULNERABILITY]: {
-    title: "Gov Interfaces Vulnerability",
+  [RiskAreaEnum.GOV_FRONTEND_VULNERABILITY]: {
+    title: "Gov Front-end Vulnerability",
     titleAbbreviation: "GV",
     description:
       "Weaknesses in the interfaces used for governance participation that could be exploited or lead to governance failures.",
