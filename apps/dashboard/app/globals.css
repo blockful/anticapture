@@ -17,7 +17,6 @@
  * 
  * Icon Colors:
  * Follow the same color as the text color except for the following:
- * - dimmed: --color-icon-secondary
  * - highlight: --color-icon-primary
  * 
  * Design System Integration
@@ -51,6 +50,7 @@
   /* Design System Colors */
   --color-primary: var(--base-primary);
   --color-secondary: var(--base-muted-foreground);
+  --color-dimmed: var(--base-dimmed);
   --color-inverted: var(--base-background);
   --color-success: var(--base-success);
   --color-warning: var(--base-warning);
@@ -59,7 +59,6 @@
   --color-link-hover: var(--base-brand);
 
   /* Icon Colors*/
-  --color-dimmed: var(--base-dimmed);
   --color-highlight: var(--base-brand);
 
   /* Surface Colors */
