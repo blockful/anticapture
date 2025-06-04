@@ -38,10 +38,10 @@ export const ENS: DaoConfiguration = {
       expiration: {
         startDate: "July 1, 2024",
         date: "July 26 2026",
-        timestamp: 1784919179000,
+        timestamp: 1784919179,
         alertExpiration: calculateMonthsBefore({
           monthsBeforeTimestamp: 3,
-          timestamp: 1784919179000,
+          timestamp: 1784919179,
         }),
       },
     },

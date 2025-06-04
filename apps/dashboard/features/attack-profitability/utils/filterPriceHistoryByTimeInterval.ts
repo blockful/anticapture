@@ -19,7 +19,7 @@ export const filterPriceHistoryByTimeInterval = (
     };
   }
 
-  const lastTimestamp = dataset[dataset.length - 1][0];
+  const lastTimestamp = Math.floor(dataset[dataset.length - 1][0] / 1000);
 
   const cutoffTimestamps = Object.values(TimeInterval).reduce(
     (acc, interval) => {

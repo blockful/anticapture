@@ -8,7 +8,7 @@ export const getDateRange = (days: string) => {
 
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  const endTimestamp = now.getTime();
+  const endTimestamp = Math.floor(now.getTime() / 1000);
 
   const startTimestamp = endTimestamp - numDays * SECONDS_PER_DAY;
 
