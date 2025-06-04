@@ -14,10 +14,10 @@ export const ARB: DaoConfiguration = {
   supportStage: SupportStageEnum.ELECTION,
   tokenDistribution: true,
   showSupport:
-    process.env.NEXT_PUBLIC_ARB_SNAPSHOT_PROPOSAL && process.env.NEXT_PUBLIC_ARB_SNAPSHOT_SPACE
+    process.env.NEXT_PUBLIC_SNAPSHOT_PROPOSAL_ARB && process.env.NEXT_PUBLIC_SNAPSHOT_SPACE
       ? {
-        snapshotProposal: process.env.NEXT_PUBLIC_ARB_SNAPSHOT_PROPOSAL,
-        snapshotSpace: process.env.NEXT_PUBLIC_ARB_SNAPSHOT_SPACE,
+        snapshotProposal: process.env.NEXT_PUBLIC_SNAPSHOT_PROPOSAL_ARB,
+        snapshotSpace: process.env.NEXT_PUBLIC_SNAPSHOT_SPACE,
       }
       : undefined,
   attackProfitability: {
