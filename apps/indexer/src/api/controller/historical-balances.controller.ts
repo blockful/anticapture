@@ -159,12 +159,7 @@ export function historicalBalances(app: Hono) {
         const tokenAddress = tokenContract.address;
 
         const response = {
-          data: balances.map((balance) => ({
-            address: balance.address,
-            balance: balance.balance.toString(), // Convert BigInt to string for JSON serialization
-            blockNumber: balance.blockNumber,
-            tokenAddress: balance.tokenAddress,
-          })),
+          data: balances
           metadata: {
             totalAddresses: addresses.length,
             blockNumber,
