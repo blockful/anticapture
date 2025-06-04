@@ -129,7 +129,9 @@ const CustomAccordionItem = ({
               <div className="flex flex-row items-center gap-2">
                 <div className="bg-middle-dark size-1 rounded-full" />
                 <p className="text-sm font-normal text-white">
-                  {`${riskFields.length} issues needs fixing`}
+                  {`${riskFields.length} issue${
+                    riskFields.length > 1 ? "s" : ""
+                  } needs fixing`}
                 </p>
               </div>
             )}
@@ -157,7 +159,9 @@ const CustomAccordionItem = ({
           >
             <StageContent
               stage={stage}
-              title="Minimal Risks"
+              title={
+                stage === Stage.ONE ? "Partial Risk Reduction" : "Minimal Risks"
+              }
               description={description}
               type="issues"
               issues={
