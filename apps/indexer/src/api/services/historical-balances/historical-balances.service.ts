@@ -261,12 +261,7 @@ export class HistoricalBalancesService {
    * @returns The current block number
    */
   async getCurrentBlockNumber(): Promise<number> {
-    try {
-      const blockNumber = await this.client.getBlockNumber();
-      return Number(blockNumber);
-    } catch (error) {
-      console.error("Error fetching current block number:", error);
-      throw new Error("Failed to fetch current block number");
-    }
+    const blockNumber = await this.client.getBlockNumber();
+    return Number(blockNumber);
   }
 }
