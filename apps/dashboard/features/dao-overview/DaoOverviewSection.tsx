@@ -128,9 +128,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <h2 className="text-primary text-[24px] leading-8 font-semibold">
-                  {daoConfig.name}
-                </h2>
+                <h3 className="text-primary font-medium">{daoConfig.name}</h3>
               </div>
               <div className="flex gap-2">
                 <DaoInfoDropdown

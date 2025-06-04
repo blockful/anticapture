@@ -42,14 +42,14 @@ export const SecurityCouncilCard = ({
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
           <div className="sm:bg-surface-contrast flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
             <ShieldCheck className="text-secondary size-4 sm:size-6" />
-            <p className="text-primary text-xs font-semibold uppercase sm:hidden">
+            <p className="text-alternative-sm text-primary font-mono font-medium uppercase sm:hidden">
               Security Council
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
-            <h3 className="text-primary hidden text-xs font-semibold uppercase sm:block">
+            <p className="text-alternative-sm text-primary hidden font-mono font-medium uppercase sm:block">
               Security Council
-            </h3>
+            </p>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
               <p className="text-secondary text-sm font-medium">Multisig:</p>
               <div className="flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
