@@ -49,12 +49,12 @@ export const UNI: DaoConfiguration = {
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
       },
-      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+      [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "<10k USD",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.EXTRACTABLE_VALUE
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {

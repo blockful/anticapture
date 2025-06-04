@@ -36,12 +36,12 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       GovernanceImplementationEnum.VOTING_SUBSIDY,
     ],
   },
-  [RiskAreaEnum.EXTRACTABLE_VALUE]: {
-    title: "Extractable Value",
+  [RiskAreaEnum.ATTACK_PROFITABILITY]: {
+    title: "Attack Profitability",
     titleAbbreviation: "EV",
     description:
       "It's the profit someone can take from a system by exploiting its design or timing. In DAOs, this might mean using voting power or insider info for personal gain.",
-    requirements: [GovernanceImplementationEnum.EXTRACTABLE_VALUE],
+    requirements: [GovernanceImplementationEnum.ATTACK_PROFITABILITY],
   },
   [RiskAreaEnum.SAFEGUARDS]: {
     title: "Safeguards",

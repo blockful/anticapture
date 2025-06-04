@@ -9,7 +9,7 @@ export const GOVERNANCE_IMPLEMENTATION_CONSTANTS = {
     description:
       "Protection against Domain Name Service attacks on the domains/websites used by the DAO.",
   },
-  [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+  [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
     description:
       "Compares the cost of all delegated votes with the value of assets in the DAO treasury excluding its governance tokens.",
   },
