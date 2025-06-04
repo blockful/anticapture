@@ -3,7 +3,7 @@ export const daosResolver = {
     const daoId = args?.where?.id || context.headers["anticapture-dao-id"];
 
     if (daoId) {
-      const graphqlClient = context[`graphql_${args.where.id.toUpperCase()}`]?.Query;
+      const graphqlClient = context[`graphql_${daoId.toUpperCase()}`]?.Query;
       return graphqlClient.daos({
         root,
         args,
