@@ -38,7 +38,7 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
   },
   [RiskAreaEnum.ATTACK_PROFITABILITY]: {
     title: "Attack Profitability",
-    titleAbbreviation: "EV",
+    titleAbbreviation: "AP",
     description:
       "It's the profit someone can take from a system by exploiting its design or timing. In DAOs, this might mean using voting power or insider info for personal gain.",
     requirements: [GovernanceImplementationEnum.ATTACK_PROFITABILITY],
