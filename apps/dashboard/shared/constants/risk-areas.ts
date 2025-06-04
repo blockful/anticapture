@@ -83,7 +83,7 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
     description:
       "Weaknesses in the interfaces used for governance participation that could be exploited or lead to governance failures.",
     requirements: [
-      GovernanceImplementationEnum.DNS_PROTECTION,
+      GovernanceImplementationEnum.INTERFACE_HIJACK,
       GovernanceImplementationEnum.VOTE_MUTABILITY,
       GovernanceImplementationEnum.VETO_STRATEGY,
     ],
