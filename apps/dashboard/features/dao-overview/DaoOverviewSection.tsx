@@ -150,7 +150,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               </div>
             </div>
           </div>
-          <div className="flex w-full flex-col">
+          <div className="flex h-full w-full flex-col">
             <div className="mb-2 flex h-full items-center gap-2">
               <p className="text-primary font-mono text-xs font-medium tracking-wider">
                 RESILIENCE STAGE
