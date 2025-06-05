@@ -36,7 +36,7 @@ export const DaoInfoDropdown = ({
         aria-controls="timeInterval-value"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "text-primary flex items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
+          "text-primary hover:border-highlight flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
             "bg-surface-contrast border-transparent": !isOpen,
@@ -44,13 +44,16 @@ export const DaoInfoDropdown = ({
         )}
       >
         {defaultValue.icon}
-        <span className="text-sm font-normal whitespace-nowrap">
+        <span className="text-md font-medium whitespace-nowrap">
           {defaultValue.value}
         </span>
         <ChevronDown
-          className={cn("size-3 shrink-0 transition-transform duration-200", {
-            "rotate-180": isOpen,
-          })}
+          className={cn(
+            "text-primary size-3 shrink-0 transition-transform duration-200",
+            {
+              "rotate-180": isOpen,
+            },
+          )}
         />
       </button>
 
