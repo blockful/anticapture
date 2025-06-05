@@ -152,9 +152,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mb-2 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
+              <p className="text-primary font-mono text-xs font-medium tracking-wider">
                 RESILIENCE STAGE
-              </h3>
+              </p>
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
@@ -221,9 +221,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           <div className="flex w-full flex-col">
             <div className="mt-3 mb-3 flex h-full items-center gap-2">
-              <h3 className="font-mono text-xs font-medium tracking-wider text-white">
+              <p className="text-primary font-mono text-xs font-medium tracking-wider">
                 RESILIENCE STAGE
-              </h3>
+              </p>
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
