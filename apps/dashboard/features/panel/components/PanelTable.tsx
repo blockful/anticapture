@@ -118,7 +118,6 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             className="gap-2"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <h4 className="text-table-header">#</h4>
             <ArrowUpDown
               props={{
                 className: "size-4",
