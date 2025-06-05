@@ -144,13 +144,13 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
             <div
               className={cn("flex w-full gap-3", {
                 "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
               })}
             >
-              <div className="flex w-full items-center gap-2">
+              <div className="flex w-full items-center gap-1.5">
                 {!isMobile && (
                   <DaoAvatarIcon
                     daoId={dao as DaoIdEnum}
@@ -158,10 +158,12 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                     isRounded
                   />
                 )}
-                {daoConfigByDaoId[dao as DaoIdEnum].name ===
-                daoConfigByDaoId[DaoIdEnum.ENS].name
-                  ? "ENS"
-                  : daoConfigByDaoId[dao as DaoIdEnum].name}
+                <p className="text-primary text-md font-medium">
+                  {daoConfigByDaoId[dao as DaoIdEnum].name ===
+                  daoConfigByDaoId[DaoIdEnum.ENS].name
+                    ? "ENS"
+                    : daoConfigByDaoId[dao as DaoIdEnum].name}
+                </p>
               </div>
               {isInAnalysis && (
                 <>
