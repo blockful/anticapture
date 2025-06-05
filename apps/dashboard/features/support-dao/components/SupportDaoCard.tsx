@@ -72,7 +72,7 @@ export const SupportDaoCard = ({
           {daoIcon}
           <div className="flex flex-col sm:gap-2">
             <div className="flex items-center gap-2">
-              <h3 className="text-primary truncate text-center text-sm font-medium">
+              <h3 className="text-primary text-md truncate text-center font-medium">
                 {daoName}
               </h3>
               <div
