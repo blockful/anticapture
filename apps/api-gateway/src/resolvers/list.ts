@@ -22,7 +22,7 @@ export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
       }
     `,
     resolve: async (root: any, args: any, context: any, info) => {
-      const daoId = args.where?.daoId;
+      const daoId = args.where?.daoId || context.headers["anticapture-dao-id"];
 
       if (!daoId) {
         throw new Error(`Missing where.daoId in query for ${fieldName}`);
@@ -34,7 +34,10 @@ export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
         return {}
       }
 
-      args.where.daoId = args.where.daoId.toUpperCase();
+      if (args?.where?.daoId) {
+        args.where.daoId = args.where.daoId.toUpperCase();
+      }
+
       return targetClient[fieldName]({
         root,
         args,

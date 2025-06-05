@@ -1,5 +1,5 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { formatUnits } from "viem";
+import { formatUnits, parseEther } from "viem";
 
 import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -8,9 +8,8 @@ import { caseInsensitiveEnum } from "@/api/middlewares";
 
 interface TokenDistributionRepository {
   getSupplyComparison(
-    daoId: string,
     metricType: string,
-    oldTimestamp: bigint,
+    days: DaysEnum,
   ): Promise<{ oldValue: string; currentValue: string } | undefined>;
 }
 
@@ -26,7 +25,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldTotalSupply: z.string(),
         currentTotalSupply: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
     {
@@ -36,7 +35,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldDelegatedSupply: z.string(),
         currentDelegatedSupply: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
     {
@@ -46,7 +45,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldCirculatingSupply: z.string(),
         currentCirculatingSupply: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
     {
@@ -56,7 +55,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldTreasury: z.string(),
         currentTreasury: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
     {
@@ -66,7 +65,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldCexSupply: z.string(),
         currentCexSupply: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
     {
@@ -76,7 +75,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldDexSupply: z.string(),
         currentDexSupply: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
     {
@@ -86,7 +85,7 @@ export function tokenDistribution(
       resultSchema: z.object({
         oldLendingSupply: z.string(),
         currentLendingSupply: z.string(),
-        changeRate: z.string(),
+        changeRate: z.number(),
       }),
     },
   ];
@@ -126,15 +125,9 @@ export function tokenDistribution(
         },
       }),
       async (ctx) => {
-        const { daoId } = ctx.req.valid("param");
         const { days } = ctx.req.valid("query");
-        const oldTimestamp = BigInt(Date.now()) - BigInt(days);
 
-        const result = await repository.getSupplyComparison(
-          daoId,
-          metric,
-          oldTimestamp,
-        );
+        const result = await repository.getSupplyComparison(metric, days);
 
         if (!result) {
           return ctx.json({ error: "No data found" }, 404);
@@ -143,20 +136,19 @@ export function tokenDistribution(
         const { oldValue, currentValue } = result;
 
         /* eslint-disable */
-        const changeRate = !oldValue
-          ? "0"
-          : formatUnits(
-            (BigInt(currentValue) * BigInt(1e18)) / BigInt(oldValue) -
-            BigInt(1e18),
-            18,
-          );
+        const changeRate =
+          oldValue &&
+          (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
+          parseEther("1");
         /* eslint-enable */
 
         return ctx.json(
           {
             [`old${resultKey}`]: oldValue || "0",
             [`current${resultKey}`]: currentValue || "0",
-            changeRate,
+            changeRate: changeRate
+              ? Number(formatUnits(changeRate, 18)).toFixed(2)
+              : 0,
           } as z.infer<typeof resultSchema>,
           200,
         );

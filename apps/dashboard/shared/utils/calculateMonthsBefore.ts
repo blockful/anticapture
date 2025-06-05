@@ -1,6 +1,6 @@
 import {
   DAYS_PER_MONTH,
-  MILLISECONDS_PER_DAY,
+  SECONDS_PER_DAY,
 } from "@/shared/constants/time-related";
 
 export const calculateMonthsBefore = ({
@@ -10,7 +10,7 @@ export const calculateMonthsBefore = ({
   timestamp: number;
   monthsBeforeTimestamp: number;
 }): number => {
-  const MILLISECONDS_TO_SUBTRACT =
-    monthsBeforeTimestamp * DAYS_PER_MONTH * MILLISECONDS_PER_DAY;
-  return timestamp - MILLISECONDS_TO_SUBTRACT;
+  const SECONDS_TO_SUBTRACT =
+    monthsBeforeTimestamp * DAYS_PER_MONTH * SECONDS_PER_DAY;
+  return timestamp - SECONDS_TO_SUBTRACT;
 };
