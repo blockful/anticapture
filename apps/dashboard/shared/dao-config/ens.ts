@@ -62,12 +62,12 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
       },
-      [GovernanceImplementationEnum.DNS_PROTECTION]: {
+      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.DNS_PROTECTION
+            GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
@@ -75,12 +75,12 @@ export const ENS: DaoConfiguration = {
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
       },
-      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+      [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "~100M USD",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.EXTRACTABLE_VALUE
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
         requirements: [
           "Once a proposal snapshot block has passed, if any single address or group has over 50% of the delegated supply, they can approve the proposal without the need of of any other support.",

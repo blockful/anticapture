@@ -36,12 +36,12 @@ export const UNI: DaoConfiguration = {
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
       },
-      [GovernanceImplementationEnum.DNS_PROTECTION]: {
+      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.DNS_PROTECTION
+            GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
@@ -49,12 +49,12 @@ export const UNI: DaoConfiguration = {
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
       },
-      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+      [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "<10k USD",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.EXTRACTABLE_VALUE
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {

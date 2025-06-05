@@ -51,13 +51,13 @@ export const SECTIONS_CONSTANTS = {
   riskAnalysis: {
     title: "Risk Analysis",
     description:
-      "Assess critical vulnerabilities in your DAO’s governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
+      "Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
     anchorId: "riskAnalysisSection",
   },
   resilienceStages: {
     title: "Resilience Stages",
     description:
-      "Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression. ",
+      "Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression.",
     anchorId: "resilienceStagesSection",
   },
 };
