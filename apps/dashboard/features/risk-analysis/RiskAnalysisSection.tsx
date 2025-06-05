@@ -48,17 +48,14 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   // Customize the GOV INTERFACES VULNERABILITY for display
   const customizedRiskAreas = [...riskAreasWithLevel];
   const govIndex = customizedRiskAreas.findIndex(
-    (risk) => risk.name === RiskAreaEnum.GOV_INTERFACES_VULNERABILITY,
+    (risk) => risk.name === RiskAreaEnum.GOV_FRONTEND_VULNERABILITY,
   );
   if (govIndex !== -1) {
     customizedRiskAreas[govIndex] = {
       ...customizedRiskAreas[govIndex],
       content: (
         <span className="line-height-[0] inline-flex flex-wrap align-baseline">
-          <span className="inline-block">GOV INTERF</span>
-          <span className="hidden sm:inline-block">ACES</span>
-          <span className="inline-block sm:hidden">.</span>
-          <span className="inline-block">&nbsp;VULNERABILITY</span>
+          <span className="inline-block">GOV FRONT-END VULNERABILITY</span>
         </span>
       ),
     };

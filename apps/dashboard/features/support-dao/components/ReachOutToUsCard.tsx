@@ -14,8 +14,8 @@ export const ReachOutToUsCard = () => {
               <Globe className="text-secondary/70 size-4" />
             </div>
             <div className="flex flex-col justify-start lg:flex-row lg:items-center lg:gap-1.5">
-              <h3 className="text-primary text-sm font-medium">
-                Don&apos;t see your DAO here?
+              <h3 className="text-sm font-medium text-white">
+                Don&apos;t see the DAO you&apos;re in here?
               </h3>
 
               <DefaultLink

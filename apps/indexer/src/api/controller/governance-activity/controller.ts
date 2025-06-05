@@ -11,21 +11,13 @@ import {
 } from "./types";
 
 interface GovernanceActivityRepository {
-  getActiveSupply(
-    daoId: string,
-    days: number,
-  ): Promise<ActiveSupplyQueryResult | undefined>;
+  getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
-    daoId: string,
-    days: number,
+    days: DaysEnum,
   ): Promise<ProposalsCompareQueryResult | undefined>;
-  getVotesCompare(
-    daoId: string,
-    days: number,
-  ): Promise<VotesCompareQueryResult | undefined>;
+  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
   getAverageTurnoutCompare(
-    daoId: string,
-    days: number,
+    days: DaysEnum,
   ): Promise<AverageTurnoutCompareQueryResult | undefined>;
 }
 
@@ -82,9 +74,8 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const { days } = context.req.valid("query");
-      const data = await repository.getActiveSupply(daoId, days);
+      const data = await repository.getActiveSupply(days);
       if (!data) {
         return context.json({ error: "No data found" }, 404);
       }
@@ -132,19 +123,23 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const { days } = context.req.valid("query");
 
-      const data = await repository.getProposalsCompare(daoId, days);
+      const data = await repository.getProposalsCompare(days);
       if (!data) {
         return context.json({ error: "No data found" }, 404);
       }
       const changeRate =
-        data.oldProposalsLaunched === 0
-          ? 0
-          : data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
+        data.oldProposalsLaunched &&
+        data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
 
-      return context.json({ ...data, changeRate }, 200);
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
     },
   );
 
@@ -188,17 +183,22 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const { days } = context.req.valid("query");
 
-      const data = await repository.getVotesCompare(daoId, days);
+      const data = await repository.getVotesCompare(days);
       if (!data) {
         return context.json({ error: "No data found" }, 404);
       }
-      const changeRate =
-        data.oldVotes === 0 ? 0 : data.currentVotes / data.oldVotes - 1;
 
-      return context.json({ ...data, changeRate }, 200);
+      const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
+
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
     },
   );
 
@@ -242,19 +242,23 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const { days } = context.req.valid("query");
 
-      const data = await repository.getAverageTurnoutCompare(daoId, days);
+      const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
         return context.json({ error: "No data found" }, 404);
       }
       const changeRate =
-        data.oldAverageTurnout === 0
-          ? 0
-          : data.currentAverageTurnout / data.oldAverageTurnout - 1;
+        data.oldAverageTurnout &&
+        data.currentAverageTurnout / data.oldAverageTurnout - 1;
 
-      return context.json({ ...data, changeRate }, 200);
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
     },
   );
 }

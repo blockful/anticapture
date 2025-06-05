@@ -73,7 +73,7 @@ export const AttackProfitabilitySection = ({
       <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
         <TheCardChartLayout
           title="Cost Comparison"
-          subtitle="Treasury values above supply costs indicate high risk."
+          subtitle="All values reflect current data."
         >
           <AttackCostBarChart />
         </TheCardChartLayout>
