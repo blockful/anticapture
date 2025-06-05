@@ -3,12 +3,10 @@ import {
   createPublicClient,
   http,
   PublicClient,
-  encodeFunctionData,
   isAddress,
-  decodeAbiParameters,
   parseAbi,
 } from "viem";
-import { readContract } from "viem/actions";
+import { readContract, multicall } from "viem/actions";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -27,10 +25,6 @@ export interface HistoricalBalancesRequest {
   blockNumber: number;
   daoId: DaoIdEnum;
 }
-
-// Multicall3 contract address (deployed after governance setup)
-const MULTICALL3_ADDRESS =
-  "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0" as Address;
 
 export class HistoricalBalancesService {
   private client: PublicClient;
@@ -90,68 +84,22 @@ export class HistoricalBalancesService {
     blockNumber: number,
     tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
-    // Prepare multicall data
-    const calls = addresses.map((address) => {
-      const calldata = encodeFunctionData({
-        abi: [
-          {
-            inputs: [{ name: "account", type: "address" }],
-            name: "balanceOf",
-            outputs: [{ name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ] as const,
+    const results = await multicall(this.client, {
+      contracts: addresses.map((address) => ({
+        address: tokenAddress,
+        abi: parseAbi([
+          "function balanceOf(address account) external view returns (uint256)",
+        ]),
         functionName: "balanceOf",
         args: [address],
-      });
-
-      return {
-        target: tokenAddress,
-        callData: calldata,
-      };
-    });
-
-    // Call Multicall3.aggregate
-    const result = await readContract(this.client, {
-      address: MULTICALL3_ADDRESS,
-      abi: [
-        {
-          inputs: [
-            {
-              components: [
-                { name: "target", type: "address" },
-                { name: "callData", type: "bytes" },
-              ],
-              name: "calls",
-              type: "tuple[]",
-            },
-          ],
-          name: "aggregate",
-          outputs: [
-            { name: "blockNumber", type: "uint256" },
-            { name: "returnData", type: "bytes[]" },
-          ],
-          stateMutability: "payable",
-          type: "function",
-        },
-      ] as const,
-      functionName: "aggregate",
-      args: [calls],
+      })),
       blockNumber: BigInt(blockNumber),
     });
 
-    const [, returnData] = result as [any, `0x${string}`[]];
-
-    // Decode the results
+    // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => {
-      const data = returnData[index];
-      let balance = 0n;
-
-      if (data && data !== "0x") {
-        // Properly decode the uint256 return value
-        [balance] = decodeAbiParameters([{ type: "uint256" }], data);
-      }
+      const result = results[index];
+      const balance = result?.status === "success" ? (result.result ?? 0n) : 0n;
 
       return {
         address,
@@ -174,7 +122,9 @@ export class HistoricalBalancesService {
       addresses.map((address) =>
         this.client.readContract({
           address: tokenAddress,
-          abi: parseAbi(["function balanceOf(address account) (uint256)"]),
+          abi: parseAbi([
+            "function balanceOf(address account) external view returns (uint256)",
+          ]),
           functionName: "balanceOf",
           args: [address],
           blockNumber: BigInt(blockNumber),

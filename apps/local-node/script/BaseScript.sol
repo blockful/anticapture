@@ -23,8 +23,6 @@ abstract contract BaseScript is Script {
         vm.label(Constants.CHARLIE, "Charlie");
         vm.label(Constants.DAVID, "David");
         
-        // Label contract addresses (updated for new deployment order)
-        vm.label(Constants.MULTICALL3_ADDRESS, "Multicall3");
         vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
         vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
         vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");

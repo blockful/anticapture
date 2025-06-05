@@ -29,13 +29,13 @@ export default createConfig({
       chain: "anvil",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.token.address,
-      startBlock: 1,
+      startBlock: 22635098, // Block where ENS Token was deployed
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "anvil",
       address: CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.governor,
-      startBlock: 1,
+      startBlock: 22635098, // Block where ENS Governor was deployed
     },
   },
 });
