@@ -213,7 +213,7 @@
   }
 
   .section-layout-icon {
-    @apply text-secondary size-6;
+    @apply text-secondary size-5;
   }
 
 }

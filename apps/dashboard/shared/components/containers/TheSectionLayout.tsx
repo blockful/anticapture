@@ -71,7 +71,9 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h4 className="text-primary sm:text-left">{title}</h4>
+                  <h4 className="text-primary font-medium sm:text-left">
+                    {title}
+                  </h4>
                 </div>
                 <div className="flex items-center">{switchDate}</div>
               </div>
@@ -81,7 +83,9 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h4 className="text-primary sm:text-left">{title}</h4>
+                    <h4 className="text-primary font-medium sm:text-left">
+                      {title}
+                    </h4>
                   </div>
                   {subHeader && (
                     <div className="flex items-center gap-2">{subHeader}</div>
