@@ -103,17 +103,6 @@
   --text-alternative-xs--line-height: 16px;
   --text-alternative-xs--letter-spacing: 6%;
 
-  --text-xl: 18px;
-  --text-xl--line-height: 24px;
-
-  --text-lg: 16px;
-  --text-lg--line-height: 24px;
-
-  --text-md: 14px;
-  --text-md--line-height: 20px;
-
-  --text-sm: 12px;
-  --text-sm--line-height: 16px;
 
   
 
@@ -137,6 +126,23 @@
 
 
 
+  /* 
+  @DEV: TODO: Check these styles once the new design system is fully implemented.
+  - Check the font sizes and line heights when create the Text component.
+  
+  --text-xl: 18px;
+  --text-xl--line-height: 24px;
+
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+
+  --text-md: 14px;
+  --text-md--line-height: 20px;
+
+  --text-sm: 12px;
+  --text-sm--line-height: 16px; */
+
+  
 @layer utilities {
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -237,6 +243,10 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 
+  /*
+  @DEV: TODO: Check these styles once the new design system is fully implemented.
+  - Check the font sizes and line heights when create the Text component.
+  
   h1 {
     @apply text-[40px] leading-[44px] tracking-[-1.2%];
   }
@@ -251,7 +261,7 @@
 
   h4 {
     @apply text-[20px] leading-[28px] tracking-[-0.5%];
-  }
+  } */
 
 
   :root {

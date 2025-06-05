@@ -83,7 +83,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="text-secondary text-md flex items-center justify-end px-4 py-3 text-end font-normal">
+      <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
         {formattedSupply}
       </div>
     );
@@ -158,7 +158,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                     isRounded
                   />
                 )}
-                <p className="text-primary text-md font-medium">
+                <p className="text-primary text-sm font-medium">
                   {daoConfigByDaoId[dao as DaoIdEnum].name ===
                   daoConfigByDaoId[DaoIdEnum.ENS].name
                     ? "ENS"

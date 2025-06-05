@@ -71,9 +71,9 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h4 className="text-primary font-medium sm:text-left">
+                  <h3 className="text-primary text-xl leading-7 font-medium tracking-[-0.5%] sm:text-left">
                     {title}
-                  </h4>
+                  </h3>
                 </div>
                 <div className="flex items-center">{switchDate}</div>
               </div>
@@ -83,7 +83,7 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h4 className="text-primary font-medium sm:text-left">
+                    <h4 className="text-xl leading-7 font-medium tracking-[-0.5%] text-white sm:text-left">
                       {title}
                     </h4>
                   </div>

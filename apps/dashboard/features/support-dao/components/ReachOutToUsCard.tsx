@@ -14,7 +14,7 @@ export const ReachOutToUsCard = () => {
               <Globe className="text-secondary/70 size-4" />
             </div>
             <div className="flex flex-col justify-start lg:flex-row lg:items-center lg:gap-1.5">
-              <p className="text-md text-primary font-medium">
+              <p className="text-primary text-sm font-medium">
                 Don&apos;t see the DAO you&apos;re in here?
               </p>
 

@@ -20,7 +20,7 @@ export const BadgeInAnalysis = ({
       )}
     >
       {hasIcon && <Clock2 className={cn("size-3", iconClassName)} />}
-      <p className="text-sm font-medium whitespace-nowrap">In analysis</p>
+      <p className="text-xs font-medium whitespace-nowrap">In analysis</p>
     </div>
   );
 };
