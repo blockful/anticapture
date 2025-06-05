@@ -40,7 +40,7 @@ const _env = envSchema.parse(
     ? process.env
     : {
       ...process.env,
-      DATABASE_URL: Resource["anticapture-db"],
+      DATABASE_URL: Resource["AnticaptureDB"],
     },
 );
 /* eslint-disable */

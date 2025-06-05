@@ -5,6 +5,19 @@
 
 declare module "sst" {
   export interface Resource {
+    "APIGateway": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "AnticaptureDB": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
+    }
     "CoingeckoAPIKey": {
       "type": "sst.sst.Secret"
       "value": string
@@ -17,30 +30,21 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "EnsIndexer": {
+      "service": string
+      "type": "sst.aws.Service"
+    }
+    "EnsIndexerAPI": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
     "EthereumRPC": {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "anticapture-db": {
-      "database": string
-      "host": string
-      "password": string
-      "port": number
-      "type": "sst.aws.Postgres"
-      "username": string
-    }
     "anticapture-vpc": {
       "type": "sst.aws.Vpc"
-    }
-    "api-gateway": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
-    "ens-indexer-api": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
     }
   }
 }

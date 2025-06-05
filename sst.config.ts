@@ -15,7 +15,7 @@ export default $config({
 
     const ethereumRpc = new sst.Secret("EthereumRPC", "http://localhost:8545")
 
-    const db = new sst.aws.Postgres("anticapture-db", {
+    const db = new sst.aws.Postgres("AnticaptureDB", {
       vpc,
       dev: {
         username: "postgres",
@@ -25,41 +25,38 @@ export default $config({
       },
     });
 
-    // new sst.aws.Service("ens-indexer", {
-    //   cluster,
-    //   memory: "1 GB",
-    //   cpu: "0.5 vCPU",
-    //   link: [db],
-    //   retries: 1,
-    //   environment: {
-    //     RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
-    //     POLLING_INTERVAL: "1000",
-    //     MAX_REQUESTS_PER_SECOND: "20",
-    //     NETWORK: "ethereum",
-    //     DAO_ID: "ENS",
-    //     CHAIN_ID: "1",
-    //     NODE_ENV: $dev ? "development" : "production",
-    //   },
-    //   retry: 1,
-    //   image: {
-    //     context: ".",
-    //     dockerfile: "apps/indexer/Dockerfile.indexer",
-    //   },
-    //   dev: {
-    //     command: "pnpm indexer start --config config/ens.config.ts",
-    //   },
-    // });
+    new sst.aws.Service("EnsIndexer", {
+      cluster,
+      memory: "0.5 GB",
+      cpu: "0.25 vCPU",
+      link: [db],
+      environment: {
+        RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
+        POLLING_INTERVAL: "1000",
+        MAX_REQUESTS_PER_SECOND: "20",
+        NETWORK: "ethereum",
+        DAO_ID: "ENS",
+        CHAIN_ID: "1",
+        NODE_ENV: $dev ? "development" : "production",
+      },
+      image: {
+        context: ".",
+        dockerfile: "apps/indexer/Dockerfile.indexer",
+      },
+      dev: {
+        command: "pnpm indexer start --config config/ens.config.ts",
+      },
+    });
 
     const duneApiUrl = new sst.Secret("DuneAPIUrl")
     const duneApiKey = new sst.Secret("DuneAPIKey")
     const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
 
-    const indexerAPI = new sst.aws.Service("ens-indexer-api", {
+    const indexerAPI = new sst.aws.Service("EnsIndexerAPI", {
       cluster,
-      memory: "1 GB",
-      cpu: "0.5 vCPU",
+      memory: "0.5 GB",
+      cpu: "0.25 vCPU",
       link: [db],
-      retries: 1,
       environment: {
         RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
         NETWORK: "ethereum",
@@ -70,12 +67,11 @@ export default $config({
         DUNE_API_KEY: duneApiKey.value,
         COINGECKO_API_KEY: coingeckoApiKey.value,
       },
-      retry: 1,
       scaling: {
         min: 1,
-        max: 2,
-        cpuUtilization: 50,
-        memoryUtilization: 80,
+        max: 1,
+        // cpuUtilization: 50,
+        // memoryUtilization: 80,
       },
       image: {
         context: ".",
@@ -89,7 +85,7 @@ export default $config({
       },
     });
 
-    new sst.aws.Service("api-gateway", {
+    new sst.aws.Service("APIGateway", {
       cluster,
       memory: "0.5 GB",
       cpu: "0.25 vCPU",
@@ -98,12 +94,6 @@ export default $config({
       ],
       environment: {
         NODE_ENV: $dev ? "development" : "production",
-      },
-      scaling: {
-        min: 1,
-        max: 2,
-        cpuUtilization: 50,
-        memoryUtilization: 80,
       },
       image: {
         context: ".",
