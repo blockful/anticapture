@@ -11,10 +11,10 @@ export default createConfig({
     kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     anvil: {
-      chainId: 31337,
-      transport: http(env.RPC_URL),
+      id: 31337,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: 10,
       pollingInterval: 1000,
     },
@@ -26,16 +26,16 @@ export default createConfig({
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,
-      network: "anvil",
+      chain: "anvil",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.token.address,
-      startBlock: 1,
+      startBlock: 22635098, // Block where ENS Token was deployed
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
-      network: "anvil",
+      chain: "anvil",
       address: CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.governor,
-      startBlock: 1,
+      startBlock: 22635098, // Block where ENS Governor was deployed
     },
   },
 });
