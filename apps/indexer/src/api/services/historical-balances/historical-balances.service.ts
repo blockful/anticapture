@@ -1,4 +1,13 @@
-import { Address, createPublicClient, http, PublicClient, encodeFunctionData } from "viem";
+import {
+  Address,
+  createPublicClient,
+  http,
+  PublicClient,
+  encodeFunctionData,
+  isAddress,
+  decodeAbiParameters,
+  parseAbi,
+} from "viem";
 import { readContract } from "viem/actions";
 
 import { DaoIdEnum } from "@/lib/enums";
@@ -20,7 +29,8 @@ export interface HistoricalBalancesRequest {
 }
 
 // Multicall3 contract address (deployed after governance setup)
-const MULTICALL3_ADDRESS = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0" as Address;
+const MULTICALL3_ADDRESS =
+  "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0" as Address;
 
 export class HistoricalBalancesService {
   private client: PublicClient;
@@ -56,17 +66,19 @@ export class HistoricalBalancesService {
     }
 
     try {
-      // Use Multicall3 for blocks 19+ (after Multicall3 deployment), individual calls for earlier blocks
-      if (blockNumber >= 19) {
-        return await this.getBalancesWithMulticall(addresses, blockNumber, tokenAddress);
-      } else {
-        return await this.getBalancesIndividually(addresses, blockNumber, tokenAddress);
-      }
+      return await this.getBalancesWithMulticall(
+        addresses,
+        blockNumber,
+        tokenAddress,
+      );
     } catch (error) {
       console.error("Error fetching historical balances:", error);
       // Fallback to individual calls if multicall fails
-      console.log("Falling back to individual calls...");
-      return await this.getBalancesIndividually(addresses, blockNumber, tokenAddress);
+      return await this.getBalancesIndividually(
+        addresses,
+        blockNumber,
+        tokenAddress,
+      );
     }
   }
 
@@ -76,7 +88,7 @@ export class HistoricalBalancesService {
   private async getBalancesWithMulticall(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
     // Prepare multicall data
     const calls = addresses.map((address) => {
@@ -129,14 +141,18 @@ export class HistoricalBalancesService {
       blockNumber: BigInt(blockNumber),
     });
 
-    const [, returnData] = result;
+    const [, returnData] = result as [any, `0x${string}`[]];
 
     // Decode the results
     return addresses.map((address, index) => {
       const data = returnData[index];
-      // Decode uint256 from bytes
-      const balance = data && data.length >= 66 ? BigInt(data) : 0n;
-      
+      let balance = 0n;
+
+      if (data && data !== "0x") {
+        // Properly decode the uint256 return value
+        [balance] = decodeAbiParameters([{ type: "uint256" }], data);
+      }
+
       return {
         address,
         balance,
@@ -152,35 +168,26 @@ export class HistoricalBalancesService {
   private async getBalancesIndividually(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
-    const balancePromises = addresses.map((address) =>
-      readContract(this.client, {
-        address: tokenAddress,
-        abi: [
-          {
-            inputs: [{ name: "account", type: "address" }],
-            name: "balanceOf",
-            outputs: [{ name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ] as const,
-        functionName: "balanceOf",
-        args: [address],
-        blockNumber: BigInt(blockNumber),
-      }).catch((error) => {
-        console.error(`Error fetching balance for ${address}:`, error);
-        return 0n; // Return 0 if individual call fails
-      })
+    const balances = await Promise.allSettled(
+      addresses.map((address) =>
+        this.client.readContract({
+          address: tokenAddress,
+          abi: parseAbi(["function balanceOf(address account) (uint256)"]),
+          functionName: "balanceOf",
+          args: [address],
+          blockNumber: BigInt(blockNumber),
+        }),
+      ),
     );
-
-    const balances = await Promise.all(balancePromises);
-
     // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => ({
-      address: address!,
-      balance: balances[index] || 0n,
+      address,
+      balance:
+        balances[index]?.status === "fulfilled"
+          ? (balances[index].value as bigint)
+          : 0n,
       blockNumber,
       tokenAddress,
     }));
@@ -193,67 +200,6 @@ export class HistoricalBalancesService {
     const { NETWORK: network } = env;
     const contractInfo = CONTRACT_ADDRESSES[network]?.[daoId];
     return contractInfo?.token?.address || null;
-  }
-
-  /**
-   * Validate the historical balances request
-   * @param request - The request to validate
-   */
-  private validateRequest(request: HistoricalBalancesRequest): void {
-    const { addresses, blockNumber, daoId } = request;
-
-    // Validate addresses array
-    if (!Array.isArray(addresses) || addresses.length === 0) {
-      throw new Error("Addresses array cannot be empty");
-    }
-
-    if (addresses.length > 100) {
-      throw new Error("Maximum 100 addresses allowed per request");
-    }
-
-    // Validate block number
-    if (!Number.isInteger(blockNumber) || blockNumber <= 0) {
-      throw new Error("Block number must be a positive integer");
-    }
-
-    // Validate DAO ID
-    if (!Object.values(DaoIdEnum).includes(daoId)) {
-      throw new Error(`Invalid DAO ID: ${daoId}`);
-    }
-
-    // Validate that addresses are valid Ethereum addresses
-    addresses.forEach((address, index) => {
-      if (!this.isValidAddress(address)) {
-        throw new Error(`Invalid address at index ${index}: ${address}`);
-      }
-    });
-  }
-
-  /**
-   * Get token contract information for a specific DAO
-   * @param daoId - The DAO identifier
-   * @returns Token contract address and ABI
-   */
-  public getTokenContract(daoId: DaoIdEnum) {
-    const { NETWORK: network } = env;
-    const contractInfo = CONTRACT_ADDRESSES[network][daoId];
-
-    if (!contractInfo?.token) {
-      throw new Error(
-        `Token contract not found for DAO: ${daoId} on network: ${network}`,
-      );
-    }
-
-    return contractInfo.token;
-  }
-
-  /**
-   * Validate Ethereum address format
-   * @param address - The address to validate
-   * @returns True if valid, false otherwise
-   */
-  private isValidAddress(address: string): boolean {
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
   }
 
   /**
