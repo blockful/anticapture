@@ -13,6 +13,7 @@ export const ENS: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
+    chainId: 1,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -37,10 +38,10 @@ export const ENS: DaoConfiguration = {
       expiration: {
         startDate: "July 1, 2024",
         date: "July 26 2026",
-        timestamp: 1784919179000,
+        timestamp: 1784919179,
         alertExpiration: calculateMonthsBefore({
           monthsBeforeTimestamp: 3,
-          timestamp: 1784919179000,
+          timestamp: 1784919179,
         }),
       },
     },
@@ -61,12 +62,12 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
       },
-      [GovernanceImplementationEnum.DNS_PROTECTION]: {
+      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.DNS_PROTECTION
+            GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
@@ -74,12 +75,12 @@ export const ENS: DaoConfiguration = {
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
       },
-      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+      [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "~100M USD",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.EXTRACTABLE_VALUE
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
         requirements: [
           "Once a proposal snapshot block has passed, if any single address or group has over 50% of the delegated supply, they can approve the proposal without the need of of any other support.",
@@ -233,5 +234,4 @@ export const ENS: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   governanceActivity: false,
-  showSupport: false,
 };

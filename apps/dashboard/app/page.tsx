@@ -4,14 +4,14 @@ import { HeaderSidebar } from "@/widgets";
 
 export default function Home() {
   return (
-    <div className="flex h-screen overflow-hidden bg-darkest">
+    <div className="bg-darkest dark flex h-screen overflow-hidden">
       <HeaderSidebar />
       <main className="flex-1 overflow-auto sm:ml-[72px]">
         <div className="sm:hidden">
           <HeaderMobile />
         </div>
-        <div className="flex w-full flex-col items-center xl4k:min-h-screen">
-          <div className="w-full xl4k:max-w-7xl">
+        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full">
             <HomeTemplate />
           </div>
         </div>

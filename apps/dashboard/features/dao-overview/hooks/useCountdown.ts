@@ -1,10 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  MILLISECONDS_PER_SECOND,
-  MILLISECONDS_PER_MINUTE,
-  MILLISECONDS_PER_HOUR,
-  MILLISECONDS_PER_DAY,
-} from "@/shared/constants/time-related";
 
 type CountdownTime = {
   days: number;
@@ -18,13 +12,13 @@ type CountdownTime = {
 export function useCountdown(targetTimestamp?: number): CountdownTime {
   const [isClient, setIsClient] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<CountdownTime>(() => ({
-    ...calculateTimeLeft(targetTimestamp ?? 0),
+    ...calculateTimeLeft(targetTimestamp),
     isLoading: true,
   }));
 
   const updateCountdown = useCallback(() => {
     setTimeLeft({
-      ...calculateTimeLeft(targetTimestamp ?? 0),
+      ...calculateTimeLeft(targetTimestamp),
       isLoading: false,
     });
   }, [targetTimestamp]);
@@ -54,7 +48,7 @@ export function useCountdown(targetTimestamp?: number): CountdownTime {
     updateCountdown();
 
     // Update every second
-    const interval = setInterval(updateCountdown, MILLISECONDS_PER_SECOND);
+    const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval);
   }, [targetTimestamp, updateCountdown, isClient]);
@@ -62,7 +56,8 @@ export function useCountdown(targetTimestamp?: number): CountdownTime {
   return timeLeft;
 }
 
-function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
+// time difference between now and targetTimestamp
+function calculateTimeLeft(targetTimestamp: number = 0): CountdownTime {
   if (!targetTimestamp) {
     return {
       expired: true,
@@ -74,11 +69,10 @@ function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
     };
   }
 
-  const targetMs = targetTimestamp;
-  const now = Date.now();
-  const diffMs = targetMs - now;
+  const now = Math.floor(Date.now() / 1000);
+  const diffSeconds = targetTimestamp - now;
 
-  if (diffMs <= 0) {
+  if (diffSeconds <= 0) {
     return {
       expired: true,
       days: 0,
@@ -89,16 +83,14 @@ function calculateTimeLeft(targetTimestamp?: number): CountdownTime {
     };
   }
 
-  const days = Math.floor(diffMs / MILLISECONDS_PER_DAY);
+  const days = Math.floor(diffSeconds / (60 * 60 * 24));
   const hours = Math.floor(
-    (diffMs % MILLISECONDS_PER_DAY) / MILLISECONDS_PER_HOUR,
+    (diffSeconds % (60 * 60 * 24)) / (60 * 60),
   );
   const minutes = Math.floor(
-    (diffMs % MILLISECONDS_PER_HOUR) / MILLISECONDS_PER_MINUTE,
+    (diffSeconds % (60 * 60)) / (60),
   );
-  const seconds = Math.floor(
-    (diffMs % MILLISECONDS_PER_MINUTE) / MILLISECONDS_PER_SECOND,
-  );
+  const seconds = Math.floor(diffSeconds % 60);
 
   return {
     expired: false,

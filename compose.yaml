@@ -1,7 +1,29 @@
 services:
-  db:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - backend
+
+  contracts:
+    build:
+      context: apps/local-node
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  indexer-db:
     image: postgres:16.2
-    container_name: anticapture-db
     ports:
       - "5432:5432"
     restart: always
@@ -10,34 +32,34 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
     tmpfs:
-      - /var/lib/postgresql/data # in memory volume
-
-  redis:
-    image: redis:latest
-    container_name: gateway-redis
-    ports:
-      - "6379:6379"
-    restart: always
-
-  contracts:
-    build:
-      context: apps/indexer/contracts
-      dockerfile: Dockerfile
-    container_name: anticapture-contracts
-    ports:
-      - "8545:8545"
+      - /var/lib/postgresql/data:rw,noexec,nosuid
+    networks:
+      - backend
 
   indexer:
     build:
-      context: apps/indexer
-    container_name: anticapture-indexer
+      context: .
+      dockerfile: infra/indexer/Dockerfile.indexer
+    command: ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
-      - DATABASE_URL=postgres://postgres:admin@anticapture-db:5432/postgres
+      - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
       - NETWORK=anvil
-      - RPC_URL=http://anticapture-contracts:8545
+      - RPC_URL=http://contracts:8545
+      - CHAIN_ID=31337
+      - MAX_REQUESTS_PER_SECOND=10
+      - POLLING_INTERVAL=1000
+      - PORT=42069
     depends_on:
-      - db
-      - contracts
+      indexer-db:
+        condition: service_started
+      contracts:
+        condition: service_healthy
     ports:
       - "42069:42069"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

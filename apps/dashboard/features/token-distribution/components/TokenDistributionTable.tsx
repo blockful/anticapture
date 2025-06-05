@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -30,10 +30,7 @@ const sortingByAscendingOrDescendingNumber = (
   return a - b;
 };
 
-const metricDetails: Record<
-  string,
-  { icon: React.ReactNode; tooltip: string }
-> = {
+const metricDetails: Record<string, { icon: ReactNode; tooltip: string }> = {
   Total: {
     icon: undefined,
     tooltip: "The total number of tokens in existence.",
@@ -94,16 +91,16 @@ export const TokenDistributionTable = () => {
         const currentValue = row.getValue("currentValue");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p
+          <div
             className={cn(
-              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-[#fafafa]",
-              { "blur-[4px]": currentValue === null },
+              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white",
+              { "blur-xs": currentValue === null },
             )}
           >
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
-          </p>
+          </div>
         );
       },
       header: () => (
@@ -128,7 +125,7 @@ export const TokenDistributionTable = () => {
           const randomNumber = Math.floor(Math.random() * 999);
           const randomValues = ["K", "M"];
           return (
-            <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
+            <div className="flex items-center justify-end px-4 py-3 text-end blur-xs">
               {randomNumber}
               {randomValues[randomNumber % 2]}
             </div>
@@ -143,7 +140,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           {String(daoId)?.toUpperCase()} Amount
@@ -180,7 +177,7 @@ export const TokenDistributionTable = () => {
         }
         if (variation === null) {
           return (
-            <div className="flex items-center justify-end text-green-400 blur-[4px]">
+            <div className="flex items-center justify-end text-green-400 blur-xs">
               {(Math.random() * 100).toFixed(2)}%
             </div>
           );
@@ -207,7 +204,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -241,7 +238,7 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="flex w-full justify-center py-2.5 blur-[4px]">
+            <div className="flex w-full justify-center py-2.5 blur-xs">
               <Sparkline
                 data={mockedTableChartMetrics.map((item) => Number(item.high))}
                 strokeColor={"#4ADE80"}

@@ -90,7 +90,7 @@ export const ResilienceStagesSection = ({
     >
       <div className="flex h-7 w-full items-center justify-center">
         {/* Timeline Component */}
-        <div className="relative h-0.5 w-full bg-middleDark">
+        <div className="bg-middle-dark relative h-0.5 w-full">
           {/* Horizontal Line */}
           <div
             className={cn(
@@ -100,12 +100,12 @@ export const ResilienceStagesSection = ({
           ></div>
 
           {/* Stage 0 */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-dark">
+          <div className="bg-dark absolute left-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
           </div>
 
           {/* Stage 1 */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-dark">
+          <div className="bg-dark absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
           </div>
 
@@ -118,7 +118,7 @@ export const ResilienceStagesSection = ({
           >
             <div
               className={cn(
-                "flex size-10 items-center justify-center overflow-hidden rounded-full border-[2px] bg-white",
+                "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
                 StagesToBorderColor[currentDaoStage],
               )}
             >
@@ -127,7 +127,7 @@ export const ResilienceStagesSection = ({
           </div>
 
           {/* Stage 2 */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-dark">
+          <div className="bg-dark absolute right-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
           </div>
         </div>

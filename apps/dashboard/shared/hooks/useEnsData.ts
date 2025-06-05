@@ -1,6 +1,6 @@
 "use client";
 
-import {default as useSWR} from "swr";
+import { default as useSWR } from "swr";
 import { Address } from "viem";
 
 const ensUrl = "https://api.ensdata.net";
@@ -22,15 +22,16 @@ export const fetchEnsData = async ({
 };
 
 export const useEnsData = (address: Address) => {
-  const { data, error } = useSWR<EnsData>(
+  const { data, error, isLoading } = useSWR<EnsData>(
     address ? [`ensData`, address] : null,
     () => fetchEnsData({ address }),
     {
       revalidateOnFocus: false,
-    }
+    },
   );
   return {
     data,
     error,
+    isLoading,
   };
 };

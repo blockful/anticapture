@@ -11,7 +11,7 @@ export const SkeletonRow = ({
     <div
       className={`${parentClassName || "flex animate-pulse justify-center space-x-2"} `}
     >
-      <div className={`${className} rounded bg-gray-300`} />
+      <div className={`${className} rounded-sm bg-gray-300`} />
     </div>
   );
 };

@@ -1,6 +1,9 @@
 import { DaoIconProps } from "@/shared/components/icons/types";
 
-export const UniswapIcon = ({ showBackground = true, ...props }: DaoIconProps) => {
+export const UniswapIcon = ({
+  showBackground = true,
+  ...props
+}: DaoIconProps) => {
   return (
     <svg
       width="100%"

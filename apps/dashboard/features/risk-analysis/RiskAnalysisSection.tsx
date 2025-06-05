@@ -20,11 +20,12 @@ import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { fieldsToArray } from "@/shared/dao-config/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { ReactNode } from "react";
 
 interface RiskAreaDisplayItem {
   name: string;
   level: RiskLevel;
-  content?: React.ReactNode;
+  content?: ReactNode;
 }
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -47,17 +48,14 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   // Customize the GOV INTERFACES VULNERABILITY for display
   const customizedRiskAreas = [...riskAreasWithLevel];
   const govIndex = customizedRiskAreas.findIndex(
-    (risk) => risk.name === RiskAreaEnum.GOV_INTERFACES_VULNERABILITY,
+    (risk) => risk.name === RiskAreaEnum.GOV_FRONTEND_VULNERABILITY,
   );
   if (govIndex !== -1) {
     customizedRiskAreas[govIndex] = {
       ...customizedRiskAreas[govIndex],
       content: (
         <span className="line-height-[0] inline-flex flex-wrap align-baseline">
-          <span className="inline-block">GOV INTERF</span>
-          <span className="hidden sm:inline-block">ACES</span>
-          <span className="inline-block sm:hidden">.</span>
-          <span className="inline-block">&nbsp;VULNERABILITY</span>
+          <span className="inline-block">GOV FRONT-END VULNERABILITY</span>
         </span>
       ),
     };
@@ -77,7 +75,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   };
 
   // Generate risk descriptions using the RiskDescription component and the RISK_AREAS object
-  const riskDescriptions: Record<string, React.ReactNode> = {};
+  const riskDescriptions: Record<string, ReactNode> = {};
 
   // Create risk descriptions for each risk area using the mapping
   Object.entries(RISK_AREAS).forEach(([riskAreaKey, riskAreaInfo]) => {
@@ -142,8 +140,8 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {activeRisk ? (
             riskDescriptions[activeRisk]
           ) : (
-            <div className="flex h-full items-center justify-center border border-lightDark bg-dark p-5">
-              <p className="text-center text-foreground">
+            <div className="border-light-dark bg-dark flex h-full items-center justify-center border p-5">
+              <p className="text-foreground text-center">
                 Select a risk area to view details
               </p>
             </div>

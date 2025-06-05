@@ -35,7 +35,7 @@ export const SupportDaosSection = () => {
       icon={<HeartIcon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.supportDaos.description}
       anchorId={SECTIONS_CONSTANTS.supportDaos.anchorId}
-      className="!gap-4 !border-b-0 !bg-darkest"
+      className="bg-darkest! gap-4! border-b-0!"
     >
       <div className="flex flex-wrap gap-4">
         {Object.entries(daoConfigElectionDaos).map(([daoId, dao]) => (

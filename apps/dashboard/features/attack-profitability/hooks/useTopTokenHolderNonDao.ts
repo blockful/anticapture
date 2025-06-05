@@ -20,14 +20,12 @@ const fetchTopTokenHolder = async (
   daoId: DaoIdEnum,
 ): Promise<AccountBalance | null> => {
   const daoAddresses = Object.values(DAO_ADDRESSES[daoId]);
-  const tokenAddress = daoConfigByDaoId[daoId].daoOverview?.contracts?.token;
-  if (!tokenAddress) {
-    return null;
-  }
+  const tokenAddress = daoConfigByDaoId[daoId].daoOverview.contracts.token;
   const response = await fetch(`${BACKEND_ENDPOINT}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "anticapture-dao-id": daoId,
     },
     body: JSON.stringify({
       query: `

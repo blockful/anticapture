@@ -4,12 +4,13 @@ import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
+import { ReactNode } from "react";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
   [Stage.ONE]: "text-warning",
   [Stage.TWO]: "text-success",
-  [Stage.NONE]: "text-middleDark",
+  [Stage.NONE]: "text-middle-dark",
 };
 
 const STAGE_TITLES: Record<Stage, string> = {
@@ -30,8 +31,8 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
-  [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-[1px]",
-  [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-[1px]",
+  [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-px",
+  [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-px",
   [Stage.TWO]: "hidden",
   [Stage.NONE]: "",
 };
@@ -48,21 +49,21 @@ export const StagesCardRequirements = ({
   className = "",
 }: StagesCardRequirementsProps) => {
   const stageStyles =
-    STAGE_STYLES[daoStage] || "border-middleDark text-foreground";
+    STAGE_STYLES[daoStage] || "border-middle-dark text-foreground";
 
   return (
     <div>
       <div className="relative w-full">
         <PointerIcon
           className={cn(
-            "absolute bottom-0 -translate-x-1/2 translate-y-[1px]",
+            "absolute bottom-0 -translate-x-1/2 translate-y-px",
             STAGE_POINTER_POSITIONS[daoStage],
           )}
         />
       </div>
 
       <div
-        className={`rounded-md bg-lightDark p-4 ${stageStyles} ${className}`}
+        className={`bg-light-dark rounded-md p-4 ${stageStyles} ${className}`}
       >
         <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
         <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
@@ -88,13 +89,13 @@ const Title = ({
   children,
   daoStage,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   daoStage: Stage;
 }) => {
   return (
     <h3
       className={cn([
-        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]",
+        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
         STAGE_STYLES[daoStage],
       ])}
     >
@@ -103,7 +104,7 @@ const Title = ({
   );
 };
 
-const Description = ({ children }: { children: React.ReactNode }) => {
+const Description = ({ children }: { children: ReactNode }) => {
   return (
     <p className="font-inter mb-4 text-sm font-normal leading-5 text-white">
       {children}
@@ -115,16 +116,16 @@ const Issue = ({
   children,
   daoStage,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   daoStage: Stage;
 }) => {
   return (
     <div className="flex items-center gap-[6px]">
       {daoStage === Stage.ZERO && (
-        <AlertTriangle className="size-4 text-error" />
+        <AlertTriangle className="text-error size-4" />
       )}
       {daoStage === Stage.ONE && (
-        <AlertCircle className="size-4 text-warning" />
+        <AlertCircle className="text-warning size-4" />
       )}
       <span className="font-inter text-sm font-normal leading-5 text-white">
         {children}

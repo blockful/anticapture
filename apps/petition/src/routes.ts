@@ -10,7 +10,7 @@ export function routes(
   petitionService: PetitionService,
 ): (app: FastifyTypedInstance) => void {
   return (app: FastifyTypedInstance) => {
-    app.post(`/petitions/:daoId`, {
+    app.post(`/petitions/{daoId}`, {
       schema: {
         operationId: "signPetition",
         tags: ["Petition"],
@@ -54,14 +54,19 @@ export function routes(
 
         return response.status(201).send(dbPetition);
       } catch (error) {
-        console.error({ error });
-        if (error.message.includes("duplicate key value violates")) {
-          return response.status(400).send({ message: "Unable to sign petition" });
+        if (error instanceof Error) {
+          if (error.message.includes("duplicate key value violates")) {
+            return response.status(400).send({ message: "Unable to sign petition" });
+          }
+          if (error.message.includes("invalid signature")) {
+            return response.status(400).send({ message: "Invalid signature" });
+          }
         }
+        return response.status(500).send({ message: "Internal server error" });
       }
     });
 
-    app.get("/petitions/:daoId", {
+    app.get("/petitions/{daoId}", {
       schema: {
         operationId: "readPetitions",
         tags: ["Petition"],

@@ -5,8 +5,6 @@ import { UNITokenAbi } from "@/indexer/uni";
 import { ENSTokenAbi } from "@/indexer/ens";
 import { ARBTokenAbi } from "@/indexer/arb";
 
-export const SECONDS_IN_DAY = 24 * 60 * 60;
-export const MILISECONDS_IN_DAY = SECONDS_IN_DAY * 1000;
 export const DAYS_IN_YEAR = 365;
 
 export const CONTRACT_ADDRESSES: Record<

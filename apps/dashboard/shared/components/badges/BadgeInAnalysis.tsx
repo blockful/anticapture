@@ -15,7 +15,7 @@ export const BadgeInAnalysis = ({
   return (
     <div
       className={cn(
-        "flex w-fit items-center gap-2 rounded-full bg-white/10 px-1.5 py-0.5 text-foreground",
+        "text-foreground flex w-fit items-center gap-2 rounded-full bg-white/10 px-1.5 py-0.5",
         className,
       )}
     >
