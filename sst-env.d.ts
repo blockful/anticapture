@@ -33,6 +33,7 @@ declare module "sst" {
     "EnsIndexer": {
       "service": string
       "type": "sst.aws.Service"
+      "url": string
     }
     "EnsIndexerAPI": {
       "service": string

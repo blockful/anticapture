@@ -30,6 +30,17 @@ export default $config({
       memory: "0.5 GB",
       cpu: "0.25 vCPU",
       link: [db],
+      loadBalancer: {
+        public: false,
+        rules: [{ listen: "42069/http", forward: "42069/http" }],
+      },
+      health: {
+        command: ["CMD-SHELL", "curl -f http://localhost:42069/health || exit 1"],
+        interval: "300 seconds",
+        timeout: "30 seconds",
+        retries: 3,
+        startPeriod: "40 seconds",
+      },
       environment: {
         RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
         POLLING_INTERVAL: "1000",
@@ -57,6 +68,13 @@ export default $config({
       memory: "0.5 GB",
       cpu: "0.25 vCPU",
       link: [db],
+      health: {
+        command: ["CMD-SHELL", "curl -f http://localhost:42069/health || exit 1"],
+        interval: "300 seconds",
+        timeout: "30 seconds",
+        retries: 3,
+        startPeriod: "40 seconds",
+      },
       environment: {
         RPC_URL: $dev ? "http://localhost:8545" : ethereumRpc.value,
         NETWORK: "ethereum",
@@ -70,8 +88,12 @@ export default $config({
       scaling: {
         min: 1,
         max: 1,
-        // cpuUtilization: 50,
-        // memoryUtilization: 80,
+        cpuUtilization: 50,
+        memoryUtilization: 80,
+      },
+      capacity: {
+        fargate: { base: 1, weight: 0 }, // mandatory 1 fargate instance
+        spot: { weight: 1 }, // additional as spot instances
       },
       image: {
         context: ".",
