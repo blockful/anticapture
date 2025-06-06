@@ -38,7 +38,6 @@ export const accountBalance = onchainTable(
   "account_balance",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text("dao_id"),
     tokenId: drizzle.text("token_id"),
     accountId: drizzle.text("account_id"),
     balance: drizzle.bigint().notNull(),
@@ -46,7 +45,6 @@ export const accountBalance = onchainTable(
     delegate: drizzle.text().default(zeroAddress).notNull(),
   }),
   (table) => ({
-    accountBalanceDaoIdx: index().on(table.daoId),
     accountBalanceAccountIdx: index().on(table.accountId),
     accountBalanceTokenIdx: index().on(table.tokenId),
     accountBalanceDelegateIdx: index().on(table.delegate),
@@ -200,8 +198,8 @@ export const accountBalanceRelations = relations(
   ({ one, many }) => ({
     // Relation to the delegate's power
     delegatePower: one(accountPower, {
-      fields: [accountBalance.delegate, accountBalance.daoId],
-      references: [accountPower.accountId, accountPower.daoId],
+      fields: [accountBalance.delegate],
+      references: [accountPower.accountId],
       relationName: "delegatePower",
     }),
     // Relations to transfers
