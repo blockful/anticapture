@@ -50,7 +50,7 @@ export const accountBalance = onchainTable(
     accountBalanceAccountIdx: index().on(table.accountId),
     accountBalanceTokenIdx: index().on(table.tokenId),
     accountBalanceDelegateIdx: index().on(table.delegate),
-  }),
+  })
 );
 
 export const accountPower = onchainTable(
@@ -69,15 +69,13 @@ export const accountPower = onchainTable(
       .notNull(),
     firstVoteTimestamp: drizzle
       .bigint("first_vote_timestamp")
-      .default(BigInt(0))
-      .notNull(),
+      .default(BigInt(0)),
   }),
   (table) => ({
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
-    firstVoteTimestamp: index().on(table.firstVoteTimestamp),
-  }),
+  })
 );
 
 export const votingPowerHistory = onchainTable(
@@ -92,7 +90,7 @@ export const votingPowerHistory = onchainTable(
   (table) => ({
     votingPowerHistoryAccountIdx: index().on(table.accountId),
     votingPowerHistoryDaoIdx: index().on(table.daoId),
-  }),
+  })
 );
 
 export const delegation = onchainTable(
@@ -108,7 +106,7 @@ export const delegation = onchainTable(
     delegationsDaoIdx: index().on(table.daoId),
     delegationsDelegateeIdx: index().on(table.delegateeAccountId),
     delegationsDelegatorIdx: index().on(table.delegatorAccountId),
-  }),
+  })
 );
 
 export const transfer = onchainTable(
@@ -125,7 +123,7 @@ export const transfer = onchainTable(
   (table) => ({
     transfersDaoIdx: index().on(table.daoId),
     transfersTokenIdx: index().on(table.tokenId),
-  }),
+  })
 );
 
 export const votesOnchain = onchainTable(
@@ -136,7 +134,7 @@ export const votesOnchain = onchainTable(
     voterAccountId: drizzle.text("voter_account_id"),
     proposalId: drizzle.text("proposal_id"),
     support: drizzle.text(),
-    weight: drizzle.text(),
+    votingPower: drizzle.text(),
     reason: drizzle.text(),
     timestamp: drizzle.bigint(),
   }),
@@ -144,7 +142,7 @@ export const votesOnchain = onchainTable(
     votesOnchainDaoIdx: index().on(table.daoId),
     votesOnchainVoterIdx: index().on(table.voterAccountId),
     votesOnchainProposalIdx: index().on(table.proposalId),
-  }),
+  })
 );
 
 export const proposalsOnchain = onchainTable(
@@ -169,12 +167,12 @@ export const proposalsOnchain = onchainTable(
   (table) => ({
     proposalsOnchainDaoIdx: index().on(table.daoId),
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),
-  }),
+  })
 );
 
 export const metricType = onchainEnum(
   "metricType",
-  metricTypeArray as [string, ...string[]],
+  metricTypeArray as [string, ...string[]]
 );
 
 export const daoMetricsDayBucket = onchainTable(
@@ -196,66 +194,63 @@ export const daoMetricsDayBucket = onchainTable(
     pk: primaryKey({
       columns: [table.date, table.daoId, table.tokenId, table.metricType],
     }),
-  }),
+  })
 );
 
 // Account Power and Balance relations
-export const accountBalanceRelations = relations(
-  accountBalance,
-  ({ one, many }) => ({
-    // Relation to the delegate's power
-    delegatePower: one(accountPower, {
-      fields: [accountBalance.delegate, accountBalance.daoId],
-      references: [accountPower.accountId, accountPower.daoId],
-      relationName: "delegatePower",
-    }),
-    // Relations to transfers
-    sentTransfers: many(transfer),
-    receivedTransfers: many(transfer),
-    account: one(account, {
-      fields: [accountBalance.accountId],
-      references: [account.id],
-      relationName: "account",
-    }),
+export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
+  account: one(account, {
+    fields: [accountBalance.accountId],
+    references: [account.id],
+    relationName: "account",
   }),
-);
+  delegateeAccount: one(account, {
+    fields: [accountBalance.delegate],
+    references: [account.id],
+    relationName: "delegateeAccount",
+  }),
+  delegatedTo: one(accountPower, {
+    fields: [accountBalance.delegate],
+    references: [accountPower.accountId],
+    relationName: "delegatedTo",
+  }),
+  token: one(token, {
+    fields: [accountBalance.tokenId],
+    references: [token.id],
+    relationName: "token",
+  }),
+}));
 
-export const transferRelations = relations(transfer, ({ one, many }) => ({
-  fromAccountBalance: one(accountBalance, {
-    fields: [transfer.fromAccountId],
-    references: [accountBalance.accountId],
-    relationName: "fromAccountBalance",
-  }),
-  toAccountBalance: one(accountBalance, {
-    fields: [transfer.toAccountId],
-    references: [accountBalance.accountId],
-    relationName: "toAccountBalance",
-  }),
+export const transferRelations = relations(transfer, ({ one }) => ({
   fromAccount: one(account, {
     fields: [transfer.fromAccountId],
     references: [account.id],
-    relationName: "fromAccount",
+    relationName: "from",
   }),
   toAccount: one(account, {
     fields: [transfer.toAccountId],
     references: [account.id],
-    relationName: "toAccount",
+    relationName: "to",
+  }),
+  token: one(token, {
+    fields: [transfer.tokenId],
+    references: [token.id],
+    relationName: "token",
   }),
 }));
 
 export const accountPowerRelations = relations(
   accountPower,
-  ({ many, one }) => ({
-    // All balances delegated to this account
-    delegatedBalances: many(accountBalance, {
-      relationName: "delegatePower",
-    }),
+  ({ one, many }) => ({
     account: one(account, {
       fields: [accountPower.accountId],
       references: [account.id],
       relationName: "account",
     }),
-  }),
+    delegatedFrom: many(accountBalance, {
+      relationName: "delegateeAccount",
+    }),
+  })
 );
 
 // Proposals and Votes relations
@@ -265,7 +260,7 @@ export const proposalsOnchainRelations = relations(
     proposalVotes: many(votesOnchain, {
       relationName: "proposalVotes",
     }),
-  }),
+  })
 );
 
 export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({
@@ -298,10 +293,13 @@ export const accountRelations = relations(account, ({ many }) => ({
   delegateeDelegations: many(delegation, {
     relationName: "delegatee",
   }),
+  delegatedFromBalances: many(accountBalance, {
+    relationName: "delegateeAccount",
+  }),
   sentTransfers: many(transfer, {
-    relationName: "fromAccount",
+    relationName: "from",
   }),
   receivedTransfers: many(transfer, {
-    relationName: "toAccount",
+    relationName: "to",
   }),
 }));

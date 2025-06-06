@@ -1,5 +1,12 @@
-import { Address, createPublicClient, http, PublicClient, encodeFunctionData } from "viem";
-import { readContract } from "viem/actions";
+import {
+  Address,
+  createPublicClient,
+  http,
+  PublicClient,
+  isAddress,
+  parseAbi,
+} from "viem";
+import { readContract, multicall } from "viem/actions";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -18,9 +25,6 @@ export interface HistoricalBalancesRequest {
   blockNumber: number;
   daoId: DaoIdEnum;
 }
-
-// Multicall3 contract address (deployed after governance setup)
-const MULTICALL3_ADDRESS = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0" as Address;
 
 export class HistoricalBalancesService {
   private client: PublicClient;
@@ -56,17 +60,19 @@ export class HistoricalBalancesService {
     }
 
     try {
-      // Use Multicall3 for blocks 19+ (after Multicall3 deployment), individual calls for earlier blocks
-      if (blockNumber >= 19) {
-        return await this.getBalancesWithMulticall(addresses, blockNumber, tokenAddress);
-      } else {
-        return await this.getBalancesIndividually(addresses, blockNumber, tokenAddress);
-      }
+      return await this.getBalancesWithMulticall(
+        addresses,
+        blockNumber,
+        tokenAddress,
+      );
     } catch (error) {
       console.error("Error fetching historical balances:", error);
       // Fallback to individual calls if multicall fails
-      console.log("Falling back to individual calls...");
-      return await this.getBalancesIndividually(addresses, blockNumber, tokenAddress);
+      return await this.getBalancesIndividually(
+        addresses,
+        blockNumber,
+        tokenAddress,
+      );
     }
   }
 
@@ -76,67 +82,25 @@ export class HistoricalBalancesService {
   private async getBalancesWithMulticall(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
-    // Prepare multicall data
-    const calls = addresses.map((address) => {
-      const calldata = encodeFunctionData({
-        abi: [
-          {
-            inputs: [{ name: "account", type: "address" }],
-            name: "balanceOf",
-            outputs: [{ name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ] as const,
+    const results = await multicall(this.client, {
+      contracts: addresses.map((address) => ({
+        address: tokenAddress,
+        abi: parseAbi([
+          "function balanceOf(address account) external view returns (uint256)",
+        ]),
         functionName: "balanceOf",
         args: [address],
-      });
-
-      return {
-        target: tokenAddress,
-        callData: calldata,
-      };
-    });
-
-    // Call Multicall3.aggregate
-    const result = await readContract(this.client, {
-      address: MULTICALL3_ADDRESS,
-      abi: [
-        {
-          inputs: [
-            {
-              components: [
-                { name: "target", type: "address" },
-                { name: "callData", type: "bytes" },
-              ],
-              name: "calls",
-              type: "tuple[]",
-            },
-          ],
-          name: "aggregate",
-          outputs: [
-            { name: "blockNumber", type: "uint256" },
-            { name: "returnData", type: "bytes[]" },
-          ],
-          stateMutability: "payable",
-          type: "function",
-        },
-      ] as const,
-      functionName: "aggregate",
-      args: [calls],
+      })),
       blockNumber: BigInt(blockNumber),
     });
 
-    const [, returnData] = result;
-
-    // Decode the results
+    // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => {
-      const data = returnData[index];
-      // Decode uint256 from bytes
-      const balance = data && data.length >= 66 ? BigInt(data) : 0n;
-      
+      const result = results[index];
+      const balance = result?.status === "success" ? (result.result ?? 0n) : 0n;
+
       return {
         address,
         balance,
@@ -152,35 +116,28 @@ export class HistoricalBalancesService {
   private async getBalancesIndividually(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
-    const balancePromises = addresses.map((address) =>
-      readContract(this.client, {
-        address: tokenAddress,
-        abi: [
-          {
-            inputs: [{ name: "account", type: "address" }],
-            name: "balanceOf",
-            outputs: [{ name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ] as const,
-        functionName: "balanceOf",
-        args: [address],
-        blockNumber: BigInt(blockNumber),
-      }).catch((error) => {
-        console.error(`Error fetching balance for ${address}:`, error);
-        return 0n; // Return 0 if individual call fails
-      })
+    const balances = await Promise.allSettled(
+      addresses.map((address) =>
+        this.client.readContract({
+          address: tokenAddress,
+          abi: parseAbi([
+            "function balanceOf(address account) external view returns (uint256)",
+          ]),
+          functionName: "balanceOf",
+          args: [address],
+          blockNumber: BigInt(blockNumber),
+        }),
+      ),
     );
-
-    const balances = await Promise.all(balancePromises);
-
     // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => ({
-      address: address!,
-      balance: balances[index] || 0n,
+      address,
+      balance:
+        balances[index]?.status === "fulfilled"
+          ? (balances[index].value as bigint)
+          : 0n,
       blockNumber,
       tokenAddress,
     }));
@@ -196,77 +153,11 @@ export class HistoricalBalancesService {
   }
 
   /**
-   * Validate the historical balances request
-   * @param request - The request to validate
-   */
-  private validateRequest(request: HistoricalBalancesRequest): void {
-    const { addresses, blockNumber, daoId } = request;
-
-    // Validate addresses array
-    if (!Array.isArray(addresses) || addresses.length === 0) {
-      throw new Error("Addresses array cannot be empty");
-    }
-
-    if (addresses.length > 100) {
-      throw new Error("Maximum 100 addresses allowed per request");
-    }
-
-    // Validate block number
-    if (!Number.isInteger(blockNumber) || blockNumber <= 0) {
-      throw new Error("Block number must be a positive integer");
-    }
-
-    // Validate DAO ID
-    if (!Object.values(DaoIdEnum).includes(daoId)) {
-      throw new Error(`Invalid DAO ID: ${daoId}`);
-    }
-
-    // Validate that addresses are valid Ethereum addresses
-    addresses.forEach((address, index) => {
-      if (!this.isValidAddress(address)) {
-        throw new Error(`Invalid address at index ${index}: ${address}`);
-      }
-    });
-  }
-
-  /**
-   * Get token contract information for a specific DAO
-   * @param daoId - The DAO identifier
-   * @returns Token contract address and ABI
-   */
-  public getTokenContract(daoId: DaoIdEnum) {
-    const { NETWORK: network } = env;
-    const contractInfo = CONTRACT_ADDRESSES[network][daoId];
-
-    if (!contractInfo?.token) {
-      throw new Error(
-        `Token contract not found for DAO: ${daoId} on network: ${network}`,
-      );
-    }
-
-    return contractInfo.token;
-  }
-
-  /**
-   * Validate Ethereum address format
-   * @param address - The address to validate
-   * @returns True if valid, false otherwise
-   */
-  private isValidAddress(address: string): boolean {
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
-  }
-
-  /**
    * Get current block number
    * @returns The current block number
    */
   async getCurrentBlockNumber(): Promise<number> {
-    try {
-      const blockNumber = await this.client.getBlockNumber();
-      return Number(blockNumber);
-    } catch (error) {
-      console.error("Error fetching current block number:", error);
-      throw new Error("Failed to fetch current block number");
-    }
+    const blockNumber = await this.client.getBlockNumber();
+    return Number(blockNumber);
   }
 }

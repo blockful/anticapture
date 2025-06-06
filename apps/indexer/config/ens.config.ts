@@ -11,10 +11,10 @@ export default createConfig({
     kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     ethereum_mainnet: {
-      chainId: 1,
-      transport: http(env.RPC_URL),
+      id: 1,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
@@ -22,14 +22,14 @@ export default createConfig({
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,
-      network: "ethereum_mainnet",
+      chain: "ethereum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.token.address,
       startBlock: 9380410,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
-      network: "ethereum_mainnet",
+      chain: "ethereum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.governor,
       startBlock: 13533772,

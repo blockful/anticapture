@@ -20,7 +20,7 @@ export const itemResolvers = daoItemQueries.reduce((acc, fieldName) => {
       }
     `,
     resolve: async (root: any, args: any, context: any, info) => {
-      const daoId = args.id;
+      const daoId = args.id || context.headers["anticapture-dao-id"];
 
       if (!daoId) {
         throw new Error(`Missing where.daoId in query for ${fieldName}`);
