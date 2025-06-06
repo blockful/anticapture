@@ -8,19 +8,17 @@
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
-    "prepare": "husky",
-    "deploy": "sst deploy"
+    "infra": "pnpm run --filter=@anticapture/infra",
+    "prepare": "husky"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "@types/aws-lambda": "8.10.149",
     "@types/node": "^20.16.5",
     "dotenv-cli": "^7.4.4",
     "husky": "^9.1.6",
-    "sst": "^3.17.0",
     "turbo": "^2.3.1"
   }
 }

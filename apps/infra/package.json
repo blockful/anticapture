@@ -1,0 +1,19 @@
+{
+  "name": "@anticapture/infra",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "deploy": "sst deploy",
+    "dev": "sst dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@pulumi/aws": "^6.82.1",
+    "@pulumi/pulumi": "^3.175.0",
+    "@types/aws-lambda": "8.10.149",
+    "sst": "^3.17.0",
+    "typescript": "^5.8.3"
+  }
+}
