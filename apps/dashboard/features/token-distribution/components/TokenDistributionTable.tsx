@@ -177,7 +177,7 @@ export const TokenDistributionTable = () => {
         }
         if (variation === null) {
           return (
-            <div className="flex items-center justify-end text-green-400 blur-xs">
+            <div className="text-success flex items-center justify-end blur-xs">
               {(Math.random() * 100).toFixed(2)}%
             </div>
           );
@@ -186,16 +186,16 @@ export const TokenDistributionTable = () => {
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
-                ? "text-green-400"
+                ? "text-success"
                 : Number(variation) < 0
-                  ? "text-red-400"
+                  ? "text-error"
                   : ""
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="size-4 text-green-400" />
+              <ChevronUp className="text-success size-4" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="size-4 text-red-400" />
+              <ChevronDown className="text-error size-4" />
             ) : null}
             {variation}%
           </p>

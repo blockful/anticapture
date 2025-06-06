@@ -39,8 +39,8 @@ export const SupportDaoCard = ({
       <div className="flex flex-col items-center gap-1 md:flex-row">
         {votingPowerSupport > 0 && (
           <div className="flex flex-row items-center gap-2">
-            <TrendingUp className="size-4 text-green-400" />
-            <div className="text-green-400">
+            <TrendingUp className="text-success size-4" />
+            <div className="text-success">
               {formatNumberUserReadable(votingPowerSupport)} {daoId}
             </div>
           </div>

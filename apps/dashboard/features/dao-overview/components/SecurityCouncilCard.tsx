@@ -56,9 +56,7 @@ export const SecurityCouncilCard = ({
                 <div
                   className={cn(
                     "flex items-center gap-1.5",
-                    securityCouncil.isActive
-                      ? "text-green-400"
-                      : "text-red-400",
+                    securityCouncil.isActive ? "text-success" : "text-error",
                   )}
                 >
                   <CheckCheck className="size-3.5" />
