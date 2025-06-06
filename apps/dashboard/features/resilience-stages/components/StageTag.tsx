@@ -3,9 +3,9 @@
 import { Stage } from "@/shared/types/enums/Stage";
 
 const STAGE_STYLES: Record<Stage, string> = {
-  [Stage.ZERO]: "border-error text-error bg-error/12",
-  [Stage.ONE]: "border-warning text-warning bg-warning/12",
-  [Stage.TWO]: "border-success text-success bg-success/12",
+  [Stage.ZERO]: "border-error text-error bg-surface-opacity-error",
+  [Stage.ONE]: "border-warning text-warning bg-surface-opacity-warning",
+  [Stage.TWO]: "border-success text-success bg-surface-opacity-success",
   [Stage.NONE]: "border-middle-dark bg-surface-contrast text-secondary",
 };
 

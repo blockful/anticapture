@@ -56,7 +56,7 @@ export const ButtonHeaderDAOSidebarMobile = ({
                   "text-secondary relative cursor-pointer gap-2 px-2 py-3 text-xs font-medium whitespace-nowrap",
                   "data-[state=active]:text-link",
                   "after:absolute after:right-0 after:-bottom-px after:left-0 after:h-px after:bg-transparent after:content-['']",
-                  "data-[state=active]:after:bg-surface-brand",
+                  "data-[state=active]:after:bg-surface-solid-brand",
                 )}
                 key={option.anchorId}
                 value={option.anchorId}

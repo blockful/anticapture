@@ -39,10 +39,10 @@ export const ProgressBar = ({
         )}
 
         <div
-          className="bg-surface-brand group absolute left-0 z-20 h-full transition-all duration-300"
+          className="bg-surface-solid-brand group absolute left-0 z-20 h-full transition-all duration-300"
           style={{ width: `${progress}%` }}
         >
-          <div className="bg-surface-brand absolute -top-[5px] -right-1.5 size-[21px] rounded-full border-2 border-[#18181B] p-2">
+          <div className="bg-surface-solid-brand absolute -top-[5px] -right-1.5 size-[21px] rounded-full border-2 border-[#18181B] p-2">
             <div className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border bg-white" />
           </div>
         </div>
@@ -52,7 +52,7 @@ export const ProgressBar = ({
             className="bg-surface-contrast absolute -top-2.5 -right-1.5 z-20 size-8 rounded-full border-2 border-[#18181B] p-2"
             style={{ left: `${warning}%` }}
           >
-            <AlertTriangle className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-red-500" />
+            <AlertTriangle className="text-error absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2" />
           </div>
         )}
       </div>
