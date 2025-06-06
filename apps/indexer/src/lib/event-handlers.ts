@@ -469,10 +469,7 @@ export const voteCast = async (
       votesCount: (current.votesCount ?? 0) + 1,
       lastVoteTimestamp: event.block.timestamp,
       // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
-      firstVoteTimestamp:
-        current.firstVoteTimestamp === BigInt(0)
-          ? event.block.timestamp
-          : current.firstVoteTimestamp,
+      firstVoteTimestamp: current.firstVoteTimestamp ?? event.block.timestamp,
     }));
 
   // Create vote record
