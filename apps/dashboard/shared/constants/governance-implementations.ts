@@ -5,11 +5,11 @@ export const GOVERNANCE_IMPLEMENTATION_CONSTANTS = {
     description:
       "The governance contract codes have been audited and approved by a security provider.",
   },
-  [GovernanceImplementationEnum.DNS_PROTECTION]: {
+  [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
     description:
       "Protection against Domain Name Service attacks on the domains/websites used by the DAO.",
   },
-  [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+  [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
     description:
       "Compares the cost of all delegated votes with the value of assets in the DAO treasury excluding its governance tokens.",
   },

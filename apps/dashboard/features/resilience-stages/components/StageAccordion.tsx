@@ -11,6 +11,7 @@ import { ReactNode } from "react";
 import { Stage } from "@/shared/types/enums/Stage";
 import { StageTagSimplified } from "@/shared/components/tags/StageTagSimplified";
 import { cn } from "@/shared/utils/";
+import { formatPlural } from "@/shared/utils/formatPlural";
 import { StageContent } from "@/features/resilience-stages/components/StageContent";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";
@@ -129,7 +130,7 @@ const CustomAccordionItem = ({
               <div className="flex flex-row items-center gap-2">
                 <div className="bg-middle-dark size-1 rounded-full" />
                 <p className="text-sm font-normal text-white">
-                  {`${riskFields.length} issues needs fixing`}
+                  {`${formatPlural(riskFields.length, "issue")} needs fixing`}
                 </p>
               </div>
             )}
@@ -157,7 +158,9 @@ const CustomAccordionItem = ({
           >
             <StageContent
               stage={stage}
-              title="Minimal Risks"
+              title={
+                stage === Stage.ONE ? "Partial Risk Reduction" : "Minimal Risks"
+              }
               description={description}
               type="issues"
               issues={

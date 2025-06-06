@@ -36,12 +36,12 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       GovernanceImplementationEnum.VOTING_SUBSIDY,
     ],
   },
-  [RiskAreaEnum.EXTRACTABLE_VALUE]: {
-    title: "Extractable Value",
-    titleAbbreviation: "EV",
+  [RiskAreaEnum.ATTACK_PROFITABILITY]: {
+    title: "Attack Profitability",
+    titleAbbreviation: "AP",
     description:
       "It's the profit someone can take from a system by exploiting its design or timing. In DAOs, this might mean using voting power or insider info for personal gain.",
-    requirements: [GovernanceImplementationEnum.EXTRACTABLE_VALUE],
+    requirements: [GovernanceImplementationEnum.ATTACK_PROFITABILITY],
   },
   [RiskAreaEnum.SAFEGUARDS]: {
     title: "Safeguards",
@@ -77,13 +77,13 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       GovernanceImplementationEnum.VOTING_PERIOD,
     ],
   },
-  [RiskAreaEnum.GOV_INTERFACES_VULNERABILITY]: {
-    title: "Gov Interfaces Vulnerability",
+  [RiskAreaEnum.GOV_FRONTEND_VULNERABILITY]: {
+    title: "Gov Front-end Vulnerability",
     titleAbbreviation: "GV",
     description:
       "Weaknesses in the interfaces used for governance participation that could be exploited or lead to governance failures.",
     requirements: [
-      GovernanceImplementationEnum.DNS_PROTECTION,
+      GovernanceImplementationEnum.INTERFACE_HIJACK,
       GovernanceImplementationEnum.VOTE_MUTABILITY,
       GovernanceImplementationEnum.VETO_STRATEGY,
     ],
