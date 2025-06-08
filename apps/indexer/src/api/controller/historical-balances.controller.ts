@@ -30,7 +30,7 @@ export function historicalBalances(app: Hono) {
             .string()
             .min(1, "At least one address is required")
             .transform((str) =>
-              str.split(",").map((addr) => addr.trim() as Address)
+              str.split(",").map((addr) => addr.trim() as Address),
             ),
           blockNumber: z.coerce
             .number()
@@ -50,7 +50,7 @@ export function historicalBalances(app: Hono) {
                     balance: z.string(), // BigInt serialized as string
                     blockNumber: z.number(),
                     tokenAddress: z.string(),
-                  })
+                  }),
                 ),
               }),
             },
@@ -98,6 +98,6 @@ export function historicalBalances(app: Hono) {
       };
 
       return context.json(response, 200);
-    }
+    },
   );
 }
