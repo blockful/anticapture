@@ -8,6 +8,7 @@ export function newGateway(cluster: sst.aws.Cluster, services: sst.aws.Service[]
     link: services,
     environment: {
       NODE_ENV: $dev ? "development" : "production",
+      DEBUG: 1
     },
     image: {
       context: "../..",

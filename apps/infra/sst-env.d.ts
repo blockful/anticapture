@@ -5,11 +5,6 @@
 
 declare module "sst" {
   export interface Resource {
-    "APIGateway": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
     "AnticaptureDB": {
       "database": string
       "host": string
@@ -18,24 +13,20 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
-    "CoingeckoAPIKey": {
-      "type": "sst.sst.Secret"
-      "value": string
+    "CreateDatabase-ens": {
+      "name": string
+      "type": "sst.aws.Function"
     }
-    "DuneAPIKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "DuneAPIUrl": {
-      "type": "sst.sst.Secret"
-      "value": string
+    "Database-ens": {
+      "dependsOn": {
+        "4dabf18193072939515e22adb298388d": string
+        "packageVersion": string
+        "urn": string
+      }
+      "name": string
+      "type": "sst.sst.Linkable"
     }
     "EnsIndexer": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
-    "EnsIndexerAPI": {
       "service": string
       "type": "sst.aws.Service"
       "url": string
@@ -45,6 +36,7 @@ declare module "sst" {
       "value": string
     }
     "anticapture-vpc": {
+      "bastion": string
       "type": "sst.aws.Vpc"
     }
   }
