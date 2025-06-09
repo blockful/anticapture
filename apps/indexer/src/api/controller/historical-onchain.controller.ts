@@ -47,16 +47,14 @@ export function historicalOnchain(app: Hono) {
           description: "Successfully retrieved historical balances",
           content: {
             "application/json": {
-              schema: z.object({
-                data: z.array(
-                  z.object({
-                    address: z.string(),
-                    balance: z.string(), // BigInt serialized as string
-                    blockNumber: z.number(),
-                    tokenAddress: z.string(),
-                  }),
-                ),
-              }),
+              schema: z.array(
+                z.object({
+                  address: z.string(),
+                  balance: z.string(), // BigInt serialized as string
+                  blockNumber: z.number(),
+                  tokenAddress: z.string(),
+                })
+              ),
             },
           },
         },
@@ -74,11 +72,7 @@ export function historicalOnchain(app: Hono) {
 
       const balances = await balancesService.getHistoricalBalances(request);
 
-      const response = {
-        data: balances,
-      };
-
-      return context.json(response, 200);
+      return context.json(balances, 200);
     },
   );
 
@@ -111,16 +105,14 @@ export function historicalOnchain(app: Hono) {
           description: "Successfully retrieved historical voting power",
           content: {
             "application/json": {
-              schema: z.object({
-                data: z.array(
-                  z.object({
-                    address: z.string(),
-                    votingPower: z.string(), // BigInt serialized as string
-                    blockNumber: z.number(),
-                    tokenAddress: z.string(),
-                  }),
-                ),
-              }),
+              schema: z.array(
+                z.object({
+                  address: z.string(),
+                  votingPower: z.string(), // BigInt serialized as string
+                  blockNumber: z.number(),
+                  tokenAddress: z.string(),
+                })
+              ),
             },
           },
         },
@@ -139,11 +131,7 @@ export function historicalOnchain(app: Hono) {
       const votingPowers =
         await votingPowerService.getHistoricalVotingPower(request);
 
-      const response = {
-        data: votingPowers,
-      };
-
-      return context.json(response, 200);
+      return context.json(votingPowers, 200);
     },
   );
 }
