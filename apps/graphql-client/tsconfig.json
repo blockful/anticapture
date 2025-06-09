@@ -8,9 +8,9 @@
       "skipLibCheck": true,
       "resolveJsonModule": true,
       "declaration": true,
-      "outDir": "dist",
-      "baseUrl": "./src"
+      "outDir": "dist"
     },
-    "include": ["src"]
+    "include": ["*.ts", "documents/**/*"],
+    "exclude": ["node_modules", "dist"]
   }
   
