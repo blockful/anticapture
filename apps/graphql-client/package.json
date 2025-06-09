@@ -5,11 +5,21 @@
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "build": "tsc",
-    "clean": "rm -f generated.ts",
+    "clean": "rm -f generated.ts types.ts",
     "dev": "npm run codegen:watch"
   },
-  "main": "dist/generated.js",
-  "types": "dist/generated.d.ts",
+  "main": "types.ts",
+  "types": "types.ts",
+  "exports": {
+    ".": {
+      "types": "./types.ts",
+      "default": "./types.ts"
+    },
+    "./hooks": {
+      "types": "./hooks.ts",
+      "default": "./hooks.ts"
+    }
+  },
   "dependencies": {
     "@apollo/client": "^3.9.0",
     "@graphql-codegen/cli": "^5.0.7",

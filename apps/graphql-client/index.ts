@@ -1,2 +1,2 @@
-// Export all generated types and hooks
-export * from "./generated";
+// Main export - types and operations only (no React hooks)
+export * from "./types";
