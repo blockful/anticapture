@@ -92,10 +92,7 @@ export const StagesDaoOverview = ({
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
-              <span className="text-primary tracking-wider duration-300">
-                {highRiskItems.length ||
-                  mediumRiskItems.length ||
-                  lowRiskItems.length}{" "}
+              <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
                 {formatPlural(
                   highRiskItems.length ||
                     mediumRiskItems.length ||
