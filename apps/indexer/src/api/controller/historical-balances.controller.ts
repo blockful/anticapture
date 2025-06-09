@@ -56,29 +56,6 @@ export function historicalBalances(app: Hono) {
             },
           },
         },
-        400: {
-          description: "Bad request - validation error",
-          content: {
-            "application/json": {
-              schema: z.object({
-                error: z.string(),
-                message: z.string(),
-                details: z.any().optional(),
-              }),
-            },
-          },
-        },
-        500: {
-          description: "Internal server error",
-          content: {
-            "application/json": {
-              schema: z.object({
-                error: z.string(),
-                message: z.string(),
-              }),
-            },
-          },
-        },
       },
     }),
     async (context) => {
