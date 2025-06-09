@@ -73,7 +73,7 @@ export const StagesDaoOverview = ({
           <div className="flex gap-2">
             <span
               className={cn(
-                "text-alternative-sm font-mono font-medium uppercase",
+                "!text-alternative-sm font-mono font-medium uppercase",
                 {
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
