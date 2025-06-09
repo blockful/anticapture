@@ -8,36 +8,6 @@ import {
   ProposalWithUserVote,
 } from "@/api/services/proposals-activity/proposals-activity.service";
 
-// Response schema
-const ProposalWithUserVoteSchema = z.object({
-  proposal: z.object({
-    id: z.string(),
-    daoId: z.string(),
-    proposerAccountId: z.string(),
-    description: z.string().nullable(),
-    startBlock: z.string().nullable(),
-    endBlock: z.string().nullable(),
-    timestamp: z.string().nullable(),
-    status: z.string().nullable(),
-    forVotes: z.string().nullable(),
-    againstVotes: z.string().nullable(),
-    abstainVotes: z.string().nullable(),
-  }),
-  userVote: z
-    .object({
-      id: z.string(),
-      voterAccountId: z.string(),
-      proposalId: z.string(),
-      support: z.string().nullable(),
-      votingPower: z.string().nullable(),
-      reason: z.string().nullable(),
-      timestamp: z.string().nullable(),
-    })
-    .nullable(),
-});
-
-
-
 export function proposalsActivity(app: Hono) {
   const service = new ProposalsActivityService();
 
@@ -85,66 +55,41 @@ export function proposalsActivity(app: Hono) {
           content: {
             "application/json": {
               schema: z.object({
-                data: z.object({
-                  address: z.string(),
-                  totalProposals: z.number(),
-                  votedProposals: z.number(),
-                  neverVoted: z.boolean(),
-                  winRate: z.number(),
-                  yesRate: z.number(),
-                  avgTimeBeforeEnd: z.number(),
-                  proposals: z.array(
-                    z.object({
-                      proposal: z.object({
-                        id: z.string(),
-                        daoId: z.string(),
-                        proposerAccountId: z.string(),
-                        description: z.string().nullable(),
-                        startBlock: z.string().nullable(),
-                        endBlock: z.string().nullable(),
-                        timestamp: z.string().nullable(),
-                        status: z.string().nullable(),
-                        forVotes: z.string().nullable(),
-                        againstVotes: z.string().nullable(),
-                        abstainVotes: z.string().nullable(),
-                      }),
-                      userVote: z
-                        .object({
-                          id: z.string(),
-                          voterAccountId: z.string(),
-                          proposalId: z.string(),
-                          support: z.string().nullable(),
-                          votingPower: z.string().nullable(),
-                          reason: z.string().nullable(),
-                          timestamp: z.string().nullable(),
-                        })
-                        .nullable(),
+                address: z.string(),
+                totalProposals: z.number(),
+                votedProposals: z.number(),
+                neverVoted: z.boolean(),
+                winRate: z.number(),
+                yesRate: z.number(),
+                avgTimeBeforeEnd: z.number(),
+                proposals: z.array(
+                  z.object({
+                    proposal: z.object({
+                      id: z.string(),
+                      daoId: z.string(),
+                      proposerAccountId: z.string(),
+                      description: z.string().nullable(),
+                      startBlock: z.string().nullable(),
+                      endBlock: z.string().nullable(),
+                      timestamp: z.string().nullable(),
+                      status: z.string().nullable(),
+                      forVotes: z.string().nullable(),
+                      againstVotes: z.string().nullable(),
+                      abstainVotes: z.string().nullable(),
                     }),
-                  ),
-                }),
-              }),
-            },
-          },
-        },
-        400: {
-          description: "Bad request - validation error",
-          content: {
-            "application/json": {
-              schema: z.object({
-                error: z.string(),
-                message: z.string(),
-                details: z.any().optional(),
-              }),
-            },
-          },
-        },
-        500: {
-          description: "Internal server error",
-          content: {
-            "application/json": {
-              schema: z.object({
-                error: z.string(),
-                message: z.string(),
+                    userVote: z
+                      .object({
+                        id: z.string(),
+                        voterAccountId: z.string(),
+                        proposalId: z.string(),
+                        support: z.string().nullable(),
+                        votingPower: z.string().nullable(),
+                        reason: z.string().nullable(),
+                        timestamp: z.string().nullable(),
+                      })
+                      .nullable(),
+                  })
+                ),
               }),
             },
           },
@@ -183,11 +128,7 @@ export function proposalsActivity(app: Hono) {
         })),
       };
 
-      const response = {
-        data: serializedResult,
-      };
-
-      return context.json(response, 200);
-    },
+      return context.json(serializedResult, 200);
+    }
   );
 }

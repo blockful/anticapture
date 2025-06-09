@@ -38,7 +38,7 @@ export function assets(app: Hono, service: AssetsClient) {
                 z.object({
                   totalAssets: z.string(),
                   date: z.string(),
-                }),
+                })
               ),
             },
           },
@@ -49,6 +49,6 @@ export function assets(app: Hono, service: AssetsClient) {
       const { days } = context.req.valid("query");
       const data = await service.fetchTotalAssets(days);
       return context.json(data.result.rows);
-    },
+    }
   );
 }

@@ -13,17 +13,17 @@ import {
 interface GovernanceActivityRepository {
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
-    days: DaysEnum,
+    days: DaysEnum
   ): Promise<ProposalsCompareQueryResult | undefined>;
   getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
   getAverageTurnoutCompare(
-    days: DaysEnum,
+    days: DaysEnum
   ): Promise<AverageTurnoutCompareQueryResult | undefined>;
 }
 
 export function governanceActivity(
   app: Hono,
-  repository: GovernanceActivityRepository,
+  repository: GovernanceActivityRepository
 ) {
   app.openapi(
     createRoute({
@@ -80,7 +80,7 @@ export function governanceActivity(
         return context.json({ error: "No data found" }, 404);
       }
       return context.json({ activeSupply: data.activeSupply }, 200);
-    },
+    }
   );
 
   app.openapi(
@@ -138,9 +138,9 @@ export function governanceActivity(
           ...data,
           changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
         },
-        200,
+        200
       );
-    },
+    }
   );
 
   app.openapi(
@@ -197,9 +197,9 @@ export function governanceActivity(
           ...data,
           changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
         },
-        200,
+        200
       );
-    },
+    }
   );
 
   app.openapi(
@@ -257,8 +257,8 @@ export function governanceActivity(
           ...data,
           changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
         },
-        200,
+        200
       );
-    },
+    }
   );
 }

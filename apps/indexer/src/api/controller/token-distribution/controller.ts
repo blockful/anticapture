@@ -9,13 +9,13 @@ import { caseInsensitiveEnum } from "@/api/middlewares";
 interface TokenDistributionRepository {
   getSupplyComparison(
     metricType: string,
-    days: DaysEnum,
+    days: DaysEnum
   ): Promise<{ oldValue: string; currentValue: string } | undefined>;
 }
 
 export function tokenDistribution(
   app: Hono,
-  repository: TokenDistributionRepository,
+  repository: TokenDistributionRepository
 ) {
   const routes = [
     {
@@ -150,9 +150,9 @@ export function tokenDistribution(
               ? Number(formatUnits(changeRate, 18)).toFixed(2)
               : 0,
           } as z.infer<typeof resultSchema>,
-          200,
+          200
         );
-      },
+      }
     );
   }
 }

@@ -10,9 +10,8 @@ import {
   tokenDistribution,
   tokenHistoricalData,
   assets,
-  historicalBalances,
-  historicalVotingPower,
   proposalsActivity,
+  historicalOnchain,
 } from "./controller";
 import { docs } from "./docs";
 import { DuneService } from "@/api/services/dune/dune.service";
@@ -31,7 +30,7 @@ const app = new Hono({
           message: validationError.message,
           details: validationError.details,
         },
-        400,
+        400
       );
     }
   },
@@ -57,9 +56,8 @@ const repo = new DrizzleRepository();
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
-historicalBalances(app);
-historicalVotingPower(app);
 proposalsActivity(app);
+historicalOnchain(app);
 docs(app, env.API_URL!);
 
 export default app;

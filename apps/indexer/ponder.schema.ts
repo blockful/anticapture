@@ -50,7 +50,7 @@ export const accountBalance = onchainTable(
     accountBalanceAccountIdx: index().on(table.accountId),
     accountBalanceTokenIdx: index().on(table.tokenId),
     accountBalanceDelegateIdx: index().on(table.delegate),
-  }),
+  })
 );
 
 export const accountPower = onchainTable(
@@ -73,7 +73,7 @@ export const accountPower = onchainTable(
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
-  }),
+  })
 );
 
 export const votingPowerHistory = onchainTable(
@@ -88,7 +88,7 @@ export const votingPowerHistory = onchainTable(
   (table) => ({
     votingPowerHistoryAccountIdx: index().on(table.accountId),
     votingPowerHistoryDaoIdx: index().on(table.daoId),
-  }),
+  })
 );
 
 export const delegation = onchainTable(
@@ -104,7 +104,7 @@ export const delegation = onchainTable(
     delegationsDaoIdx: index().on(table.daoId),
     delegationsDelegateeIdx: index().on(table.delegateeAccountId),
     delegationsDelegatorIdx: index().on(table.delegatorAccountId),
-  }),
+  })
 );
 
 export const transfer = onchainTable(
@@ -121,7 +121,7 @@ export const transfer = onchainTable(
   (table) => ({
     transfersDaoIdx: index().on(table.daoId),
     transfersTokenIdx: index().on(table.tokenId),
-  }),
+  })
 );
 
 export const votesOnchain = onchainTable(
@@ -140,7 +140,7 @@ export const votesOnchain = onchainTable(
     votesOnchainDaoIdx: index().on(table.daoId),
     votesOnchainVoterIdx: index().on(table.voterAccountId),
     votesOnchainProposalIdx: index().on(table.proposalId),
-  }),
+  })
 );
 
 export const proposalsOnchain = onchainTable(
@@ -165,12 +165,12 @@ export const proposalsOnchain = onchainTable(
   (table) => ({
     proposalsOnchainDaoIdx: index().on(table.daoId),
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),
-  }),
+  })
 );
 
 export const metricType = onchainEnum(
   "metricType",
-  metricTypeArray as [string, ...string[]],
+  metricTypeArray as [string, ...string[]]
 );
 
 export const daoMetricsDayBucket = onchainTable(
@@ -192,7 +192,7 @@ export const daoMetricsDayBucket = onchainTable(
     pk: primaryKey({
       columns: [table.date, table.daoId, table.tokenId, table.metricType],
     }),
-  }),
+  })
 );
 
 // Account Power and Balance relations
@@ -248,7 +248,7 @@ export const accountPowerRelations = relations(
     delegatedFrom: many(accountBalance, {
       relationName: "delegateeAccount",
     }),
-  }),
+  })
 );
 
 // Proposals and Votes relations
@@ -258,7 +258,7 @@ export const proposalsOnchainRelations = relations(
     proposalVotes: many(votesOnchain, {
       relationName: "proposalVotes",
     }),
-  }),
+  })
 );
 
 export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({

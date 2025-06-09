@@ -63,7 +63,7 @@ export class ProposalsActivityService {
       fromDate,
       daoId,
       skip,
-      limit,
+      limit
     );
   }
 
@@ -75,7 +75,7 @@ export class ProposalsActivityService {
     fromDate: number | undefined,
     daoId: DaoIdEnum,
     skip: number = 0,
-    limit: number = 10,
+    limit: number = 10
   ): Promise<DelegateProposalActivity> {
     // Get the DAO voting period to calculate proposal end times
     const daoQuery = sql`
@@ -94,8 +94,6 @@ export class ProposalsActivityService {
       throw new Error(`DAO ${daoId} not found or missing voting period`);
     }
 
-
-
     // Get the first vote timestamp for this address
     const firstVoteQuery = sql`
       SELECT first_vote_timestamp
@@ -108,8 +106,6 @@ export class ProposalsActivityService {
       first_vote_timestamp: string | null;
     }>(firstVoteQuery);
     const firstVoteTimestamp = firstVoteResult.rows[0]?.first_vote_timestamp;
-
-
 
     if (!firstVoteTimestamp) {
       // User has never voted, return empty activity
@@ -135,14 +131,10 @@ export class ProposalsActivityService {
       activityStart = fromDate;
     }
 
-
-
     // Get all proposals where the voting period overlapped with the user's activity period
     // A proposal is available for voting from timestamp to timestamp + voting_period_seconds
     // We assume 1 block = 12 seconds for timestamp calculation (Ethereum average)
     const votingPeriodSeconds = Number(votingPeriodBlocks) * 12;
-
-
 
     // Find proposals where:
     // proposal_end_time = timestamp + voting_period_seconds
@@ -173,8 +165,6 @@ export class ProposalsActivityService {
     }>(proposalsQuery);
 
     const proposals = proposalsResult.rows;
-
-
 
     if (proposals.length === 0) {
       return {
@@ -212,8 +202,6 @@ export class ProposalsActivityService {
 
     const userVotes = userVotesResult.rows;
 
-
-
     // Create a map of proposalId -> vote for quick lookup
     const voteMap = new Map(userVotes.map((vote) => [vote.proposal_id, vote]));
 
@@ -244,13 +232,11 @@ export class ProposalsActivityService {
               timestamp: voteMap.get(proposal.id)!.timestamp,
             }
           : null,
-      }),
+      })
     );
 
     // Apply pagination to the proposals array
     const proposalsWithVotes = allProposalsWithVotes.slice(skip, skip + limit);
-
-
 
     // Calculate analytics
     const votedProposals = userVotes.length;
@@ -270,10 +256,10 @@ export class ProposalsActivityService {
       // Final statuses: "EXECUTED", "DEFEATED", "CANCELED", "EXPIRED" (case-insensitive)
       // "PENDING" and "ACTIVE" should not count towards winRate
       const finalStatuses = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
-      
+
       let winningVotes = 0;
       let finishedProposalsVoted = 0;
-      
+
       for (const vote of userVotes) {
         const proposal = proposals.find((p) => p.id === vote.proposal_id);
         if (
@@ -285,17 +271,21 @@ export class ProposalsActivityService {
           proposal.abstain_votes !== null
         ) {
           finishedProposalsVoted++;
-          
+
           // Determine winning side based on proposal outcome/status
           // In governance, the "winning side" is determined by whether the proposal passed or failed
           let winningSide = "0"; // Default to "Against" (proposal failed)
-          
+
           const statusUpper = proposal.status.toUpperCase();
           if (statusUpper === "EXECUTED") {
             // Proposal passed - FOR side won
             winningSide = "1";
-          } else if (statusUpper === "DEFEATED" || statusUpper === "CANCELED" || statusUpper === "EXPIRED") {
-            // Proposal failed - AGAINST side won  
+          } else if (
+            statusUpper === "DEFEATED" ||
+            statusUpper === "CANCELED" ||
+            statusUpper === "EXPIRED"
+          ) {
+            // Proposal failed - AGAINST side won
             winningSide = "0";
           }
 
@@ -303,15 +293,14 @@ export class ProposalsActivityService {
           if (userWon) {
             winningVotes++;
           }
-          
-
         }
       }
-      
-      // Only calculate winRate if user voted on finished proposals
-      winRate = finishedProposalsVoted > 0 ? (winningVotes / finishedProposalsVoted) * 100 : 0;
-      
 
+      // Only calculate winRate if user voted on finished proposals
+      winRate =
+        finishedProposalsVoted > 0
+          ? (winningVotes / finishedProposalsVoted) * 100
+          : 0;
 
       // Calculate average time before end
       // This is tricky since we need to convert block numbers to timestamps
