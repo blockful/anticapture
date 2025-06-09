@@ -99,7 +99,7 @@ export class HistoricalBalancesService {
     // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => {
       const result = results[index];
-      const balance = result?.status === "success" ? (result.result ?? 0n) : 0n;
+      const balance = result?.result|| 0n;
 
       return {
         address,
