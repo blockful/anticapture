@@ -1,7 +1,10 @@
-query MyQuery {
-  daos {
-    items {
-      id
-    }
+query GetDaoData($daoId: String!) {
+  dao(id: $daoId) {
+    id
+    quorum
+    proposalThreshold
+    votingDelay
+    votingPeriod
+    timelockDelay
   }
 }

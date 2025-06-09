@@ -1,3 +1,5 @@
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -5,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -1560,7 +1563,56 @@ export type VotingPowerHistoryPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type MyQueryQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetDaoDataQueryVariables = Exact<{
+  daoId: Scalars['String']['input'];
+}>;
 
 
-export type MyQueryQuery = { __typename?: 'Query', daos: { __typename?: 'daoPage', items: Array<{ __typename?: 'dao', id: string }> } };
+export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao', id: string, quorum: any, proposalThreshold: any, votingDelay: any, votingPeriod: any, timelockDelay: any } | null };
+
+
+export const GetDaoDataDocument = gql`
+    query GetDaoData($daoId: String!) {
+  dao(id: $daoId) {
+    id
+    quorum
+    proposalThreshold
+    votingDelay
+    votingPeriod
+    timelockDelay
+  }
+}
+    `;
+
+/**
+ * __useGetDaoDataQuery__
+ *
+ * To run a query within a React component, call `useGetDaoDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDaoDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDaoDataQuery({
+ *   variables: {
+ *      daoId: // value for 'daoId'
+ *   },
+ * });
+ */
+export function useGetDaoDataQuery(baseOptions: Apollo.QueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables> & ({ variables: GetDaoDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
+      }
+export function useGetDaoDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
+        }
+export function useGetDaoDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
+        }
+export type GetDaoDataQueryHookResult = ReturnType<typeof useGetDaoDataQuery>;
+export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQuery>;
+export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
+export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;

@@ -1,46 +1,23 @@
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
-import { DAO, DaoIdEnum } from "@/shared/types/daos";
-import useSWR from "swr";
-import axios from "axios";
-
-export const fetchDaoData = async (daoId: DaoIdEnum): Promise<DAO> => {
-  const query = `query GetDaoData {
-    dao(id: "${daoId}") {
-      id
-      quorum
-      proposalThreshold
-      votingDelay
-      votingPeriod  
-      timelockDelay
-    }
-  }`;
-  const response: { data: { data: { dao: DAO } } } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    { query },
-  );
-  const { dao } = response.data.data as {
-    dao: DAO;
-  };
-  return dao as DAO;
-};
+import { useGetDaoDataQuery } from "@anticapture/graphql-client";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseDaoDataResult {
-  data: DAO | null;
+  data: any | null; // You can type this more specifically based on your DAO type
   loading: boolean;
   error: Error | null;
-  refetch: () => Promise<void | DAO>;
+  refetch: () => void;
 }
 
 export const useDaoData = (daoId: DaoIdEnum): UseDaoDataResult => {
-  const { data, error, isLoading, mutate } = useSWR<DAO>(
-    daoId ? `dao/${daoId}` : null,
-    () => fetchDaoData(daoId),
-  );
+  const { data, loading, error, refetch } = useGetDaoDataQuery({
+    variables: { daoId },
+    skip: !daoId, // Skip query if no daoId
+  });
 
   return {
-    data: data || null,
-    loading: isLoading,
+    data: data?.dao || null,
+    loading,
     error: error || null,
-    refetch: () => mutate(),
+    refetch: () => refetch(),
   };
 };

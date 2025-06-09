@@ -1,14 +1,29 @@
 {
   "name": "@anticapture/graphql-client",
   "version": "1.0.0",
+  "scripts": {
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen --watch",
+    "build": "tsc",
+    "clean": "rm -f generated.ts",
+    "dev": "npm run codegen:watch"
+  },
   "main": "generated.ts",
   "types": "generated.ts",
   "dependencies": {
+    "@apollo/client": "^3.9.0",
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-operations": "^4.6.1",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.3",
     "graphql": "^16.11.0",
-    "@graphql-codegen/cli": "^5.0.6",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@types/node": "^20.16.5"
+  },
+  "peerDependencies": {
+    "@apollo/client": "^3.9.0",
+    "react": "^18.0.0"
   }
 }
