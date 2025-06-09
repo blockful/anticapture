@@ -39,8 +39,8 @@ export const SupportDaoCard = ({
       <div className="flex flex-col items-center gap-1 md:flex-row">
         {votingPowerSupport > 0 && (
           <div className="flex flex-row items-center gap-2">
-            <TrendingUp className="size-4 text-green-400" />
-            <div className="text-green-400">
+            <TrendingUp className="text-success size-4" />
+            <div className="text-success">
               {formatNumberUserReadable(votingPowerSupport)} {daoId}
             </div>
           </div>
@@ -64,7 +64,7 @@ export const SupportDaoCard = ({
 
   return (
     <Card
-      className="border-light-dark bg-dark hover:bg-light-dark xl4k:max-w-full flex w-full flex-row rounded-md border p-3 shadow-sm hover:cursor-pointer md:w-[calc(50%-10px)]"
+      className="border-light-dark bg-surface-default hover:bg-surface-contrast xl4k:max-w-full flex w-full flex-row rounded-md border p-3 shadow-sm hover:cursor-pointer md:w-[calc(50%-10px)]"
       onClick={onClick}
     >
       <div className="flex h-full w-full flex-row justify-between gap-2">
@@ -72,13 +72,13 @@ export const SupportDaoCard = ({
           {daoIcon}
           <div className="flex flex-col sm:gap-2">
             <div className="flex items-center gap-2">
-              <h3 className="truncate text-center text-sm font-medium text-white">
+              <h3 className="text-primary truncate text-center text-sm font-medium">
                 {daoName}
               </h3>
               <div
-                className={`bg-light-dark mx-2 w-fit rounded-full px-2 py-1 ${!userSupport && "hidden"}`}
+                className={`bg-surface-contrast mx-2 w-fit rounded-full px-2 py-1 ${!userSupport && "hidden"}`}
               >
-                <p className="text-xs text-white">Supported</p>
+                <p className="text-primary text-xs">Supported</p>
               </div>
             </div>
             <div className="flex justify-start sm:hidden">{supportersInfo}</div>
@@ -87,7 +87,7 @@ export const SupportDaoCard = ({
         <div className="flex flex-row items-center gap-2">
           <div className="hidden sm:flex">{supportersInfo}</div>
           <div className="flex flex-row items-center p-2">
-            <ChevronRight className="text-foreground size-4" />
+            <ChevronRight className="text-secondary size-4" />
           </div>
         </div>
       </div>
