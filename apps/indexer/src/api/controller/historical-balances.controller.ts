@@ -26,7 +26,8 @@ export function historicalBalances(app: Hono) {
           daoId: caseInsensitiveEnum(DaoIdEnum),
         }),
         query: z.object({
-          addresses: z.array(z.string())
+          addresses: z
+            .array(z.string())
             .min(1, "At least one address is required"),
           blockNumber: z.coerce
             .number()
@@ -46,7 +47,7 @@ export function historicalBalances(app: Hono) {
                     balance: z.string(), // BigInt serialized as string
                     blockNumber: z.number(),
                     tokenAddress: z.string(),
-                  })
+                  }),
                 ),
               }),
             },
@@ -59,7 +60,7 @@ export function historicalBalances(app: Hono) {
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalBalancesRequest = {
-        addresses,
+        addresses: addresses as Address[],
         blockNumber,
         daoId,
       };
@@ -71,6 +72,6 @@ export function historicalBalances(app: Hono) {
       };
 
       return context.json(response, 200);
-    }
+    },
   );
 }
