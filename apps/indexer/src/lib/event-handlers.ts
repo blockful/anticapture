@@ -53,13 +53,16 @@ export const delegateChanged = async (
     .onConflictDoNothing();
 
   // Create a new delegation record
-  await context.db.insert(delegation).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
-    daoId,
-    delegateeAccountId: event.args.toDelegate,
-    delegatorAccountId: event.args.delegator,
-    timestamp: event.block.timestamp,
-  });
+  await context.db
+    .insert(delegation)
+    .values({
+      id: [event.transaction.hash, event.log.logIndex].join("-"),
+      daoId,
+      delegateeAccountId: event.args.toDelegate,
+      delegatorAccountId: event.args.delegator,
+      timestamp: event.block.timestamp,
+    })
+    .onConflictDoNothing();
 
   // Update the delegator's delegate
   await context.db

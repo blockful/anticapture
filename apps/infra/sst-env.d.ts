@@ -13,19 +13,6 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
-    "CreateDatabase-ens": {
-      "name": string
-      "type": "sst.aws.Function"
-    }
-    "Database-ens": {
-      "dependsOn": {
-        "4dabf18193072939515e22adb298388d": string
-        "packageVersion": string
-        "urn": string
-      }
-      "name": string
-      "type": "sst.sst.Linkable"
-    }
     "EnsIndexer": {
       "service": string
       "type": "sst.aws.Service"
