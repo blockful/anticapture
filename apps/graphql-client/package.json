@@ -8,8 +8,8 @@
     "clean": "rm -f generated.ts",
     "dev": "npm run codegen:watch"
   },
-  "main": "generated.ts",
-  "types": "generated.ts",
+  "main": "dist/generated.js",
+  "types": "dist/generated.d.ts",
   "dependencies": {
     "@apollo/client": "^3.9.0",
     "@graphql-codegen/cli": "^5.0.7",
