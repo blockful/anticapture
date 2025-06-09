@@ -5,12 +5,10 @@ import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
-  HistoricalBalance,
   HistoricalBalancesRequest,
 } from "../services/historical-balances";
 import {
   HistoricalVotingPowerService,
-  HistoricalVotingPower,
   HistoricalVotingPowerRequest,
 } from "../services/historical-voting-power";
 
@@ -53,7 +51,7 @@ export function historicalOnchain(app: Hono) {
                   balance: z.string(), // BigInt serialized as string
                   blockNumber: z.number(),
                   tokenAddress: z.string(),
-                })
+                }),
               ),
             },
           },
@@ -73,7 +71,7 @@ export function historicalOnchain(app: Hono) {
       const balances = await balancesService.getHistoricalBalances(request);
 
       return context.json(balances, 200);
-    }
+    },
   );
 
   // Historical Voting Power endpoint
@@ -105,16 +103,14 @@ export function historicalOnchain(app: Hono) {
           description: "Successfully retrieved historical voting power",
           content: {
             "application/json": {
-              schema: z.object({
-                data: z.array(
-                  z.object({
-                    address: z.string(),
-                    votingPower: z.string(), // BigInt serialized as string
-                    blockNumber: z.number(),
-                    tokenAddress: z.string(),
-                  })
-                ),
-              }),
+              schema: z.array(
+                z.object({
+                  address: z.string(),
+                  votingPower: z.string(), // BigInt serialized as string
+                  blockNumber: z.number(),
+                  tokenAddress: z.string(),
+                }),
+              ),
             },
           },
         },
@@ -133,11 +129,7 @@ export function historicalOnchain(app: Hono) {
       const votingPowers =
         await votingPowerService.getHistoricalVotingPower(request);
 
-      const response = {
-        data: votingPowers,
-      };
-
-      return context.json(response, 200);
-    }
+      return context.json(votingPowers, 200);
+    },
   );
 }
