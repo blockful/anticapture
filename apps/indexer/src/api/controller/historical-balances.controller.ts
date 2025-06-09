@@ -26,12 +26,8 @@ export function historicalBalances(app: Hono) {
           daoId: caseInsensitiveEnum(DaoIdEnum),
         }),
         query: z.object({
-          addresses: z
-            .string()
-            .min(1, "At least one address is required")
-            .transform((str) =>
-              str.split(",").map((addr) => addr.trim() as Address)
-            ),
+          addresses: z.array(z.string())
+            .min(1, "At least one address is required"),
           blockNumber: z.coerce
             .number()
             .int()
