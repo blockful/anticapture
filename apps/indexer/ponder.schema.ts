@@ -290,7 +290,7 @@ export const accountRelations = relations(account, ({ many }) => ({
   delegateeDelegations: many(delegation, {
     relationName: "delegatee",
   }),
-  delegatedFromBalances: many(accountBalance, {
+  delegatedFrom: many(accountBalance, {
     relationName: "delegateeAccount",
   }),
   sentTransfers: many(transfer, {
