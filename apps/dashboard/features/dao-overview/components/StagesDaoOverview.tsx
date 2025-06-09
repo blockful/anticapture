@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
+import { cn, formatPlural } from "@/shared/utils/";
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
@@ -73,7 +73,7 @@ export const StagesDaoOverview = ({
           <div className="flex gap-2">
             <span
               className={cn(
-                "font-mono text-sm font-medium tracking-wider uppercase",
+                "text-alternative-sm font-mono font-medium uppercase",
                 {
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
@@ -96,7 +96,12 @@ export const StagesDaoOverview = ({
                 {highRiskItems.length ||
                   mediumRiskItems.length ||
                   lowRiskItems.length}{" "}
-                ITEMS
+                {formatPlural(
+                  highRiskItems.length ||
+                    mediumRiskItems.length ||
+                    lowRiskItems.length,
+                  "ITEM",
+                )}
               </span>
               <span className="text-alternative-sm text-secondary group-hover:text-primary duration-300">
                 {" "}
