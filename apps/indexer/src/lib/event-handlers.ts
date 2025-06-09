@@ -475,7 +475,7 @@ export const voteCast = async (
 
   // Create vote record
   await context.db.insert(votesOnchain).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    id: event.transaction.hash,
     daoId,
     proposalId: String(proposalId),
     voterAccountId: event.args.voter,
