@@ -48,7 +48,10 @@ export const StageAccordion = ({
                 <span className="block">
                   All DAOs that have governor and timelock are considered at
                   least{" "}
-                  <span className="whitespace-nowrap text-white">Stage 0</span>.
+                  <span className="text-primary whitespace-nowrap">
+                    Stage 0
+                  </span>
+                  .
                 </span>
                 <span className="block pl-1">
                   At this stage, critical risks still be present and require
@@ -135,8 +138,8 @@ const CustomAccordionItem = ({
               </div>
             )}
           </div>
-          <Plus className="text-foreground size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
-          <MinusIcon className="text-foreground hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
+          <Plus className="text-secondary size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
+          <MinusIcon className="text-secondary hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
         </AccordionTrigger>
         {content ? (
           <AccordionContent
