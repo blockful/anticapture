@@ -54,11 +54,6 @@ export class HistoricalBalancesService {
     daoId,
   }: HistoricalBalancesRequest): Promise<HistoricalBalance[]> {
     const tokenAddress = this.getTokenAddress(daoId);
-
-    if (!tokenAddress) {
-      throw new Error(`Token address not found for DAO: ${daoId}`);
-    }
-
     try {
       return await this.getBalancesWithMulticall(
         addresses,
@@ -99,7 +94,7 @@ export class HistoricalBalancesService {
     // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => {
       const result = results[index];
-      const balance = result?.status === "success" ? (result.result ?? 0n) : 0n;
+      const balance = result?.result || 0n;
 
       return {
         address,
@@ -146,10 +141,10 @@ export class HistoricalBalancesService {
   /**
    * Maps DAO ID to corresponding token contract address
    */
-  private getTokenAddress(daoId: DaoIdEnum): Address | null {
+  private getTokenAddress(daoId: DaoIdEnum): Address {
     const { NETWORK: network } = env;
     const contractInfo = CONTRACT_ADDRESSES[network]?.[daoId];
-    return contractInfo?.token?.address || null;
+    return contractInfo?.token?.address || "0x";
   }
 
   /**
