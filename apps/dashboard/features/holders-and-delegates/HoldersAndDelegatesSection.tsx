@@ -46,10 +46,10 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "cursor-pointer rounded-lg border-2 px-6 py-3 text-sm font-medium tracking-wider uppercase transition-all",
+                "cursor-pointer border-2 px-3 py-2 font-mono text-[13px] leading-5 font-medium tracking-[0.78px] uppercase transition-all",
                 activeTab === tab.id
-                  ? "border-tangerine text-tangerine bg-transparent"
-                  : "border-gray-600 bg-transparent text-gray-400 hover:text-gray-300",
+                  ? "border-[#EC762E] bg-transparent text-[#EC762E]"
+                  : "border-[#3F3F46] bg-transparent text-[#3F3F46] hover:border-gray-500 hover:text-gray-500",
               )}
             >
               {tab.label}
@@ -67,11 +67,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       icon={<UserCheck className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.holdersAndDelegates.description}
       switchDate={
-        <SwitcherDate
-          defaultValue={defaultDays}
-          setTimeInterval={setDays}
-          disableRecentData={true}
-        />
+        <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
       }
       days={days}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
