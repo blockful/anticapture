@@ -99,7 +99,7 @@ export interface AttackProfitabilityConfig {
   supportsLiquidTreasuryCall?: boolean;
 }
 export interface GovernanceImplementationConfig
-  extends GovernanceImplementation { }
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
@@ -108,6 +108,7 @@ export interface DaoConfiguration extends BaseInfo {
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
+  holdersAndDelegates?: boolean;
   governanceActivity?: boolean;
   showSupport?: {
     snapshotProposal: string;
