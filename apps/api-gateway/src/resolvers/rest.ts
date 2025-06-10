@@ -1,5 +1,3 @@
-import { convertGraphQLArgs } from '../utils';
-
 const daoItemQueries = [
   'compareActiveSupply',
   'compareAverageTurnout',
@@ -40,12 +38,10 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
       }
 
       try {
-        // Convert GraphQL arguments to JavaScript values ready to be used as query params
-        const convertedArgs = convertGraphQLArgs(args);
         
         return targetClient[fieldName]({
           root,
-          args: convertedArgs,
+          args,
           context,
           info,
         });
