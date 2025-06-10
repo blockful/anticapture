@@ -9,11 +9,11 @@ export function newIndexer(
 ): sst.aws.Service {
   return new sst.aws.Service("EnsIndexer", {
     cluster,
-    memory: "0.5 GB",
-    cpu: "0.25 vCPU",
+    memory: "2 GB",
+    cpu: "1 vCPU",
     link: [db],
     loadBalancer: {
-      // public: false,
+      public: false,
       rules: [{ listen: "80/http", forward: "42069/http" }],
     },
     health: {

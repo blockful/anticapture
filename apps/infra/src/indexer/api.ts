@@ -7,9 +7,9 @@ export function newIndexerAPI(
   db: sst.aws.Postgres,
   rpcUrl: Output<string>,
 ): sst.aws.Service {
-  const duneApiUrl = new sst.Secret("DuneAPIUrl")
-  const duneApiKey = new sst.Secret("DuneAPIKey")
-  const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
+  // const duneApiUrl = new sst.Secret("DuneAPIUrl")
+  // const duneApiKey = new sst.Secret("DuneAPIKey")
+  // const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
 
   return new sst.aws.Service("EnsIndexerAPI", {
     cluster,
@@ -24,14 +24,15 @@ export function newIndexerAPI(
       startPeriod: "40 seconds",
     },
     environment: {
+      DATABASE_URL: $interpolate`postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`,
       RPC_URL: rpcUrl,
       NETWORK: "ethereum",
       DAO_ID: "ENS",
       CHAIN_ID: "1",
       NODE_ENV: $dev ? "development" : "production",
-      DUNE_API_URL: duneApiUrl.value,
-      DUNE_API_KEY: duneApiKey.value,
-      COINGECKO_API_KEY: coingeckoApiKey.value,
+      // DUNE_API_URL: duneApiUrl?.value,
+      // DUNE_API_KEY: duneApiKey?.value,
+      // COINGECKO_API_KEY: coingeckoApiKey?.value,
     },
     scaling: {
       min: 1,

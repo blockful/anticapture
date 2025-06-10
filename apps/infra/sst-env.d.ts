@@ -18,6 +18,11 @@ declare module "sst" {
       "type": "sst.aws.Service"
       "url": string
     }
+    "EnsIndexerAPI": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
     "EthereumRPC": {
       "type": "sst.sst.Secret"
       "value": string
