@@ -58,7 +58,6 @@ export const DaoTemplate = () => {
           storageKey={`banner-dismissed-${daoIdEnum}`}
           variant="highlight"
         /> */}
-        <HoldersAndDelegatesSection daoId={daoIdEnum} />
 
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
@@ -77,7 +76,11 @@ export const DaoTemplate = () => {
         {daoConstants.resilienceStages && (
           <ResilienceStagesSection daoId={daoIdEnum} />
         )}
+
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
+
+        <HoldersAndDelegatesSection daoId={daoIdEnum} />
+
         {daoConstants.governanceActivity && <GovernanceActivitySection />}
       </div>
       <ShowYourSupportStickyBar />
