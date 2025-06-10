@@ -35,7 +35,8 @@ export function historicalOnchain(app: Hono) {
         query: z.object({
           addresses: z
             .array(z.string())
-            .min(1, "At least one address is required"),
+            .min(1, "At least one address is required")
+            .or(z.string()),
           blockNumber: z.coerce
             .number()
             .int()
@@ -65,7 +66,9 @@ export function historicalOnchain(app: Hono) {
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalBalancesRequest = {
-        addresses: addresses as Address[],
+        addresses: (Array.isArray(addresses)
+          ? addresses
+          : [addresses]) as Address[],
         blockNumber,
         daoId,
       };
@@ -93,7 +96,8 @@ export function historicalOnchain(app: Hono) {
         query: z.object({
           addresses: z
             .array(z.string())
-            .min(1, "At least one address is required"),
+            .min(1, "At least one address is required")
+            .or(z.string()),
           blockNumber: z.coerce
             .number()
             .int()
@@ -123,7 +127,9 @@ export function historicalOnchain(app: Hono) {
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalVotingPowerRequest = {
-        addresses: addresses as Address[],
+        addresses: (Array.isArray(addresses)
+          ? addresses
+          : [addresses]) as Address[],
         blockNumber,
         daoId,
       };
