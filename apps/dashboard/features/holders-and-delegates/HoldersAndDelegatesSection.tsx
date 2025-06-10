@@ -8,16 +8,34 @@ import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { cn } from "@/shared/utils";
 
 import { UserCheck } from "lucide-react";
+import {
+  TokenHolders,
+  Delegates,
+} from "@/features/holders-and-delegates/components";
+
+type TabId = "tokenHolders" | "delegates";
 
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const defaultDays = TimeInterval.ONE_YEAR;
   const [days, setDays] = useState<TimeInterval>(defaultDays);
-  const [activeTab, setActiveTab] = useState("token-holders");
+  const [activeTab, setActiveTab] = useState<TabId>("tokenHolders");
+
+  // Map from tab ID to tab component
+  const tabComponentMap: Record<TabId, React.ReactElement> = {
+    tokenHolders: <TokenHolders />,
+    delegates: <Delegates />,
+  };
 
   const HoldersAndDelegatesLeftComponent = () => {
-    const tabs = [
-      { id: "token-holders", label: "TOKEN HOLDERS" },
-      { id: "delegates", label: "DELEGATES" },
+    const tabs: Array<{ id: TabId; label: string }> = [
+      {
+        id: "tokenHolders",
+        label: "TOKEN HOLDERS",
+      },
+      {
+        id: "delegates",
+        label: "DELEGATES",
+      },
     ];
 
     return (
@@ -59,7 +77,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       leftComponent={<HoldersAndDelegatesLeftComponent />}
     >
-      <div className="text-white">Holders and Delegates</div>
+      {tabComponentMap[activeTab]}
     </TheSectionLayout>
   );
 };
