@@ -71,6 +71,17 @@ services:
     networks:
       - backend
 
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    ports:
+      - "4000:4000"
+    depends_on:
+      - indexer
+    networks:
+      - backend
+
 networks:
   backend:
     driver: bridge

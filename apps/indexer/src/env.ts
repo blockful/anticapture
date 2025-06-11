@@ -23,8 +23,6 @@ const envSchema = z.object({
 
 const _env = envSchema.parse(process.env);
 
-console.log({ _env });
-
 if (!_env.API_URL) {
   _env.API_URL = `http://127.0.0.1:${_env.PORT}`;
 }

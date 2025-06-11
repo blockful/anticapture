@@ -21,6 +21,7 @@ const env =
         }), {}),
     }
 
+console.log({ env, Resource })
 
 export default processConfig({
   sources: Object.entries(env)
