@@ -147,10 +147,6 @@ export const delegatedVotesChanged = async (
     })
     .onConflictDoUpdate((current) => ({
       votingPower: newBalance,
-      delegationsCount: current.delegationsCount,
-      votesCount: current.votesCount,
-      proposalsCount: current.proposalsCount,
-      lastVoteTimestamp: current.lastVoteTimestamp,
     }));
 
   const currentDelegatedSupply = (await context.db.find(token, {
@@ -467,10 +463,13 @@ export const voteCast = async (
       accountId: event.args.voter,
       votesCount: 1,
       lastVoteTimestamp: event.block.timestamp,
+      firstVoteTimestamp: event.block.timestamp, // Set as first vote timestamp for new accounts
     })
     .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
       lastVoteTimestamp: event.block.timestamp,
+      // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
+      firstVoteTimestamp: current.firstVoteTimestamp ?? event.block.timestamp,
     }));
 
   // Create vote record
