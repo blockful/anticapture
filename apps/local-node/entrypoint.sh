@@ -62,54 +62,54 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
 
         forge script script/FundTimelock.s.sol:FundTimelock --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
     } && {
-        echo "📝 Creating governance proposals using granular approach..."
-
+        echo "📝 Creating governance proposals using parameterized approach..."
+        
         # Create Proposal 1
         echo "Creating Proposal 1 (Transfer 5 ENS to Bob)..."
-        forge script script/CreateProposal1.s.sol:CreateProposal1 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
-
+        forge script script/CreateProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 1" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "Proposal 1: Transfer 5 ENS tokens to Bob for community contribution" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
         # Skip blocks to make Proposal 1 active
         echo "⏭️ Advancing blocks to activate Proposal 1..."
         cast rpc anvil_mine 2 --rpc-url http://localhost:8545
-
-        # Vote on Proposal 1
-        echo "🗳️ Voting on Proposal 1..."
-        forge script script/VoteProposal1.s.sol:VoteProposal1 --rpc-url http://localhost:8545 --broadcast
-
+        
+        # Vote on Proposal 1 (All vote FOR)
+        echo "🗳️ Voting on Proposal 1 (Alice=FOR, Bob=FOR, Charlie=FOR)..."
+        forge script script/VoteProposal.s.sol --sig "run(string,address,uint256,string,uint8,uint8,uint8)" "Proposal 1" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "Proposal 1: Transfer 5 ENS tokens to Bob for community contribution" 1 1 1 --rpc-url http://localhost:8545 --broadcast
+        
         # Skip blocks to end voting period for Proposal 1
         echo "⏭️ Ending voting period for Proposal 1..."
         cast rpc anvil_mine 200 --rpc-url http://localhost:8545
 
         # Queue Proposal 1 after voting ends
         echo "📋 Queuing Proposal 1..."
-        forge script script/QueueProposal1.s.sol:QueueProposal1 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
-
+        forge script script/QueueProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 1" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "Proposal 1: Transfer 5 ENS tokens to Bob for community contribution" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
         # Skip blocks for timelock delay and execute Proposal 1
         echo "⏭️ Waiting for timelock delay and executing Proposal 1..."
         cast rpc anvil_mine 2 --rpc-url http://localhost:8545
-        forge script script/ExecuteProposal1.s.sol:ExecuteProposal1 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
-
+        forge script script/ExecuteProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 1" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "Proposal 1: Transfer 5 ENS tokens to Bob for community contribution" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
         echo "✅ Proposal 1 flow completed!"
 
         # Create Proposal 2
         echo "📝 Creating Proposal 2 (Transfer 5 ENS to Charlie)..."
-        forge script script/CreateProposal2.s.sol:CreateProposal2 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
-
+        forge script script/CreateProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 2" 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC 5000000000000000000 "Proposal 2: Transfer 5 ENS tokens to Charlie for development work" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
         # Skip blocks to make Proposal 2 active
         echo "⏭️ Advancing blocks to activate Proposal 2..."
         cast rpc anvil_mine 2 --rpc-url http://localhost:8545
-
-        # Vote on Proposal 2 (with mixed voting pattern)
-        echo "🗳️ Voting on Proposal 2 (mixed voting pattern)..."
-        forge script script/VoteProposal2.s.sol:VoteProposal2 --rpc-url http://localhost:8545 --broadcast
-
+        
+        # Vote on Proposal 2 (Mixed voting pattern)
+        echo "🗳️ Voting on Proposal 2 (Alice=FOR, Bob=AGAINST, Charlie=ABSTAIN)..."
+        forge script script/VoteProposal.s.sol --sig "run(string,address,uint256,string,uint8,uint8,uint8)" "Proposal 2" 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC 5000000000000000000 "Proposal 2: Transfer 5 ENS tokens to Charlie for development work" 1 0 2 --rpc-url http://localhost:8545 --broadcast
+        
         # Skip blocks to end voting period for Proposal 2
         echo "⏭️ Ending voting period for Proposal 2..."
         cast rpc anvil_mine 200 --rpc-url http://localhost:8545
 
         # Queue Proposal 2 after voting ends (only if it succeeded)
         echo "📋 Attempting to queue Proposal 2..."
-        forge script script/QueueProposal2.s.sol:QueueProposal2 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY || {
+        forge script script/QueueProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 2" 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC 5000000000000000000 "Proposal 2: Transfer 5 ENS tokens to Charlie for development work" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY || {
             echo "ℹ️ Proposal 2 queuing failed - likely defeated by voting results"
         }
 
@@ -118,11 +118,11 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
         cast rpc anvil_mine 2 --rpc-url http://localhost:8545
 
         echo "🔍 Checking Proposal 2 status for potential execution..."
-        echo "Note: Proposal 2 has mixed voting (Alice FOR, Bob AGAINST, Charlie ABSTAIN)"
-        echo "With voting power: Alice(20), Bob(20), Charlie(10) - should succeed"
-
+        echo "Note: Proposal 2 has mixed voting (Alice=FOR, Bob=AGAINST, Charlie=ABSTAIN)"
+        echo "With voting power: Alice(20), Bob(20), Charlie(10) - Alice FOR wins!"
+        
         # Try to execute Proposal 2 (will only work if it was queued)
-        forge script script/ExecuteProposal2.s.sol:ExecuteProposal2 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY || {
+        forge script script/ExecuteProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 2" 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC 5000000000000000000 "Proposal 2: Transfer 5 ENS tokens to Charlie for development work" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY || {
             echo "ℹ️ Proposal 2 execution failed"
         }
 
@@ -130,16 +130,16 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
 
         # Create Proposal 3
         echo "📝 Creating Proposal 3 (Transfer 5 ENS to David)..."
-        forge script script/CreateProposal3.s.sol:CreateProposal3 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
-
+        forge script script/CreateProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 3" 0x90F79bf6EB2c4f870365E785982E1f101E93b906 5000000000000000000 "Proposal 3: Transfer 5 ENS tokens to David for testing work" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
         # Skip blocks to make Proposal 3 active
         echo "⏭️ Advancing blocks to activate Proposal 3..."
         cast rpc anvil_mine 2 --rpc-url http://localhost:8545
-
-        # Vote on Proposal 3 (Alice AGAINST, Bob FOR, Charlie FOR - leaving as voted/pending)
-        echo "🗳️ Voting on Proposal 3 (Alice AGAINST, Bob & Charlie FOR) - leaving as pending..."
-        forge script script/VoteProposal3.s.sol:VoteProposal3 --rpc-url http://localhost:8545 --broadcast
-
+        
+        # Vote on Proposal 3 (Alice votes AGAINST, others FOR - should still succeed)
+        echo "🗳️ Voting on Proposal 3 (Alice=AGAINST, Bob=FOR, Charlie=FOR) - leaving as pending..."
+        forge script script/VoteProposal.s.sol --sig "run(string,address,uint256,string,uint8,uint8,uint8)" "Proposal 3" 0x90F79bf6EB2c4f870365E785982E1f101E93b906 5000000000000000000 "Proposal 3: Transfer 5 ENS tokens to David for testing work" 0 1 1 --rpc-url http://localhost:8545 --broadcast
+        
         # Skip blocks to end voting period for Proposal 3 but don't queue/execute
         echo "⏭️ Ending voting period for Proposal 3 (leaving as voted, not executing)..."
         cast rpc anvil_mine 200 --rpc-url http://localhost:8545
@@ -147,43 +147,43 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
         echo "✅ Proposal 3 left in voted state for testing variety!"
 
         # Create Proposal 4
-        echo "📝 Creating Proposal 4 (Transfer 3 ENS to Alice - will be defeated)..."
-        forge script script/CreateProposal4.s.sol:CreateProposal4 --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
-
+        echo "📝 Creating Proposal 4 (Transfer 3 ENS to Alice)..."
+        forge script script/CreateProposal.s.sol --sig "run(string,address,uint256,string)" "Proposal 4" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 3000000000000000000 "Proposal 4: Transfer 3 ENS tokens to Alice as performance bonus" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
         # Skip blocks to make Proposal 4 active
         echo "⏭️ Advancing blocks to activate Proposal 4..."
         cast rpc anvil_mine 2 --rpc-url http://localhost:8545
-
-        # Vote on Proposal 4 (all vote AGAINST - leaving as pending)
-        echo "🗳️ Voting on Proposal 4 (all vote AGAINST) - leaving as pending..."
-        forge script script/VoteProposal4.s.sol:VoteProposal4 --rpc-url http://localhost:8545 --broadcast
-
-        echo "✅ Proposal 4 left in voted state (should be defeated) for testing variety!"
-
-        echo "✅ Granular governance flow completed successfully!"
+        
+        # Vote on Proposal 4 (All vote AGAINST - should be defeated)
+        echo "🗳️ Voting on Proposal 4 (Alice=AGAINST, Bob=AGAINST, Charlie=AGAINST) - should be defeated..."
+        forge script script/VoteProposal.s.sol --sig "run(string,address,uint256,string,uint8,uint8,uint8)" "Proposal 4" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 3000000000000000000 "Proposal 4: Transfer 3 ENS tokens to Alice as performance bonus" 0 0 0 --rpc-url http://localhost:8545 --broadcast
+        
+        echo "✅ Proposal 4 left in voted state for testing variety!"
+        
+        echo "✅ Parameterized governance flow completed successfully!"
         echo "🎉 Development environment ready with:"
         echo "   - Forked mainnet state with all existing contracts"
         echo "   - ENS governance contracts deployed"
         echo "   - Token distributions to Alice, Bob, Charlie, David"
         echo "   - Delegations set up"
-        echo "   - 4 proposals with different lifecycle states for testing:"
-        echo "     * Proposal 1: Transfer 5 ENS to Bob (all voted FOR - EXECUTED)"
-        echo "     * Proposal 2: Transfer 5 ENS to Charlie (mixed votes - EXECUTED if FOR wins)"
-        echo "     * Proposal 3: Transfer 5 ENS to David (Alice AGAINST, Bob & Charlie FOR - LEFT AS VOTED)"
-        echo "     * Proposal 4: Transfer 3 ENS to Alice (all voted AGAINST - LEFT AS VOTED/DEFEATED)"
-        echo "   - Clean granular script architecture for easy testing"
+        echo "   - 4 proposals with different voting patterns and lifecycle states for testing:"
+        echo "     * Proposal 1: Transfer 5 ENS to Bob (Alice=FOR, Bob=FOR, Charlie=FOR - EXECUTED)"
+        echo "     * Proposal 2: Transfer 5 ENS to Charlie (Alice=FOR, Bob=AGAINST, Charlie=ABSTAIN - EXECUTED)"
+        echo "     * Proposal 3: Transfer 5 ENS to David (Alice=AGAINST, Bob=FOR, Charlie=FOR - LEFT AS VOTED)"
+        echo "     * Proposal 4: Transfer 3 ENS to Alice (Alice=AGAINST, Bob=AGAINST, Charlie=AGAINST - LEFT AS DEFEATED)"
+        echo "   - Clean parameterized script architecture for easy testing"
         echo ""
         echo "🔧 Access to all mainnet contracts including:"
         echo "   - Multicall3: 0xcA11bde05977b3631167028862bE2a173976CA11"
         echo "   - USDC, WETH, and other mainnet tokens"
         echo "   - Uniswap, Aave, and other DeFi protocols"
         echo ""
-        echo "🚀 To create more proposals, use the granular scripts:"
-        echo "   forge script script/CreateProposal1.s.sol --rpc-url http://localhost:8545 --broadcast"
+        echo "🚀 To create more proposals, use the parameterized scripts:"
+        echo '   forge script script/CreateProposal.s.sol --sig "run(string,address,uint256,string)" "My Proposal" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "My custom proposal description" --rpc-url http://localhost:8545 --broadcast'
         echo "   cast rpc anvil_mine 2 --rpc-url http://localhost:8545"
-        echo "   forge script script/VoteProposal1.s.sol --rpc-url http://localhost:8545 --broadcast"
+        echo '   forge script script/VoteProposal.s.sol --sig "run(string,address,uint256,string,uint8,uint8,uint8)" "My Proposal" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "My custom proposal description" 1 1 1 --rpc-url http://localhost:8545 --broadcast'
         echo "   cast rpc anvil_mine 200 --rpc-url http://localhost:8545"
-        echo "   forge script script/ExecuteProposal1.s.sol --rpc-url http://localhost:8545 --broadcast"
+        echo '   forge script script/ExecuteProposal.s.sol --sig "run(string,address,uint256,string)" "My Proposal" 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 5000000000000000000 "My custom proposal description" --rpc-url http://localhost:8545 --broadcast'
     } || {
         echo "❌ One of the governance setup steps failed"
         echo "Please check the logs above to identify which step failed"
