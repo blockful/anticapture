@@ -479,7 +479,7 @@ export const voteCast = async (
     proposalId: String(proposalId),
     voterAccountId: event.args.voter,
     support: event.args.support.toString(),
-    weight: weight.toString(),
+    votingPower: weight.toString(),
     reason: event.args.reason,
     timestamp: event.block.timestamp,
   });

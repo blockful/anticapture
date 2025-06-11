@@ -205,7 +205,11 @@ export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
   delegatedTo: one(accountPower, {
     fields: [accountBalance.delegate],
     references: [accountPower.accountId],
-    relationName: "delegatedFromTo",
+  }),
+  delegatedToAccount: one(account, {
+    fields: [accountBalance.delegate],
+    references: [account.id],
+    relationName: "delegatedBalances",
   }),
   token: one(token, {
     fields: [accountBalance.tokenId],
@@ -239,9 +243,6 @@ export const accountPowerRelations = relations(
       fields: [accountPower.accountId],
       references: [account.id],
       relationName: "accountPowers",
-    }),
-    delegatedFrom: many(accountBalance, {
-      relationName: "delegatedFromTo",
     }),
   }),
 );
@@ -311,5 +312,8 @@ export const accountRelations = relations(account, ({ many }) => ({
   }),
   votes: many(votesOnchain, {
     relationName: "voter",
+  }),
+  delegatedFromBalances: many(accountBalance, {
+    relationName: "delegatedBalances",
   }),
 }));
