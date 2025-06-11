@@ -15,29 +15,30 @@ function wait_for_anvil() {
   echo "✅ Anvil is ready!"
 }
 
-# Start Anvil in the background with multiple accounts unlocked
-echo "🚀 Starting Anvil blockchain with multiple accounts..."
+# Start Anvil in the background with forking from mainnet via Llamarpc
+echo "🚀 Starting Anvil blockchain forked from mainnet (via llamarpc.com)..."
+echo "🔗 This will include all existing mainnet contracts including Multicall3"
+echo "📦 Forking from recent block to avoid syncing entire blockchain history..."
+
+# Fork from recent block (same as configured in ens.local.config.ts)
 anvil --host 0.0.0.0 --port 8545 --chain-id 31337 \
   --accounts 10 \
-  --balance 1000 &
+  --balance 1000 \
+  --fork-url $FORK_RPC_URL \
+  --fork-block-number 22635098 &
 
 # Wait for Anvil to be ready
 wait_for_anvil
 
-echo "📋 Deploying ENS governance contracts..."
+echo "📋 Deploying ENS governance contracts on forked mainnet..."
+echo "🔍 Note: Using existing Multicall3 at 0xcA11bde05977b3631167028862bE2a173976CA11"
+
 # Deploy contracts and continue only if successful
 forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY && {
-    echo "✅ Contracts deployed successfully"
+    echo "✅ ENS contracts deployed successfully on forked mainnet"
     
-    # Contract addresses (these are deterministic with Anvil)
-    ENS_TOKEN_ADDR="0x5FbDB2315678afecb367f032d93F642f64180aa3"
-    ENS_GOVERNOR_ADDR="0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-    ENS_TIMELOCK_ADDR="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-    
-    echo "📍 Contract addresses:"
-    echo "   ENS Token: $ENS_TOKEN_ADDR"
-    echo "   ENS Governor: $ENS_GOVERNOR_ADDR"
-    echo "   ENS Timelock: $ENS_TIMELOCK_ADDR"
+    # Contract addresses (these will be different on forked mainnet)
+    echo "📍 ENS contracts deployed. Check broadcast logs for exact addresses."
     
     echo "🏛️ Setting up governance environment (delegation and tokens)..."
     # Chain all governance setup steps
@@ -70,15 +71,24 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
           --broadcast
         
         echo "✅ Governance simulation completed successfully"
-        echo "📊 Development environment ready with:"
+        echo "🎉 Development environment ready with:"
+        echo "   - Forked mainnet state with all existing contracts"
+        echo "   - ENS governance contracts deployed"
         echo "   - Token distributions to Alice, Bob, Charlie"
         echo "   - Delegations set up"
         echo "   - 1 active proposal with votes from all parties"
+        echo "   - Existing Multicall3 available at 0xcA11bde05977b3631167028862bE2a173976CA11"
+        echo ""
+        echo "🔧 Access to all mainnet contracts including:"
+        echo "   - Multicall3: 0xcA11bde05977b3631167028862bE2a173976CA11"
+        echo "   - USDC, WETH, and other mainnet tokens"
+        echo "   - Uniswap, Aave, and other DeFi protocols"
+        
     } || {
         echo "❌ One of the governance setup steps failed"
         echo "Please check the logs above to identify which step failed"
     }
-} || echo "❌ Contract deployment failed"
+} || echo "❌ ENS contract deployment failed"
 
 echo "🔄 Keeping Anvil running for blockchain interactions..."
 wait

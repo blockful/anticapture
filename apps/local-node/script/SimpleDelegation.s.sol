@@ -5,8 +5,8 @@ pragma solidity ^0.8.13;
 import {Script, console} from "forge-std/Script.sol";
 import {Test} from "forge-std/Test.sol";
 import {BaseScript} from "./BaseScript.sol";
-import {ENSToken} from "../src/ENSToken.sol";
-import {ENSGovernor, TimelockController} from "../src/ENSGovernor.sol";
+import {ENSToken} from "../src/ens/ENSToken.sol";
+import {ENSGovernor, TimelockController} from "../src/ens/ENSGovernor.sol";
 import {Constants} from "./Constants.sol";
 
 /**

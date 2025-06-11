@@ -15,6 +15,8 @@ services:
       - "8545:8545"
     networks:
       - backend
+    env_file:
+      - path: ./.env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8545", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}"]
       interval: 5s
@@ -39,7 +41,7 @@ services:
   indexer:
     build:
       context: .
-      dockerfile: docker/indexer/Dockerfile.indexer
+      dockerfile: infra/indexer/Dockerfile.indexer
     command: ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres

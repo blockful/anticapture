@@ -4,10 +4,11 @@
   "description": "Anticapture Monorepo",
   "scripts": {
     "dashboard": "dotenv -- pnpm run --filter=@anticapture/dashboard",
-    "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer dev --config config/ens.local.config.ts",
+    "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
+    "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
     "prepare": "husky"
   },
   "license": "MIT",

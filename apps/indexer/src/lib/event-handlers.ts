@@ -56,7 +56,7 @@ export const delegateChanged = async (
   await context.db.insert(delegation).values({
     id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
-    delegateeAccountId: event.args.toDelegate,
+    delegateAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
     timestamp: event.block.timestamp,
   });
@@ -75,14 +75,14 @@ export const delegateChanged = async (
       delegate: event.args.toDelegate,
     });
 
-  // Update the old delegatee's delegations count
+  // Update the old delegate's delegations count
   if (event.args.fromDelegate != zeroAddress) {
     await context.db
       .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
 
-  // Update the delegatee's delegations count
+  // Update the delegate's delegations count
   await context.db
     .insert(accountPower)
     .values({
@@ -147,10 +147,6 @@ export const delegatedVotesChanged = async (
     })
     .onConflictDoUpdate((current) => ({
       votingPower: newBalance,
-      delegationsCount: current.delegationsCount,
-      votesCount: current.votesCount,
-      proposalsCount: current.proposalsCount,
-      lastVoteTimestamp: current.lastVoteTimestamp,
     }));
 
   const currentDelegatedSupply = (await context.db.find(token, {
@@ -467,10 +463,13 @@ export const voteCast = async (
       accountId: event.args.voter,
       votesCount: 1,
       lastVoteTimestamp: event.block.timestamp,
+      firstVoteTimestamp: event.block.timestamp, // Set as first vote timestamp for new accounts
     })
     .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
       lastVoteTimestamp: event.block.timestamp,
+      // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
+      firstVoteTimestamp: current.firstVoteTimestamp ?? event.block.timestamp,
     }));
 
   // Create vote record
@@ -480,7 +479,7 @@ export const voteCast = async (
     proposalId: String(proposalId),
     voterAccountId: event.args.voter,
     support: event.args.support.toString(),
-    weight: weight.toString(),
+    votingPower: weight.toString(),
     reason: event.args.reason,
     timestamp: event.block.timestamp,
   });
