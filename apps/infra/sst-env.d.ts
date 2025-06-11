@@ -5,7 +5,12 @@
 
 declare module "sst" {
   export interface Resource {
-    "AnticaptureDB": {
+    "APIGateway": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "Anticapture-ENS-DB": {
       "database": string
       "host": string
       "password": string

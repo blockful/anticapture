@@ -21,7 +21,7 @@ export default $config({
     newIndexer(cluster, db, $dev ? "http://localhost:8545" : ethereumRpc.value)
     const indexerAPI = newIndexerAPI(cluster, db, ethereumRpc.value)
 
-    // const { newGateway } = await import("./src/gateway.ts");
-    // newGateway(cluster, [{ service: indexerAPI, dao: "ENS" }])
+    const { newGateway } = await import("./src/gateway.ts");
+    newGateway(cluster, [indexerAPI])
   },
 });

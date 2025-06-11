@@ -3,7 +3,7 @@
 import { vpc } from "./cluster";
 
 export function newDatabase(dao: string) {
-  return new sst.aws.Postgres(`Anticapture${dao}DB`, {
+  return new sst.aws.Postgres(`Anticapture-${dao}-DB`, {
     vpc,
     storage: "30 GB",
     dev: {
