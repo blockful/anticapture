@@ -10,7 +10,7 @@ import {
   tokenDistribution,
   tokenHistoricalData,
   assets,
-  historicalBalances,
+  historicalOnchain,
 } from "./controller";
 import { docs } from "./docs";
 import { DuneService } from "@/api/services/dune/dune.service";
@@ -55,7 +55,7 @@ const repo = new DrizzleRepository();
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
-historicalBalances(app);
+historicalOnchain(app);
 docs(app, env.API_URL!);
 
 export default app;

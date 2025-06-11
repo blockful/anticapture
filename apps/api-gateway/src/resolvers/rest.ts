@@ -13,7 +13,8 @@ const daoItemQueries = [
   'getTotalAssets',
   'getVotingPower',
   'historicalTokenData',
-  'historicalBalances'
+  'historicalBalances',
+  'historicalVotingPower',
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {

@@ -8,7 +8,7 @@ export default {
     ...listResolvers,
     ...itemResolvers,
     ...restResolvers,
-    daos: daosResolver
+    daos: daosResolver,
   }
 }
 
