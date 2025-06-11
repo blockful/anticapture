@@ -35,9 +35,9 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
-      - NETWORK=ethereum
+      - NETWORK=anvil
       - RPC_URL=http://contracts:8545
-      - CHAIN_ID=1
+      - CHAIN_ID=31337
       - PORT=42069
     depends_on:
       indexer-db:

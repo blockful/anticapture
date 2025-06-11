@@ -22,10 +22,10 @@ echo "📦 Forking from recent block to avoid syncing entire blockchain history.
 
 # Fork from recent block (same as configured in ens.local.config.ts)
 anvil --host 0.0.0.0 --port 8545 \
-    --chain-id 1 \
+    --chain-id 31337 \
     --accounts 10 \
     --balance 1000 \
-    --fork-url https://eth-mainnet.public.blastapi.io \
+    --fork-url https://eth.llamarpc.com \
     --fork-block-number 22635098 \
     --silent &
 
@@ -33,6 +33,9 @@ ANVIL_PID=$!
 
 # Wait for Anvil to be ready
 wait_for_anvil
+
+forge clean
+forge build
 
 echo "📋 Deploying ENS governance contracts on forked mainnet..."
 echo "🔍 Note: Using existing Multicall3 at 0xcA11bde05977b3631167028862bE2a173976CA11"
