@@ -1,5 +1,5 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
@@ -27,8 +27,7 @@ export function proposalsActivity(app: Hono) {
         query: z.object({
           address: z
             .string()
-            .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address")
-            .transform((addr) => addr.trim() as Address),
+            .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
           fromDate: z.coerce
             .number()
             .int()
@@ -88,7 +87,7 @@ export function proposalsActivity(app: Hono) {
                         timestamp: z.string().nullable(),
                       })
                       .nullable(),
-                  })
+                  }),
                 ),
               }),
             },
@@ -108,27 +107,7 @@ export function proposalsActivity(app: Hono) {
         limit,
       });
 
-      // Convert BigInt values to strings for JSON serialization
-      const serializedResult = {
-        ...result,
-        proposals: result.proposals.map((item: ProposalWithUserVote) => ({
-          proposal: {
-            ...item.proposal,
-            timestamp: item.proposal.timestamp?.toString() || null,
-            forVotes: item.proposal.forVotes?.toString() || null,
-            againstVotes: item.proposal.againstVotes?.toString() || null,
-            abstainVotes: item.proposal.abstainVotes?.toString() || null,
-          },
-          userVote: item.userVote
-            ? {
-                ...item.userVote,
-                timestamp: item.userVote.timestamp?.toString() || null,
-              }
-            : null,
-        })),
-      };
-
-      return context.json(serializedResult, 200);
-    }
+      return context.json(result, 200);
+    },
   );
 }
