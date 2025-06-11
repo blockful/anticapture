@@ -5,13 +5,12 @@ import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { cn } from "@/shared/utils";
-
 import { UserCheck } from "lucide-react";
 import {
   TokenHolders,
   Delegates,
 } from "@/features/holders-and-delegates/components";
+import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 
 type TabId = "tokenHolders" | "delegates";
 
@@ -42,18 +41,13 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div className="flex h-full w-full items-center justify-between">
         <div className="flex gap-2">
           {tabs.map((tab) => (
-            <button
+            <TabButton
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                "cursor-pointer border-2 px-3 py-2 font-mono text-[13px] leading-5 font-medium tracking-[0.78px] uppercase transition-all",
-                activeTab === tab.id
-                  ? "border-[#EC762E] bg-transparent text-[#EC762E]"
-                  : "border-[#3F3F46] bg-transparent text-[#3F3F46] hover:border-gray-500 hover:text-gray-500",
-              )}
-            >
-              {tab.label}
-            </button>
+              id={tab.id}
+              label={tab.label}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
           ))}
         </div>
       </div>
