@@ -1,16 +1,14 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
-  HistoricalBalance,
   HistoricalBalancesRequest,
 } from "../services/historical-balances";
 import {
   HistoricalVotingPowerService,
-  HistoricalVotingPower,
   HistoricalVotingPowerRequest,
 } from "../services/historical-voting-power";
 
@@ -36,7 +34,14 @@ export function historicalOnchain(app: Hono) {
           addresses: z
             .array(z.string())
             .min(1, "At least one address is required")
-            .or(z.string()),
+            .refine((addresses) =>
+              addresses.every((address) => isAddress(address)),
+            )
+            .or(
+              z
+                .string()
+                .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
+            ),
           blockNumber: z.coerce
             .number()
             .int()
@@ -54,7 +59,7 @@ export function historicalOnchain(app: Hono) {
                   balance: z.string(), // BigInt serialized as string
                   blockNumber: z.number(),
                   tokenAddress: z.string(),
-                })
+                }),
               ),
             },
           },
@@ -97,7 +102,15 @@ export function historicalOnchain(app: Hono) {
           addresses: z
             .array(z.string())
             .min(1, "At least one address is required")
-            .or(z.string()),
+            .refine((addresses) =>
+              addresses.every((address) => isAddress(address)),
+            )
+            .or(
+              z
+                .string()
+                .refine((addr) => isAddress(addr), "Invalid Ethereum address")
+                .transform((addr) => [addr]),
+            ),
           blockNumber: z.coerce
             .number()
             .int()
@@ -115,7 +128,7 @@ export function historicalOnchain(app: Hono) {
                   votingPower: z.string(), // BigInt serialized as string
                   blockNumber: z.number(),
                   tokenAddress: z.string(),
-                })
+                }),
               ),
             },
           },
@@ -127,9 +140,7 @@ export function historicalOnchain(app: Hono) {
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalVotingPowerRequest = {
-        addresses: (Array.isArray(addresses)
-          ? addresses
-          : [addresses]) as Address[],
+        addresses,
         blockNumber,
         daoId,
       };
