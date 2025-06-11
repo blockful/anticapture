@@ -35,12 +35,12 @@ contract DelegateTokens is BaseScript, Test {
         // Bob delegates to himself
         console.log("Setting up Bob's delegation...");
         vm.startBroadcast(Constants.BOB_PRIVATE_KEY);
-        ensToken.delegate(Constants.BOB);
+        ensToken.delegate(Constants.CHARLIE);
         vm.stopBroadcast();
         console.log("SUCCESS: Bob delegated to himself");
         
         // Assert Bob now has voting power equal to his token balance
-        assertEq(ensToken.getVotes(Constants.BOB), ensToken.balanceOf(Constants.BOB), "Bob's voting power should equal his token balance after delegation");
+        assertEq(ensToken.getVotes(Constants.CHARLIE), ensToken.balanceOf(Constants.BOB), "Charlies's voting power should equal Bob's token balance after delegation");
         
         // Assert Charlie has token balance before delegation
         assertGt(ensToken.balanceOf(Constants.CHARLIE), 0, "Charlie must have token balance before delegation");
@@ -49,12 +49,12 @@ contract DelegateTokens is BaseScript, Test {
         // Charlie delegates to himself
         console.log("Setting up Charlie's delegation...");
         vm.startBroadcast(Constants.CHARLIE_PRIVATE_KEY);
-        ensToken.delegate(Constants.CHARLIE);
+        ensToken.delegate(Constants.BOB);
         vm.stopBroadcast();
         console.log("SUCCESS: Charlie delegated to himself");
         
         // Assert Charlie now has voting power equal to his token balance
-        assertEq(ensToken.getVotes(Constants.CHARLIE), ensToken.balanceOf(Constants.CHARLIE), "Charlie's voting power should equal his token balance after delegation");
+        assertEq(ensToken.getVotes(Constants.BOB), ensToken.balanceOf(Constants.CHARLIE), "Bob's voting power should equal Charlie's token balance after delegation");
         
         // Display final voting power
         displayVotingPower("Final");

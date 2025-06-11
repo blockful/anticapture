@@ -73,7 +73,7 @@ export const delegateChanged = async (
   await context.db.insert(delegation).values({
     id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
-    delegateeAccountId: event.args.toDelegate,
+    delegateAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
     timestamp: event.block.timestamp,
   });
@@ -92,14 +92,14 @@ export const delegateChanged = async (
       delegate: event.args.toDelegate,
     });
 
-  // Update the old delegatee's delegations count
+  // Update the old delegate's delegations count
   if (event.args.fromDelegate != zeroAddress) {
     await context.db
       .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
 
-  // Update the delegatee's delegations count
+  // Update the delegate's delegations count
   await context.db
     .insert(accountPower)
     .values({
