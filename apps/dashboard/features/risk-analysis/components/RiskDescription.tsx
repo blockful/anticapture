@@ -38,17 +38,17 @@ export const RiskDescription = ({
   };
 
   return (
-    <CorneredBox className="bg-darkest sm:bg-dark p-4">
+    <CorneredBox className="bg-surface-background sm:bg-surface-default p-4">
       <div className="flex flex-col gap-4">
         {/* Header with title and risk level */}
         <div className="flex w-full items-center justify-start gap-2">
-          <h2 className="text-lg font-medium text-white">{title}</h2>
+          <h2 className="text-primary text-lg font-medium">{title}</h2>
           <RiskLevelCardSmall status={riskLevel} />
         </div>
 
         {/* Description paragraphs */}
         {descriptionArray.map((paragraph, index) => (
-          <p key={index} className="text-foreground text-sm">
+          <p key={index} className="text-secondary text-sm">
             {paragraph}
           </p>
         ))}
@@ -57,16 +57,16 @@ export const RiskDescription = ({
         {requirements.length > 0 && (
           <div className="flex flex-col gap-4">
             {/* Thin divider line */}
-            <div className="bg-light-dark h-px w-full" />
+            <div className="bg-surface-contrast h-px w-full" />
 
-            <h3 className="text-alternative-sm font-mono font-medium tracking-wider text-white">
-              <span className="text-foreground">{`//`}</span> REQUIREMENTS
+            <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wider">
+              <span className="text-secondary">{`//`}</span> REQUIREMENTS
             </h3>
             <ul className="space-y-2">
               {requirements.map((requirement, index) => (
                 <li key={index} className="flex items-center gap-2">
                   {iconsMapping[requirement.riskLevel]}
-                  <span className="text-foreground text-sm">
+                  <span className="text-secondary text-sm">
                     {requirement.name}
                   </span>
                 </li>

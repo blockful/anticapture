@@ -30,23 +30,23 @@ export const StageContent = ({
 }: StageContentProps) => {
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="bg-light-dark flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
+      <div className="bg-surface-contrast flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
         <div className="flex flex-col gap-1 sm:max-w-[200px]">
-          <h3 className="text-alternative-sm font-mono font-medium tracking-wide text-white uppercase">
+          <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wide uppercase">
             {title}
           </h3>
-          <p className="text-foreground text-sm font-normal">{description}</p>
+          <p className="text-secondary text-sm font-normal">{description}</p>
         </div>
         <div className="flex flex-col gap-4">
           {type === "requirements" && (
-            <h4 className="font-mono text-xs font-medium tracking-wide text-white uppercase">
+            <h4 className="text-primary font-mono text-xs font-medium tracking-wide uppercase">
               Requirements
             </h4>
           )}
           {type === "issues" && (
             <h4
               className={cn(
-                "font-mono text-xs font-medium tracking-wide text-white uppercase",
+                "text-primary font-mono text-xs font-medium tracking-wide uppercase",
                 stage === Stage.ONE && "text-error",
                 stage === Stage.TWO && "text-warning",
               )}
@@ -57,7 +57,7 @@ export const StageContent = ({
 
           {type === "requirements" ? (
             <div className="flex flex-row gap-2">
-              <p className="text-foreground flex flex-wrap text-sm font-normal">
+              <p className="text-secondary flex flex-wrap text-sm font-normal">
                 {requirementText}
               </p>
             </div>
@@ -86,7 +86,7 @@ export const StageContent = ({
                         />
                       </div>
                     )}
-                    <p className="text-sm font-normal text-white">
+                    <p className="text-primary text-sm font-normal">
                       {issue.title}
                     </p>
                   </div>
@@ -99,7 +99,7 @@ export const StageContent = ({
                           </div>
                           <p
                             key={i}
-                            className="text-foreground text-sm font-normal"
+                            className="text-secondary text-sm font-normal"
                           >
                             {desc}
                           </p>

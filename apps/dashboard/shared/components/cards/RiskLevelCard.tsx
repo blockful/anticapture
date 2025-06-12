@@ -29,9 +29,9 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
     icon: <CheckCircle2 className="text-success size-3.5" />,
   },
   [RiskLevel.NONE]: {
-    color: "foreground",
-    pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
-    icon: <CounterClockwiseClockIcon className="text-foreground size-4" />,
+    color: "secondary",
+    pattern: ["bg-surface-hover", "bg-surface-hover", "bg-surface-hover"],
+    icon: <CounterClockwiseClockIcon className="text-secondary size-4" />,
   },
 } as const;
 
@@ -44,8 +44,8 @@ const RiskLabel = ({
   color: string;
   icon: ReactNode;
 }) => (
-  <div className="bg-light-dark flex h-full flex-row gap-1 rounded-l-full px-2">
-    <p className="text-foreground flex items-center text-xs font-medium">
+  <div className="bg-surface-contrast flex h-full flex-row gap-1 rounded-l-full px-2">
+    <p className="text-secondary flex items-center text-xs font-medium">
       Risk level:
     </p>
     <p
@@ -58,7 +58,7 @@ const RiskLabel = ({
 );
 
 const RiskBar = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
-  <div className="bg-light-dark flex items-center gap-1 rounded-r-full p-1 pr-2">
+  <div className="bg-surface-contrast flex items-center gap-1 rounded-r-full p-1 pr-2">
     {pattern.map((bgClass, index) => (
       <div
         key={index}

@@ -33,7 +33,7 @@ export function TooltipInfo({
         aria-label="tooltip-info"
         onClick={handleToggle}
       >
-        <Info className="text-foreground size-3.5 cursor-pointer" />
+        <Info className="text-secondary size-3.5 cursor-pointer" />
       </TooltipTrigger>
       <TooltipContent
         side="top"
@@ -41,9 +41,9 @@ export function TooltipInfo({
         sideOffset={10}
         avoidCollisions={true}
         className={cn(
-          "border-light-dark bg-dark z-50 rounded-lg border p-3 text-center text-white shadow-sm",
+          "border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-3 text-center shadow-sm",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "whitespace-normal break-words",
+          "break-words whitespace-normal",
           className,
         )}
       >
