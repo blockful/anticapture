@@ -83,7 +83,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="flex items-center justify-end px-4 py-3 text-end text-white">
+      <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
         {formattedSupply}
       </div>
     );
@@ -98,7 +98,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         return (
           <div className="flex min-h-[68px] items-center justify-center gap-3 sm:min-h-0">
-            <p className="scrollbar-none text-foreground flex items-center overflow-auto py-3">
+            <p className="scrollbar-none text-secondary flex items-center overflow-auto py-3">
               {row.index + 1}
             </p>
             {isMobile && details && (
@@ -118,7 +118,6 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             className="gap-2"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <h4 className="text-table-header">#</h4>
             <ArrowUpDown
               props={{
                 className: "size-4",
@@ -145,13 +144,13 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
             <div
               className={cn("flex w-full gap-3", {
                 "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
               })}
             >
-              <div className="flex w-full items-center gap-2">
+              <div className="flex w-full items-center gap-1.5">
                 {!isMobile && (
                   <DaoAvatarIcon
                     daoId={dao as DaoIdEnum}
@@ -159,10 +158,12 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                     isRounded
                   />
                 )}
-                {daoConfigByDaoId[dao as DaoIdEnum].name ===
-                daoConfigByDaoId[DaoIdEnum.ENS].name
-                  ? "ENS"
-                  : daoConfigByDaoId[dao as DaoIdEnum].name}
+                <p className="text-primary text-sm font-medium">
+                  {daoConfigByDaoId[dao as DaoIdEnum].name ===
+                  daoConfigByDaoId[DaoIdEnum.ENS].name
+                    ? "ENS"
+                    : daoConfigByDaoId[dao as DaoIdEnum].name}
+                </p>
               </div>
               {isInAnalysis && (
                 <>
@@ -188,7 +189,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const daoConfig = daoConfigByDaoId[daoId];
         if (!daoConfig.governanceImplementation) {
           return (
-            <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+            <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
               <StageTag
                 daoStage={Stage.NONE}
                 tagStage={Stage.NONE}
@@ -201,7 +202,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           fieldsToArray(daoConfig.governanceImplementation?.fields),
         );
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 text-white sm:py-3.5">
+          <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
             <StageTag daoStage={stage} tagStage={stage} showStageText />
           </div>
         );
@@ -222,7 +223,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         };
 
         return (
-          <div className="scrollbar-none flex w-full items-center overflow-auto px-4 py-3 text-white">
+          <div className="scrollbar-none text-primary flex w-full items-center overflow-auto px-4 py-3">
             <RiskAreaCardWrapper
               riskAreas={riskAreas.risks}
               variant={RiskAreaCardEnum.PANEL_TABLE}

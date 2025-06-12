@@ -17,7 +17,7 @@ export const BadgeCardDaoInfoItem = ({
   return (
     <Badge className={`flex h-full w-full ${className}`}>
       <div className="flex">{icon}</div>
-      <p className="flex text-sm font-normal whitespace-nowrap text-white">
+      <p className="text-primary flex text-sm font-normal whitespace-nowrap">
         {label}
       </p>
     </Badge>

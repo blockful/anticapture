@@ -49,7 +49,7 @@ export const StagesCardRequirements = ({
   className = "",
 }: StagesCardRequirementsProps) => {
   const stageStyles =
-    STAGE_STYLES[daoStage] || "border-middle-dark text-foreground";
+    STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
 
   return (
     <div>
@@ -63,7 +63,7 @@ export const StagesCardRequirements = ({
       </div>
 
       <div
-        className={`bg-light-dark rounded-md p-4 ${stageStyles} ${className}`}
+        className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
       >
         <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
         <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
@@ -95,7 +95,7 @@ const Title = ({
   return (
     <h3
       className={cn([
-        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
+        "mb-2 font-mono text-xs leading-4 font-medium tracking-wider uppercase",
         STAGE_STYLES[daoStage],
       ])}
     >
@@ -106,7 +106,7 @@ const Title = ({
 
 const Description = ({ children }: { children: ReactNode }) => {
   return (
-    <p className="font-inter mb-4 text-sm font-normal leading-5 text-white">
+    <p className="font-inter text-primary mb-4 text-sm leading-5 font-normal">
       {children}
     </p>
   );
@@ -127,7 +127,7 @@ const Issue = ({
       {daoStage === Stage.ONE && (
         <AlertCircle className="text-warning size-4" />
       )}
-      <span className="font-inter text-sm font-normal leading-5 text-white">
+      <span className="font-inter text-primary text-sm leading-5 font-normal">
         {children}
       </span>
     </div>

@@ -8,12 +8,12 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "gap-1.5 border-transparent text-sm font-medium bg-light-dark leading-tight",
+          "gap-1.5 border-transparent text-sm font-medium bg-surface-contrast leading-tight",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
+        outline: "text-secondary",
       },
     },
     defaultVariants: {

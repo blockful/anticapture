@@ -63,7 +63,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default function DaoPage() {
   return (
-    <div className="bg-darkest dark flex h-screen overflow-hidden">
+    <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
         <HeaderDAOSidebar />
