@@ -194,27 +194,37 @@ export const daoMetricsDayBucket = onchainTable(
 );
 
 // Account Power and Balance relations
-export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
-  account: one(account, {
-    fields: [accountBalance.accountId],
-    references: [account.id],
-    relationName: "accountBalances",
+export const accountBalanceRelations = relations(
+  accountBalance,
+  ({ one, many }) => ({
+    // Relation to the delegate's power
+    delegatePower: one(accountPower, {
+      fields: [accountBalance.delegate],
+      references: [accountPower.accountId],
+      relationName: "delegatePower",
+    }),
+    account: one(account, {
+      fields: [accountBalance.accountId],
+      references: [account.id],
+      relationName: "account",
+    }),
+    delegateeAccount: one(account, {
+      fields: [accountBalance.delegate],
+      references: [account.id],
+      relationName: "delegateeAccount",
+    }),
+    delegatedTo: one(accountPower, {
+      fields: [accountBalance.delegate],
+      references: [accountPower.accountId],
+      relationName: "delegatedTo",
+    }),
+    token: one(token, {
+      fields: [accountBalance.tokenId],
+      references: [token.id],
+      relationName: "token",
+    }),
   }),
-  delegatedTo: one(accountPower, {
-    fields: [accountBalance.delegate],
-    references: [accountPower.accountId],
-  }),
-  delegatedToAccount: one(account, {
-    fields: [accountBalance.delegate],
-    references: [account.id],
-    relationName: "delegatedBalances",
-  }),
-  token: one(token, {
-    fields: [accountBalance.tokenId],
-    references: [token.id],
-    relationName: "token",
-  }),
-}));
+);
 
 export const transferRelations = relations(transfer, ({ one }) => ({
   from: one(account, {
