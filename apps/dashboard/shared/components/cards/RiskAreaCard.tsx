@@ -69,7 +69,7 @@ const RiskAreaCardInternal = ({
       <CheckCircle2
         className={cn(
           "size-4",
-          isActive || isHovered ? "text-darkest" : "text-success",
+          isActive || isHovered ? "text-inverted" : "text-success",
         )}
       />
     ),
@@ -77,7 +77,7 @@ const RiskAreaCardInternal = ({
       <AlertCircle
         className={cn(
           "size-4",
-          isActive || isHovered ? "text-darkest" : "text-warning",
+          isActive || isHovered ? "text-inverted" : "text-warning",
         )}
       />
     ),
@@ -85,7 +85,7 @@ const RiskAreaCardInternal = ({
       <AlertTriangle
         className={cn(
           "size-4",
-          isActive || isHovered ? "text-darkest" : "text-error",
+          isActive || isHovered ? "text-inverted" : "text-error",
         )}
       />
     ),
@@ -107,7 +107,7 @@ const RiskAreaCardInternal = ({
           "flex h-full items-center px-1 py-2 sm:px-2",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
-            "bg-light-dark": risk.level === RiskLevel.NONE,
+            "bg-surface-contrast": risk.level === RiskLevel.NONE,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
@@ -130,15 +130,15 @@ const RiskAreaCardInternal = ({
         >
           <span
             className={cn("block font-mono font-medium sm:tracking-wider", {
-              "!text-foreground": risk.level === RiskLevel.NONE,
+              "!text-secondary": risk.level === RiskLevel.NONE,
               "!text-success":
                 risk.level === RiskLevel.LOW && !isActive && !isHovered,
               "!text-warning":
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "!text-error":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "!text-darkest":
-                (isActive && risk.level !== undefined) || isHovered,
+              "!text-inverted":
+                isActive && risk.level !== RiskLevel.NONE && isHovered,
               "text-alternative-sm": isRiskAnalysis,
               "text-xs": !isRiskAnalysis,
             })}
@@ -157,7 +157,7 @@ const RiskAreaCardInternal = ({
             riskLevelIcons[risk.level as RiskLevel]
           ) : (
             <div className="flex items-center justify-center font-mono text-xs">
-              <CounterClockwiseClockIcon className="text-foreground size-4 sm:size-5" />
+              <CounterClockwiseClockIcon className="text-secondary size-4 sm:size-5" />
             </div>
           )}
         </div>
@@ -184,7 +184,7 @@ const RiskAreaCardInternal = ({
                 !isActive &&
                 isBox3Filled &&
                 !isHovered,
-              "bg-light-dark": risk.level === undefined || !isBox3Filled,
+              "bg-surface-contrast": risk.level === undefined || !isBox3Filled,
             })}
           />
           <div
@@ -207,7 +207,7 @@ const RiskAreaCardInternal = ({
                 !isActive &&
                 isBox2Filled &&
                 !isHovered,
-              "bg-light-dark": risk.level === undefined || !isBox2Filled,
+              "bg-surface-contrast": risk.level === undefined || !isBox2Filled,
             })}
           />
           <div
@@ -221,7 +221,7 @@ const RiskAreaCardInternal = ({
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "bg-error/12":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "bg-light-dark": risk.level === undefined,
+              "bg-surface-contrast": risk.level === undefined,
             })}
           />
         </div>
@@ -275,7 +275,8 @@ export const RiskAreaCard = ({
         <div
           className={cn(
             "w-full p-1.5",
-            isActive && "border-middle-dark bg-darkest sm:bg-dark border-2",
+            isActive &&
+              "border-middle-dark bg-surface-background sm:bg-surface-default border-2",
           )}
         >
           <RiskAreaCardInternal
@@ -287,7 +288,7 @@ export const RiskAreaCard = ({
         </div>
         <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
           {isActive && (
-            <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
+            <div className="border-l-middle-dark size-0 border-y-13 border-l-13 border-y-transparent" />
           )}
         </div>
       </div>
@@ -340,7 +341,7 @@ export const RiskAreaCardWrapper = ({
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
       {withTitle && (
-        <h3 className="mb-3 hidden font-mono text-xs font-medium tracking-wider text-white sm:block">
+        <h3 className="text-primary mb-3 hidden font-mono text-xs font-medium tracking-wider sm:block">
           {title}
         </h3>
       )}

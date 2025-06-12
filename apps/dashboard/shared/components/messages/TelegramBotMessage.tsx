@@ -10,10 +10,10 @@ export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };
   return (
     <div className="flex items-center gap-3 tracking-wider sm:flex-row">
-      <Send className="hidden size-4 text-white sm:block" />
+      <Send className="text-primary hidden size-4 sm:block" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex gap-3">
-          <span className="font-mono font-normal text-white">
+          <span className="text-primary font-mono font-normal">
             RECEIVE REAL-TIME{" "}
             {daoConfigByDaoId[
               daoId.toUpperCase() as DaoIdEnum
@@ -26,7 +26,7 @@ export const TelegramBotMessage = () => {
             href={ANTICAPTURE_TELEGRAM_BOT}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-tangerine/80 font-normal"
+            className="hover:text-link/80 font-normal"
           >
             JOIN OUR TELEGRAM BOT
           </a>

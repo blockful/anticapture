@@ -9,7 +9,7 @@ export const SupporterBadge = ({ address }: { address: Address }) => {
     <div
       key={`${address}-supporter-badge`}
       className={cn(
-        "bg-light-dark flex min-w-max items-center gap-2 rounded-full px-3 py-1.5",
+        "bg-surface-contrast flex min-w-max items-center gap-2 rounded-full px-3 py-1.5",
         "transition-all duration-200 hover:bg-gray-700",
       )}
     >

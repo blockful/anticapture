@@ -23,7 +23,7 @@ export const PanelSection = () => {
         />
       }
       anchorId={SECTIONS_CONSTANTS.panel.anchorId}
-      className="bg-darkest! mt-[56px]! sm:mt-0!"
+      className="bg-surface-background! mt-[56px]! sm:mt-0!"
       isSwitchDateLinear
     >
       <PanelTable days={timeIntervalPanel} />

@@ -24,7 +24,7 @@ export default function NotFound({ reason = "not_found" }: NotFoundProps) {
   const { title, description } = messages[reason];
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 text-white">
+    <div className="text-primary flex flex-col items-center justify-center gap-4">
       <h2 className="text-2xl font-bold">{title}</h2>
       <p className="text-center">{description}</p>
       <Link

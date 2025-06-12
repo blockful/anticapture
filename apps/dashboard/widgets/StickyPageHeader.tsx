@@ -72,7 +72,7 @@ export const StickyPageHeader = () => {
     <div className="h-[98px]">
       <header
         className={cn(
-          "bg-darkest fixed top-0 right-0 left-0 z-30 w-full shadow-md transition-transform duration-300",
+          "bg-surface-background fixed top-0 right-0 left-0 z-30 w-full shadow-md transition-transform duration-300",
         )}
       >
         <HeaderDAOSidebarDropdown />
@@ -82,7 +82,7 @@ export const StickyPageHeader = () => {
 
       <div
         className={cn(
-          "bg-darkest sticky top-0 z-30 w-full transition-all duration-300",
+          "bg-surface-background sticky top-0 z-30 w-full transition-all duration-300",
         )}
       >
         <div
