@@ -202,9 +202,6 @@ export const accountBalanceRelations = relations(
       references: [accountPower.accountId],
       relationName: "delegatePower",
     }),
-    // Relations to transfers
-    sentTransfers: many(transfer),
-    receivedTransfers: many(transfer),
     account: one(account, {
       fields: [accountBalance.accountId],
       references: [account.id],
