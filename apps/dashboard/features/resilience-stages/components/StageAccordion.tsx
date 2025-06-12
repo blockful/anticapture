@@ -11,6 +11,7 @@ import { ReactNode } from "react";
 import { Stage } from "@/shared/types/enums/Stage";
 import { StageTagSimplified } from "@/shared/components/tags/StageTagSimplified";
 import { cn } from "@/shared/utils/";
+import { formatPlural } from "@/shared/utils/formatPlural";
 import { StageContent } from "@/features/resilience-stages/components/StageContent";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";
@@ -47,7 +48,10 @@ export const StageAccordion = ({
                 <span className="block">
                   All DAOs that have governor and timelock are considered at
                   least{" "}
-                  <span className="whitespace-nowrap text-white">Stage 0</span>.
+                  <span className="text-primary whitespace-nowrap">
+                    Stage 0
+                  </span>
+                  .
                 </span>
                 <span className="block pl-1">
                   At this stage, critical risks still be present and require
@@ -129,13 +133,13 @@ const CustomAccordionItem = ({
               <div className="flex flex-row items-center gap-2">
                 <div className="bg-middle-dark size-1 rounded-full" />
                 <p className="text-sm font-normal text-white">
-                  {`${riskFields.length} issues needs fixing`}
+                  {`${formatPlural(riskFields.length, "issue")} needs fixing`}
                 </p>
               </div>
             )}
           </div>
-          <Plus className="text-foreground size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
-          <MinusIcon className="text-foreground hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
+          <Plus className="text-secondary size-4 transition-all duration-300 ease-in-out group-data-[state=open]:hidden" />
+          <MinusIcon className="text-secondary hidden size-4 transition-all duration-300 ease-in-out group-data-[state=open]:block" />
         </AccordionTrigger>
         {content ? (
           <AccordionContent
@@ -157,7 +161,9 @@ const CustomAccordionItem = ({
           >
             <StageContent
               stage={stage}
-              title="Minimal Risks"
+              title={
+                stage === Stage.ONE ? "Partial Risk Reduction" : "Minimal Risks"
+              }
               description={description}
               type="issues"
               issues={

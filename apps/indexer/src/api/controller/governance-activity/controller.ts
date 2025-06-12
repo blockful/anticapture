@@ -13,17 +13,17 @@ import {
 interface GovernanceActivityRepository {
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
-    days: DaysEnum
+    days: DaysEnum,
   ): Promise<ProposalsCompareQueryResult | undefined>;
   getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
   getAverageTurnoutCompare(
-    days: DaysEnum
+    days: DaysEnum,
   ): Promise<AverageTurnoutCompareQueryResult | undefined>;
 }
 
 export function governanceActivity(
   app: Hono,
-  repository: GovernanceActivityRepository
+  repository: GovernanceActivityRepository,
 ) {
   app.openapi(
     createRoute({
@@ -65,12 +65,6 @@ export function governanceActivity(
             },
           },
         },
-        404: {
-          description: "No data found",
-          content: {
-            "application/json": { schema: z.object({ error: z.string() }) },
-          },
-        },
       },
     }),
     async (context) => {
@@ -80,7 +74,7 @@ export function governanceActivity(
         return context.json({ error: "No data found" }, 404);
       }
       return context.json({ activeSupply: data.activeSupply }, 200);
-    }
+    },
   );
 
   app.openapi(
@@ -114,12 +108,6 @@ export function governanceActivity(
             },
           },
         },
-        404: {
-          description: "No data found",
-          content: {
-            "application/json": { schema: z.object({ error: z.string() }) },
-          },
-        },
       },
     }),
     async (context) => {
@@ -127,7 +115,11 @@ export function governanceActivity(
 
       const data = await repository.getProposalsCompare(days);
       if (!data) {
-        return context.json({ error: "No data found" }, 404);
+        return context.json({
+          currentProposalsLaunched: 0,
+          oldProposalsLaunched: 0,
+          changeRate: 0,
+        });
       }
       const changeRate =
         data.oldProposalsLaunched &&
@@ -138,9 +130,9 @@ export function governanceActivity(
           ...data,
           changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
         },
-        200
+        200,
       );
-    }
+    },
   );
 
   app.openapi(
@@ -174,12 +166,6 @@ export function governanceActivity(
             },
           },
         },
-        404: {
-          description: "No data found",
-          content: {
-            "application/json": { schema: z.object({ error: z.string() }) },
-          },
-        },
       },
     }),
     async (context) => {
@@ -187,7 +173,11 @@ export function governanceActivity(
 
       const data = await repository.getVotesCompare(days);
       if (!data) {
-        return context.json({ error: "No data found" }, 404);
+        return context.json({
+          currentVotes: 0,
+          oldVotes: 0,
+          changeRate: 0,
+        });
       }
 
       const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
@@ -197,9 +187,9 @@ export function governanceActivity(
           ...data,
           changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
         },
-        200
+        200,
       );
-    }
+    },
   );
 
   app.openapi(
@@ -233,12 +223,6 @@ export function governanceActivity(
             },
           },
         },
-        404: {
-          description: "No data found",
-          content: {
-            "application/json": { schema: z.object({ error: z.string() }) },
-          },
-        },
       },
     }),
     async (context) => {
@@ -246,7 +230,11 @@ export function governanceActivity(
 
       const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
-        return context.json({ error: "No data found" }, 404);
+        return context.json({
+          currentAverageTurnout: 0,
+          oldAverageTurnout: 0,
+          changeRate: 0,
+        });
       }
       const changeRate =
         data.oldAverageTurnout &&
@@ -257,8 +245,8 @@ export function governanceActivity(
           ...data,
           changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
         },
-        200
+        200,
       );
-    }
+    },
   );
 }
