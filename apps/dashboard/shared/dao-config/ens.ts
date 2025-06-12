@@ -51,7 +51,6 @@ export const ENS: DaoConfiguration = {
     supportsLiquidTreasuryCall: true,
   },
   riskAnalysis: true,
-  holdersAndDelegates: true,
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
