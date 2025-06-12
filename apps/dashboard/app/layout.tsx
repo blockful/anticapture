@@ -7,10 +7,10 @@ import { ReactNode } from "react";
 import HotjarScript from "@/shared/services/hotjar";
 import { Inter, Roboto_Mono } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
 const roboto = Roboto_Mono({
-  weight: ["400", "500", "700"],
+  weight: ["500"],
   subsets: ["latin"],
   display: "swap",
   variable: "--font-mono",
@@ -58,6 +58,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
         <HotjarScript />
       </head>
       <body

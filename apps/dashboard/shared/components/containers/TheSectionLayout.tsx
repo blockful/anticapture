@@ -53,7 +53,7 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "sm:bg-dark flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:px-5 sm:py-7",
+        "sm:bg-surface-default flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:px-5 sm:py-7",
         isSwitchDateLinear && "mt-4 gap-4",
         className,
       )}
@@ -71,9 +71,9 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
+                  <h3 className="text-primary text-xl leading-7 font-medium tracking-[-0.5%] sm:text-left">
                     {title}
-                  </h1>
+                  </h3>
                 </div>
                 <div className="flex items-center">{switchDate}</div>
               </div>
@@ -83,9 +83,9 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
+                    <h4 className="text-xl leading-7 font-medium tracking-[-0.5%] text-white sm:text-left">
                       {title}
-                    </h1>
+                    </h4>
                   </div>
                   {subHeader && (
                     <div className="flex items-center gap-2">{subHeader}</div>
@@ -98,7 +98,7 @@ export const TheSectionLayout = ({
             )}
           </div>
           <div className="flex w-full">
-            <p className="text-foreground flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] sm:text-sm">
+            <p className="text-secondary flex w-full flex-col text-justify text-[12px] leading-[18px] font-normal sm:text-sm">
               {description}
             </p>
           </div>
@@ -116,11 +116,11 @@ export const TheSectionLayout = ({
           )}
         >
           <div className="flex flex-col">
-            <CardTitle className="!text-alternative-sm flex items-center font-mono font-medium uppercase tracking-wide text-white sm:gap-2.5">
+            <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
               {subtitle}
             </CardTitle>
             <p
-              className={`text-foreground font-normal ${subtitle ? "text-sm" : "text-base"}`}
+              className={`text-secondary font-normal ${subtitle ? "text-sm" : "text-base"}`}
             >
               {getDateRange(days ?? "")}
             </p>
@@ -129,11 +129,11 @@ export const TheSectionLayout = ({
         </div>
       )}
       {infoText && (
-        <CardDescription className="bg-light-dark flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
+        <CardDescription className="bg-surface-contrast flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
           <div className="mt-0.5 sm:mt-0">
-            <Info className="size-4 w-fit text-white" />
+            <Info className="text-primary size-4 w-fit" />
           </div>
-          <p className="text-foreground text-sm font-normal">{infoText}</p>
+          <p className="text-secondary text-sm font-normal">{infoText}</p>
         </CardDescription>
       )}
       {children}

@@ -20,7 +20,7 @@ export const ProgressBar = ({
 }: ProgressBarProps) => {
   return (
     <div className={cn("flex w-full flex-col", className)}>
-      <div className="bg-light-dark relative h-3 w-full">
+      <div className="bg-surface-contrast relative h-3 w-full">
         {warning && warning > 0 && (
           <div
             className="absolute z-10 h-full"
@@ -39,7 +39,7 @@ export const ProgressBar = ({
         )}
 
         <div
-          className="bg-tangerine group absolute left-0 z-20 h-full transition-all duration-300"
+          className="bg-surface-solid-brand group absolute left-0 z-20 h-full transition-all duration-300"
           style={{ width: `${progress}%` }}
         >
           <div className="border-darkest bg-tangerine absolute -top-[5px] -right-1.5 size-[21px] rounded-full border-2 p-2">
@@ -64,12 +64,12 @@ export const ProgressBar = ({
         ></div>
         <div className="flex w-full items-start justify-between px-2 py-3">
           <div className="flex flex-col justify-center">
-            <p className="text-foreground text-xs font-medium">Start</p>
-            <p className="text-sm font-normal text-white">{startDate}</p>
+            <p className="text-secondary text-xs font-medium">Start</p>
+            <p className="text-primary text-sm font-normal">{startDate}</p>
           </div>
           <div className="flex flex-col items-end justify-center">
-            <p className="text-foreground text-xs font-medium">Expiration</p>
-            <p className="text-sm font-normal text-white">{endDate}</p>
+            <p className="text-secondary text-xs font-medium">Expiration</p>
+            <p className="text-primary text-sm font-normal">{endDate}</p>
           </div>
         </div>
       </div>

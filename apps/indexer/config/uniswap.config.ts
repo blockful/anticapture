@@ -8,13 +8,13 @@ import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
 
 export default createConfig({
   database: {
-    kind: "postgres",
+    kind: "postgres", 
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     ethereum_mainnet: {
-      chainId: 1,
-      transport: http(env.RPC_URL),
+      id: 1,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
@@ -22,14 +22,14 @@ export default createConfig({
   contracts: {
     UNIToken: {
       abi: UNITokenAbi,
-      network: "ethereum_mainnet",
+      chain: "ethereum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!.token.address,
       startBlock: 10861674,
     },
     UNIGovernor: {
       abi: UNIGovernorAbi,
-      network: "ethereum_mainnet",
+      chain: "ethereum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!.governor,
       startBlock: 13059157,

@@ -58,19 +58,19 @@ export const SecurityCouncilCard = ({
     <div className="flex h-full w-full flex-col gap-6 py-2 sm:gap-5">
       <div className="flex w-full justify-between gap-5">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="sm:bg-light-dark flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
-            <ShieldCheck className="text-foreground size-4 sm:size-6" />
-            <h3 className="text-xs font-semibold text-white uppercase sm:hidden">
+          <div className="sm:bg-surface-contrast flex h-fit gap-1.5 rounded-md py-2 sm:gap-0 sm:p-2">
+            <ShieldCheck className="text-secondary size-4 sm:size-6" />
+            <p className="text-alternative-sm text-primary font-mono font-medium uppercase sm:hidden">
               Security Council
-            </h3>
+            </p>
           </div>
           <div className="flex flex-col gap-3 sm:gap-1.5">
-            <h3 className="hidden text-xs font-semibold text-white uppercase sm:block">
+            <p className="text-alternative-sm text-primary hidden font-mono font-medium uppercase sm:block">
               Security Council
-            </h3>
+            </p>
             <div className="flex w-full items-center justify-between gap-1.5 sm:justify-start">
-              <p className="text-foreground text-sm font-medium">Multisig:</p>
-              <div className="bg-dark flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
+              <p className="text-secondary text-sm font-medium">Multisig:</p>
+              <div className="flex items-center gap-1.5 rounded-lg px-2 py-1 sm:rounded-none sm:bg-none sm:p-0">
                 <div
                   className={cn(
                     "flex items-center gap-1.5",
@@ -87,8 +87,8 @@ export const SecurityCouncilCard = ({
                   href={securityCouncil.multisig.externalLink}
                   openInNewTab
                 >
-                  <Key className="text-tangerine size-3.5" />
-                  <span className="text-white">
+                  <Key className="text-link size-3.5" />
+                  <span className="text-primary">
                     {securityCouncil.multisig.threshold}/
                     {securityCouncil.multisig.signers}
                   </span>
@@ -103,10 +103,10 @@ export const SecurityCouncilCard = ({
               </div>
             </div>
             <div className="flex w-full items-center justify-between sm:hidden">
-              <p className="text-foreground text-sm font-medium">Countdown:</p>
+              <p className="text-secondary text-sm font-medium">Countdown:</p>
               <CountdownDaoInfo
                 daoOverview={daoOverview}
-                className="bg-dark border-none"
+                className="bg-surface-default border-none"
               />
             </div>
           </div>

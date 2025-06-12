@@ -17,7 +17,7 @@ export const TimelockCard = ({
 }) => {
   const timelockData: CardData = {
     title: "Timelock",
-    icon: <Clock4 className="text-foreground size-4" />,
+    icon: <Clock4 className="text-secondary size-4" />,
     sections: [
       {
         title: "Timelock",
@@ -26,7 +26,7 @@ export const TimelockCard = ({
         items: [
           <SwitchCardDaoInfoItem
             switched={daoOverview.rules?.timelock}
-            icon={<ExternalLink className="text-foreground size-3.5" />}
+            icon={<ExternalLink className="text-secondary size-3.5" />}
             onClick={() =>
               openEtherscanAddress(daoOverview.contracts?.timelock as Address)
             }
@@ -41,7 +41,7 @@ export const TimelockCard = ({
         items: [
           <SwitchCardDaoInfoItem
             switched={daoOverview.rules?.cancelFunction}
-            icon={<ExternalLink className="text-foreground size-3.5" />}
+            icon={<ExternalLink className="text-secondary size-3.5" />}
             onClick={() =>
               window.open(
                 `${daoOverview.cancelFunction}`,

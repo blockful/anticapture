@@ -4,7 +4,7 @@ import { HeaderSidebar } from "@/widgets";
 
 export default function Home() {
   return (
-    <div className="bg-darkest dark flex h-screen overflow-hidden">
+    <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <HeaderSidebar />
       <main className="flex-1 overflow-auto sm:ml-[72px]">
         <div className="sm:hidden">
