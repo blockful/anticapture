@@ -5,19 +5,13 @@
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "build": "tsc",
-    "clean": "rm -f generated.ts types.ts",
+    "clean": "rm -f src",
     "dev": "npm run codegen:watch"
   },
-  "main": "types.ts",
-  "types": "types.ts",
   "exports": {
-    ".": {
-      "types": "./types.ts",
-      "default": "./types.ts"
-    },
-    "./hooks": {
-      "types": "./hooks.ts",
-      "default": "./hooks.ts"
+    "./react": {
+      "types": "./src/react/index.ts",
+      "default": "./src/react/index.ts"
     }
   },
   "dependencies": {
@@ -26,10 +20,10 @@
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@graphql-codegen/typescript-react-apollo": "^4.3.3",
-    "graphql": "^16.11.0",
-    "typescript": "^5.8.3"
+    "graphql": "^16.11.0"
   },
   "devDependencies": {
+    "typescript": "^5.8.3",
     "@types/node": "^20.16.5"
   },
   "peerDependencies": {

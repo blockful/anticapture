@@ -1,4 +1,4 @@
-import { useGetDaoDataQuery } from "@anticapture/graphql-client/hooks";
+import { useGetDaoDataQuery } from "@anticapture/graphql-client/react";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseDaoDataResult {

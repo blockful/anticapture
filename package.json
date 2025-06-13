@@ -7,7 +7,9 @@
     "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
-    "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics"
+    "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
+    "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
+    "prepare": "husky"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
