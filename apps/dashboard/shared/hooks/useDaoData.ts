@@ -11,7 +11,6 @@ interface UseDaoDataResult {
 export const useDaoData = (daoId: DaoIdEnum): UseDaoDataResult => {
   const { data, loading, error, refetch } = useGetDaoDataQuery({
     variables: { daoId },
-    skip: !daoId, // Skip query if no daoId
   });
 
   return {

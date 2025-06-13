@@ -10,8 +10,8 @@
   },
   "exports": {
     "./react": {
-      "types": "./src/react/index.ts",
-      "default": "./src/react/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "dependencies": {
