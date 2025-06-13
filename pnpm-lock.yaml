@@ -64,8 +64,8 @@ importers:
   apps/dashboard:
     dependencies:
       '@anticapture/graphql-client':
-        specifier: workspace:*
-        version: link:../../packages/graphql-client
+        specifier: file:../../packages/graphql-client
+        version: file:packages/graphql-client(@parcel/watcher@2.5.0)(@types/node@20.17.6)(@types/react@19.1.4)(bufferutil@4.0.8)(graphql-ws@6.0.4(graphql@16.11.0)(ws@8.18.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@apollo/client':
         specifier: ^3.13.8
         version: 3.13.8(@types/react@19.1.4)(graphql-ws@6.0.4(graphql@16.11.0)(ws@8.18.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -409,6 +409,11 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@anticapture/graphql-client@file:packages/graphql-client':
+    resolution: {directory: packages/graphql-client, type: directory}
+    peerDependencies:
+      react: ^18.0.0
 
   '@apollo/client@3.13.8':
     resolution: {integrity: sha512-YM9lQpm0VfVco4DSyKooHS/fDTiKQcCHfxr7i3iL6a0kP/jNO5+4NFK6vtRDxaYisd5BrwOZHLJpPBnvRVpKPg==}
@@ -10710,6 +10715,33 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
+
+  '@anticapture/graphql-client@file:packages/graphql-client(@parcel/watcher@2.5.0)(@types/node@20.17.6)(@types/react@19.1.4)(bufferutil@4.0.8)(graphql-ws@6.0.4(graphql@16.11.0)(ws@8.18.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@apollo/client': 3.13.8(@types/react@19.1.4)(graphql-ws@6.0.4(graphql@16.11.0)(ws@8.18.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@graphql-codegen/cli': 5.0.7(@parcel/watcher@2.5.0)(@types/node@20.17.6)(bufferutil@4.0.8)(graphql@16.11.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@graphql-codegen/typescript': 4.1.6(graphql@16.11.0)
+      '@graphql-codegen/typescript-operations': 4.6.1(graphql@16.11.0)
+      '@graphql-codegen/typescript-react-apollo': 4.3.3(graphql@16.11.0)
+      graphql: 16.11.0
+      react: 19.1.0
+    transitivePeerDependencies:
+      - '@fastify/websocket'
+      - '@parcel/watcher'
+      - '@types/node'
+      - '@types/react'
+      - bufferutil
+      - cosmiconfig-toml-loader
+      - encoding
+      - enquirer
+      - graphql-sock
+      - graphql-ws
+      - react-dom
+      - subscriptions-transport-ws
+      - supports-color
+      - typescript
+      - uWebSockets.js
+      - utf-8-validate
 
   '@apollo/client@3.13.8(@types/react@19.1.4)(graphql-ws@6.0.4(graphql@16.11.0)(ws@8.18.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.1.0(react@18.3.1))(react@18.3.1)':
     dependencies:
