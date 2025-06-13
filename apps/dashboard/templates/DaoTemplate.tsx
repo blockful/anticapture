@@ -79,9 +79,7 @@ export const DaoTemplate = () => {
 
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
 
-        {daoConstants.holdersAndDelegates && (
-          <HoldersAndDelegatesSection daoId={daoIdEnum} />
-        )}
+        <HoldersAndDelegatesSection daoId={daoIdEnum} />
 
         {daoConstants.governanceActivity && <GovernanceActivitySection />}
       </div>
