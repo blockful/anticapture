@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev --schema public",
-    "start": "ponder start --schema public",
-    "serve": "ponder serve --schema public",
+    "start": "ponder start",
+    "serve": "ponder serve",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
   },

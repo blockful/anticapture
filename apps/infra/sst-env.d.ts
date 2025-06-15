@@ -5,11 +5,6 @@
 
 declare module "sst" {
   export interface Resource {
-    "APIGateway": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
     "Anticapture-ENS-DB": {
       "database": string
       "host": string
@@ -18,12 +13,15 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
-    "EnsIndexer": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
+    "Anticapture-UNI-DB": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
     }
-    "EnsIndexerAPI": {
+    "ENSIndexer": {
       "service": string
       "type": "sst.aws.Service"
       "url": string
@@ -31,6 +29,11 @@ declare module "sst" {
     "EthereumRPC": {
       "type": "sst.sst.Secret"
       "value": string
+    }
+    "UNIIndexer": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
     }
     "anticapture-vpc": {
       "bastion": string

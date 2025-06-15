@@ -1,5 +1,4 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
@@ -8,7 +7,7 @@ import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
 
 export default createConfig({
   database: {
-    kind: "postgres", 
+    kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
   chains: {

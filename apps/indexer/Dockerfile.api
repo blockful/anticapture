@@ -12,4 +12,11 @@ WORKDIR /app
 COPY --from=builder /app .
 RUN npm install -g pnpm
 EXPOSE 42069
-CMD ["pnpm", "run", "serve", "--config", "config/ens.config.ts"]
+
+ARG CONFIG_FILE
+ARG SCHEMA="public"
+
+ENV CONFIG_FILE=${CONFIG_FILE}
+ENV SCHEMA=${SCHEMA}
+
+CMD pnpm serve --config ${CONFIG_FILE} --schema=${SCHEMA}

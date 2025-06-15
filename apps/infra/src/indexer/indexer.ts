@@ -3,11 +3,13 @@
 import { Output } from "@pulumi/pulumi";
 
 export function newIndexer(
+  dao: string,
   cluster: sst.aws.Cluster,
   db: sst.aws.Postgres,
-  rpcUrl: Output<string>
+  rpcUrl: Output<string>,
+  schema: string,
 ): sst.aws.Service {
-  return new sst.aws.Service("EnsIndexer", {
+  return new sst.aws.Service(`${dao}Indexer`, {
     cluster,
     memory: "2 GB",
     cpu: "1 vCPU",
@@ -29,17 +31,20 @@ export function newIndexer(
       POLLING_INTERVAL: "1000",
       MAX_REQUESTS_PER_SECOND: "20",
       NETWORK: "ethereum",
-      DAO_ID: "ENS",
+      DAO_ID: dao,
       CHAIN_ID: "1",
       NODE_ENV: $dev ? "development" : "production",
-      PONDER_LOG_LEVEL: "debug",
     },
     image: {
       context: "../..",
       dockerfile: "apps/indexer/Dockerfile.indexer",
+      args: {
+        CONFIG_FILE: `config/${dao.toLowerCase()}.config.ts`,
+        SCHEMA: schema
+      },
     },
     dev: {
-      command: "pnpm -w indexer dev --config config/ens.config.ts",
+      command: `pnpm -w indexer dev --config config/${dao.toLowerCase()}.config.ts`,
     },
   });
 }

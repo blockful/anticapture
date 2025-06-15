@@ -3,7 +3,9 @@ import { Resource } from "sst";
 
 import { processConfig } from '@graphql-mesh/config'
 
-dotenv.config();
+if (process.env.NODE_ENV === "local") {
+  dotenv.config();
+}
 
 const env =
   process.env.NODE_ENV !== "production"

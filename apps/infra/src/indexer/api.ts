@@ -3,15 +3,17 @@
 import { Output } from "@pulumi/pulumi";
 
 export function newIndexerAPI(
+  dao: string,
   cluster: sst.aws.Cluster,
   db: sst.aws.Postgres,
   rpcUrl: Output<string>,
+  schema: string,
 ): sst.aws.Service {
   // const duneApiUrl = new sst.Secret("DuneAPIUrl")
   // const duneApiKey = new sst.Secret("DuneAPIKey")
   // const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
 
-  return new sst.aws.Service("EnsIndexerAPI", {
+  return new sst.aws.Service(`${dao}IndexerAPI`, {
     cluster,
     memory: "0.5 GB",
     cpu: "0.25 vCPU",
@@ -27,7 +29,7 @@ export function newIndexerAPI(
       DATABASE_URL: $interpolate`postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`,
       RPC_URL: rpcUrl,
       NETWORK: "ethereum",
-      DAO_ID: "ENS",
+      DAO_ID: dao,
       CHAIN_ID: "1",
       NODE_ENV: $dev ? "development" : "production",
       // DUNE_API_URL: duneApiUrl?.value,
@@ -47,12 +49,16 @@ export function newIndexerAPI(
     image: {
       context: "../..",
       dockerfile: "apps/indexer/Dockerfile.api",
+      args: {
+        CONFIG_FILE: `config/${dao.toLowerCase()}.config.ts`,
+        SCHEMA: schema
+      },
     },
     loadBalancer: {
       rules: [{ listen: "80/http", forward: "42069/http" }],
     },
     dev: {
-      command: "pnpm -w indexer serve --config config/ens.config.ts",
+      command: `pnpm -w indexer serve --config config/${dao.toLowerCase()}.config.ts`,
     },
   });
 }

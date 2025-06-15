@@ -17,11 +17,17 @@ export default $config({
 
     const ethereumRpc = new sst.Secret("EthereumRPC", "http://localhost:8545")
 
-    const db = newDatabase("ENS")
-    newIndexer(cluster, db, $dev ? "http://localhost:8545" : ethereumRpc.value)
-    const indexerAPI = newIndexerAPI(cluster, db, ethereumRpc.value)
+    const schema = crypto.randomUUID();
+
+    const apis = []
+    for (const dao of ["ENS", "UNI"]) {
+      const db = newDatabase(dao)
+      newIndexer(dao, cluster, db, $dev ? "http://localhost:8545" : ethereumRpc.value, schema)
+      const indexerAPI = newIndexerAPI(dao, cluster, db, ethereumRpc.value, schema)
+      apis.push(indexerAPI)
+    }
 
     const { newGateway } = await import("./src/gateway.ts");
-    newGateway(cluster, [indexerAPI])
+    newGateway(cluster, apis)
   },
 });
