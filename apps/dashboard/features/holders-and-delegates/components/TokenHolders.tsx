@@ -3,7 +3,10 @@
 import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable, formatVariation } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
+import { tokenHoldersMock } from "@/features/holders-and-delegates/mock-data/TokenHoldersMock";
+import { formatAddress } from "@/shared/utils/formatAddress";
+import { Badge } from "@/shared/components/badges/Badge";
 
 interface TokenHolders {
   address: string | Address;
@@ -22,6 +25,18 @@ export const TokenHolders = () => {
           Address
         </div>
       ),
+      cell: ({ row }) => {
+        const addressValue: string = row.getValue("address");
+        const address = isAddress(addressValue)
+          ? formatAddress(addressValue)
+          : "Invalid address";
+
+        return (
+          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
+            {address}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "type",
@@ -30,11 +45,20 @@ export const TokenHolders = () => {
           Type
         </div>
       ),
+      cell: ({ row }) => {
+        const typeValue: string = row.getValue("type");
+        const type = typeValue === "Contract" ? "Contract" : "EOA";
+        return (
+          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
+            <Badge>{type}</Badge>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "balance",
       header: () => (
-        <div className="text-table-header flex w-full justify-end px-2 py-1.5">
+        <div className="text-table-header flex w-full px-2 py-1.5 sm:justify-end">
           Balance
         </div>
       ),
@@ -42,7 +66,7 @@ export const TokenHolders = () => {
         const balance: number = row.getValue("balance");
         return (
           <div className="font-nomal flex w-full justify-end px-2 py-1.5 text-sm">
-            {formatNumberUserReadable(balance)} ENS
+            {formatNumberUserReadable(balance, 1)} ENS
           </div>
         );
       },
@@ -54,7 +78,14 @@ export const TokenHolders = () => {
           Variation
         </div>
       ),
-      cell: ({ row }: any) => formatVariation(row.original.variation) + " ENS",
+      cell: ({ row }) => {
+        const variation: number = row.getValue("variation");
+        return (
+          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
+            {variation}%
+          </div>
+        );
+      },
     },
     {
       accessorKey: "delegate",
@@ -63,44 +94,56 @@ export const TokenHolders = () => {
           Delegate
         </div>
       ),
+      cell: ({ row }) => {
+        const delegate: string = row.getValue("delegate");
+        const delegateAddress = isAddress(delegate)
+          ? formatAddress(delegate)
+          : "Invalid address";
+
+        return (
+          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
+            {delegateAddress}
+          </div>
+        );
+      },
     },
   ];
 
   const data: TokenHolders[] = [
     {
-      address: "magicbear.eth",
-      type: "Contract",
-      balance: 3000,
+      address: tokenHoldersMock[0].accountId,
+      type: tokenHoldersMock[0].account.type,
+      balance: tokenHoldersMock[0].balance,
       variation: 300,
-      delegate: "0x9d2c...e34b",
+      delegate: tokenHoldersMock[0].delegate,
     },
     {
-      address: "0x2cbe...bbf8",
-      type: "EOA",
-      balance: 3000,
+      address: tokenHoldersMock[1].accountId,
+      type: tokenHoldersMock[1].account.type,
+      balance: tokenHoldersMock[1].balance,
       variation: 300,
-      delegate: "0x9d2c...e34b",
+      delegate: tokenHoldersMock[1].delegate,
     },
     {
-      address: "zeugh.eth",
-      type: "EOA",
-      balance: 3000,
+      address: tokenHoldersMock[2].accountId,
+      type: tokenHoldersMock[2].account.type,
+      balance: tokenHoldersMock[2].balance,
       variation: 300,
-      delegate: "0x9d2c...e34b",
+      delegate: tokenHoldersMock[2].delegate,
     },
     {
-      address: "0x4c1d...9b7f",
-      type: "EOA",
-      balance: 3000,
+      address: tokenHoldersMock[3].accountId,
+      type: tokenHoldersMock[3].account.type,
+      balance: tokenHoldersMock[3].balance,
       variation: 300,
-      delegate: "0x9d2c...e34b",
+      delegate: tokenHoldersMock[3].delegate,
     },
     {
-      address: "isadora.eth",
-      type: "Contract",
-      balance: 3000,
+      address: tokenHoldersMock[4].accountId,
+      type: tokenHoldersMock[4].account.type,
+      balance: tokenHoldersMock[4].balance,
       variation: 300,
-      delegate: "0x9d2c...e34b",
+      delegate: tokenHoldersMock[4].delegate,
     },
   ];
 
