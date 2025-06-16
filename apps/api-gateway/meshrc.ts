@@ -1,32 +1,11 @@
 import dotenv from "dotenv";
-import { Resource } from "sst";
-
 import { processConfig } from '@graphql-mesh/config'
 
-if (process.env.NODE_ENV === "local") {
-  dotenv.config();
-}
+dotenv.config();
 
-const env =
-  process.env.NODE_ENV !== "production"
-    ? process.env
-    : {
-      ...Object.entries(Resource)
-        .filter(([key, value]) => /(\w+)IndexerAPI/.test(key) && value.url)
-        .map(([key, value]) => {
-          const daoName = /(\w+)IndexerAPI/.exec(key)?.[1];
-          return [`DAO_API_${daoName?.toUpperCase()}`, value.url];
-        })
-        .reduce((acc, [key, value]) => ({
-          ...acc,
-          [key]: value
-        }), {}),
-    }
-
-console.log({ env, Resource })
 
 export default processConfig({
-  sources: Object.entries(env)
+  sources: Object.entries(process.env)
     .filter(([key]) => key.startsWith('DAO_API_'))
     .flatMap(([key, value]) => {
       if (!value) return [];
@@ -38,6 +17,8 @@ export default processConfig({
           handler: {
             graphql: {
               endpoint: value,
+              retry: 5,
+              timeout: 30000
             }
           }
         },
