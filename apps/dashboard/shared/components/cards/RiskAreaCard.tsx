@@ -129,19 +129,22 @@ const RiskAreaCardInternal = ({
           )}
         >
           <span
-            className={cn("block font-mono font-medium sm:tracking-wider", {
-              "!text-secondary": risk.level === RiskLevel.NONE,
-              "!text-success":
-                risk.level === RiskLevel.LOW && !isActive && !isHovered,
-              "!text-warning":
-                risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-              "!text-error":
-                risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "!text-inverted":
-                isActive && risk.level !== RiskLevel.NONE && isHovered,
-              "text-alternative-sm": isRiskAnalysis,
-              "text-xs": !isRiskAnalysis,
-            })}
+            className={cn(
+              "block font-mono font-medium text-black sm:tracking-wider",
+              {
+                "!text-secondary": risk.level === RiskLevel.NONE,
+                "!text-success":
+                  risk.level === RiskLevel.LOW && !isActive && !isHovered,
+                "!text-warning":
+                  risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
+                "!text-error":
+                  risk.level === RiskLevel.HIGH && !isActive && !isHovered,
+                "!text-inverted":
+                  isActive && risk.level !== RiskLevel.NONE && isHovered,
+                "text-alternative-sm": isRiskAnalysis,
+                "text-xs": !isRiskAnalysis,
+              },
+            )}
             title={risk.name}
           >
             {risk.content ? risk.content : risk.name}
@@ -345,7 +348,6 @@ export const RiskAreaCardWrapper = ({
           {title}
         </h3>
       )}
-
       <div className={cn("", className)}>
         {riskAreas.map((risk: RiskArea, index: number) => (
           <RiskAreaCard
