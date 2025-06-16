@@ -8,14 +8,14 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "dist",
   },
   "include": [
     "src/**/*",
     "documents/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "dist"
+    "node_modules/",
+    "dist/"
   ]
 }
