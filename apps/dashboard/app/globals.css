@@ -266,7 +266,7 @@
 
   :root {
     --radius: 0.625rem;
-    --base-background: #ffffff;
+    --base-background: #FAFAFA;
     --base-foreground: #09090b;
     --base-muted: #F4F4F5;
     --base-muted-foreground: #71717A;
