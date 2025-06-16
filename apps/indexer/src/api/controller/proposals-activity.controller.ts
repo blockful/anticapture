@@ -84,7 +84,7 @@ export function proposalsActivity(app: Hono) {
                         support: z.string().nullable(),
                         votingPower: z.string().default("0"),
                         reason: z.string().nullable(),
-                        timestamp: z.string().nullable(),
+                        timestamp: z.string(),
                       })
                       .nullable(),
                   }),
