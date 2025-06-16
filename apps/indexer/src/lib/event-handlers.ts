@@ -69,12 +69,23 @@ export const delegateChanged = async (
     })
     .onConflictDoNothing();
 
+  // Get the delegator's current balance
+  const delegatorBalance = await context.db.find(accountBalance, {
+    accountId: event.args.delegator,
+    tokenId: event.log.address,
+  });
+
+  const delegatedValue = delegatorBalance?.balance ?? BigInt(0);
+
   // Create a new delegation record
   await context.db.insert(delegation).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    transactionHash: event.transaction.hash,
+    logIndex: event.log.logIndex,
     daoId,
     delegateAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
+    delegatedValue,
+    previousDelegate: event.args.fromDelegate,
     timestamp: event.block.timestamp,
   });
 
@@ -82,7 +93,6 @@ export const delegateChanged = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [event.args.delegator, event.log.address].join("-"),
       accountId: event.args.delegator,
       tokenId: event.log.address,
       delegate: event.args.toDelegate,
@@ -95,7 +105,10 @@ export const delegateChanged = async (
   // Update the old delegate's delegations count
   if (event.args.fromDelegate != zeroAddress) {
     await context.db
-      .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
+      .update(accountPower, {
+        accountId: event.args.fromDelegate,
+        daoId,
+      })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
 
@@ -103,7 +116,6 @@ export const delegateChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.toDelegate, daoId].join("-"),
       accountId: event.args.toDelegate,
       daoId,
       delegationsCount: 1,
@@ -152,7 +164,8 @@ export const delegatedVotesChanged = async (
 
   // Create a new voting power history record
   await context.db.insert(votingPowerHistory).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    transactionHash: event.transaction.hash,
+    logIndex: event.log.logIndex,
     accountId: event.args.delegate,
     daoId,
     votingPower: newBalance,
@@ -163,7 +176,6 @@ export const delegatedVotesChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.delegate, daoId].join("-"),
       accountId: event.args.delegate,
       daoId,
       votingPower: newBalance,
@@ -235,7 +247,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(transfer)
     .values({
-      id: [event.transaction.hash, event.log.logIndex].join("-"),
+      transactionHash: event.transaction.hash,
+      logIndex: event.log.logIndex,
       daoId,
       tokenId: tokenAddress,
       amount: value,
@@ -249,10 +262,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [to, tokenAddress].join("-"),
-      daoId,
-      tokenId: tokenAddress,
       accountId: to,
+      tokenId: tokenAddress,
       balance: value,
       delegate: zeroAddress,
     })
@@ -265,10 +276,8 @@ export const tokenTransfer = async (
     await context.db
       .insert(accountBalance)
       .values({
-        id: [from, tokenAddress].join("-"),
-        daoId,
-        tokenId: tokenAddress,
         accountId: from,
+        tokenId: tokenAddress,
         balance: -value,
         delegate: zeroAddress,
       })
@@ -490,9 +499,8 @@ export const voteCast = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.voter, daoId].join("-"),
-      daoId,
       accountId: event.args.voter,
+      daoId,
       votesCount: 1,
       lastVoteTimestamp: event.block.timestamp,
       firstVoteTimestamp: event.block.timestamp, // Set as first vote timestamp for new accounts
@@ -581,9 +589,8 @@ export const proposalCreated = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.proposer, daoId].join("-"),
-      daoId,
       accountId: event.args.proposer,
+      daoId,
       proposalsCount: 1,
     })
     .onConflictDoUpdate((current) => ({

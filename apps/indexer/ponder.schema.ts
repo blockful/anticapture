@@ -38,14 +38,16 @@ export const account = onchainTable("account", (drizzle) => ({
 export const accountBalance = onchainTable(
   "account_balance",
   (drizzle) => ({
-    id: drizzle.text().primaryKey(),
-    tokenId: drizzle.text("token_id"),
-    accountId: drizzle.text("account_id"),
+    accountId: drizzle.text("account_id").notNull(),
+    tokenId: drizzle.text("token_id").notNull(),
     balance: drizzle.bigint().notNull(),
     // This field represents for who the account is delegating their voting power to
     delegate: drizzle.text().default(zeroAddress).notNull(),
   }),
   (table) => ({
+    pk: primaryKey({
+      columns: [table.accountId, table.tokenId],
+    }),
     accountBalanceAccountIdx: index().on(table.accountId),
     accountBalanceTokenIdx: index().on(table.tokenId),
     accountBalanceDelegateIdx: index().on(table.delegate),
@@ -55,9 +57,8 @@ export const accountBalance = onchainTable(
 export const accountPower = onchainTable(
   "account_power",
   (drizzle) => ({
-    id: drizzle.text().primaryKey(),
-    accountId: drizzle.text("account_id"),
-    daoId: drizzle.text("dao_id"),
+    accountId: drizzle.text("account_id").notNull(),
+    daoId: drizzle.text("dao_id").notNull(),
     votingPower: drizzle.bigint("voting_power").default(BigInt(0)).notNull(),
     votesCount: drizzle.integer("votes_count").default(0).notNull(),
     proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
@@ -69,6 +70,9 @@ export const accountPower = onchainTable(
     firstVoteTimestamp: drizzle.bigint("first_vote_timestamp"),
   }),
   (table) => ({
+    pk: primaryKey({
+      columns: [table.accountId, table.daoId],
+    }),
     accountPowerAccountIdx: index().on(table.accountId),
     accountPowerDaoIdx: index().on(table.daoId),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
@@ -78,13 +82,17 @@ export const accountPower = onchainTable(
 export const votingPowerHistory = onchainTable(
   "voting_power_history",
   (drizzle) => ({
-    id: drizzle.text().primaryKey(),
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
     daoId: drizzle.text("dao_id"),
     accountId: drizzle.text("account_id"),
     votingPower: drizzle.bigint("voting_power").notNull(),
     timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
+    pk: primaryKey({
+      columns: [table.transactionHash, table.logIndex],
+    }),
     votingPowerHistoryAccountIdx: index().on(table.accountId),
     votingPowerHistoryDaoIdx: index().on(table.daoId),
   }),
@@ -93,13 +101,19 @@ export const votingPowerHistory = onchainTable(
 export const delegation = onchainTable(
   "delegations",
   (drizzle) => ({
-    id: drizzle.text().primaryKey(),
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
     daoId: drizzle.text("dao_id"),
     delegateAccountId: drizzle.text("delegate_account_id"),
     delegatorAccountId: drizzle.text("delegator_account_id"),
+    delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
+    previousDelegate: drizzle.text("previous_delegate"),
     timestamp: drizzle.bigint(),
   }),
   (table) => ({
+    pk: primaryKey({
+      columns: [table.transactionHash, table.logIndex],
+    }),
     delegationsDaoIdx: index().on(table.daoId),
     delegationsDelegateeIdx: index().on(table.delegateAccountId),
     delegationsDelegatorIdx: index().on(table.delegatorAccountId),
@@ -109,7 +123,8 @@ export const delegation = onchainTable(
 export const transfer = onchainTable(
   "transfers",
   (drizzle) => ({
-    id: drizzle.text().primaryKey(),
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
     daoId: drizzle.text("dao_id"),
     tokenId: drizzle.text("token_id"),
     amount: drizzle.bigint(),
@@ -118,6 +133,9 @@ export const transfer = onchainTable(
     timestamp: drizzle.bigint(),
   }),
   (table) => ({
+    pk: primaryKey({
+      columns: [table.transactionHash, table.logIndex],
+    }),
     transfersDaoIdx: index().on(table.daoId),
     transfersTokenIdx: index().on(table.tokenId),
   }),

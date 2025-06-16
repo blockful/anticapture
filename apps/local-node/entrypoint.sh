@@ -49,7 +49,9 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
 
     echo "🏛️ Setting up governance environment (delegation and tokens)..."
     # Chain all governance setup steps
-    forge script script/SimpleDelegation.s.sol:SimpleDelegation --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY && {
+    
+    # Alice delegates to herself (basic delegation setup)
+    forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $ALICE_KEY 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 "Alice self-delegates to activate voting power" --rpc-url http://localhost:8545 --broadcast && {
         echo "✅ Basic delegation completed"
         echo "💰 Distributing tokens to other accounts..."
 
@@ -58,8 +60,19 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
         echo "✅ Token distribution completed"
         echo "🗳️ Setting up delegations..."
 
-        forge script script/DelegateTokens.s.sol:DelegateTokens --rpc-url http://localhost:8545 --broadcast
+        # Bob delegates to himself (self-delegation)
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $BOB_KEY 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 "Bob self-delegates to activate voting power" --rpc-url http://localhost:8545 --broadcast
+        sleep 1
+        
+        # Charlie delegates to himself (self-delegation) 
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $CHARLIE_KEY 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC "Charlie self-delegates to activate voting power" --rpc-url http://localhost:8545 --broadcast
+        sleep 1
+        
+        # David delegates to himself (self-delegation)
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $DAVID_KEY 0x90F79bf6EB2c4f870365E785982E1f101E93b906 "David self-delegates to activate voting power" --rpc-url http://localhost:8545 --broadcast
         sleep 2
+        
+
     } && {
         echo "💰 Funding ENS Timelock with treasury funds..."
 
@@ -162,6 +175,26 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
         forge script script/VoteProposal.s.sol --sig "run(string,address,uint256,string,uint8,uint8,uint8)" "Proposal 4" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 3000000000000000000 "Proposal 4: Transfer 3 ENS tokens to Alice as performance bonus" 0 0 0 --rpc-url http://localhost:8545 --broadcast
         
         echo "✅ Proposal 4 left in voted state for testing variety!"
+        
+        echo "🔄 Creating post-voting delegation events for testing..."
+        
+        # Charlie delegates to Alice (consolidating power after voting)
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $CHARLIE_KEY 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 "Charlie delegates to Alice after voting" --rpc-url http://localhost:8545 --broadcast
+        sleep 1
+        
+        # Bob delegates to Alice (creating delegation chain)
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $BOB_KEY 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 "Bob delegates to Alice" --rpc-url http://localhost:8545 --broadcast
+        sleep 1
+        
+        # Alice delegates to David (redistributing consolidated power)
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $ALICE_KEY 0x90F79bf6EB2c4f870365E785982E1f101E93b906 "Alice delegates to David" --rpc-url http://localhost:8545 --broadcast
+        sleep 1
+        
+        # Bob changes delegate to Charlie (circular delegation)
+        forge script script/DelegateToken.s.sol --sig "run(uint256,address,string)" $BOB_KEY 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC "Bob delegates to Charlie" --rpc-url http://localhost:8545 --broadcast
+        sleep 1
+        
+        echo "✅ Post-voting delegation events completed!"
         
         echo "✅ Parameterized governance flow completed successfully!"
         echo "🎉 Development environment ready with:"
