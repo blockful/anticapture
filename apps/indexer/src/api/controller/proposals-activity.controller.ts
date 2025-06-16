@@ -7,9 +7,18 @@ import {
   ProposalsActivityService,
   ProposalWithUserVote,
 } from "@/api/services/proposals-activity/proposals-activity.service";
+import {
+  ProposalsActivityRepositoryInterface,
+  DrizzleProposalsActivityRepository,
+} from "@/api/repositories/proposals-activity.repository";
 
-export function proposalsActivity(app: Hono) {
-  const service = new ProposalsActivityService();
+export function proposalsActivity(
+  app: Hono,
+  repository?: ProposalsActivityRepositoryInterface,
+) {
+  const proposalsRepository =
+    repository || new DrizzleProposalsActivityRepository();
+  const service = new ProposalsActivityService(proposalsRepository);
 
   app.openapi(
     createRoute({

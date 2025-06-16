@@ -1,13 +1,13 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import {
-  ProposalsActivityRepository,
+  ProposalsActivityRepositoryInterface,
+  DrizzleProposalsActivityRepository,
   DbProposal,
   DbVote,
 } from "@/api/repositories/proposals-activity.repository";
+import { SECONDS_PER_BLOCK } from "@/lib/constants";
 
-// Constants
-const SECONDS_PER_BLOCK = 12; // Ethereum average
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
 export interface ProposalActivityRequest {
@@ -23,23 +23,23 @@ export interface ProposalWithUserVote {
     id: string;
     daoId: string;
     proposerAccountId: string;
-    description: string | null;
-    startBlock: string | null;
-    endBlock: string | null;
-    timestamp: string | null;
-    status: string | null;
-    forVotes: string | null;
-    againstVotes: string | null;
-    abstainVotes: string | null;
+    description: string;
+    startBlock: string;
+    endBlock: string;
+    timestamp: string;
+    status: string;
+    forVotes: number;
+    againstVotes: number;
+    abstainVotes: number;
   };
   userVote: {
     id: string;
     voterAccountId: string;
     proposalId: string;
-    support: string | null;
-    votingPower: string | null;
-    reason: string | null;
-    timestamp: string | null;
+    support: string;
+    votingPower: string;
+    reason: string;
+    timestamp: string;
   } | null;
 }
 
@@ -55,10 +55,10 @@ export interface DelegateProposalActivity {
 }
 
 export class ProposalsActivityService {
-  private repository: ProposalsActivityRepository;
+  private repository: ProposalsActivityRepositoryInterface;
 
-  constructor() {
-    this.repository = new ProposalsActivityRepository();
+  constructor(repository?: ProposalsActivityRepositoryInterface) {
+    this.repository = repository || new DrizzleProposalsActivityRepository();
   }
 
   async getProposalsActivity({
@@ -80,6 +80,7 @@ export class ProposalsActivityService {
 
     // Get voting period for the DAO
     const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
+    const votingPeriodSeconds = votingPeriodBlocks * SECONDS_PER_BLOCK;
 
     // Calculate activity start time
     const activityStart = this.calculateActivityStart(
@@ -91,7 +92,7 @@ export class ProposalsActivityService {
     const proposals = await this.repository.getProposals(
       daoId,
       activityStart,
-      votingPeriodBlocks,
+      votingPeriodSeconds,
     );
 
     if (proposals.length === 0) {
@@ -101,7 +102,7 @@ export class ProposalsActivityService {
     const userVotes = await this.repository.getUserVotes(
       address,
       daoId,
-      proposals.map((p) => p.id),
+      proposals.map((p: DbProposal) => p.id),
     );
 
     // Build response
@@ -150,9 +151,9 @@ export class ProposalsActivityService {
           endBlock: proposal.end_block,
           timestamp: proposal.timestamp,
           status: proposal.status,
-          forVotes: proposal.for_votes,
-          againstVotes: proposal.against_votes,
-          abstainVotes: proposal.abstain_votes,
+          forVotes: Number(proposal.for_votes || 0),
+          againstVotes: Number(proposal.against_votes || 0),
+          abstainVotes: Number(proposal.abstain_votes || 0),
         },
         userVote: vote
           ? {

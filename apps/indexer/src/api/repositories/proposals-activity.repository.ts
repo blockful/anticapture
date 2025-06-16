@@ -3,21 +3,18 @@ import { DaoIdEnum } from "@/lib/enums";
 import { sql } from "ponder";
 import { db } from "ponder:api";
 
-// Constants
-const SECONDS_PER_BLOCK = 12; // Ethereum average
-
 export type DbProposal = {
   id: string;
   dao_id: string;
   proposer_account_id: string;
-  description: string | null;
-  start_block: string | null;
-  end_block: string | null;
-  timestamp: string | null;
-  status: string | null;
-  for_votes: string | null;
-  against_votes: string | null;
-  abstain_votes: string | null;
+  description: string;
+  start_block: string;
+  end_block: string;
+  timestamp: string;
+  status: string;
+  for_votes: string;
+  against_votes: string;
+  abstain_votes: string;
   proposal_end_timestamp: string;
 };
 
@@ -25,13 +22,36 @@ export type DbVote = {
   id: string;
   voter_account_id: string;
   proposal_id: string;
-  support: string | null;
-  voting_power: string | null;
-  reason: string | null;
-  timestamp: string | null;
+  support: string;
+  voting_power: string;
+  reason: string;
+  timestamp: string;
 };
 
-export class ProposalsActivityRepository {
+export interface ProposalsActivityRepositoryInterface {
+  getFirstVoteTimestamp(
+    address: Address,
+    daoId: DaoIdEnum,
+  ): Promise<number | null>;
+
+  getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number>;
+
+  getProposals(
+    daoId: DaoIdEnum,
+    activityStart: number,
+    votingPeriodSeconds: number,
+  ): Promise<DbProposal[]>;
+
+  getUserVotes(
+    address: Address,
+    daoId: DaoIdEnum,
+    proposalIds: string[],
+  ): Promise<DbVote[]>;
+}
+
+export class DrizzleProposalsActivityRepository
+  implements ProposalsActivityRepositoryInterface
+{
   async getFirstVoteTimestamp(
     address: Address,
     daoId: DaoIdEnum,
@@ -72,17 +92,14 @@ export class ProposalsActivityRepository {
   async getProposals(
     daoId: DaoIdEnum,
     activityStart: number,
-    votingPeriodBlocks: number,
+    votingPeriodSeconds: number,
   ): Promise<DbProposal[]> {
-    const votingPeriodSeconds = votingPeriodBlocks * SECONDS_PER_BLOCK;
-
     const query = sql`
       SELECT id, dao_id, proposer_account_id, description, start_block, end_block, 
              timestamp, status, for_votes, against_votes, abstain_votes,
              (timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp
       FROM proposals_onchain
-      WHERE dao_id = ${daoId}
-        AND (timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+      WHERE (timestamp + ${votingPeriodSeconds}) >= ${activityStart}
       ORDER BY timestamp DESC
     `;
 
