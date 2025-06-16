@@ -96,7 +96,7 @@ const RiskAreaCardInternal = ({
     <div
       className={cn(
         "flex h-full w-full flex-1 cursor-pointer items-center gap-1",
-        isPanelTable && "cursor-default",
+        isPanelTable || (risk.level === RiskLevel.NONE && "cursor-default"),
       )}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -224,7 +224,7 @@ const RiskAreaCardInternal = ({
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "bg-error/12":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "bg-surface-contrast": risk.level === undefined,
+              "bg-surface-contrast": risk.level === "NONE",
             })}
           />
         </div>
@@ -338,8 +338,7 @@ export const RiskAreaCardWrapper = ({
   className,
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
-  withTooltip = true,
-}: RiskAreaCardWrapperProps & { withTooltip?: boolean }) => {
+}: RiskAreaCardWrapperProps) => {
   return (
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
