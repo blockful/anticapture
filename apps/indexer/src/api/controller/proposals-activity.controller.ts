@@ -68,13 +68,13 @@ export function proposalsActivity(app: Hono) {
                       daoId: z.string(),
                       proposerAccountId: z.string(),
                       description: z.string().nullable(),
-                      startBlock: z.string().nullable(),
-                      endBlock: z.string().nullable(),
-                      timestamp: z.string().nullable(),
-                      status: z.string().nullable(),
-                      forVotes: z.string().nullable(),
-                      againstVotes: z.string().nullable(),
-                      abstainVotes: z.string().nullable(),
+                      startBlock: z.string(),
+                      endBlock: z.string(),
+                      timestamp: z.string(),
+                      status: z.string(),
+                      forVotes: z.number(), // default 0
+                      againstVotes: z.number(), // default 0
+                      abstainVotes: z.number(), // default 0
                     }),
                     userVote: z
                       .object({
