@@ -1,20 +1,23 @@
 "use client";
 
 import {
+  Badge,
   BaseCardDaoInfo,
   CardData,
   SwitchCardDaoInfoItem,
 } from "@/shared/components";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
-import { Clock4, ExternalLink } from "lucide-react";
+import { Clock, Clock4, ExternalLink } from "lucide-react";
 import { Address } from "viem";
 
+// timelock card section
 export const TimelockCard = ({
   daoOverview,
 }: {
   daoOverview: DaoOverviewConfig;
 }) => {
+  console.log("daoOverview", daoOverview);
   const timelockData: CardData = {
     title: "Timelock",
     icon: <Clock4 className="text-secondary size-4" />,
@@ -23,35 +26,51 @@ export const TimelockCard = ({
         title: "Timelock",
         tooltip:
           "A Timelock contract holds the DAO's assets. The Governor contract can execute approved proposals against these assets after a specified waiting period.",
-        items: [
-          <SwitchCardDaoInfoItem
-            switched={daoOverview.rules?.timelock}
-            icon={<ExternalLink className="text-secondary size-3.5" />}
-            onClick={() =>
-              openEtherscanAddress(daoOverview.contracts?.timelock as Address)
-            }
-            key={"switch"}
-          />,
-        ],
+        items: daoOverview.rules?.timelock
+          ? [
+              <SwitchCardDaoInfoItem
+                switched={daoOverview.rules?.timelock}
+                icon={<ExternalLink className="text-secondary size-3.5" />}
+                onClick={() =>
+                  openEtherscanAddress(
+                    daoOverview.contracts?.timelock as Address,
+                  )
+                }
+                key={"switch"}
+              />,
+            ]
+          : [
+              <Badge className="text-gray-500" key={"hello2"}>
+                <Clock className="size-3.5 text-gray-500" />
+                Research pending
+              </Badge>,
+            ],
       },
       {
         title: "Cancel Function",
         tooltip:
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
-        items: [
-          <SwitchCardDaoInfoItem
-            switched={daoOverview.rules?.cancelFunction}
-            icon={<ExternalLink className="text-secondary size-3.5" />}
-            onClick={() =>
-              window.open(
-                `${daoOverview.cancelFunction}`,
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-            key={"switch"}
-          />,
-        ],
+        items: daoOverview.rules?.cancelFunction
+          ? [
+              <SwitchCardDaoInfoItem
+                switched={daoOverview.rules?.cancelFunction}
+                icon={<ExternalLink className="text-secondary size-3.5" />}
+                onClick={() =>
+                  window.open(
+                    `${daoOverview.cancelFunction}`,
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
+                key={"switch"}
+              />,
+            ]
+          : [
+              <Badge className="text-gray-500" key={"hello2"}>
+                <Clock className="size-3.5 text-gray-500" />
+                Research pending
+              </Badge>,
+            ],
       },
     ],
   };
