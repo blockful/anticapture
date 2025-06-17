@@ -1,12 +1,16 @@
 "use client";
 
 import { TheTable } from "@/shared/components/tables/TheTable";
-import { formatNumberUserReadable, formatVariation } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { tokenHoldersMock } from "@/features/holders-and-delegates/mock-data/TokenHoldersMock";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { Badge } from "@/shared/components/badges/Badge";
+import { CheckIcon, Filter } from "lucide-react";
+import { useState } from "react";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import { Button } from "@/shared/components/ui/button";
 
 interface TokenHolders {
   address: string | Address;
@@ -17,6 +21,7 @@ interface TokenHolders {
 }
 
 export const TokenHolders = () => {
+  const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
     {
       accessorKey: "address",
@@ -40,11 +45,48 @@ export const TokenHolders = () => {
     },
     {
       accessorKey: "type",
-      header: () => (
-        <div className="text-table-header flex w-full items-start justify-start px-2 py-1.5">
-          Type
-        </div>
-      ),
+      enableColumnFilter: true,
+      header: ({ column }) => {
+        const filterValue = column.getFilterValue();
+        const options = ["Remove All", "Contract", "EOA"];
+
+        return (
+          <div className="text-table-header relative flex w-full items-start justify-start gap-1.5 px-2 py-1.5">
+            Type
+            <button
+              className="hover:border-highlight flex items-center p-1"
+              onClick={() => setFilterOpen(!filterOpen)}
+            >
+              <Filter className="size-3" />
+            </button>
+            {filterOpen && (
+              <div className="absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+                {options.map((option) => {
+                  const value = option === "Remove All" ? undefined : option;
+                  const isSelected = filterValue === value;
+
+                  return (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        column.setFilterValue(value);
+                        setFilterOpen(false);
+                      }}
+                      className={cn(
+                        "text-primary flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-[#26262A]",
+                        isSelected && "bg-middle-dark",
+                      )}
+                    >
+                      <span>{option}</span>
+                      {isSelected && <CheckIcon className="size-3.5" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      },
       cell: ({ row }) => {
         const typeValue: string = row.getValue("type");
         const type = typeValue === "Contract" ? "Contract" : "EOA";
@@ -57,9 +99,26 @@ export const TokenHolders = () => {
     },
     {
       accessorKey: "balance",
-      header: () => (
+      header: ({ column }) => (
         <div className="text-table-header flex w-full px-2 py-1.5 sm:justify-end">
           Balance
+          <button
+            className="!text-table-header cursor-pointer justify-end text-end"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "ml-2 size-4",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </button>
         </div>
       ),
       cell: ({ row }) => {
@@ -73,9 +132,26 @@ export const TokenHolders = () => {
     },
     {
       accessorKey: "variation",
-      header: () => (
+      header: ({ column }) => (
         <div className="text-table-header flex w-full items-start justify-start px-2 py-1.5">
           Variation
+          <button
+            className="!text-table-header cursor-pointer justify-end text-end"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "ml-2 size-4",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </button>
         </div>
       ),
       cell: ({ row }) => {
@@ -150,7 +226,12 @@ export const TokenHolders = () => {
   return (
     <div className="flex">
       <div className="w-full text-white">
-        <TheTable columns={tokenHoldersColumns} data={data} />
+        <TheTable
+          columns={tokenHoldersColumns}
+          data={data}
+          filterColumn="type"
+          withSorting={true}
+        />
       </div>
     </div>
   );
