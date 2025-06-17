@@ -7,9 +7,18 @@ import {
   ProposalsActivityService,
   ProposalWithUserVote,
 } from "@/api/services/proposals-activity/proposals-activity.service";
+import {
+  ProposalsActivityRepositoryInterface,
+  DrizzleProposalsActivityRepository,
+} from "@/api/repositories/proposals-activity.repository";
 
-export function proposalsActivity(app: Hono) {
-  const service = new ProposalsActivityService();
+export function proposalsActivity(
+  app: Hono,
+  repository?: ProposalsActivityRepositoryInterface,
+) {
+  const proposalsRepository =
+    repository || new DrizzleProposalsActivityRepository();
+  const service = new ProposalsActivityService(proposalsRepository);
 
   app.openapi(
     createRoute({
@@ -68,13 +77,13 @@ export function proposalsActivity(app: Hono) {
                       daoId: z.string(),
                       proposerAccountId: z.string(),
                       description: z.string().nullable(),
-                      startBlock: z.string().nullable(),
-                      endBlock: z.string().nullable(),
-                      timestamp: z.string().nullable(),
-                      status: z.string().nullable(),
-                      forVotes: z.string().nullable(),
-                      againstVotes: z.string().nullable(),
-                      abstainVotes: z.string().nullable(),
+                      startBlock: z.string(),
+                      endBlock: z.string(),
+                      timestamp: z.string(),
+                      status: z.string(),
+                      forVotes: z.number(), // default 0
+                      againstVotes: z.number(), // default 0
+                      abstainVotes: z.number(), // default 0
                     }),
                     userVote: z
                       .object({
@@ -82,9 +91,9 @@ export function proposalsActivity(app: Hono) {
                         voterAccountId: z.string(),
                         proposalId: z.string(),
                         support: z.string().nullable(),
-                        votingPower: z.string().nullable(),
+                        votingPower: z.string().default("0"),
                         reason: z.string().nullable(),
-                        timestamp: z.string().nullable(),
+                        timestamp: z.string(),
                       })
                       .nullable(),
                   }),

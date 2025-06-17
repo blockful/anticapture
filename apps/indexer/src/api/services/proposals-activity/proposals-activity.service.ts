@@ -1,7 +1,14 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
-import { sql } from "ponder";
-import { db } from "ponder:api";
+import {
+  ProposalsActivityRepositoryInterface,
+  DrizzleProposalsActivityRepository,
+  DbProposal,
+  DbVote,
+} from "@/api/repositories/proposals-activity.repository";
+import { SECONDS_PER_BLOCK } from "@/lib/constants";
+
+const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
 export interface ProposalActivityRequest {
   address: Address;
@@ -16,23 +23,23 @@ export interface ProposalWithUserVote {
     id: string;
     daoId: string;
     proposerAccountId: string;
-    description: string | null;
-    startBlock: string | null;
-    endBlock: string | null;
-    timestamp: string | null;
-    status: string | null;
-    forVotes: string | null;
-    againstVotes: string | null;
-    abstainVotes: string | null;
+    description: string;
+    startBlock: string;
+    endBlock: string;
+    timestamp: string;
+    status: string;
+    forVotes: number;
+    againstVotes: number;
+    abstainVotes: number;
   };
   userVote: {
     id: string;
     voterAccountId: string;
     proposalId: string;
-    support: string | null;
-    votingPower: string | null;
-    reason: string | null;
-    timestamp: string | null;
+    support: string;
+    votingPower: string;
+    reason: string;
+    timestamp: string;
   } | null;
 }
 
@@ -48,9 +55,12 @@ export interface DelegateProposalActivity {
 }
 
 export class ProposalsActivityService {
-  /**
-   * Get proposal activity data for a single delegate
-   */
+  private repository: ProposalsActivityRepositoryInterface;
+
+  constructor(repository?: ProposalsActivityRepositoryInterface) {
+    this.repository = repository || new DrizzleProposalsActivityRepository();
+  }
+
   async getProposalsActivity({
     address,
     fromDate,
@@ -58,156 +68,80 @@ export class ProposalsActivityService {
     skip = 0,
     limit = 10,
   }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
-    return await this.getActivityForAddress(
+    // Check if user has ever voted
+    const firstVoteTimestamp = await this.repository.getFirstVoteTimestamp(
       address,
-      fromDate,
       daoId,
-      skip,
-      limit
     );
-  }
-
-  /**
-   * Get proposal activity for a single address
-   */
-  private async getActivityForAddress(
-    address: Address,
-    fromDate: number | undefined,
-    daoId: DaoIdEnum,
-    skip: number = 0,
-    limit: number = 10
-  ): Promise<DelegateProposalActivity> {
-    // Get the DAO voting period to calculate proposal end times
-    const daoQuery = sql`
-      SELECT voting_period
-      FROM dao
-      WHERE id = ${daoId}
-      LIMIT 1
-    `;
-
-    const daoResult = await db.execute<{
-      voting_period: string;
-    }>(daoQuery);
-    const votingPeriodBlocks = daoResult.rows[0]?.voting_period;
-
-    if (!votingPeriodBlocks) {
-      throw new Error(`DAO ${daoId} not found or missing voting period`);
-    }
-
-    // Get the first vote timestamp for this address
-    const firstVoteQuery = sql`
-      SELECT first_vote_timestamp
-      FROM account_power
-      WHERE account_id = ${address} AND dao_id = ${daoId}
-      LIMIT 1
-    `;
-
-    const firstVoteResult = await db.execute<{
-      first_vote_timestamp: string | null;
-    }>(firstVoteQuery);
-    const firstVoteTimestamp = firstVoteResult.rows[0]?.first_vote_timestamp;
 
     if (!firstVoteTimestamp) {
-      // User has never voted, return empty activity
-      return {
-        address,
-        totalProposals: 0,
-        votedProposals: 0,
-        neverVoted: true,
-        winRate: 0,
-        yesRate: 0,
-        avgTimeBeforeEnd: 0,
-        proposals: [],
-      };
+      return this.createEmptyActivity(address, true);
     }
 
-    const firstVoteTs = Number(firstVoteTimestamp);
+    // Get voting period for the DAO
+    const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
+    const votingPeriodSeconds = votingPeriodBlocks * SECONDS_PER_BLOCK;
 
     // Calculate activity start time
-    // If fromDate is provided and it's after the first vote, use fromDate
-    // Otherwise, use the first vote timestamp as the start
-    let activityStart = firstVoteTs;
-    if (fromDate && fromDate > firstVoteTs) {
-      activityStart = fromDate;
-    }
+    const activityStart = this.calculateActivityStart(
+      firstVoteTimestamp,
+      fromDate,
+    );
 
-    // Get all proposals where the voting period overlapped with the user's activity period
-    // A proposal is available for voting from timestamp to timestamp + voting_period_seconds
-    // We assume 1 block = 12 seconds for timestamp calculation (Ethereum average)
-    const votingPeriodSeconds = Number(votingPeriodBlocks) * 12;
-
-    // Find proposals where:
-    // proposal_end_time = timestamp + voting_period_seconds
-    // proposal_end_time >= activityStart (proposal was still votable when user became active)
-    const proposalsQuery = sql`
-      SELECT id, dao_id, proposer_account_id, description, start_block, end_block, 
-             timestamp, status, for_votes, against_votes, abstain_votes,
-             (timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp
-      FROM proposals_onchain
-      WHERE dao_id = ${daoId}
-        AND (timestamp + ${votingPeriodSeconds}) >= ${activityStart}
-      ORDER BY timestamp DESC
-    `;
-
-    const proposalsResult = await db.execute<{
-      id: string;
-      dao_id: string;
-      proposer_account_id: string;
-      description: string | null;
-      start_block: string | null;
-      end_block: string | null;
-      timestamp: string | null;
-      status: string | null;
-      for_votes: string | null;
-      against_votes: string | null;
-      abstain_votes: string | null;
-      proposal_end_timestamp: string;
-    }>(proposalsQuery);
-
-    const proposals = proposalsResult.rows;
+    // Get proposals and votes
+    const proposals = await this.repository.getProposals(
+      daoId,
+      activityStart,
+      votingPeriodSeconds,
+    );
 
     if (proposals.length === 0) {
-      return {
-        address,
-        totalProposals: 0,
-        votedProposals: 0,
-        neverVoted: false,
-        winRate: 0,
-        yesRate: 0,
-        avgTimeBeforeEnd: 0,
-        proposals: [],
-      };
+      return this.createEmptyActivity(address, false);
     }
 
-    // Get user's votes for these proposals
-    const proposalIds = proposals.map((p) => p.id);
+    const userVotes = await this.repository.getUserVotes(
+      address,
+      daoId,
+      proposals.map((p: DbProposal) => p.id),
+    );
 
-    const userVotesQuery = sql`
-      SELECT id, voter_account_id, proposal_id, support, voting_power, reason, timestamp
-      FROM votes_onchain
-      WHERE voter_account_id = ${address}
-        AND dao_id = ${daoId}
-        AND proposal_id IN (${sql.raw(proposalIds.map((id) => `'${id}'`).join(","))})
-    `;
+    // Build response
+    const proposalsWithVotes = this.buildProposalsWithVotes(
+      proposals,
+      userVotes,
+    );
+    const paginatedProposals = proposalsWithVotes.slice(skip, skip + limit);
+    const analytics = this.calculateAnalytics(proposals, userVotes);
 
-    const userVotesResult = await db.execute<{
-      id: string;
-      voter_account_id: string;
-      proposal_id: string;
-      support: string | null;
-      voting_power: string | null;
-      reason: string | null;
-      timestamp: string | null;
-    }>(userVotesQuery);
+    return {
+      address,
+      totalProposals: proposals.length,
+      votedProposals: userVotes.length,
+      neverVoted: false,
+      ...analytics,
+      proposals: paginatedProposals,
+    };
+  }
 
-    const userVotes = userVotesResult.rows;
+  private calculateActivityStart(
+    firstVoteTimestamp: number,
+    fromDate?: number,
+  ): number {
+    return fromDate && fromDate > firstVoteTimestamp
+      ? fromDate
+      : firstVoteTimestamp;
+  }
 
-    // Create a map of proposalId -> vote for quick lookup
+  private buildProposalsWithVotes(
+    proposals: DbProposal[],
+    userVotes: DbVote[],
+  ): ProposalWithUserVote[] {
     const voteMap = new Map(userVotes.map((vote) => [vote.proposal_id, vote]));
 
-    // Build proposals with user votes
-    const allProposalsWithVotes: ProposalWithUserVote[] = proposals.map(
-      (proposal) => ({
+    return proposals.map((proposal) => {
+      const vote = voteMap.get(proposal.id);
+
+      return {
         proposal: {
           id: proposal.id,
           daoId: proposal.dao_id,
@@ -217,107 +151,99 @@ export class ProposalsActivityService {
           endBlock: proposal.end_block,
           timestamp: proposal.timestamp,
           status: proposal.status,
-          forVotes: proposal.for_votes,
-          againstVotes: proposal.against_votes,
-          abstainVotes: proposal.abstain_votes,
+          forVotes: Number(proposal.for_votes || 0),
+          againstVotes: Number(proposal.against_votes || 0),
+          abstainVotes: Number(proposal.abstain_votes || 0),
         },
-        userVote: voteMap.get(proposal.id)
+        userVote: vote
           ? {
-              id: voteMap.get(proposal.id)!.id,
-              voterAccountId: voteMap.get(proposal.id)!.voter_account_id,
-              proposalId: voteMap.get(proposal.id)!.proposal_id,
-              support: voteMap.get(proposal.id)!.support,
-              votingPower: voteMap.get(proposal.id)!.voting_power,
-              reason: voteMap.get(proposal.id)!.reason,
-              timestamp: voteMap.get(proposal.id)!.timestamp,
+              id: vote.id,
+              voterAccountId: vote.voter_account_id,
+              proposalId: vote.proposal_id,
+              support: vote.support,
+              votingPower: vote.voting_power,
+              reason: vote.reason,
+              timestamp: vote.timestamp,
             }
           : null,
-      })
-    );
+      };
+    });
+  }
 
-    // Apply pagination to the proposals array
-    const proposalsWithVotes = allProposalsWithVotes.slice(skip, skip + limit);
-
-    // Calculate analytics
-    const votedProposals = userVotes.length;
-    const totalProposals = proposals.length;
-    const neverVoted = votedProposals === 0;
-
-    let winRate = 0;
-    let yesRate = 0;
-    let avgTimeBeforeEnd = 0;
-
-    if (votedProposals > 0) {
-      // Calculate yes rate (support = "1" means "For")
-      const yesVotes = userVotes.filter((vote) => vote.support === "1").length;
-      yesRate = (yesVotes / votedProposals) * 100;
-
-      // Calculate win rate - only consider proposals with final status
-      // Final statuses: "EXECUTED", "DEFEATED", "CANCELED", "EXPIRED" (case-insensitive)
-      // "PENDING" and "ACTIVE" should not count towards winRate
-      const finalStatuses = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
-
-      let winningVotes = 0;
-      let finishedProposalsVoted = 0;
-
-      for (const vote of userVotes) {
-        const proposal = proposals.find((p) => p.id === vote.proposal_id);
-        if (
-          proposal &&
-          proposal.status &&
-          finalStatuses.includes(proposal.status.toUpperCase()) &&
-          proposal.for_votes !== null &&
-          proposal.against_votes !== null &&
-          proposal.abstain_votes !== null
-        ) {
-          finishedProposalsVoted++;
-
-          // Determine winning side based on proposal outcome/status
-          // In governance, the "winning side" is determined by whether the proposal passed or failed
-          let winningSide = "0"; // Default to "Against" (proposal failed)
-
-          const statusUpper = proposal.status.toUpperCase();
-          if (statusUpper === "EXECUTED") {
-            // Proposal passed - FOR side won
-            winningSide = "1";
-          } else if (
-            statusUpper === "DEFEATED" ||
-            statusUpper === "CANCELED" ||
-            statusUpper === "EXPIRED"
-          ) {
-            // Proposal failed - AGAINST side won
-            winningSide = "0";
-          }
-
-          const userWon = vote.support === winningSide;
-          if (userWon) {
-            winningVotes++;
-          }
-        }
-      }
-
-      // Only calculate winRate if user voted on finished proposals
-      winRate =
-        finishedProposalsVoted > 0
-          ? (winningVotes / finishedProposalsVoted) * 100
-          : 0;
-
-      // Calculate average time before end
-      // This is tricky since we need to convert block numbers to timestamps
-      // For now, we'll skip this calculation and return 0
-      // TODO: Implement proper block-to-timestamp conversion
-      avgTimeBeforeEnd = 0;
+  private calculateAnalytics(proposals: DbProposal[], userVotes: DbVote[]) {
+    if (userVotes.length === 0) {
+      return { winRate: 0, yesRate: 0, avgTimeBeforeEnd: 0 };
     }
 
+    // Calculate yes rate (support = "1" means "For")
+    const yesVotes = userVotes.filter((vote) => vote.support === "1").length;
+    const yesRate = (yesVotes / userVotes.length) * 100;
+
+    // Calculate win rate for finished proposals only
+    const { winningVotes, finishedProposalsVoted } = this.calculateWinRate(
+      proposals,
+      userVotes,
+    );
+    const winRate =
+      finishedProposalsVoted > 0
+        ? (winningVotes / finishedProposalsVoted) * 100
+        : 0;
+
+    return {
+      winRate: Math.round(winRate * 100) / 100,
+      yesRate: Math.round(yesRate * 100) / 100,
+      avgTimeBeforeEnd: 0, // TODO: Implement proper block-to-timestamp conversion
+    };
+  }
+
+  private calculateWinRate(proposals: DbProposal[], userVotes: DbVote[]) {
+    let winningVotes = 0;
+    let finishedProposalsVoted = 0;
+
+    for (const vote of userVotes) {
+      const proposal = proposals.find((p) => p.id === vote.proposal_id);
+
+      if (!this.isFinishedProposal(proposal)) continue;
+
+      finishedProposalsVoted++;
+
+      const winningSide = this.getWinningSide(proposal!.status!);
+      if (vote.support === winningSide) {
+        winningVotes++;
+      }
+    }
+
+    return { winningVotes, finishedProposalsVoted };
+  }
+
+  private isFinishedProposal(proposal: DbProposal | undefined): boolean {
+    return !!(
+      proposal?.status &&
+      FINAL_PROPOSAL_STATUSES.includes(proposal.status.toUpperCase()) &&
+      proposal.for_votes !== null &&
+      proposal.against_votes !== null &&
+      proposal.abstain_votes !== null
+    );
+  }
+
+  private getWinningSide(status: string): string {
+    const statusUpper = status.toUpperCase();
+    return statusUpper === "EXECUTED" ? "1" : "0"; // "1" = For, "0" = Against
+  }
+
+  private createEmptyActivity(
+    address: string,
+    neverVoted: boolean,
+  ): DelegateProposalActivity {
     return {
       address,
-      totalProposals,
-      votedProposals,
+      totalProposals: 0,
+      votedProposals: 0,
       neverVoted,
-      winRate: Math.round(winRate * 100) / 100, // Round to 2 decimal places
-      yesRate: Math.round(yesRate * 100) / 100,
-      avgTimeBeforeEnd: Math.round(avgTimeBeforeEnd * 100) / 100,
-      proposals: proposalsWithVotes,
+      winRate: 0,
+      yesRate: 0,
+      avgTimeBeforeEnd: 0,
+      proposals: [],
     };
   }
 }

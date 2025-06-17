@@ -13,6 +13,7 @@ import {
   proposalsActivity,
   historicalOnchain,
 } from "./controller";
+import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
@@ -30,7 +31,7 @@ const app = new Hono({
           message: validationError.message,
           details: validationError.details,
         },
-        400
+        400,
       );
     }
   },
@@ -53,10 +54,11 @@ if (env.COINGECKO_API_KEY) {
 }
 
 const repo = new DrizzleRepository();
+const proposalsRepo = new DrizzleProposalsActivityRepository();
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
-proposalsActivity(app);
+proposalsActivity(app, proposalsRepo);
 historicalOnchain(app);
 docs(app, env.API_URL!);
 
