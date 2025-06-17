@@ -39,8 +39,8 @@ export const TimelockCard = ({
               />,
             ]
           : [
-              <Badge className="text-gray-500" key={"hello2"}>
-                <Clock className="size-3.5 text-gray-500" />
+              <Badge className="text-secondary" key={"hello2"}>
+                <Clock className="text-secondary size-3" />
                 Research pending
               </Badge>,
             ],
@@ -65,8 +65,8 @@ export const TimelockCard = ({
               />,
             ]
           : [
-              <Badge className="text-gray-500" key={"hello2"}>
-                <Clock className="size-3.5 text-gray-500" />
+              <Badge className="text-secondary" key={"hello2"}>
+                <Clock className="text-secondary size-3" />
                 Research pending
               </Badge>,
             ],

@@ -53,7 +53,7 @@ export const CardDaoSignature = ({
             />
           </div>
         </div>
-        <div className="border-light-dark bg-surface-default flex w-full rounded-md border py-2.5 pr-[15px] pl-3.5 sm:hidden">
+        <div className="border-light-dark bg-surface-default flex w-full items-center justify-center rounded-md border py-2.5 pr-[15px] pl-3.5 sm:hidden">
           <Image
             alt={`${signatures?.userSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={

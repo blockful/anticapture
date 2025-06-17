@@ -85,7 +85,7 @@ export const StagesDaoOverview = ({
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
                   "text-success": currentStage === Stage.TWO,
-                  "text-gray-500": currentStage === Stage.NONE,
+                  "text-secondary": currentStage === Stage.NONE,
                 },
               )}
             >
