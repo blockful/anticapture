@@ -6,6 +6,7 @@ import { ENSTokenAbi } from "@/indexer/ens";
 import { ARBTokenAbi } from "@/indexer/arb";
 
 export const DAYS_IN_YEAR = 365;
+export const SECONDS_PER_BLOCK = 12; // Ethereum average
 
 export const CONTRACT_ADDRESSES: Record<
   NetworkEnum,

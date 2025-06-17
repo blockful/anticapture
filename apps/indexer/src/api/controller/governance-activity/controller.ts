@@ -70,10 +70,7 @@ export function governanceActivity(
     async (context) => {
       const { days } = context.req.valid("query");
       const data = await repository.getActiveSupply(days);
-      if (!data) {
-        return context.json({ error: "No data found" }, 404);
-      }
-      return context.json({ activeSupply: data.activeSupply }, 200);
+      return context.json({ activeSupply: data?.activeSupply || "0" });
     },
   );
 
