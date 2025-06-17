@@ -41,15 +41,12 @@ export const accountBalance = onchainTable(
     accountId: drizzle.text("account_id").notNull(),
     tokenId: drizzle.text("token_id").notNull(),
     balance: drizzle.bigint().notNull(),
-    // This field represents for who the account is delegating their voting power to
     delegate: drizzle.text().default(zeroAddress).notNull(),
   }),
   (table) => ({
     pk: primaryKey({
       columns: [table.accountId, table.tokenId],
     }),
-    accountBalanceAccountIdx: index().on(table.accountId),
-    accountBalanceTokenIdx: index().on(table.tokenId),
     accountBalanceDelegateIdx: index().on(table.delegate),
   }),
 );
@@ -73,8 +70,6 @@ export const accountPower = onchainTable(
     pk: primaryKey({
       columns: [table.accountId, table.daoId],
     }),
-    accountPowerAccountIdx: index().on(table.accountId),
-    accountPowerDaoIdx: index().on(table.daoId),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
   }),
 );
@@ -93,8 +88,6 @@ export const votingPowerHistory = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.logIndex],
     }),
-    votingPowerHistoryAccountIdx: index().on(table.accountId),
-    votingPowerHistoryDaoIdx: index().on(table.daoId),
   }),
 );
 
@@ -114,7 +107,6 @@ export const delegation = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.logIndex],
     }),
-    delegationsDaoIdx: index().on(table.daoId),
     delegationsDelegateeIdx: index().on(table.delegateAccountId),
     delegationsDelegatorIdx: index().on(table.delegatorAccountId),
   }),
@@ -136,7 +128,6 @@ export const transfer = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.logIndex],
     }),
-    transfersDaoIdx: index().on(table.daoId),
     transfersTokenIdx: index().on(table.tokenId),
   }),
 );
@@ -154,7 +145,6 @@ export const votesOnchain = onchainTable(
     timestamp: drizzle.bigint(),
   }),
   (table) => ({
-    votesOnchainDaoIdx: index().on(table.daoId),
     votesOnchainVoterIdx: index().on(table.voterAccountId),
     votesOnchainProposalIdx: index().on(table.proposalId),
   }),
