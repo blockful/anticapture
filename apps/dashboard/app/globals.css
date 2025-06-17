@@ -37,6 +37,7 @@
   --tracking-wider: 0.72px;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-scroll-left: scroll-left 20s linear infinite;
 
   /* DEV: TODO: Remove these colors once the new design system is fully implemented. 
    * Check the border colors and gradients as well.
@@ -120,6 +121,14 @@
     }
     to {
       height: 0;
+    }
+  }
+  @keyframes scroll-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
     }
   }
 }

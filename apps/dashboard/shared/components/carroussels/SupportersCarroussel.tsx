@@ -1,6 +1,3 @@
-"use client";
-
-import { useRef, useEffect } from "react";
 import { TooltipInfo } from "@/shared/components/tooltips/TooltipInfo";
 import { Address } from "viem";
 import {
@@ -18,44 +15,6 @@ export const SupportersCarroussel = ({
   supporters,
   isLoading,
 }: SupportersCarrousselProps) => {
-  // Use enough supporters for a smooth scrolling effect
-  let paddedSupporters = supporters;
-
-  const scrollContentRef = useRef<HTMLDivElement>(null);
-
-  // Set up the marquee-like animation
-  useEffect(() => {
-    const scrollElement = scrollContentRef.current;
-    if (!scrollElement) return;
-
-    let scrollPos = 0;
-    const totalWidth = scrollElement.scrollWidth;
-
-    // We'll reset when we're halfway through the content
-    const resetPoint = totalWidth / 2;
-
-    const scroll = () => {
-      if (!scrollElement) return;
-
-      scrollPos += 0.3;
-
-      // If we've scrolled past the first set of supporters,
-      // jump back to the beginning to create infinite loop
-      if (scrollPos >= resetPoint) {
-        scrollPos = 0;
-      }
-
-      scrollElement.scrollLeft = scrollPos;
-      requestAnimationFrame(scroll);
-    };
-
-    const animationId = requestAnimationFrame(scroll);
-
-    return () => {
-      cancelAnimationFrame(animationId);
-    };
-  }, [supporters.length]);
-
   return (
     <div className="border-light-dark bg-surface-background sm:bg-surface-default relative w-full overflow-hidden border-b p-4 sm:rounded-b-lg sm:border-t sm:border-b-0">
       <div className="flex w-full gap-2">
@@ -66,11 +25,8 @@ export const SupportersCarroussel = ({
       {/* Left shadow overlay */}
       <div className="sm:from-dark absolute top-0 left-3 z-10 h-full w-24 bg-linear-to-r from-[#18181B] to-transparent" />
 
-      <div className="relative rounded-lg pt-2">
-        <div
-          ref={scrollContentRef}
-          className="scrollbar-none flex items-center gap-2 overflow-x-auto px-4"
-        >
+      <div className="relative overflow-hidden rounded-lg pt-2">
+        <div className="animate-scroll-left flex items-center gap-2">
           {isLoading ? (
             <>
               {Array.from({ length: 40 }).map((_, index) => (
@@ -78,7 +34,7 @@ export const SupportersCarroussel = ({
               ))}
             </>
           ) : (
-            paddedSupporters.map((supporter, index) => (
+            supporters.map((supporter, index) => (
               <SupporterBadge
                 key={`${supporter}-${index}`}
                 address={supporter}
