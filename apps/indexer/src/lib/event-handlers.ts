@@ -80,7 +80,6 @@ export const delegateChanged = async (
   // Create a new delegation record
   await context.db.insert(delegation).values({
     transactionHash: event.transaction.hash,
-    logIndex: event.log.logIndex,
     daoId,
     delegateAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
@@ -130,7 +129,6 @@ export const delegatedVotesChanged = async (
   context: Context,
   daoId: string,
 ) => {
-  //Inserting delegate account if didn't exist with type verification
   const delegateType = await verifyAddressType(
     context.client,
     event.args.delegate,
@@ -162,7 +160,6 @@ export const delegatedVotesChanged = async (
     daoId,
   );
 
-  // Create a new voting power history record
   await context.db.insert(votingPowerHistory).values({
     transactionHash: event.transaction.hash,
     logIndex: event.log.logIndex,

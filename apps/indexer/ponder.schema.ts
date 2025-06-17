@@ -102,7 +102,6 @@ export const delegation = onchainTable(
   "delegations",
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
     daoId: drizzle.text("dao_id"),
     delegateAccountId: drizzle.text("delegate_account_id"),
     delegatorAccountId: drizzle.text("delegator_account_id"),
@@ -112,7 +111,7 @@ export const delegation = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.logIndex],
+      columns: [table.transactionHash],
     }),
     delegationsDaoIdx: index().on(table.daoId),
     delegationsDelegateeIdx: index().on(table.delegateAccountId),
@@ -124,7 +123,6 @@ export const transfer = onchainTable(
   "transfers",
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
     daoId: drizzle.text("dao_id"),
     tokenId: drizzle.text("token_id"),
     amount: drizzle.bigint(),
@@ -134,7 +132,7 @@ export const transfer = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.logIndex],
+      columns: [table.transactionHash],
     }),
     transfersDaoIdx: index().on(table.daoId),
     transfersTokenIdx: index().on(table.tokenId),
@@ -235,7 +233,7 @@ export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
   }),
 }));
 
-export const transferRelations = relations(transfer, ({ one }) => ({
+export const transferRelations = relations(transfer, ({ one, many }) => ({
   from: one(account, {
     fields: [transfer.fromAccountId],
     references: [account.id],
@@ -292,7 +290,7 @@ export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({
   }),
 }));
 
-export const delegationsRelations = relations(delegation, ({ one }) => ({
+export const delegationsRelations = relations(delegation, ({ one, many }) => ({
   delegate: one(account, {
     fields: [delegation.delegateAccountId],
     references: [account.id],
@@ -304,6 +302,26 @@ export const delegationsRelations = relations(delegation, ({ one }) => ({
     relationName: "delegator",
   }),
 }));
+
+export const votingPowerHistoryRelations = relations(
+  votingPowerHistory,
+  ({ one }) => ({
+    transfer: one(transfer, {
+      fields: [votingPowerHistory.transactionHash],
+      references: [transfer.transactionHash],
+      relationName: "votingPowerTransfer",
+    }),
+    delegation: one(delegation, {
+      fields: [votingPowerHistory.transactionHash],
+      references: [delegation.transactionHash],
+      relationName: "votingPowerDelegation",
+    }),
+    account: one(account, {
+      fields: [votingPowerHistory.accountId],
+      references: [account.id],
+    }),
+  }),
+);
 
 export const accountRelations = relations(account, ({ many }) => ({
   balances: many(accountBalance, {
