@@ -38,7 +38,6 @@ export const accountBalance = onchainTable(
   "account_balance",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    daoId: drizzle.text("dao_id"),
     tokenId: drizzle.text("token_id"),
     accountId: drizzle.text("account_id"),
     balance: drizzle.bigint().notNull(),
@@ -46,7 +45,6 @@ export const accountBalance = onchainTable(
     delegate: drizzle.text().default(zeroAddress).notNull(),
   }),
   (table) => ({
-    accountBalanceDaoIdx: index().on(table.daoId),
     accountBalanceAccountIdx: index().on(table.accountId),
     accountBalanceTokenIdx: index().on(table.tokenId),
     accountBalanceDelegateIdx: index().on(table.delegate),
@@ -131,7 +129,7 @@ export const votesOnchain = onchainTable(
     voterAccountId: drizzle.text("voter_account_id"),
     proposalId: drizzle.text("proposal_id"),
     support: drizzle.text(),
-    weight: drizzle.text(),
+    votingPower: drizzle.text(),
     reason: drizzle.text(),
     timestamp: drizzle.bigint(),
   }),
@@ -200,8 +198,8 @@ export const accountBalanceRelations = relations(
   ({ one, many }) => ({
     // Relation to the delegate's power
     delegatePower: one(accountPower, {
-      fields: [accountBalance.delegate, accountBalance.daoId],
-      references: [accountPower.accountId, accountPower.daoId],
+      fields: [accountBalance.delegate],
+      references: [accountPower.accountId],
       relationName: "delegatePower",
     }),
     // Relations to transfers
@@ -212,43 +210,52 @@ export const accountBalanceRelations = relations(
       references: [account.id],
       relationName: "account",
     }),
+    delegateeAccount: one(account, {
+      fields: [accountBalance.delegate],
+      references: [account.id],
+      relationName: "delegateeAccount",
+    }),
+    delegatedTo: one(accountPower, {
+      fields: [accountBalance.delegate],
+      references: [accountPower.accountId],
+      relationName: "delegatedTo",
+    }),
+    token: one(token, {
+      fields: [accountBalance.tokenId],
+      references: [token.id],
+      relationName: "token",
+    }),
   }),
 );
 
-export const transferRelations = relations(transfer, ({ one, many }) => ({
-  fromAccountBalance: one(accountBalance, {
-    fields: [transfer.fromAccountId],
-    references: [accountBalance.accountId],
-    relationName: "fromAccountBalance",
-  }),
-  toAccountBalance: one(accountBalance, {
-    fields: [transfer.toAccountId],
-    references: [accountBalance.accountId],
-    relationName: "toAccountBalance",
-  }),
+export const transferRelations = relations(transfer, ({ one }) => ({
   fromAccount: one(account, {
     fields: [transfer.fromAccountId],
     references: [account.id],
-    relationName: "fromAccount",
+    relationName: "from",
   }),
   toAccount: one(account, {
     fields: [transfer.toAccountId],
     references: [account.id],
-    relationName: "toAccount",
+    relationName: "to",
+  }),
+  token: one(token, {
+    fields: [transfer.tokenId],
+    references: [token.id],
+    relationName: "token",
   }),
 }));
 
 export const accountPowerRelations = relations(
   accountPower,
-  ({ many, one }) => ({
-    // All balances delegated to this account
-    delegatedBalances: many(accountBalance, {
-      relationName: "delegatePower",
-    }),
+  ({ one, many }) => ({
     account: one(account, {
       fields: [accountPower.accountId],
       references: [account.id],
       relationName: "account",
+    }),
+    delegatedFrom: many(accountBalance, {
+      relationName: "delegateeAccount",
     }),
   }),
 );
@@ -293,10 +300,13 @@ export const accountRelations = relations(account, ({ many }) => ({
   delegateeDelegations: many(delegation, {
     relationName: "delegatee",
   }),
+  delegatedFrom: many(accountBalance, {
+    relationName: "delegateeAccount",
+  }),
   sentTransfers: many(transfer, {
-    relationName: "fromAccount",
+    relationName: "from",
   }),
   receivedTransfers: many(transfer, {
-    relationName: "toAccount",
+    relationName: "to",
   }),
 }));

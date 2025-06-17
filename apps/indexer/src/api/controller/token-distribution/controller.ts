@@ -116,12 +116,6 @@ export function tokenDistribution(
               "application/json": { schema: resultSchema },
             },
           },
-          404: {
-            description: "No data found",
-            content: {
-              "application/json": { schema: z.object({ error: z.string() }) },
-            },
-          },
         },
       }),
       async (ctx) => {
@@ -130,7 +124,14 @@ export function tokenDistribution(
         const result = await repository.getSupplyComparison(metric, days);
 
         if (!result) {
-          return ctx.json({ error: "No data found" }, 404);
+          return ctx.json(
+            {
+              [`old${resultKey}`]: "0",
+              [`current${resultKey}`]: "0",
+              changeRate: 0,
+            } as z.infer<typeof resultSchema>,
+            200,
+          );
         }
 
         const { oldValue, currentValue } = result;
