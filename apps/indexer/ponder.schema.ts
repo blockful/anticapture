@@ -67,7 +67,7 @@ export const accountPower = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.accountId, table.daoId],
+      columns: [table.accountId],
     }),
     lastVoteTimestamp: index().on(table.lastVoteTimestamp),
   }),
