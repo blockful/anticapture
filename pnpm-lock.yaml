@@ -287,9 +287,6 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
-      sst:
-        specifier: 3.17.0
-        version: 3.17.0
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.19.1)(typescript@5.8.3)
@@ -299,7 +296,16 @@ importers:
 
   apps/indexer-metrics: {}
 
-  apps/infra:
+  apps/local-node:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: ^4.3.1
+        version: 4.9.6
+      forge-std:
+        specifier: github:foundry-rs/forge-std
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f
+
+  packages/infra:
     devDependencies:
       '@pulumi/aws':
         specifier: ^6.82.1
@@ -316,15 +322,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
-
-  apps/local-node:
-    dependencies:
-      '@openzeppelin/contracts':
-        specifier: ^4.3.1
-        version: 4.9.6
-      forge-std:
-        specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f
 
 packages:
 
