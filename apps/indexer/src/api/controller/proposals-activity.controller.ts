@@ -3,22 +3,14 @@ import { Address, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
-import {
-  ProposalsActivityService,
-  ProposalWithUserVote,
-} from "@/api/services/proposals-activity/proposals-activity.service";
-import {
-  ProposalsActivityRepositoryInterface,
-  DrizzleProposalsActivityRepository,
-} from "@/api/repositories/proposals-activity.repository";
+import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
+import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 
 export function proposalsActivity(
   app: Hono,
-  repository?: ProposalsActivityRepositoryInterface,
+  repository: ProposalsActivityRepository,
 ) {
-  const proposalsRepository =
-    repository || new DrizzleProposalsActivityRepository();
-  const service = new ProposalsActivityService(proposalsRepository);
+  const service = new ProposalsActivityService(repository);
 
   app.openapi(
     createRoute({

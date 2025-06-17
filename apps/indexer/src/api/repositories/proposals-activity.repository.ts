@@ -28,7 +28,7 @@ export type DbVote = {
   timestamp: string;
 };
 
-export interface ProposalsActivityRepositoryInterface {
+export interface ProposalsActivityRepository {
   getFirstVoteTimestamp(
     address: Address,
     daoId: DaoIdEnum,
@@ -50,7 +50,7 @@ export interface ProposalsActivityRepositoryInterface {
 }
 
 export class DrizzleProposalsActivityRepository
-  implements ProposalsActivityRepositoryInterface
+  implements ProposalsActivityRepository
 {
   async getFirstVoteTimestamp(
     address: Address,
