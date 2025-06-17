@@ -13,17 +13,18 @@
   "license": "ISC",
   "devDependencies": {
     "@graphql-mesh/cli": "^0.100.5",
+    "@types/node": "^24.0.3",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "sst": "^3.17.0",
     "@graphql-mesh/config": "^0.108.5",
     "@graphql-mesh/graphql": "^0.104.4",
     "@graphql-mesh/http": "^0.106.4",
     "@graphql-mesh/openapi": "^0.109.11",
     "@graphql-mesh/runtime": "^0.106.4",
     "@graphql-mesh/types": "^0.104.4",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "sst": "^3.17.0"
   }
 }
