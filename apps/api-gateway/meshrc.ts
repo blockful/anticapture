@@ -35,8 +35,6 @@ export default processConfig({
           handler: {
             graphql: {
               endpoint: value,
-              retry: 5,
-              timeout: 30000
             }
           }
         },
