@@ -29,6 +29,9 @@ export const OutlinedBox = ({
       "border-foreground bg-surface-contrast text-secondary font-mono text-sm font-medium",
   };
 
+  const disabledVariantClasses =
+    "bg-surface-contrast text-secondary font-mono text-sm font-medium border-[#3F3F46]";
+
   const variantIcons = {
     success: <CheckCircle2 className="size-4" />,
     warning: <AlertCircle className="size-4" />,
@@ -43,7 +46,7 @@ export const OutlinedBox = ({
         "flex items-center gap-2 rounded-md border",
         props.className,
         variantClasses[variant],
-        disabled && variantClasses["lightDark"],
+        disabled && disabledVariantClasses,
         {
           "flex-row-reverse": iconPosition === "right",
         },
