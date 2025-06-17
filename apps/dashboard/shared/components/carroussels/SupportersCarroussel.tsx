@@ -3,21 +3,23 @@
 import { useRef, useEffect } from "react";
 import { TooltipInfo } from "@/shared/components/tooltips/TooltipInfo";
 import { Address } from "viem";
-import { SupporterBadge } from "@/shared/components/badges/SupporterBadge";
+import {
+  SupporterBadge,
+  LoadingSupporterBadge,
+} from "@/shared/components/badges/SupporterBadge";
 
 interface SupportersCarrousselProps {
   supporters: Address[];
+  isLoading: boolean;
 }
 
 // Creates a scrolling carousel that displays supporter badges
 export const SupportersCarroussel = ({
   supporters,
+  isLoading,
 }: SupportersCarrousselProps) => {
   // Use enough supporters for a smooth scrolling effect
   let paddedSupporters = supporters;
-  while (paddedSupporters.length < 40) {
-    paddedSupporters = [...paddedSupporters, ...paddedSupporters];
-  }
 
   const scrollContentRef = useRef<HTMLDivElement>(null);
 
@@ -69,9 +71,20 @@ export const SupportersCarroussel = ({
           ref={scrollContentRef}
           className="scrollbar-none flex items-center gap-2 overflow-x-auto px-4"
         >
-          {paddedSupporters.map((supporter, index) => (
-            <SupporterBadge key={`${supporter}-${index}`} address={supporter} />
-          ))}
+          {isLoading ? (
+            <>
+              {Array.from({ length: 40 }).map((_, index) => (
+                <LoadingSupporterBadge key={`loading-supporter-${index}`} />
+              ))}
+            </>
+          ) : (
+            paddedSupporters.map((supporter, index) => (
+              <SupporterBadge
+                key={`${supporter}-${index}`}
+                address={supporter}
+              />
+            ))
+          )}
         </div>
       </div>
 
