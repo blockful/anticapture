@@ -58,7 +58,7 @@ export function newIndexerAPI(
       rules: [{ listen: "80/http", forward: "42069/http" }],
     },
     dev: {
-      command: `pnpm -w indexer serve --config config/${dao.toLowerCase()}.config.ts`,
+      command: `pnpm -w indexer serve --config config/${dao.toLowerCase()}.config.ts --schema=${schema}`,
     },
   });
 }
