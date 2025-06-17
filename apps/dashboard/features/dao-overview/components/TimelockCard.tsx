@@ -17,7 +17,6 @@ export const TimelockCard = ({
 }: {
   daoOverview: DaoOverviewConfig;
 }) => {
-  console.log("daoOverview", daoOverview);
   const timelockData: CardData = {
     title: "Timelock",
     icon: <Clock4 className="text-secondary size-4" />,
