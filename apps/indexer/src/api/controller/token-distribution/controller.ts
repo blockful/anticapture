@@ -23,9 +23,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.TOTAL_SUPPLY,
       resultKey: "TotalSupply",
       resultSchema: z.object({
-        oldTotalSupply: z.string(),
-        currentTotalSupply: z.string(),
-        changeRate: z.number(),
+        oldTotalSupply: z.string().nullable(),
+        currentTotalSupply: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
     {
@@ -33,9 +33,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.DELEGATED_SUPPLY,
       resultKey: "DelegatedSupply",
       resultSchema: z.object({
-        oldDelegatedSupply: z.string(),
-        currentDelegatedSupply: z.string(),
-        changeRate: z.number(),
+        oldDelegatedSupply: z.string().nullable(),
+        currentDelegatedSupply: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
     {
@@ -43,9 +43,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.CIRCULATING_SUPPLY,
       resultKey: "CirculatingSupply",
       resultSchema: z.object({
-        oldCirculatingSupply: z.string(),
-        currentCirculatingSupply: z.string(),
-        changeRate: z.number(),
+        oldCirculatingSupply: z.string().nullable(),
+        currentCirculatingSupply: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
     {
@@ -53,9 +53,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.TREASURY,
       resultKey: "Treasury",
       resultSchema: z.object({
-        oldTreasury: z.string(),
-        currentTreasury: z.string(),
-        changeRate: z.number(),
+        oldTreasury: z.string().nullable(),
+        currentTreasury: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
     {
@@ -63,9 +63,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.CEX_SUPPLY,
       resultKey: "CexSupply",
       resultSchema: z.object({
-        oldCexSupply: z.string(),
-        currentCexSupply: z.string(),
-        changeRate: z.number(),
+        oldCexSupply: z.string().nullable(),
+        currentCexSupply: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
     {
@@ -73,9 +73,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.DEX_SUPPLY,
       resultKey: "DexSupply",
       resultSchema: z.object({
-        oldDexSupply: z.string(),
-        currentDexSupply: z.string(),
-        changeRate: z.number(),
+        oldDexSupply: z.string().nullable(),
+        currentDexSupply: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
     {
@@ -83,9 +83,9 @@ export function tokenDistribution(
       metric: MetricTypesEnum.LENDING_SUPPLY,
       resultKey: "LendingSupply",
       resultSchema: z.object({
-        oldLendingSupply: z.string(),
-        currentLendingSupply: z.string(),
-        changeRate: z.number(),
+        oldLendingSupply: z.string().nullable(),
+        currentLendingSupply: z.string().nullable(),
+        changeRate: z.number().nullable(),
       }),
     },
   ];
@@ -123,12 +123,12 @@ export function tokenDistribution(
 
         const result = await repository.getSupplyComparison(metric, days);
 
-        if (!result) {
+        if (!result || (!result.oldValue && !result.currentValue)) {
           return ctx.json(
             {
-              [`old${resultKey}`]: "0",
-              [`current${resultKey}`]: "0",
-              changeRate: 0,
+              [`old${resultKey}`]: null,
+              [`current${resultKey}`]: null,
+              changeRate: null,
             } as z.infer<typeof resultSchema>,
             200,
           );
@@ -138,7 +138,7 @@ export function tokenDistribution(
 
         /* eslint-disable */
         const changeRate =
-          oldValue &&
+          oldValue !== "0" &&
           (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
           parseEther("1");
         /* eslint-enable */

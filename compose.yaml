@@ -52,6 +52,9 @@ services:
     build:
       context: .
       dockerfile: apps/indexer/Dockerfile.indexer
+      args:
+        - CONFIG_FILE=config/ens.local.config.ts
+        - SCHEMA=public
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
@@ -61,6 +64,7 @@ services:
       - MAX_REQUESTS_PER_SECOND=10
       - POLLING_INTERVAL=1000
       - PORT=42069
+
     depends_on:
       indexer-db:
         condition: service_started
