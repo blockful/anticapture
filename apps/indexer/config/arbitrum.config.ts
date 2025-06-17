@@ -11,10 +11,10 @@ export default createConfig({
     kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     arbitrum_mainnet: {
-      chainId: 42161,
-      transport: http(env.RPC_URL),
+      id: 42161,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
@@ -22,7 +22,7 @@ export default createConfig({
   contracts: {
     ARBToken: {
       abi: ARBTokenAbi,
-      network: "arbitrum_mainnet",
+      chain: "arbitrum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB]!.token.address,
       startBlock: 70398200,
