@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import {
-  ProposalsActivityRepositoryInterface,
+  ProposalsActivityRepository,
   DrizzleProposalsActivityRepository,
   DbProposal,
   DbVote,
@@ -55,11 +55,7 @@ export interface DelegateProposalActivity {
 }
 
 export class ProposalsActivityService {
-  private repository: ProposalsActivityRepositoryInterface;
-
-  constructor(repository?: ProposalsActivityRepositoryInterface) {
-    this.repository = repository || new DrizzleProposalsActivityRepository();
-  }
+  constructor(private readonly repository: ProposalsActivityRepository) {}
 
   async getProposalsActivity({
     address,
