@@ -49,27 +49,28 @@ export const TimelockCard = ({
         title: "Cancel Function",
         tooltip:
           "Allows a proposal's execution to be canceled, even after approval, under certain rules defined in the Timelock contract.",
-        items: daoOverview.rules?.cancelFunction
-          ? [
-              <SwitchCardDaoInfoItem
-                switched={daoOverview.rules?.cancelFunction}
-                icon={<ExternalLink className="text-secondary size-3.5" />}
-                onClick={() =>
-                  window.open(
-                    `${daoOverview.cancelFunction}`,
-                    "_blank",
-                    "noopener,noreferrer",
-                  )
-                }
-                key={"switch"}
-              />,
-            ]
-          : [
-              <Badge className="text-secondary" key={"hello2"}>
-                <Clock className="text-secondary size-3.5" />
-                Research pending
-              </Badge>,
-            ],
+        items:
+          daoOverview.rules?.cancelFunction !== undefined
+            ? [
+                <SwitchCardDaoInfoItem
+                  switched={daoOverview.rules?.cancelFunction}
+                  icon={<ExternalLink className="text-secondary size-3.5" />}
+                  onClick={() =>
+                    window.open(
+                      `${daoOverview.cancelFunction}`,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                  key={"switch"}
+                />,
+              ]
+            : [
+                <Badge className="text-secondary" key={"hello2"}>
+                  <Clock className="text-secondary size-3.5" />
+                  Research pending
+                </Badge>,
+              ],
       },
     ],
   };
