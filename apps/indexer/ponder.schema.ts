@@ -206,10 +206,10 @@ export const accountBalanceRelations = relations(
       references: [account.id],
       relationName: "account",
     }),
-    delegateeAccount: one(account, {
+    delegateAccount: one(account, {
       fields: [accountBalance.delegate],
       references: [account.id],
-      relationName: "delegateeAccount",
+      relationName: "delegateAccount",
     }),
     delegatedTo: one(accountPower, {
       fields: [accountBalance.delegate],
