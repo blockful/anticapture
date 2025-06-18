@@ -24,6 +24,6 @@
   "private": true,
   "workspaces": [
     "apps/dashboard",
-    "apps/graphql-client"
+    "packages/graphql-client"
   ]
 }
