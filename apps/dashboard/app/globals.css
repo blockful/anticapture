@@ -178,6 +178,7 @@
     --base-error-opacity: #f871711F;
     --base-destructive-hover: #F87171;
     --base-dimmed: #A1A1AA;
+
   @keyframes scroll-left {
     from {
       transform: translateX(0);
@@ -186,7 +187,7 @@
       transform: translateX(-50%);
     }
   }
-]
+
 }
 
 
