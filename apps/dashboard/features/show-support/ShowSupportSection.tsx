@@ -13,7 +13,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 
 export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { isConnected, address } = useAccount();
-  const { signatures } = usePetitionSignatures(daoId, address);
+  const { signatures, isLoading } = usePetitionSignatures(daoId, address);
 
   return (
     <TheSectionLayout
@@ -22,7 +22,7 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
       className="gap-5 sm:gap-4"
     >
-      <CardPetitionInformation data={signatures} />
+      <CardPetitionInformation isLoading={isLoading} data={signatures} />
       <CardDaoSignature isConnected={isConnected} address={address} />
     </TheSectionLayout>
   );
