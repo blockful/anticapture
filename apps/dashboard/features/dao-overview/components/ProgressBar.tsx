@@ -40,7 +40,7 @@ export const ProgressBar = ({
 
         <div
           className="bg-surface-solid-brand group absolute left-0 z-20 h-full transition-all duration-300"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${Math.floor(progress)}%` }}
         >
           <div className="border-inverted bg-tangerine absolute -top-[5px] -right-1.5 size-[21px] rounded-full border-2 p-2">
             <div className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border bg-white" />
@@ -60,7 +60,7 @@ export const ProgressBar = ({
       <div className="border-tangerine relative flex h-12 w-full border-l">
         <div
           className="border-tangerine to-tangerine/20 absolute h-12 border-r bg-linear-to-r from-transparent"
-          style={{ width: `calc(${progress}% - 4px)` }}
+          style={{ width: `calc(${Math.floor(progress)}% - 4px)` }}
         ></div>
         <div className="flex w-full items-start justify-between px-2 py-3">
           <div className="flex flex-col justify-center">

@@ -4,7 +4,7 @@ export const SkeletonRow = ({
   className,
   parentClassName,
 }: {
-  className: string;
+  className?: string;
   parentClassName?: string;
 }) => {
   return (
