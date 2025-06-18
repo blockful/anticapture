@@ -7,8 +7,7 @@
     "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
-    "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
-    "prepare": "if [ \"$CI\" != \"true\" ]; then husky install; fi"
+    "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
