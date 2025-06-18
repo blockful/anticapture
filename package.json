@@ -7,8 +7,7 @@
     "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
-    "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
-    "prepare": "husky"
+    "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
@@ -19,5 +18,10 @@
     "dotenv-cli": "^7.4.4",
     "husky": "^9.1.6",
     "turbo": "^2.3.1"
-  }
+  },
+  "private": true,
+  "workspaces": [
+    "apps/dashboard",
+    "apps/graphql-client"
+  ]
 }
