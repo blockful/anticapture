@@ -10,6 +10,7 @@
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
     "infra": "pnpm run --filter=@anticapture/infra",
     "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
+    "client": "pnpm run --filter=@anticapture/graphql-client",
     "prepare": "husky"
   },
   "license": "MIT",

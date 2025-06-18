@@ -1,5 +1,2 @@
 packages:
   - "apps/*"
-  - "packages/*"
-  - "!apps/graphql-client"
-  - "!apps/dashboard"
