@@ -1,6 +1,6 @@
 // apps/indexer/contracts/script/Constants.sol
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.12;
 
 /**
  * @title Constants
@@ -20,10 +20,11 @@ library Constants {
     uint256 internal constant CHARLIE_PRIVATE_KEY = 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a;
     uint256 internal constant DAVID_PRIVATE_KEY = 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6;
     
-    // Contract addresses (deterministic with Anvil)
-    address internal constant ENS_TOKEN_ADDRESS = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
-    address internal constant ENS_GOVERNOR_ADDRESS = 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0;
-    address internal constant ENS_TIMELOCK_ADDRESS = 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512;
+    // Contract addresses (forked mainnet deployment)
+    // Updated to match actual deployment addresses from forked mainnet
+    address internal constant ENS_TOKEN_ADDRESS = 0x244dE6b06E7087110b94Cde88A42d9aBA17efa52;    // ✅ Forked mainnet deployment
+    address internal constant ENS_GOVERNOR_ADDRESS = 0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9;  // ✅ Forked mainnet deployment
+    address internal constant ENS_TIMELOCK_ADDRESS = 0xa7E99C1df635d13d61F7c81eCe571cc952E64526;   // ✅ Forked mainnet deployment  
     
     // Governance vote support values
     uint8 internal constant AGAINST = 0;

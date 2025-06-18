@@ -122,10 +122,13 @@ export function governanceActivity(
         data.oldProposalsLaunched &&
         data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
 
-      return context.json({
-        ...data,
-        changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
-      });
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
     },
   );
 
@@ -176,10 +179,13 @@ export function governanceActivity(
 
       const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
 
-      return context.json({
-        ...data,
-        changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
-      });
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
     },
   );
 
