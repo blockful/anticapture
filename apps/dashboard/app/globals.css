@@ -37,6 +37,7 @@
   --tracking-wider: 0.72px;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-scroll-left: scroll-left 20s linear infinite;
 
   /* DEV: TODO: Remove these colors once the new design system is fully implemented. 
    * Check the border colors and gradients as well.
@@ -103,7 +104,8 @@
   --text-alternative-xs: 12px;
   --text-alternative-xs--line-height: 16px;
   --text-alternative-xs--letter-spacing: 6%;
-
+  
+ 
 
   
 
@@ -176,6 +178,15 @@
     --base-error-opacity: #f871711F;
     --base-destructive-hover: #F87171;
     --base-dimmed: #A1A1AA;
+  @keyframes scroll-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+]
 }
 
 
@@ -247,7 +258,7 @@
   }
 
   .btn-connect-wallet {
-    @apply bg-surface-contrast hover:border-light-dark flex size-9 w-full items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-primary hover:border hover:bg-surface-hover;
+    @apply bg-surface-contrast cursor-pointer flex size-9 w-full items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-primary hover:border hover:bg-surface-hover;
   }
 
   .card-text-accordion {

@@ -8,11 +8,28 @@ import { formatNumberUserReadable } from "@/shared/utils/";
 import { formatEther } from "viem";
 
 export const CardPetitionInformation = ({
+  isLoading,
   data,
 }: {
+  isLoading: boolean;
   data?: PetitionResponse;
 }) => {
-  const supporters = data?.signers ?? [];
+  const originalSigners = data?.signers ?? [];
+
+  // If signers length is less than 40, repeat until we have 40
+  let supporters = originalSigners;
+  if (originalSigners.length > 0 && originalSigners.length < 40) {
+    supporters = [];
+    while (supporters.length < 40) {
+      const remainingSlots = 40 - supporters.length;
+      const signersToAdd = originalSigners.slice(
+        0,
+        Math.min(remainingSlots, originalSigners.length),
+      );
+      supporters = [...supporters, ...signersToAdd];
+    }
+  }
+
   return (
     <Card className="border-light-dark sm:bg-surface-default mb-10 h-[156px] w-full border max-sm:border-0 sm:mb-0 sm:border">
       <div className="flex w-full flex-col sm:flex-row">
@@ -21,27 +38,36 @@ export const CardPetitionInformation = ({
             <p className="text-md text-secondary">Total Supporters</p>
             <TooltipInfo text="The total number of supporters who have voted in the petition." />
           </div>
-          <p className="text-md text-secondary">
-            {data?.totalSignatures ?? "-"}
-          </p>
+
+          {isLoading ? (
+            <div className="size-4 animate-pulse rounded-sm bg-gray-300" />
+          ) : (
+            <p className="text-md text-secondary">
+              {data?.totalSignatures ?? "-"}
+            </p>
+          )}
         </div>
         <div className="border-light-dark flex w-full justify-between gap-2 border border-t-0 border-r-0 border-b border-l-0 p-4 sm:w-1/2 sm:border-b-0">
           <div className="flex items-center gap-2">
             <p className="text-md text-secondary">Supporters Voting Power</p>
             <TooltipInfo text="The total voting power of all supporters who have voted in the petition." />
           </div>
-          <p className="text-md text-primary">
-            {data?.totalSignaturesPower !== "0"
-              ? formatNumberUserReadable(
-                  Number(formatEther(BigInt(data?.totalSignaturesPower ?? 0n))),
-                )
-              : "-"}
-          </p>
+
+          {isLoading ? (
+            <div className="size-4 animate-pulse rounded-sm bg-gray-300" />
+          ) : data?.totalSignaturesPower !== "0" ? (
+            <p className="text-md text-primary">
+              {formatNumberUserReadable(
+                Number(formatEther(BigInt(data?.totalSignaturesPower ?? 0n))),
+              )}
+            </p>
+          ) : (
+            <p className="text-md text-primary">-</p>
+          )}
         </div>
       </div>
-      {supporters.length > 0 && (
-        <SupportersCarroussel supporters={supporters} />
-      )}
+
+      <SupportersCarroussel isLoading={isLoading} supporters={supporters} />
     </Card>
   );
 };
