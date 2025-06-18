@@ -99,7 +99,7 @@ export const QuorumCard = () => {
             ]
           : [
               <Badge className="text-secondary" key={"hello2"}>
-                <Clock className="text-secondary size-3" />
+                <Clock className="text-secondary size-3.5" />
                 Research pending
               </Badge>,
             ],
@@ -118,7 +118,7 @@ export const QuorumCard = () => {
             ]
           : [
               <Badge className="text-secondary" key={"hello2"}>
-                <Clock className="text-secondary size-3" />
+                <Clock className="text-secondary size-3.5" />
                 Research pending
               </Badge>,
             ],

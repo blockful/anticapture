@@ -23,7 +23,7 @@ export const SupportersCarroussel = ({
       </div>
 
       {/* Left shadow overlay */}
-      <div className="sm:from-dark absolute top-0 left-3 z-10 h-full w-24 bg-linear-to-r from-[#18181B] to-transparent" />
+      <div className="sm:from-dark absolute top-0 left-3 z-10 h-full w-24 bg-linear-to-r from-black to-transparent md:from-[#18181B]" />
 
       <div className="relative overflow-hidden rounded-lg pt-2">
         <div className="animate-scroll-left flex items-center gap-2">
@@ -45,7 +45,7 @@ export const SupportersCarroussel = ({
       </div>
 
       {/* Right shadow overlay */}
-      <div className="sm:from-dark absolute top-0 right-4 z-10 h-full w-24 bg-linear-to-l from-[#18181B] to-transparent" />
+      <div className="sm:from-dark absolute top-0 right-4 z-10 h-full w-24 bg-linear-to-l from-black to-transparent md:from-[#18181B]" />
     </div>
   );
 };
