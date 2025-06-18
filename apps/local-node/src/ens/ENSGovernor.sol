@@ -23,7 +23,7 @@ contract ENSGovernor is Governor, GovernorProposalThreshold, GovernorCountingSim
     }
 
     function votingPeriod() public pure override returns (uint256) {
-        return 10; // 1 week
+        return 200; // Much longer voting period for testing
     }
 
     function proposalThreshold() public pure override returns (uint256) {

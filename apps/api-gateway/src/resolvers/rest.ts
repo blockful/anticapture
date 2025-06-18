@@ -12,7 +12,10 @@ const daoItemQueries = [
   'compareVotes',
   'getTotalAssets',
   'getVotingPower',
-  'historicalTokenData'
+  'historicalTokenData',
+  'proposalsActivity',
+  'historicalBalances',
+  'historicalVotingPower',
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
@@ -30,12 +33,12 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
       }
 
       const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
-
       if (!targetClient || typeof targetClient[fieldName] !== 'function') {
         return {}
       }
 
       try {
+        
         return targetClient[fieldName]({
           root,
           args,
