@@ -1,4 +1,5 @@
 import * as chains from "viem/chains";
+import { Address, PublicClient, createPublicClient, http } from "viem";
 
 type ValueNamesByDao = {
   name: string;
@@ -53,4 +54,29 @@ export function max(...values: bigint[]): bigint {
 
 export function getChain(chainId: number): chains.Chain | undefined {
   return Object.values(chains).find((chain) => chain.id === chainId);
+}
+
+/**
+ * Verifies if an address is a Contract or an Externally Owned Account (EOA)
+ * by checking the bytecode at the address using context.client.request
+ */
+export async function verifyAddressType(
+  client: any,
+  address: Address,
+): Promise<"Contract" | "EOA"> {
+  try {
+    // Use context.client.request to make RPC call directly
+    const bytecode = await client.request({
+      method: "eth_getCode",
+      params: [address, "latest"],
+    });
+
+    const isContract = bytecode && bytecode !== "0x";
+    const result = isContract ? "Contract" : "EOA";
+
+    return result;
+  } catch (error) {
+    console.warn(`Error checking bytecode for address ${address}:`, error);
+    return "EOA";
+  }
 }

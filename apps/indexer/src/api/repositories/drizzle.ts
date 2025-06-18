@@ -32,7 +32,7 @@ export class DrizzleRepository {
     `;
 
     const result = await db.execute<{ oldValue: string; currentValue: string }>(
-      query,
+      query
     );
     return result.rows[0];
   }

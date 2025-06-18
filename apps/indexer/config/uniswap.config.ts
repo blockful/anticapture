@@ -8,7 +8,7 @@ import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
 
 export default createConfig({
   database: {
-    kind: "postgres", 
+    kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
   chains: {

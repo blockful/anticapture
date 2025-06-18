@@ -69,7 +69,7 @@ Gov Indexer creates the following tables in the database to store the indexed da
 - **Description**: Records vote delegations between accounts.
 - **Fields**:
   - `id`: Unique identifier of the delegation (string).
-  - `delegatee`: Account receiving the delegation (string).
+  - `delegate`: Account receiving the delegation (string).
   - `delegator`: Account making the delegation (string).
   - `timestamp`: Date and time when the delegation was made (bigint).
 
