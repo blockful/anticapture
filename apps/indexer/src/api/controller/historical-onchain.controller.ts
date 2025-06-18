@@ -40,7 +40,8 @@ export function historicalOnchain(app: Hono) {
             .or(
               z
                 .string()
-                .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
+                .refine((addr) => isAddress(addr), "Invalid Ethereum address")
+                .transform((addr) => [addr]),
             ),
           blockNumber: z.coerce
             .number()
@@ -71,9 +72,7 @@ export function historicalOnchain(app: Hono) {
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalBalancesRequest = {
-        addresses: (Array.isArray(addresses)
-          ? addresses
-          : [addresses]) as Address[],
+        addresses,
         blockNumber,
         daoId,
       };

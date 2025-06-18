@@ -10,8 +10,10 @@ import {
   tokenDistribution,
   tokenHistoricalData,
   assets,
+  proposalsActivity,
   historicalOnchain,
 } from "./controller";
+import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
@@ -52,9 +54,11 @@ if (env.COINGECKO_API_KEY) {
 }
 
 const repo = new DrizzleRepository();
+const proposalsRepo = new DrizzleProposalsActivityRepository();
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
+proposalsActivity(app, proposalsRepo);
 historicalOnchain(app);
 docs(app, env.API_URL!);
 

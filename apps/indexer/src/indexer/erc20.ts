@@ -8,7 +8,7 @@ import { tokenTransfer } from "@/lib/event-handlers";
 export function ERC20Indexer(
   daoId: DaoIdEnum,
   address: Address,
-  decimals: number,
+  decimals: number
 ) {
   ponder.on(`${daoId}Token:setup`, async ({ context }) => {
     await context.db.insert(token).values({

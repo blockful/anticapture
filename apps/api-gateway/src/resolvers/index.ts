@@ -9,6 +9,5 @@ export default {
     ...itemResolvers,
     ...restResolvers,
     daos: daosResolver,
-  }
-}
-
+  },
+};

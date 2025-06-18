@@ -13,6 +13,7 @@ const daoItemQueries = [
   'getTotalAssets',
   'getVotingPower',
   'historicalTokenData',
+  'proposalsActivity',
   'historicalBalances',
   'historicalVotingPower',
 ];
