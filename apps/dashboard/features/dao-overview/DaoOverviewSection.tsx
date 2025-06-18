@@ -58,37 +58,53 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   }
 
   const onChainOptions = [
-    {
-      value: "Governor",
-      icon: <Shield className="text-link size-4" />,
-      onClick: () =>
-        openEtherscanAddress(daoOverview.contracts?.governor as Address),
-    },
-    {
-      value: "Token",
-      icon: <TokensIcon className="text-link size-4" />,
-      onClick: () =>
-        openEtherscanAddress(daoOverview.contracts?.token as Address),
-    },
+    ...(daoOverview.contracts?.governor
+      ? [
+          {
+            value: "Governor",
+            icon: <Shield className="text-link size-4" />,
+            onClick: () =>
+              openEtherscanAddress(daoOverview.contracts?.governor as Address),
+          },
+        ]
+      : []),
+    ...(daoOverview.contracts?.token
+      ? [
+          {
+            value: "Token",
+            icon: <TokensIcon className="text-link size-4" />,
+            onClick: () =>
+              openEtherscanAddress(daoOverview.contracts?.token as Address),
+          },
+        ]
+      : []),
   ];
 
   const offChainOptions = [
-    {
-      value: "Snapshot",
-      icon: <LightningBoltIcon className="text-link size-4" />,
-      onClick: () =>
-        window.open(
-          daoOverview.snapshot as string,
-          "_blank",
-          "noopener,noreferrer",
-        ),
-    },
-    {
-      value: "Token",
-      icon: <TokensIcon className="text-link size-4" />,
-      onClick: () =>
-        openEtherscanAddress(daoOverview.contracts?.token as Address),
-    },
+    ...(daoOverview.snapshot
+      ? [
+          {
+            value: "Snapshot",
+            icon: <LightningBoltIcon className="text-link size-4" />,
+            onClick: () =>
+              window.open(
+                daoOverview.snapshot as string,
+                "_blank",
+                "noopener,noreferrer",
+              ),
+          },
+        ]
+      : []),
+    ...(daoOverview.contracts?.token
+      ? [
+          {
+            value: "Token",
+            icon: <TokensIcon className="text-link size-4" />,
+            onClick: () =>
+              openEtherscanAddress(daoOverview.contracts?.token as Address),
+          },
+        ]
+      : []),
   ];
 
   // Risk areas data using our utility function
@@ -133,22 +149,26 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 </h3>
               </div>
               <div className="flex gap-2">
-                <DaoInfoDropdown
-                  defaultValue={{
-                    value: "OnChain Gov",
-                    icon: <LinkIcon className="text-primary size-3.5" />,
-                    onClick: () => {},
-                  }}
-                  options={onChainOptions}
-                />
-                <DaoInfoDropdown
-                  defaultValue={{
-                    value: "OffChain Gov",
-                    icon: <FilePenLine className="text-primary size-3.5" />,
-                    onClick: () => {},
-                  }}
-                  options={offChainOptions}
-                />
+                {onChainOptions.length > 0 && (
+                  <DaoInfoDropdown
+                    defaultValue={{
+                      value: "OnChain Gov",
+                      icon: <LinkIcon className="text-primary size-3.5" />,
+                      onClick: () => {},
+                    }}
+                    options={onChainOptions}
+                  />
+                )}
+                {offChainOptions.length > 0 && (
+                  <DaoInfoDropdown
+                    defaultValue={{
+                      value: "OffChain Gov",
+                      icon: <FilePenLine className="text-primary size-3.5" />,
+                      onClick: () => {},
+                    }}
+                    options={offChainOptions}
+                  />
+                )}
               </div>
             </div>
           </div>

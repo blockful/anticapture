@@ -7,6 +7,7 @@ type OutlinedBoxProps = ComponentProps<"div"> & {
   customIcon?: ReactNode;
   hideIcon?: boolean;
   iconPosition?: "left" | "right";
+  disabled?: boolean;
 };
 
 export const OutlinedBox = ({
@@ -15,6 +16,7 @@ export const OutlinedBox = ({
   hideIcon = false,
   customIcon,
   children,
+  disabled = false,
   ...props
 }: OutlinedBoxProps) => {
   const variantClasses = {
@@ -26,6 +28,9 @@ export const OutlinedBox = ({
     lightDark:
       "border-foreground bg-surface-contrast text-secondary font-mono text-sm font-medium",
   };
+
+  const disabledVariantClasses =
+    "bg-surface-contrast text-secondary font-mono text-sm font-medium border-[#3F3F46]";
 
   const variantIcons = {
     success: <CheckCircle2 className="size-4" />,
@@ -41,6 +46,7 @@ export const OutlinedBox = ({
         "flex items-center gap-2 rounded-md border",
         props.className,
         variantClasses[variant],
+        disabled && disabledVariantClasses,
         {
           "flex-row-reverse": iconPosition === "right",
         },

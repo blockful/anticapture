@@ -20,7 +20,7 @@ interface StagesDaoOverviewProps {
 }
 
 export const StagesDaoOverview = ({
-  currentStage = Stage.ONE,
+  currentStage = Stage.NONE,
   itemsToNextStage = 3,
   highRiskItems = [],
   mediumRiskItems = [],
@@ -62,6 +62,13 @@ export const StagesDaoOverview = ({
     }
   };
 
+  const stageToText = (stage: Stage) => {
+    if (stage === Stage.NONE) {
+      return "?";
+    }
+    return stage;
+  };
+
   return (
     <div className="relative w-full py-0 sm:w-full">
       <div
@@ -78,63 +85,82 @@ export const StagesDaoOverview = ({
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
                   "text-success": currentStage === Stage.TWO,
+                  "text-secondary": currentStage === Stage.NONE,
                 },
               )}
             >
-              Stage {currentStage}
+              Stage {stageToText(currentStage)}
             </span>
           </div>
           <BulletPoint className="text-middle-dark mb-1 hidden text-sm sm:block" />
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="border-foreground group text-primary cursor-pointer border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
+              className="border-foreground group text-primary border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
               <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
-                {formatPlural(
-                  highRiskItems.length ||
-                    mediumRiskItems.length ||
-                    lowRiskItems.length,
-                  "ITEM",
-                )}
+                {currentStage !== Stage.NONE
+                  ? formatPlural(
+                      highRiskItems.length ||
+                        mediumRiskItems.length ||
+                        lowRiskItems.length,
+                      "ITEM",
+                    )
+                  : "? ITEMS"}
               </span>
-              <span className="text-alternative-sm text-secondary group-hover:text-primary duration-300">
+              <span
+                className={cn([
+                  "text-alternative-sm text-secondary duration-300",
+                  { "group-hover:text-primary": currentStage !== Stage.NONE },
+                ])}
+              >
                 {" "}
-                TO STAGE {Number(currentStage) + 1}
+                {currentStage !== Stage.NONE
+                  ? `TO STAGE ${Number(currentStage) + 1}`
+                  : "TO NEXT"}
               </span>
             </button>
           </div>
         </div>
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">
           <OutlinedBox
-            variant="error"
+            variant={"error"}
+            disabled={currentStage === Stage.NONE}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">{highRiskItems.length}</span>
+            <span className="font-mono">
+              {currentStage !== Stage.NONE ? highRiskItems.length : "?"}
+            </span>
           </OutlinedBox>
           <OutlinedBox
             variant="warning"
+            disabled={currentStage === Stage.NONE}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">{mediumRiskItems.length}</span>
+            <span className="font-mono">
+              {currentStage !== Stage.NONE ? mediumRiskItems.length : "?"}
+            </span>
           </OutlinedBox>
           <OutlinedBox
             variant="success"
+            disabled={currentStage === Stage.NONE}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">{lowRiskItems.length}</span>
+            <span className="font-mono">
+              {currentStage !== Stage.NONE ? lowRiskItems.length : "?"}
+            </span>
           </OutlinedBox>
         </div>
       </div>
-      {showTooltip && (
+      {showTooltip && currentStage !== Stage.NONE && (
         <StageRequirementsTooltip
           currentStage={currentStage}
           nextStage={Number(currentStage) + 1}
