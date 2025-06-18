@@ -1,5 +1,7 @@
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
+directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
+
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
@@ -11,21 +13,21 @@ type Query {
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
-  accountBalance(id: String!): accountBalance
+  accountBalance(accountId: String!, tokenId: String!): accountBalance
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
-  accountPower(id: String!): accountPower
+  accountPower(accountId: String!): accountPower
   accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(id: String!): votingPowerHistory
+  votingPowerHistory(transactionHash: String!, accountId: String!): votingPowerHistory
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
-  delegation(id: String!): delegation
+  delegation(transactionHash: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
-  transfer(id: String!): transfer
+  transfer(transactionHash: String!): transfer
   transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage!
   votesOnchain(id: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   proposalsOnchain(id: String!): proposalsOnchain
   proposalsOnchains(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage!
-  daoMetricsDayBucket(date: BigInt!, daoId: String!, tokenId: String!, metricType: String!): daoMetricsDayBucket
+  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
@@ -67,12 +69,27 @@ type Query {
 
   """Compare average turnout between time periods"""
   compareAverageTurnout(daoId: queryInput_compareAverageTurnout_daoId!, days: queryInput_compareAverageTurnout_days = _90d): compareAverageTurnout_200_response
+
+  """
+  Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
+  """
+  proposalsActivity(daoId: queryInput_proposalsActivity_daoId!, address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10): proposalsActivity_200_response
+
+  """
+  Fetch historical token balances for multiple addresses at a specific block number using multicall
+  """
+  historicalBalances(daoId: queryInput_historicalBalances_daoId!, addresses: JSON!, blockNumber: NonNegativeInt!): [query_historicalBalances_items]
+
+  """
+  Fetch historical voting power for multiple addresses at a specific block number using multicall
+  """
+  historicalVotingPower(daoId: queryInput_historicalVotingPower_daoId!, addresses: JSON!, blockNumber: NonNegativeInt!): [query_historicalVotingPower_items]
 }
 
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 scalar BigInt
 
@@ -267,34 +284,16 @@ input tokenFilter {
 
 type account {
   id: String!
-}
-
-type accountPage {
-  items: [account!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input accountFilter {
-  AND: [accountFilter]
-  OR: [accountFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-}
-
-type accountBalance {
-  id: String!
-  tokenId: String
-  accountId: String
-  balance: BigInt!
+  type: String!
+  balances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage
+  powers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage
+  delegationsFrom(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
+  delegationsTo(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
+  sentTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
+  receivedTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
+  proposals(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage
+  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
+  delegatedFromBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage
 }
 
 type accountBalancePage {
@@ -303,29 +302,32 @@ type accountBalancePage {
   totalCount: Int!
 }
 
+type accountBalance {
+  accountId: String!
+  tokenId: String!
+  balance: BigInt!
+  delegate: String!
+  delegatePower: accountPower
+  account: account
+  delegateAccount: account
+  delegatedTo: accountPower
+  token: token
+}
+
+type accountPower {
+  accountId: String!
+  votingPower: BigInt!
+  votesCount: Int!
+  proposalsCount: Int!
+  delegationsCount: Int!
+  lastVoteTimestamp: BigInt!
+  firstVoteTimestamp: BigInt
+  account: account
+}
+
 input accountBalanceFilter {
   AND: [accountBalanceFilter]
   OR: [accountBalanceFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  tokenId: String
-  tokenId_not: String
-  tokenId_in: [String]
-  tokenId_not_in: [String]
-  tokenId_contains: String
-  tokenId_not_contains: String
-  tokenId_starts_with: String
-  tokenId_ends_with: String
-  tokenId_not_starts_with: String
-  tokenId_not_ends_with: String
   accountId: String
   accountId_not: String
   accountId_in: [String]
@@ -336,6 +338,16 @@ input accountBalanceFilter {
   accountId_ends_with: String
   accountId_not_starts_with: String
   accountId_not_ends_with: String
+  tokenId: String
+  tokenId_not: String
+  tokenId_in: [String]
+  tokenId_not_in: [String]
+  tokenId_contains: String
+  tokenId_not_contains: String
+  tokenId_starts_with: String
+  tokenId_ends_with: String
+  tokenId_not_starts_with: String
+  tokenId_not_ends_with: String
   balance: BigInt
   balance_not: BigInt
   balance_in: [BigInt]
@@ -344,18 +356,16 @@ input accountBalanceFilter {
   balance_lt: BigInt
   balance_gte: BigInt
   balance_lte: BigInt
-}
-
-type accountPower {
-  id: String!
-  accountId: String
-  daoId: String
-  votingPower: BigInt!
-  votesCount: Int!
-  proposalsCount: Int!
-  delegationsCount: Int!
-  delegate: String!
-  lastVoteTimestamp: BigInt!
+  delegate: String
+  delegate_not: String
+  delegate_in: [String]
+  delegate_not_in: [String]
+  delegate_contains: String
+  delegate_not_contains: String
+  delegate_starts_with: String
+  delegate_ends_with: String
+  delegate_not_starts_with: String
+  delegate_not_ends_with: String
 }
 
 type accountPowerPage {
@@ -367,16 +377,6 @@ type accountPowerPage {
 input accountPowerFilter {
   AND: [accountPowerFilter]
   OR: [accountPowerFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
   accountId: String
   accountId_not: String
   accountId_in: [String]
@@ -387,16 +387,6 @@ input accountPowerFilter {
   accountId_ends_with: String
   accountId_not_starts_with: String
   accountId_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
   votingPower: BigInt
   votingPower_not: BigInt
   votingPower_in: [BigInt]
@@ -429,16 +419,6 @@ input accountPowerFilter {
   delegationsCount_lt: Int
   delegationsCount_gte: Int
   delegationsCount_lte: Int
-  delegate: String
-  delegate_not: String
-  delegate_in: [String]
-  delegate_not_in: [String]
-  delegate_contains: String
-  delegate_not_contains: String
-  delegate_starts_with: String
-  delegate_ends_with: String
-  delegate_not_starts_with: String
-  delegate_not_ends_with: String
   lastVoteTimestamp: BigInt
   lastVoteTimestamp_not: BigInt
   lastVoteTimestamp_in: [BigInt]
@@ -447,79 +427,14 @@ input accountPowerFilter {
   lastVoteTimestamp_lt: BigInt
   lastVoteTimestamp_gte: BigInt
   lastVoteTimestamp_lte: BigInt
-}
-
-type votingPowerHistory {
-  id: String!
-  daoId: String
-  accountId: String
-  votingPower: BigInt!
-  timestamp: BigInt!
-}
-
-type votingPowerHistoryPage {
-  items: [votingPowerHistory!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input votingPowerHistoryFilter {
-  AND: [votingPowerHistoryFilter]
-  OR: [votingPowerHistoryFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  accountId: String
-  accountId_not: String
-  accountId_in: [String]
-  accountId_not_in: [String]
-  accountId_contains: String
-  accountId_not_contains: String
-  accountId_starts_with: String
-  accountId_ends_with: String
-  accountId_not_starts_with: String
-  accountId_not_ends_with: String
-  votingPower: BigInt
-  votingPower_not: BigInt
-  votingPower_in: [BigInt]
-  votingPower_not_in: [BigInt]
-  votingPower_gt: BigInt
-  votingPower_lt: BigInt
-  votingPower_gte: BigInt
-  votingPower_lte: BigInt
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-}
-
-type delegation {
-  id: String!
-  daoId: String
-  delegateeAccountId: String
-  delegatorAccountId: String
-  timestamp: BigInt
+  firstVoteTimestamp: BigInt
+  firstVoteTimestamp_not: BigInt
+  firstVoteTimestamp_in: [BigInt]
+  firstVoteTimestamp_not_in: [BigInt]
+  firstVoteTimestamp_gt: BigInt
+  firstVoteTimestamp_lt: BigInt
+  firstVoteTimestamp_gte: BigInt
+  firstVoteTimestamp_lte: BigInt
 }
 
 type delegationPage {
@@ -528,39 +443,40 @@ type delegationPage {
   totalCount: Int!
 }
 
+type delegation {
+  transactionHash: String!
+  delegateAccountId: String
+  delegatorAccountId: String
+  delegatedValue: BigInt!
+  previousDelegate: String
+  timestamp: BigInt
+  delegate: account
+  delegator: account
+}
+
 input delegationFilter {
   AND: [delegationFilter]
   OR: [delegationFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  delegateeAccountId: String
-  delegateeAccountId_not: String
-  delegateeAccountId_in: [String]
-  delegateeAccountId_not_in: [String]
-  delegateeAccountId_contains: String
-  delegateeAccountId_not_contains: String
-  delegateeAccountId_starts_with: String
-  delegateeAccountId_ends_with: String
-  delegateeAccountId_not_starts_with: String
-  delegateeAccountId_not_ends_with: String
+  transactionHash: String
+  transactionHash_not: String
+  transactionHash_in: [String]
+  transactionHash_not_in: [String]
+  transactionHash_contains: String
+  transactionHash_not_contains: String
+  transactionHash_starts_with: String
+  transactionHash_ends_with: String
+  transactionHash_not_starts_with: String
+  transactionHash_not_ends_with: String
+  delegateAccountId: String
+  delegateAccountId_not: String
+  delegateAccountId_in: [String]
+  delegateAccountId_not_in: [String]
+  delegateAccountId_contains: String
+  delegateAccountId_not_contains: String
+  delegateAccountId_starts_with: String
+  delegateAccountId_ends_with: String
+  delegateAccountId_not_starts_with: String
+  delegateAccountId_not_ends_with: String
   delegatorAccountId: String
   delegatorAccountId_not: String
   delegatorAccountId_in: [String]
@@ -571,6 +487,24 @@ input delegationFilter {
   delegatorAccountId_ends_with: String
   delegatorAccountId_not_starts_with: String
   delegatorAccountId_not_ends_with: String
+  delegatedValue: BigInt
+  delegatedValue_not: BigInt
+  delegatedValue_in: [BigInt]
+  delegatedValue_not_in: [BigInt]
+  delegatedValue_gt: BigInt
+  delegatedValue_lt: BigInt
+  delegatedValue_gte: BigInt
+  delegatedValue_lte: BigInt
+  previousDelegate: String
+  previousDelegate_not: String
+  previousDelegate_in: [String]
+  previousDelegate_not_in: [String]
+  previousDelegate_contains: String
+  previousDelegate_not_contains: String
+  previousDelegate_starts_with: String
+  previousDelegate_ends_with: String
+  previousDelegate_not_starts_with: String
+  previousDelegate_not_ends_with: String
   timestamp: BigInt
   timestamp_not: BigInt
   timestamp_in: [BigInt]
@@ -581,45 +515,37 @@ input delegationFilter {
   timestamp_lte: BigInt
 }
 
-type transfer {
-  id: String!
-  daoId: String
-  tokenId: String
-  amount: BigInt
-  fromAccountId: String
-  toAccountId: String
-  timestamp: BigInt
-}
-
 type transferPage {
   items: [transfer!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
+type transfer {
+  transactionHash: String!
+  tokenId: String
+  amount: BigInt
+  fromAccountId: String
+  toAccountId: String
+  timestamp: BigInt
+  from: account
+  to: account
+  token: token
+}
+
 input transferFilter {
   AND: [transferFilter]
   OR: [transferFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
+  transactionHash: String
+  transactionHash_not: String
+  transactionHash_in: [String]
+  transactionHash_not_in: [String]
+  transactionHash_contains: String
+  transactionHash_not_contains: String
+  transactionHash_starts_with: String
+  transactionHash_ends_with: String
+  transactionHash_not_starts_with: String
+  transactionHash_not_ends_with: String
   tokenId: String
   tokenId_not: String
   tokenId_in: [String]
@@ -668,21 +594,47 @@ input transferFilter {
   timestamp_lte: BigInt
 }
 
-type votesOnchain {
+type proposalsOnchainPage {
+  items: [proposalsOnchain!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type proposalsOnchain {
   id: String!
-  daoId: String
-  voterAccountId: String
-  proposalId: String
-  support: String
-  weight: String
-  reason: String
+  proposerAccountId: String
+  targets: JSON
+  values: JSON
+  signatures: JSON
+  calldatas: JSON
+  startBlock: String
+  endBlock: String
+  description: String
   timestamp: BigInt
+  status: String
+  forVotes: BigInt
+  againstVotes: BigInt
+  abstainVotes: BigInt
+  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
+  proposer: account
 }
 
 type votesOnchainPage {
   items: [votesOnchain!]!
   pageInfo: PageInfo!
   totalCount: Int!
+}
+
+type votesOnchain {
+  id: String!
+  voterAccountId: String
+  proposalId: String
+  support: String
+  votingPower: String
+  reason: String
+  timestamp: BigInt
+  proposal: proposalsOnchain
+  voter: account
 }
 
 input votesOnchainFilter {
@@ -698,16 +650,6 @@ input votesOnchainFilter {
   id_ends_with: String
   id_not_starts_with: String
   id_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
   voterAccountId: String
   voterAccountId_not: String
   voterAccountId_in: [String]
@@ -738,16 +680,16 @@ input votesOnchainFilter {
   support_ends_with: String
   support_not_starts_with: String
   support_not_ends_with: String
-  weight: String
-  weight_not: String
-  weight_in: [String]
-  weight_not_in: [String]
-  weight_contains: String
-  weight_not_contains: String
-  weight_starts_with: String
-  weight_ends_with: String
-  weight_not_starts_with: String
-  weight_not_ends_with: String
+  votingPower: String
+  votingPower_not: String
+  votingPower_in: [String]
+  votingPower_not_in: [String]
+  votingPower_contains: String
+  votingPower_not_contains: String
+  votingPower_starts_with: String
+  votingPower_ends_with: String
+  votingPower_not_starts_with: String
+  votingPower_not_ends_with: String
   reason: String
   reason_not: String
   reason_in: [String]
@@ -768,30 +710,6 @@ input votesOnchainFilter {
   timestamp_lte: BigInt
 }
 
-type proposalsOnchain {
-  id: String!
-  daoId: String
-  proposerAccountId: String
-  targets: JSON
-  values: JSON
-  signatures: JSON
-  calldatas: JSON
-  startBlock: String
-  endBlock: String
-  description: String
-  timestamp: BigInt
-  status: String
-  forVotes: BigInt
-  againstVotes: BigInt
-  abstainVotes: BigInt
-}
-
-type proposalsOnchainPage {
-  items: [proposalsOnchain!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
 input proposalsOnchainFilter {
   AND: [proposalsOnchainFilter]
   OR: [proposalsOnchainFilter]
@@ -805,16 +723,6 @@ input proposalsOnchainFilter {
   id_ends_with: String
   id_not_starts_with: String
   id_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
   proposerAccountId: String
   proposerAccountId_not: String
   proposerAccountId_in: [String]
@@ -899,9 +807,96 @@ input proposalsOnchainFilter {
   abstainVotes_lte: BigInt
 }
 
+type accountPage {
+  items: [account!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input accountFilter {
+  AND: [accountFilter]
+  OR: [accountFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  type: String
+  type_not: String
+  type_in: [String]
+  type_not_in: [String]
+  type_contains: String
+  type_not_contains: String
+  type_starts_with: String
+  type_ends_with: String
+  type_not_starts_with: String
+  type_not_ends_with: String
+}
+
+type votingPowerHistory {
+  transactionHash: String!
+  accountId: String
+  votingPower: BigInt!
+  timestamp: BigInt!
+  transfer: transfer
+  delegation: delegation
+  account: account
+}
+
+type votingPowerHistoryPage {
+  items: [votingPowerHistory!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input votingPowerHistoryFilter {
+  AND: [votingPowerHistoryFilter]
+  OR: [votingPowerHistoryFilter]
+  transactionHash: String
+  transactionHash_not: String
+  transactionHash_in: [String]
+  transactionHash_not_in: [String]
+  transactionHash_contains: String
+  transactionHash_not_contains: String
+  transactionHash_starts_with: String
+  transactionHash_ends_with: String
+  transactionHash_not_starts_with: String
+  transactionHash_not_ends_with: String
+  accountId: String
+  accountId_not: String
+  accountId_in: [String]
+  accountId_not_in: [String]
+  accountId_contains: String
+  accountId_not_contains: String
+  accountId_starts_with: String
+  accountId_ends_with: String
+  accountId_not_starts_with: String
+  accountId_not_ends_with: String
+  votingPower: BigInt
+  votingPower_not: BigInt
+  votingPower_in: [BigInt]
+  votingPower_not_in: [BigInt]
+  votingPower_gt: BigInt
+  votingPower_lt: BigInt
+  votingPower_gte: BigInt
+  votingPower_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
 type daoMetricsDayBucket {
   date: BigInt!
-  daoId: String!
   tokenId: String!
   metricType: metricType!
   open: BigInt!
@@ -940,16 +935,6 @@ input daoMetricsDayBucketFilter {
   date_lt: BigInt
   date_gte: BigInt
   date_lte: BigInt
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
   tokenId: String
   tokenId_not: String
   tokenId_in: [String]
@@ -1269,6 +1254,84 @@ enum queryInput_compareAverageTurnout_days {
   _90d
   _180d
   _365d
+}
+
+type proposalsActivity_200_response {
+  address: String!
+  totalProposals: Float!
+  votedProposals: Float!
+  neverVoted: Boolean!
+  winRate: Float!
+  yesRate: Float!
+  avgTimeBeforeEnd: Float!
+  proposals: [query_proposalsActivity_proposals_items]!
+}
+
+type query_proposalsActivity_proposals_items {
+  proposal: query_proposalsActivity_proposals_items_proposal!
+  userVote: query_proposalsActivity_proposals_items_userVote
+}
+
+type query_proposalsActivity_proposals_items_proposal {
+  id: String!
+  daoId: String!
+  proposerAccountId: String!
+  description: String
+  startBlock: String!
+  endBlock: String!
+  timestamp: String!
+  status: String!
+  forVotes: Float!
+  againstVotes: Float!
+  abstainVotes: Float!
+}
+
+type query_proposalsActivity_proposals_items_userVote {
+  id: String!
+  voterAccountId: String!
+  proposalId: String!
+  support: String
+  votingPower: String
+  reason: String
+  timestamp: String!
+}
+
+enum queryInput_proposalsActivity_daoId {
+  UNI
+  ENS
+  ARB
+}
+
+"""Integers that will have a value of 0 or more."""
+scalar NonNegativeInt
+
+"""Integers that will have a value greater than 0."""
+scalar PositiveInt
+
+type query_historicalBalances_items {
+  address: String!
+  balance: String!
+  blockNumber: Float!
+  tokenAddress: String!
+}
+
+enum queryInput_historicalBalances_daoId {
+  UNI
+  ENS
+  ARB
+}
+
+type query_historicalVotingPower_items {
+  address: String!
+  votingPower: String!
+  blockNumber: Float!
+  tokenAddress: String!
+}
+
+enum queryInput_historicalVotingPower_daoId {
+  UNI
+  ENS
+  ARB
 }
 
 enum HTTPMethod {
