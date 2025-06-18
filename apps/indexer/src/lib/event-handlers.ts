@@ -69,12 +69,21 @@ export const delegateChanged = async (
     })
     .onConflictDoNothing();
 
+  // Get the delegator's current balance
+  const delegatorBalance = await context.db.find(accountBalance, {
+    id: [event.args.delegator, event.log.address].join("-"),
+  });
+
+  const delegatedValue = delegatorBalance?.balance ?? BigInt(0);
+
   // Create a new delegation record
   await context.db.insert(delegation).values({
     id: [event.transaction.hash, event.log.logIndex].join("-"),
     daoId,
     delegateAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
+    delegatedValue,
+    previousDelegate: event.args.fromDelegate,
     timestamp: event.block.timestamp,
   });
 
