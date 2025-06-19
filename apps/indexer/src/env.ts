@@ -18,13 +18,8 @@ const envSchema = z.object({
   COINGECKO_API_KEY: z.string().optional(),
   REDIS_URL: z.string().optional(),
   PORT: z.coerce.number().default(42069),
-  API_URL: z.string().optional(),
 });
 
 const _env = envSchema.parse(process.env);
-
-if (!_env.API_URL) {
-  _env.API_URL = `http://127.0.0.1:${_env.PORT}`;
-}
 
 export const env = _env;

@@ -43,6 +43,7 @@ export default processConfig({
           handler: {
             openapi: {
               source: `${value}/docs`,
+              endpoint: value,
             }
           }
         }
