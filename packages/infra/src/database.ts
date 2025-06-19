@@ -2,10 +2,11 @@
 
 import { vpc } from "./cluster";
 
-export function newDatabase(dao: string) {
+export function newDatabase(dao: string, size?: `${number}0 GB`) {
   return new sst.aws.Postgres(`Anticapture-${dao}-DB`, {
     vpc,
-    storage: "30 GB",
+    storage: size,
+    password: new sst.Secret(`${dao}DBPassword`),
     dev: {
       username: "postgres",
       password: "postgres",

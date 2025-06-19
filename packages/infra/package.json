@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "deploy": "sst deploy",
-    "dev": "sst dev"
+    "dev": "sst dev",
+    "db": "sst tunnel"
   },
   "keywords": [],
   "author": "",

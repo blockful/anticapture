@@ -1,5 +1,16 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+const daos: { name: string; size: `${number}0 GB` }[] = [
+  {
+    name:"ENS",
+    size:"30 GB"
+  },
+  {
+    name:"UNI",
+    size:"30 GB"
+  },
+]
+
 export default $config({
   app(input) {
     return {
@@ -20,10 +31,10 @@ export default $config({
     const schema = crypto.randomUUID();
 
     const apis = []
-    for (const dao of ["ENS", "UNI"]) {
-      const db = newDatabase(dao)
-      newIndexer(dao, cluster, db, $dev ? "http://localhost:8545" : ethereumRpc.value, schema)
-      const indexerAPI = newIndexerAPI(dao, cluster, db, ethereumRpc.value, schema)
+    for (const dao of daos) {
+      const db = newDatabase(dao.name, dao.size)
+      newIndexer(dao.name, cluster, db, $dev ? "http://localhost:8545" : ethereumRpc.value, schema)
+      const indexerAPI = newIndexerAPI(dao.name, cluster, db, ethereumRpc.value, schema)
       apis.push(indexerAPI)
     }
 
