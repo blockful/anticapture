@@ -9,6 +9,7 @@
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
     "infra": "pnpm run --filter=@anticapture/infra",
+    "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
     "prepare": "husky"
   },
   "license": "MIT",

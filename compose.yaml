@@ -1,11 +1,4 @@
 services:
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    restart: always
-    networks:
-      - backend
 
   contracts:
     build:
@@ -16,22 +9,10 @@ services:
     networks:
       - backend
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:8545",
-          "-X",
-          "POST",
-          "-H",
-          "Content-Type: application/json",
-          "-d",
-          '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}',
-        ]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      test: ["CMD", "test", "-f", "/tmp/anvil-ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
       start_period: 30s
 
   indexer-db:
@@ -43,8 +24,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
-    tmpfs:
-      - /var/lib/postgresql/data:rw,noexec,nosuid
     networks:
       - backend
 
@@ -61,8 +40,6 @@ services:
       - NETWORK=anvil
       - RPC_URL=http://contracts:8545
       - CHAIN_ID=31337
-      - MAX_REQUESTS_PER_SECOND=10
-      - POLLING_INTERVAL=1000
       - PORT=42069
 
     depends_on:
@@ -88,4 +65,3 @@ services:
 
 networks:
   backend:
-    driver: bridge

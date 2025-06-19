@@ -1,5 +1,11 @@
 import { Context, Event } from "ponder:registry";
-import { delta, getValueFromEventArgs, max, min } from "./utils";
+import {
+  delta,
+  getValueFromEventArgs,
+  max,
+  min,
+  verifyAddressType,
+} from "./utils";
 import {
   account,
   accountBalance,
@@ -35,13 +41,22 @@ import {
 export const delegateChanged = async (
   event: DaoDelegateChangedEvent,
   context: Context,
-  daoId: string
 ) => {
-  // Inserting accounts if didn't exist
+  // Inserting accounts if didn't exist with type verification
+  const delegatorType = await verifyAddressType(
+    context.client,
+    event.args.delegator,
+  );
+  const toDelegateType = await verifyAddressType(
+    context.client,
+    event.args.toDelegate,
+  );
+
   await context.db
     .insert(account)
     .values({
       id: event.args.delegator,
+      type: delegatorType,
     })
     .onConflictDoNothing();
 
@@ -49,26 +64,32 @@ export const delegateChanged = async (
     .insert(account)
     .values({
       id: event.args.toDelegate,
+      type: toDelegateType,
     })
     .onConflictDoNothing();
 
+  // Get the delegator's current balance
+  const delegatorBalance = await context.db.find(accountBalance, {
+    accountId: event.args.delegator,
+    tokenId: event.log.address,
+  });
+
+  const delegatedValue = delegatorBalance?.balance ?? BigInt(0);
+
   // Create a new delegation record
-  await context.db
-    .insert(delegation)
-    .values({
-      id: [event.transaction.hash, event.log.logIndex].join("-"),
-      daoId,
-      delegateeAccountId: event.args.toDelegate,
-      delegatorAccountId: event.args.delegator,
-      timestamp: event.block.timestamp,
-    })
-    .onConflictDoNothing();
+  await context.db.insert(delegation).values({
+    transactionHash: event.transaction.hash,
+    delegateAccountId: event.args.toDelegate,
+    delegatorAccountId: event.args.delegator,
+    delegatedValue,
+    previousDelegate: event.args.fromDelegate,
+    timestamp: event.block.timestamp,
+  });
 
   // Update the delegator's delegate
   await context.db
     .insert(accountBalance)
     .values({
-      id: [event.args.delegator, event.log.address].join("-"),
       accountId: event.args.delegator,
       tokenId: event.log.address,
       delegate: event.args.toDelegate,
@@ -78,20 +99,20 @@ export const delegateChanged = async (
       delegate: event.args.toDelegate,
     });
 
-  // Update the old delegatee's delegations count
+  // Update the old delegate's delegations count
   if (event.args.fromDelegate != zeroAddress) {
     await context.db
-      .update(accountPower, { id: [event.args.fromDelegate, daoId].join("-") })
+      .update(accountPower, {
+        accountId: event.args.fromDelegate,
+      })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
 
-  // Update the delegatee's delegations count
+  // Update the delegate's delegations count
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.toDelegate, daoId].join("-"),
       accountId: event.args.toDelegate,
-      daoId,
       delegationsCount: 1,
     })
     .onConflictDoUpdate((current) => ({
@@ -102,13 +123,18 @@ export const delegateChanged = async (
 export const delegatedVotesChanged = async (
   event: DaoDelegateVotesChangedEvent,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
-  //Inserting delegate account if didn't exist
+  const delegateType = await verifyAddressType(
+    context.client,
+    event.args.delegate,
+  );
+
   await context.db
     .insert(account)
     .values({
       id: event.args.delegate,
+      type: delegateType,
     })
     .onConflictDoNothing();
 
@@ -118,7 +144,7 @@ export const delegatedVotesChanged = async (
       { name: "newVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -127,14 +153,12 @@ export const delegatedVotesChanged = async (
       { name: "previousVotes", daos: ["SHU"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
-  // Create a new voting power history record
   await context.db.insert(votingPowerHistory).values({
-    id: [event.transaction.hash, event.log.logIndex].join("-"),
+    transactionHash: event.transaction.hash,
     accountId: event.args.delegate,
-    daoId,
     votingPower: newBalance,
     timestamp: event.block.timestamp,
   });
@@ -143,17 +167,11 @@ export const delegatedVotesChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.delegate, daoId].join("-"),
       accountId: event.args.delegate,
-      daoId,
       votingPower: newBalance,
     })
     .onConflictDoUpdate((current) => ({
       votingPower: newBalance,
-      delegationsCount: current.delegationsCount,
-      votesCount: current.votesCount,
-      proposalsCount: current.proposalsCount,
-      lastVoteTimestamp: current.lastVoteTimestamp,
     }));
 
   const currentDelegatedSupply = (await context.db.find(token, {
@@ -171,10 +189,9 @@ export const delegatedVotesChanged = async (
   await storeDailyBucket(
     context,
     event,
-    daoId,
     MetricTypesEnum.DELEGATED_SUPPLY,
     currentDelegatedSupply,
-    newDelegatedSupply
+    newDelegatedSupply,
   );
 };
 
@@ -182,7 +199,7 @@ export const tokenTransfer = async (
   event: DaoTransferEvent,
   context: Context,
   daoId: DaoIdEnum,
-  tokenAddress: Address
+  tokenAddress: Address,
 ) => {
   //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
   const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
@@ -191,16 +208,20 @@ export const tokenTransfer = async (
       { name: "amount", daos: ["COMP", "UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const { from, to } = event.args;
 
-  //Inserting delegate account if didn't exist
+  //Inserting accounts if didn't exist with type verification
+  const toType = await verifyAddressType(context.client, to);
+  const fromType = await verifyAddressType(context.client, from);
+
   await context.db
     .insert(account)
     .values({
       id: to,
+      type: toType,
     })
     .onConflictDoNothing();
 
@@ -208,14 +229,14 @@ export const tokenTransfer = async (
     .insert(account)
     .values({
       id: from,
+      type: fromType,
     })
     .onConflictDoNothing();
 
   await context.db
     .insert(transfer)
     .values({
-      id: [event.transaction.hash, event.log.logIndex].join("-"),
-      daoId,
+      transactionHash: event.transaction.hash,
       tokenId: tokenAddress,
       amount: value,
       fromAccountId: from,
@@ -228,10 +249,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      id: [to, tokenAddress].join("-"),
-      daoId,
-      tokenId: tokenAddress,
       accountId: to,
+      tokenId: tokenAddress,
       balance: value,
       delegate: zeroAddress,
     })
@@ -244,10 +263,8 @@ export const tokenTransfer = async (
     await context.db
       .insert(accountBalance)
       .values({
-        id: [from, tokenAddress].join("-"),
-        daoId,
-        tokenId: tokenAddress,
         accountId: from,
+        tokenId: tokenAddress,
         balance: -value,
         delegate: zeroAddress,
       })
@@ -279,10 +296,9 @@ export const tokenTransfer = async (
     await storeDailyBucket(
       context,
       event,
-      daoId,
       MetricTypesEnum.LENDING_SUPPLY,
       currentLendingSupply,
-      newLendingSupply
+      newLendingSupply,
     );
   }
 
@@ -307,10 +323,9 @@ export const tokenTransfer = async (
     await storeDailyBucket(
       context,
       event,
-      daoId,
       MetricTypesEnum.CEX_SUPPLY,
       currentCexSupply,
-      newCexSupply
+      newCexSupply,
     );
   }
 
@@ -335,10 +350,9 @@ export const tokenTransfer = async (
     await storeDailyBucket(
       context,
       event,
-      daoId,
       MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
-      newDexSupply
+      newDexSupply,
     );
   }
 
@@ -366,10 +380,9 @@ export const tokenTransfer = async (
     await storeDailyBucket(
       context,
       event,
-      daoId,
       MetricTypesEnum.TREASURY,
       currentTreasury,
-      newTreasury
+      newTreasury,
     );
   }
 
@@ -400,10 +413,9 @@ export const tokenTransfer = async (
     await storeDailyBucket(
       context,
       event,
-      daoId,
       MetricTypesEnum.TOTAL_SUPPLY,
       currentTotalSupply,
-      newTotalSupply
+      newTotalSupply,
     );
   }
 
@@ -427,10 +439,9 @@ export const tokenTransfer = async (
     await storeDailyBucket(
       context,
       event,
-      daoId,
       MetricTypesEnum.CIRCULATING_SUPPLY,
       currentCirculatingSupply,
-      newCirculatingSupply
+      newCirculatingSupply,
     );
   }
 };
@@ -438,7 +449,7 @@ export const tokenTransfer = async (
 export const voteCast = async (
   event: DaoVoteCastEvent,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const weight = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -446,44 +457,48 @@ export const voteCast = async (
       { name: "votes", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
 
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [{ name: "proposalId", daos: ["ENS", "UNI"] }],
     event.args,
-    daoId
+    daoId,
   );
+
+  // Insert voter account with type verification
+  const voterType = await verifyAddressType(context.client, event.args.voter);
 
   await context.db
     .insert(account)
     .values({
       id: event.args.voter,
+      type: voterType,
     })
     .onConflictDoNothing();
 
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.voter, daoId].join("-"),
-      daoId,
       accountId: event.args.voter,
       votesCount: 1,
       lastVoteTimestamp: event.block.timestamp,
+      firstVoteTimestamp: event.block.timestamp, // Set as first vote timestamp for new accounts
     })
     .onConflictDoUpdate((current) => ({
       votesCount: (current.votesCount ?? 0) + 1,
       lastVoteTimestamp: event.block.timestamp,
+      // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
+      firstVoteTimestamp: current.firstVoteTimestamp ?? event.block.timestamp,
     }));
 
   // Create vote record
   await context.db.insert(votesOnchain).values({
     id: event.transaction.hash,
-    daoId,
     proposalId: String(proposalId),
     voterAccountId: event.args.voter,
     support: event.args.support.toString(),
-    weight: weight.toString(),
+    votingPower: weight.toString(),
     reason: event.args.reason,
     timestamp: event.block.timestamp,
   });
@@ -506,7 +521,7 @@ export const voteCast = async (
 export const proposalCreated = async (
   event: DaoProposalCreatedEvent,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -514,20 +529,26 @@ export const proposalCreated = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
+  );
+
+  // Insert proposer account with type verification
+  const proposerType = await verifyAddressType(
+    context.client,
+    event.args.proposer,
   );
 
   await context.db
     .insert(account)
     .values({
       id: event.args.proposer,
+      type: proposerType,
     })
     .onConflictDoNothing();
 
   // Create proposal record
   await context.db.insert(proposalsOnchain).values({
     id: String(proposalId),
-    daoId,
     proposerAccountId: event.args.proposer,
     targets: JSON.stringify(event.args.targets),
     values: JSON.stringify(event.args.values.map((v: bigint) => v.toString())),
@@ -546,8 +567,6 @@ export const proposalCreated = async (
   await context.db
     .insert(accountPower)
     .values({
-      id: [event.args.proposer, daoId].join("-"),
-      daoId,
       accountId: event.args.proposer,
       proposalsCount: 1,
     })
@@ -559,7 +578,7 @@ export const proposalCreated = async (
 export const proposalCanceled = async (
   event: DaoProposalCanceledEvent,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -567,7 +586,7 @@ export const proposalCanceled = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
   await context.db.update(proposalsOnchain, { id: String(proposalId) }).set({
     status: "CANCELED",
@@ -577,7 +596,7 @@ export const proposalCanceled = async (
 export const proposalExecuted = async (
   event: DaoProposalExecutedEvent,
   context: Context,
-  daoId: string
+  daoId: string,
 ) => {
   const proposalId = getValueFromEventArgs<bigint, (typeof event)["args"]>(
     [
@@ -585,7 +604,7 @@ export const proposalExecuted = async (
       { name: "id", daos: ["UNI"] },
     ],
     event.args,
-    daoId
+    daoId,
   );
   await context.db.update(proposalsOnchain, { id: String(proposalId) }).set({
     status: "EXECUTED",
@@ -595,10 +614,9 @@ export const proposalExecuted = async (
 const storeDailyBucket = async (
   context: Context,
   event: Event,
-  daoId: string,
   metricType: MetricTypesEnum,
   currentValue: bigint,
-  newValue: bigint
+  newValue: bigint,
 ) => {
   const volume = delta(newValue, currentValue);
   const dayStartTimestampInSeconds =
@@ -606,13 +624,12 @@ const storeDailyBucket = async (
       0,
       0,
       0,
-      0
+      0,
     ) / 1000;
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
       date: BigInt(dayStartTimestampInSeconds),
-      daoId,
       tokenId: event.log.address,
       metricType,
       average: newValue,

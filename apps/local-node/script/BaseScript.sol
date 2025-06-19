@@ -1,6 +1,6 @@
 // apps/local-node/script/BaseScript.sol
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.12;
 
 import {Script} from "forge-std/Script.sol";
 import {Constants} from "./Constants.sol";
@@ -23,7 +23,6 @@ abstract contract BaseScript is Script {
         vm.label(Constants.CHARLIE, "Charlie");
         vm.label(Constants.DAVID, "David");
         
-        // Label contract addresses
         vm.label(Constants.ENS_TOKEN_ADDRESS, "ENSToken");
         vm.label(Constants.ENS_GOVERNOR_ADDRESS, "ENSGovernor");
         vm.label(Constants.ENS_TIMELOCK_ADDRESS, "ENSTimelock");
