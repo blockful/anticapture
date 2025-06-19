@@ -41,6 +41,7 @@ import {
 export const delegateChanged = async (
   event: DaoDelegateChangedEvent,
   context: Context,
+  daoId: string,
 ) => {
   // Inserting accounts if didn't exist with type verification
   const delegatorType = await verifyAddressType(
@@ -79,6 +80,7 @@ export const delegateChanged = async (
   // Create a new delegation record
   await context.db.insert(delegation).values({
     transactionHash: event.transaction.hash,
+    daoId,
     delegateAccountId: event.args.toDelegate,
     delegatorAccountId: event.args.delegator,
     delegatedValue,
@@ -113,6 +115,7 @@ export const delegateChanged = async (
     .insert(accountPower)
     .values({
       accountId: event.args.toDelegate,
+      daoId,
       delegationsCount: 1,
     })
     .onConflictDoUpdate((current) => ({
@@ -168,6 +171,7 @@ export const delegatedVotesChanged = async (
     .insert(accountPower)
     .values({
       accountId: event.args.delegate,
+      daoId,
       votingPower: newBalance,
     })
     .onConflictDoUpdate((current) => ({
@@ -192,6 +196,7 @@ export const delegatedVotesChanged = async (
     MetricTypesEnum.DELEGATED_SUPPLY,
     currentDelegatedSupply,
     newDelegatedSupply,
+    daoId,
   );
 };
 
@@ -299,6 +304,7 @@ export const tokenTransfer = async (
       MetricTypesEnum.LENDING_SUPPLY,
       currentLendingSupply,
       newLendingSupply,
+      daoId,
     );
   }
 
@@ -326,6 +332,7 @@ export const tokenTransfer = async (
       MetricTypesEnum.CEX_SUPPLY,
       currentCexSupply,
       newCexSupply,
+      daoId,
     );
   }
 
@@ -353,6 +360,7 @@ export const tokenTransfer = async (
       MetricTypesEnum.DEX_SUPPLY,
       currentDexSupply,
       newDexSupply,
+      daoId,
     );
   }
 
@@ -383,6 +391,7 @@ export const tokenTransfer = async (
       MetricTypesEnum.TREASURY,
       currentTreasury,
       newTreasury,
+      daoId,
     );
   }
 
@@ -416,6 +425,7 @@ export const tokenTransfer = async (
       MetricTypesEnum.TOTAL_SUPPLY,
       currentTotalSupply,
       newTotalSupply,
+      daoId,
     );
   }
 
@@ -442,6 +452,7 @@ export const tokenTransfer = async (
       MetricTypesEnum.CIRCULATING_SUPPLY,
       currentCirculatingSupply,
       newCirculatingSupply,
+      daoId,
     );
   }
 };
@@ -481,6 +492,7 @@ export const voteCast = async (
     .insert(accountPower)
     .values({
       accountId: event.args.voter,
+      daoId,
       votesCount: 1,
       lastVoteTimestamp: event.block.timestamp,
       firstVoteTimestamp: event.block.timestamp, // Set as first vote timestamp for new accounts
@@ -568,6 +580,7 @@ export const proposalCreated = async (
     .insert(accountPower)
     .values({
       accountId: event.args.proposer,
+      daoId,
       proposalsCount: 1,
     })
     .onConflictDoUpdate((current) => ({
@@ -617,6 +630,7 @@ const storeDailyBucket = async (
   metricType: MetricTypesEnum,
   currentValue: bigint,
   newValue: bigint,
+  daoId: string,
 ) => {
   const volume = delta(newValue, currentValue);
   const dayStartTimestampInSeconds =
@@ -632,6 +646,7 @@ const storeDailyBucket = async (
       date: BigInt(dayStartTimestampInSeconds),
       tokenId: event.log.address,
       metricType,
+      daoId,
       average: newValue,
       open: currentValue,
       high: max(newValue, currentValue),
