@@ -20,6 +20,27 @@ export default $config({
       home: "aws",
     };
   },
+  console: {
+    autodeploy: {
+      target(event: {type: string, branch: string, action: string }) {
+        if (event.type === "branch"  && event.action === "pushed") {
+          if (event.branch === "main") return {stage: "production"}
+          if (event.branch === "dev") return {stage: "dev"}
+        }
+
+        if (event.type === "pull_request") {
+          return {
+            stage: `pr-${event.branch
+              .replace(/[^a-zA-Z0-9-]/g, "-")
+              .replace(/-+/g, "-")
+              .replace(/^-/g, "")
+              .replace(/-$/g, "")
+            }`
+          };
+        }
+      }
+    }
+  },
   async run() {
     const { newDatabase } = await import("./src/database.ts");
     const { newIndexer, newIndexerAPI } = await import("./src/indexer/index.ts");

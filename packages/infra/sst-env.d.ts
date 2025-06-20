@@ -26,10 +26,6 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
-    "ENSDBPassword": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
     "ENSIndexer": {
       "service": string
       "type": "sst.aws.Service"
