@@ -1746,3 +1746,8 @@ export type GetDaoDataQueryVariables = Exact<{
 
 
 export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao', id: string, quorum: any, proposalThreshold: any, votingDelay: any, votingPeriod: any, timelockDelay: any } | null };
+
+export type GetDelegatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, account?: { __typename?: 'account', type: string, id: string } | null }> } };

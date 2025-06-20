@@ -1,0 +1,11 @@
+query GetDelegates {
+  accountPowers(orderBy: "votingPower", orderDirection: "desc", limit: 10) {
+    items {
+      votingPower
+      account {
+        type
+        id
+      }
+    }
+  }
+}
