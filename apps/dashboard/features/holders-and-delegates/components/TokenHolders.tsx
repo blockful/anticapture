@@ -7,10 +7,10 @@ import { Address, isAddress } from "viem";
 import { tokenHoldersMock } from "@/features/holders-and-delegates/mock-data/TokenHoldersMock";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { Badge } from "@/shared/components/badges/Badge";
-import { CheckIcon, Filter } from "lucide-react";
+import { CheckIcon, Filter, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { Button } from "@/shared/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface TokenHolders {
   address: string | Address;
@@ -22,6 +22,8 @@ interface TokenHolders {
 
 export const TokenHolders = () => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
+  const router = useRouter();
   const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
     {
       accessorKey: "address",
@@ -37,9 +39,19 @@ export const TokenHolders = () => {
           : "Invalid address";
 
         return (
-          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
-            {address}
-          </div>
+          <>
+            <div className="flex w-full gap-2">
+              <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
+                {address}
+              </div>
+              {isDetailsOpen && (
+                <button className="border-surface-contrast bg-surface-default text-primary flex items-center gap-1.5 rounded-md border px-2 py-1">
+                  <PlusIcon className="size-3.5" />
+                  <p className="text-sm font-medium">Details</p>
+                </button>
+              )}
+            </div>
+          </>
         );
       },
     },
@@ -223,6 +235,15 @@ export const TokenHolders = () => {
     },
   ];
 
+  interface TokenHolder {
+    address: string | Address;
+  }
+
+  const handleRowClick = (row: TokenHolder) => {
+    setIsDetailsOpen(true);
+    row.address && router.push(`/${row.address}`);
+  };
+
   return (
     <div className="flex">
       <div className="w-full text-white">
@@ -231,6 +252,7 @@ export const TokenHolders = () => {
           data={data}
           filterColumn="type"
           withSorting={true}
+          onRowClick={handleRowClick}
         />
       </div>
     </div>
