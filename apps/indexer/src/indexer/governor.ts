@@ -66,6 +66,6 @@ export function GovernorIndexer(daoId: DaoIdEnum, governor: Governor) {
     `${daoId}Token:DelegateVotesChanged`,
     async ({ event, context }) => {
       await delegatedVotesChanged(event, context, daoId);
-    },
+    }
   );
 }
