@@ -55,6 +55,7 @@ export function newIndexerAPI(
       },
     },
     loadBalancer: {
+      public: false,
       rules: [{ listen: "80/http", forward: "42069/http" }],
     },
     dev: {
