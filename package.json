@@ -8,7 +8,8 @@
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
-    "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node"
+    "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
+    "client": "pnpm run --filter=@anticapture/graphql-client"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
