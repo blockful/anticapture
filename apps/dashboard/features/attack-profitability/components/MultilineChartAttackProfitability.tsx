@@ -65,14 +65,10 @@ export const MultilineChartAttackProfitability = ({
     },
   );
   useEffect(() => {
-    if (
+    setMocked(
       timeSeriesData !== undefined &&
-      Object.values(timeSeriesData).every((data) => data.length === 0)
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        Object.values(timeSeriesData).every((data) => data.length === 0),
+    );
   }, [timeSeriesData]);
 
   let delegatedSupplyChart;
