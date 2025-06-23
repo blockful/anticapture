@@ -1751,3 +1751,15 @@ export type GetDelegatesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, account?: { __typename?: 'account', type: string, id: string } | null }> } };
+
+export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+  address: Scalars['String']['input'];
+  blockNumber: Scalars['NonNegativeInt']['input'];
+  daoId: QueryInput_HistoricalVotingPower_DaoId;
+  fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  proposalsDaoId: QueryInput_ProposalsActivity_DaoId;
+}>;
+
+
+export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
