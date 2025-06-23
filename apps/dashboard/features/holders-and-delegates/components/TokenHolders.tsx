@@ -6,7 +6,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { tokenHoldersMock } from "@/features/holders-and-delegates/mock-data/TokenHoldersMock";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { Badge } from "@/shared/components/badges/Badge";
 import { CheckIcon, Filter, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
@@ -14,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 
 interface TokenHolders {
   address: string | Address;
@@ -43,7 +43,7 @@ export const TokenHolders = () => {
 
         return (
           <>
-            <div className="flex w-full gap-2">
+            <div className="flex w-full gap-2 py-1.5">
               <div className="flex items-center gap-1.5 px-2">
                 <div>
                   <EnsAvatar
@@ -79,12 +79,10 @@ export const TokenHolders = () => {
           <div className="text-table-header relative flex w-full items-start justify-start gap-1.5 px-2 py-1.5">
             <div className="flex items-center gap-1.5">
               <p>Type</p>
-              <button
-                className="hover:border-highlight bg-surface-hover group flex cursor-pointer items-center rounded-sm border border-transparent p-1"
+              <ButtonFilter
                 onClick={() => setFilterOpen(!filterOpen)}
-              >
-                <Filter className="text-primary size-3" />
-              </button>
+                isActive={filterOpen}
+              />
             </div>
             {filterOpen && (
               <div className="absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
