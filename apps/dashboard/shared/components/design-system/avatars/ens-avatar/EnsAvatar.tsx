@@ -67,14 +67,16 @@ export const EnsAvatar = ({
   const baseClasses = cn(
     sizeClasses[size],
     variantClasses[variant],
-    "relative overflow-hidden bg-gray-700/50 flex items-center justify-center",
+    "relative overflow-hidden bg-surface-hover flex items-center justify-center",
     className,
   );
 
   // Show skeleton when loading (either external loading prop or ENS data loading)
   const isLoading = loading || ensLoading;
   if (isLoading) {
-    return <div className={cn(baseClasses, "animate-pulse bg-gray-700/50")} />;
+    return (
+      <div className={cn(baseClasses, "bg-surface-hover animate-pulse")} />
+    );
   }
 
   // Show image if available and no error

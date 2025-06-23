@@ -17,6 +17,7 @@ import { useTokenHolder } from "@/shared/hooks/graphql-client/useTokenHolder";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 
 interface TokenHolders {
   address: string | Address;
@@ -37,6 +38,50 @@ export const TokenHolders = ({
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const router = useRouter();
   const { data: tokenHoldersData, loading } = useTokenHolder(daoId);
+  const addresses = tokenHoldersData?.map((holder) => holder.accountId);
+  const { data: historicalBalancesData } = useHistoricalBalances(
+    daoId,
+    addresses || [],
+    days,
+  );
+
+  const calculateVariation = (
+    currentBalance: string,
+    historicalBalance: string | undefined,
+  ): number => {
+    if (!currentBalance || !historicalBalance) return 0;
+
+    try {
+      const current = Number(formatUnits(BigInt(currentBalance), 18));
+      const historical = Number(formatUnits(BigInt(historicalBalance), 18));
+
+      if (historical === 0) return 0;
+
+      const variation = current - historical;
+      return Number(variation.toFixed(2));
+    } catch (error) {
+      console.error("Error calculating variation:", error);
+      return 0;
+    }
+  };
+
+  const data: TokenHolders[] =
+    tokenHoldersData?.map((holder) => {
+      const historicalBalance = historicalBalancesData?.find(
+        (h) => h.address.toLowerCase() === holder.accountId.toLowerCase(),
+      );
+
+      return {
+        address: holder.accountId as Address,
+        type: holder.account.type as "Contract" | "EOA",
+        balance: Number(formatUnits(BigInt(holder.balance), 18)),
+        variation: calculateVariation(
+          holder.balance,
+          historicalBalance?.balance,
+        ),
+        delegate: holder.delegate as Address,
+      };
+    }) || [];
 
   const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
     {
@@ -232,15 +277,6 @@ export const TokenHolders = ({
       },
     },
   ];
-
-  const data: TokenHolders[] =
-    tokenHoldersData?.map((holder) => ({
-      address: holder.accountId as Address,
-      type: holder.account.type as "Contract" | "EOA",
-      balance: Number(formatUnits(BigInt(holder.balance), 18)),
-      variation: 0,
-      delegate: holder.delegate as Address,
-    })) || [];
 
   const handleRowClick = (row: TokenHolders) => {
     setIsDetailsOpen(true);
