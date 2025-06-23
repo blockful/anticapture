@@ -1,0 +1,12 @@
+query GetHistoricalVotingAndActivity($address: String!, $blockNumber: Int!, $daoId: String!, $fromDate: Int!) {
+  historicalVotingPower(addresses: [$address], blockNumber: $blockNumber, daoId: $daoId) {
+    address
+    votingPower
+  }
+  
+  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate) {
+    totalProposals
+    votedProposals
+    neverVoted
+  }
+}
