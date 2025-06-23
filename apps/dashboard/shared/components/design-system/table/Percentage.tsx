@@ -35,7 +35,7 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
       ) : (
         <ArrowDown className="size-4" />
       )}
-      {Math.abs(value)}%
+      {Math.abs(value).toFixed(2)}%
     </span>
   );
 };

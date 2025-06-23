@@ -16,6 +16,7 @@ import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilt
 import { useTokenHolder } from "@/shared/hooks/graphql-client/useTokenHolder";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 interface TokenHolders {
   address: string | Address;
@@ -25,14 +26,17 @@ interface TokenHolders {
   delegate: string | Address;
 }
 
-export const TokenHolders = () => {
+export const TokenHolders = ({
+  days,
+  daoId,
+}: {
+  days: TimeInterval;
+  daoId: DaoIdEnum;
+}) => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const router = useRouter();
-  const { daoId } = useParams();
-  const { data: tokenHoldersData, loading } = useTokenHolder(
-    daoId as DaoIdEnum,
-  );
+  const { data: tokenHoldersData, loading } = useTokenHolder(daoId);
 
   const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
     {

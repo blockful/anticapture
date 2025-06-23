@@ -21,7 +21,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   // Map from tab ID to tab component
   const tabComponentMap: Record<TabId, React.ReactElement> = {
-    tokenHolders: <TokenHolders />,
+    tokenHolders: <TokenHolders days={days} daoId={daoId} />,
     delegates: <Delegates />,
   };
 
