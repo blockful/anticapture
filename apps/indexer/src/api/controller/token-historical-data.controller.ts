@@ -12,13 +12,13 @@ import { DAYS_IN_YEAR } from "@/lib/constants";
 interface TokenHistoricalDataClient {
   getHistoricalTokenData(
     tokenId: CoingeckoTokenId,
-    days: number,
+    days: number
   ): Promise<CoingeckoHistoricalMarketData>;
 }
 
 export function tokenHistoricalData(
   app: Hono,
-  client: TokenHistoricalDataClient,
+  client: TokenHistoricalDataClient
 ) {
   app.openapi(
     createRoute({
@@ -53,10 +53,10 @@ export function tokenHistoricalData(
 
       const data = await client.getHistoricalTokenData(
         CoingeckoTokenIdEnum[daoId],
-        DAYS_IN_YEAR,
+        DAYS_IN_YEAR
       );
 
       return context.json(data, 200);
-    },
+    }
   );
 }
