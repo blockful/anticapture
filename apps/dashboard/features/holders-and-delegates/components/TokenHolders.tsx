@@ -57,7 +57,8 @@ export const TokenHolders = ({
 
       if (historical === 0) return 0;
 
-      const variation = current - historical;
+      // Calculate percentage variation
+      const variation = ((current - historical) / historical) * 100;
       return Number(variation.toFixed(2));
     } catch (error) {
       console.error("Error calculating variation:", error);
@@ -206,7 +207,7 @@ export const TokenHolders = ({
         const balance: number = row.getValue("balance");
         return (
           <div className="font-nomal flex w-full justify-end px-2 py-1.5 text-sm">
-            {formatNumberUserReadable(balance, 1)} ENS
+            {formatNumberUserReadable(balance, 1)} {daoId}
           </div>
         );
       },
@@ -237,9 +238,12 @@ export const TokenHolders = ({
       ),
       cell: ({ row }) => {
         const variation: number = row.getValue("variation");
+        const token: number = row.getValue("balance");
         return (
           <div className="flex w-full items-start justify-start gap-2 px-2 py-1.5 text-sm">
-            <p>{variation}%</p>
+            <p>
+              {token * variation} {daoId}
+            </p>
             <div>
               <Percentage value={variation} />
             </div>
