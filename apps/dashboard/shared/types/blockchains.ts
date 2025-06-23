@@ -2,4 +2,4 @@ export enum BlockchainEnum {
   ETHEREUM = "ETHEREUM",
 }
 
-export const ETHEREUM_BLOCKS_PER_SECOND = 12;
+export const ETHEREUM_BLOCK_TIME_SECONDS = 12;

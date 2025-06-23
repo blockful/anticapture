@@ -8,7 +8,7 @@ import { formatAddress } from "@/shared/utils/formatAddress";
 import { CheckIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
@@ -23,7 +23,10 @@ interface TokenHolders {
   address: string | Address;
   type: "Contract" | "EOA";
   balance: number;
-  variation: number;
+  variation: {
+    percentageChange: number;
+    absoluteChange: number;
+  };
   delegate: string | Address;
 }
 
@@ -48,21 +51,28 @@ export const TokenHolders = ({
   const calculateVariation = (
     currentBalance: string,
     historicalBalance: string | undefined,
-  ): number => {
-    if (!currentBalance || !historicalBalance) return 0;
+  ): { percentageChange: number; absoluteChange: number } => {
+    if (!currentBalance || !historicalBalance)
+      return { percentageChange: 0, absoluteChange: 0 };
 
     try {
       const current = Number(formatUnits(BigInt(currentBalance), 18));
       const historical = Number(formatUnits(BigInt(historicalBalance), 18));
 
-      if (historical === 0) return 0;
+      if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
 
+      // Calculate absolute change in tokens
+      const absoluteChange = current - historical;
       // Calculate percentage variation
-      const variation = ((current - historical) / historical) * 100;
-      return Number(variation.toFixed(2));
+      const percentageChange = ((current - historical) / historical) * 100;
+
+      return {
+        percentageChange: Number(percentageChange.toFixed(2)),
+        absoluteChange: Number(absoluteChange.toFixed(2)),
+      };
     } catch (error) {
       console.error("Error calculating variation:", error);
-      return 0;
+      return { percentageChange: 0, absoluteChange: 0 };
     }
   };
 
@@ -72,14 +82,16 @@ export const TokenHolders = ({
         (h) => h.address.toLowerCase() === holder.accountId.toLowerCase(),
       );
 
+      const variation = calculateVariation(
+        holder.balance,
+        historicalBalance?.balance,
+      );
+
       return {
         address: holder.accountId as Address,
         type: holder.account.type as "Contract" | "EOA",
         balance: Number(formatUnits(BigInt(holder.balance), 18)),
-        variation: calculateVariation(
-          holder.balance,
-          historicalBalance?.balance,
-        ),
+        variation,
         delegate: holder.delegate as Address,
       };
     }) || [];
@@ -237,15 +249,19 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        const variation: number = row.getValue("variation");
-        const token: number = row.getValue("balance");
+        const variation = row.getValue("variation") as {
+          percentageChange: number;
+          absoluteChange: number;
+        };
+
         return (
           <div className="flex w-full items-start justify-start gap-2 px-2 py-1.5 text-sm">
             <p>
-              {token * variation} {daoId}
+              {formatNumberUserReadable(Math.abs(variation.absoluteChange))}{" "}
+              {daoId}
             </p>
             <div>
-              <Percentage value={variation} />
+              <Percentage value={variation.percentageChange} />
             </div>
           </div>
         );

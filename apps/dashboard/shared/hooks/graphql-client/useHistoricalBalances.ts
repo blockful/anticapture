@@ -6,7 +6,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { useEffect, useState } from "react";
 import { TimeInterval } from "@/shared/types/enums";
 import { BlockchainEnum } from "@/shared/types/blockchains";
-import { getActualBlockNumber } from "@/shared/utils/getActualBlockNumber";
+import { getHistoricalBlockNumber } from "@/shared/utils/calculateHistoricalBlockNumber";
 
 interface HistoricalBalance {
   address: string;
@@ -32,11 +32,12 @@ export const useHistoricalBalances = (
   useEffect(() => {
     const fetchBlockNumber = async () => {
       try {
-        const actualBlock = await getActualBlockNumber({
+        const historicalBlock = await getHistoricalBlockNumber({
+          period: days,
           blockchain: BlockchainEnum.ETHEREUM,
         });
 
-        setBlockNumber(Number(actualBlock || 0));
+        setBlockNumber(Math.abs(historicalBlock));
       } catch (error) {
         console.error("Error fetching historical block:", error);
         setBlockNumber(0);

@@ -31,11 +31,15 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
   return (
     <span className={cn(percentageVariants({ variant }), className)} {...props}>
       {value > 0 ? (
-        <ArrowUp className="size-4" />
+        <ArrowUp
+          className={cn("size-4", variant === "positive" && "text-success")}
+        />
       ) : (
-        <ArrowDown className="size-4" />
+        <ArrowDown
+          className={cn("size-4", variant === "negative" && "text-error")}
+        />
       )}
-      {Math.abs(value).toFixed(2)}%
+      {Math.abs(value)}%
     </span>
   );
 };
