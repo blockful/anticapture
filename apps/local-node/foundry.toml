@@ -5,6 +5,6 @@ libs = ["lib"]
 optimizer = true
 remappings = [
   "@openzeppelin=node_modules/@openzeppelin",
-  "forge-std=lib/forge-std",
+  "forge-std=node_modules/forge-std/src",
 ]
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -37,6 +37,30 @@ interface TokenDistributionProviderProps {
   daoId: DaoIdEnum;
 }
 
+export const calculateChangeRate = (
+  data: DaoMetricsDayBucket[] = [],
+): string | null => {
+  if (!data || data.length < 2) return null;
+
+  try {
+    if (data.length > 0) {
+      const oldHigh = data[0].high ?? "0";
+      const currentHigh = data[data.length - 1]?.high ?? "0";
+      if (currentHigh === "0") {
+        return "0";
+      } else {
+        return formatUnits(
+          (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) - BigInt(1e18),
+          18,
+        );
+      }
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+};
+
 export const TokenDistributionProvider = ({
   children,
   daoId,
@@ -56,31 +80,6 @@ export const TokenDistributionProvider = ({
     refreshInterval: 300000,
     revalidateOnFocus: false,
   });
-
-  const calculateChangeRate = (
-    data: DaoMetricsDayBucket[] = [],
-  ): string | null => {
-    if (!data || data.length < 2) return null;
-
-    try {
-      if (data.length > 0) {
-        const oldHigh = data[0].high ?? "0";
-        const currentHigh = data[data.length - 1]?.high ?? "0";
-        if (currentHigh === "0") {
-          return "0";
-        } else {
-          return formatUnits(
-            (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) -
-              BigInt(1e18),
-            18,
-          );
-        }
-      }
-    } catch (e) {
-      return null;
-    }
-    return null;
-  };
 
   const value: TokenDistributionContextProps = {
     days,

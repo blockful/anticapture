@@ -14,7 +14,9 @@ const fetchTimeSeriesDataFromGraphQL = async (
   metricTypes: MetricTypesEnum[],
 ): Promise<Record<MetricTypesEnum, DaoMetricsDayBucket[]>> => {
   const oneYearAgo = String(
-    BigInt(Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.ONE_YEAR]),
+    BigInt(
+      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.ONE_YEAR],
+    ),
   ).slice(0, 10);
 
   const whereConditions = metricTypes
@@ -55,7 +57,6 @@ const fetchTimeSeriesDataFromGraphQL = async (
       query: `query DaoMetricsDayBuckets { ${whereConditions} }`,
     }),
   });
-
 
   const data = await response.json();
   const metricsByType: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =

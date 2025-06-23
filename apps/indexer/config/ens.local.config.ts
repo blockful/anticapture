@@ -19,19 +19,23 @@ export default createConfig({
       pollingInterval: 1000,
     },
   },
+  // NOTE: These addresses are deterministic for Anvil local development
+  // They are calculated based on deployer address (Alice) + transaction nonce
+  // If someone changes the ENS deployment script (DeployENS.sol) or deployment order,
+  // these addresses will change and must be updated in CONTRACT_ADDRESSES constant
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,
       chain: "anvil",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.token.address,
-      startBlock: 1,
+      startBlock: 22635098, // Block where ENS Token was deployed
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "anvil",
       address: CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.governor,
-      startBlock: 1,
+      startBlock: 22635098, // Block where ENS Governor was deployed
     },
   },
 });

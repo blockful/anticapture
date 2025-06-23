@@ -69,6 +69,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
   const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
   const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
+
   const {
     data: daoTokenPriceHistoricalData,
     loading: daoTokenPriceHistoricalDataLoading,
@@ -88,13 +89,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     const prices = daoTokenPriceHistoricalData.prices;
     return prices.length > 0 ? prices[prices.length - 1][1] : 0;
   }, [daoTokenPriceHistoricalData]);
+
   useEffect(() => {
     if (
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
-      activeSupply.data?.activeSupply === "0" &&
-      averageTurnout.data?.currentAverageTurnout === null &&
+      activeSupply.data?.activeSupply === undefined &&
+      averageTurnout.data?.currentAverageTurnout === undefined &&
       daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === null
+      vetoCouncilVotingPower === undefined
     ) {
       setMocked(true);
     } else {
@@ -107,6 +109,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     daoTopTokenHolderExcludingTheDao,
     vetoCouncilVotingPower,
   ]);
+
   const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
@@ -123,6 +126,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       </div>
     );
   }
+
   let chartData: ChartDataItem[] = [];
   if (!mocked) {
     chartData = [
@@ -198,6 +202,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   } else {
     chartData = mockedAttackCostBarData as ChartDataItem[];
   }
+
   return (
     <div className={`relative w-full ${className || ""}`}>
       {mocked && (

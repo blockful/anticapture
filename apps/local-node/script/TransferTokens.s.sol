@@ -5,7 +5,7 @@ pragma solidity ^0.8.13;
 import {Script, console} from "forge-std/Script.sol";
 import {Test} from "forge-std/Test.sol";
 import {BaseScript} from "./BaseScript.sol";
-import {ENSToken} from "../src/ENSToken.sol";
+import {ENSToken} from "../src/ens/ENSToken.sol";
 import {Constants} from "./Constants.sol";
 
 /**

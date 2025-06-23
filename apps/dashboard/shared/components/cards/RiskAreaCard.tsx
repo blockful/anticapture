@@ -96,7 +96,7 @@ const RiskAreaCardInternal = ({
     <div
       className={cn(
         "flex h-full w-full flex-1 cursor-pointer items-center gap-1",
-        isPanelTable && "cursor-default",
+        isPanelTable || (risk.level === RiskLevel.NONE && "cursor-default"),
       )}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -129,19 +129,22 @@ const RiskAreaCardInternal = ({
           )}
         >
           <span
-            className={cn("block font-mono font-medium sm:tracking-wider", {
-              "!text-secondary": risk.level === RiskLevel.NONE,
-              "!text-success":
-                risk.level === RiskLevel.LOW && !isActive && !isHovered,
-              "!text-warning":
-                risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-              "!text-error":
-                risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "!text-inverted":
-                isActive && risk.level !== RiskLevel.NONE && isHovered,
-              "text-alternative-sm": isRiskAnalysis,
-              "text-xs": !isRiskAnalysis,
-            })}
+            className={cn(
+              "block font-mono font-medium text-black sm:tracking-wider",
+              {
+                "!text-secondary": risk.level === RiskLevel.NONE,
+                "!text-success":
+                  risk.level === RiskLevel.LOW && !isActive && !isHovered,
+                "!text-warning":
+                  risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
+                "!text-error":
+                  risk.level === RiskLevel.HIGH && !isActive && !isHovered,
+                "!text-inverted":
+                  isActive && risk.level !== RiskLevel.NONE && isHovered,
+                "text-alternative-sm": isRiskAnalysis,
+                "text-xs": !isRiskAnalysis,
+              },
+            )}
             title={risk.name}
           >
             {risk.content ? risk.content : risk.name}
@@ -221,7 +224,7 @@ const RiskAreaCardInternal = ({
                 risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
               "bg-error/12":
                 risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-              "bg-surface-contrast": risk.level === undefined,
+              "bg-surface-contrast": risk.level === "NONE",
             })}
           />
         </div>
@@ -335,8 +338,7 @@ export const RiskAreaCardWrapper = ({
   className,
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
-  withTooltip = true,
-}: RiskAreaCardWrapperProps & { withTooltip?: boolean }) => {
+}: RiskAreaCardWrapperProps) => {
   return (
     <div className="flex w-full flex-col gap-1">
       {/* Desktop title */}
@@ -345,7 +347,6 @@ export const RiskAreaCardWrapper = ({
           {title}
         </h3>
       )}
-
       <div className={cn("", className)}>
         {riskAreas.map((risk: RiskArea, index: number) => (
           <RiskAreaCard
