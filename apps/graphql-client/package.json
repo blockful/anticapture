@@ -8,8 +8,8 @@
     "clean": "rm -f generated.ts types.ts",
     "dev": "npm run codegen:watch"
   },
-  "main": "types.ts",
-  "types": "types.ts",
+  "main": "dist/generated.js",
+  "types": "dist/types.js",
   "exports": {
     ".": {
       "types": "./types.ts",
@@ -21,7 +21,6 @@
     }
   },
   "dependencies": {
-    "@apollo/client": "^3.9.0",
     "@graphql-codegen/cli": "^5.0.7",
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.1",
@@ -33,6 +32,7 @@
     "@types/node": "^20.16.5"
   },
   "peerDependencies": {
-    "react": "^18.0.0"
+    "react": "^18.0.0",
+    "@apollo/client": "^3.9.0"
   }
 }
