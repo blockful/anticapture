@@ -16,7 +16,7 @@ export const GovernanceActivitySection = () => {
       icon={<Activity className="section-layout-icon" />}
       switchDate={
         <SwitcherDate
-          defaultValue={TimeInterval.NINETY_DAYS}
+          defaultValue={TimeInterval.ONE_YEAR}
           setTimeInterval={setDays}
           isSmall
         />
