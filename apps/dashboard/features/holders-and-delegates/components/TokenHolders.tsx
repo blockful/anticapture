@@ -4,16 +4,18 @@ import { TheTable } from "@/shared/components/tables/TheTable";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
-import { tokenHoldersMock } from "@/features/holders-and-delegates/mock-data/TokenHoldersMock";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { CheckIcon, Filter, PlusIcon } from "lucide-react";
+import { CheckIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
+import { useTokenHolder } from "@/shared/hooks/graphql-client/useTokenHolder";
+import { formatUnits } from "viem";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface TokenHolders {
   address: string | Address;
@@ -27,6 +29,11 @@ export const TokenHolders = () => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const router = useRouter();
+  const { daoId } = useParams();
+  const { data: tokenHoldersData, loading } = useTokenHolder(
+    daoId as DaoIdEnum,
+  );
+
   const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
     {
       accessorKey: "address",
@@ -222,52 +229,23 @@ export const TokenHolders = () => {
     },
   ];
 
-  const data: TokenHolders[] = [
-    {
-      address: tokenHoldersMock[0].accountId,
-      type: tokenHoldersMock[0].account.type,
-      balance: tokenHoldersMock[0].balance,
-      variation: 300,
-      delegate: tokenHoldersMock[0].delegate,
-    },
-    {
-      address: tokenHoldersMock[1].accountId,
-      type: tokenHoldersMock[1].account.type,
-      balance: tokenHoldersMock[1].balance,
-      variation: 300,
-      delegate: tokenHoldersMock[1].delegate,
-    },
-    {
-      address: tokenHoldersMock[2].accountId,
-      type: tokenHoldersMock[2].account.type,
-      balance: tokenHoldersMock[2].balance,
-      variation: 300,
-      delegate: tokenHoldersMock[2].delegate,
-    },
-    {
-      address: tokenHoldersMock[3].accountId,
-      type: tokenHoldersMock[3].account.type,
-      balance: tokenHoldersMock[3].balance,
-      variation: 300,
-      delegate: tokenHoldersMock[3].delegate,
-    },
-    {
-      address: tokenHoldersMock[4].accountId,
-      type: tokenHoldersMock[4].account.type,
-      balance: tokenHoldersMock[4].balance,
-      variation: 300,
-      delegate: tokenHoldersMock[4].delegate,
-    },
-  ];
+  const data: TokenHolders[] =
+    tokenHoldersData?.map((holder) => ({
+      address: holder.accountId as Address,
+      type: holder.account.type as "Contract" | "EOA",
+      balance: Number(formatUnits(BigInt(holder.balance), 18)),
+      variation: 0,
+      delegate: holder.delegate as Address,
+    })) || [];
 
-  interface TokenHolder {
-    address: string | Address;
-  }
-
-  const handleRowClick = (row: TokenHolder) => {
+  const handleRowClick = (row: TokenHolders) => {
     setIsDetailsOpen(true);
     row.address && router.push(`/${row.address}`);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex">

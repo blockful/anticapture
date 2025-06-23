@@ -1,0 +1,13 @@
+query GetTopTokenHolders {
+  accountBalances(orderBy: "balance", orderDirection: "desc", limit: 10) {
+    items {
+      accountId
+      balance
+      delegate
+      tokenId
+      account {
+        type
+      }
+    }
+  }
+}
