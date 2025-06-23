@@ -11,6 +11,9 @@ import { CheckIcon, Filter, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useRouter } from "next/navigation";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 interface TokenHolders {
   address: string | Address;
@@ -41,8 +44,18 @@ export const TokenHolders = () => {
         return (
           <>
             <div className="flex w-full gap-2">
-              <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
-                {address}
+              <div className="flex items-center gap-1.5 px-2">
+                <div>
+                  <EnsAvatar
+                    address={addressValue as Address}
+                    size="sm"
+                    variant="rounded"
+                  />
+                </div>
+
+                <div className="text-primary flex w-full items-start justify-start px-2 py-1.5 text-sm">
+                  {address}
+                </div>
               </div>
               {isDetailsOpen && (
                 <button className="border-surface-contrast bg-surface-default text-primary flex items-center gap-1.5 rounded-md border px-2 py-1">
@@ -64,13 +77,15 @@ export const TokenHolders = () => {
 
         return (
           <div className="text-table-header relative flex w-full items-start justify-start gap-1.5 px-2 py-1.5">
-            Type
-            <button
-              className="hover:border-highlight flex items-center p-1"
-              onClick={() => setFilterOpen(!filterOpen)}
-            >
-              <Filter className="size-3" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <p>Type</p>
+              <button
+                className="hover:border-highlight bg-surface-hover group flex cursor-pointer items-center rounded-sm border border-transparent p-1"
+                onClick={() => setFilterOpen(!filterOpen)}
+              >
+                <Filter className="text-primary size-3" />
+              </button>
+            </div>
             {filterOpen && (
               <div className="absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
                 {options.map((option) => {
@@ -104,7 +119,7 @@ export const TokenHolders = () => {
         const type = typeValue === "Contract" ? "Contract" : "EOA";
         return (
           <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
-            <Badge>{type}</Badge>
+            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
@@ -169,8 +184,11 @@ export const TokenHolders = () => {
       cell: ({ row }) => {
         const variation: number = row.getValue("variation");
         return (
-          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
-            {variation}%
+          <div className="flex w-full items-start justify-start gap-2 px-2 py-1.5 text-sm">
+            <p>{variation}%</p>
+            <div>
+              <Percentage value={variation} />
+            </div>
           </div>
         );
       },
@@ -189,8 +207,17 @@ export const TokenHolders = () => {
           : "Invalid address";
 
         return (
-          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
-            {delegateAddress}
+          <div className="flex items-center gap-1.5 px-2">
+            <div>
+              <EnsAvatar
+                address={delegate as Address}
+                size="sm"
+                variant="rounded"
+              />
+            </div>
+            <div className="text-primary flex w-full items-start justify-start px-2 py-1.5 text-sm">
+              {delegateAddress}
+            </div>
           </div>
         );
       },
