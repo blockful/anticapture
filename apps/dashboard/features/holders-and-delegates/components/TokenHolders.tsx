@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { CheckIcon, PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -19,6 +19,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 
 interface TokenHolders {
   address: string | Address;
@@ -39,7 +40,7 @@ export const TokenHolders = ({
   daoId: DaoIdEnum;
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const router = useRouter();
@@ -55,6 +56,10 @@ export const TokenHolders = ({
     addresses || [],
     days,
   );
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const calculateVariation = (
     currentBalance: string,
@@ -108,40 +113,44 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-start justify-start px-2 py-1.5">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Address
         </div>
       ),
       cell: ({ row }) => {
+        if (!isMounted || loading) {
+          return (
+            <div className="flex h-10 items-center gap-2">
+              <SkeletonRow className="size-6 rounded-full" />
+              <SkeletonRow className="h-4 w-24" />
+            </div>
+          );
+        }
+
         const addressValue: string = row.getValue("address");
         const address = isAddress(addressValue)
           ? formatAddress(addressValue)
           : "Invalid address";
 
         return (
-          <>
-            <div className="flex w-full gap-2 py-1.5">
-              <div className="flex items-center gap-1.5 px-2">
-                <div>
-                  <EnsAvatar
-                    address={addressValue as Address}
-                    size="sm"
-                    variant="rounded"
-                  />
-                </div>
-
-                <div className="text-primary flex w-full items-start justify-start px-2 py-1.5 text-sm">
-                  {address}
-                </div>
-              </div>
-              {isDetailsOpen && (
-                <button className="border-surface-contrast bg-surface-default text-primary flex items-center gap-1.5 rounded-md border px-2 py-1">
-                  <PlusIcon className="size-3.5" />
-                  <p className="text-sm font-medium">Details</p>
-                </button>
-              )}
-            </div>
-          </>
+          <div className="group relative flex h-10 w-full items-center gap-2">
+            <EnsAvatar
+              address={addressValue as Address}
+              size="sm"
+              variant="rounded"
+            />
+            <span className="text-primary [tr:hover_&]:border-primary w-fit border-b border-dashed border-transparent text-sm">
+              {address}
+            </span>
+            <button
+              className="border-surface-contrast bg-surface-default text-primary hover:bg-surface-hover absolute right-0 flex items-center gap-1.5 rounded-md border px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              tabIndex={-1}
+              onClick={(e) => handleDetailsClick(addressValue as Address, e)}
+            >
+              <PlusIcon className="size-3.5" />
+              <span className="text-sm font-medium">Details</span>
+            </button>
+          </div>
         );
       },
     },
@@ -178,7 +187,7 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="text-table-header relative flex w-full items-start justify-start gap-1.5 px-2 py-1.5">
+          <div className="text-table-header relative flex h-8 w-full items-center justify-start gap-1.5 px-2">
             <div className="flex items-center gap-1.5">
               <p>Type</p>
               <ButtonFilter
@@ -223,10 +232,14 @@ export const TokenHolders = ({
         );
       },
       cell: ({ row }) => {
+        if (!isMounted || loading) {
+          return <SkeletonRow className="h-5 w-16" />;
+        }
+
         const typeValue: string = row.getValue("type");
         const type = typeValue === "Contract" ? "Contract" : "EOA";
         return (
-          <div className="flex w-full items-start justify-start px-2 py-1.5 text-sm">
+          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
             <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
@@ -235,7 +248,7 @@ export const TokenHolders = ({
     {
       accessorKey: "balance",
       header: ({ column }) => (
-        <div className="text-table-header flex w-full px-2 py-1.5 sm:justify-end">
+        <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
           Balance
           <button
             className="!text-table-header cursor-pointer justify-end text-end"
@@ -257,9 +270,13 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
+        if (!isMounted || loading) {
+          return <SkeletonRow className="h-4 w-20" />;
+        }
+
         const balance: number = row.getValue("balance");
         return (
-          <div className="font-nomal flex w-full justify-end px-2 py-1.5 text-sm">
+          <div className="font-nomal flex h-10 w-full items-center justify-end px-2 text-sm">
             {formatNumberUserReadable(balance, 1)} {daoId}
           </div>
         );
@@ -268,7 +285,7 @@ export const TokenHolders = ({
     {
       accessorKey: "variation",
       header: ({ column }) => (
-        <div className="text-table-header flex w-full items-start justify-start px-2 py-1.5">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Variation
           <button
             className="!text-table-header cursor-pointer justify-end text-end"
@@ -290,13 +307,17 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
+        if (!isMounted || loading) {
+          return <SkeletonRow className="h-4 w-16" />;
+        }
+
         const variation = row.getValue("variation") as {
           percentageChange: number;
           absoluteChange: number;
         };
 
         return (
-          <div className="flex w-full items-start justify-start gap-2 px-2 py-1.5 text-sm">
+          <div className="flex h-10 w-full items-center justify-start gap-2 px-2 text-sm">
             <p>
               {formatNumberUserReadable(Math.abs(variation.absoluteChange))}{" "}
               {daoId}
@@ -323,28 +344,33 @@ export const TokenHolders = ({
     {
       accessorKey: "delegate",
       header: () => (
-        <div className="text-table-header flex w-full items-start justify-start px-2 py-1.5">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Delegate
         </div>
       ),
       cell: ({ row }) => {
+        if (!isMounted || loading) {
+          return (
+            <div className="flex h-10 items-center gap-1.5">
+              <SkeletonRow className="h-6 w-6 rounded-full" />
+              <SkeletonRow className="h-4 w-24" />
+            </div>
+          );
+        }
+
         const delegate: string = row.getValue("delegate");
         const delegateAddress = isAddress(delegate)
           ? formatAddress(delegate)
           : "Invalid address";
 
         return (
-          <div className="flex items-center gap-1.5 px-2">
-            <div>
-              <EnsAvatar
-                address={delegate as Address}
-                size="sm"
-                variant="rounded"
-              />
-            </div>
-            <div className="text-primary flex w-full items-start justify-start px-2 py-1.5 text-sm">
-              {delegateAddress}
-            </div>
+          <div className="flex h-10 items-center gap-1.5">
+            <EnsAvatar
+              address={delegate as Address}
+              size="sm"
+              variant="rounded"
+            />
+            <span className="text-primary text-sm">{delegateAddress}</span>
           </div>
         );
       },
@@ -352,8 +378,13 @@ export const TokenHolders = ({
   ];
 
   const handleRowClick = (row: TokenHolders) => {
-    setIsDetailsOpen(true);
-    row.address && router.push(`/${row.address}`);
+    router.push(`/${row.address}`);
+  };
+
+  const handleDetailsClick = (address: Address, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Details button clicked for address:", address);
+    router.push(`/${address}`);
   };
 
   const handlePageChange = (page: number) => {
@@ -366,16 +397,12 @@ export const TokenHolders = ({
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full text-white">
         <TheTable
           columns={tokenHoldersColumns}
-          data={data}
+          data={loading ? Array(5).fill({}) : data || []}
           filterColumn="type"
           withSorting={true}
           onRowClick={handleRowClick}
