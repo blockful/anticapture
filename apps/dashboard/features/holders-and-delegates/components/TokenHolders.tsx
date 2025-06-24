@@ -38,7 +38,7 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [filterOpen, setFilterOpen] = useState<boolean>(false);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -182,11 +182,11 @@ export const TokenHolders = ({
             <div className="flex items-center gap-1.5">
               <p>Type</p>
               <ButtonFilter
-                onClick={() => setFilterOpen(!filterOpen)}
-                isActive={filterOpen}
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                isActive={isFilterOpen}
               />
             </div>
-            {filterOpen && (
+            {isFilterOpen && (
               <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
                 {options.map((option) => {
                   const isSelected =
@@ -198,17 +198,19 @@ export const TokenHolders = ({
                       key={option}
                       onClick={() => {
                         handleOptionClick(option);
-                        setFilterOpen(false);
+                        setIsFilterOpen(false);
                       }}
                       className={cn(
-                        "text-primary hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left text-sm",
+                        "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
                         option === "Remove All" && "border-b border-[#3F3F46]",
                         isSelected &&
                           option !== "Remove All" &&
                           "bg-middle-dark",
                       )}
                     >
-                      <span>{option}</span>
+                      <span className="text-primary text-sm font-normal">
+                        {option}
+                      </span>
                       {isSelected && option !== "Remove All" && (
                         <CheckIcon className="size-3.5" />
                       )}
