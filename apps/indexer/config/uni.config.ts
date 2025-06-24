@@ -24,14 +24,12 @@ export default createConfig({
       chain: "ethereum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!.token.address,
-      startBlock: 22747275,
     },
     UNIGovernor: {
       abi: UNIGovernorAbi,
       chain: "ethereum_mainnet",
       address:
         CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!.governor,
-      startBlock: 22747275,
     },
   },
 });
