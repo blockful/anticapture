@@ -1,27 +1,80 @@
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useDelegates } from "@/features/holders-and-delegates";
+import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
+import { TimeInterval } from "@/shared/types/enums";
 import { TheTable, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface DelegateTableData {
   address: string;
   type: string;
   votingPower: string;
-  variation: number;
-  activity: string; // Changed to string to show fraction
+  variation: string;
+  activity: string;
   delegators: number;
 }
 
-export const Delegates = () => {
-  const { data, loading, error } = useDelegates();
+interface DelegatesProps {
+  timePeriod?: TimeInterval; // Use TimeInterval enum directly
+  daoId?: QueryInput_HistoricalVotingPower_DaoId;
+}
+
+// Helper function to convert time period to timestamp and block number
+const getTimeDataFromPeriod = (period: TimeInterval) => {
+  const now = Date.now();
+  const msPerDay = 24 * 60 * 60 * 1000;
+
+  let daysBack: number;
+  switch (period) {
+    case TimeInterval.SEVEN_DAYS:
+      daysBack = 7;
+      break;
+    case TimeInterval.THIRTY_DAYS:
+      daysBack = 30;
+      break;
+    case TimeInterval.NINETY_DAYS:
+      daysBack = 90;
+      break;
+    case TimeInterval.ONE_YEAR:
+      daysBack = 365;
+      break;
+    default:
+      daysBack = 30;
+  }
+
+  const fromDate = Math.floor((now - daysBack * msPerDay) / 1000);
+
+  // Rough estimation: 1 block every 12 seconds on Ethereum
+  const currentBlock = 20161841;
+  const blocksBack = Math.floor((daysBack * 24 * 60 * 60) / 12);
+  const blockNumber = currentBlock - blocksBack;
+
+  return { fromDate, blockNumber };
+};
+
+export const Delegates = ({
+  timePeriod = TimeInterval.THIRTY_DAYS,
+  daoId = QueryInput_HistoricalVotingPower_DaoId.Ens,
+}: DelegatesProps) => {
+  // Calculate time-based parameters
+  const { fromDate, blockNumber } = useMemo(
+    () => getTimeDataFromPeriod(timePeriod),
+    [timePeriod],
+  );
+
+  const { data, loading, error } = useDelegates({
+    blockNumber,
+    fromDate,
+    daoId,
+  });
 
   // Console log the enriched delegate data with proposals activity
   console.log("Delegates with Proposals Activity:", data);
+  console.log("Time parameters:", { timePeriod, fromDate, blockNumber, daoId });
 
   const tableData = useMemo(() => {
     if (!data) return [];
@@ -35,13 +88,38 @@ export const Delegates = () => {
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
         : "0/0";
 
+      // Calculate variation using real historical voting power
+      let variation = "0 ENS 0%";
+      if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
+        const historicalVotingPowerBigInt = BigInt(
+          delegate.historicalVotingPower,
+        );
+        const historicalVotingPowerFormatted = Number(
+          historicalVotingPowerBigInt / BigInt(10 ** 18),
+        );
+
+        // Calculate absolute change and percentage
+        const absoluteChange =
+          votingPowerFormatted - historicalVotingPowerFormatted;
+        const percentageChange = (absoluteChange / votingPowerFormatted) * 100;
+        const roundedPercentage = Math.round(percentageChange * 100) / 100;
+
+        // Format the variation string
+        const absChangeFormatted = formatNumberUserReadable(
+          Math.abs(absoluteChange),
+        );
+        const arrow = absoluteChange > 0 ? "↑" : absoluteChange < 0 ? "↓" : "";
+
+        variation = `${absChangeFormatted} ENS ${arrow} ${Math.abs(roundedPercentage)}%`;
+      }
+
       return {
         address: delegate.account?.id || "",
         type: delegate.account?.type || "EOA",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation: Math.random() * 20 - 10, // Random variation between -10% and +10%
+        variation: variation,
         activity,
-        delegators: delegate.delegationsCount, // Use real delegationsCount
+        delegators: delegate.delegationsCount,
       };
     });
   }, [data]);
@@ -167,9 +245,9 @@ export const Delegates = () => {
     },
     {
       accessorKey: "variation",
-      size: 120,
+      size: 200,
       cell: ({ row }) => {
-        const variation = row.getValue("variation") as number;
+        const variation = row.getValue("variation") as string;
 
         if (loading) {
           return (
@@ -183,24 +261,22 @@ export const Delegates = () => {
         }
 
         return (
-          <p
-            className={cn(
-              "flex items-center justify-end gap-1 px-4 py-3 text-end text-sm",
-              variation > 0
-                ? "text-success"
-                : variation < 0
-                  ? "text-error"
-                  : "text-secondary",
-            )}
-          >
-            {variation > 0 ? (
-              <ChevronUp className="text-success size-4" />
-            ) : variation < 0 ? (
-              <ChevronDown className="text-error size-4" />
-            ) : null}
-            {variation > 0 ? "+" : ""}
-            {variation.toFixed(1)}%
-          </p>
+          <div className="flex items-center justify-end gap-1 px-4 py-3 text-end text-sm whitespace-nowrap">
+            <span className="text-secondary">
+              {variation.split(" ")[0]} ENS
+            </span>
+            <span
+              className={cn(
+                variation.includes("↑")
+                  ? "text-success"
+                  : variation.includes("↓")
+                    ? "text-error"
+                    : "text-secondary",
+              )}
+            >
+              {variation.split(" ").slice(2).join(" ")}
+            </span>
+          </div>
         );
       },
       header: ({ column }) => (
@@ -313,11 +389,11 @@ export const Delegates = () => {
       <div className="flex">
         <TheTable
           columns={delegateColumns}
-          data={Array.from({ length: 5 }, (_, i) => ({
+          data={Array.from({ length: 10 }, (_, i) => ({
             address: `0x${"0".repeat(40)}`,
             type: "EOA",
             votingPower: "0",
-            variation: 0,
+            variation: "0%",
             activity: "0/0",
             delegators: 0,
           }))}

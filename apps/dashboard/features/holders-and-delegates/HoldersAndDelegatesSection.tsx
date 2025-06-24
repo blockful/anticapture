@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { UserCheck } from "lucide-react";
 import {
@@ -22,7 +23,12 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   // Map from tab ID to tab component
   const tabComponentMap: Record<TabId, React.ReactElement> = {
     tokenHolders: <TokenHolders />,
-    delegates: <Delegates />,
+    delegates: (
+      <Delegates
+        daoId={daoId as unknown as QueryInput_HistoricalVotingPower_DaoId}
+        timePeriod={days}
+      />
+    ),
   };
 
   const HoldersAndDelegatesLeftComponent = () => {

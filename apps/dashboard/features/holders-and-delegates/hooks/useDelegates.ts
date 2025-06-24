@@ -22,6 +22,7 @@ interface Delegate {
     id: string;
   } | null;
   proposalsActivity?: ProposalsActivity;
+  historicalVotingPower?: string;
 }
 
 interface UseDelegatesResult {
@@ -31,7 +32,17 @@ interface UseDelegatesResult {
   refetch: () => void;
 }
 
-export const useDelegates = (): UseDelegatesResult => {
+interface UseDelegatesParams {
+  blockNumber: number;
+  fromDate: number;
+  daoId: QueryInput_HistoricalVotingPower_DaoId;
+}
+
+export const useDelegates = ({
+  blockNumber,
+  fromDate,
+  daoId,
+}: UseDelegatesParams): UseDelegatesResult => {
   const {
     data: delegatesData,
     loading: delegatesLoading,
@@ -40,7 +51,7 @@ export const useDelegates = (): UseDelegatesResult => {
   } = useGetDelegatesQuery({
     context: {
       headers: {
-        "anticapture-dao-id": "ENS",
+        "anticapture-dao-id": daoId,
       },
     },
   });
@@ -62,14 +73,14 @@ export const useDelegates = (): UseDelegatesResult => {
       addresses: delegateAddresses,
       address:
         delegateAddresses[0] || "0x0000000000000000000000000000000000000000",
-      blockNumber: 20161841,
-      daoId: QueryInput_HistoricalVotingPower_DaoId.Ens,
-      proposalsDaoId: QueryInput_ProposalsActivity_DaoId.Ens,
-      fromDate: 1672531200,
+      blockNumber,
+      daoId,
+      proposalsDaoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
+      fromDate,
     },
     context: {
       headers: {
-        "anticapture-dao-id": "ENS",
+        "anticapture-dao-id": daoId,
       },
     },
     skip: delegateAddresses.length === 0,
@@ -87,9 +98,16 @@ export const useDelegates = (): UseDelegatesResult => {
           }
         : undefined;
 
+      // Find historical voting power for this delegate
+      const historicalVotingPowerData =
+        activityData?.historicalVotingPower?.find(
+          (historical) => historical?.address === delegate.account?.id,
+        );
+
       return {
         ...delegate,
         proposalsActivity,
+        historicalVotingPower: historicalVotingPowerData?.votingPower,
       };
     });
   }, [delegatesData, activityData]);
