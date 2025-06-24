@@ -1750,7 +1750,7 @@ export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao'
 export type GetDelegatesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, account?: { __typename?: 'account', type: string, id: string } | null }> } };
+export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, delegationsCount: number, account?: { __typename?: 'account', type: string, id: string } | null }> } };
 
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];

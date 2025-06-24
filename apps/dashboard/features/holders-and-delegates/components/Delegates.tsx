@@ -67,6 +67,9 @@ const ActivityIndicator = ({
 export const Delegates = () => {
   const { data, loading, error } = useDelegates();
 
+  // Console log the enriched delegate data with proposals activity
+  console.log("Delegates with Proposals Activity:", data);
+
   const tableData = useMemo(() => {
     if (!data) return [];
 
