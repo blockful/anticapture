@@ -41,6 +41,7 @@ export const TokenHolders = ({
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const router = useRouter();
   const {
     data: tokenHoldersData,
@@ -147,9 +148,34 @@ export const TokenHolders = ({
     {
       accessorKey: "type",
       enableColumnFilter: true,
+      filterFn: (row, id, filterValue) => {
+        if (!filterValue || filterValue.length === 0) return true;
+        const rowValue = row.getValue(id) as string;
+        return filterValue.includes(rowValue);
+      },
       header: ({ column }) => {
-        const filterValue = column.getFilterValue();
         const options = ["Remove All", "Contract", "EOA"];
+
+        const handleOptionClick = (option: string) => {
+          if (option === "Remove All") {
+            setSelectedFilters([]);
+            column.setFilterValue(undefined);
+            return;
+          }
+
+          setSelectedFilters((prev) => {
+            const newFilters = prev.includes(option)
+              ? prev.filter((filter) => filter !== option)
+              : [...prev, option];
+
+            // Atualiza o filtro da coluna
+            column.setFilterValue(
+              newFilters.length > 0 ? newFilters : undefined,
+            );
+
+            return newFilters;
+          });
+        };
 
         return (
           <div className="text-table-header relative flex w-full items-start justify-start gap-1.5 px-2 py-1.5">
@@ -161,25 +187,31 @@ export const TokenHolders = ({
               />
             </div>
             {filterOpen && (
-              <div className="absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
                 {options.map((option) => {
-                  const value = option === "Remove All" ? undefined : option;
-                  const isSelected = filterValue === value;
-
+                  const isSelected =
+                    option === "Remove All"
+                      ? selectedFilters.length === 0
+                      : selectedFilters.includes(option);
                   return (
                     <button
                       key={option}
                       onClick={() => {
-                        column.setFilterValue(value);
+                        handleOptionClick(option);
                         setFilterOpen(false);
                       }}
                       className={cn(
-                        "text-primary flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-[#26262A]",
-                        isSelected && "bg-middle-dark",
+                        "text-primary hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left text-sm",
+                        option === "Remove All" && "border-b border-[#3F3F46]",
+                        isSelected &&
+                          option !== "Remove All" &&
+                          "bg-middle-dark",
                       )}
                     >
                       <span>{option}</span>
-                      {isSelected && <CheckIcon className="size-3.5" />}
+                      {isSelected && option !== "Remove All" && (
+                        <CheckIcon className="size-3.5" />
+                      )}
                     </button>
                   );
                 })}
