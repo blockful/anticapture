@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { ButtonHTMLAttributes, ReactNode } from "react";
 
 /*This component need to be refactored to use the new design system. */
-const buttonVariants = cva("flex items-center justify-center", {
+const buttonVariants = cva("flex items-center justify-center cursor-pointer", {
   variants: {
     variant: {
       primary: "",
