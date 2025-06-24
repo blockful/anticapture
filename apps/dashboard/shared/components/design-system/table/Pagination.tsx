@@ -29,7 +29,7 @@ export function Pagination({
       >
         <ChevronLeft className="text-primary size-3.5" />
       </TheButton>
-      <span className="flex items-center gap-1 text-sm">
+      <span className="text-secondary bg-surface-contrast flex items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
         Page {currentPage} of {totalPages}
       </span>
       <TheButton
