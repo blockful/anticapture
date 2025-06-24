@@ -18,6 +18,7 @@ import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 interface TokenHolders {
   address: string | Address;
@@ -39,8 +40,14 @@ export const TokenHolders = ({
 }) => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const router = useRouter();
-  const { data: tokenHoldersData, loading } = useTokenHolder(daoId);
+  const {
+    data: tokenHoldersData,
+    loading,
+    pageInfo,
+    fetchMore,
+  } = useTokenHolder(daoId);
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
   const { data: historicalBalancesData } = useHistoricalBalances(
     daoId,
@@ -266,6 +273,18 @@ export const TokenHolders = ({
           </div>
         );
       },
+      sortingFn: (rowA, rowB) => {
+        const variationA = rowA.getValue("variation") as {
+          percentageChange: number;
+          absoluteChange: number;
+        };
+        const variationB = rowB.getValue("variation") as {
+          percentageChange: number;
+          absoluteChange: number;
+        };
+
+        return variationA.percentageChange - variationB.percentageChange;
+      },
     },
     {
       accessorKey: "delegate",
@@ -303,12 +322,22 @@ export const TokenHolders = ({
     row.address && router.push(`/${row.address}`);
   };
 
+  const handlePageChange = (page: number) => {
+    if (page > currentPage && pageInfo?.hasNextPage) {
+      fetchMore(pageInfo.endCursor!, "forward");
+      setCurrentPage(page);
+    } else if (page < currentPage && pageInfo?.hasPreviousPage) {
+      fetchMore(pageInfo.startCursor!, "backward");
+      setCurrentPage(page);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col gap-4">
       <div className="w-full text-white">
         <TheTable
           columns={tokenHoldersColumns}
@@ -316,6 +345,16 @@ export const TokenHolders = ({
           filterColumn="type"
           withSorting={true}
           onRowClick={handleRowClick}
+        />
+      </div>
+      <div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={5}
+          onPageChange={handlePageChange}
+          className="text-white"
+          hasNextPage={!!pageInfo?.hasNextPage}
+          hasPreviousPage={!!pageInfo?.hasPreviousPage}
         />
       </div>
     </div>

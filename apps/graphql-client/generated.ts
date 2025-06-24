@@ -1836,10 +1836,13 @@ export type GetHistoricalBalancesQueryVariables = Exact<{
 
 export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalances?: Array<{ __typename?: 'query_historicalBalances_items', address: string, balance: string, blockNumber: number, tokenAddress: string } | null> | null };
 
-export type GetTopTokenHoldersQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetTopTokenHoldersQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
-export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any, delegate: string, tokenId: string, account?: { __typename?: 'account', type: string } | null }> } };
+export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any, delegate: string, tokenId: string, account?: { __typename?: 'account', type: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 
 export const GetDaoDataDocument = gql`
@@ -1937,8 +1940,14 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const GetTopTokenHoldersDocument = gql`
-    query GetTopTokenHolders {
-  accountBalances(orderBy: "balance", orderDirection: "desc", limit: 10) {
+    query GetTopTokenHolders($after: String, $before: String) {
+  accountBalances(
+    orderBy: "balance"
+    orderDirection: "desc"
+    limit: 6
+    after: $after
+    before: $before
+  ) {
     items {
       accountId
       balance
@@ -1947,6 +1956,12 @@ export const GetTopTokenHoldersDocument = gql`
       account {
         type
       }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
     }
   }
 }
@@ -1964,6 +1979,8 @@ export const GetTopTokenHoldersDocument = gql`
  * @example
  * const { data, loading, error } = useGetTopTokenHoldersQuery({
  *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
  *   },
  * });
  */

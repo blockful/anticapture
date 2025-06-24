@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["euc.li"],
+    domains: ["euc.li", "ensdata.net", "static.ricmoo.com", "www.ricmoo.com"],
   },
   webpack: (config: { externals: string[] }) => {
     config.externals.push("pino-pretty");
