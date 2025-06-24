@@ -16,6 +16,7 @@ interface ProposalsActivity {
 
 interface Delegate {
   votingPower: any;
+  delegationsCount: number;
   account?: {
     type: string;
     id: string;

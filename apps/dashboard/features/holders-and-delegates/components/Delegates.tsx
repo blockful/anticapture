@@ -13,56 +13,9 @@ interface DelegateTableData {
   type: string;
   votingPower: string;
   variation: number;
-  activity: number;
+  activity: string; // Changed to string to show fraction
   delegators: number;
 }
-
-// Mock data for activity and delegators as requested
-const mockActivityData: Record<string, number> = {};
-const mockDelegatorsData: Record<string, number> = {};
-
-const generateMockData = (address: string) => {
-  if (!mockActivityData[address]) {
-    mockActivityData[address] = Math.floor(Math.random() * 5) + 1; // 1-5 for activity
-  }
-  if (!mockDelegatorsData[address]) {
-    mockDelegatorsData[address] = Math.floor(Math.random() * 200) + 50; // 50-250 for delegators
-  }
-  return {
-    activity: mockActivityData[address],
-    delegators: mockDelegatorsData[address],
-  };
-};
-
-const ActivityIndicator = ({
-  value,
-  total = 5,
-}: {
-  value: number;
-  total?: number;
-}) => {
-  const percentage = (value / total) * 100;
-  const filledDots = Math.round((value / total) * total);
-
-  return (
-    <div className="flex items-center gap-1">
-      <div className="flex gap-1">
-        {Array.from({ length: total }, (_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "size-2 rounded-full",
-              i < filledDots ? "bg-success" : "bg-surface-contrast",
-            )}
-          />
-        ))}
-      </div>
-      <span className="text-secondary ml-1 text-xs">
-        {value}/{total} ({percentage.toFixed(0)}%)
-      </span>
-    </div>
-  );
-};
 
 export const Delegates = () => {
   const { data, loading, error } = useDelegates();
@@ -74,17 +27,21 @@ export const Delegates = () => {
     if (!data) return [];
 
     return data.map((delegate): DelegateTableData => {
-      const mockData = generateMockData(delegate.account?.id || "");
       const votingPowerBigInt = BigInt(delegate.votingPower || "0");
       const votingPowerFormatted = Number(votingPowerBigInt / BigInt(10 ** 18));
+
+      // Get activity from real proposals data
+      const activity = delegate.proposalsActivity
+        ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
+        : "0/0";
 
       return {
         address: delegate.account?.id || "",
         type: delegate.account?.type || "EOA",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: Math.random() * 20 - 10, // Random variation between -10% and +10%
-        activity: mockData.activity,
-        delegators: mockData.delegators,
+        activity,
+        delegators: delegate.delegationsCount, // Use real delegationsCount
       };
     });
   }, [data]);
@@ -271,7 +228,7 @@ export const Delegates = () => {
       accessorKey: "activity",
       size: 150,
       cell: ({ row }) => {
-        const activity = row.getValue("activity") as number;
+        const activity = row.getValue("activity") as string;
 
         if (loading) {
           return (
@@ -283,7 +240,7 @@ export const Delegates = () => {
 
         return (
           <div className="flex items-center justify-center px-4 py-3">
-            <ActivityIndicator value={activity} />
+            {activity}
           </div>
         );
       },
@@ -361,7 +318,7 @@ export const Delegates = () => {
             type: "EOA",
             votingPower: "0",
             variation: 0,
-            activity: 0,
+            activity: "0/0",
             delegators: 0,
           }))}
           withPagination={true}
