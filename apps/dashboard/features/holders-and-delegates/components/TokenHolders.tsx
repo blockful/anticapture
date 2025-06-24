@@ -5,7 +5,7 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { CheckIcon, PlusIcon } from "lucide-react";
+import { CheckIcon, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useRouter } from "next/navigation";
@@ -133,7 +133,7 @@ export const TokenHolders = ({
           : "Invalid address";
 
         return (
-          <div className="group relative flex h-10 w-full items-center gap-2">
+          <div className="group flex h-10 w-full items-center gap-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -143,11 +143,11 @@ export const TokenHolders = ({
               {address}
             </span>
             <button
-              className="border-surface-contrast bg-surface-default text-primary hover:bg-surface-hover absolute right-0 flex items-center gap-1.5 rounded-md border px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
               tabIndex={-1}
               onClick={(e) => handleDetailsClick(addressValue as Address, e)}
             >
-              <PlusIcon className="size-3.5" />
+              <Plus className="size-3.5" />
               <span className="text-sm font-medium">Details</span>
             </button>
           </div>
