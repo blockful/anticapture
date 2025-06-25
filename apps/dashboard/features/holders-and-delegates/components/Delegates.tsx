@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useDelegates } from "@/features/holders-and-delegates";
 import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
@@ -8,6 +8,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
+import { HolderDelegateDrawer, EntityType } from "./HolderDelegateDrawer";
 
 interface DelegateTableData {
   address: string;
@@ -72,9 +73,33 @@ export const Delegates = ({
     daoId,
   });
 
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedDelegate, setSelectedDelegate] = useState<{
+    address: string;
+    type: string;
+    votingPower: string;
+    delegators: number;
+  } | null>(null);
+
   // Console log the enriched delegate data with proposals activity
   console.log("Delegates with Proposals Activity:", data);
   console.log("Time parameters:", { timePeriod, fromDate, blockNumber, daoId });
+
+  const handleOpenDrawer = (
+    address: string,
+    type: string,
+    votingPower: string,
+    delegators: number,
+  ) => {
+    setSelectedDelegate({ address, type, votingPower, delegators });
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedDelegate(null);
+  };
 
   const tableData = useMemo(() => {
     if (!data) return [];
@@ -415,13 +440,29 @@ export const Delegates = ({
   }
 
   return (
-    <div className="flex">
-      <TheTable
-        columns={delegateColumns}
-        data={tableData}
-        withPagination={true}
-        withSorting={true}
-      />
-    </div>
+    <>
+      <div className="flex">
+        <TheTable
+          columns={delegateColumns}
+          data={tableData}
+          withPagination={true}
+          withSorting={true}
+        />
+      </div>
+
+      {selectedDelegate && (
+        <HolderDelegateDrawer
+          isOpen={isDrawerOpen}
+          onClose={handleCloseDrawer}
+          entityType="delegate"
+          address={selectedDelegate.address}
+          entityData={{
+            votingPower: selectedDelegate.votingPower,
+            delegators: selectedDelegate.delegators,
+            type: selectedDelegate.type,
+          }}
+        />
+      )}
+    </>
   );
 };
