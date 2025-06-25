@@ -16,16 +16,17 @@ import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 export const QuorumCard = () => {
   const { daoId }: { daoId: string } = useParams();
-  const { data: daoData, loading: isDaoDataLoading } = useDaoData(
-    daoId.toUpperCase() as DaoIdEnum,
-  );
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { data: daoData, loading: isDaoDataLoading } = useDaoData(daoIdEnum);
+  const daoConfig = daoConfigByDaoId[daoIdEnum];
 
   const { data: timeSeriesData, isLoading: isTimeSeriesDataLoading } =
     useTimeSeriesData(
-      daoId.toUpperCase() as DaoIdEnum,
+      daoIdEnum,
       [MetricTypesEnum.TOTAL_SUPPLY],
       TimeInterval.ONE_YEAR,
     );
@@ -90,19 +91,22 @@ export const QuorumCard = () => {
         title: "Logic",
         tooltip:
           'Specifies whether quorum is calculated based on "For" votes, "For + Abstain" votes, or all votes cast',
-        items: daoData
-          ? [
-              <TextCardDaoInfoItem
-                key="text-logic"
-                item={{ label: "For + Abstain" }}
-              />,
-            ]
-          : [
-              <Badge className="text-secondary" key={"hello2"}>
-                <Clock className="text-secondary size-3.5" />
-                Research pending
-              </Badge>,
-            ],
+        items:
+          daoData && daoConfig.daoOverview.rules?.logic
+            ? [
+                <TextCardDaoInfoItem
+                  key="text-logic"
+                  item={{
+                    label: daoConfig.daoOverview.rules.logic,
+                  }}
+                />,
+              ]
+            : [
+                <Badge className="text-secondary" key={"hello2"}>
+                  <Clock className="text-secondary size-3.5" />
+                  Research pending
+                </Badge>,
+              ],
       },
 
       {
