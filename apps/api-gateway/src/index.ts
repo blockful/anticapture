@@ -16,7 +16,14 @@ const bootstrap = async () => {
     getBuiltMesh: () => Promise.resolve(mesh),
   });
 
-  const server = createServer((req, res) => handler(req, res));
+  const server = createServer((req, res) => {
+    if (req.url === '/health' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+      return;
+    }
+    handler(req, res);
+  });
   const port = process.env.PORT || 4000;
   server.listen(port, () => {
     console.log(`🚀 Mesh running at http://localhost:${port}/graphql`);
