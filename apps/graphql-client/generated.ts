@@ -1750,10 +1750,13 @@ export type GetDaoDataQueryVariables = Exact<{
 
 export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao', id: string, quorum: any, proposalThreshold: any, votingDelay: any, votingPeriod: any, timelockDelay: any } | null };
 
-export type GetDelegatesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetDelegatesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
-export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, delegationsCount: number, account?: { __typename?: 'account', type: string, id: string } | null }> } };
+export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, delegationsCount: number, account?: { __typename?: 'account', type: string, id: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -1814,8 +1817,14 @@ export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQ
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
 export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
 export const GetDelegatesDocument = gql`
-    query GetDelegates {
-  accountPowers(orderBy: "votingPower", orderDirection: "desc", limit: 10) {
+    query GetDelegates($after: String, $before: String) {
+  accountPowers(
+    orderBy: "votingPower"
+    orderDirection: "desc"
+    limit: 10
+    after: $after
+    before: $before
+  ) {
     items {
       votingPower
       account {
@@ -1823,6 +1832,12 @@ export const GetDelegatesDocument = gql`
         id
       }
       delegationsCount
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
     }
   }
 }
@@ -1840,6 +1855,8 @@ export const GetDelegatesDocument = gql`
  * @example
  * const { data, loading, error } = useGetDelegatesQuery({
  *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
  *   },
  * });
  */

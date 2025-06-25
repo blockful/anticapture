@@ -9,25 +9,19 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 
 export type EntityType = "delegate" | "tokenHolder";
 
-interface HolderDelegateDrawerProps {
+interface HoldersAndDelegatesDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   entityType: EntityType;
   address: string;
-  entityData?: {
-    votingPower?: string;
-    delegators?: number;
-    type?: string;
-  };
 }
 
-export const HolderDelegateDrawer = ({
+export const HoldersAndDelegatesDrawer = ({
   isOpen,
   onClose,
   entityType,
   address,
-  entityData,
-}: HolderDelegateDrawerProps) => {
+}: HoldersAndDelegatesDrawerProps) => {
   const tabs = {
     delegate: [
       { id: "votes", label: "Votes", content: <>Votes</> },

@@ -6,7 +6,8 @@ import {
   QueryInput_HistoricalVotingPower_DaoId,
   QueryInput_ProposalsActivity_DaoId,
 } from "@anticapture/graphql-client";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
+import { NetworkStatus } from "@apollo/client";
 
 interface ProposalsActivity {
   totalProposals: number;
@@ -25,11 +26,22 @@ interface Delegate {
   historicalVotingPower?: string;
 }
 
+interface PaginationInfo {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  endCursor?: string | null;
+  startCursor?: string | null;
+}
+
 interface UseDelegatesResult {
   data: Delegate[] | null;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
+  pagination: PaginationInfo;
+  fetchNextPage: () => Promise<void>;
+  fetchPreviousPage: () => Promise<void>;
+  fetchingMore: boolean;
 }
 
 interface UseDelegatesParams {
@@ -48,12 +60,19 @@ export const useDelegates = ({
     loading: delegatesLoading,
     error: delegatesError,
     refetch,
+    fetchMore,
+    networkStatus,
   } = useGetDelegatesQuery({
+    variables: {
+      after: undefined,
+      before: undefined,
+    },
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
+    notifyOnNetworkStatusChange: true,
   });
 
   const delegateAddresses = useMemo(() => {
@@ -112,10 +131,87 @@ export const useDelegates = ({
     });
   }, [delegatesData, activityData]);
 
+  // Pagination info
+  const pagination = useMemo<PaginationInfo>(() => {
+    const pageInfo = delegatesData?.accountPowers?.pageInfo;
+    return {
+      hasNextPage: pageInfo?.hasNextPage ?? false,
+      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
+      endCursor: pageInfo?.endCursor,
+      startCursor: pageInfo?.startCursor,
+    };
+  }, [delegatesData?.accountPowers?.pageInfo]);
+
+  // Fetch next page function
+  const fetchNextPage = useCallback(async () => {
+    if (!pagination.hasNextPage || !pagination.endCursor) {
+      console.warn("No next page available");
+      return;
+    }
+
+    try {
+      await fetchMore({
+        variables: {
+          after: pagination.endCursor,
+          before: undefined,
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
+
+          // Replace the current data with the new page data
+          return {
+            ...fetchMoreResult,
+            accountPowers: {
+              ...fetchMoreResult.accountPowers,
+              items: fetchMoreResult.accountPowers.items,
+            },
+          };
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching next page:", error);
+    }
+  }, [fetchMore, pagination.hasNextPage, pagination.endCursor]);
+
+  // Fetch previous page function
+  const fetchPreviousPage = useCallback(async () => {
+    if (!pagination.hasPreviousPage || !pagination.startCursor) {
+      console.warn("No previous page available");
+      return;
+    }
+
+    try {
+      await fetchMore({
+        variables: {
+          after: undefined,
+          before: pagination.startCursor,
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
+
+          // Replace the current data with the new page data
+          return {
+            ...fetchMoreResult,
+            accountPowers: {
+              ...fetchMoreResult.accountPowers,
+              items: fetchMoreResult.accountPowers.items,
+            },
+          };
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching previous page:", error);
+    }
+  }, [fetchMore, pagination.hasPreviousPage, pagination.startCursor]);
+
   return {
     data: enrichedData,
     loading: delegatesLoading || activityLoading,
     error: delegatesError || activityError || null,
     refetch,
+    pagination,
+    fetchNextPage,
+    fetchPreviousPage,
+    fetchingMore: networkStatus === NetworkStatus.fetchMore,
   };
 };
