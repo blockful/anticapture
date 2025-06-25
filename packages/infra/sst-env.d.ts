@@ -26,6 +26,18 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
+    "CoingeckoAPIKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DuneAPIKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DuneAPIUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "ENSIndexer": {
       "service": string
       "type": "sst.aws.Service"

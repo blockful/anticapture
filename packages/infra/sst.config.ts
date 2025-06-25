@@ -45,11 +45,26 @@ export default $config({
 
     const schema = crypto.randomUUID();
 
+    const duneApiUrl = new sst.Secret("DuneAPIUrl")
+    const duneApiKey = new sst.Secret("DuneAPIKey")
+    const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
+
     const apis = []
     for (const dao of daos) {
       const db = newDatabase(dao.name, dao.size)
       newIndexer(dao.name, cluster, db, $dev ? "http://localhost:8545" : ethereumRpc.value, schema)
-      const indexerAPI = newIndexerAPI(dao.name, cluster, db, ethereumRpc.value, schema)
+      const indexerAPI = newIndexerAPI(
+        dao.name,
+        cluster,
+        db,
+        ethereumRpc.value,
+        schema,
+        {
+          DUNE_API_URL: duneApiUrl?.value,
+          DUNE_API_KEY: duneApiKey?.value,
+          COINGECKO_API_KEY: coingeckoApiKey?.value,
+        }
+      )
       apis.push(indexerAPI)
     }
 

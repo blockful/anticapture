@@ -8,11 +8,8 @@ export function newIndexerAPI(
   db: sst.aws.Postgres,
   rpcUrl: Output<string>,
   schema: string,
+  envs: Record<string, string>,
 ): sst.aws.Service {
-  // const duneApiUrl = new sst.Secret("DuneAPIUrl")
-  // const duneApiKey = new sst.Secret("DuneAPIKey")
-  // const coingeckoApiKey = new sst.Secret("CoingeckoAPIKey")
-
   return new sst.aws.Service(`${dao}IndexerAPI`, {
     cluster,
     memory: "0.5 GB",
@@ -32,9 +29,7 @@ export function newIndexerAPI(
       DAO_ID: dao,
       CHAIN_ID: "1",
       NODE_ENV: $dev ? "development" : "production",
-      // DUNE_API_URL: duneApiUrl?.value,
-      // DUNE_API_KEY: duneApiKey?.value,
-      // COINGECKO_API_KEY: coingeckoApiKey?.value,
+      ...envs,
     },
     scaling: {
       min: 1,
