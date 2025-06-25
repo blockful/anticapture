@@ -25,12 +25,7 @@ export default $config({
       target(event: {type: string, branch: string, action: string, number: number}) {
         if (event.type === "branch" && event.action === "pushed") {
           if (event.branch === "main") return {stage: "production"}
-          if (event.branch === "dev") return {stage: "dev"}
-          return {stage: `pr-${event.number}`}
-        }
-
-        if (event.type === "pull_request") {
-          return {stage: `pr-${event.number}`}
+          return {stage: "dev"}
         }
       }
     }
