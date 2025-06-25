@@ -11,6 +11,7 @@ const nextConfig = {
         hostname: "**",
       },
     ],
+    domains: ["euc.li", "ensdata.net", "static.ricmoo.com", "www.ricmoo.com"],
   },
   webpack: (config: { externals: string[] }) => {
     config.externals.push("pino-pretty");
