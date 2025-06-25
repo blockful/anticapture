@@ -5,6 +5,67 @@
 
 declare module "sst" {
   export interface Resource {
+    "APIGateway": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "Anticapture-ENS-DB": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
+    }
+    "Anticapture-UNI-DB": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
+    }
+    "CoingeckoAPIKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DuneAPIKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DuneAPIUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "ENSIndexer": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "ENSIndexerAPI": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "EthereumRPC": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "UNIIndexer": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "UNIIndexerAPI": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "anticapture-vpc": {
+      "bastion": string
+      "type": "sst.aws.Vpc"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />

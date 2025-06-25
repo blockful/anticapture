@@ -38,7 +38,10 @@ export default $config({
 
     const ethereumRpc = new sst.Secret("EthereumRPC", "http://localhost:8545")
 
-    const schema = crypto.randomUUID();
+    const { execSync } = await import('child_process');
+    const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+    const commitHash = execSync('git rev-parse --short=8 HEAD', { encoding: 'utf8' }).trim();
+    const schema = `${commitHash}:${currentBranch}`;
 
     const duneApiUrl = new sst.Secret("DuneAPIUrl")
     const duneApiKey = new sst.Secret("DuneAPIKey")
