@@ -11,7 +11,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 interface DelegateTableData {
   address: string;
@@ -177,6 +177,14 @@ export const Delegates = ({
                 </span>
               </div>
             </div>
+            <button
+              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              tabIndex={-1}
+              onClick={(e) => handleOpenDrawer(address)}
+            >
+              <Plus className="size-3.5" />
+              <span className="text-sm font-medium">Details</span>
+            </button>
           </div>
         );
       },

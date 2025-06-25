@@ -20,6 +20,7 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 
 interface TokenHolders {
   address: string | Address;
@@ -39,6 +40,10 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
+    null,
+  );
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -60,6 +65,16 @@ export const TokenHolders = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleOpenDrawer = (address: string) => {
+    setSelectedTokenHolder(address);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedTokenHolder(null);
+  };
 
   const calculateVariation = (
     currentBalance: string,
@@ -145,7 +160,7 @@ export const TokenHolders = ({
             <button
               className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
               tabIndex={-1}
-              onClick={(e) => handleDetailsClick(addressValue as Address, e)}
+              onClick={() => handleOpenDrawer(addressValue as Address)}
             >
               <Plus className="size-3.5" />
               <span className="text-sm font-medium">Details</span>
@@ -381,12 +396,6 @@ export const TokenHolders = ({
     router.push(`/${row.address}`);
   };
 
-  const handleDetailsClick = (address: Address, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Details button clicked for address:", address);
-    router.push(`/${address}`);
-  };
-
   const handlePageChange = (page: number) => {
     if (page > currentPage && pageInfo?.hasNextPage) {
       fetchMore(pageInfo.endCursor!, "forward");
@@ -398,26 +407,36 @@ export const TokenHolders = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="w-full text-white">
-        <TheTable
-          columns={tokenHoldersColumns}
-          data={loading ? Array(5).fill({}) : data || []}
-          filterColumn="type"
-          withSorting={true}
-          onRowClick={handleRowClick}
-        />
+    <>
+      <div className="flex flex-col gap-4">
+        <div className="w-full text-white">
+          <TheTable
+            columns={tokenHoldersColumns}
+            data={loading ? Array(5).fill({}) : data || []}
+            filterColumn="type"
+            withSorting={true}
+            onRowClick={handleRowClick}
+          />
+        </div>
+        <div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={5}
+            onPageChange={handlePageChange}
+            className="text-white"
+            hasNextPage={!!pageInfo?.hasNextPage}
+            hasPreviousPage={!!pageInfo?.hasPreviousPage}
+          />
+        </div>
       </div>
-      <div>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={5}
-          onPageChange={handlePageChange}
-          className="text-white"
-          hasNextPage={!!pageInfo?.hasNextPage}
-          hasPreviousPage={!!pageInfo?.hasPreviousPage}
+      {selectedTokenHolder && (
+        <HoldersAndDelegatesDrawer
+          isOpen={isDrawerOpen}
+          onClose={handleCloseDrawer}
+          entityType="tokenHolder"
+          address={selectedTokenHolder}
         />
-      </div>
-    </div>
+      )}
+    </>
   );
 };
