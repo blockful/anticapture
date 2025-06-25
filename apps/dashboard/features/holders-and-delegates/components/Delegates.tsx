@@ -8,6 +8,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DelegateTableData {
   address: string;
@@ -66,7 +67,15 @@ export const Delegates = ({
     [timePeriod],
   );
 
-  const { data, loading, error } = useDelegates({
+  const {
+    data,
+    loading,
+    error,
+    pagination,
+    fetchNextPage,
+    fetchPreviousPage,
+    fetchingMore,
+  } = useDelegates({
     blockNumber,
     fromDate,
     daoId,
@@ -75,6 +84,8 @@ export const Delegates = ({
   // Console log the enriched delegate data with proposals activity
   console.log("Delegates with Proposals Activity:", data);
   console.log("Time parameters:", { timePeriod, fromDate, blockNumber, daoId });
+  console.log("Pagination state:", pagination);
+  console.log("Loading states:", { loading, fetchingMore });
 
   const tableData = useMemo(() => {
     if (!data) return [];
@@ -386,7 +397,7 @@ export const Delegates = ({
 
   if (loading) {
     return (
-      <div className="flex">
+      <div className="flex flex-col">
         <TheTable
           columns={delegateColumns}
           data={Array.from({ length: 10 }, (_, i) => ({
@@ -400,6 +411,31 @@ export const Delegates = ({
           withPagination={true}
           withSorting={true}
         />
+
+        {/* Pagination Controls - Disabled during loading */}
+        <div className="x-4 flex items-center justify-start py-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={true}
+              className="flex items-center gap-2 text-white opacity-50"
+            >
+              <ChevronLeft className="size-4" />
+              Previous
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={true}
+              className="flex items-center gap-2 text-white opacity-50"
+            >
+              Next
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -415,13 +451,40 @@ export const Delegates = ({
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col">
       <TheTable
         columns={delegateColumns}
         data={tableData}
         withPagination={true}
         withSorting={true}
       />
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchPreviousPage}
+            disabled={!pagination.hasPreviousPage || fetchingMore}
+            className="flex items-center gap-2 text-white"
+          >
+            <ChevronLeft className="size-4" />
+            Previous
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchNextPage}
+            disabled={!pagination.hasNextPage || fetchingMore}
+            className="flex items-center gap-2 text-white"
+          >
+            Next
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

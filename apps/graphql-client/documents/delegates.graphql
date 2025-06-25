@@ -1,5 +1,5 @@
-query GetDelegates {
-  accountPowers(orderBy: "votingPower", orderDirection: "desc", limit: 10) {
+query GetDelegates($after: String, $before: String) {
+  accountPowers(orderBy: "votingPower", orderDirection: "desc", limit: 10, after: $after, before: $before) {
     items {
       votingPower
       account {
@@ -8,5 +8,11 @@ query GetDelegates {
       }
       delegationsCount
     }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }   
   }
 }
