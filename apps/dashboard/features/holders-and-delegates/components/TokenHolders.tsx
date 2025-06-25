@@ -392,10 +392,6 @@ export const TokenHolders = ({
     },
   ];
 
-  const handleRowClick = (row: TokenHolders) => {
-    router.push(`/${row.address}`);
-  };
-
   const handlePageChange = (page: number) => {
     if (page > currentPage && pageInfo?.hasNextPage) {
       fetchMore(pageInfo.endCursor!, "forward");
@@ -415,7 +411,6 @@ export const TokenHolders = ({
             data={loading ? Array(5).fill({}) : data || []}
             filterColumn="type"
             withSorting={true}
-            onRowClick={handleRowClick}
           />
         </div>
         <div>
