@@ -51,7 +51,6 @@ export const useHistoricalBalances = (
     variables: {
       addresses,
       blockNumber,
-      daoId: daoId as unknown as QueryInput_HistoricalBalances_DaoId,
     },
     context: {
       headers: {
