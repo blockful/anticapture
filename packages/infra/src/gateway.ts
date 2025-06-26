@@ -15,10 +15,10 @@ export function newGateway(cluster: sst.aws.Cluster, services: sst.aws.Service[]
       rules: [{ listen: "80/http", forward: "4000/http" }],
     },
     health: {
-      command: ["curl", "http://localhost:4000/health"],
-      interval: "30s",
+      command: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"],
+      interval: "30 seconds",
       retries: 3,
-      startPeriod: "1 minute",
+      startPeriod: "40 seconds",
     },
     dev: {
       command: "pnpm -w gateway dev",

@@ -17,10 +17,7 @@ export function newIndexerAPI(
     link: [db],
     health: {
       command: ["CMD-SHELL", "curl -f http://localhost:42069/health || exit 1"],
-      interval: "300 seconds",
-      timeout: "30 seconds",
       retries: 3,
-      startPeriod: "40 seconds",
     },
     environment: {
       DATABASE_URL: $interpolate`postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`,
