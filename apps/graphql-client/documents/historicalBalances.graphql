@@ -1,4 +1,4 @@
-query getHistoricalBalances($addresses: JSON!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalBalances_daoId!) {
+query getHistoricalBalances($addresses:  [String!], $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalBalances_daoId!) {
   historicalBalances(addresses: $addresses, blockNumber: $blockNumber, daoId: $daoId) {
     address
     balance

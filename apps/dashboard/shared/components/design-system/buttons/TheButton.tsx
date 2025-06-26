@@ -1,6 +1,6 @@
 import { cn } from "@/shared/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 
 /*This component need to be refactored to use the new design system. */
 const buttonVariants = cva("flex items-center justify-center cursor-pointer", {
@@ -34,7 +34,7 @@ type TheButtonProps = VariantProps<typeof buttonVariants> &
     onClick?: () => void;
     hasText?: boolean;
     hasIcon?: boolean;
-    icon?: ReactNode;
+    icon?: ElementType;
   };
 
 export const TheButton = ({
@@ -44,7 +44,7 @@ export const TheButton = ({
   onClick,
   hasText,
   hasIcon = true,
-  icon,
+  icon: Icon,
   ...props
 }: TheButtonProps) => {
   return (
@@ -54,7 +54,7 @@ export const TheButton = ({
       onClick={onClick}
     >
       {children}
-      {hasIcon && icon}
+      {hasIcon && Icon && <Icon className="size-4" />}
     </button>
   );
 };
