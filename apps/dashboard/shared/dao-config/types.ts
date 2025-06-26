@@ -77,6 +77,7 @@ export interface DaoOverviewConfig {
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
+    logic: "For" | "For + Abstain";
   };
   securityCouncil?: {
     isActive: boolean;
@@ -108,7 +109,6 @@ export interface DaoConfiguration extends BaseInfo {
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
-  holdersAndDelegates?: boolean;
   governanceActivity?: boolean;
   showSupport?: {
     snapshotProposal: string;

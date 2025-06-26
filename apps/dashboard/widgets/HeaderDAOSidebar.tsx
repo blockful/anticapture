@@ -87,13 +87,12 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
-          {daoConfig.holdersAndDelegates && (
-            <ButtonHeaderSidebar
-              anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
-              icon={UserCheck}
-              label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
-            />
-          )}
+          <ButtonHeaderSidebar
+            anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+            icon={UserCheck}
+            label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
+          />
+
           {daoConfig.governanceActivity && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}

@@ -65,7 +65,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       }
       days={days}
       anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
-      leftComponent={<HoldersAndDelegatesLeftComponent />}
+      leftContent={<HoldersAndDelegatesLeftComponent />}
     >
       {tabComponentMap[activeTab]}
     </TheSectionLayout>

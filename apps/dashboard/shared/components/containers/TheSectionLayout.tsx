@@ -22,7 +22,7 @@ interface TheSectionLayoutProps {
   anchorId: string;
   className?: string;
   subHeader?: ReactNode;
-  leftComponent?: ReactNode;
+  leftContent?: ReactNode;
 }
 
 export const TheSectionLayout = ({
@@ -39,7 +39,7 @@ export const TheSectionLayout = ({
   anchorId,
   className,
   subHeader,
-  leftComponent,
+  leftContent,
 }: TheSectionLayoutProps) => {
   const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
@@ -119,7 +119,11 @@ export const TheSectionLayout = ({
             isSwitchDateLinear ? "hidden" : "flex",
           )}
         >
-          {!leftComponent && (
+          {leftContent ? (
+            <div className="flex h-full w-full items-center justify-between">
+              {leftContent}
+            </div>
+          ) : (
             <div className="flex flex-col">
               <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
                 {subtitle}
@@ -129,11 +133,6 @@ export const TheSectionLayout = ({
               >
                 {getDateRange(days ?? "")}
               </p>
-            </div>
-          )}
-          {leftComponent && (
-            <div className="flex h-full w-full items-center justify-between">
-              {leftComponent}
             </div>
           )}
           <div className="flex items-center">{switchDate}</div>

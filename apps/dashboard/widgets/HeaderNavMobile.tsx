@@ -58,7 +58,7 @@ export const HeaderNavMobile = () => {
     {
       anchorId: SECTIONS_CONSTANTS.holdersAndDelegates.anchorId,
       title: SECTIONS_CONSTANTS.holdersAndDelegates.title,
-      enabled: !!daoConfig.holdersAndDelegates,
+      enabled: true,
     },
   ];
 

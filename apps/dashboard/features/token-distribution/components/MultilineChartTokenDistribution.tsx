@@ -53,7 +53,10 @@ export const MultilineChartTokenDistribution = ({
       });
 
       return dataPoint;
-    });
+    })
+    .filter(
+      (dataPoint) => !Object.values(dataPoint).some((value) => value == null),
+    );
 
   const visibleDataSets = Object.keys(datasets).filter(
     (item) => item !== filterData,

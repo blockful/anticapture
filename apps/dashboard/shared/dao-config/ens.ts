@@ -26,6 +26,7 @@ export const ENS: DaoConfiguration = {
       changeVote: false,
       timelock: true,
       cancelFunction: false,
+      logic: "For + Abstain",
     },
     securityCouncil: {
       isActive: true,
@@ -51,7 +52,6 @@ export const ENS: DaoConfiguration = {
     supportsLiquidTreasuryCall: true,
   },
   riskAnalysis: true,
-  holdersAndDelegates: true,
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
