@@ -9,7 +9,6 @@ query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDir
         type
       }
     },
-    totalCount,
       pageInfo {
         endCursor
         hasNextPage

@@ -21,17 +21,6 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 
-interface TokenHolders {
-  address: string | Address;
-  type: "Contract" | "EOA";
-  balance: number;
-  variation: {
-    percentageChange: number;
-    absoluteChange: number;
-  };
-  delegate: string | Address;
-}
-
 export const TokenHolders = ({
   days,
   daoId,
@@ -96,7 +85,7 @@ export const TokenHolders = ({
     }
   };
 
-  const data: TokenHolders[] =
+  const data =
     tokenHoldersData?.map((holder) => {
       const historicalBalance = historicalBalancesData?.find(
         (h) => h.address.toLowerCase() === holder.accountId.toLowerCase(),
@@ -109,14 +98,14 @@ export const TokenHolders = ({
 
       return {
         address: holder.accountId as Address,
-        type: holder.account.type as "Contract" | "EOA",
+        type: holder.account?.type,
         balance: Number(formatUnits(BigInt(holder.balance), 18)),
         variation,
         delegate: holder.delegate as Address,
       };
     }) || [];
 
-  const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
+  const tokenHoldersColumns: ColumnDef<typeof data>[] = [
     {
       accessorKey: "address",
       header: () => (
@@ -394,7 +383,7 @@ export const TokenHolders = ({
       <div>
         <Pagination
           currentPage={currentPage}
-          totalPages={Math.floor(totalPages / pageLimit)}
+          totalPages={Math.floor(totalPages || 0 / pageLimit)}
           onPageChange={handlePageChange}
           className="text-white"
           hasNextPage={!!pageInfo?.hasNextPage}
