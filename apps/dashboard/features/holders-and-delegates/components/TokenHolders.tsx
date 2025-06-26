@@ -146,7 +146,7 @@ export const TokenHolders = ({
               size="sm"
               variant="rounded"
             />
-            <span className="text-primary [tr:hover_&]:border-primary w-fit border-b border-dashed border-transparent text-sm">
+            <span className="text-primary [tr:hover_&]:border-primary border-secondary w-fit border-b border-dashed text-sm">
               {address}
             </span>
             <button
