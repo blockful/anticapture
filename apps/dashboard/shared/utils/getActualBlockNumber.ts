@@ -1,7 +1,7 @@
 import { publicClient } from "@/shared/services/wallet/wallet";
 import { BlockchainEnum } from "@/shared/types/blockchains";
 
-export const getActualBlockNumber = async ({
+export const getCurrentBlockNumber = async ({
   blockchain = BlockchainEnum.ETHEREUM,
 }: {
   blockchain?: BlockchainEnum;
