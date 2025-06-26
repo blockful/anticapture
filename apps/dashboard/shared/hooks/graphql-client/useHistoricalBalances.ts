@@ -64,6 +64,6 @@ export const useHistoricalBalances = (
     data: data?.historicalBalances as HistoricalBalance[] | null,
     loading,
     error: error || null,
-    refetch: () => refetch(),
+    refetch,
   };
 };
