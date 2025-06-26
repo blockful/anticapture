@@ -65,14 +65,10 @@ export const MultilineChartAttackProfitability = ({
     },
   );
   useEffect(() => {
-    if (
+    setMocked(
       timeSeriesData !== undefined &&
-      Object.values(timeSeriesData).every((data) => data.length === 0)
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        Object.values(timeSeriesData).every((data) => data.length === 0),
+    );
   }, [timeSeriesData]);
 
   let delegatedSupplyChart;
@@ -159,7 +155,10 @@ export const MultilineChartAttackProfitability = ({
       });
 
       return dataPoint;
-    });
+    })
+    .filter(
+      (dataPoint) => !Object.values(dataPoint).some((value) => value == null),
+    );
 
   return (
     <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">

@@ -34,7 +34,7 @@ export const AttackProfitabilityCustomTooltip: React.FC<
           >
             {formattedName}:{" "}
             <strong>
-              {value !== 0 ? formatNumberUserReadable(value) : "No Data"}
+              {value !== 0 ? `$${formatNumberUserReadable(value)}` : "No Data"}
             </strong>
           </p>
         );
