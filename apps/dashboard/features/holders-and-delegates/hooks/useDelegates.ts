@@ -96,8 +96,7 @@ export const useDelegates = ({
   } = useGetHistoricalVotingAndActivityQuery({
     variables: {
       addresses: delegateAddresses,
-      address:
-        delegateAddresses[0] || "0x0000000000000000000000000000000000000000",
+      address: delegateAddresses[0] || "",
       blockNumber,
       daoId,
       proposalsDaoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,

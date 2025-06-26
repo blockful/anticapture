@@ -144,7 +144,7 @@ export const Delegates = ({
 
       return {
         address: delegate.account?.id || "",
-        type: delegate.account?.type || "EOA",
+        type: delegate.account?.type || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
@@ -160,6 +160,21 @@ export const Delegates = ({
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
         const type = row.getValue("type") as string;
+
+        if (loading) {
+          return (
+            <div className="flex items-center gap-3 px-4 py-3">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
+            </div>
+          );
+        }
 
         return (
           <div className="flex items-center gap-3 px-4 py-3">
@@ -179,6 +194,15 @@ export const Delegates = ({
       size: 100,
       cell: ({ row }) => {
         const type = row.getValue("type") as string;
+
+        if (loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse justify-end pr-4"
+              className="h-5 w-full max-w-20"
+            />
+          );
+        }
 
         return (
           <div className="flex items-center px-4 py-3">
@@ -358,7 +382,7 @@ export const Delegates = ({
           columns={delegateColumns}
           data={Array.from({ length: 10 }, (_, i) => ({
             address: `0x${"0".repeat(40)}`,
-            type: "EOA",
+            type: "",
             votingPower: "0",
             variation: "0%",
             activity: "0/0",
