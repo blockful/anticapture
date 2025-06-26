@@ -167,7 +167,9 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
       timestamp: event.block.timestamp,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate(() => ({
+      votingPower: newBalance,
+    }));
 
   // Update the delegate's voting power
   await context.db
@@ -177,7 +179,7 @@ export const delegatedVotesChanged = async (
       daoId,
       votingPower: newBalance,
     })
-    .onConflictDoUpdate((current) => ({
+    .onConflictDoUpdate(() => ({
       votingPower: newBalance,
     }));
 
