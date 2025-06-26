@@ -284,26 +284,9 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "variation",
-      header: ({ column }) => (
+      header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Variation
-          <button
-            className="!text-table-header cursor-pointer justify-end text-end"
-            onClick={() => column.toggleSorting()}
-          >
-            <ArrowUpDown
-              props={{
-                className: "ml-2 size-4",
-              }}
-              activeState={
-                column.getIsSorted() === "asc"
-                  ? ArrowState.UP
-                  : column.getIsSorted() === "desc"
-                    ? ArrowState.DOWN
-                    : ArrowState.DEFAULT
-              }
-            />
-          </button>
         </div>
       ),
       cell: ({ row }) => {
@@ -319,7 +302,7 @@ export const TokenHolders = ({
         return (
           <div className="flex h-10 w-full items-center justify-start gap-2 px-2 text-sm">
             <p>
-              {formatNumberUserReadable(Math.abs(variation.absoluteChange))}{" "}
+              {formatNumberUserReadable(Math.abs(variation.percentageChange))}{" "}
               {daoId}
             </p>
             <div>
@@ -327,18 +310,6 @@ export const TokenHolders = ({
             </div>
           </div>
         );
-      },
-      sortingFn: (rowA, rowB) => {
-        const variationA = rowA.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
-        const variationB = rowB.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
-
-        return variationA.percentageChange - variationB.percentageChange;
       },
     },
     {
