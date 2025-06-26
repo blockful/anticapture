@@ -163,9 +163,9 @@ export const proposalsOnchain = onchainTable(
     description: drizzle.text(),
     timestamp: drizzle.bigint(),
     status: drizzle.text(),
-    forVotes: drizzle.bigint("for_votes"),
-    againstVotes: drizzle.bigint("against_votes"),
-    abstainVotes: drizzle.bigint("abstain_votes"),
+    forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
+    againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
+    abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
   }),
   (table) => ({
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),

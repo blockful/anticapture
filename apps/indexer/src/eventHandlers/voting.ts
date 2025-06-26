@@ -131,9 +131,6 @@ export const proposalCreated = async (
     description: event.args.description,
     timestamp: event.block.timestamp,
     status: "Pending",
-    forVotes: BigInt(0),
-    againstVotes: BigInt(0),
-    abstainVotes: BigInt(0),
   });
 
   // Update proposer's proposal count
