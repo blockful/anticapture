@@ -6,7 +6,6 @@ export function newGateway(cluster: sst.aws.Cluster, services: sst.aws.Service[]
     memory: "1 GB",
     cpu: "0.5 vCPU",
     link: services,
-    wait: true,
     image: {
       context: "../..",
       dockerfile: "apps/api-gateway/Dockerfile",
