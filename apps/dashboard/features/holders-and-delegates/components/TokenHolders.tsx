@@ -247,6 +247,7 @@ export const TokenHolders = ({
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
           setSortOrder(newSortOrder);
+          setCurrentPage(1);
           column.toggleSorting(newSortOrder === "desc");
         };
 
@@ -362,11 +363,10 @@ export const TokenHolders = ({
   const handlePageChange = (page: number) => {
     if (page > currentPage && pageInfo?.hasNextPage) {
       fetchMore(pageInfo.endCursor!, "forward");
-      setCurrentPage(page);
     } else if (page < currentPage && pageInfo?.hasPreviousPage) {
       fetchMore(pageInfo.startCursor!, "backward");
-      setCurrentPage(page);
     }
+    setCurrentPage(page);
   };
 
   return (
