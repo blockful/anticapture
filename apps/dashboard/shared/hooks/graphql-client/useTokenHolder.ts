@@ -18,6 +18,7 @@ interface TokenHolder {
 
 interface UseTokenHolderResult {
   data: TokenHolder[] | null;
+  totalCount: number;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -25,13 +26,22 @@ interface UseTokenHolderResult {
   fetchMore: (cursor: string, direction: "forward" | "backward") => void;
 }
 
-export const useTokenHolder = (daoId: DaoIdEnum): UseTokenHolderResult => {
+export const useTokenHolder = ({
+  daoId,
+  limit,
+}: {
+  daoId: DaoIdEnum;
+  limit: number;
+}): UseTokenHolderResult => {
   const { data, loading, error, refetch, fetchMore } =
     useGetTopTokenHoldersQuery({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
         },
+      },
+      variables: {
+        limit: limit,
       },
     });
 
@@ -58,6 +68,7 @@ export const useTokenHolder = (daoId: DaoIdEnum): UseTokenHolderResult => {
 
   return {
     data: data?.accountBalances?.items as TokenHolder[] | null,
+    totalCount: data?.accountBalances.totalCount as number,
     loading,
     error: error || null,
     refetch,

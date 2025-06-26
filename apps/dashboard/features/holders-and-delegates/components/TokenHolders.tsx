@@ -44,12 +44,14 @@ export const TokenHolders = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const router = useRouter();
+  const pageLimit: number = 6;
   const {
     data: tokenHoldersData,
+    totalCount: totalPages,
     loading,
     pageInfo,
     fetchMore,
-  } = useTokenHolder(daoId);
+  } = useTokenHolder({ daoId: daoId, limit: pageLimit });
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
   const { data: historicalBalancesData } = useHistoricalBalances(
     daoId,
@@ -323,7 +325,7 @@ export const TokenHolders = ({
         if (!isMounted || loading) {
           return (
             <div className="flex h-10 items-center gap-1.5">
-              <SkeletonRow className="h-6 w-6 rounded-full" />
+              <SkeletonRow className="size-6 rounded-full" />
               <SkeletonRow className="h-4 w-24" />
             </div>
           );
@@ -382,7 +384,7 @@ export const TokenHolders = ({
       <div>
         <Pagination
           currentPage={currentPage}
-          totalPages={5}
+          totalPages={Math.floor(totalPages / pageLimit)}
           onPageChange={handlePageChange}
           className="text-white"
           hasNextPage={!!pageInfo?.hasNextPage}

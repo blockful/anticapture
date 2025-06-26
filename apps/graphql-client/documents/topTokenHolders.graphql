@@ -1,5 +1,5 @@
-query GetTopTokenHolders($after: String, $before: String) {
-  accountBalances(orderBy: "balance", orderDirection: "desc", limit: 6, after: $after, before: $before) {
+query GetTopTokenHolders($after: String, $before: String, $limit: Int) {
+  accountBalances(orderBy: "balance", orderDirection: "desc", limit: $limit, after: $after, before: $before) {
     items {
       accountId
       balance
@@ -9,6 +9,7 @@ query GetTopTokenHolders($after: String, $before: String) {
         type
       }
     },
+    totalCount,
       pageInfo {
         endCursor
         hasNextPage

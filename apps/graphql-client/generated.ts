@@ -1839,10 +1839,11 @@ export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalan
 export type GetTopTokenHoldersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any, delegate: string, tokenId: string, account?: { __typename?: 'account', type: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number, items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any, delegate: string, tokenId: string, account?: { __typename?: 'account', type: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 
 export const GetDaoDataDocument = gql`
@@ -1940,11 +1941,11 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const GetTopTokenHoldersDocument = gql`
-    query GetTopTokenHolders($after: String, $before: String) {
+    query GetTopTokenHolders($after: String, $before: String, $limit: Int) {
   accountBalances(
     orderBy: "balance"
     orderDirection: "desc"
-    limit: 6
+    limit: $limit
     after: $after
     before: $before
   ) {
@@ -1957,6 +1958,7 @@ export const GetTopTokenHoldersDocument = gql`
         type
       }
     }
+    totalCount
     pageInfo {
       endCursor
       hasNextPage
@@ -1981,6 +1983,7 @@ export const GetTopTokenHoldersDocument = gql`
  *   variables: {
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      limit: // value for 'limit'
  *   },
  * });
  */
