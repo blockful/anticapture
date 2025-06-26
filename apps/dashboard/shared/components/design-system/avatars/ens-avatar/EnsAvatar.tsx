@@ -6,6 +6,7 @@ import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { UserIcon } from "@/shared/components/icons";
+import { SkeletonRow } from "@/shared/components";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -108,7 +109,10 @@ export const EnsAvatar = ({
   const avatarElement = () => {
     if (isLoading) {
       return (
-        <div className={cn(baseClasses, "animate-pulse bg-gray-700/50")} />
+        <SkeletonRow
+          parentClassName="flex animate-pulse"
+          className={cn(sizeClasses[size], variantClasses[variant])}
+        />
       );
     }
 
@@ -151,7 +155,10 @@ export const EnsAvatar = ({
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
           {isLoadingName ? (
-            <div className="h-4 w-20 animate-pulse rounded bg-gray-700/50" />
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-24"
+            />
           ) : (
             <span
               className={cn("text-primary text-sm font-medium", nameClassName)}
