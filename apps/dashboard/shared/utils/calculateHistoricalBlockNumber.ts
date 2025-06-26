@@ -9,7 +9,7 @@ import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 const calculateBlocksForPeriod = (period: TimeInterval): bigint => {
   const seconds = BigInt(DAYS_IN_SECONDS[period]);
   const blockTime = BigInt(ETHEREUM_BLOCK_TIME_SECONDS);
-  return seconds / blockTime;
+  return Math.floor(seconds / blockTime);
 };
 
 export const getHistoricalBlockNumber = async ({
