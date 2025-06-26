@@ -363,10 +363,6 @@ export const TokenHolders = ({
     },
   ];
 
-  const handleRowClick = (row: TokenHolders) => {
-    router.push(`/${row.address}`);
-  };
-
   const handleDetailsClick = (address: Address, e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Details button clicked for address:", address);
@@ -391,7 +387,7 @@ export const TokenHolders = ({
           data={loading ? Array(5).fill({}) : data || []}
           filterColumn="type"
           withSorting={true}
-          onRowClick={handleRowClick}
+          onRowClick={() => {}}
         />
       </div>
       <div>
