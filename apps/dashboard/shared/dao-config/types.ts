@@ -77,6 +77,7 @@ export interface DaoOverviewConfig {
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
+    logic: "For" | "For + Abstain";
   };
   securityCouncil?: {
     isActive: boolean;
@@ -99,7 +100,7 @@ export interface AttackProfitabilityConfig {
   supportsLiquidTreasuryCall?: boolean;
 }
 export interface GovernanceImplementationConfig
-  extends GovernanceImplementation { }
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {

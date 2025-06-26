@@ -23,6 +23,7 @@ export const UNI: DaoConfiguration = {
       changeVote: true,
       timelock: true,
       cancelFunction: true,
+      logic: "For",
     },
   },
   governanceImplementation: {

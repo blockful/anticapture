@@ -159,12 +159,17 @@ export const delegatedVotesChanged = async (
     daoId,
   );
 
-  await context.db.insert(votingPowerHistory).values({
-    transactionHash: event.transaction.hash,
-    accountId: event.args.delegate,
-    votingPower: newBalance,
-    timestamp: event.block.timestamp,
-  });
+  await context.db
+    .insert(votingPowerHistory)
+    .values({
+      transactionHash: event.transaction.hash,
+      accountId: event.args.delegate,
+      votingPower: newBalance,
+      timestamp: event.block.timestamp,
+    })
+    .onConflictDoUpdate(() => ({
+      votingPower: newBalance,
+    }));
 
   // Update the delegate's voting power
   await context.db
@@ -174,7 +179,7 @@ export const delegatedVotesChanged = async (
       daoId,
       votingPower: newBalance,
     })
-    .onConflictDoUpdate((current) => ({
+    .onConflictDoUpdate(() => ({
       votingPower: newBalance,
     }));
 
