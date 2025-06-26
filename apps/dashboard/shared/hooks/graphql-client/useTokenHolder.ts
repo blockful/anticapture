@@ -29,9 +29,11 @@ interface UseTokenHolderResult {
 export const useTokenHolder = ({
   daoId,
   limit,
+  orderDirection,
 }: {
   daoId: DaoIdEnum;
   limit: number;
+  orderDirection: "desc" | "asc";
 }): UseTokenHolderResult => {
   const { data, loading, error, refetch, fetchMore } =
     useGetTopTokenHoldersQuery({
@@ -42,6 +44,7 @@ export const useTokenHolder = ({
       },
       variables: {
         limit: limit,
+        orderDirection: orderDirection,
       },
     });
 

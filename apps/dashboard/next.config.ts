@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["euc.li", "ensdata.net", "static.ricmoo.com", "www.ricmoo.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
   },
   webpack: (config: { externals: string[] }) => {
     config.externals.push("pino-pretty");

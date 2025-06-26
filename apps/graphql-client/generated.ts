@@ -1840,6 +1840,7 @@ export type GetTopTokenHoldersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1941,10 +1942,10 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const GetTopTokenHoldersDocument = gql`
-    query GetTopTokenHolders($after: String, $before: String, $limit: Int) {
+    query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String) {
   accountBalances(
     orderBy: "balance"
-    orderDirection: "desc"
+    orderDirection: $orderDirection
     limit: $limit
     after: $after
     before: $before
@@ -1984,6 +1985,7 @@ export const GetTopTokenHoldersDocument = gql`
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */

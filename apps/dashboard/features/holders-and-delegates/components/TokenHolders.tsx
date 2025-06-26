@@ -43,6 +43,7 @@ export const TokenHolders = ({
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const router = useRouter();
   const pageLimit: number = 6;
   const {
@@ -51,7 +52,11 @@ export const TokenHolders = ({
     loading,
     pageInfo,
     fetchMore,
-  } = useTokenHolder({ daoId: daoId, limit: pageLimit });
+  } = useTokenHolder({
+    daoId: daoId,
+    limit: pageLimit,
+    orderDirection: sortOrder,
+  });
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
   const { data: historicalBalancesData } = useHistoricalBalances(
     daoId,
@@ -249,28 +254,36 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "balance",
-      header: ({ column }) => (
-        <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
-          Balance
-          <button
-            className="!text-table-header cursor-pointer justify-end text-end"
-            onClick={() => column.toggleSorting()}
-          >
-            <ArrowUpDown
-              props={{
-                className: "ml-2 size-4",
-              }}
-              activeState={
-                column.getIsSorted() === "asc"
-                  ? ArrowState.UP
-                  : column.getIsSorted() === "desc"
-                    ? ArrowState.DOWN
-                    : ArrowState.DEFAULT
-              }
-            />
-          </button>
-        </div>
-      ),
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          setSortOrder(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+
+        return (
+          <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
+            Balance
+            <button
+              className="!text-table-header cursor-pointer justify-end text-end"
+              onClick={handleSortToggle}
+            >
+              <ArrowUpDown
+                props={{
+                  className: "ml-2 size-4",
+                }}
+                activeState={
+                  sortOrder === "asc"
+                    ? ArrowState.UP
+                    : sortOrder === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </button>
+          </div>
+        );
+      },
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return <SkeletonRow className="h-4 w-20" />;

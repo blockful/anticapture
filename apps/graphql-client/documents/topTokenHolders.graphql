@@ -1,5 +1,5 @@
-query GetTopTokenHolders($after: String, $before: String, $limit: Int) {
-  accountBalances(orderBy: "balance", orderDirection: "desc", limit: $limit, after: $after, before: $before) {
+query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String ) {
+  accountBalances(orderBy: "balance", orderDirection: $orderDirection, limit: $limit, after: $after, before: $before) {
     items {
       accountId
       balance
