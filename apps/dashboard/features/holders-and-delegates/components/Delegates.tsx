@@ -163,21 +163,12 @@ export const Delegates = ({
 
         return (
           <div className="flex items-center gap-3 px-4 py-3">
-            <div className="size-6">
-              <EnsAvatar
-                address={address as `0x${string}`}
-                size="sm"
-                variant="rounded"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-primary text-sm font-medium">
-                  {address.slice(0, 6)}...{address.slice(-4)}
-                </span>
-              </div>
-            </div>
+            <EnsAvatar
+              address={address as `0x${string}`}
+              size="sm"
+              variant="rounded"
+              showName={true}
+            />
           </div>
         );
       },

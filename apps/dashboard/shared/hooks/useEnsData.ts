@@ -9,6 +9,7 @@ type EnsData = {
   address: Address;
   avatar_url: string;
   ens: string;
+  avatar: string;
 };
 
 /* Fetch Dao Total Supply */
