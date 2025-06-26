@@ -263,7 +263,7 @@ export const TokenHolders = ({
 
         return (
           <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
-            Balance
+            Balance ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
               onClick={handleSortToggle}
@@ -292,7 +292,7 @@ export const TokenHolders = ({
         const balance: number = row.getValue("balance");
         return (
           <div className="font-nomal flex h-10 w-full items-center justify-end px-2 text-sm">
-            {formatNumberUserReadable(balance, 1)} {daoId}
+            {formatNumberUserReadable(balance, 1)}
           </div>
         );
       },
@@ -301,7 +301,7 @@ export const TokenHolders = ({
       accessorKey: "variation",
       header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-          Variation
+          Variation ({daoId})
         </div>
       ),
       cell: ({ row }) => {
@@ -317,8 +317,9 @@ export const TokenHolders = ({
         return (
           <div className="flex h-10 w-full items-center justify-start gap-2 px-2 text-sm">
             <p>
-              {formatNumberUserReadable(Math.abs(variation.percentageChange))}{" "}
-              {daoId}
+              {formatNumberUserReadable(
+                Math.abs(variation.percentageChange),
+              )}{" "}
             </p>
             <div>
               <Percentage value={variation.percentageChange} />
