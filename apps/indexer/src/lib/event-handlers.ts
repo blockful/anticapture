@@ -159,12 +159,15 @@ export const delegatedVotesChanged = async (
     daoId,
   );
 
-  await context.db.insert(votingPowerHistory).values({
-    transactionHash: event.transaction.hash,
-    accountId: event.args.delegate,
-    votingPower: newBalance,
-    timestamp: event.block.timestamp,
-  });
+  await context.db
+    .insert(votingPowerHistory)
+    .values({
+      transactionHash: event.transaction.hash,
+      accountId: event.args.delegate,
+      votingPower: newBalance,
+      timestamp: event.block.timestamp,
+    })
+    .onConflictDoNothing();
 
   // Update the delegate's voting power
   await context.db
