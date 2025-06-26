@@ -1,5 +1,5 @@
-query GetDelegates($after: String, $before: String) {
-  accountPowers(orderBy: "votingPower", orderDirection: "desc", limit: 10, after: $after, before: $before) {
+query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
+  accountPowers(orderBy: $orderBy, orderDirection: $orderDirection, limit: 10, after: $after, before: $before) {
     items {
       votingPower
       account {

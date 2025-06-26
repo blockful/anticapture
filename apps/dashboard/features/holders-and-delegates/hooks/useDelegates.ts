@@ -48,12 +48,16 @@ interface UseDelegatesParams {
   blockNumber: number;
   fromDate: number;
   daoId: QueryInput_HistoricalVotingPower_DaoId;
+  orderBy?: string;
+  orderDirection?: string;
 }
 
 export const useDelegates = ({
   blockNumber,
   fromDate,
   daoId,
+  orderBy = "votingPower",
+  orderDirection = "desc",
 }: UseDelegatesParams): UseDelegatesResult => {
   const {
     data: delegatesData,
@@ -66,6 +70,8 @@ export const useDelegates = ({
     variables: {
       after: undefined,
       before: undefined,
+      orderBy,
+      orderDirection,
     },
     context: {
       headers: {
@@ -154,6 +160,8 @@ export const useDelegates = ({
         variables: {
           after: pagination.endCursor,
           before: undefined,
+          orderBy,
+          orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -171,7 +179,13 @@ export const useDelegates = ({
     } catch (error) {
       console.error("Error fetching next page:", error);
     }
-  }, [fetchMore, pagination.hasNextPage, pagination.endCursor]);
+  }, [
+    fetchMore,
+    pagination.hasNextPage,
+    pagination.endCursor,
+    orderBy,
+    orderDirection,
+  ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
@@ -185,6 +199,8 @@ export const useDelegates = ({
         variables: {
           after: undefined,
           before: pagination.startCursor,
+          orderBy,
+          orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -202,7 +218,13 @@ export const useDelegates = ({
     } catch (error) {
       console.error("Error fetching previous page:", error);
     }
-  }, [fetchMore, pagination.hasPreviousPage, pagination.startCursor]);
+  }, [
+    fetchMore,
+    pagination.hasPreviousPage,
+    pagination.startCursor,
+    orderBy,
+    orderDirection,
+  ]);
 
   return {
     data: enrichedData,

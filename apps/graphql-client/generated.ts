@@ -1753,6 +1753,8 @@ export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao'
 export type GetDelegatesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1817,10 +1819,10 @@ export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQ
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
 export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
 export const GetDelegatesDocument = gql`
-    query GetDelegates($after: String, $before: String) {
+    query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
   accountPowers(
-    orderBy: "votingPower"
-    orderDirection: "desc"
+    orderBy: $orderBy
+    orderDirection: $orderDirection
     limit: 10
     after: $after
     before: $before
@@ -1857,6 +1859,8 @@ export const GetDelegatesDocument = gql`
  *   variables: {
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useDelegates } from "@/features/holders-and-delegates";
 import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
@@ -61,6 +61,10 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId = QueryInput_HistoricalVotingPower_DaoId.Ens,
 }: DelegatesProps) => {
+  // State for managing sort order
+  const [sortBy, setSortBy] = useState<string>("votingPower");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
   // Calculate time-based parameters
   const { fromDate, blockNumber } = useMemo(
     () => getTimeDataFromPeriod(timePeriod),
@@ -79,7 +83,21 @@ export const Delegates = ({
     blockNumber,
     fromDate,
     daoId,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
   });
+
+  // Handle sorting for voting power and delegators
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      // Toggle direction if same field
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // New field, default to desc for votingPower, asc for delegationsCount
+      setSortBy(field);
+      setSortDirection(field === "votingPower" ? "desc" : "asc");
+    }
+  };
 
   // Console log the enriched delegate data with proposals activity
   console.log("Delegates with Proposals Activity:", data);
@@ -186,26 +204,8 @@ export const Delegates = ({
           </div>
         );
       },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header px-4"
-          onClick={() => column.toggleSorting()}
-        >
-          Type
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
-      enableSorting: true,
+      header: () => <h4 className="text-table-header px-4">Type</h4>,
+      enableSorting: false,
     },
     {
       accessorKey: "votingPower",
@@ -228,31 +228,26 @@ export const Delegates = ({
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
           className="flex w-full justify-end px-4"
-          onClick={() => column.toggleSorting()}
+          onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header">Voting Power</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              sortBy === "votingPower"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => {
-        const a = parseFloat(rowA.getValue("votingPower") as string) || 0;
-        const b = parseFloat(rowB.getValue("votingPower") as string) || 0;
-        return a - b;
-      },
+      enableSorting: false,
     },
     {
       accessorKey: "variation",
@@ -290,26 +285,10 @@ export const Delegates = ({
           </div>
         );
       },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header w-full justify-end px-4"
-          onClick={() => column.toggleSorting()}
-        >
-          Variation
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+      header: () => (
+        <h4 className="text-table-header w-full justify-end px-4">Variation</h4>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
     {
       accessorKey: "activity",
@@ -331,26 +310,12 @@ export const Delegates = ({
           </div>
         );
       },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header w-full justify-center px-4"
-          onClick={() => column.toggleSorting()}
-        >
+      header: () => (
+        <h4 className="text-table-header w-full justify-center px-4">
           Activity
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        </h4>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
     {
       accessorKey: "delegators",
@@ -372,26 +337,26 @@ export const Delegates = ({
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
           className="flex w-full justify-end px-4"
-          onClick={() => column.toggleSorting()}
+          onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              sortBy === "delegationsCount"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
   ];
 
