@@ -26,6 +26,7 @@ export const ENS: DaoConfiguration = {
       changeVote: false,
       timelock: true,
       cancelFunction: false,
+      logic: "For + Abstain",
     },
     securityCouncil: {
       isActive: true,
