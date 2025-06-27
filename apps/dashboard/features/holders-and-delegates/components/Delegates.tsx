@@ -439,8 +439,29 @@ export const Delegates = ({
         withSorting={true}
       />
 
+      {/* Pagination Info */}
+      <div className="flex items-center justify-between border-t border-gray-800 px-4 py-3">
+        <div className="flex items-center gap-4 text-sm text-gray-400">
+          <span>
+            Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}{" "}
+            to{" "}
+            {Math.min(
+              pagination.currentPage * pagination.itemsPerPage,
+              pagination.totalCount,
+            )}{" "}
+            of {pagination.totalCount} delegates
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4 text-sm text-gray-400">
+          <span>
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+        </div>
+      </div>
+
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
