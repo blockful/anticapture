@@ -77,6 +77,7 @@ export interface DaoOverviewConfig {
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
+    logic: "For" | "For + Abstain";
   };
   securityCouncil?: {
     isActive: boolean;

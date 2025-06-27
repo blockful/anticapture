@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -21,8 +21,8 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [activeTab, setActiveTab] = useState<TabId>("tokenHolders");
 
   // Map from tab ID to tab component
-  const tabComponentMap: Record<TabId, React.ReactElement> = {
-    tokenHolders: <TokenHolders />,
+  const tabComponentMap: Record<TabId, ReactElement> = {
+    tokenHolders: <TokenHolders days={days} daoId={daoId} />,
     delegates: (
       <Delegates
         daoId={daoId as unknown as QueryInput_HistoricalVotingPower_DaoId}

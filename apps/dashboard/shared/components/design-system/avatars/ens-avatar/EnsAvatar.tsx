@@ -99,7 +99,7 @@ export const EnsAvatar = ({
   const baseClasses = cn(
     sizeClasses[size],
     variantClasses[variant],
-    "relative overflow-hidden bg-gray-700/50 flex items-center justify-center",
+    "relative overflow-hidden bg-surface-hover flex items-center justify-center",
     className,
   );
 
