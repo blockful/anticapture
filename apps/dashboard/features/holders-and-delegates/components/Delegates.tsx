@@ -392,29 +392,33 @@ export const Delegates = ({
           withSorting={true}
         />
 
-        {/* Pagination Controls - Disabled during loading */}
-        <div className="x-4 flex items-center justify-start py-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={true}
-              className="flex items-center gap-2 text-white opacity-50"
-            >
-              <ChevronLeft className="size-4" />
-              Previous
-            </Button>
+        {/* Pagination Controls */}
+        <div className="mt-3 flex items-center justify-start gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchPreviousPage}
+            disabled={!pagination.hasPreviousPage || fetchingMore}
+            className="flex items-center gap-2 text-white"
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={true}
-              className="flex items-center gap-2 text-white opacity-50"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
+          <div className="flex items-center justify-center rounded-md border border-gray-800 px-2 py-1">
+            <span className="text-sm text-gray-400">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </span>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchNextPage}
+            disabled={!pagination.hasNextPage || fetchingMore}
+            className="flex items-center gap-2 text-white"
+          >
+            <ChevronRight className="size-4" />
+          </Button>
         </div>
       </div>
     );
@@ -439,52 +443,33 @@ export const Delegates = ({
         withSorting={true}
       />
 
-      {/* Pagination Info */}
-      <div className="flex items-center justify-between border-t border-gray-800 px-4 py-3">
-        <div className="flex items-center gap-4 text-sm text-gray-400">
-          <span>
-            Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}{" "}
-            to{" "}
-            {Math.min(
-              pagination.currentPage * pagination.itemsPerPage,
-              pagination.totalCount,
-            )}{" "}
-            of {pagination.totalCount} delegates
-          </span>
-        </div>
+      {/* Pagination Controls */}
+      <div className="mt-3 flex items-center justify-start gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchPreviousPage}
+          disabled={!pagination.hasPreviousPage || fetchingMore}
+          className="flex items-center gap-2 text-white"
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
 
-        <div className="flex items-center gap-4 text-sm text-gray-400">
-          <span>
+        <div className="flex items-center justify-center rounded-md border border-gray-800 px-2 py-1">
+          <span className="text-sm text-gray-400">
             Page {pagination.currentPage} of {pagination.totalPages}
           </span>
         </div>
-      </div>
 
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between px-4 py-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchPreviousPage}
-            disabled={!pagination.hasPreviousPage || fetchingMore}
-            className="flex items-center gap-2 text-white"
-          >
-            <ChevronLeft className="size-4" />
-            Previous
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchNextPage}
-            disabled={!pagination.hasNextPage || fetchingMore}
-            className="flex items-center gap-2 text-white"
-          >
-            Next
-            <ChevronRight className="size-4" />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchNextPage}
+          disabled={!pagination.hasNextPage || fetchingMore}
+          className="flex items-center gap-2 text-white"
+        >
+          <ChevronRight className="size-4" />
+        </Button>
       </div>
     </div>
   );
