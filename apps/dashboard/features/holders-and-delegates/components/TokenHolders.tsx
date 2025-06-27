@@ -135,9 +135,6 @@ export const TokenHolders = ({
               size="sm"
               variant="rounded"
             />
-            <span className="text-primary [tr:hover_&]:border-primary border-secondary w-fit border-b border-dashed text-sm">
-              {address}
-            </span>
             <button
               className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
               tabIndex={-1}
@@ -347,7 +344,6 @@ export const TokenHolders = ({
               size="sm"
               variant="rounded"
             />
-            <span className="text-primary text-sm">{delegateAddress}</span>
           </div>
         );
       },

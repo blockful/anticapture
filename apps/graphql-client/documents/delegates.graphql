@@ -1,0 +1,18 @@
+query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
+  accountPowers(orderBy: $orderBy, orderDirection: $orderDirection, limit: 10, after: $after, before: $before) {
+    items {
+      votingPower
+      account {
+        type
+        id
+      }
+      delegationsCount
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }   
+  }
+}

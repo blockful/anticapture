@@ -11,6 +11,9 @@ const nextConfig = {
         hostname: "**",
       },
     ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   webpack: (config: { externals: string[] }) => {
     config.externals.push("pino-pretty");
