@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { ReactNode, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import { useScreenSize } from "@/shared/hooks";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -49,12 +50,18 @@ export const HoldersAndDelegatesDrawer = ({
 
   const [activeTab, setActiveTab] = useState(tabs[entityType][0].id);
 
+  const { isMobile } = useScreenSize();
+
   const renderTabContent = (tabId: string) => {
     return tabs[entityType].find((tab) => tab.id === tabId)?.content;
   };
 
   return (
-    <Drawer open={isOpen} onOpenChange={onClose} direction="right">
+    <Drawer
+      open={isOpen}
+      onOpenChange={onClose}
+      direction={isMobile ? "bottom" : "right"}
+    >
       <DrawerContent>
         <div className="bg-surface-default h-full w-full">
           <div className="bg-surface-contrast h-[100px] w-full">
@@ -73,7 +80,7 @@ export const HoldersAndDelegatesDrawer = ({
                   />
 
                   {/* Address/ENS Name */}
-                  <div className="text-primary text-md font-medium">
+                  <div className="text-primary text-md max-w-[50vw] truncate font-medium">
                     {address}
                   </div>
                 </div>
@@ -84,9 +91,9 @@ export const HoldersAndDelegatesDrawer = ({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="bg-surface-default hover:bg-surface-contrast border-middle-dark size-8 border p-0"
+                className="bg-surface-default hover:bg-surface-contrast border-middle-dark size-7 border p-0"
               >
-                <X className="text-primary size-4" />
+                <X className="text-primary size-3" />
                 <span className="sr-only">Close</span>
               </Button>
             </div>
