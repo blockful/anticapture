@@ -361,10 +361,11 @@ export const TokenHolders = ({
   };
 
   const handlePageChange = (page: number) => {
-    if (page > currentPage && pageInfo?.hasNextPage) {
-      fetchMore(pageInfo.endCursor!, "forward");
-    } else if (page < currentPage && pageInfo?.hasPreviousPage) {
-      fetchMore(pageInfo.startCursor!, "backward");
+    if (pageInfo?.hasNextPage) {
+      return fetchMore(pageInfo.endCursor!, "forward");
+    }
+    if (pageInfo?.hasPreviousPage) {
+      return fetchMore(pageInfo.startCursor!, "backward");
     }
     setCurrentPage(page);
   };
