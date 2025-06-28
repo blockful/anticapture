@@ -163,7 +163,7 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center gap-3 px-4 py-3">
+            <div className="flex h-10 items-center gap-3 px-4 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -177,7 +177,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center gap-3 px-4 py-3">
+          <div className="flex h-10 items-center gap-3 px-4 py-2">
             <EnsAvatar
               address={address as `0x${string}`}
               size="sm"
@@ -205,7 +205,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center px-4 py-3">
+          <div className="flex h-10 items-center px-4 py-2">
             <span
               className={cn(
                 "rounded-full px-2 py-1 text-xs font-medium",
@@ -238,7 +238,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
             {votingPower} ENS
           </div>
         );
@@ -282,7 +282,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center justify-end gap-1 px-4 py-3 text-end text-sm whitespace-nowrap">
+          <div className="flex h-10 items-center justify-end gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
             <span className="text-secondary">
               {variation.split(" ")[0]} ENS
             </span>
@@ -320,7 +320,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center justify-center px-4 py-3">
+          <div className="flex h-10 items-center justify-center px-4 py-2">
             {activity}
           </div>
         );
@@ -347,7 +347,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
             {delegators}
           </div>
         );
@@ -422,6 +422,9 @@ export const Delegates = ({
         data={tableData}
         withPagination={true}
         withSorting={true}
+        onRowClick={(row) => {
+          console.log("Row clicked:", row);
+        }}
       />
 
       <Pagination
