@@ -8,7 +8,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 interface DelegateTableData {
   address: string;
@@ -377,7 +377,7 @@ export const Delegates = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         <TheTable
           columns={delegateColumns}
           data={Array.from({ length: 10 }, (_, i) => ({
@@ -392,34 +392,15 @@ export const Delegates = ({
           withSorting={true}
         />
 
-        {/* Pagination Controls */}
-        <div className="mt-3 flex items-center justify-start gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchPreviousPage}
-            disabled={!pagination.hasPreviousPage || fetchingMore}
-            className="flex items-center gap-2 text-white"
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-
-          <div className="flex items-center justify-center rounded-md border border-gray-800 px-2 py-1">
-            <span className="text-sm text-gray-400">
-              Page {pagination.currentPage} of {pagination.totalPages}
-            </span>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchNextPage}
-            disabled={!pagination.hasNextPage || fetchingMore}
-            className="flex items-center gap-2 text-white"
-          >
-            <ChevronRight className="size-4" />
-          </Button>
-        </div>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     );
   }
@@ -435,7 +416,7 @@ export const Delegates = ({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2">
       <TheTable
         columns={delegateColumns}
         data={tableData}
@@ -443,34 +424,15 @@ export const Delegates = ({
         withSorting={true}
       />
 
-      {/* Pagination Controls */}
-      <div className="mt-3 flex items-center justify-start gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={fetchPreviousPage}
-          disabled={!pagination.hasPreviousPage || fetchingMore}
-          className="flex items-center gap-2 text-white"
-        >
-          <ChevronLeft className="size-4" />
-        </Button>
-
-        <div className="flex items-center justify-center rounded-md border border-gray-800 px-2 py-1">
-          <span className="text-sm text-gray-400">
-            Page {pagination.currentPage} of {pagination.totalPages}
-          </span>
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={fetchNextPage}
-          disabled={!pagination.hasNextPage || fetchingMore}
-          className="flex items-center gap-2 text-white"
-        >
-          <ChevronRight className="size-4" />
-        </Button>
-      </div>
+      <Pagination
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPrevious={fetchPreviousPage}
+        onNext={fetchNextPage}
+        hasNextPage={pagination.hasNextPage}
+        hasPreviousPage={pagination.hasPreviousPage}
+        isLoading={fetchingMore}
+      />
     </div>
   );
 };
