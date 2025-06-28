@@ -117,8 +117,14 @@ export const TokenHolders = ({
         if (!isMounted || loading) {
           return (
             <div className="flex h-10 items-center gap-2">
-              <SkeletonRow className="size-6 rounded-full" />
-              <SkeletonRow className="h-4 w-24" />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
             </div>
           );
         }
@@ -226,7 +232,12 @@ export const TokenHolders = ({
       },
       cell: ({ row }) => {
         if (!isMounted || loading) {
-          return <SkeletonRow className="h-5 w-16" />;
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-5 w-16"
+            />
+          );
         }
 
         const typeValue: string = row.getValue("type");
@@ -293,7 +304,12 @@ export const TokenHolders = ({
       ),
       cell: ({ row }) => {
         if (!isMounted || loading) {
-          return <SkeletonRow className="h-4 w-16" />;
+          return (
+            <SkeletonRow
+              className="h-4 w-16"
+              parentClassName="flex animate-pulse"
+            />
+          );
         }
 
         const variation = row.getValue("variation") as {
@@ -326,8 +342,14 @@ export const TokenHolders = ({
         if (!isMounted || loading) {
           return (
             <div className="flex h-10 items-center gap-1.5">
-              <SkeletonRow className="size-6 rounded-full" />
-              <SkeletonRow className="h-4 w-24" />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
             </div>
           );
         }
