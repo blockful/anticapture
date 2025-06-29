@@ -136,8 +136,12 @@ export const Delegates = ({
         // Calculate absolute change and percentage
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
-        const percentageChange = (absoluteChange / votingPowerFormatted) * 100;
+        const percentageChange =
+          (votingPowerFormatted / historicalVotingPowerFormatted) * 100 - 100;
         const roundedPercentage = Math.round(percentageChange * 100) / 100;
+        const absPercentage = Math.abs(roundedPercentage);
+        const displayPercentage =
+          absPercentage > 1000 ? ">1000" : absPercentage.toString();
 
         // Format the variation string
         const absChangeFormatted = formatNumberUserReadable(
@@ -145,7 +149,7 @@ export const Delegates = ({
         );
         const arrow = absoluteChange > 0 ? "↑" : absoluteChange < 0 ? "↓" : "";
 
-        variation = `${absChangeFormatted} ENS ${arrow} ${Math.abs(roundedPercentage)}%`;
+        variation = `${absChangeFormatted} ENS ${arrow} ${displayPercentage}%`;
       }
 
       return {
