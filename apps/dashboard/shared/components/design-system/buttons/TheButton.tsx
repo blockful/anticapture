@@ -53,7 +53,7 @@ export const TheButton = ({
       className={cn(
         buttonVariants({ variant }),
         className,
-        disabled && "cursor-default",
+        disabled && "bg-surface-disabled cursor-default",
       )}
       {...props}
       onClick={onClick}

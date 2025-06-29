@@ -9,6 +9,8 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { Plus } from "lucide-react";
+import { ProgressCircle } from "./ProgressCircle";
 
 interface DelegateTableData {
   address: string;
@@ -117,6 +119,10 @@ export const Delegates = ({
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
         : "0/0";
 
+      const activityPercentage =
+        (delegate.proposalsActivity?.votedProposals || 0) /
+        (delegate.proposalsActivity?.totalProposals || 1);
+
       // Calculate variation using real historical voting power
       let variation = "0 ENS 0%";
       if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
@@ -184,6 +190,14 @@ export const Delegates = ({
               variant="rounded"
               showName={true}
             />
+            <button
+              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
+              tabIndex={-1}
+              onClick={(e) => {}}
+            >
+              <Plus className="size-3.5" />
+              <span className="text-sm font-medium">Details</span>
+            </button>
           </div>
         );
       },
@@ -310,6 +324,9 @@ export const Delegates = ({
       size: 150,
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string;
+        const activityPercentage =
+          parseInt(row.original.activity.split("/")[0] || "0") /
+          parseInt(row.original.activity.split("/")[1] || "1");
 
         if (loading) {
           return (
@@ -320,7 +337,8 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center justify-start px-4 py-2">
+          <div className="flex h-10 items-center justify-start gap-2 px-4 py-2">
+            <ProgressCircle percentage={activityPercentage} />
             {activity}
           </div>
         );
