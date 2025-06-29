@@ -156,7 +156,7 @@ export const Delegates = ({
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
       accessorKey: "address",
-      size: 200,
+      size: 280,
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
         const type = row.getValue("type") as string;
@@ -266,23 +266,23 @@ export const Delegates = ({
     },
     {
       accessorKey: "variation",
-      size: 200,
+      size: 250,
       cell: ({ row }) => {
         const variation = row.getValue("variation") as string;
 
         if (loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow
                 className="h-5 w-16"
-                parentClassName="justify-end flex animate-pulse"
+                parentClassName="justify-start flex animate-pulse"
               />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-end gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
+          <div className="flex h-10 items-center justify-start gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
             <span className="text-secondary">
               {variation.split(" ")[0]} ENS
             </span>
@@ -313,14 +313,14 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-center">
-              <SkeletonRow className="h-5 w-20" />
+            <div className="flex items-center justify-start px-4">
+              <SkeletonRow className="h-5 w-10" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-center px-4 py-2">
+          <div className="flex h-10 items-center justify-start px-4 py-2">
             {activity}
           </div>
         );
@@ -340,14 +340,14 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 items-center justify-start px-4 py-2 text-end text-sm font-normal">
             {delegators}
           </div>
         );
