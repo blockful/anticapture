@@ -69,6 +69,9 @@ export const useDelegates = ({
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Track pagination loading state to prevent rapid clicks
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
@@ -190,10 +193,16 @@ export const useDelegates = ({
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || !pagination.endCursor) {
-      console.warn("No next page available");
+    if (
+      !pagination.hasNextPage ||
+      !pagination.endCursor ||
+      isPaginationLoading
+    ) {
+      console.warn("No next page available or already loading");
       return;
     }
+
+    setIsPaginationLoading(true);
 
     try {
       await fetchMore({
@@ -221,6 +230,8 @@ export const useDelegates = ({
       setCurrentPage((prev) => prev + 1);
     } catch (error) {
       console.error("Error fetching next page:", error);
+    } finally {
+      setIsPaginationLoading(false);
     }
   }, [
     fetchMore,
@@ -228,14 +239,21 @@ export const useDelegates = ({
     pagination.endCursor,
     orderBy,
     orderDirection,
+    isPaginationLoading,
   ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
-    if (!pagination.hasPreviousPage || !pagination.startCursor) {
-      console.warn("No previous page available");
+    if (
+      !pagination.hasPreviousPage ||
+      !pagination.startCursor ||
+      isPaginationLoading
+    ) {
+      console.warn("No previous page available or already loading");
       return;
     }
+
+    setIsPaginationLoading(true);
 
     try {
       await fetchMore({
@@ -263,6 +281,8 @@ export const useDelegates = ({
       setCurrentPage((prev) => prev - 1);
     } catch (error) {
       console.error("Error fetching previous page:", error);
+    } finally {
+      setIsPaginationLoading(false);
     }
   }, [
     fetchMore,
@@ -270,6 +290,7 @@ export const useDelegates = ({
     pagination.startCursor,
     orderBy,
     orderDirection,
+    isPaginationLoading,
   ]);
 
   // Enhanced refetch that resets pagination
@@ -286,6 +307,7 @@ export const useDelegates = ({
     pagination,
     fetchNextPage,
     fetchPreviousPage,
-    fetchingMore: networkStatus === NetworkStatus.fetchMore,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 };
