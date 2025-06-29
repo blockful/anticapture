@@ -124,7 +124,7 @@ export const Delegates = ({
         (delegate.proposalsActivity?.totalProposals || 1);
 
       // Calculate variation using real historical voting power
-      let variation = "0 ENS 0%";
+      let variation = "0 0%";
       if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
@@ -149,7 +149,7 @@ export const Delegates = ({
         );
         const arrow = absoluteChange > 0 ? "↑" : absoluteChange < 0 ? "↓" : "";
 
-        variation = `${absChangeFormatted} ENS ${arrow} ${displayPercentage}%`;
+        variation = `${absChangeFormatted} ${arrow} ${displayPercentage}%`;
       }
 
       return {
@@ -257,7 +257,7 @@ export const Delegates = ({
 
         return (
           <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
-            {votingPower} ENS
+            {votingPower}
           </div>
         );
       },
@@ -267,7 +267,13 @@ export const Delegates = ({
           className="flex w-full justify-end px-4"
           onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">Voting Power</h4>
+          <h4 className="text-table-header">
+            Voting Power (
+            {daoId === QueryInput_HistoricalVotingPower_DaoId.Ens
+              ? "ENS"
+              : "UNI"}
+            )
+          </h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
@@ -301,9 +307,7 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center justify-start gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
-            <span className="text-secondary">
-              {variation.split(" ")[0]} ENS
-            </span>
+            <span className="text-secondary">{variation.split(" ")[0]}</span>
             <span
               className={cn(
                 variation.includes("↑")
