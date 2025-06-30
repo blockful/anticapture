@@ -5,14 +5,13 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { CheckIcon, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -28,9 +27,7 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const router = useRouter();
   const pageLimit: number = 10;
@@ -169,81 +166,11 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "type",
-      enableColumnFilter: true,
-      filterFn: (row, id, filterValue) => {
-        if (!filterValue || filterValue.length === 0) return true;
-        const rowValue = row.getValue(id) as string;
-        return filterValue.includes(rowValue);
-      },
-      header: ({ column }) => {
-        const options = ["Remove All", "Contract", "EOA"];
-
-        const handleOptionClick = (option: string) => {
-          if (option === "Remove All") {
-            setSelectedFilters([]);
-            column.setFilterValue(undefined);
-            return;
-          }
-
-          setSelectedFilters((prev) => {
-            const newFilters = prev.includes(option)
-              ? prev.filter((filter) => filter !== option)
-              : [...prev, option];
-
-            // Atualiza o filtro da coluna
-            column.setFilterValue(
-              newFilters.length > 0 ? newFilters : undefined,
-            );
-
-            return newFilters;
-          });
-        };
-
-        return (
-          <div className="text-table-header relative flex h-8 w-full items-center justify-start gap-1.5 px-2">
-            <div className="flex items-center gap-1.5">
-              <p>Type</p>
-              <ButtonFilter
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                isActive={isFilterOpen}
-              />
-            </div>
-            {isFilterOpen && (
-              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
-                {options.map((option) => {
-                  const isSelected =
-                    option === "Remove All"
-                      ? selectedFilters.length === 0
-                      : selectedFilters.includes(option);
-                  return (
-                    <button
-                      key={option}
-                      onClick={() => {
-                        handleOptionClick(option);
-                        setIsFilterOpen(false);
-                      }}
-                      className={cn(
-                        "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
-                        option === "Remove All" && "border-b border-[#3F3F46]",
-                        isSelected &&
-                          option !== "Remove All" &&
-                          "bg-middle-dark",
-                      )}
-                    >
-                      <span className="text-primary text-sm font-normal">
-                        {option}
-                      </span>
-                      {isSelected && option !== "Remove All" && (
-                        <CheckIcon className="size-3.5" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      },
+      header: () => (
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          Type
+        </div>
+      ),
       cell: ({ row }) => {
         if (loading) {
           return (
@@ -413,7 +340,6 @@ export const TokenHolders = ({
         <TheTable
           columns={tokenHoldersColumns}
           data={tableData}
-          filterColumn="type"
           withSorting={true}
           onRowClick={() => {}}
         />
