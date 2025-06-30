@@ -1,12 +1,12 @@
 "use client";
 
 import { TheTable } from "@/shared/components/tables/TheTable";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -27,7 +27,6 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const router = useRouter();
   const pageLimit: number = 10;
@@ -52,10 +51,6 @@ export const TokenHolders = ({
     addresses || [],
     days,
   );
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const calculateVariation = (
     currentBalance: string,
