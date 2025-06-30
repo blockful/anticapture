@@ -55,6 +55,11 @@ export const HeaderNavMobile = () => {
       title: SECTIONS_CONSTANTS.governanceActivity.title,
       enabled: !!daoConfig.governanceActivity,
     },
+    {
+      anchorId: SECTIONS_CONSTANTS.holdersAndDelegates.anchorId,
+      title: SECTIONS_CONSTANTS.holdersAndDelegates.title,
+      enabled: true,
+    },
   ];
 
   return (
