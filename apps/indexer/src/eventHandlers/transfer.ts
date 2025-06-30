@@ -224,6 +224,7 @@ export const tokenTransfer = async (
     .insert(transfer)
     .values({
       transactionHash: event.transaction.hash,
+      daoId,
       tokenId: tokenAddress,
       amount: value,
       fromAccountId: from,

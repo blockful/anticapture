@@ -190,6 +190,7 @@ export const delegatedVotesChanged = async (
   await context.db
     .insert(votingPowerHistory)
     .values({
+      daoId,
       transactionHash: event.transaction.hash,
       accountId: event.args.delegate,
       votingPower: newBalance,
