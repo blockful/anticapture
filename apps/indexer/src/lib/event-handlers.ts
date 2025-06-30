@@ -512,6 +512,7 @@ export const voteCast = async (
   // Create vote record
   await context.db.insert(votesOnchain).values({
     id: event.transaction.hash,
+    daoId,
     proposalId: String(proposalId),
     voterAccountId: event.args.voter,
     support: event.args.support.toString(),
@@ -566,6 +567,7 @@ export const proposalCreated = async (
   // Create proposal record
   await context.db.insert(proposalsOnchain).values({
     id: String(proposalId),
+    daoId,
     proposerAccountId: event.args.proposer,
     targets: JSON.stringify(event.args.targets),
     values: JSON.stringify(event.args.values.map((v: bigint) => v.toString())),
