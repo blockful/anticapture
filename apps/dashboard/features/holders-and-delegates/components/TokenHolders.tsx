@@ -13,7 +13,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
-import { useTokenHolder } from "@/shared/hooks/graphql-client/useTokenHolder";
+import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -30,22 +30,25 @@ export const TokenHolders = ({
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const router = useRouter();
   const pageLimit: number = 6;
+
   const {
     data: tokenHoldersData,
-    totalCount: totalPages,
     loading,
-    pageInfo,
-    fetchMore,
-  } = useTokenHolder({
+    error,
+    pagination,
+    fetchNextPage,
+    fetchPreviousPage,
+    fetchingMore,
+  } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
     orderDirection: sortOrder,
   });
+
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
   const { data: historicalBalancesData } = useHistoricalBalances(
     daoId,
@@ -255,7 +258,6 @@ export const TokenHolders = ({
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
           setSortOrder(newSortOrder);
-          setCurrentPage(1);
           column.toggleSorting(newSortOrder === "desc");
         };
 
@@ -378,14 +380,12 @@ export const TokenHolders = ({
     router.push(`/${address}`);
   };
 
-  const handlePageChange = (page: number) => {
-    if (pageInfo?.hasNextPage) {
-      return fetchMore(pageInfo.endCursor!, "forward");
+  const handlePageChange = async (page: number) => {
+    if (page > pagination.currentPage && pagination.hasNextPage) {
+      await fetchNextPage();
+    } else if (page < pagination.currentPage && pagination.hasPreviousPage) {
+      await fetchPreviousPage();
     }
-    if (pageInfo?.hasPreviousPage) {
-      return fetchMore(pageInfo.startCursor!, "backward");
-    }
-    setCurrentPage(page);
   };
 
   return (
@@ -401,12 +401,12 @@ export const TokenHolders = ({
       </div>
       <div>
         <Pagination
-          currentPage={currentPage}
-          totalPages={Math.floor(totalPages || 0 / pageLimit)}
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
           onPageChange={handlePageChange}
           className="text-white"
-          hasNextPage={!!pageInfo?.hasNextPage}
-          hasPreviousPage={!!pageInfo?.hasPreviousPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
         />
       </div>
     </div>
