@@ -1837,6 +1837,13 @@ export type GetDelegatesQueryVariables = Exact<{
 
 export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, delegationsCount: number, account?: { __typename?: 'account', type: string, id: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
+export type GetDelegationHistoryQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegationHistoryQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }> } };
+
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   address: Scalars['String']['input'];
@@ -1981,6 +1988,60 @@ export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery
 export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
 export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
 export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
+export const GetDelegationHistoryDocument = gql`
+    query GetDelegationHistory($delegator: String!) {
+  delegations(
+    where: {delegatorAccountId: $delegator}
+    orderBy: "timestamp"
+    orderDirection: "desc"
+  ) {
+    items {
+      delegate {
+        id
+        powers {
+          items {
+            votingPower
+          }
+        }
+      }
+      timestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDelegationHistoryQuery__
+ *
+ * To run a query within a React component, call `useGetDelegationHistoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegationHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegationHistoryQuery({
+ *   variables: {
+ *      delegator: // value for 'delegator'
+ *   },
+ * });
+ */
+export function useGetDelegationHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables> & ({ variables: GetDelegationHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables>(GetDelegationHistoryDocument, options);
+      }
+export function useGetDelegationHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables>(GetDelegationHistoryDocument, options);
+        }
+export function useGetDelegationHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables>(GetDelegationHistoryDocument, options);
+        }
+export type GetDelegationHistoryQueryHookResult = ReturnType<typeof useGetDelegationHistoryQuery>;
+export type GetDelegationHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryLazyQuery>;
+export type GetDelegationHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistorySuspenseQuery>;
+export type GetDelegationHistoryQueryResult = Apollo.QueryResult<GetDelegationHistoryQuery, GetDelegationHistoryQueryVariables>;
 export const GetHistoricalVotingAndActivityDocument = gql`
     query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalVotingPower_daoId!, $fromDate: NonNegativeInt, $proposalsDaoId: queryInput_proposalsActivity_daoId!) {
   historicalVotingPower(

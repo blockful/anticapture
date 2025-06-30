@@ -1,0 +1,19 @@
+query GetDelegationHistory($delegator: String!) {
+  delegations(
+    where: {delegatorAccountId: $delegator},
+    orderBy: "timestamp"
+    orderDirection: "desc"
+  ) {
+    items {
+      delegate {
+        id
+        powers {
+          items {
+            votingPower
+          }
+        }
+      }
+      timestamp
+    }
+  }
+}

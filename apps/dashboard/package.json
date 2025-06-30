@@ -40,11 +40,11 @@
     "recharts": "^2.15.0",
     "swr": "^2.3.2",
     "tailwind-merge": "^2.5.4",
+    "vaul": "^1.1.2",
     "viem": "^2.21.34",
     "wagmi": "^2.12.25"
   },
   "devDependencies": {
-    "vitest": "^3.2.1",
     "@chromatic-com/storybook": "^3.2.6",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
@@ -71,6 +71,7 @@
     "tailwindcss": "^4.1.7",
     "ts-jest": "^29.2.6",
     "tw-animate-css": "^1.3.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.1"
   }
 }
