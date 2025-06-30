@@ -1,0 +1,12 @@
+query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalVotingPower_daoId!, $fromDate: NonNegativeInt, $proposalsDaoId: queryInput_proposalsActivity_daoId!) {
+  historicalVotingPower(addresses: $addresses, blockNumber: $blockNumber, daoId: $daoId) {
+    address
+    votingPower
+  }
+  
+  proposalsActivity(address: $address, daoId: $proposalsDaoId, fromDate: $fromDate) {
+    totalProposals
+    votedProposals
+    neverVoted
+  }
+}
