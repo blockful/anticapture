@@ -1,0 +1,26 @@
+query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 10) {
+  transfers(
+    where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
+    orderBy: "timestamp"
+    orderDirection: "desc"
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      timestamp
+      amount
+      fromAccountId
+      toAccountId
+      transactionHash
+    }
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }    
+  }
+}
+

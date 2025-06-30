@@ -7,6 +7,8 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { Filter } from "lucide-react";
+import { useBalanceHistory, Transfer } from "../hooks/useBalanceHistory";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface BalanceHistoryData {
   id: string;
@@ -20,110 +22,26 @@ interface BalanceHistoryData {
 }
 
 interface BalanceHistoryProps {
-  loading?: boolean;
+  accountId: string;
 }
 
-// Mock data for the balance history table
-const mockBalanceHistoryData: BalanceHistoryData[] = [
-  {
-    id: "1",
-    date: "1 hour ago",
-    amount: "89,432.57",
-    type: "Sell",
-    fromAddress: "0x1234567890123456789012345678901234567890",
-    fromEns: "jicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "2",
-    date: "2 days ago",
-    amount: "67,890.12",
-    type: "Sell",
-    fromAddress: "0x1234567890123456789012345678901234567890",
-    fromEns: "jicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "3",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Buy",
-    fromAddress: "0xabcdef1234567890123456789012345678901234",
-    fromEns: "happyguy.eth",
-    toAddress: "0x9876543210987654321098765432109876543210",
-    toEns: "magicbear.eth",
-  },
-  {
-    id: "4",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Buy",
-    fromAddress: "0xabcdef1234567890123456789012345678901234",
-    fromEns: "happyguy.eth",
-    toAddress: "0x9876543210987654321098765432109876543210",
-    toEns: "magicbear.eth",
-  },
-  {
-    id: "5",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Sell",
-    fromAddress: "0x9876543210987654321098765432109876543210",
-    fromEns: "magicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "6",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Sell",
-    fromAddress: "0x9876543210987654321098765432109876543210",
-    fromEns: "magicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "7",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Sell",
-    fromAddress: "0x9876543210987654321098765432109876543210",
-    fromEns: "magicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "8",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Sell",
-    fromAddress: "0x9876543210987654321098765432109876543210",
-    fromEns: "magicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "9",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Sell",
-    fromAddress: "0x9876543210987654321098765432109876543210",
-    fromEns: "magicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-  {
-    id: "10",
-    date: "5 days ago",
-    amount: "34,567.89",
-    type: "Sell",
-    fromAddress: "0x9876543210987654321098765432109876543210",
-    fromEns: "magicbear.eth",
-    toAddress: "0x5f9a7d8e1234567890123456789012345678901234",
-  },
-];
-
-export const BalanceHistory = ({ loading = false }: BalanceHistoryProps) => {
+export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
   const [sortBy, setSortBy] = useState<string>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [typeFilter, setTypeFilter] = useState<"all" | "Buy" | "Sell">("all");
   const [showTypeFilter, setShowTypeFilter] = useState(false);
+
+  // Use the balance history hook
+  const {
+    transfers,
+    loading,
+    error,
+    paginationInfo,
+    fetchNextPage,
+    fetchPreviousPage,
+    refetch,
+    fetchingMore,
+  } = useBalanceHistory(accountId);
 
   // Handle sorting
   const handleSort = (field: string) => {
@@ -135,9 +53,21 @@ export const BalanceHistory = ({ loading = false }: BalanceHistoryProps) => {
     }
   };
 
+  // Transform transfers to table data format
+  const transformedData = useMemo(() => {
+    return transfers.map((transfer) => ({
+      id: transfer.transactionHash,
+      date: new Date(parseInt(transfer.timestamp) * 1000).toLocaleDateString(),
+      amount: formatNumberUserReadable(parseFloat(transfer.amount)),
+      type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
+      fromAddress: transfer.fromAccountId || "",
+      toAddress: transfer.toAccountId || "",
+    }));
+  }, [transfers]);
+
   // Filter and sort data
   const tableData = useMemo(() => {
-    let filteredData = mockBalanceHistoryData;
+    let filteredData = transformedData;
 
     if (typeFilter !== "all") {
       filteredData = filteredData.filter((item) => item.type === typeFilter);
@@ -151,7 +81,7 @@ export const BalanceHistory = ({ loading = false }: BalanceHistoryProps) => {
       }
       return 0; // For now, we'll keep the original order for other fields
     });
-  }, [typeFilter, sortBy, sortDirection]);
+  }, [transformedData, typeFilter, sortBy, sortDirection]);
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
@@ -422,13 +352,13 @@ export const BalanceHistory = ({ loading = false }: BalanceHistoryProps) => {
 
       {/* Pagination */}
       <Pagination
-        currentPage={1}
-        totalPages={1}
+        currentPage={paginationInfo.currentPage}
+        totalPages={paginationInfo.totalPages}
         onPageChange={() => {}}
-        onPrevious={() => {}}
-        onNext={() => {}}
-        hasNextPage={false}
-        hasPreviousPage={false}
+        onPrevious={fetchPreviousPage}
+        onNext={fetchNextPage}
+        hasNextPage={paginationInfo.hasNextPage}
+        hasPreviousPage={paginationInfo.hasPreviousPage}
       />
     </div>
   );

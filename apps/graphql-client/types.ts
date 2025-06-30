@@ -1817,6 +1817,16 @@ export type VotingPowerHistoryPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type MyQueryQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type MyQueryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number, items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
 }>;
