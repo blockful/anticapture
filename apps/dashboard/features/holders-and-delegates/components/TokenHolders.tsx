@@ -33,7 +33,7 @@ export const TokenHolders = ({
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const router = useRouter();
-  const pageLimit: number = 6;
+  const pageLimit: number = 10;
 
   const {
     data: tokenHoldersData,
@@ -108,6 +108,17 @@ export const TokenHolders = ({
       };
     }) || [];
 
+  // Create skeleton data when loading
+  const skeletonData = Array(10).fill({
+    address: "0x0000000000000000000000000000000000000000" as Address,
+    type: "EOA",
+    balance: 0,
+    variation: { percentageChange: 0, absoluteChange: 0 },
+    delegate: "0x0000000000000000000000000000000000000000" as Address,
+  });
+
+  const tableData = loading ? skeletonData : data;
+
   const tokenHoldersColumns: ColumnDef<typeof data>[] = [
     {
       accessorKey: "address",
@@ -117,9 +128,9 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (!isMounted || loading) {
+        if (loading) {
           return (
-            <div className="flex h-10 items-center gap-2">
+            <div className="flex h-10 items-center gap-2 px-4 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -138,7 +149,7 @@ export const TokenHolders = ({
           : "Invalid address";
 
         return (
-          <div className="group flex h-10 w-full items-center gap-2">
+          <div className="group flex h-10 w-full items-center gap-2 px-4 py-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -234,19 +245,21 @@ export const TokenHolders = ({
         );
       },
       cell: ({ row }) => {
-        if (!isMounted || loading) {
+        if (loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse"
-              className="h-5 w-16"
-            />
+            <div className="flex h-10 items-center px-4 py-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-5 w-16"
+              />
+            </div>
           );
         }
 
         const typeValue: string = row.getValue("type");
         const type = typeValue === "Contract" ? "Contract" : "EOA";
         return (
-          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
+          <div className="flex h-10 w-full items-center justify-start px-4 py-2 text-sm">
             <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
@@ -285,13 +298,17 @@ export const TokenHolders = ({
         );
       },
       cell: ({ row }) => {
-        if (!isMounted || loading) {
-          return <SkeletonRow className="h-4 w-20" />;
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center justify-end px-4 py-2">
+              <SkeletonRow className="h-4 w-20" />
+            </div>
+          );
         }
 
         const balance: number = row.getValue("balance");
         return (
-          <div className="font-nomal flex h-10 w-full items-center justify-end px-2 text-sm">
+          <div className="font-nomal flex h-10 w-full items-center justify-end px-4 py-2 text-sm">
             {formatNumberUserReadable(balance, 1)}
           </div>
         );
@@ -305,12 +322,14 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (!isMounted || loading) {
+        if (loading) {
           return (
-            <SkeletonRow
-              className="h-4 w-16"
-              parentClassName="flex animate-pulse"
-            />
+            <div className="flex h-10 items-center justify-start px-4 py-2">
+              <SkeletonRow
+                className="h-4 w-16"
+                parentClassName="flex animate-pulse"
+              />
+            </div>
           );
         }
 
@@ -320,7 +339,7 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-2 text-sm">
+          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
             <p>
               {formatNumberUserReadable(
                 Math.abs(variation.absoluteChange),
@@ -341,9 +360,9 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (!isMounted || loading) {
+        if (loading) {
           return (
-            <div className="flex h-10 items-center gap-1.5">
+            <div className="flex h-10 items-center gap-1.5 px-4 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -362,7 +381,7 @@ export const TokenHolders = ({
           : "Invalid address";
 
         return (
-          <div className="flex h-10 items-center gap-1.5">
+          <div className="flex h-10 items-center gap-1.5 px-4 py-2">
             <EnsAvatar
               address={delegate as Address}
               size="sm"
@@ -389,11 +408,11 @@ export const TokenHolders = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <div className="w-full text-white">
         <TheTable
           columns={tokenHoldersColumns}
-          data={loading ? Array(5).fill({}) : data || []}
+          data={tableData}
           filterColumn="type"
           withSorting={true}
           onRowClick={() => {}}
