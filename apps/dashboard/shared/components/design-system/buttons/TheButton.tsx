@@ -45,11 +45,16 @@ export const TheButton = ({
   hasText,
   hasIcon = true,
   icon: Icon,
+  disabled = false,
   ...props
 }: TheButtonProps) => {
   return (
     <button
-      className={cn(buttonVariants({ variant }), className)}
+      className={cn(
+        buttonVariants({ variant }),
+        className,
+        disabled && "bg-surface-disabled cursor-default",
+      )}
       {...props}
       onClick={onClick}
     >

@@ -6,7 +6,7 @@ import {
   QueryInput_HistoricalVotingPower_DaoId,
   QueryInput_ProposalsActivity_DaoId,
 } from "@anticapture/graphql-client";
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 
 interface ProposalsActivity {
@@ -31,6 +31,11 @@ interface PaginationInfo {
   hasPreviousPage: boolean;
   endCursor?: string | null;
   startCursor?: string | null;
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  currentItemsCount: number;
 }
 
 interface UseDelegatesResult {
@@ -59,6 +64,19 @@ export const useDelegates = ({
   orderBy = "votingPower",
   orderDirection = "desc",
 }: UseDelegatesParams): UseDelegatesResult => {
+  const itemsPerPage = 10; // This should match the limit in the GraphQL query
+
+  // Track current page - this is the source of truth for page number
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Track pagination loading state to prevent rapid clicks
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+
+  // Reset to page 1 and refetch when sorting changes (new query)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderBy, orderDirection]);
+
   const {
     data: delegatesData,
     loading: delegatesLoading,
@@ -79,7 +97,18 @@ export const useDelegates = ({
       },
     },
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
+
+  // Refetch data when sorting changes to ensure we start from page 1
+  useEffect(() => {
+    refetch({
+      after: undefined,
+      before: undefined,
+      orderBy,
+      orderDirection,
+    });
+  }, [orderBy, orderDirection, refetch]);
 
   const delegateAddresses = useMemo(() => {
     return (
@@ -136,23 +165,44 @@ export const useDelegates = ({
     });
   }, [delegatesData, activityData]);
 
-  // Pagination info
+  // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
     const pageInfo = delegatesData?.accountPowers?.pageInfo;
+    const totalCount = delegatesData?.accountPowers?.totalCount || 0;
+    const currentItemsCount = delegatesData?.accountPowers?.items?.length || 0;
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+
     return {
       hasNextPage: pageInfo?.hasNextPage ?? false,
       hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
       endCursor: pageInfo?.endCursor,
       startCursor: pageInfo?.startCursor,
+      totalCount,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      currentItemsCount,
     };
-  }, [delegatesData?.accountPowers?.pageInfo]);
+  }, [
+    delegatesData?.accountPowers?.pageInfo,
+    delegatesData?.accountPowers?.totalCount,
+    delegatesData?.accountPowers?.items?.length,
+    currentPage,
+    itemsPerPage,
+  ]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || !pagination.endCursor) {
-      console.warn("No next page available");
+    if (
+      !pagination.hasNextPage ||
+      !pagination.endCursor ||
+      isPaginationLoading
+    ) {
+      console.warn("No next page available or already loading");
       return;
     }
+
+    setIsPaginationLoading(true);
 
     try {
       await fetchMore({
@@ -175,8 +225,13 @@ export const useDelegates = ({
           };
         },
       });
+
+      // Update page number after successful fetch
+      setCurrentPage((prev) => prev + 1);
     } catch (error) {
       console.error("Error fetching next page:", error);
+    } finally {
+      setIsPaginationLoading(false);
     }
   }, [
     fetchMore,
@@ -184,14 +239,21 @@ export const useDelegates = ({
     pagination.endCursor,
     orderBy,
     orderDirection,
+    isPaginationLoading,
   ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
-    if (!pagination.hasPreviousPage || !pagination.startCursor) {
-      console.warn("No previous page available");
+    if (
+      !pagination.hasPreviousPage ||
+      !pagination.startCursor ||
+      isPaginationLoading
+    ) {
+      console.warn("No previous page available or already loading");
       return;
     }
+
+    setIsPaginationLoading(true);
 
     try {
       await fetchMore({
@@ -214,8 +276,13 @@ export const useDelegates = ({
           };
         },
       });
+
+      // Update page number after successful fetch
+      setCurrentPage((prev) => prev - 1);
     } catch (error) {
       console.error("Error fetching previous page:", error);
+    } finally {
+      setIsPaginationLoading(false);
     }
   }, [
     fetchMore,
@@ -223,16 +290,24 @@ export const useDelegates = ({
     pagination.startCursor,
     orderBy,
     orderDirection,
+    isPaginationLoading,
   ]);
+
+  // Enhanced refetch that resets pagination
+  const handleRefetch = useCallback(() => {
+    setCurrentPage(1);
+    refetch();
+  }, [refetch]);
 
   return {
     data: enrichedData,
     loading: delegatesLoading || activityLoading,
     error: delegatesError || activityError || null,
-    refetch,
+    refetch: handleRefetch,
     pagination,
     fetchNextPage,
     fetchPreviousPage,
-    fetchingMore: networkStatus === NetworkStatus.fetchMore,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 };

@@ -5,27 +5,49 @@ import { TheButton } from "../buttons/TheButton";
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
   className?: string;
   hasNextPage?: boolean;
   hasPreviousPage?: boolean;
+  isLoading?: boolean;
 }
 
 export function Pagination({
   currentPage,
   totalPages,
   onPageChange,
+  onPrevious,
+  onNext,
   className,
   hasNextPage = true,
   hasPreviousPage = true,
+  isLoading = false,
 }: PaginationProps) {
+  const handlePrevious = () => {
+    if (onPrevious) {
+      onPrevious();
+    } else if (onPageChange) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (onNext) {
+      onNext();
+    } else if (onPageChange) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
   return (
-    <div className={cn("flex items-center gap-2 px-2", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       <TheButton
         variant="outline"
         size="sm"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage <= 1 || !hasPreviousPage}
+        onClick={handlePrevious}
+        disabled={isLoading || !hasPreviousPage}
       >
         <ChevronLeft className="text-primary size-3.5" />
       </TheButton>
@@ -35,8 +57,8 @@ export function Pagination({
       <TheButton
         variant="outline"
         size="sm"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage >= totalPages || !hasNextPage}
+        onClick={handleNext}
+        disabled={isLoading || !hasNextPage}
       >
         <ChevronRight className="text-primary size-3.5" />
       </TheButton>
