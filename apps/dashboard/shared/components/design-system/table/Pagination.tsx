@@ -5,7 +5,6 @@ import { TheButton } from "../buttons/TheButton";
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange?: (page: number) => void;
   onPrevious?: () => void;
   onNext?: () => void;
   className?: string;
@@ -17,7 +16,6 @@ interface PaginationProps {
 export function Pagination({
   currentPage,
   totalPages,
-  onPageChange,
   onPrevious,
   onNext,
   className,
@@ -28,16 +26,12 @@ export function Pagination({
   const handlePrevious = () => {
     if (onPrevious) {
       onPrevious();
-    } else if (onPageChange) {
-      onPageChange(currentPage - 1);
     }
   };
 
   const handleNext = () => {
     if (onNext) {
       onNext();
-    } else if (onPageChange) {
-      onPageChange(currentPage + 1);
     }
   };
 

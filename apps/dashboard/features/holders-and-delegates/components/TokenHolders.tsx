@@ -322,14 +322,6 @@ export const TokenHolders = ({
     router.push(`/${address}`);
   };
 
-  const handlePageChange = async (page: number) => {
-    if (page > pagination.currentPage && pagination.hasNextPage) {
-      await fetchNextPage();
-    } else if (page < pagination.currentPage && pagination.hasPreviousPage) {
-      await fetchPreviousPage();
-    }
-  };
-
   if (error) {
     return (
       <div className="flex flex-col gap-2">
@@ -377,7 +369,8 @@ export const TokenHolders = ({
         <Pagination
           currentPage={pagination.currentPage}
           totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
           className="text-white"
           hasNextPage={pagination.hasNextPage}
           hasPreviousPage={pagination.hasPreviousPage}
@@ -401,10 +394,12 @@ export const TokenHolders = ({
         <Pagination
           currentPage={pagination.currentPage}
           totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
           className="text-white"
           hasNextPage={pagination.hasNextPage}
           hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
         />
       </div>
     </div>
