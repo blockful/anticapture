@@ -101,12 +101,6 @@ export const Delegates = ({
     }
   };
 
-  // Console log the enriched delegate data with proposals activity
-  console.log("Delegates with Proposals Activity:", data);
-  console.log("Time parameters:", { timePeriod, fromDate, blockNumber, daoId });
-  console.log("Pagination state:", pagination);
-  console.log("Loading states:", { loading, fetchingMore });
-
   const tableData = useMemo(() => {
     if (!data) return [];
 
@@ -433,10 +427,57 @@ export const Delegates = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-error">
-          Error loading delegates: {error.message}
+      <div className="flex flex-col gap-2">
+        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b">
+              <tr className="border-light-dark">
+                {delegateColumns.map((column, index) => (
+                  <th
+                    key={index}
+                    className="h-10 text-left [&:has([role=checkbox])]:pr-0"
+                    style={{
+                      width: column.size !== 150 ? column.size : "auto",
+                    }}
+                  >
+                    {typeof column.header === "function"
+                      ? column.header({
+                          column: {
+                            getIsSorted: () => false,
+                            toggleSorting: () => {},
+                          },
+                        } as any)
+                      : column.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
+              <tr>
+                <td
+                  colSpan={delegateColumns.length}
+                  className="bg-light h-[410px] p-0 text-center"
+                >
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-error">
+                      Error loading delegates: {error.message}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     );
   }
