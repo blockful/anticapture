@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev --schema public",
-    "start": "ponder start --schema public",
-    "serve": "ponder serve --schema public",
+    "start": "ponder start --views-schema=anticapture --schema=\"$(git rev-parse --short=8 HEAD):$(git branch --show-current)\"",
+    "serve": "ponder serve --schema=\"$(git rev-parse --short=8 HEAD):$(git branch --show-current)\"",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc"
