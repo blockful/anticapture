@@ -115,10 +115,11 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex h-8 w-full items-center justify-start pl-4">
           Address
         </div>
       ),
+      size: 280,
       cell: ({ row }) => {
         if (loading) {
           return (
@@ -162,7 +163,7 @@ export const TokenHolders = ({
     {
       accessorKey: "type",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex h-8 w-full items-center justify-start pl-4">
           Type
         </div>
       ),
@@ -339,7 +340,7 @@ export const TokenHolders = ({
                 {tokenHoldersColumns.map((column, index) => (
                   <th
                     key={index}
-                    className="h-10 text-left [&:has([role=checkbox])]:pr-0"
+                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
                     style={{
                       width: column.size !== 150 ? column.size : "auto",
                     }}
@@ -393,6 +394,7 @@ export const TokenHolders = ({
           data={tableData}
           withSorting={true}
           onRowClick={() => {}}
+          isTableSmall={true}
         />
       </div>
       <div>

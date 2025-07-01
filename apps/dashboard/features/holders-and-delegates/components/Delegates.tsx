@@ -200,7 +200,11 @@ export const Delegates = ({
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Address</h4>,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Address
+        </h4>
+      ),
     },
     {
       accessorKey: "type",
@@ -223,7 +227,11 @@ export const Delegates = ({
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-4">Type</h4>,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Type
+        </h4>
+      ),
       enableSorting: false,
     },
     {
@@ -250,7 +258,7 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
+          className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header">
@@ -309,7 +317,9 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header w-full justify-end px-4">Variation</h4>
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
+          Variation
+        </h4>
       ),
       enableSorting: false,
     },
@@ -338,7 +348,7 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header w-full justify-center px-4">
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
           Activity
         </h4>
       ),
@@ -367,7 +377,7 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
+          className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
@@ -402,6 +412,7 @@ export const Delegates = ({
           }))}
           withPagination={true}
           withSorting={true}
+          isTableSmall={true}
         />
 
         <Pagination
@@ -422,12 +433,12 @@ export const Delegates = ({
       <div className="flex flex-col gap-2">
         <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
           <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
-            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_tr]:border-b">
               <tr className="border-light-dark">
                 {delegateColumns.map((column, index) => (
                   <th
                     key={index}
-                    className="h-10 text-left [&:has([role=checkbox])]:pr-0"
+                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
                     style={{
                       width: column.size !== 150 ? column.size : "auto",
                     }}
@@ -484,6 +495,7 @@ export const Delegates = ({
         onRowClick={(row) => {
           console.log("Row clicked:", row);
         }}
+        isTableSmall={true}
       />
 
       <Pagination
