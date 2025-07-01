@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev --schema public",
-    "start": "ponder start --views-schema=anticapture --schema=\"$(git rev-parse --short=8 HEAD):$(git branch --show-current)\"",
+    "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
     "serve": "ponder serve --schema=anticapture",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
