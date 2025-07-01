@@ -168,7 +168,7 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 px-4 py-2">
+            <div className="flex h-10 items-center gap-3 p-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -182,7 +182,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 px-4 py-2">
+          <div className="flex h-10 items-center gap-3 p-2">
             <EnsAvatar
               address={address as `0x${string}`}
               size="sm"

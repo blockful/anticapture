@@ -122,7 +122,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-2 px-2 py-2">
+            <div className="flex h-10 items-center gap-3 px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
