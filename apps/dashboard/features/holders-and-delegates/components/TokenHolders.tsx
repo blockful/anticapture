@@ -122,7 +122,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-2 px-4 py-2">
+            <div className="flex h-10 items-center gap-2 px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -141,7 +141,7 @@ export const TokenHolders = ({
           : "Invalid address";
 
         return (
-          <div className="group flex h-10 w-full items-center gap-2 px-4 py-2">
+          <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -357,14 +357,14 @@ export const TokenHolders = ({
               </tr>
             </thead>
             <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-              <tr>
+              <tr className="hover:bg-surface-contrast transition-colors duration-300">
                 <td
                   colSpan={tokenHoldersColumns.length}
                   className="bg-light h-[410px] p-0 text-center"
                 >
                   <div className="flex h-full items-center justify-center">
                     <div className="text-error">
-                      Error loading token holders: {error.message}
+                      {/* Error loading token holders: {error.message} */}
                     </div>
                   </div>
                 </td>

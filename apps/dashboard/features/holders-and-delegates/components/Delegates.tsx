@@ -11,6 +11,7 @@ import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { Plus } from "lucide-react";
 import { ProgressCircle } from "./ProgressCircle";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 interface DelegateTableData {
   address: string;
@@ -218,16 +219,7 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center px-4 py-2">
-            <span
-              className={cn(
-                "rounded-full px-2 py-1 text-xs font-medium",
-                type === "Contract"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : "bg-gray-500/20 text-gray-400",
-              )}
-            >
-              {type}
-            </span>
+            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
@@ -453,7 +445,7 @@ export const Delegates = ({
               </tr>
             </thead>
             <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-              <tr>
+              <tr className="hover:bg-surface-contrast transition-colors duration-300">
                 <td
                   colSpan={delegateColumns.length}
                   className="bg-light h-[410px] p-0 text-center"
