@@ -196,8 +196,8 @@ export class ProposalsActivityService {
     return {
       winRate: Math.round(winRate * 100) / 100,
       yesRate: Math.round(yesRate * 100) / 100,
-      avgTimeBeforeEnd: Math.round(avgTimeBeforeEnd), // Round to nearest second
-    };
+      avgTimeBeforeEnd, // This parameter is in seconds
+    }
   }
 
   private calculateWinRate(proposals: DbProposal[], userVotes: DbVote[]) {
@@ -266,7 +266,7 @@ export class ProposalsActivityService {
       }
     }
 
-    return validVotes > 0 ? totalTimeBeforeEnd / validVotes : 0;
+    return validVotes > 0 ? Math.round(totalTimeBeforeEnd / validVotes) : 0;
   }
 
   private createEmptyActivity(
