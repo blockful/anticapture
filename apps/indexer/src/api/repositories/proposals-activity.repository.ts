@@ -74,7 +74,7 @@ export class DrizzleProposalsActivityRepository
   async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number> {
     const query = sql`
       SELECT voting_period
-      FROM dao
+      FROM anticapture.dao
       WHERE id = ${daoId}
       LIMIT 1
     `;
@@ -98,7 +98,7 @@ export class DrizzleProposalsActivityRepository
       SELECT id, dao_id, proposer_account_id, description, start_block, end_block, 
              timestamp, status, for_votes, against_votes, abstain_votes,
              (timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp
-      FROM proposals_onchain
+      FROM anticapture.proposals_onchain
       WHERE (timestamp + ${votingPeriodSeconds}) >= ${activityStart}
       ORDER BY timestamp DESC
     `;
@@ -116,7 +116,7 @@ export class DrizzleProposalsActivityRepository
 
     const query = sql`
       SELECT id, voter_account_id, proposal_id, support, voting_power, reason, timestamp
-      FROM votes_onchain
+      FROM anticapture.votes_onchain
       WHERE voter_account_id = ${address}
         AND dao_id = ${daoId}
         AND proposal_id IN (${sql.raw(proposalIds.map((id) => `'${id}'`).join(","))})
