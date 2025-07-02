@@ -1,0 +1,34 @@
+query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt) {
+  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate) {
+    totalProposals
+    votedProposals
+    neverVoted
+    winRate
+    yesRate
+    avgTimeBeforeEnd
+    proposals {
+      proposal {
+        id
+        description
+        startBlock
+        endBlock
+        status
+        againstVotes
+        forVotes
+        abstainVotes
+        timestamp
+        proposerAccountId
+        daoId
+      }
+      userVote {
+        id
+        support
+        votingPower
+        reason
+        timestamp
+        proposalId
+        voterAccountId
+      }
+    }
+  }
+} 

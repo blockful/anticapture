@@ -4,7 +4,10 @@ import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
-import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
+import {
+  QueryInput_HistoricalVotingPower_DaoId,
+  QueryInput_ProposalsActivity_DaoId,
+} from "@anticapture/graphql-client";
 import { TimeInterval } from "@/shared/types/enums";
 import { TheTable, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -518,6 +521,8 @@ export const Delegates = ({
           onClose={handleCloseDrawer}
           entityType="delegate"
           address={selectedDelegate}
+          daoId={daoId as unknown as QueryInput_ProposalsActivity_DaoId}
+          fromDate={fromDate}
         />
       )}
     </>

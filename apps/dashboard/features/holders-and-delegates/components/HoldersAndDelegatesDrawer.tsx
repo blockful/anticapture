@@ -8,6 +8,8 @@ import { cn } from "@/shared/utils";
 import { ReactNode, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
+import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
+import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -16,6 +18,8 @@ interface HoldersAndDelegatesDrawerProps {
   onClose: () => void;
   entityType: EntityType;
   address: string;
+  daoId?: QueryInput_ProposalsActivity_DaoId;
+  fromDate?: number;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -23,10 +27,22 @@ export const HoldersAndDelegatesDrawer = ({
   onClose,
   entityType,
   address,
+  daoId = QueryInput_ProposalsActivity_DaoId.Ens,
+  fromDate,
 }: HoldersAndDelegatesDrawerProps) => {
   const tabs = {
     delegate: [
-      { id: "votes", label: "Votes", content: <>Votes</> },
+      {
+        id: "votes",
+        label: "Votes",
+        content: (
+          <DelegateProposalsActivity
+            address={address}
+            daoId={daoId}
+            fromDate={fromDate}
+          />
+        ),
+      },
       { id: "votingPower", label: "Voting Power", content: <>Voting Power</> },
       {
         id: "delegationHistory",
