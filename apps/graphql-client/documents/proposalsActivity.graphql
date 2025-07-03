@@ -1,5 +1,5 @@
-query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt) {
-  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate) {
+query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt) {
+  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate, skip: $skip, limit: $limit) {
     totalProposals
     votedProposals
     neverVoted

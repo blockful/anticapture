@@ -6,6 +6,8 @@ interface UseProposalsActivityParams {
   address: string;
   daoId: QueryInput_ProposalsActivity_DaoId;
   fromDate?: number;
+  skip?: number;
+  limit?: number;
 }
 
 interface UseProposalsActivityResult {
@@ -19,12 +21,16 @@ export const useProposalsActivity = ({
   address,
   daoId,
   fromDate,
+  skip,
+  limit,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
   const { data, loading, error, refetch } = useGetProposalsActivityQuery({
     variables: {
       address,
       daoId,
       fromDate,
+      skip,
+      limit,
     },
     context: {
       headers: {

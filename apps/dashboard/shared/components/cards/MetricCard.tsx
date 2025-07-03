@@ -1,12 +1,13 @@
 "use client";
 
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { cn } from "@/shared/utils";
+import { SkeletonRow } from "@/shared/components";
 
 interface MetricCardProps {
   icon: ReactNode;
   title: string;
-  value: string;
+  value?: string;
   className?: string;
 }
 
@@ -34,7 +35,9 @@ export const MetricCard = ({
       </div>
 
       {/* Value */}
-      <div className="text-primary text-sm font-thin">{value}</div>
+      <div className="text-primary text-sm font-thin">
+        {value !== undefined ? value : <SkeletonRow className="h-5 w-16" />}
+      </div>
     </div>
   );
 };
