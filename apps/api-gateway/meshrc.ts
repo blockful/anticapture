@@ -26,22 +26,12 @@ export default processConfig({
             handler: {
               openapi: {
                 source: `${value}/docs`,
+                endpoint: value,
               }
             }
           }
         ];
       }),
-    ...(process.env.PETITION_API_URL
-      ? [
-        {
-          name: 'petition',
-          handler: {
-            openapi: {
-              source: process.env.PETITION_API_URL,
-            }
-          }
-        }
-      ] : []),
   ],
   additionalResolvers: [
     "src/resolvers/index",
