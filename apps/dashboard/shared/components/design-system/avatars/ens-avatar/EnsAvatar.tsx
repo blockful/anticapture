@@ -116,8 +116,6 @@ export const EnsAvatar = ({
       );
     }
 
-    console.log("finalImageUrl", ensData);
-
     // Show image if available and no error
     if (finalImageUrl && !imageError) {
       return (

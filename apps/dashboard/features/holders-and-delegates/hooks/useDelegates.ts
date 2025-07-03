@@ -1,6 +1,7 @@
 import {
   useGetDelegatesQuery,
   useGetHistoricalVotingAndActivityQuery,
+  useGetDelegatesCountQuery,
 } from "@anticapture/graphql-client/hooks";
 import {
   QueryInput_HistoricalVotingPower_DaoId,
@@ -100,6 +101,14 @@ export const useDelegates = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
+  const { data: countingData } = useGetDelegatesCountQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  });
+
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
@@ -168,7 +177,7 @@ export const useDelegates = ({
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
     const pageInfo = delegatesData?.accountPowers?.pageInfo;
-    const totalCount = delegatesData?.accountPowers?.totalCount || 0;
+    const totalCount = countingData?.accountPowers?.totalCount || 0;
     const currentItemsCount = delegatesData?.accountPowers?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -185,7 +194,7 @@ export const useDelegates = ({
     };
   }, [
     delegatesData?.accountPowers?.pageInfo,
-    delegatesData?.accountPowers?.totalCount,
+    countingData?.accountPowers?.totalCount,
     delegatesData?.accountPowers?.items?.length,
     currentPage,
     itemsPerPage,

@@ -13,7 +13,6 @@ query GetDelegates($after: String, $before: String, $orderBy: String = "votingPo
       hasNextPage
       hasPreviousPage
       startCursor
-    }  
-    totalCount
+    }
   }
 }
