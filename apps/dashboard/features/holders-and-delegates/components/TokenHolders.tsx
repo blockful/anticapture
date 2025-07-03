@@ -32,7 +32,6 @@ export const TokenHolders = ({
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
     null,
   );
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const pageLimit: number = 10;
 
@@ -56,10 +55,6 @@ export const TokenHolders = ({
     addresses || [],
     days,
   );
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const handleOpenDrawer = (address: string) => {
     setSelectedTokenHolder(address);
@@ -334,12 +329,6 @@ export const TokenHolders = ({
       },
     },
   ];
-
-  const handleDetailsClick = (address: Address, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Details button clicked for address:", address);
-    router.push(`/${address}`);
-  };
 
   if (error) {
     return (
