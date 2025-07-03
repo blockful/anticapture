@@ -5,7 +5,6 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useEffect, useState } from "react";
 import { TimeInterval } from "@/shared/types/enums";
-import { BlockchainEnum } from "@/shared/types/blockchains";
 import { getHistoricalBlockNumber } from "@/shared/utils/calculateHistoricalBlockNumber";
 
 interface HistoricalBalance {
@@ -34,7 +33,6 @@ export const useHistoricalBalances = (
       try {
         const historicalBlock = await getHistoricalBlockNumber({
           period: days,
-          blockchain: BlockchainEnum.ETHEREUM,
         });
 
         setBlockNumber(Math.abs(historicalBlock));

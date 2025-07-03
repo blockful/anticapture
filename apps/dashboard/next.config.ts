@@ -12,6 +12,9 @@ const nextConfig = {
       },
     ],
     domains: ["euc.li", "ensdata.net", "static.ricmoo.com", "www.ricmoo.com"],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   webpack: (config: { externals: string[] }) => {
     config.externals.push("pino-pretty");
