@@ -1,9 +1,13 @@
-query GetDelegationHistory($delegator: String!) {
+query GetDelegationHistory($delegator: String!, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   delegations(
     where: {delegatorAccountId: $delegator},
-    orderBy: "timestamp"
-    orderDirection: "desc"
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: 2
+    after: $after
+    before: $before
   ) {
+    totalCount
     items {
       delegate {
         id
@@ -14,6 +18,12 @@ query GetDelegationHistory($delegator: String!) {
         }
       }
       timestamp
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
     }
   }
 }

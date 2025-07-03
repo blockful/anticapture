@@ -1839,10 +1839,14 @@ export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typen
 
 export type GetDelegationHistoryQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetDelegationHistoryQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }> } };
+export type GetDelegationHistoryQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number, items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -1989,12 +1993,16 @@ export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesL
 export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
 export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
 export const GetDelegationHistoryDocument = gql`
-    query GetDelegationHistory($delegator: String!) {
+    query GetDelegationHistory($delegator: String!, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   delegations(
     where: {delegatorAccountId: $delegator}
-    orderBy: "timestamp"
-    orderDirection: "desc"
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: 2
+    after: $after
+    before: $before
   ) {
+    totalCount
     items {
       delegate {
         id
@@ -2005,6 +2013,12 @@ export const GetDelegationHistoryDocument = gql`
         }
       }
       timestamp
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
     }
   }
 }
@@ -2023,6 +2037,10 @@ export const GetDelegationHistoryDocument = gql`
  * const { data, loading, error } = useGetDelegationHistoryQuery({
  *   variables: {
  *      delegator: // value for 'delegator'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */

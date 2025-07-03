@@ -9,7 +9,8 @@ const blankStateVariants = cva(
   {
     variants: {
       variant: {
-        default: " h-[92px] flex flex-col",
+        default: " h-fit flex flex-col",
+        title: " h-fit flex flex-col",
       },
     },
     defaultVariants: {
@@ -22,6 +23,7 @@ const iconVariants = cva("size-6", {
   variants: {
     variant: {
       default: "text-secondary",
+      title: "text-secondary",
     },
   },
   defaultVariants: {
@@ -30,8 +32,9 @@ const iconVariants = cva("size-6", {
 });
 
 interface BlankStateProps {
-  variant: "default";
+  variant: "default" | "title";
   icon: ElementType;
+  title?: string;
   className?: string;
   description: string;
 }
@@ -39,6 +42,7 @@ interface BlankStateProps {
 export const BlankState = ({
   variant,
   icon: Icon,
+  title,
   className,
   description,
 }: BlankStateProps) => {
@@ -47,6 +51,11 @@ export const BlankState = ({
       <div className="flex">
         <Icon className={cn(iconVariants({ variant }))} />
       </div>
+      {title && (
+        <div className="text-primary flex font-mono text-sm text-[13px] leading-[20px] font-medium uppercase">
+          {title}
+        </div>
+      )}
       <div className="text-secondary flex text-sm font-medium">
         {description}
       </div>

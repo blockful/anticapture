@@ -425,6 +425,7 @@ export const TokenHolders = ({
           onClose={handleCloseDrawer}
           entityType="tokenHolder"
           address={selectedTokenHolder}
+          daoId={daoId}
         />
       )}
     </>

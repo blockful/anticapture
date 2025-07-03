@@ -9,6 +9,7 @@ import { ReactNode, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "./DelegationHistoryTable";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -17,6 +18,7 @@ interface HoldersAndDelegatesDrawerProps {
   onClose: () => void;
   entityType: EntityType;
   address: string;
+  daoId: DaoIdEnum;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -24,6 +26,7 @@ export const HoldersAndDelegatesDrawer = ({
   onClose,
   entityType,
   address,
+  daoId,
 }: HoldersAndDelegatesDrawerProps) => {
   const tabs = {
     delegate: [
@@ -39,7 +42,7 @@ export const HoldersAndDelegatesDrawer = ({
       {
         id: "delegationHistory",
         label: "Delegation History",
-        content: <DelegationHistoryTable />,
+        content: <DelegationHistoryTable address={address} daoId={daoId} />,
       },
       {
         id: "balanceHistory",
@@ -79,15 +82,9 @@ export const HoldersAndDelegatesDrawer = ({
                     size="sm"
                     variant="rounded"
                   />
-
-                  {/* Address/ENS Name */}
-                  <div className="text-primary text-md max-w-[50vw] truncate font-medium">
-                    {address}
-                  </div>
                 </div>
               </div>
 
-              {/* Close Button */}
               <Button
                 variant="ghost"
                 size="sm"
