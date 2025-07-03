@@ -1927,6 +1927,7 @@ export const GetDelegatesDocument = gql`
     limit: 10
     after: $after
     before: $before
+    where: {votingPower_gt: 0}
   ) {
     items {
       votingPower
@@ -2098,6 +2099,7 @@ export const GetTopTokenHoldersDocument = gql`
     limit: $limit
     after: $after
     before: $before
+    where: {balance_gt: 0}
   ) {
     items {
       accountId
@@ -2155,7 +2157,7 @@ export type GetTopTokenHoldersSuspenseQueryHookResult = ReturnType<typeof useGet
 export type GetTopTokenHoldersQueryResult = Apollo.QueryResult<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>;
 export const GetTokenHoldersCoutingDocument = gql`
     query GetTokenHoldersCouting {
-  accountBalances {
+  accountBalances(where: {balance_gt: 0}) {
     totalCount
   }
 }
