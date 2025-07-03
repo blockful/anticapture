@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { cn } from "@/shared/utils";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
@@ -30,6 +31,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onRowClick?: (row: TData) => void;
   disableRowClick?: (row: TData) => boolean;
+  isTableSmall?: boolean;
 }
 
 export const TheTable = <TData, TValue>({
@@ -40,6 +42,7 @@ export const TheTable = <TData, TValue>({
   data,
   onRowClick,
   disableRowClick,
+  isTableSmall = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -81,11 +84,18 @@ export const TheTable = <TData, TValue>({
     <Table className="bg-surface-background text-secondary md:bg-surface-default table-auto md:table-fixed">
       <TableHeader className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="border-light-dark">
+          <TableRow
+            key={headerGroup.id}
+            className={cn(
+              "border-light-dark",
+              isTableSmall && "border-surface-default border-b-4",
+            )}
+          >
             {headerGroup.headers.map((header) => {
               return (
                 <TableHead
                   key={header.id}
+                  className={cn(isTableSmall && "h-8")}
                   style={{
                     width:
                       header.column.getSize() !== 150
@@ -111,7 +121,7 @@ export const TheTable = <TData, TValue>({
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
+                className={`border-transparent transition-colors duration-300 ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
                 onClick={() =>
                   !disableRowClick?.(row.original) && onRowClick?.(row.original)
                 }

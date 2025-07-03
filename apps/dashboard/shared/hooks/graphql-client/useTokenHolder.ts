@@ -1,31 +1,18 @@
 import {
-  PageInfo,
   useGetTopTokenHoldersQuery,
+  useGetTokenHoldersCoutingQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 
-interface TokenHolder {
-  accountId: string;
-  balance: string;
-  daoId: string;
-  delegate: string;
-  id: string;
-  tokenId: string;
-  account: {
-    type: string;
-  };
-}
-
-interface UseTokenHolderResult {
-  data: TokenHolder[] | null;
-  loading: boolean;
-  error: Error | null;
-  refetch: () => void;
-  pageInfo: PageInfo | null;
-  fetchMore: (cursor: string, direction: "forward" | "backward") => void;
-}
-
-export const useTokenHolder = (daoId: DaoIdEnum): UseTokenHolderResult => {
+export const useTokenHolder = ({
+  daoId,
+  limit,
+  orderDirection,
+}: {
+  daoId: DaoIdEnum;
+  limit: number;
+  orderDirection: "desc" | "asc";
+}) => {
   const { data, loading, error, refetch, fetchMore } =
     useGetTopTokenHoldersQuery({
       context: {
@@ -33,7 +20,19 @@ export const useTokenHolder = (daoId: DaoIdEnum): UseTokenHolderResult => {
           "anticapture-dao-id": daoId,
         },
       },
+      variables: {
+        limit: limit,
+        orderDirection: orderDirection,
+      },
     });
+
+  const { data: countingData } = useGetTokenHoldersCoutingQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  });
 
   const handleFetchMore = (
     cursor: string,
@@ -57,11 +56,12 @@ export const useTokenHolder = (daoId: DaoIdEnum): UseTokenHolderResult => {
   };
 
   return {
-    data: data?.accountBalances?.items as TokenHolder[] | null,
+    data: data?.accountBalances?.items,
+    totalCount: countingData?.accountBalances.totalCount,
     loading,
-    error: error || null,
+    error,
     refetch,
-    pageInfo: data?.accountBalances?.pageInfo || null,
+    pageInfo: data?.accountBalances?.pageInfo,
     fetchMore: handleFetchMore,
   };
 };

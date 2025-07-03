@@ -28,9 +28,10 @@ export interface ProposalWithUserVote {
     endBlock: string;
     timestamp: string;
     status: string;
-    forVotes: number;
-    againstVotes: number;
-    abstainVotes: number;
+    forVotes: string;
+    againstVotes: string;
+    abstainVotes: string;
+    proposalEndTimestamp: string;
   };
   userVote: {
     id: string;
@@ -147,9 +148,10 @@ export class ProposalsActivityService {
           endBlock: proposal.end_block,
           timestamp: proposal.timestamp,
           status: proposal.status,
-          forVotes: Number(proposal.for_votes || 0),
-          againstVotes: Number(proposal.against_votes || 0),
-          abstainVotes: Number(proposal.abstain_votes || 0),
+          forVotes: proposal.for_votes,
+          againstVotes: proposal.against_votes,
+          abstainVotes: proposal.abstain_votes,
+          proposalEndTimestamp: proposal.proposal_end_timestamp,
         },
         userVote: vote
           ? {
@@ -185,11 +187,17 @@ export class ProposalsActivityService {
         ? (winningVotes / finishedProposalsVoted) * 100
         : 0;
 
+    // Calculate average time before end
+    const avgTimeBeforeEnd = this.calculateAvgTimeBeforeEnd(
+      proposals,
+      userVotes,
+    );
+
     return {
       winRate: Math.round(winRate * 100) / 100,
       yesRate: Math.round(yesRate * 100) / 100,
-      avgTimeBeforeEnd: 0, // TODO: Implement proper block-to-timestamp conversion
-    };
+      avgTimeBeforeEnd, // This parameter is in seconds
+    }
   }
 
   private calculateWinRate(proposals: DbProposal[], userVotes: DbVote[]) {
@@ -225,6 +233,40 @@ export class ProposalsActivityService {
   private getWinningSide(status: string): string {
     const statusUpper = status.toUpperCase();
     return statusUpper === "EXECUTED" ? "1" : "0"; // "1" = For, "0" = Against
+  }
+
+  private calculateAvgTimeBeforeEnd(
+    proposals: DbProposal[],
+    userVotes: DbVote[],
+  ): number {
+    if (userVotes.length === 0) {
+      return 0;
+    }
+
+    const proposalMap = new Map(proposals.map((p) => [p.id, p]));
+    let totalTimeBeforeEnd = 0;
+    let validVotes = 0;
+
+    for (const vote of userVotes) {
+      const proposal = proposalMap.get(vote.proposal_id);
+      if (!proposal || !proposal.proposal_end_timestamp) {
+        continue;
+      }
+
+      const voteTimestamp = Number(vote.timestamp);
+      const proposalEndTimestamp = Number(proposal.proposal_end_timestamp);
+
+      // Calculate time difference in seconds
+      const timeBeforeEndSeconds = proposalEndTimestamp - voteTimestamp;
+
+      // Only count positive values (votes cast before proposal ended)
+      if (timeBeforeEndSeconds > 0) {
+        totalTimeBeforeEnd += timeBeforeEndSeconds;
+        validVotes++;
+      }
+    }
+
+    return validVotes > 0 ? Math.round(totalTimeBeforeEnd / validVotes) : 0;
   }
 
   private createEmptyActivity(

@@ -1,25 +1,20 @@
-import {
-  BlockchainEnum,
-  ETHEREUM_BLOCK_TIME_SECONDS,
-} from "@/shared/types/blockchains";
-import { getActualBlockNumber } from "./getActualBlockNumber";
+import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
+import { getEthereumCurrentBlockNumber } from "./getActualBlockNumber";
 import { TimeInterval } from "../types/enums/TimeInterval";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 const calculateBlocksForPeriod = (period: TimeInterval): bigint => {
   const seconds = BigInt(DAYS_IN_SECONDS[period]);
   const blockTime = BigInt(ETHEREUM_BLOCK_TIME_SECONDS);
-  return seconds / blockTime;
+  return BigInt(Math.floor(Number(seconds) / Number(blockTime)));
 };
 
 export const getHistoricalBlockNumber = async ({
   period,
-  blockchain = BlockchainEnum.ETHEREUM,
 }: {
   period: TimeInterval;
-  blockchain?: BlockchainEnum;
 }): Promise<number> => {
-  const currentBlock = await getActualBlockNumber({ blockchain });
+  const currentBlock = await getEthereumCurrentBlockNumber();
   if (currentBlock == null) {
     throw new Error("Could not get the current block");
   }

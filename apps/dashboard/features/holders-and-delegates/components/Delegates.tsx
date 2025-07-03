@@ -11,7 +11,10 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ProgressCircle } from "./ProgressCircle";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 interface DelegateTableData {
   address: string;
@@ -64,6 +67,10 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId = QueryInput_HistoricalVotingPower_DaoId.Ens,
 }: DelegatesProps) => {
+  // State for managing sort order
+  const [sortBy, setSortBy] = useState<string>("votingPower");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
   // Calculate time-based parameters
   const { fromDate, blockNumber } = useMemo(
     () => getTimeDataFromPeriod(timePeriod),
@@ -82,17 +89,24 @@ export const Delegates = ({
     blockNumber,
     fromDate,
     daoId,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
   });
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
-
-  // Console log the enriched delegate data with proposals activity
-  console.log("Delegates with Proposals Activity:", data);
-  console.log("Time parameters:", { timePeriod, fromDate, blockNumber, daoId });
-  console.log("Pagination state:", pagination);
-  console.log("Loading states:", { loading, fetchingMore });
+  // Handle sorting for voting power and delegators
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      // Toggle direction if same field
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // New field, default to desc for votingPower, asc for delegationsCount
+      setSortBy(field);
+      setSortDirection(field === "votingPower" ? "desc" : "asc");
+    }
+  };
 
   const handleOpenDrawer = (address: string) => {
     setSelectedDelegate(address);
@@ -116,8 +130,12 @@ export const Delegates = ({
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
         : "0/0";
 
+      const activityPercentage =
+        (delegate.proposalsActivity?.votedProposals || 0) /
+        (delegate.proposalsActivity?.totalProposals || 1);
+
       // Calculate variation using real historical voting power
-      let variation = "0 ENS 0%";
+      let variation = "0 0%";
       if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
@@ -129,8 +147,12 @@ export const Delegates = ({
         // Calculate absolute change and percentage
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
-        const percentageChange = (absoluteChange / votingPowerFormatted) * 100;
+        const percentageChange =
+          (votingPowerFormatted / historicalVotingPowerFormatted) * 100 - 100;
         const roundedPercentage = Math.round(percentageChange * 100) / 100;
+        const absPercentage = Math.abs(roundedPercentage);
+        const displayPercentage =
+          absPercentage > 1000 ? ">1000" : absPercentage.toString();
 
         // Format the variation string
         const absChangeFormatted = formatNumberUserReadable(
@@ -138,12 +160,12 @@ export const Delegates = ({
         );
         const arrow = absoluteChange > 0 ? "↑" : absoluteChange < 0 ? "↓" : "";
 
-        variation = `${absChangeFormatted} ENS ${arrow} ${Math.abs(roundedPercentage)}%`;
+        variation = `${absChangeFormatted} ${arrow} ${displayPercentage}%`;
       }
 
       return {
         address: delegate.account?.id || "",
-        type: delegate.account?.type || "EOA",
+        type: delegate.account?.type || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
@@ -155,30 +177,34 @@ export const Delegates = ({
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
       accessorKey: "address",
-      size: 200,
+      size: 280,
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
-        const type = row.getValue("type") as string;
-
-        return (
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="size-6">
-              <EnsAvatar
-                address={address as `0x${string}`}
-                size="sm"
-                variant="rounded"
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center gap-3 p-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
               />
             </div>
+          );
+        }
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-primary text-sm font-medium">
-                  {address.slice(0, 6)}...{address.slice(-4)}
-                </span>
-              </div>
-            </div>
+        return (
+          <div className="flex h-10 items-center gap-3 p-2">
+            <EnsAvatar
+              address={address as `0x${string}`}
+              size="sm"
+              variant="rounded"
+              showName={true}
+            />
             <button
-              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
               tabIndex={-1}
               onClick={(e) => handleOpenDrawer(address)}
             >
@@ -188,7 +214,11 @@ export const Delegates = ({
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Address</h4>,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Address
+        </h4>
+      ),
     },
     {
       accessorKey: "type",
@@ -196,41 +226,27 @@ export const Delegates = ({
       cell: ({ row }) => {
         const type = row.getValue("type") as string;
 
+        if (loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse justify-end pr-4"
+              className="h-5 w-full max-w-20"
+            />
+          );
+        }
+
         return (
-          <div className="flex items-center px-4 py-3">
-            <span
-              className={cn(
-                "rounded-full px-2 py-1 text-xs font-medium",
-                type === "Contract"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : "bg-gray-500/20 text-gray-400",
-              )}
-            >
-              {type}
-            </span>
+          <div className="flex h-10 items-center px-4 py-2">
+            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header px-4"
-          onClick={() => column.toggleSorting()}
-        >
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
           Type
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        </h4>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
     {
       accessorKey: "votingPower",
@@ -248,59 +264,58 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
-            {votingPower} ENS
+          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
+            {votingPower}
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
-          onClick={() => column.toggleSorting()}
+          className="flex h-8 w-full justify-end rounded-b-none px-4"
+          onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">Voting Power</h4>
+          <h4 className="text-table-header">
+            Voting Power (
+            {daoId === QueryInput_HistoricalVotingPower_DaoId.Ens
+              ? "ENS"
+              : "UNI"}
+            )
+          </h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              sortBy === "votingPower"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => {
-        const a = parseFloat(rowA.getValue("votingPower") as string) || 0;
-        const b = parseFloat(rowB.getValue("votingPower") as string) || 0;
-        return a - b;
-      },
+      enableSorting: false,
     },
     {
       accessorKey: "variation",
-      size: 200,
+      size: 250,
       cell: ({ row }) => {
         const variation = row.getValue("variation") as string;
 
         if (loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow
                 className="h-5 w-16"
-                parentClassName="justify-end flex animate-pulse"
+                parentClassName="justify-start flex animate-pulse"
               />
             </div>
           );
         }
 
         return (
-          <div className="flex items-center justify-end gap-1 px-4 py-3 text-end text-sm whitespace-nowrap">
-            <span className="text-secondary">
-              {variation.split(" ")[0]} ENS
-            </span>
+          <div className="flex h-10 items-center justify-start gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
+            <span className="text-secondary">{variation.split(" ")[0]}</span>
             <span
               className={cn(
                 variation.includes("↑")
@@ -315,67 +330,43 @@ export const Delegates = ({
           </div>
         );
       },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header w-full justify-end px-4"
-          onClick={() => column.toggleSorting()}
-        >
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
           Variation
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        </h4>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
     {
       accessorKey: "activity",
       size: 150,
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string;
+        const activityPercentage =
+          parseInt(row.original.activity.split("/")[0] || "0") /
+          parseInt(row.original.activity.split("/")[1] || "1");
 
         if (loading) {
           return (
-            <div className="flex items-center justify-center">
-              <SkeletonRow className="h-5 w-20" />
+            <div className="flex items-center justify-start px-4">
+              <SkeletonRow className="h-5 w-10" />
             </div>
           );
         }
 
         return (
-          <div className="flex items-center justify-center px-4 py-3">
+          <div className="flex h-10 items-center justify-start gap-2 px-4 py-2">
+            <ProgressCircle percentage={activityPercentage} />
             {activity}
           </div>
         );
       },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header w-full justify-center px-4"
-          onClick={() => column.toggleSorting()}
-        >
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
           Activity
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        </h4>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
     {
       accessorKey: "delegators",
@@ -385,49 +376,49 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 items-center justify-start px-4 py-2 text-end text-sm font-normal">
             {delegators}
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
-          onClick={() => column.toggleSorting()}
+          className="flex h-8 w-full justify-end rounded-b-none px-4"
+          onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              sortBy === "delegationsCount"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
+      enableSorting: false,
     },
   ];
 
   if (loading) {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         <TheTable
           columns={delegateColumns}
           data={Array.from({ length: 10 }, (_, i) => ({
             address: `0x${"0".repeat(40)}`,
-            type: "EOA",
+            type: "",
             votingPower: "0",
             variation: "0%",
             activity: "0/0",
@@ -435,82 +426,102 @@ export const Delegates = ({
           }))}
           withPagination={true}
           withSorting={true}
+          isTableSmall={true}
         />
 
-        {/* Pagination Controls - Disabled during loading */}
-        <div className="x-4 flex items-center justify-start py-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={true}
-              className="flex items-center gap-2 text-white opacity-50"
-            >
-              <ChevronLeft className="size-4" />
-              Previous
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={true}
-              className="flex items-center gap-2 text-white opacity-50"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-error">
-          Error loading delegates: {error.message}
+      <div className="flex flex-col gap-2">
+        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_tr]:border-b">
+              <tr className="border-light-dark">
+                {delegateColumns.map((column, index) => (
+                  <th
+                    key={index}
+                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
+                    style={{
+                      width: column.size !== 150 ? column.size : "auto",
+                    }}
+                  >
+                    {typeof column.header === "function"
+                      ? column.header({
+                          column: {
+                            getIsSorted: () => false,
+                            toggleSorting: () => {},
+                          },
+                        } as any)
+                      : column.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
+              <tr className="hover:bg-surface-contrast transition-colors duration-300">
+                <td
+                  colSpan={delegateColumns.length}
+                  className="bg-light h-[410px] p-0 text-center"
+                >
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-error">
+                      Error loading delegates: {error.message}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         <TheTable
           columns={delegateColumns}
           data={tableData}
           withPagination={true}
           withSorting={true}
+          onRowClick={(row) => {
+            console.log("Row clicked:", row);
+          }}
+          isTableSmall={true}
         />
 
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchPreviousPage}
-              disabled={!pagination.hasPreviousPage || fetchingMore}
-              className="flex items-center gap-2 text-white"
-            >
-              <ChevronLeft className="size-4" />
-              Previous
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchNextPage}
-              disabled={!pagination.hasNextPage || fetchingMore}
-              className="flex items-center gap-2 text-white"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
       {selectedDelegate && (
         <HoldersAndDelegatesDrawer

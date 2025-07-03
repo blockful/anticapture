@@ -28,12 +28,14 @@
  * - Ensure color consistency across all components
  * - Document any color modifications from default shadcn-ui
  */
- 
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   --breakpoint-xl4k: 2000px;
-  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", monospace;
   --tracking-wider: 0.72px;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -45,8 +47,7 @@
   /* Old System Colors */
   --color-middle-dark: var(--base-border);
   --color-light-dark: var(--base-muted);
-  --color-tangerine: var(--base-brand); 
-
+  --color-tangerine: var(--base-brand);
 
   /* Design System Colors */
   --color-primary: var(--base-primary);
@@ -58,7 +59,6 @@
   --color-error: var(--base-error);
   --color-link: var(--base-brand);
   --color-link-hover: var(--base-brand);
-
 
   /* Icon Colors*/
   --color-highlight: var(--base-brand);
@@ -87,7 +87,6 @@
   --color-surface-solid-error: var(--base-error);
   --color-surface-solid-brand: var(--base-brand);
 
-
   /* Icon Sizes */
   --size-icon-xxs: 16px;
   --size-icon-xs: 20px;
@@ -104,10 +103,6 @@
   --text-alternative-xs: 12px;
   --text-alternative-xs--line-height: 16px;
   --text-alternative-xs--letter-spacing: 6%;
-  
- 
-
-  
 
   @keyframes accordion-down {
     from {
@@ -126,58 +121,57 @@
     }
   }
 
-
   /* root colors  */
   --radius: 0.625rem;
-    --base-background: #ffffff;
-    --base-foreground: #09090b;
-    --base-muted: #F4F4F5;
-    --base-muted-foreground: #71717A;
-    --base-card: #ffffff;
-    --base-card-foreground: #09090b;
-    --base-border: #e4e4e7;
-    --base-input: #e4e4e7;
-    --base-primary: #18181b;
-    --base-primary-foreground: #fafafa;
-    --base-secondary: #F4F4F5;
-    --base-secondary-foreground: #18181b;
-    --base-accent: #f4f4f5;
-    --base-accent-foreground: #18181b;
-    --base-destructive: #ef4444;
-    --base-destructive-foreground: #FAFAFA;
-    --base-ring: #71717A;
-    --base-popover: #ffffff;
-    --base-popover-foreground: #09090b;
-    --base-sidebar: #fafafa;
-    --base-sidebar-foreground: #09090b;
-    --base-sidebar-primary: #18181b;
-    --base-sidebar-primary-foreground: #fafafa;
-    --base-sidebar-accent: #f5f5f6;
-    --base-sidebar-accent-foreground: #18181b;
-    --base-sidebar-border: #e4e4e7;
+  --base-background: #ffffff;
+  --base-foreground: #09090b;
+  --base-muted: #f4f4f5;
+  --base-muted-foreground: #71717a;
+  --base-card: #ffffff;
+  --base-card-foreground: #09090b;
+  --base-border: #e4e4e7;
+  --base-input: #e4e4e7;
+  --base-primary: #18181b;
+  --base-primary-foreground: #fafafa;
+  --base-secondary: #f4f4f5;
+  --base-secondary-foreground: #18181b;
+  --base-accent: #f4f4f5;
+  --base-accent-foreground: #18181b;
+  --base-destructive: #ef4444;
+  --base-destructive-foreground: #fafafa;
+  --base-ring: #71717a;
+  --base-popover: #ffffff;
+  --base-popover-foreground: #09090b;
+  --base-sidebar: #fafafa;
+  --base-sidebar-foreground: #09090b;
+  --base-sidebar-primary: #18181b;
+  --base-sidebar-primary-foreground: #fafafa;
+  --base-sidebar-accent: #f5f5f6;
+  --base-sidebar-accent-foreground: #18181b;
+  --base-sidebar-border: #e4e4e7;
 
-    --base-chart-1: #3b82f6;
-    --base-chart-2: #ec4899;
-    --base-chart-3: #f59e0b;
-    --base-chart-4: #a855f7;
-    --base-chart-5: #10b981;
-    --base-chart-6: #06b6d4;
-    --base-chart-7: #fbbf24;
+  --base-chart-1: #3b82f6;
+  --base-chart-2: #ec4899;
+  --base-chart-3: #f59e0b;
+  --base-chart-4: #a855f7;
+  --base-chart-5: #10b981;
+  --base-chart-6: #06b6d4;
+  --base-chart-7: #fbbf24;
 
-    /* Custom Colors */
-    --base-primary-opacity: #FAFAFA1F;
-    --base-primary-opacity-darker: #FAFAFAB3;
-    --base-brand: #ec762e;
-    --base-brand-lighter: #FB8F4D;
-    --base-brand-opacity: #FB8F4D1F;
-    --base-success: #4ade80;
-    --base-success-opacity: #4ade801F;
-    --base-warning: #facc15;
-    --base-warning-opacity: #facc151F;
-    --base-error: #f87171;
-    --base-error-opacity: #f871711F;
-    --base-destructive-hover: #F87171;
-    --base-dimmed: #A1A1AA;
+  /* Custom Colors */
+  --base-primary-opacity: #fafafa1f;
+  --base-primary-opacity-darker: #fafafab3;
+  --base-brand: #ec762e;
+  --base-brand-lighter: #fb8f4d;
+  --base-brand-opacity: #fb8f4d1f;
+  --base-success: #4ade80;
+  --base-success-opacity: #4ade801f;
+  --base-warning: #facc15;
+  --base-warning-opacity: #facc151f;
+  --base-error: #f87171;
+  --base-error-opacity: #f871711f;
+  --base-destructive-hover: #f87171;
+  --base-dimmed: #a1a1aa;
 
   @keyframes scroll-left {
     from {
@@ -187,12 +181,9 @@
       transform: translateX(-50%);
     }
   }
-
 }
 
-
-
-  /* 
+/* 
   @DEV: TODO: Check these styles once the new design system is fully implemented.
   - Check the font sizes and line heights when create the Text component.
   
@@ -208,9 +199,7 @@
   --text-sm: 12px;
   --text-sm--line-height: 16px; */
 
-  
 @layer utilities {
-
   /* Hide scrollbar for Chrome, Safari and Opera */
   .scrollbar-none::-webkit-scrollbar {
     display: none;
@@ -259,7 +248,7 @@
   }
 
   .btn-connect-wallet {
-    @apply bg-surface-contrast cursor-pointer flex size-9 w-full items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-primary hover:border hover:bg-surface-hover;
+    @apply bg-surface-contrast text-primary hover:bg-surface-hover flex size-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 hover:border;
   }
 
   .card-text-accordion {
@@ -287,9 +276,7 @@
   .section-layout-icon {
     @apply text-secondary size-5;
   }
-
 }
-
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
@@ -329,70 +316,14 @@
     @apply text-[20px] leading-[28px] tracking-[-0.5%];
   } */
 
-
-  :root {
-    --radius: 0.625rem;
-    --base-background: #FAFAFA;
-    --base-foreground: #09090b;
-    --base-muted: #F4F4F5;
-    --base-muted-foreground: #71717A;
-    --base-card: #ffffff;
-    --base-card-foreground: #09090b;
-    --base-border: #e4e4e7;
-    --base-input: #e4e4e7;
-    --base-primary: #18181b;
-    --base-primary-foreground: #fafafa;
-    --base-secondary: #F4F4F5;
-    --base-secondary-foreground: #18181b;
-    --base-accent: #f4f4f5;
-    --base-accent-foreground: #18181b;
-    --base-destructive: #ef4444;
-    --base-destructive-foreground: #FAFAFA;
-    --base-ring: #71717A;
-    --base-popover: #ffffff;
-    --base-popover-foreground: #09090b;
-    --base-sidebar: #fafafa;
-    --base-sidebar-foreground: #09090b;
-    --base-sidebar-primary: #18181b;
-    --base-sidebar-primary-foreground: #fafafa;
-    --base-sidebar-accent: #f5f5f6;
-    --base-sidebar-accent-foreground: #18181b;
-    --base-sidebar-border: #e4e4e7;
-
-    --base-chart-1: #3b82f6;
-    --base-chart-2: #ec4899;
-    --base-chart-3: #f59e0b;
-    --base-chart-4: #a855f7;
-    --base-chart-5: #10b981;
-    --base-chart-6: #06b6d4;
-    --base-chart-7: #fbbf24;
-
-    /* Custom Colors */
-    --base-primary-opacity: #FAFAFA1F;
-    --base-primary-opacity-darker: #FAFAFAB3;
-    --base-brand: #ec762e;
-    --base-brand-lighter: #FB8F4D;
-    --base-brand-opacity: #FB8F4D1F;
-    --base-success: #4ade80;
-    --base-success-opacity: #4ade801F;
-    --base-warning: #facc15;
-    --base-warning-opacity: #facc151F;
-    --base-error: #f87171;
-    --base-error-opacity: #f871711F;
-    --base-destructive-hover: #F87171;
-    --base-dimmed: #A1A1AA;
-
-
-  }
-
   .dark {
     --base-background: #09090b;
     --base-foreground: #fafafa;
-    --base-muted: #27272A;
+    --base-muted: #27272a;
     --base-muted-foreground: #a1a1aa;
-    --base-card: #09090B;
+    --base-card: #09090b;
     --base-card-foreground: #fafafa;
-    --base-popover: #09090B;
+    --base-popover: #09090b;
     --base-popover-foreground: #fafafa;
     --base-border: #3f3f46;
     --base-input: #3f3f46;
@@ -403,8 +334,8 @@
     --base-accent: #27272a;
     --base-accent-foreground: #fafafa;
     --base-destructive: #7f1d1d;
-    --base-destructive-foreground: #FAFAFA;
-    --base-ring: #A1A1AA;
+    --base-destructive-foreground: #fafafa;
+    --base-ring: #a1a1aa;
 
     --base-chart-1: #3b82f6;
     --base-chart-2: #ec4899;
@@ -415,19 +346,18 @@
     --base-chart-7: #fbbf24;
 
     /* Custom Colors */
-    --base-primary-opacity: #FAFAFA1F;
-    --base-primary-opacity-darker: #FAFAFAB3;
+    --base-primary-opacity: #fafafa1f;
+    --base-primary-opacity-darker: #fafafab3;
     --base-brand: #ec762e;
-    --base-brand-lighter: #FB8F4D;
-    --base-brand-opacity: #FB8F4D1F;
+    --base-brand-lighter: #fb8f4d;
+    --base-brand-opacity: #fb8f4d1f;
     --base-success: #4ade80;
-    --base-success-opacity: #4ade801F;
+    --base-success-opacity: #4ade801f;
     --base-warning: #facc15;
-    --base-warning-opacity: #facc151F;
+    --base-warning-opacity: #facc151f;
     --base-error: #f87171;
-    --base-error-opacity: #f871711F;
-    --base-destructive-hover: #991B1B;
-    --base-dimmed: #52525B;
-
+    --base-error-opacity: #f871711f;
+    --base-destructive-hover: #991b1b;
+    --base-dimmed: #52525b;
   }
 }

@@ -1,19 +1,18 @@
 "use client";
 
 import { TheTable } from "@/shared/components/tables/TheTable";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, isAddress } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { CheckIcon, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
-import { useTokenHolder } from "@/shared/hooks/graphql-client/useTokenHolder";
+import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -21,17 +20,6 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-
-interface TokenHolders {
-  address: string | Address;
-  type: "Contract" | "EOA";
-  balance: number;
-  variation: {
-    percentageChange: number;
-    absoluteChange: number;
-  };
-  delegate: string | Address;
-}
 
 export const TokenHolders = ({
   days,
@@ -44,17 +32,24 @@ export const TokenHolders = ({
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
     null,
   );
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const router = useRouter();
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const pageLimit: number = 10;
+
   const {
     data: tokenHoldersData,
     loading,
-    pageInfo,
-    fetchMore,
-  } = useTokenHolder(daoId);
+    error,
+    pagination,
+    fetchNextPage,
+    fetchPreviousPage,
+    fetchingMore,
+  } = useTokenHolders({
+    daoId: daoId,
+    limit: pageLimit,
+    orderDirection: sortOrder,
+  });
+
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
   const { data: historicalBalancesData } = useHistoricalBalances(
     daoId,
@@ -104,7 +99,7 @@ export const TokenHolders = ({
     }
   };
 
-  const data: TokenHolders[] =
+  const data =
     tokenHoldersData?.map((holder) => {
       const historicalBalance = historicalBalancesData?.find(
         (h) => h.address.toLowerCase() === holder.accountId.toLowerCase(),
@@ -117,27 +112,45 @@ export const TokenHolders = ({
 
       return {
         address: holder.accountId as Address,
-        type: holder.account.type as "Contract" | "EOA",
+        type: holder.account?.type,
         balance: Number(formatUnits(BigInt(holder.balance), 18)),
         variation,
         delegate: holder.delegate as Address,
       };
     }) || [];
 
-  const tokenHoldersColumns: ColumnDef<TokenHolders>[] = [
+  // Create skeleton data when loading
+  const skeletonData = Array(10).fill({
+    address: "0x0000000000000000000000000000000000000000" as Address,
+    type: "EOA",
+    balance: 0,
+    variation: { percentageChange: 0, absoluteChange: 0 },
+    delegate: "0x0000000000000000000000000000000000000000" as Address,
+  });
+
+  const tableData = loading ? skeletonData : data;
+
+  const tokenHoldersColumns: ColumnDef<typeof data>[] = [
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex h-8 w-full items-center justify-start pl-4">
           Address
         </div>
       ),
+      size: 280,
       cell: ({ row }) => {
-        if (!isMounted || loading) {
+        if (loading) {
           return (
-            <div className="flex h-10 items-center gap-2">
-              <SkeletonRow className="size-6 rounded-full" />
-              <SkeletonRow className="h-4 w-24" />
+            <div className="flex h-10 items-center gap-3 px-2 py-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
             </div>
           );
         }
@@ -148,15 +161,12 @@ export const TokenHolders = ({
           : "Invalid address";
 
         return (
-          <div className="group flex h-10 w-full items-center gap-2">
+          <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
               variant="rounded"
             />
-            <span className="text-primary [tr:hover_&]:border-primary w-fit border-b border-dashed border-transparent text-sm">
-              {address}
-            </span>
             <button
               className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
               tabIndex={-1}
@@ -171,90 +181,27 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "type",
-      enableColumnFilter: true,
-      filterFn: (row, id, filterValue) => {
-        if (!filterValue || filterValue.length === 0) return true;
-        const rowValue = row.getValue(id) as string;
-        return filterValue.includes(rowValue);
-      },
-      header: ({ column }) => {
-        const options = ["Remove All", "Contract", "EOA"];
-
-        const handleOptionClick = (option: string) => {
-          if (option === "Remove All") {
-            setSelectedFilters([]);
-            column.setFilterValue(undefined);
-            return;
-          }
-
-          setSelectedFilters((prev) => {
-            const newFilters = prev.includes(option)
-              ? prev.filter((filter) => filter !== option)
-              : [...prev, option];
-
-            // Atualiza o filtro da coluna
-            column.setFilterValue(
-              newFilters.length > 0 ? newFilters : undefined,
-            );
-
-            return newFilters;
-          });
-        };
-
-        return (
-          <div className="text-table-header relative flex h-8 w-full items-center justify-start gap-1.5 px-2">
-            <div className="flex items-center gap-1.5">
-              <p>Type</p>
-              <ButtonFilter
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                isActive={isFilterOpen}
+      header: () => (
+        <div className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Type
+        </div>
+      ),
+      cell: ({ row }) => {
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center px-4 py-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-5 w-16"
               />
             </div>
-            {isFilterOpen && (
-              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
-                {options.map((option) => {
-                  const isSelected =
-                    option === "Remove All"
-                      ? selectedFilters.length === 0
-                      : selectedFilters.includes(option);
-                  return (
-                    <button
-                      key={option}
-                      onClick={() => {
-                        handleOptionClick(option);
-                        setIsFilterOpen(false);
-                      }}
-                      className={cn(
-                        "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
-                        option === "Remove All" && "border-b border-[#3F3F46]",
-                        isSelected &&
-                          option !== "Remove All" &&
-                          "bg-middle-dark",
-                      )}
-                    >
-                      <span className="text-primary text-sm font-normal">
-                        {option}
-                      </span>
-                      {isSelected && option !== "Remove All" && (
-                        <CheckIcon className="size-3.5" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        if (!isMounted || loading) {
-          return <SkeletonRow className="h-5 w-16" />;
+          );
         }
 
         const typeValue: string = row.getValue("type");
         const type = typeValue === "Contract" ? "Contract" : "EOA";
         return (
-          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
+          <div className="flex h-10 w-full items-center justify-start px-4 py-2 text-sm">
             <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
@@ -262,68 +209,70 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "balance",
-      header: ({ column }) => (
-        <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
-          Balance
-          <button
-            className="!text-table-header cursor-pointer justify-end text-end"
-            onClick={() => column.toggleSorting()}
-          >
-            <ArrowUpDown
-              props={{
-                className: "ml-2 size-4",
-              }}
-              activeState={
-                column.getIsSorted() === "asc"
-                  ? ArrowState.UP
-                  : column.getIsSorted() === "desc"
-                    ? ArrowState.DOWN
-                    : ArrowState.DEFAULT
-              }
-            />
-          </button>
-        </div>
-      ),
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          setSortOrder(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+
+        return (
+          <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
+            Balance ({daoId})
+            <button
+              className="!text-table-header cursor-pointer justify-end text-end"
+              onClick={handleSortToggle}
+            >
+              <ArrowUpDown
+                props={{
+                  className: "ml-2 size-4",
+                }}
+                activeState={
+                  sortOrder === "asc"
+                    ? ArrowState.UP
+                    : sortOrder === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </button>
+          </div>
+        );
+      },
       cell: ({ row }) => {
-        if (!isMounted || loading) {
-          return <SkeletonRow className="h-4 w-20" />;
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center justify-end px-4 py-2">
+              <SkeletonRow className="h-4 w-20" />
+            </div>
+          );
         }
 
         const balance: number = row.getValue("balance");
         return (
-          <div className="font-nomal flex h-10 w-full items-center justify-end px-2 text-sm">
-            {formatNumberUserReadable(balance, 1)} {daoId}
+          <div className="font-nomal flex h-10 w-full items-center justify-end px-4 py-2 text-sm">
+            {formatNumberUserReadable(balance, 1)}
           </div>
         );
       },
     },
     {
       accessorKey: "variation",
-      header: ({ column }) => (
+      header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-          Variation
-          <button
-            className="!text-table-header cursor-pointer justify-end text-end"
-            onClick={() => column.toggleSorting()}
-          >
-            <ArrowUpDown
-              props={{
-                className: "ml-2 size-4",
-              }}
-              activeState={
-                column.getIsSorted() === "asc"
-                  ? ArrowState.UP
-                  : column.getIsSorted() === "desc"
-                    ? ArrowState.DOWN
-                    : ArrowState.DEFAULT
-              }
-            />
-          </button>
+          Variation ({daoId})
         </div>
       ),
       cell: ({ row }) => {
-        if (!isMounted || loading) {
-          return <SkeletonRow className="h-4 w-16" />;
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center justify-start px-4 py-2">
+              <SkeletonRow
+                className="h-4 w-16"
+                parentClassName="flex animate-pulse"
+              />
+            </div>
+          );
         }
 
         const variation = row.getValue("variation") as {
@@ -332,28 +281,17 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-2 text-sm">
+          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
             <p>
-              {formatNumberUserReadable(Math.abs(variation.absoluteChange))}{" "}
-              {daoId}
+              {formatNumberUserReadable(
+                Math.abs(variation.absoluteChange),
+              )}{" "}
             </p>
             <div>
               <Percentage value={variation.percentageChange} />
             </div>
           </div>
         );
-      },
-      sortingFn: (rowA, rowB) => {
-        const variationA = rowA.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
-        const variationB = rowB.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
-
-        return variationA.percentageChange - variationB.percentageChange;
       },
     },
     {
@@ -364,11 +302,17 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (!isMounted || loading) {
+        if (loading) {
           return (
-            <div className="flex h-10 items-center gap-1.5">
-              <SkeletonRow className="h-6 w-6 rounded-full" />
-              <SkeletonRow className="h-4 w-24" />
+            <div className="flex h-10 items-center gap-1.5 px-4 py-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
             </div>
           );
         }
@@ -379,48 +323,103 @@ export const TokenHolders = ({
           : "Invalid address";
 
         return (
-          <div className="flex h-10 items-center gap-1.5">
+          <div className="flex h-10 items-center gap-1.5 px-4 py-2">
             <EnsAvatar
               address={delegate as Address}
               size="sm"
               variant="rounded"
             />
-            <span className="text-primary text-sm">{delegateAddress}</span>
           </div>
         );
       },
     },
   ];
 
-  const handlePageChange = (page: number) => {
-    if (page > currentPage && pageInfo?.hasNextPage) {
-      fetchMore(pageInfo.endCursor!, "forward");
-      setCurrentPage(page);
-    } else if (page < currentPage && pageInfo?.hasPreviousPage) {
-      fetchMore(pageInfo.startCursor!, "backward");
-      setCurrentPage(page);
-    }
+  const handleDetailsClick = (address: Address, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Details button clicked for address:", address);
+    router.push(`/${address}`);
   };
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b">
+              <tr className="border-light-dark">
+                {tokenHoldersColumns.map((column, index) => (
+                  <th
+                    key={index}
+                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
+                    style={{
+                      width: column.size !== 150 ? column.size : "auto",
+                    }}
+                  >
+                    {typeof column.header === "function"
+                      ? column.header({
+                          column: {
+                            getIsSorted: () => false,
+                            toggleSorting: () => {},
+                          },
+                        } as any)
+                      : column.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
+              <tr className="hover:bg-surface-contrast transition-colors duration-300">
+                <td
+                  colSpan={tokenHoldersColumns.length}
+                  className="bg-light h-[410px] p-0 text-center"
+                >
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-error">
+                      {/* Error loading token holders: {error.message} */}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          className="text-white"
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="flex flex-col gap-4">
-        <div className="w-full text-white">
+      <div className="w-full text-white">
+        <div className="flex flex-col gap-2">
           <TheTable
             columns={tokenHoldersColumns}
-            data={loading ? Array(5).fill({}) : data || []}
-            filterColumn="type"
+            data={tableData}
             withSorting={true}
+            onRowClick={() => {}}
+            isTableSmall={true}
           />
         </div>
         <div>
           <Pagination
-            currentPage={currentPage}
-            totalPages={5}
-            onPageChange={handlePageChange}
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
             className="text-white"
-            hasNextPage={!!pageInfo?.hasNextPage}
-            hasPreviousPage={!!pageInfo?.hasPreviousPage}
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isLoading={fetchingMore}
           />
         </div>
       </div>
