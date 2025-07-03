@@ -2,6 +2,7 @@ import {
   useGetDelegatesQuery,
   useGetHistoricalVotingAndActivityQuery,
   useGetDelegatesCountQuery,
+  useGetDelegateProposalsActivityLazyQuery,
 } from "@anticapture/graphql-client/hooks";
 import {
   QueryInput_HistoricalVotingPower_DaoId,
@@ -74,6 +75,12 @@ export const useDelegates = ({
   // Track pagination loading state to prevent rapid clicks
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
+  // Track proposals activity data for each delegate
+  const [delegateActivities, setDelegateActivities] = useState<
+    Record<string, ProposalsActivity>
+  >({});
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
@@ -128,14 +135,15 @@ export const useDelegates = ({
     );
   }, [delegatesData]);
 
+  // Get historical voting power data
   const {
-    data: activityData,
-    loading: activityLoading,
-    error: activityError,
+    data: historicalData,
+    loading: historicalLoading,
+    error: historicalError,
   } = useGetHistoricalVotingAndActivityQuery({
     variables: {
       addresses: delegateAddresses,
-      address: delegateAddresses[0] || "",
+      address: delegateAddresses[0] || "", // This is still needed for the query structure
       blockNumber,
       daoId,
       proposalsDaoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
@@ -148,6 +156,63 @@ export const useDelegates = ({
     },
     skip: delegateAddresses.length === 0,
   });
+
+  // Lazy query for individual delegate proposals activity
+  const [getDelegateProposalsActivity] =
+    useGetDelegateProposalsActivityLazyQuery({
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
+    });
+
+  // Fetch proposals activity for all delegates using Promise.all
+  useEffect(() => {
+    if (delegateAddresses.length === 0) return;
+
+    const fetchDelegateActivities = async () => {
+      setActivitiesLoading(true);
+      try {
+        const activityPromises = delegateAddresses.map(async (address) => {
+          if (!address) return { address: "", activity: null };
+
+          const result = await getDelegateProposalsActivity({
+            variables: {
+              address,
+              daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
+              fromDate,
+            },
+          });
+          return {
+            address,
+            activity: result.data?.proposalsActivity,
+          };
+        });
+
+        const activities = await Promise.all(activityPromises);
+
+        const activitiesMap: Record<string, ProposalsActivity> = {};
+        activities.forEach(({ address, activity }) => {
+          if (activity && address) {
+            activitiesMap[address] = {
+              totalProposals: activity.totalProposals,
+              votedProposals: activity.votedProposals,
+              neverVoted: activity.neverVoted ? 1 : 0,
+            };
+          }
+        });
+
+        setDelegateActivities(activitiesMap);
+      } catch (error) {
+        console.error("Error fetching delegate activities:", error);
+      } finally {
+        setActivitiesLoading(false);
+      }
+    };
+
+    fetchDelegateActivities();
+  }, [delegateAddresses, getDelegateProposalsActivity, daoId, fromDate]);
 
   // Create base data first (without historical data)
   const baseData = useMemo(() => {
@@ -165,17 +230,17 @@ export const useDelegates = ({
     if (!baseData) return null;
 
     return baseData.map((delegate) => {
-      const proposalsActivity = activityData?.proposalsActivity
-        ? {
-            totalProposals: activityData.proposalsActivity.totalProposals,
-            votedProposals: activityData.proposalsActivity.votedProposals,
-            neverVoted: activityData.proposalsActivity.neverVoted ? 1 : 0,
-          }
-        : undefined;
+      const address = delegate.account?.id;
+
+      // Get proposals activity for this specific delegate
+      const proposalsActivity =
+        address && delegateActivities[address]
+          ? delegateActivities[address]
+          : undefined;
 
       // Find historical voting power for this delegate
       const historicalVotingPowerData =
-        activityData?.historicalVotingPower?.find(
+        historicalData?.historicalVotingPower?.find(
           (historical) => historical?.address === delegate.account?.id,
         );
 
@@ -185,10 +250,10 @@ export const useDelegates = ({
         historicalVotingPower: historicalVotingPowerData?.votingPower,
       };
     });
-  }, [baseData, activityData]);
+  }, [baseData, delegateActivities, historicalData]);
 
   // Use enriched data if available, otherwise use base data
-  const finalData = activityData ? enrichedData : baseData;
+  const finalData = historicalData ? enrichedData : baseData;
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
@@ -327,13 +392,13 @@ export const useDelegates = ({
   return {
     data: finalData,
     loading: delegatesLoading,
-    error: delegatesError || activityError || null,
+    error: delegatesError || historicalError || null,
     refetch: handleRefetch,
     pagination,
     fetchNextPage,
     fetchPreviousPage,
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
-    historicalDataLoading: activityLoading,
+    historicalDataLoading: historicalLoading || activitiesLoading,
   };
 };
