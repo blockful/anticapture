@@ -48,6 +48,7 @@ interface UseDelegatesResult {
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
+  historicalDataLoading: boolean;
 }
 
 interface UseDelegatesParams {
@@ -148,10 +149,22 @@ export const useDelegates = ({
     skip: delegateAddresses.length === 0,
   });
 
-  const enrichedData = useMemo(() => {
+  // Create base data first (without historical data)
+  const baseData = useMemo(() => {
     if (!delegatesData?.accountPowers?.items) return null;
 
-    return delegatesData.accountPowers.items.map((delegate) => {
+    return delegatesData.accountPowers.items.map((delegate) => ({
+      ...delegate,
+      proposalsActivity: undefined, // Will be populated when activityData loads
+      historicalVotingPower: undefined, // Will be populated when activityData loads
+    }));
+  }, [delegatesData]);
+
+  // Enrich data with historical information when available
+  const enrichedData = useMemo(() => {
+    if (!baseData) return null;
+
+    return baseData.map((delegate) => {
       const proposalsActivity = activityData?.proposalsActivity
         ? {
             totalProposals: activityData.proposalsActivity.totalProposals,
@@ -172,7 +185,10 @@ export const useDelegates = ({
         historicalVotingPower: historicalVotingPowerData?.votingPower,
       };
     });
-  }, [delegatesData, activityData]);
+  }, [baseData, activityData]);
+
+  // Use enriched data if available, otherwise use base data
+  const finalData = activityData ? enrichedData : baseData;
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
@@ -309,8 +325,8 @@ export const useDelegates = ({
   }, [refetch]);
 
   return {
-    data: enrichedData,
-    loading: delegatesLoading || activityLoading,
+    data: finalData,
+    loading: delegatesLoading,
     error: delegatesError || activityError || null,
     refetch: handleRefetch,
     pagination,
@@ -318,5 +334,6 @@ export const useDelegates = ({
     fetchPreviousPage,
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+    historicalDataLoading: activityLoading,
   };
 };

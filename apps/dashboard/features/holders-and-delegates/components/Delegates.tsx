@@ -82,6 +82,7 @@ export const Delegates = ({
     fetchNextPage,
     fetchPreviousPage,
     fetchingMore,
+    historicalDataLoading,
   } = useDelegates({
     blockNumber,
     fromDate,
@@ -288,7 +289,7 @@ export const Delegates = ({
       cell: ({ row }) => {
         const variation = row.getValue("variation") as string;
 
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
             <div className="flex items-center justify-start px-4">
               <SkeletonRow
@@ -332,7 +333,7 @@ export const Delegates = ({
           parseInt(row.original.activity.split("/")[0] || "0") /
           parseInt(row.original.activity.split("/")[1] || "1");
 
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
             <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-10" />
@@ -493,7 +494,7 @@ export const Delegates = ({
         withPagination={true}
         withSorting={true}
         onRowClick={(row) => {
-          console.log("Row clicked:", row);
+          // Row click handler - can be used for navigation or actions
         }}
         isTableSmall={true}
       />
