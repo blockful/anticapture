@@ -60,6 +60,6 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo);
 historicalOnchain(app);
-docs(app, env.API_URL!);
+docs(app);
 
 export default app;
