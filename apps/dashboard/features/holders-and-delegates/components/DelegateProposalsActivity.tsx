@@ -122,7 +122,8 @@ export const DelegateProposalsActivity = ({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={handlePageChange}
+              onPrevious={() => handlePageChange(currentPage - 1)}
+              onNext={() => handlePageChange(currentPage + 1)}
               hasNextPage={hasNextPage}
               hasPreviousPage={hasPreviousPage}
               className="text-white"
