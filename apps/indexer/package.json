@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev --schema public",
-    "start": "ponder start --schema public",
-    "serve": "ponder serve --schema public",
+    "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
+    "serve": "ponder serve --schema=anticapture",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc"
