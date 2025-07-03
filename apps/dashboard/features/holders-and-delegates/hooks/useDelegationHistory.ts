@@ -141,7 +141,7 @@ export const useDelegationHistory = ({
     try {
       await fetchMore({
         variables: {
-          delegator: delegatorAccountId, // TODO: Check if need this
+          delegator: delegatorAccountId,
           after: pagination.endCursor,
           before: undefined,
           orderBy,
@@ -173,7 +173,7 @@ export const useDelegationHistory = ({
     pagination.endCursor,
     orderBy,
     orderDirection,
-    delegatorAccountId, // TODO: Check if need this
+    delegatorAccountId,
     isPaginationLoading,
   ]);
 
