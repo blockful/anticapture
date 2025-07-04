@@ -354,7 +354,6 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
       <Pagination
         currentPage={paginationInfo.currentPage}
         totalPages={paginationInfo.totalPages}
-        onPageChange={() => {}}
         onPrevious={fetchPreviousPage}
         onNext={fetchNextPage}
         hasNextPage={paginationInfo.hasNextPage}
