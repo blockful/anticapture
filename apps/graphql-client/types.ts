@@ -1832,7 +1832,12 @@ export type GetDelegatesQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', totalCount: number, items: Array<{ __typename?: 'accountPower', votingPower: any, delegationsCount: number, account?: { __typename?: 'account', type: string, id: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, delegationsCount: number, account?: { __typename?: 'account', type: string, id: string } | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+
+export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDelegatesCountQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', totalCount: number } };
 
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -1845,6 +1850,15 @@ export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
 
 
 export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+
+export type GetDelegateProposalsActivityQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  daoId: QueryInput_ProposalsActivity_DaoId;
+  fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+}>;
+
+
+export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];

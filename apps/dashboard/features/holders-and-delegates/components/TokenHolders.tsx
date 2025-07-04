@@ -8,7 +8,6 @@ import { formatAddress } from "@/shared/utils/formatAddress";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
@@ -20,6 +19,14 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+
+interface TokenHolderTableData {
+  address: Address;
+  type: string | undefined;
+  balance: number;
+  variation: { percentageChange: number; absoluteChange: number };
+  delegate: Address;
+}
 
 export const TokenHolders = ({
   days,
@@ -50,11 +57,8 @@ export const TokenHolders = ({
   });
 
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
-  const { data: historicalBalancesData } = useHistoricalBalances(
-    daoId,
-    addresses || [],
-    days,
-  );
+  const { data: historicalBalancesData, loading: historicalDataLoading } =
+    useHistoricalBalances(daoId, addresses || [], days);
 
   const handleOpenDrawer = (address: string) => {
     setSelectedTokenHolder(address);
@@ -94,7 +98,18 @@ export const TokenHolders = ({
     }
   };
 
-  const data =
+  // Create base data first (without historical data)
+  const baseData: TokenHolderTableData[] =
+    tokenHoldersData?.map((holder) => ({
+      address: holder.accountId as Address,
+      type: holder.account?.type,
+      balance: Number(formatUnits(BigInt(holder.balance), 18)),
+      variation: { percentageChange: 0, absoluteChange: 0 }, // Default values
+      delegate: holder.delegate as Address,
+    })) || [];
+
+  // Enrich data with historical information when available
+  const enrichedData: TokenHolderTableData[] =
     tokenHoldersData?.map((holder) => {
       const historicalBalance = historicalBalancesData?.find(
         (h) => h.address.toLowerCase() === holder.accountId.toLowerCase(),
@@ -114,18 +129,12 @@ export const TokenHolders = ({
       };
     }) || [];
 
-  // Create skeleton data when loading
-  const skeletonData = Array(10).fill({
-    address: "0x0000000000000000000000000000000000000000" as Address,
-    type: "EOA",
-    balance: 0,
-    variation: { percentageChange: 0, absoluteChange: 0 },
-    delegate: "0x0000000000000000000000000000000000000000" as Address,
-  });
+  // Use enriched data if available, otherwise use base data
+  const data = historicalBalancesData ? enrichedData : baseData;
 
-  const tableData = loading ? skeletonData : data;
+  const tableData = data;
 
-  const tokenHoldersColumns: ColumnDef<typeof data>[] = [
+  const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
       accessorKey: "address",
       header: () => (
@@ -259,7 +268,7 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
             <div className="flex h-10 items-center justify-start px-4 py-2">
               <SkeletonRow
@@ -329,6 +338,39 @@ export const TokenHolders = ({
       },
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-2">
+        <TheTable
+          columns={tokenHoldersColumns}
+          data={
+            Array.from({ length: 10 }, (_, i) => ({
+              address: `0x${"0".repeat(40)}` as Address,
+              type: "EOA" as string | undefined,
+              balance: 0,
+              variation: { percentageChange: 0, absoluteChange: 0 },
+              delegate: `0x${"0".repeat(40)}` as Address,
+            })) as TokenHolderTableData[]
+          }
+          withSorting={true}
+          onRowClick={() => {}}
+          isTableSmall={true}
+        />
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          className="text-white"
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (

@@ -54,10 +54,11 @@ export const useTokenHolders = ({
   const itemsPerPage = limit;
 
   // Track current page - this is the source of truth for page number
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Track pagination loading state to prevent rapid clicks
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const [isPaginationLoading, setIsPaginationLoading] =
+    useState<boolean>(false);
 
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {

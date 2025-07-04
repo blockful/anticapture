@@ -1,6 +1,6 @@
 import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
-import { getEthereumCurrentBlockNumber } from "./getActualBlockNumber";
-import { TimeInterval } from "../types/enums/TimeInterval";
+import { getEthereumCurrentBlockNumber } from "@/shared/utils/getActualBlockNumber";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 const calculateBlocksForPeriod = (period: TimeInterval): bigint => {

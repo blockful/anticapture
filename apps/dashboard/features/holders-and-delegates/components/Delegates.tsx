@@ -22,6 +22,7 @@ interface DelegateTableData {
   votingPower: string;
   variation: string;
   activity: string;
+  activityPercentage: number;
   delegators: number;
 }
 
@@ -85,6 +86,7 @@ export const Delegates = ({
     fetchNextPage,
     fetchPreviousPage,
     fetchingMore,
+    historicalDataLoading,
   } = useDelegates({
     blockNumber,
     fromDate,
@@ -131,8 +133,9 @@ export const Delegates = ({
         : "0/0";
 
       const activityPercentage =
-        (delegate.proposalsActivity?.votedProposals || 0) /
-        (delegate.proposalsActivity?.totalProposals || 1);
+        ((delegate.proposalsActivity?.votedProposals || 0) /
+          (delegate.proposalsActivity?.totalProposals || 1)) *
+        100;
 
       // Calculate variation using real historical voting power
       let variation = "0 0%";
@@ -169,6 +172,7 @@ export const Delegates = ({
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
+        activityPercentage,
         delegators: delegate.delegationsCount,
       };
     });
@@ -302,7 +306,7 @@ export const Delegates = ({
       cell: ({ row }) => {
         const variation = row.getValue("variation") as string;
 
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
             <div className="flex items-center justify-start px-4">
               <SkeletonRow
@@ -342,11 +346,9 @@ export const Delegates = ({
       size: 150,
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string;
-        const activityPercentage =
-          parseInt(row.original.activity.split("/")[0] || "0") /
-          parseInt(row.original.activity.split("/")[1] || "1");
+        const activityPercentage = row.original.activityPercentage;
 
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
             <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-10" />
@@ -422,6 +424,7 @@ export const Delegates = ({
             votingPower: "0",
             variation: "0%",
             activity: "0/0",
+            activityPercentage: 0,
             delegators: 0,
           }))}
           withPagination={true}
@@ -508,7 +511,7 @@ export const Delegates = ({
           withPagination={true}
           withSorting={true}
           onRowClick={(row) => {
-            console.log("Row clicked:", row);
+            // Row click handler - can be used for navigation or actions
           }}
           isTableSmall={true}
         />
