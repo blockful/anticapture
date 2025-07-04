@@ -5,7 +5,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "./DelegationHistoryTable";

@@ -1,13 +1,13 @@
 import { ponder } from "ponder:registry";
 
 import {
-  delegateChanged,
-  delegatedVotesChanged,
   proposalCanceled,
   proposalCreated,
   proposalExecuted,
   voteCast,
-} from "@/lib/event-handlers";
+  delegateChanged,
+  delegatedVotesChanged,
+} from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { Governor } from "@/interfaces/governor";
 import { dao } from "ponder:schema";
@@ -66,6 +66,6 @@ export function GovernorIndexer(daoId: DaoIdEnum, governor: Governor) {
     `${daoId}Token:DelegateVotesChanged`,
     async ({ event, context }) => {
       await delegatedVotesChanged(event, context, daoId);
-    }
+    },
   );
 }

@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { useDelegates } from "@/features/holders-and-delegates";
+import {
+  useDelegates,
+  HoldersAndDelegatesDrawer,
+} from "@/features/holders-and-delegates";
 import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
 import { TimeInterval } from "@/shared/types/enums";
 import { TheTable, SkeletonRow } from "@/shared/components";
@@ -8,7 +11,10 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ProgressCircle } from "./ProgressCircle";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 interface DelegateTableData {
   address: string;
@@ -16,6 +22,7 @@ interface DelegateTableData {
   votingPower: string;
   variation: string;
   activity: string;
+  activityPercentage: number;
   delegators: number;
 }
 
@@ -79,6 +86,7 @@ export const Delegates = ({
     fetchNextPage,
     fetchPreviousPage,
     fetchingMore,
+    historicalDataLoading,
   } = useDelegates({
     blockNumber,
     fromDate,
@@ -87,6 +95,9 @@ export const Delegates = ({
     orderDirection: sortDirection,
   });
 
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
   // Handle sorting for voting power and delegators
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -99,11 +110,15 @@ export const Delegates = ({
     }
   };
 
-  // Console log the enriched delegate data with proposals activity
-  console.log("Delegates with Proposals Activity:", data);
-  console.log("Time parameters:", { timePeriod, fromDate, blockNumber, daoId });
-  console.log("Pagination state:", pagination);
-  console.log("Loading states:", { loading, fetchingMore });
+  const handleOpenDrawer = (address: string) => {
+    setSelectedDelegate(address);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedDelegate(null);
+  };
 
   const tableData = useMemo(() => {
     if (!data) return [];
@@ -117,8 +132,13 @@ export const Delegates = ({
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
         : "0/0";
 
+      const activityPercentage =
+        ((delegate.proposalsActivity?.votedProposals || 0) /
+          (delegate.proposalsActivity?.totalProposals || 1)) *
+        100;
+
       // Calculate variation using real historical voting power
-      let variation = "0 ENS 0%";
+      let variation = "0 0%";
       if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
@@ -130,8 +150,12 @@ export const Delegates = ({
         // Calculate absolute change and percentage
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
-        const percentageChange = (absoluteChange / votingPowerFormatted) * 100;
+        const percentageChange =
+          (votingPowerFormatted / historicalVotingPowerFormatted) * 100 - 100;
         const roundedPercentage = Math.round(percentageChange * 100) / 100;
+        const absPercentage = Math.abs(roundedPercentage);
+        const displayPercentage =
+          absPercentage > 1000 ? ">1000" : absPercentage.toString();
 
         // Format the variation string
         const absChangeFormatted = formatNumberUserReadable(
@@ -139,7 +163,7 @@ export const Delegates = ({
         );
         const arrow = absoluteChange > 0 ? "↑" : absoluteChange < 0 ? "↓" : "";
 
-        variation = `${absChangeFormatted} ENS ${arrow} ${Math.abs(roundedPercentage)}%`;
+        variation = `${absChangeFormatted} ${arrow} ${displayPercentage}%`;
       }
 
       return {
@@ -148,6 +172,7 @@ export const Delegates = ({
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
+        activityPercentage,
         delegators: delegate.delegationsCount,
       };
     });
@@ -156,14 +181,12 @@ export const Delegates = ({
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
       accessorKey: "address",
-      size: 200,
+      size: 280,
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
-        const type = row.getValue("type") as string;
-
         if (loading) {
           return (
-            <div className="flex items-center gap-3 px-4 py-3">
+            <div className="flex h-10 items-center gap-3 p-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -177,17 +200,29 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center gap-3 px-4 py-3">
+          <div className="flex h-10 items-center gap-3 p-2">
             <EnsAvatar
               address={address as `0x${string}`}
               size="sm"
               variant="rounded"
               showName={true}
             />
+            <button
+              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
+              tabIndex={-1}
+              onClick={(e) => handleOpenDrawer(address)}
+            >
+              <Plus className="size-3.5" />
+              <span className="text-sm font-medium">Details</span>
+            </button>
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Address</h4>,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Address
+        </h4>
+      ),
     },
     {
       accessorKey: "type",
@@ -205,21 +240,16 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center px-4 py-3">
-            <span
-              className={cn(
-                "rounded-full px-2 py-1 text-xs font-medium",
-                type === "Contract"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : "bg-gray-500/20 text-gray-400",
-              )}
-            >
-              {type}
-            </span>
+          <div className="flex h-10 items-center px-4 py-2">
+            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-4">Type</h4>,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Type
+        </h4>
+      ),
       enableSorting: false,
     },
     {
@@ -238,18 +268,24 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
-            {votingPower} ENS
+          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
+            {votingPower}
           </div>
         );
       },
       header: () => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
+          className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">Voting Power</h4>
+          <h4 className="text-table-header">
+            Voting Power (
+            {daoId === QueryInput_HistoricalVotingPower_DaoId.Ens
+              ? "ENS"
+              : "UNI"}
+            )
+          </h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
@@ -266,26 +302,24 @@ export const Delegates = ({
     },
     {
       accessorKey: "variation",
-      size: 200,
+      size: 250,
       cell: ({ row }) => {
         const variation = row.getValue("variation") as string;
 
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow
                 className="h-5 w-16"
-                parentClassName="justify-end flex animate-pulse"
+                parentClassName="justify-start flex animate-pulse"
               />
             </div>
           );
         }
 
         return (
-          <div className="flex items-center justify-end gap-1 px-4 py-3 text-end text-sm whitespace-nowrap">
-            <span className="text-secondary">
-              {variation.split(" ")[0]} ENS
-            </span>
+          <div className="flex h-10 items-center justify-start gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
+            <span className="text-secondary">{variation.split(" ")[0]}</span>
             <span
               className={cn(
                 variation.includes("↑")
@@ -301,7 +335,9 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header w-full justify-end px-4">Variation</h4>
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
+          Variation
+        </h4>
       ),
       enableSorting: false,
     },
@@ -310,23 +346,25 @@ export const Delegates = ({
       size: 150,
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string;
+        const activityPercentage = row.original.activityPercentage;
 
-        if (loading) {
+        if (historicalDataLoading || loading) {
           return (
-            <div className="flex items-center justify-center">
-              <SkeletonRow className="h-5 w-20" />
+            <div className="flex items-center justify-start px-4">
+              <SkeletonRow className="h-5 w-10" />
             </div>
           );
         }
 
         return (
-          <div className="flex items-center justify-center px-4 py-3">
+          <div className="flex h-10 items-center justify-start gap-2 px-4 py-2">
+            <ProgressCircle percentage={activityPercentage} />
             {activity}
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header w-full justify-center px-4">
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
           Activity
         </h4>
       ),
@@ -340,14 +378,14 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 items-center justify-start px-4 py-2 text-end text-sm font-normal">
             {delegators}
           </div>
         );
@@ -355,7 +393,7 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
+          className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
@@ -377,7 +415,7 @@ export const Delegates = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         <TheTable
           columns={delegateColumns}
           data={Array.from({ length: 10 }, (_, i) => ({
@@ -386,85 +424,116 @@ export const Delegates = ({
             votingPower: "0",
             variation: "0%",
             activity: "0/0",
+            activityPercentage: 0,
             delegators: 0,
           }))}
           withPagination={true}
           withSorting={true}
+          isTableSmall={true}
         />
 
-        {/* Pagination Controls - Disabled during loading */}
-        <div className="x-4 flex items-center justify-start py-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={true}
-              className="flex items-center gap-2 text-white opacity-50"
-            >
-              <ChevronLeft className="size-4" />
-              Previous
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={true}
-              className="flex items-center gap-2 text-white opacity-50"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-error">
-          Error loading delegates: {error.message}
+      <div className="flex flex-col gap-2">
+        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_tr]:border-b">
+              <tr className="border-light-dark">
+                {delegateColumns.map((column, index) => (
+                  <th
+                    key={index}
+                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
+                    style={{
+                      width: column.size !== 150 ? column.size : "auto",
+                    }}
+                  >
+                    {typeof column.header === "function"
+                      ? column.header({
+                          column: {
+                            getIsSorted: () => false,
+                            toggleSorting: () => {},
+                          },
+                        } as any)
+                      : column.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
+              <tr className="hover:bg-surface-contrast transition-colors duration-300">
+                <td
+                  colSpan={delegateColumns.length}
+                  className="bg-light h-[410px] p-0 text-center"
+                >
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-error">
+                      Error loading delegates: {error.message}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col">
-      <TheTable
-        columns={delegateColumns}
-        data={tableData}
-        withPagination={true}
-        withSorting={true}
-      />
+    <>
+      <div className="flex flex-col gap-2">
+        <TheTable
+          columns={delegateColumns}
+          data={tableData}
+          withPagination={true}
+          withSorting={true}
+          onRowClick={(row) => {
+            // Row click handler - can be used for navigation or actions
+          }}
+          isTableSmall={true}
+        />
 
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchPreviousPage}
-            disabled={!pagination.hasPreviousPage || fetchingMore}
-            className="flex items-center gap-2 text-white"
-          >
-            <ChevronLeft className="size-4" />
-            Previous
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchNextPage}
-            disabled={!pagination.hasNextPage || fetchingMore}
-            className="flex items-center gap-2 text-white"
-          >
-            Next
-            <ChevronRight className="size-4" />
-          </Button>
-        </div>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
-    </div>
+      {selectedDelegate && (
+        <HoldersAndDelegatesDrawer
+          isOpen={isDrawerOpen}
+          onClose={handleCloseDrawer}
+          entityType="delegate"
+          address={selectedDelegate}
+        />
+      )}
+    </>
   );
 };
