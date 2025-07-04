@@ -17,7 +17,6 @@ const envSchema = z.object({
   COINGECKO_API_KEY: z.string().optional(),
   REDIS_URL: z.string().optional(),
   PORT: z.coerce.number().default(42069),
-  API_URL: z.string().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);
@@ -25,10 +24,6 @@ const _env = envSchema.safeParse(process.env);
 if (_env.success === false) {
   console.error("Invalid environment variables", _env.error.format());
   throw new Error("Invalid environment variables");
-}
-
-if (!_env.data.API_URL) {
-  _env.data.API_URL = `http://127.0.0.1:${_env.data.PORT}`;
 }
 
 export const env = _env.data;

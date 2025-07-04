@@ -1,11 +1,10 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { TheButton } from "../buttons/TheButton";
+import { TheButton } from "@/shared/components/design-system/buttons/TheButton";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange?: (page: number) => void;
   onPrevious?: () => void;
   onNext?: () => void;
   className?: string;
@@ -17,7 +16,6 @@ interface PaginationProps {
 export function Pagination({
   currentPage,
   totalPages,
-  onPageChange,
   onPrevious,
   onNext,
   className,
@@ -28,16 +26,12 @@ export function Pagination({
   const handlePrevious = () => {
     if (onPrevious) {
       onPrevious();
-    } else if (onPageChange) {
-      onPageChange(currentPage - 1);
     }
   };
 
   const handleNext = () => {
     if (onNext) {
       onNext();
-    } else if (onPageChange) {
-      onPageChange(currentPage + 1);
     }
   };
 
@@ -51,7 +45,7 @@ export function Pagination({
       >
         <ChevronLeft className="text-primary size-3.5" />
       </TheButton>
-      <span className="text-secondary bg-surface-contrast flex items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
+      <span className="text-secondary bg-surface-contrast flex h-8 items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
         Page {currentPage} of {totalPages}
       </span>
       <TheButton

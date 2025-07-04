@@ -73,9 +73,9 @@ export function proposalsActivity(
                       endBlock: z.string(),
                       timestamp: z.string(),
                       status: z.string(),
-                      forVotes: z.number(), // default 0
-                      againstVotes: z.number(), // default 0
-                      abstainVotes: z.number(), // default 0
+                      forVotes: z.string(),
+                      againstVotes: z.string(),
+                      abstainVotes: z.string(),
                     }),
                     userVote: z
                       .object({

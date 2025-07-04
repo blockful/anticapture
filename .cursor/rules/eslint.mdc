@@ -5,7 +5,7 @@ alwaysApply: true
 ---
 # Your rule content
 - Follow the style rules pointed by the .eslintrc files
-- Always check if the tailwind.config.ts has the colors you're using
+- We're using "tailwindcss": "^4.1.7", so always check if the globals.css has the colors you're using
     - If they are, use the variable of the tailwind;
     - If not, create a variable and use it, do not use Hex colors
 - If you are dealing with complex problems and making mistakes frequently, use sequential thinking mcp;
