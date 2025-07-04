@@ -55,12 +55,12 @@ interface ChartDataItem {
 
 interface AttackCostBarChartProps {
   className?: string;
+  timeInterval: TimeInterval;
 }
 
-export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
+export const AttackCostBarChart = ({ className, timeInterval }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const timeInterval = TimeInterval.ONE_YEAR;
   const [mocked, setMocked] = useState<boolean>(false);
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,

@@ -75,7 +75,7 @@ export const AttackProfitabilitySection = ({
           title="Cost Comparison"
           subtitle="All values reflect current data."
         >
-          <AttackCostBarChart />
+          <AttackCostBarChart timeInterval={days} />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
