@@ -36,7 +36,6 @@ export const DelegationHistoryTable = ({
   const [sortBy, setSortBy] = useState<"timestamp" | "delegatedValue">(
     "timestamp",
   );
-  console.log("sortBy", sortBy);
   const {
     data: delegationHistory,
     loading,
