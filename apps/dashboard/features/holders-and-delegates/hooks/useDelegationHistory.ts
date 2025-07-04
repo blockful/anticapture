@@ -1,6 +1,10 @@
-import { useGetDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetDelegationHistoryQuery,
+  useGetDelegationHistoryItemsQuery,
+  useGetDelegationHistoryCountQuery,
+} from "@anticapture/graphql-client/hooks";
+import {
+  GetDelegationHistoryItemsQuery,
+  GetDelegationHistoryCountQuery,
   QueryInput_HistoricalVotingPower_DaoId,
 } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
@@ -19,7 +23,7 @@ interface PaginationInfo {
 }
 
 interface UseDelegationHistoryResult {
-  data: GetDelegationHistoryQuery["delegations"]["items"] | null;
+  data: GetDelegationHistoryItemsQuery["delegations"]["items"] | null;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -57,12 +61,12 @@ export const useDelegationHistory = ({
 
   const {
     data: delegationHistoryData,
-    loading: delegationHistoryLoading,
-    error: delegationHistoryError,
+    loading: itemsLoading,
+    error: itemsError,
     refetch,
     fetchMore,
     networkStatus,
-  } = useGetDelegationHistoryQuery({
+  } = useGetDelegationHistoryItemsQuery({
     variables: {
       delegator: delegatorAccountId,
       after: undefined,
@@ -93,15 +97,30 @@ export const useDelegationHistory = ({
   const processedData = useMemo(() => {
     if (!delegationHistoryData?.delegations?.items) return null;
 
-    return delegationHistoryData.delegations.items.map((delegation) => ({
-      delegate: delegation.delegate,
-      timestamp: delegation.timestamp,
-    }));
+    return delegationHistoryData.delegations.items.map(
+      (
+        delegation: GetDelegationHistoryItemsQuery["delegations"]["items"][number],
+      ) => ({
+        delegate: delegation.delegate,
+        timestamp: delegation.timestamp,
+      }),
+    );
   }, [delegationHistoryData]);
+
+  // Fetch totalCount with separate lightweight query
+  const { data: countData, loading: countLoading } =
+    useGetDelegationHistoryCountQuery({
+      variables: { delegator: delegatorAccountId },
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
+    });
 
   const pagination = useMemo<PaginationInfo>(() => {
     const pageInfo = delegationHistoryData?.delegations?.pageInfo;
-    const totalCount = delegationHistoryData?.delegations?.totalCount || 0;
+    const totalCount = countData?.delegations?.totalCount || 0;
     const currentItemsCount =
       delegationHistoryData?.delegations?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -119,10 +138,10 @@ export const useDelegationHistory = ({
     };
   }, [
     delegationHistoryData?.delegations?.pageInfo,
-    delegationHistoryData?.delegations?.totalCount,
     delegationHistoryData?.delegations?.items?.length,
     currentPage,
     itemsPerPage,
+    countData?.delegations?.totalCount,
   ]);
 
   // Fetch next page function
@@ -147,7 +166,12 @@ export const useDelegationHistory = ({
           orderBy,
           orderDirection,
         },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
+        updateQuery: (
+          previousResult: GetDelegationHistoryItemsQuery,
+          {
+            fetchMoreResult,
+          }: { fetchMoreResult?: GetDelegationHistoryItemsQuery },
+        ) => {
           if (!fetchMoreResult) return previousResult;
 
           // Replace the current data with the new page data
@@ -198,7 +222,12 @@ export const useDelegationHistory = ({
           orderBy,
           orderDirection,
         },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
+        updateQuery: (
+          previousResult: GetDelegationHistoryItemsQuery,
+          {
+            fetchMoreResult,
+          }: { fetchMoreResult?: GetDelegationHistoryItemsQuery },
+        ) => {
           if (!fetchMoreResult) return previousResult;
 
           // Replace the current data with the new page data
@@ -236,8 +265,8 @@ export const useDelegationHistory = ({
 
   return {
     data: processedData,
-    loading: delegationHistoryLoading,
-    error: delegationHistoryError || null,
+    loading: itemsLoading || countLoading,
+    error: itemsError || null,
     refetch: handleRefetch,
     pagination,
     fetchNextPage,
