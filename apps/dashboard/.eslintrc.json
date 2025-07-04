@@ -7,6 +7,9 @@
       "error",
       {
         "patterns": ["../*", "./*"]
+      },
+      {
+        "endOfLine": "auto"
       }
     ]
   }

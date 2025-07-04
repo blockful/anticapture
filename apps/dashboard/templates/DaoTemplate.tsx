@@ -13,6 +13,7 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
+import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
 
 // import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 // import { Info, Send } from "lucide-react";
@@ -75,7 +76,11 @@ export const DaoTemplate = () => {
         {daoConstants.resilienceStages && (
           <ResilienceStagesSection daoId={daoIdEnum} />
         )}
+
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
+
+        <HoldersAndDelegatesSection daoId={daoIdEnum} />
+
         {daoConstants.governanceActivity && <GovernanceActivitySection />}
       </div>
       <ShowYourSupportStickyBar />
