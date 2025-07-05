@@ -55,14 +55,3 @@ export function max(...values: bigint[]): bigint {
 export function getChain(chainId: number): chains.Chain | undefined {
   return Object.values(chains).find((chain) => chain.id === chainId);
 }
-
-/**
- * Verifies if an address is a Contract or an Externally Owned Account (EOA)
- * by checking the bytecode at the address using context.client.request
- */
-export async function verifyAddressType(
-  client: any,
-  address: Address,
-): Promise<"Contract" | "EOA"> {
-  return "EOA";
-}

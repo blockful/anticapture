@@ -1,5 +1,6 @@
 const SECONDS_IN_DAY = 24 * 60 * 60;
 
+// TODO: DaysEnum is repeated in enums.ts
 export enum DaysEnum {
   "7d" = 7 * SECONDS_IN_DAY,
   "30d" = 30 * SECONDS_IN_DAY,

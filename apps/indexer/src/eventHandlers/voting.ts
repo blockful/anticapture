@@ -7,7 +7,7 @@ import {
 } from "ponder:schema";
 import { Address } from "viem";
 
-import { getValueFromEventArgs, verifyAddressType } from "@/lib/utils";
+import { getValueFromEventArgs } from "@/lib/utils";
 import {
   DaoProposalCanceledEvent,
   DaoProposalCreatedEvent,
@@ -19,17 +19,16 @@ import {
  * Helper function to ensure an account exists in the database
  * Verifies address type and inserts account if it doesn't exist
  */
+// TODO: Decouple this to be used also in transfer.ts. and it's duplicated in delegation.ts
 const ensureAccountExists = async (
   context: Context,
   address: Address,
 ): Promise<void> => {
-  const addressType = await verifyAddressType(context.client, address);
 
   await context.db
     .insert(account)
     .values({
       id: address,
-      type: addressType,
     })
     .onConflictDoNothing();
 };

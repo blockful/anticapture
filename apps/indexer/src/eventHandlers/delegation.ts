@@ -12,7 +12,6 @@ import { Address, zeroAddress } from "viem";
 
 import {
   getValueFromEventArgs,
-  verifyAddressType,
   delta,
   max,
   min,
@@ -27,17 +26,16 @@ import {
  * Helper function to ensure an account exists in the database
  * Verifies address type and inserts account if it doesn't exist
  */
+// TODO: Decouple this to be used also in transfer.ts
 const ensureAccountExists = async (
   context: Context,
   address: Address,
 ): Promise<void> => {
-  const addressType = await verifyAddressType(context.client, address);
 
   await context.db
     .insert(account)
     .values({
       id: address,
-      type: addressType,
     })
     .onConflictDoNothing();
 };

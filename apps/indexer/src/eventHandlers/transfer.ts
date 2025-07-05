@@ -10,7 +10,6 @@ import {
 
 import {
   getValueFromEventArgs,
-  verifyAddressType,
   delta,
   max,
   min,
@@ -200,15 +199,11 @@ export const tokenTransfer = async (
 
   const { from, to } = event.args;
 
-  //Inserting accounts if didn't exist with type verification
-  const toType = await verifyAddressType(context.client, to);
-  const fromType = await verifyAddressType(context.client, from);
 
   await context.db
     .insert(account)
     .values({
       id: to,
-      type: toType,
     })
     .onConflictDoNothing();
 
@@ -216,7 +211,6 @@ export const tokenTransfer = async (
     .insert(account)
     .values({
       id: from,
-      type: fromType,
     })
     .onConflictDoNothing();
 
