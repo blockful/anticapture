@@ -64,19 +64,5 @@ export async function verifyAddressType(
   client: any,
   address: Address,
 ): Promise<"Contract" | "EOA"> {
-  try {
-    // Use context.client.request to make RPC call directly
-    const bytecode = await client.request({
-      method: "eth_getCode",
-      params: [address, "latest"],
-    });
-
-    const isContract = bytecode && bytecode !== "0x";
-    const result = isContract ? "Contract" : "EOA";
-
-    return result;
-  } catch (error) {
-    console.warn(`Error checking bytecode for address ${address}:`, error);
-    return "EOA";
-  }
+  return "EOA";
 }
