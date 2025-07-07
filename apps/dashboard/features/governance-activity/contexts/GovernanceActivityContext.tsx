@@ -44,7 +44,7 @@ export const GovernanceActivityProvider = ({
   children: ReactNode;
   daoId: DaoIdEnum;
 }) => {
-  const [days, setDays] = useState<TimeInterval>(TimeInterval.NINETY_DAYS);
+  const [days, setDays] = useState<TimeInterval>(TimeInterval.ONE_YEAR);
   const [treasury, setTreasury] = useState<MetricData>(initialMetricData);
   const [treasurySupplyChart, setTreasurySupplyChart] = useState<
     DaoMetricsDayBucket[]

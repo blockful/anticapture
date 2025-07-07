@@ -17,6 +17,7 @@ import { formatEther } from "viem";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ReactNode } from "react";
+import { useParams } from "next/navigation";
 
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<GovernanceActivity>,
@@ -65,6 +66,7 @@ export const GovernanceActivityTable = () => {
     averageTurnout,
   } = useGovernanceActivityContext();
 
+  const { daoId } = useParams<{ daoId: string }>();
   const governanceActivityColumns: ColumnDef<GovernanceActivity>[] = [
     {
       accessorKey: "metric",
@@ -90,7 +92,11 @@ export const GovernanceActivityTable = () => {
       accessorKey: "average",
       cell: ({ row }) => {
         const average: string = row.getValue("average");
-
+        const metric = row.getValue("metric");
+        const isCurrency =
+          metric === "Treasury" ||
+          metric === "Active Supply" ||
+          metric === "Average Turnout";
         if (!average) {
           return (
             <div className="flex items-center justify-end">
@@ -101,7 +107,7 @@ export const GovernanceActivityTable = () => {
 
         return (
           <div className="flex items-center justify-end px-4 text-end">
-            {average}
+            {average} {isCurrency && daoId ? daoId.toUpperCase() : ""}
           </div>
         );
       },
