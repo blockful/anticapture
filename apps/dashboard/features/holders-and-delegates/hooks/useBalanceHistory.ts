@@ -4,12 +4,7 @@ import {
   useMyQueryBuyQuery,
   useMyQuerySellQuery,
 } from "@anticapture/graphql-client/hooks";
-import {
-  MyQueryQuery,
-  MyQueryBuyQuery,
-  MyQuerySellQuery,
-} from "@anticapture/graphql-client";
-import { NetworkStatus } from "@apollo/client";
+
 import { formatUnits } from "viem";
 
 // Interface for a single transfer
@@ -43,8 +38,6 @@ export interface UseBalanceHistoryResult {
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
-  refetch: () => void;
-  fetchingMore: boolean;
 }
 
 export function useBalanceHistory(
@@ -53,7 +46,7 @@ export function useBalanceHistory(
   orderDirection: "asc" | "desc" = "desc",
   transactionType: "all" | "buy" | "sell" = "all",
 ): UseBalanceHistoryResult {
-  const itemsPerPage = 2;
+  const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
@@ -112,14 +105,7 @@ export function useBalanceHistory(
         ? sellQuery
         : allQuery;
 
-  const {
-    data,
-    loading,
-    error,
-    refetch: originalRefetch,
-    fetchMore,
-    networkStatus,
-  } = activeQuery;
+  const { data, loading, error, fetchMore } = activeQuery;
 
   // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
@@ -255,11 +241,6 @@ export function useBalanceHistory(
     queryVariables,
   ]);
 
-  const refetch = useCallback(() => {
-    setCurrentPage(1);
-    originalRefetch();
-  }, [originalRefetch]);
-
   return {
     transfers: transformedTransfers,
     loading,
@@ -267,8 +248,5 @@ export function useBalanceHistory(
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-    refetch,
-    fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 }

@@ -44,8 +44,6 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-    refetch,
-    fetchingMore,
   } = useBalanceHistory(accountId, orderBy, orderDirection, transactionType);
 
   // Handle sorting - both date and amount now control the GraphQL query
@@ -79,10 +77,21 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     }));
   }, [transfers]);
 
-  // No more client-side filtering needed - it's handled by GraphQL
+  // Handle loading state with skeleton data
   const tableData = useMemo(() => {
+    if (loading) {
+      // Return skeleton data while loading
+      return Array.from({ length: 10 }, (_, i) => ({
+        id: `skeleton-${i}`,
+        date: "",
+        amount: "",
+        type: "Buy" as "Buy" | "Sell",
+        fromAddress: "",
+        toAddress: "",
+      }));
+    }
     return transformedData;
-  }, [transformedData]);
+  }, [loading, transformedData]);
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
