@@ -23,9 +23,10 @@ interface BalanceHistoryData {
 
 interface BalanceHistoryProps {
   accountId: string;
+  daoId: string;
 }
 
-export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
+export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const [sortBy, setSortBy] = useState<string>("date");
   const [typeFilter, setTypeFilter] = useState<"all" | "Buy" | "Sell">("all");
   const [showTypeFilter, setShowTypeFilter] = useState(false);
@@ -44,7 +45,13 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-  } = useBalanceHistory(accountId, orderBy, orderDirection, transactionType);
+  } = useBalanceHistory(
+    accountId,
+    daoId,
+    orderBy,
+    orderDirection,
+    transactionType,
+  );
 
   // Handle sorting - both date and amount now control the GraphQL query
   const handleSort = (field: string) => {

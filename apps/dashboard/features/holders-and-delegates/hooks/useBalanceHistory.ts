@@ -42,6 +42,7 @@ export interface UseBalanceHistoryResult {
 
 export function useBalanceHistory(
   accountId: string,
+  daoId: string,
   orderBy: string = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
   transactionType: "all" | "buy" | "sell" = "all",
@@ -70,7 +71,7 @@ export function useBalanceHistory(
   const queryOptions = {
     context: {
       headers: {
-        "anticapture-dao-id": "ENS",
+        "anticapture-dao-id": daoId,
       },
     },
     skip: !accountId,

@@ -84,6 +84,7 @@ export const DaoTemplate = () => {
 
         <BalanceHistory
           accountId={"0x89EdE5cBE53473A64d6C8DF14176a0d658dAAeDC"}
+          daoId={daoIdEnum}
         />
 
         {daoConstants.governanceActivity && <GovernanceActivitySection />}
