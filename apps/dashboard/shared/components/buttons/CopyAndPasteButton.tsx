@@ -35,15 +35,15 @@ export const CopyAndPasteButton = ({
       disabled={disabled || !textToCopy}
       aria-label={isCopied ? "Copied!" : "Copy to clipboard"}
       className={cn(
-        "group flex size-8 cursor-pointer items-center justify-center rounded-md border border-[#3F3F46] bg-[#23243a] transition-all duration-200 active:scale-95",
-        "hover:bg-[#2a2b42] disabled:cursor-not-allowed disabled:opacity-50",
+        "group bg-surface-accent hover:bg-surface-accent-hover flex size-8 cursor-pointer items-center justify-center rounded-md transition-all duration-200 active:scale-95",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
     >
       {isCopied ? (
         <Check className="text-success size-4" />
       ) : (
-        <Copy className="group-hover:text-primary text-primary size-4" />
+        <Copy className="group-hover:text-primary text-secondary size-4" />
       )}
     </button>
   );
