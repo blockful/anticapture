@@ -30,6 +30,7 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [typeFilter, setTypeFilter] = useState<"all" | "Buy" | "Sell">("all");
   const [showTypeFilter, setShowTypeFilter] = useState(false);
+  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
 
   // Use the balance history hook
   const {
@@ -41,15 +42,21 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     fetchPreviousPage,
     refetch,
     fetchingMore,
-  } = useBalanceHistory(accountId);
+  } = useBalanceHistory(accountId, orderDirection);
 
-  // Handle sorting
+  // Handle sorting - for date, we control the GraphQL orderDirection
   const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    if (field === "date") {
+      setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
+      setSortBy("date");
     } else {
-      setSortBy(field);
-      setSortDirection("desc");
+      // For other fields, we'll handle local sorting
+      if (sortBy === field) {
+        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      } else {
+        setSortBy(field);
+        setSortDirection("desc");
+      }
     }
   };
 
@@ -118,7 +125,7 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
             props={{ className: "ml-2 size-4" }}
             activeState={
               sortBy === "date"
-                ? sortDirection === "asc"
+                ? orderDirection === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT

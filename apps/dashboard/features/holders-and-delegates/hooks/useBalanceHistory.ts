@@ -39,7 +39,10 @@ export interface UseBalanceHistoryResult {
   fetchingMore: boolean;
 }
 
-export function useBalanceHistory(accountId: string): UseBalanceHistoryResult {
+export function useBalanceHistory(
+  accountId: string,
+  orderDirection: "asc" | "desc" = "desc",
+): UseBalanceHistoryResult {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
@@ -55,6 +58,7 @@ export function useBalanceHistory(accountId: string): UseBalanceHistoryResult {
     variables: {
       account: accountId,
       limit: itemsPerPage,
+      orderDirection,
     },
     context: {
       headers: {
@@ -129,6 +133,7 @@ export function useBalanceHistory(accountId: string): UseBalanceHistoryResult {
           account: accountId,
           after: paginationInfo.endCursor,
           limit: itemsPerPage,
+          orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -156,6 +161,7 @@ export function useBalanceHistory(accountId: string): UseBalanceHistoryResult {
     accountId,
     isPaginationLoading,
     itemsPerPage,
+    orderDirection,
   ]);
 
   // Fetch previous page function
@@ -177,6 +183,7 @@ export function useBalanceHistory(accountId: string): UseBalanceHistoryResult {
           account: accountId,
           before: paginationInfo.startCursor,
           limit: itemsPerPage,
+          orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -204,6 +211,7 @@ export function useBalanceHistory(accountId: string): UseBalanceHistoryResult {
     accountId,
     isPaginationLoading,
     itemsPerPage,
+    orderDirection,
   ]);
 
   const refetch = useCallback(() => {

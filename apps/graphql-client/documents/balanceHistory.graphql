@@ -1,8 +1,8 @@
-query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 10) {
+query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 10, $orderDirection: String = "desc") {
   transfers(
     where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
     orderBy: "timestamp"
-    orderDirection: "desc"
+    orderDirection: $orderDirection
     limit: $limit
     after: $after
     before: $before
