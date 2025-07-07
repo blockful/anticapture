@@ -46,7 +46,7 @@ export const useDelegationHistory = ({
   orderBy = "timestamp",
   orderDirection = "desc",
 }: UseDelegationHistoryParams): UseDelegationHistoryResult => {
-  const itemsPerPage = 2; // This should match the limit in the GraphQL query
+  const itemsPerPage = 10; // This should match the limit in the GraphQL query
 
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState(1);

@@ -135,11 +135,9 @@ export const DelegationHistoryTable = ({
               <ArrowUpDown
                 props={{ className: "ml-2 size-4" }}
                 activeState={
-                  sortBy === "delegatedValue"
-                    ? sortOrder === "asc"
-                      ? ArrowState.UP
-                      : ArrowState.DOWN
-                    : ArrowState.DEFAULT
+                  sortBy === "delegatedValue" && sortOrder === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
                 }
               />
             </button>

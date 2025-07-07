@@ -2070,7 +2070,7 @@ export const GetDelegationHistoryDocument = gql`
     where: {delegatorAccountId: $delegator}
     orderBy: $orderBy
     orderDirection: $orderDirection
-    limit: 2
+    limit: 10
     after: $after
     before: $before
   ) {
@@ -2178,7 +2178,7 @@ export const GetDelegationHistoryItemsDocument = gql`
     where: {delegatorAccountId: $delegator}
     orderBy: $orderBy
     orderDirection: $orderDirection
-    limit: 2
+    limit: 10
     after: $after
     before: $before
   ) {
