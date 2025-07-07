@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   useMyQueryQuery,
   useMyQueryBuyQuery,
@@ -53,9 +53,19 @@ export function useBalanceHistory(
   orderDirection: "asc" | "desc" = "desc",
   transactionType: "all" | "buy" | "sell" = "all",
 ): UseBalanceHistoryResult {
-  const itemsPerPage = 10;
+  const itemsPerPage = 2;
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+
+  // Reset page to 1 when transaction type changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [transactionType]);
+
+  // Reset page to 1 when sorting changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderBy, orderDirection]);
 
   const queryVariables = {
     account: accountId,
