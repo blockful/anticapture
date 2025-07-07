@@ -1,19 +1,8 @@
 import { Context, Event } from "ponder:registry";
 import { Address, zeroAddress } from "viem";
-import {
-  account,
-  accountBalance,
-  transfer,
-  token,
-  daoMetricsDayBucket,
-} from "ponder:schema";
+import { account, accountBalance, transfer, token } from "ponder:schema";
 
-import {
-  getValueFromEventArgs,
-  delta,
-  max,
-  min,
-} from "@/lib/utils";
+import { getValueFromEventArgs } from "@/lib/utils";
 import {
   BurningAddresses,
   CEXAddresses,
@@ -24,6 +13,7 @@ import {
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { DaoTransferEvent } from "@/indexer/types";
+import { storeDailyBucket } from "./shared";
 
 const updateSupplyMetric = async (
   context: Context,
@@ -139,48 +129,6 @@ const updateCirculatingSupplyMetric = async (
   }
 };
 
-const storeDailyBucket = async (
-  context: Context,
-  event: Event,
-  metricType: MetricTypesEnum,
-  currentValue: bigint,
-  newValue: bigint,
-  daoId: string,
-) => {
-  const volume = delta(newValue, currentValue);
-  const dayStartTimestampInSeconds =
-    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(
-      0,
-      0,
-      0,
-      0,
-    ) / 1000;
-  await context.db
-    .insert(daoMetricsDayBucket)
-    .values({
-      date: BigInt(dayStartTimestampInSeconds),
-      tokenId: event.log.address,
-      metricType,
-      daoId,
-      average: newValue,
-      open: currentValue,
-      high: max(newValue, currentValue),
-      low: min(newValue, currentValue),
-      close: newValue,
-      volume,
-      count: 1,
-    })
-    .onConflictDoUpdate((row) => ({
-      average:
-        (row.average * BigInt(row.count) + newValue) / BigInt(row.count + 1),
-      high: max(newValue, row.low),
-      low: min(newValue, row.low),
-      close: newValue,
-      volume: row.volume + volume,
-      count: row.count + 1,
-    }));
-};
-
 export const tokenTransfer = async (
   event: DaoTransferEvent,
   context: Context,
@@ -198,7 +146,6 @@ export const tokenTransfer = async (
   );
 
   const { from, to } = event.args;
-
 
   await context.db
     .insert(account)
