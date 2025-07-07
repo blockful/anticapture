@@ -27,9 +27,9 @@ interface BalanceHistoryProps {
 
 export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
   const [sortBy, setSortBy] = useState<string>("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [typeFilter, setTypeFilter] = useState<"all" | "Buy" | "Sell">("all");
   const [showTypeFilter, setShowTypeFilter] = useState(false);
+  const [orderBy, setOrderBy] = useState<string>("timestamp");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
 
   // Use the balance history hook
@@ -42,21 +42,24 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     fetchPreviousPage,
     refetch,
     fetchingMore,
-  } = useBalanceHistory(accountId, orderDirection);
+  } = useBalanceHistory(accountId, orderBy, orderDirection);
 
-  // Handle sorting - for date, we control the GraphQL orderDirection
+  // Handle sorting - both date and amount now control the GraphQL query
   const handleSort = (field: string) => {
     if (field === "date") {
-      setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
+      const newOrderBy = "timestamp";
+      const newOrderDirection =
+        orderBy === "timestamp" && orderDirection === "asc" ? "desc" : "asc";
+      setOrderBy(newOrderBy);
+      setOrderDirection(newOrderDirection);
       setSortBy("date");
-    } else {
-      // For other fields, we'll handle local sorting
-      if (sortBy === field) {
-        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-      } else {
-        setSortBy(field);
-        setSortDirection("desc");
-      }
+    } else if (field === "amount") {
+      const newOrderBy = "amount";
+      const newOrderDirection =
+        orderBy === "amount" && orderDirection === "asc" ? "desc" : "asc";
+      setOrderBy(newOrderBy);
+      setOrderDirection(newOrderDirection);
+      setSortBy("amount");
     }
   };
 
@@ -72,7 +75,7 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     }));
   }, [transfers]);
 
-  // Filter and sort data
+  // Filter data (no more local sorting needed)
   const tableData = useMemo(() => {
     let filteredData = transformedData;
 
@@ -80,15 +83,8 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
       filteredData = filteredData.filter((item) => item.type === typeFilter);
     }
 
-    return filteredData.sort((a, b) => {
-      if (sortBy === "amount") {
-        const aAmount = parseFloat(a.amount.replace(/,/g, ""));
-        const bAmount = parseFloat(b.amount.replace(/,/g, ""));
-        return sortDirection === "asc" ? aAmount - bAmount : bAmount - aAmount;
-      }
-      return 0; // For now, we'll keep the original order for other fields
-    });
-  }, [transformedData, typeFilter, sortBy, sortDirection]);
+    return filteredData;
+  }, [transformedData, typeFilter]);
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
@@ -171,7 +167,7 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
             props={{ className: "ml-2 size-4" }}
             activeState={
               sortBy === "amount"
-                ? sortDirection === "asc"
+                ? orderDirection === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT

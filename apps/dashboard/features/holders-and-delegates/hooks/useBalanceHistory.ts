@@ -41,6 +41,7 @@ export interface UseBalanceHistoryResult {
 
 export function useBalanceHistory(
   accountId: string,
+  orderBy: string = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
 ): UseBalanceHistoryResult {
   const itemsPerPage = 10;
@@ -58,6 +59,7 @@ export function useBalanceHistory(
     variables: {
       account: accountId,
       limit: itemsPerPage,
+      orderBy,
       orderDirection,
     },
     context: {
@@ -133,6 +135,7 @@ export function useBalanceHistory(
           account: accountId,
           after: paginationInfo.endCursor,
           limit: itemsPerPage,
+          orderBy,
           orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -161,6 +164,7 @@ export function useBalanceHistory(
     accountId,
     isPaginationLoading,
     itemsPerPage,
+    orderBy,
     orderDirection,
   ]);
 
@@ -183,6 +187,7 @@ export function useBalanceHistory(
           account: accountId,
           before: paginationInfo.startCursor,
           limit: itemsPerPage,
+          orderBy,
           orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -211,6 +216,7 @@ export function useBalanceHistory(
     accountId,
     isPaginationLoading,
     itemsPerPage,
+    orderBy,
     orderDirection,
   ]);
 

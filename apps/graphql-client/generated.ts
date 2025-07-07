@@ -1825,6 +1825,7 @@ export type MyQueryQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
 }>;
 
@@ -1900,10 +1901,10 @@ export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalance
 
 
 export const MyQueryDocument = gql`
-    query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 10, $orderDirection: String = "desc") {
+    query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   transfers(
     where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
-    orderBy: "timestamp"
+    orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
     after: $after
@@ -1943,6 +1944,7 @@ export const MyQueryDocument = gql`
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
  *   },
  * });
