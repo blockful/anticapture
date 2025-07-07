@@ -360,7 +360,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 p-4">
       <TheTable
         columns={balanceHistoryColumns}
         data={tableData}
