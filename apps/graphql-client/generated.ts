@@ -1832,6 +1832,30 @@ export type MyQueryQueryVariables = Exact<{
 
 export type MyQueryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number, items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
+export type MyQueryBuyQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type MyQueryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number, items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+
+export type MyQuerySellQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type MyQuerySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number, items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
 }>;
@@ -1965,6 +1989,136 @@ export type MyQueryQueryHookResult = ReturnType<typeof useMyQueryQuery>;
 export type MyQueryLazyQueryHookResult = ReturnType<typeof useMyQueryLazyQuery>;
 export type MyQuerySuspenseQueryHookResult = ReturnType<typeof useMyQuerySuspenseQuery>;
 export type MyQueryQueryResult = Apollo.QueryResult<MyQueryQuery, MyQueryQueryVariables>;
+export const MyQueryBuyDocument = gql`
+    query MyQueryBuy($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+  transfers(
+    where: {toAccountId: $account}
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      timestamp
+      amount
+      fromAccountId
+      toAccountId
+      transactionHash
+    }
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyQueryBuyQuery__
+ *
+ * To run a query within a React component, call `useMyQueryBuyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQueryBuyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQueryBuyQuery({
+ *   variables: {
+ *      account: // value for 'account'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useMyQueryBuyQuery(baseOptions: Apollo.QueryHookOptions<MyQueryBuyQuery, MyQueryBuyQueryVariables> & ({ variables: MyQueryBuyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MyQueryBuyQuery, MyQueryBuyQueryVariables>(MyQueryBuyDocument, options);
+      }
+export function useMyQueryBuyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyQueryBuyQuery, MyQueryBuyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MyQueryBuyQuery, MyQueryBuyQueryVariables>(MyQueryBuyDocument, options);
+        }
+export function useMyQueryBuySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MyQueryBuyQuery, MyQueryBuyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MyQueryBuyQuery, MyQueryBuyQueryVariables>(MyQueryBuyDocument, options);
+        }
+export type MyQueryBuyQueryHookResult = ReturnType<typeof useMyQueryBuyQuery>;
+export type MyQueryBuyLazyQueryHookResult = ReturnType<typeof useMyQueryBuyLazyQuery>;
+export type MyQueryBuySuspenseQueryHookResult = ReturnType<typeof useMyQueryBuySuspenseQuery>;
+export type MyQueryBuyQueryResult = Apollo.QueryResult<MyQueryBuyQuery, MyQueryBuyQueryVariables>;
+export const MyQuerySellDocument = gql`
+    query MyQuerySell($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+  transfers(
+    where: {fromAccountId: $account}
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      timestamp
+      amount
+      fromAccountId
+      toAccountId
+      transactionHash
+    }
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyQuerySellQuery__
+ *
+ * To run a query within a React component, call `useMyQuerySellQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQuerySellQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQuerySellQuery({
+ *   variables: {
+ *      account: // value for 'account'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useMyQuerySellQuery(baseOptions: Apollo.QueryHookOptions<MyQuerySellQuery, MyQuerySellQueryVariables> & ({ variables: MyQuerySellQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MyQuerySellQuery, MyQuerySellQueryVariables>(MyQuerySellDocument, options);
+      }
+export function useMyQuerySellLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyQuerySellQuery, MyQuerySellQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MyQuerySellQuery, MyQuerySellQueryVariables>(MyQuerySellDocument, options);
+        }
+export function useMyQuerySellSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MyQuerySellQuery, MyQuerySellQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MyQuerySellQuery, MyQuerySellQueryVariables>(MyQuerySellDocument, options);
+        }
+export type MyQuerySellQueryHookResult = ReturnType<typeof useMyQuerySellQuery>;
+export type MyQuerySellLazyQueryHookResult = ReturnType<typeof useMyQuerySellLazyQuery>;
+export type MyQuerySellSuspenseQueryHookResult = ReturnType<typeof useMyQuerySellSuspenseQuery>;
+export type MyQuerySellQueryResult = Apollo.QueryResult<MyQuerySellQuery, MyQuerySellQueryVariables>;
 export const GetDaoDataDocument = gql`
     query GetDaoData($daoId: String!) {
   dao(id: $daoId) {

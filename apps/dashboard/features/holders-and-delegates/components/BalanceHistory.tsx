@@ -32,6 +32,10 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
   const [orderBy, setOrderBy] = useState<string>("timestamp");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
 
+  // Convert UI filter to hook filter format
+  const transactionType =
+    typeFilter === "Buy" ? "buy" : typeFilter === "Sell" ? "sell" : "all";
+
   // Use the balance history hook
   const {
     transfers,
@@ -42,7 +46,7 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     fetchPreviousPage,
     refetch,
     fetchingMore,
-  } = useBalanceHistory(accountId, orderBy, orderDirection);
+  } = useBalanceHistory(accountId, orderBy, orderDirection, transactionType);
 
   // Handle sorting - both date and amount now control the GraphQL query
   const handleSort = (field: string) => {
@@ -75,16 +79,10 @@ export const BalanceHistory = ({ accountId }: BalanceHistoryProps) => {
     }));
   }, [transfers]);
 
-  // Filter data (no more local sorting needed)
+  // No more client-side filtering needed - it's handled by GraphQL
   const tableData = useMemo(() => {
-    let filteredData = transformedData;
-
-    if (typeFilter !== "all") {
-      filteredData = filteredData.filter((item) => item.type === typeFilter);
-    }
-
-    return filteredData;
-  }, [transformedData, typeFilter]);
+    return transformedData;
+  }, [transformedData]);
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {

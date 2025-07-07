@@ -1,6 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
-import { useMyQueryQuery } from "@anticapture/graphql-client/hooks";
-import { MyQueryQuery } from "@anticapture/graphql-client";
+import {
+  useMyQueryQuery,
+  useMyQueryBuyQuery,
+  useMyQuerySellQuery,
+} from "@anticapture/graphql-client/hooks";
+import {
+  MyQueryQuery,
+  MyQueryBuyQuery,
+  MyQuerySellQuery,
+} from "@anticapture/graphql-client";
 import { NetworkStatus } from "@apollo/client";
 import { formatUnits } from "viem";
 
@@ -43,10 +51,56 @@ export function useBalanceHistory(
   accountId: string,
   orderBy: string = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
+  transactionType: "all" | "buy" | "sell" = "all",
 ): UseBalanceHistoryResult {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+
+  const queryVariables = {
+    account: accountId,
+    limit: itemsPerPage,
+    orderBy,
+    orderDirection,
+  };
+
+  const queryOptions = {
+    context: {
+      headers: {
+        "anticapture-dao-id": "ENS",
+      },
+    },
+    skip: !accountId,
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network" as const,
+  };
+
+  // Use different queries based on transaction type
+  const allQuery = useMyQueryQuery({
+    variables: queryVariables,
+    ...queryOptions,
+    skip: !accountId || transactionType !== "all",
+  });
+
+  const buyQuery = useMyQueryBuyQuery({
+    variables: queryVariables,
+    ...queryOptions,
+    skip: !accountId || transactionType !== "buy",
+  });
+
+  const sellQuery = useMyQuerySellQuery({
+    variables: queryVariables,
+    ...queryOptions,
+    skip: !accountId || transactionType !== "sell",
+  });
+
+  // Select the active query based on transaction type
+  const activeQuery =
+    transactionType === "buy"
+      ? buyQuery
+      : transactionType === "sell"
+        ? sellQuery
+        : allQuery;
 
   const {
     data,
@@ -55,39 +109,22 @@ export function useBalanceHistory(
     refetch: originalRefetch,
     fetchMore,
     networkStatus,
-  } = useMyQueryQuery({
-    variables: {
-      account: accountId,
-      limit: itemsPerPage,
-      orderBy,
-      orderDirection,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": "ENS",
-      },
-    },
-    skip: !accountId,
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-  });
+  } = activeQuery;
 
   // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
     if (!data?.transfers?.items) return [];
 
-    return data.transfers.items.map(
-      (transfer: NonNullable<MyQueryQuery["transfers"]["items"][0]>) => ({
-        timestamp: transfer.timestamp?.toString() || "",
-        amount: formatUnits(BigInt(transfer.amount || "0"), 18),
-        fromAccountId: transfer.fromAccountId || null,
-        toAccountId: transfer.toAccountId || null,
-        transactionHash: transfer.transactionHash,
-        direction: (transfer.fromAccountId === accountId ? "out" : "in") as
-          | "in"
-          | "out",
-      }),
-    );
+    return data.transfers.items.map((transfer: any) => ({
+      timestamp: transfer.timestamp?.toString() || "",
+      amount: formatUnits(BigInt(transfer.amount || "0"), 18),
+      fromAccountId: transfer.fromAccountId || null,
+      toAccountId: transfer.toAccountId || null,
+      transactionHash: transfer.transactionHash,
+      direction: (transfer.fromAccountId === accountId ? "out" : "in") as
+        | "in"
+        | "out",
+    }));
   }, [data, accountId]);
 
   // Real pagination info from GraphQL query
@@ -132,11 +169,8 @@ export function useBalanceHistory(
     try {
       await fetchMore({
         variables: {
-          account: accountId,
+          ...queryVariables,
           after: paginationInfo.endCursor,
-          limit: itemsPerPage,
-          orderBy,
-          orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -161,11 +195,8 @@ export function useBalanceHistory(
     fetchMore,
     paginationInfo.hasNextPage,
     paginationInfo.endCursor,
-    accountId,
     isPaginationLoading,
-    itemsPerPage,
-    orderBy,
-    orderDirection,
+    queryVariables,
   ]);
 
   // Fetch previous page function
@@ -184,11 +215,8 @@ export function useBalanceHistory(
     try {
       await fetchMore({
         variables: {
-          account: accountId,
+          ...queryVariables,
           before: paginationInfo.startCursor,
-          limit: itemsPerPage,
-          orderBy,
-          orderDirection,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -213,11 +241,8 @@ export function useBalanceHistory(
     fetchMore,
     paginationInfo.hasPreviousPage,
     paginationInfo.startCursor,
-    accountId,
     isPaginationLoading,
-    itemsPerPage,
-    orderBy,
-    orderDirection,
+    queryVariables,
   ]);
 
   const refetch = useCallback(() => {
