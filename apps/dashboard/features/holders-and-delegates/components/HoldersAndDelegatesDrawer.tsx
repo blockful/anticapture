@@ -82,7 +82,7 @@ export const HoldersAndDelegatesDrawer = ({
         <div className="bg-surface-default h-full w-full">
           <div className="bg-surface-contrast h-[100px] w-full">
             {/* Header */}
-            <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-0">
+            <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
               <div className="flex flex-col gap-1">
                 {/* Title */}
                 <div className="text-secondary font-mono text-xs font-medium tracking-wide uppercase">
@@ -93,12 +93,9 @@ export const HoldersAndDelegatesDrawer = ({
                     address={address as `0x${string}`}
                     size="sm"
                     variant="rounded"
+                    nameClassName="text-lg leading-[18px]"
+                    containerClassName="gap-2"
                   />
-
-                  {/* Address/ENS Name */}
-                  <div className="text-primary text-md max-w-[50vw] truncate font-medium">
-                    {address}
-                  </div>
                 </div>
               </div>
 
@@ -123,7 +120,7 @@ export const HoldersAndDelegatesDrawer = ({
                 {tabs[entityType].map((tab) => (
                   <TabsTrigger
                     className={cn(
-                      "text-secondary relative cursor-pointer gap-2 px-2 py-3 text-xs font-medium whitespace-nowrap",
+                      "text-secondary relative cursor-pointer gap-2 px-2 py-2 text-xs font-medium whitespace-nowrap",
                       "data-[state=active]:text-link",
                       "after:absolute after:right-0 after:-bottom-px after:left-0 after:h-px after:bg-transparent after:content-['']",
                       "data-[state=active]:after:bg-surface-solid-brand",
