@@ -35,7 +35,6 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
     null,
   );
@@ -62,11 +61,9 @@ export const TokenHolders = ({
 
   const handleOpenDrawer = (address: string) => {
     setSelectedTokenHolder(address);
-    setIsDrawerOpen(true);
   };
 
   const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
     setSelectedTokenHolder(null);
   };
 
@@ -160,9 +157,6 @@ export const TokenHolders = ({
         }
 
         const addressValue: string = row.getValue("address");
-        const address = isAddress(addressValue)
-          ? formatAddress(addressValue)
-          : "Invalid address";
 
         return (
           <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
@@ -454,14 +448,12 @@ export const TokenHolders = ({
           />
         </div>
       </div>
-      {selectedTokenHolder && (
         <HoldersAndDelegatesDrawer
-          isOpen={isDrawerOpen}
+          isOpen={!!selectedTokenHolder}
           onClose={handleCloseDrawer}
           entityType="tokenHolder"
-          address={selectedTokenHolder}
+          address={selectedTokenHolder || "0x0000000000000000000000000000000000000000"}
         />
-      )}
     </>
   );
 };

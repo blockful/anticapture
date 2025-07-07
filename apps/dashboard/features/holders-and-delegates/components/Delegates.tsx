@@ -95,8 +95,6 @@ export const Delegates = ({
     orderDirection: sortDirection,
   });
 
-  // Drawer state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
   // Handle sorting for voting power and delegators
   const handleSort = (field: string) => {
@@ -112,11 +110,9 @@ export const Delegates = ({
 
   const handleOpenDrawer = (address: string) => {
     setSelectedDelegate(address);
-    setIsDrawerOpen(true);
   };
 
   const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
     setSelectedDelegate(null);
   };
 
@@ -526,14 +522,12 @@ export const Delegates = ({
           isLoading={fetchingMore}
         />
       </div>
-      {selectedDelegate && (
         <HoldersAndDelegatesDrawer
-          isOpen={isDrawerOpen}
+          isOpen={!!selectedDelegate}
           onClose={handleCloseDrawer}
           entityType="delegate"
-          address={selectedDelegate}
+          address={selectedDelegate || "0x0000000000000000000000000000000000000000"}
         />
-      )}
     </>
   );
 };
