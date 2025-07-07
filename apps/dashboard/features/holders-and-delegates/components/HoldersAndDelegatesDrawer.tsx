@@ -5,7 +5,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 
@@ -18,14 +18,10 @@ interface HoldersAndDelegatesDrawerProps {
   address: string;
 }
 
-export const HoldersAndDelegatesDrawer = ({
-  isOpen,
-  onClose,
-  entityType,
-  address,
-}: HoldersAndDelegatesDrawerProps) => {
-  const tabs = {
-    delegate: [
+const entities = {
+  delegate: {
+    title: "Delegate",
+    tabs: [
       { id: "votes", label: "Votes", content: <>Votes</> },
       { id: "votingPower", label: "Voting Power", content: <>Voting Power</> },
       {
@@ -34,7 +30,10 @@ export const HoldersAndDelegatesDrawer = ({
         content: <>Delegation History</>,
       },
     ],
-    tokenHolder: [
+  },
+  tokenHolder: {
+    title: "Token Holder",
+    tabs: [
       {
         id: "delegationHistory",
         label: "Delegation History",
@@ -46,14 +45,21 @@ export const HoldersAndDelegatesDrawer = ({
         content: <>Balance History</>,
       },
     ],
-  };
+  },
+};
 
-  const [activeTab, setActiveTab] = useState(tabs[entityType][0].id);
+export const HoldersAndDelegatesDrawer = ({
+  isOpen,
+  onClose,
+  entityType,
+  address,
+}: HoldersAndDelegatesDrawerProps) => {
+  const [activeTab, setActiveTab] = useState(entities[entityType].tabs[0].id);
 
   const { isMobile } = useScreenSize();
 
   const renderTabContent = (tabId: string) => {
-    return tabs[entityType].find((tab) => tab.id === tabId)?.content;
+    return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
   };
 
   return (
@@ -70,7 +76,7 @@ export const HoldersAndDelegatesDrawer = ({
               <div className="flex flex-col gap-1">
                 {/* Title */}
                 <div className="text-secondary font-mono text-xs font-medium tracking-wide uppercase">
-                  {entityType === "delegate" ? "Delegate" : "Token Holder"}
+                  {entities[entityType].title}
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <EnsAvatar
@@ -98,13 +104,13 @@ export const HoldersAndDelegatesDrawer = ({
               </Button>
             </div>
             <Tabs
-              defaultValue={tabs[entityType][0].id}
+              defaultValue={entities[entityType].tabs[0].id}
               value={activeTab}
               onValueChange={(tabId) => setActiveTab(tabId)}
               className="w-fit min-w-full"
             >
               <TabsList className="group flex border-b border-b-white/10 pl-4">
-                {tabs[entityType].map((tab) => (
+                {entities[entityType].tabs.map((tab) => (
                   <TabsTrigger
                     className={cn(
                       "text-secondary relative cursor-pointer gap-2 px-2 py-3 text-xs font-medium whitespace-nowrap",
