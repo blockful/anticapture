@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "./DelegationHistoryTable";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -82,6 +83,7 @@ export const HoldersAndDelegatesDrawer = ({
                     size="sm"
                     variant="rounded"
                   />
+                  <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
               </div>
 
