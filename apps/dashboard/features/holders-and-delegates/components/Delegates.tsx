@@ -162,7 +162,7 @@ export const Delegates = ({
       }
 
       return {
-        address: delegate.account?.id || "",
+        address: delegate.accountId || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
@@ -492,12 +492,14 @@ export const Delegates = ({
           isLoading={fetchingMore}
         />
       </div>
-        <HoldersAndDelegatesDrawer
-          isOpen={!!selectedDelegate}
-          onClose={handleCloseDrawer}
-          entityType="delegate"
-          address={selectedDelegate || "0x0000000000000000000000000000000000000000"}
-        />
+      <HoldersAndDelegatesDrawer
+        isOpen={!!selectedDelegate}
+        onClose={handleCloseDrawer}
+        entityType="delegate"
+        address={
+          selectedDelegate || "0x0000000000000000000000000000000000000000"
+        }
+      />
     </>
   );
 };

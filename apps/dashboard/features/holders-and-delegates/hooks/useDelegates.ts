@@ -20,9 +20,7 @@ interface ProposalsActivity {
 interface Delegate {
   votingPower: any;
   delegationsCount: number;
-  account?: {
-    id: string;
-  } | null;
+  accountId: string;
   proposalsActivity?: ProposalsActivity;
   historicalVotingPower?: string;
 }
