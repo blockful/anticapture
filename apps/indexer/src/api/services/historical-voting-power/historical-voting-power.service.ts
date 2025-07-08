@@ -9,8 +9,10 @@ import {
 import { readContract, multicall } from "viem/actions";
 
 import { DaoIdEnum } from "@/lib/enums";
+import { DaysEnum } from "@/lib/daysEnum";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getChain } from "@/lib/utils";
+import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { env } from "@/env";
 
 export interface HistoricalVotingPower {
@@ -22,7 +24,7 @@ export interface HistoricalVotingPower {
 
 export interface HistoricalVotingPowerRequest {
   addresses: Address[];
-  blockNumber: number;
+  days: DaysEnum;
   daoId: DaoIdEnum;
 }
 
@@ -44,13 +46,13 @@ export class HistoricalVotingPowerService {
   }
 
   /**
-   * Fetches historical voting power for multiple addresses at a specific block
+   * Fetches historical voting power for multiple addresses at a specific time period
    * Uses Multicall3 for efficient batch queries when available (block 19+)
    * Falls back to individual calls for earlier blocks
    */
   async getHistoricalVotingPower({
     addresses,
-    blockNumber,
+    days,
     daoId,
   }: HistoricalVotingPowerRequest): Promise<HistoricalVotingPower[]> {
     const tokenAddress = this.getTokenAddress(daoId);
@@ -58,6 +60,12 @@ export class HistoricalVotingPowerService {
     if (!tokenAddress) {
       throw new Error(`Token address not found for DAO: ${daoId}`);
     }
+    const currentBlockNumber = await this.getCurrentBlockNumber();
+    const blockNumber = calculateHistoricalBlockNumber(
+      days,
+      currentBlockNumber,
+      daoId
+    );
 
     try {
       return await this.getVotingPowerWithMulticall(
