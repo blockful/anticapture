@@ -52,4 +52,4 @@ jobs:
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
       - name: Deploy ${{ matrix.service }}
-        run: echo -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
+        run: railway up -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
