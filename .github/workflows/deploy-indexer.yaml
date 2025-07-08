@@ -7,37 +7,36 @@ on:
     branches: [dev, main]
 
 jobs:
-  get-services:
+  get-daos:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.get-services.outputs.services }}
+      daos: ${{ steps.get-daos.outputs.daos }}
     steps:
       - uses: actions/checkout@v3
-      - name: Get available services
-        id: get-services
+      - name: Get available DAOs
+        id: get-daos
         run: |
           # Extract DAO names from config files (excluding local configs)
           daos=$(ls apps/indexer/config/*.config.ts | grep -v local | grep ens | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
 
-          # Create service list with DAO indexers, DAO APIs + API gateway
-          services="["
+          # Create DAO array
+          dao_array="["
           for dao in $daos; do
-            services="${services}\"${dao}-indexer\","
-            services="${services}\"${dao}-api\","
+            dao_array="${dao_array}\"${dao}\","
           done
-          services="${services}\"api-gateway\"]"
+          dao_array="${dao_array%,}]"
 
-          echo "services=$services" >> $GITHUB_OUTPUT
-          echo "Detected services: $services"
+          echo "daos=$dao_array" >> $GITHUB_OUTPUT
+          echo "Detected DAOs: $dao_array"
 
-  deploy:
-    needs: get-services
+  deploy-indexers:
+    needs: get-daos
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
     strategy:
       matrix:
-        service: ${{ fromJson(needs.get-services.outputs.services) }}
+        dao: ${{ fromJson(needs.get-daos.outputs.daos) }}
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
@@ -50,5 +49,27 @@ jobs:
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
-      - name: Deploy ${{ matrix.service }}
-        run: railway up -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
+      - name: Deploy ${{ matrix.dao }}-indexer
+        run: railway up -s ${{ matrix.dao }}-indexer -e ${{ steps.env.outputs.environment }} --ci
+      - name: Deploy ${{ matrix.dao }}-api
+        run: railway up -s ${{ matrix.dao }}-api -e ${{ steps.env.outputs.environment }} --ci
+
+  deploy-api-gateway:
+    needs: deploy-indexers
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+      - name: Deploy api-gateway
+        run: railway up -s api-gateway -e ${{ steps.env.outputs.environment }} --ci
