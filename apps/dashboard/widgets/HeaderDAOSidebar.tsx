@@ -6,7 +6,14 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
+import {
+  BarChart,
+  Gauge,
+  HeartIcon,
+  Lightbulb,
+  Activity,
+  UserCheck,
+} from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
@@ -80,6 +87,11 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
+          <ButtonHeaderSidebar
+            anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+            icon={UserCheck}
+            label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
+          />
         </div>
       </div>
     </aside>

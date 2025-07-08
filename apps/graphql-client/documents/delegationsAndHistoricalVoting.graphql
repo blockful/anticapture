@@ -1,0 +1,22 @@
+query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalVotingPower_daoId!, $fromDate: NonNegativeInt, $proposalsDaoId: queryInput_proposalsActivity_daoId!) {
+  historicalVotingPower(addresses: $addresses, blockNumber: $blockNumber, daoId: $daoId) {
+    address
+    votingPower
+  }
+  
+  proposalsActivity(address: $address, daoId: $proposalsDaoId, fromDate: $fromDate) {
+    totalProposals
+    votedProposals
+    neverVoted
+  }
+}
+
+# Simple query for individual delegate proposals activity
+query GetDelegateProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt) {
+  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate) {
+    address
+    totalProposals
+    votedProposals
+    neverVoted
+  }
+}
