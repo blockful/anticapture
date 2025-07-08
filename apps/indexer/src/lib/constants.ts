@@ -16,6 +16,7 @@ export const CONTRACT_ADDRESSES: Record<
       {
         token: { address: Address; decimals: number; abi: Abi };
         governor?: Address;
+        blockTime: number; // Block time in seconds
       }
     >
   >
@@ -28,6 +29,7 @@ export const CONTRACT_ADDRESSES: Record<
         abi: UNITokenAbi,
       },
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+      blockTime: 12, // Ethereum average block time
     },
     [DaoIdEnum.ENS]: {
       token: {
@@ -36,6 +38,7 @@ export const CONTRACT_ADDRESSES: Record<
         abi: ENSTokenAbi,
       },
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      blockTime: 12, // Ethereum average block time
     },
   },
   [NetworkEnum.ARBITRUM]: {
@@ -45,6 +48,7 @@ export const CONTRACT_ADDRESSES: Record<
         decimals: 18,
         abi: ARBTokenAbi,
       },
+      blockTime: 0.25, // Arbitrum average block time
     },
   },
   [NetworkEnum.ANVIL]: {
@@ -55,6 +59,7 @@ export const CONTRACT_ADDRESSES: Record<
         abi: ENSTokenAbi,
       },
       governor: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+      blockTime: 1, // Anvil default block time
     },
   },
 } as const;
