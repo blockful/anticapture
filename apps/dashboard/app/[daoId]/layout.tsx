@@ -4,7 +4,6 @@ import NotFound from "@/app/[daoId]/not-found";
 import { DaoPageInteractionProvider } from "@/shared/contexts";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { TokenDistributionProvider } from "@/features/token-distribution/contexts";
-import { GovernanceActivityProvider } from "@/features/governance-activity/contexts";
 
 type DaoParams = {
   daoId: string;
@@ -33,9 +32,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
   // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
     <TokenDistributionProvider daoId={daoIdEnum}>
-      <GovernanceActivityProvider daoId={daoIdEnum}>
-        <DaoPageInteractionProvider>{children}</DaoPageInteractionProvider>
-      </GovernanceActivityProvider>
+      <DaoPageInteractionProvider>{children}</DaoPageInteractionProvider>
     </TokenDistributionProvider>
   );
 }

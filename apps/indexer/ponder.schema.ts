@@ -32,7 +32,6 @@ export const token = onchainTable("token", (drizzle) => ({
 
 export const account = onchainTable("account", (drizzle) => ({
   id: drizzle.text().primaryKey(),
-  type: drizzle.text().default("EOA").notNull(),
 }));
 
 export const accountBalance = onchainTable(
