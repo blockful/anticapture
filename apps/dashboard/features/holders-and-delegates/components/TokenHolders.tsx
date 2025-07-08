@@ -19,6 +19,7 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
 
 interface TokenHolderTableData {
   address: Address;
@@ -448,12 +449,15 @@ export const TokenHolders = ({
           />
         </div>
       </div>
-        <HoldersAndDelegatesDrawer
-          isOpen={!!selectedTokenHolder}
-          onClose={handleCloseDrawer}
-          entityType="tokenHolder"
-          address={selectedTokenHolder || "0x0000000000000000000000000000000000000000"}
-        />
+      <HoldersAndDelegatesDrawer
+        daoId={daoId as unknown as QueryInput_ProposalsActivity_DaoId}
+        isOpen={!!selectedTokenHolder}
+        onClose={handleCloseDrawer}
+        entityType="tokenHolder"
+        address={
+          selectedTokenHolder || "0x0000000000000000000000000000000000000000"
+        }
+      />
     </>
   );
 };
