@@ -25,7 +25,8 @@ jobs:
             services="${services}\"${dao}-indexer\","
             # services="${services}\"${dao}-api\","
           done
-          # services="${services}\"api-gateway\"]"
+          services="${services}\"api-gateway\""
+          services="${services}]"
 
           echo "services=$services" >> $GITHUB_OUTPUT
           echo "Detected services: $services"
