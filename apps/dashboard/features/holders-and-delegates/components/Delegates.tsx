@@ -165,7 +165,7 @@ export const Delegates = ({
       }
 
       return {
-        address: delegate.account?.id || "",
+        address: delegate.accountId || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
