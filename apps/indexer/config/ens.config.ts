@@ -1,10 +1,11 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 
 import { env } from "@/env";
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
+
+const ENS_CONTRACTS = CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!;
 
 export default createConfig({
   database: {
@@ -23,16 +24,14 @@ export default createConfig({
     ENSToken: {
       abi: ENSTokenAbi,
       chain: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.token.address,
-      startBlock: 9380410,
+      address: ENS_CONTRACTS.token.address,
+      startBlock: ENS_CONTRACTS.token.startBlock,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.governor,
-      startBlock: 13533772,
+      address: ENS_CONTRACTS.governor!.address,
+      startBlock: ENS_CONTRACTS.governor!.startBlock,
     },
   },
 });
