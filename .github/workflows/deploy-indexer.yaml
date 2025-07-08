@@ -25,8 +25,7 @@ jobs:
             services="${services}\"${dao}-indexer\","
             # services="${services}\"${dao}-api\","
           done
-          services="${services}\"api-gateway\""
-          services="${services}]"
+          services="${services}\"api-gateway\"]"
 
           echo "services=$services" >> $GITHUB_OUTPUT
           echo "Detected services: $services"
@@ -53,5 +52,4 @@ jobs:
       - name: Deploy ${{ matrix.service }}
         env:
           RAILWAY_TOKEN: ${{ steps.env.outputs.railway_token }}
-        # run: railway up -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
-        run: echo ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
+        run: railway up -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
