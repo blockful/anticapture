@@ -24,7 +24,7 @@ export interface HistoricalVotingPower {
 
 export interface HistoricalVotingPowerRequest {
   addresses: Address[];
-  days: DaysEnum;
+  daysInSeconds: DaysEnum;
   daoId: DaoIdEnum;
 }
 
@@ -52,7 +52,7 @@ export class HistoricalVotingPowerService {
    */
   async getHistoricalVotingPower({
     addresses,
-    days,
+    daysInSeconds,
     daoId,
   }: HistoricalVotingPowerRequest): Promise<HistoricalVotingPower[]> {
     const tokenAddress = this.getTokenAddress(daoId);
@@ -62,7 +62,7 @@ export class HistoricalVotingPowerService {
     }
     const currentBlockNumber = await this.getCurrentBlockNumber();
     const blockNumber = calculateHistoricalBlockNumber(
-      days,
+      daysInSeconds,
       currentBlockNumber,
       daoId
     );

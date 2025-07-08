@@ -24,7 +24,7 @@ export interface HistoricalBalance {
 
 export interface HistoricalBalancesRequest {
   addresses: Address[];
-  days: DaysEnum;
+  daysInSeconds: DaysEnum;
   daoId: DaoIdEnum;
 }
 
@@ -52,13 +52,13 @@ export class HistoricalBalancesService {
    */
   async getHistoricalBalances({
     addresses,
-    days,
+    daysInSeconds,
     daoId,
   }: HistoricalBalancesRequest): Promise<HistoricalBalance[]> {
     const tokenAddress = this.getTokenAddress(daoId);
     const currentBlockNumber = await this.getCurrentBlockNumber();
     const blockNumber = calculateHistoricalBlockNumber(
-      days,
+      daysInSeconds,
       currentBlockNumber,
       daoId
     );
