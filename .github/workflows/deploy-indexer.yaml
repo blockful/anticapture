@@ -23,10 +23,9 @@ jobs:
           services="["
           for dao in $daos; do
             services="${services}\"${dao}-indexer\","
-            # services="${services}\"${dao}-api\","
+            services="${services}\"${dao}-api\","
           done
-          #services="${services}\"api-gateway\""
-          services="${services}]"
+          services="${services}\"api-gateway\"]"
 
           echo "services=$services" >> $GITHUB_OUTPUT
           echo "Detected services: $services"
