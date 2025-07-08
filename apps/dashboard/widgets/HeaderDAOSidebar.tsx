@@ -6,6 +6,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
+<<<<<<< HEAD
 import {
   BarChart,
   Gauge,
@@ -14,6 +15,9 @@ import {
   Activity,
   UserCheck,
 } from "lucide-react";
+=======
+import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
+>>>>>>> dev
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
