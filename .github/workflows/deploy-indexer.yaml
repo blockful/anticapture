@@ -50,7 +50,7 @@ jobs:
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
       - name: Deploy ${{ matrix.dao }}-indexer
-        run: railway up -s ${{ matrix.dao }}-indexer -e ${{ steps.env.outputs.environment }} --ci
+        run: railway up -s ${{ matrix.dao }}-indexer -e ${{ steps.env.outputs.environment }} --ci -d
       - name: Deploy ${{ matrix.dao }}-api
         run: railway up -s ${{ matrix.dao }}-api -e ${{ steps.env.outputs.environment }} --ci
 
