@@ -1,0 +1,56 @@
+name: Deploy Indexers and API Gateway to Railway
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  get-services:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.get-services.outputs.services }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get available services
+        id: get-services
+        run: |
+          # Extract DAO names from config files (excluding local configs)
+          daos=$(ls apps/indexer/config/*.config.ts | grep -v local | grep ens | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
+
+          # Create service list with DAO indexers, DAO APIs + API gateway
+          services="["
+          for dao in $daos; do
+            services="${services}\"${dao}-indexer\","
+            # services="${services}\"${dao}-api\","
+          done
+          # services="${services}\"api-gateway\"]"
+
+          echo "services=$services" >> $GITHUB_OUTPUT
+          echo "Detected services: $services"
+
+  deploy:
+    needs: get-services
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.get-services.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Determine environment and token
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "railway_token=${{ secrets.RAILWAY_TOKEN_PROD }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "railway_token=${{ secrets.RAILWAY_TOKEN_DEV }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Deploy ${{ matrix.service }}
+        env:
+          RAILWAY_TOKEN: ${{ steps.env.outputs.railway_token }}
+        # run: railway up -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
+        run: echo ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
