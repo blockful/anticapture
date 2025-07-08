@@ -21,7 +21,6 @@ interface Delegate {
   votingPower: any;
   delegationsCount: number;
   account?: {
-    type: string;
     id: string;
   } | null;
   proposalsActivity?: ProposalsActivity;
