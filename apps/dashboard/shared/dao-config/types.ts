@@ -109,7 +109,6 @@ export interface DaoConfiguration extends BaseInfo {
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
-  governanceActivity?: boolean;
   showSupport?: {
     snapshotProposal: string;
     snapshotSpace: string;
