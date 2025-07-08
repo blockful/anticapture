@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
+import { DaysEnum } from "@/lib/daysEnum";
 import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
@@ -24,7 +25,7 @@ export function historicalOnchain(app: Hono) {
       path: "/historical-balances/{daoId}",
       summary: "Get historical token balances",
       description:
-        "Fetch historical token balances for multiple addresses at a specific block number using multicall",
+        "Fetch historical token balances for multiple addresses at a specific time period using multicall",
       tags: ["historical-onchain"],
       request: {
         params: z.object({
@@ -43,10 +44,9 @@ export function historicalOnchain(app: Hono) {
                 .refine((addr) => isAddress(addr), "Invalid Ethereum address")
                 .transform((addr) => [addr]),
             ),
-          blockNumber: z.coerce
-            .number()
-            .int()
-            .positive("Block number must be positive"),
+          days: z.nativeEnum(DaysEnum, {
+            errorMap: () => ({ message: "Invalid days parameter. Must be one of: 7d, 30d, 90d, 180d, 365d" }),
+          }),
         }),
       },
       responses: {
@@ -69,11 +69,11 @@ export function historicalOnchain(app: Hono) {
     }),
     async (context) => {
       const { daoId } = context.req.valid("param");
-      const { addresses, blockNumber } = context.req.valid("query");
+      const { addresses, days } = context.req.valid("query");
 
       const request: HistoricalBalancesRequest = {
         addresses,
-        blockNumber,
+        days,
         daoId,
       };
 
@@ -91,7 +91,7 @@ export function historicalOnchain(app: Hono) {
       path: "/historical-voting-power/{daoId}",
       summary: "Get historical voting power",
       description:
-        "Fetch historical voting power for multiple addresses at a specific block number using multicall",
+        "Fetch historical voting power for multiple addresses at a specific time period using multicall",
       tags: ["historical-onchain"],
       request: {
         params: z.object({
@@ -110,10 +110,9 @@ export function historicalOnchain(app: Hono) {
                 .refine((addr) => isAddress(addr), "Invalid Ethereum address")
                 .transform((addr) => [addr]),
             ),
-          blockNumber: z.coerce
-            .number()
-            .int()
-            .positive("Block number must be positive"),
+          days: z.nativeEnum(DaysEnum, {
+            errorMap: () => ({ message: "Invalid days parameter. Must be one of: 7d, 30d, 90d, 180d, 365d" }),
+          }),
         }),
       },
       responses: {
@@ -136,11 +135,11 @@ export function historicalOnchain(app: Hono) {
     }),
     async (context) => {
       const { daoId } = context.req.valid("param");
-      const { addresses, blockNumber } = context.req.valid("query");
+      const { addresses, days } = context.req.valid("query");
 
       const request: HistoricalVotingPowerRequest = {
         addresses,
-        blockNumber,
+        days,
         daoId,
       };
 
