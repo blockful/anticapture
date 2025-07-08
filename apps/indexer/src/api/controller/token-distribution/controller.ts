@@ -1,7 +1,7 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { formatUnits, parseEther } from "viem";
 
-import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
+import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { MetricTypesEnum } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "@/api/middlewares";
@@ -9,13 +9,13 @@ import { caseInsensitiveEnum } from "@/api/middlewares";
 interface TokenDistributionRepository {
   getSupplyComparison(
     metricType: string,
-    days: DaysEnum
+    days: DaysEnum,
   ): Promise<{ oldValue: string; currentValue: string } | undefined>;
 }
 
 export function tokenDistribution(
   app: Hono,
-  repository: TokenDistributionRepository
+  repository: TokenDistributionRepository,
 ) {
   const routes = [
     {
@@ -140,7 +140,7 @@ export function tokenDistribution(
         const changeRate =
           oldValue &&
           (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
-          parseEther("1");
+            parseEther("1");
         /* eslint-enable */
 
         return ctx.json(
@@ -151,9 +151,9 @@ export function tokenDistribution(
               ? Number(formatUnits(changeRate, 18)).toFixed(2)
               : 0,
           } as z.infer<typeof resultSchema>,
-          200
+          200,
         );
-      }
+      },
     );
   }
 }
