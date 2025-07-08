@@ -8,7 +8,7 @@ on:
       - "apps/api-gateway/**/*.ts"
       - "infra/**"
   pull_request:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - "apps/indexer/**/*.ts"
       - "apps/api-gateway/**/*.ts"
