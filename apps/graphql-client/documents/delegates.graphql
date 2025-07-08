@@ -1,18 +1,15 @@
-query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
-  accountPowers(orderBy: $orderBy, orderDirection: $orderDirection, limit: 10, after: $after, before: $before, where: {votingPower_gt: 0}) {
-    items {
-      votingPower
-      account {
-        type
-        id
+  query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
+    accountPowers(orderBy: $orderBy, orderDirection: $orderDirection, limit: 10, after: $after, before: $before, where: {votingPower_gt: 0}) {
+      items {
+        votingPower
+        accountId
+        delegationsCount
       }
-      delegationsCount
-    }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+      }
     }
   }
-}

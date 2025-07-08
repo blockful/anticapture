@@ -18,7 +18,6 @@ import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatu
 
 interface DelegateTableData {
   address: string;
-  type: string;
   votingPower: string;
   variation: string;
   activity: string;
@@ -163,8 +162,7 @@ export const Delegates = ({
       }
 
       return {
-        address: delegate.account?.id || "",
-        type: delegate.account?.type || "",
+        address: delegate.accountId || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: variation,
         activity,
@@ -219,34 +217,6 @@ export const Delegates = ({
           Address
         </h4>
       ),
-    },
-    {
-      accessorKey: "type",
-      size: 100,
-      cell: ({ row }) => {
-        const type = row.getValue("type") as string;
-
-        if (loading) {
-          return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end pr-4"
-              className="h-5 w-full max-w-20"
-            />
-          );
-        }
-
-        return (
-          <div className="flex h-10 items-center px-4 py-2">
-            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
-          </div>
-        );
-      },
-      header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
-          Type
-        </h4>
-      ),
-      enableSorting: false,
     },
     {
       accessorKey: "votingPower",
@@ -522,12 +492,14 @@ export const Delegates = ({
           isLoading={fetchingMore}
         />
       </div>
-        <HoldersAndDelegatesDrawer
-          isOpen={!!selectedDelegate}
-          onClose={handleCloseDrawer}
-          entityType="delegate"
-          address={selectedDelegate || "0x0000000000000000000000000000000000000000"}
-        />
+      <HoldersAndDelegatesDrawer
+        isOpen={!!selectedDelegate}
+        onClose={handleCloseDrawer}
+        entityType="delegate"
+        address={
+          selectedDelegate || "0x0000000000000000000000000000000000000000"
+        }
+      />
     </>
   );
 };

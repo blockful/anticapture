@@ -178,34 +178,6 @@ export const TokenHolders = ({
       },
     },
     {
-      accessorKey: "type",
-      header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start pl-4">
-          Type
-        </div>
-      ),
-      cell: ({ row }) => {
-        if (loading) {
-          return (
-            <div className="flex h-10 items-center px-4 py-2">
-              <SkeletonRow
-                parentClassName="flex animate-pulse"
-                className="h-5 w-16"
-              />
-            </div>
-          );
-        }
-
-        const typeValue: string = row.getValue("type");
-        const type = typeValue === "Contract" ? "Contract" : "EOA";
-        return (
-          <div className="flex h-10 w-full items-center justify-start px-4 py-2 text-sm">
-            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: "balance",
       header: ({ column }) => {
         const handleSortToggle = () => {
