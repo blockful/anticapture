@@ -8,7 +8,6 @@ import { formatAddress } from "@/shared/utils/formatAddress";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { useRouter } from "next/navigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
@@ -19,6 +18,7 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 
 interface TokenHolderTableData {
   address: Address;
@@ -35,8 +35,10 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
+  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
+    null,
+  );
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  const router = useRouter();
   const pageLimit: number = 10;
 
   const {
@@ -56,6 +58,14 @@ export const TokenHolders = ({
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
   const { data: historicalBalancesData, loading: historicalDataLoading } =
     useHistoricalBalances(daoId, addresses || [], days);
+
+  const handleOpenDrawer = (address: string) => {
+    setSelectedTokenHolder(address);
+  };
+
+  const handleCloseDrawer = () => {
+    setSelectedTokenHolder(null);
+  };
 
   const calculateVariation = (
     currentBalance: string,
@@ -147,9 +157,6 @@ export const TokenHolders = ({
         }
 
         const addressValue: string = row.getValue("address");
-        const address = isAddress(addressValue)
-          ? formatAddress(addressValue)
-          : "Invalid address";
 
         return (
           <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
@@ -161,7 +168,7 @@ export const TokenHolders = ({
             <button
               className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
               tabIndex={-1}
-              onClick={(e) => handleDetailsClick(addressValue as Address, e)}
+              onClick={() => handleOpenDrawer(addressValue as Address)}
             >
               <Plus className="size-3.5" />
               <span className="text-sm font-medium">Details</span>
@@ -298,12 +305,6 @@ export const TokenHolders = ({
     },
   ];
 
-  const handleDetailsClick = (address: Address, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Details button clicked for address:", address);
-    router.push(`/${address}`);
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col gap-2">
@@ -395,28 +396,36 @@ export const TokenHolders = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <>
       <div className="w-full text-white">
-        <TheTable
-          columns={tokenHoldersColumns}
-          data={tableData}
-          withSorting={true}
-          onRowClick={() => {}}
-          isTableSmall={true}
-        />
+        <div className="flex flex-col gap-2">
+          <TheTable
+            columns={tokenHoldersColumns}
+            data={tableData}
+            withSorting={true}
+            onRowClick={() => {}}
+            isTableSmall={true}
+          />
+        </div>
+        <div>
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            className="text-white"
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isLoading={fetchingMore}
+          />
+        </div>
       </div>
-      <div>
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          className="text-white"
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
+        <HoldersAndDelegatesDrawer
+          isOpen={!!selectedTokenHolder}
+          onClose={handleCloseDrawer}
+          entityType="tokenHolder"
+          address={selectedTokenHolder || "0x0000000000000000000000000000000000000000"}
         />
-      </div>
-    </div>
+    </>
   );
 };
