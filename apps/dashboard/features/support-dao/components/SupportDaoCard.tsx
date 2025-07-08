@@ -36,7 +36,7 @@ export const SupportDaoCard = ({
 
   const supportersInfo = (
     <div className="text-xs text-gray-400">
-      <div className="flex flex-col items-center gap-1 md:flex-row">
+      <div className="flex flex-col items-start gap-1 md:flex-row md:items-center">
         {votingPowerSupport > 0 && (
           <div className="flex flex-row items-center gap-2">
             <TrendingUp className="text-success size-4" />
@@ -64,7 +64,7 @@ export const SupportDaoCard = ({
 
   return (
     <Card
-      className="border-light-dark bg-surface-default hover:bg-surface-contrast xl4k:max-w-full flex w-full flex-row rounded-md border p-3 shadow-sm hover:cursor-pointer md:w-[calc(50%-10px)]"
+      className="border-light-dark bg-surface-default hover:bg-surface-contrast flex w-full flex-row rounded-md border p-3 shadow-sm hover:cursor-pointer"
       onClick={onClick}
     >
       <div className="flex h-full w-full flex-row justify-between gap-2">

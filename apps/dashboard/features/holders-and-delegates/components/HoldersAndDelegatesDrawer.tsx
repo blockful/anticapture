@@ -5,7 +5,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
@@ -18,7 +18,7 @@ interface HoldersAndDelegatesDrawerProps {
   onClose: () => void;
   entityType: EntityType;
   address: string;
-  daoId?: QueryInput_ProposalsActivity_DaoId;
+  daoId: QueryInput_ProposalsActivity_DaoId;
   fromDate?: number;
 }
 
@@ -27,49 +27,50 @@ export const HoldersAndDelegatesDrawer = ({
   onClose,
   entityType,
   address,
-  daoId = QueryInput_ProposalsActivity_DaoId.Ens,
-  fromDate,
+  daoId,
+  fromDate
 }: HoldersAndDelegatesDrawerProps) => {
-  const tabs = {
-    delegate: [
-      {
-        id: "votes",
-        label: "Votes",
-        content: (
-          <DelegateProposalsActivity
-            address={address}
-            daoId={daoId}
-            fromDate={fromDate}
-          />
-        ),
-      },
-      { id: "votingPower", label: "Voting Power", content: <>Voting Power</> },
-      {
-        id: "delegationHistory",
-        label: "Delegation History",
-        content: <>Delegation History</>,
-      },
-    ],
-    tokenHolder: [
-      {
-        id: "delegationHistory",
-        label: "Delegation History",
-        content: <>Delegation History</>,
-      },
-      {
-        id: "balanceHistory",
-        label: "Balance History",
-        content: <>Balance History</>,
-      },
-    ],
+
+  const entities = {
+    delegate: {
+      title: "Delegate",
+      tabs: [
+        { id: "votes", label: "Votes", content: <DelegateProposalsActivity
+          address={address}
+          daoId={daoId}
+          fromDate={fromDate}
+        /> },
+        { id: "votingPower", label: "Voting Power", content: <>Voting Power</> },
+        {
+          id: "delegationHistory",
+          label: "Delegation History",
+          content: <>Delegation History</>,
+        },
+      ],
+    },
+    tokenHolder: {
+      title: "Token Holder",
+      tabs: [
+        {
+          id: "delegationHistory",
+          label: "Delegation History",
+          content: <>Delegation History</>,
+        },
+        {
+          id: "balanceHistory",
+          label: "Balance History",
+          content: <>Balance History</>,
+        },
+      ],
+    },
   };
 
-  const [activeTab, setActiveTab] = useState(tabs[entityType][0].id);
+  const [activeTab, setActiveTab] = useState(entities[entityType].tabs[0].id);
 
   const { isMobile } = useScreenSize();
 
   const renderTabContent = (tabId: string) => {
-    return tabs[entityType].find((tab) => tab.id === tabId)?.content;
+    return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
   };
 
   return (
@@ -86,7 +87,7 @@ export const HoldersAndDelegatesDrawer = ({
               <div className="flex flex-col gap-1">
                 {/* Title */}
                 <div className="text-secondary font-mono text-xs font-medium tracking-wide uppercase">
-                  {entityType === "delegate" ? "Delegate" : "Token Holder"}
+                  {entities[entityType].title}
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <EnsAvatar
@@ -111,13 +112,13 @@ export const HoldersAndDelegatesDrawer = ({
               </Button>
             </div>
             <Tabs
-              defaultValue={tabs[entityType][0].id}
+              defaultValue={entities[entityType].tabs[0].id}
               value={activeTab}
               onValueChange={(tabId) => setActiveTab(tabId)}
               className="w-fit min-w-full"
             >
               <TabsList className="group flex border-b border-b-white/10 pl-4">
-                {tabs[entityType].map((tab) => (
+                {entities[entityType].tabs.map((tab) => (
                   <TabsTrigger
                     className={cn(
                       "text-secondary relative cursor-pointer gap-2 px-2 py-2 text-xs font-medium whitespace-nowrap",

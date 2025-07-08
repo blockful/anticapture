@@ -1,7 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaoIdEnum } from "@/lib/enums";
-import { DaysOpts } from "@/lib/daysEnum";
+import { DaoIdEnum, DaysOpts } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import { DuneResponse } from "../services/dune/types";
 
@@ -38,7 +37,7 @@ export function assets(app: Hono, service: AssetsClient) {
                 z.object({
                   totalAssets: z.string(),
                   date: z.string(),
-                })
+                }),
               ),
             },
           },
@@ -49,6 +48,6 @@ export function assets(app: Hono, service: AssetsClient) {
       const { days } = context.req.valid("query");
       const data = await service.fetchTotalAssets(days);
       return context.json(data.result.rows);
-    }
+    },
   );
 }

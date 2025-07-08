@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
+import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "@/api/middlewares";
 import {
