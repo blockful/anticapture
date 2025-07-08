@@ -78,6 +78,8 @@ export const DaoTemplate = () => {
 
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
         <HoldersAndDelegatesSection daoId={daoIdEnum} />
+      </div>
+      <ShowYourSupportStickyBar />
     </DaoPageInteractionProvider>
   );
 };
