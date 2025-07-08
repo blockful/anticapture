@@ -35,23 +35,21 @@ jobs:
     needs: get-services
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
     strategy:
       matrix:
         service: ${{ fromJson(needs.get-services.outputs.services) }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
-      - name: Determine environment and token
+      - name: Determine environment
         id: env
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
             echo "environment=production" >> $GITHUB_OUTPUT
-            echo "railway_token=${{ secrets.RAILWAY_TOKEN_PROD }}" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
-            echo "railway_token=${{ secrets.RAILWAY_TOKEN_DEV }}" >> $GITHUB_OUTPUT
           fi
       - name: Deploy ${{ matrix.service }}
-        env:
-          RAILWAY_TOKEN: ${{ steps.env.outputs.railway_token }}
-        # run: railway up -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
-        run: echo ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci ${{ steps.env.outputs.railway_token }}
+        run: echo -s ${{ matrix.service }} -e ${{ steps.env.outputs.environment }} --ci
