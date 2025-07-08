@@ -55,13 +55,13 @@ interface ChartDataItem {
 
 interface AttackCostBarChartProps {
   className?: string;
-  timeInterval: TimeInterval;
 }
 
-export const AttackCostBarChart = ({ className, timeInterval }: AttackCostBarChartProps) => {
+export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const [mocked, setMocked] = useState<boolean>(false);
+  const timeInterval = TimeInterval.NINETY_DAYS;
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -167,7 +167,7 @@ export const AttackCostBarChart = ({ className, timeInterval }: AttackCostBarCha
       },
       {
         id: "activeSupply",
-        name: "Active Supply",
+        name: "Active Supply (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
         value:
@@ -176,7 +176,7 @@ export const AttackCostBarChart = ({ className, timeInterval }: AttackCostBarCha
       },
       {
         id: "averageTurnout",
-        name: "Average Turnout",
+        name: "Average Turnout (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
         value:
