@@ -11,6 +11,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "./DelegationHistoryTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { VotingPower } from "./VotingPower";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -29,36 +30,46 @@ export const HoldersAndDelegatesDrawer = ({
   address,
   daoId,
 }: HoldersAndDelegatesDrawerProps) => {
-  const tabs = {
-    delegate: [
-      { id: "votes", label: "Votes", content: <>Votes</> },
-      { id: "votingPower", label: "Voting Power", content: <>Voting Power</> },
-      {
-        id: "delegationHistory",
-        label: "Delegation History",
-        content: <>Delegation History</>,
-      },
-    ],
-    tokenHolder: [
-      {
-        id: "delegationHistory",
-        label: "Delegation History",
-        content: <DelegationHistoryTable address={address} daoId={daoId} />,
-      },
-      {
-        id: "balanceHistory",
-        label: "Balance History",
-        content: <>Balance History</>,
-      },
-    ],
+  const entities = {
+    delegate: {
+      title: "Delegate",
+      tabs: [
+        { id: "votes", label: "Votes", content: <>Votes</> },
+        {
+          id: "votingPower",
+          label: "Voting Power",
+          content: <VotingPower address={address} daoId={daoId} />,
+        },
+        {
+          id: "delegationHistory",
+          label: "Delegation History",
+          content: <>Delegation History</>,
+        },
+      ],
+    },
+    tokenHolder: {
+      title: "Token Holder",
+      tabs: [
+        {
+          id: "delegationHistory",
+          label: "Delegation History",
+          content: <DelegationHistoryTable address={address} daoId={daoId} />,
+        },
+        {
+          id: "balanceHistory",
+          label: "Balance History",
+          content: <>Balance History</>,
+        },
+      ],
+    },
   };
 
-  const [activeTab, setActiveTab] = useState(tabs[entityType][0].id);
+  const [activeTab, setActiveTab] = useState(entities[entityType].tabs[0].id);
 
   const { isMobile } = useScreenSize();
 
   const renderTabContent = (tabId: string) => {
-    return tabs[entityType].find((tab) => tab.id === tabId)?.content;
+    return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
   };
 
   return (
@@ -71,17 +82,19 @@ export const HoldersAndDelegatesDrawer = ({
         <div className="bg-surface-default h-full w-full">
           <div className="bg-surface-contrast h-[100px] w-full">
             {/* Header */}
-            <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-0">
+            <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
               <div className="flex flex-col gap-1">
                 {/* Title */}
                 <div className="text-secondary font-mono text-xs font-medium tracking-wide uppercase">
-                  {entityType === "delegate" ? "Delegate" : "Token Holder"}
+                  {entities[entityType].title}
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <EnsAvatar
                     address={address as `0x${string}`}
                     size="sm"
                     variant="rounded"
+                    nameClassName="text-lg leading-[18px]"
+                    containerClassName="gap-2"
                   />
                   <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
@@ -98,16 +111,16 @@ export const HoldersAndDelegatesDrawer = ({
               </Button>
             </div>
             <Tabs
-              defaultValue={tabs[entityType][0].id}
+              defaultValue={entities[entityType].tabs[0].id}
               value={activeTab}
               onValueChange={(tabId) => setActiveTab(tabId)}
               className="w-fit min-w-full"
             >
               <TabsList className="group flex border-b border-b-white/10 pl-4">
-                {tabs[entityType].map((tab) => (
+                {entities[entityType].tabs.map((tab) => (
                   <TabsTrigger
                     className={cn(
-                      "text-secondary relative cursor-pointer gap-2 px-2 py-3 text-xs font-medium whitespace-nowrap",
+                      "text-secondary relative cursor-pointer gap-2 px-2 py-2 text-xs font-medium whitespace-nowrap",
                       "data-[state=active]:text-link",
                       "after:absolute after:right-0 after:-bottom-px after:left-0 after:h-px after:bg-transparent after:content-['']",
                       "data-[state=active]:after:bg-surface-solid-brand",

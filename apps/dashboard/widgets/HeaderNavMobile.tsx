@@ -51,11 +51,6 @@ export const HeaderNavMobile = () => {
       enabled: !!daoConfig.tokenDistribution,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.governanceActivity.anchorId,
-      title: SECTIONS_CONSTANTS.governanceActivity.title,
-      enabled: !!daoConfig.governanceActivity,
-    },
-    {
       anchorId: SECTIONS_CONSTANTS.holdersAndDelegates.anchorId,
       title: SECTIONS_CONSTANTS.holdersAndDelegates.title,
       enabled: true,

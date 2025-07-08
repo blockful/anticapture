@@ -5,9 +5,6 @@ query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDir
       balance
       delegate
       tokenId
-      account {
-        type
-      }
     },
       pageInfo {
         endCursor

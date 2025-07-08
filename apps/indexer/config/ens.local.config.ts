@@ -1,10 +1,11 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
 
 import { env } from "@/env";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
+
+const ENS_CONTRACTS = CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!;
 
 export default createConfig({
   database: {
@@ -27,15 +28,14 @@ export default createConfig({
     ENSToken: {
       abi: ENSTokenAbi,
       chain: "anvil",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.token.address,
-      startBlock: 22635098, // Block where ENS Token was deployed
+      address: ENS_CONTRACTS.token.address,
+      startBlock: ENS_CONTRACTS.token.startBlock, // Block where ENS Token was deployed
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "anvil",
-      address: CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!.governor,
-      startBlock: 22635098, // Block where ENS Governor was deployed
+      address: ENS_CONTRACTS.governor!.address,
+      startBlock: ENS_CONTRACTS.governor!.startBlock, // Block where ENS Governor was deployed
     },
   },
 });
