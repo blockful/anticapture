@@ -241,7 +241,7 @@ export const DelegationHistoryTable = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-full">
+      <div className="h-full w-full overflow-y-auto">
         <TheTable
           columns={delegationHistoryColumns}
           data={loading ? Array(5).fill({}) : data}
