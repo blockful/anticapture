@@ -5,8 +5,7 @@ export function calculateHistoricalBlockNumber(
   currentBlockNumber: number,
   blockTime: number,
 ): number {
-  const secondsInPast = days; // DaysEnum values are already in seconds
-  const blocksToGoBack = Math.floor(secondsInPast / blockTime);
+  const blocksToGoBack = Math.floor(days / blockTime);
   const historicalBlockNumber = Math.max(0, currentBlockNumber - blocksToGoBack);
 
   return historicalBlockNumber;
