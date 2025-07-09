@@ -1,21 +1,30 @@
 name: Deploy Indexers and API Gateway to Railway
 
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
     paths:
       - "apps/indexer/**/*.ts"
       - "apps/api-gateway/**/*.ts"
       - "infra/**"
-  workflow_dispatch:
+  issue_comment:
+    types: [created]
 
 jobs:
   get-daos:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/deploy-dev'))
     outputs:
       daos: ${{ steps.get-daos.outputs.daos }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
       - name: Get available DAOs
         id: get-daos
         run: |
@@ -44,6 +53,8 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
       - name: Determine environment
         id: env
         run: |
@@ -66,6 +77,8 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
       - name: Determine environment
         id: env
         run: |
