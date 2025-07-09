@@ -83,7 +83,6 @@ anticapture/
 - Governance security analysis and risk assessment
 - Attack profitability calculations
 - Token distribution visualization
-- Real-time governance activity tracking
 - Community petition system integration
 - Wallet connection (RainbowKit)
 

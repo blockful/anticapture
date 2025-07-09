@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev --schema public",
-    "start": "ponder start --views-schema=anticapture --schema=$(git rev-parse --short HEAD):$(git rev-parse --abbrev-ref HEAD)",
+    "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
     "serve": "ponder serve --schema=anticapture",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
@@ -16,7 +16,7 @@
     "drizzle-kit": "^0.31.0",
     "drizzle-orm": "^0.39.3",
     "hono": "^4.7.10",
-    "ponder": "^0.11.11",
+    "ponder": "^0.11.24",
     "viem": "^2.29.4",
     "zod": "^3.25.3",
     "zod-validation-error": "^3.4.1"

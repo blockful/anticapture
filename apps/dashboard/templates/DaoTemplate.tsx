@@ -10,7 +10,6 @@ import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
 import { ResilienceStagesSection } from "@/features/resilience-stages";
-import { GovernanceActivitySection } from "@/features/governance-activity";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
@@ -79,10 +78,7 @@ export const DaoTemplate = () => {
         )}
 
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
-
         <HoldersAndDelegatesSection daoId={daoIdEnum} />
-
-        {daoConstants.governanceActivity && <GovernanceActivitySection />}
       </div>
       <ShowYourSupportStickyBar />
     </DaoPageInteractionProvider>

@@ -1,38 +1,14 @@
 import { Context } from "ponder:registry";
-import {
-  account,
-  accountPower,
-  proposalsOnchain,
-  votesOnchain,
-} from "ponder:schema";
-import { Address } from "viem";
+import { accountPower, proposalsOnchain, votesOnchain } from "ponder:schema";
 
-import { getValueFromEventArgs, verifyAddressType } from "@/lib/utils";
+import { getValueFromEventArgs } from "@/lib/utils";
 import {
   DaoProposalCanceledEvent,
   DaoProposalCreatedEvent,
   DaoProposalExecutedEvent,
   DaoVoteCastEvent,
 } from "@/indexer/types";
-
-/**
- * Helper function to ensure an account exists in the database
- * Verifies address type and inserts account if it doesn't exist
- */
-const ensureAccountExists = async (
-  context: Context,
-  address: Address,
-): Promise<void> => {
-  const addressType = await verifyAddressType(context.client, address);
-
-  await context.db
-    .insert(account)
-    .values({
-      id: address,
-      type: addressType,
-    })
-    .onConflictDoNothing();
-};
+import { ensureAccountExists } from "./shared";
 
 export const voteCast = async (
   event: DaoVoteCastEvent,
