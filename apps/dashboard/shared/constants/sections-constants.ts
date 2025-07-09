@@ -31,12 +31,6 @@ export const SECTIONS_CONSTANTS = {
       "Explore top token holders and high-power delegates. Click on any row to view more details.",
     anchorId: "holdersAndDelegatesSection",
   },
-  governanceActivity: {
-    title: "Governance Activity",
-    description:
-      "Governance activity metrics are based on a 30 days average. Choosing the time frame buttons below will give you the variation based on the 30 days average prior to that date compared to the current.",
-    anchorId: "governanceActivitySection",
-  },
   tokenDistribution: {
     title: "Token Distribution",
     description:

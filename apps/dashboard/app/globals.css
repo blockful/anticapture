@@ -49,7 +49,7 @@
   --color-light-dark: var(--base-muted);
   --color-tangerine: var(--base-brand);
 
-  /* Design System Colors */
+  /* Design System Text and Icon Colors */
   --color-primary: var(--base-primary);
   --color-secondary: var(--base-muted-foreground);
   --color-dimmed: var(--base-dimmed);
@@ -86,6 +86,11 @@
   --color-surface-solid-warning: var(--base-warning);
   --color-surface-solid-error: var(--base-error);
   --color-surface-solid-brand: var(--base-brand);
+
+  /* Border Colors */
+  --color-border-default: var(--base-secondary);
+  --color-border-contrast: var(--base-border);
+  --color-border-primary: var(--base-primary-foreground);
 
   /* Icon Sizes */
   --size-icon-xxs: 16px;
