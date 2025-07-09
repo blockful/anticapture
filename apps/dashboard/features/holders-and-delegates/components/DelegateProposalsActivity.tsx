@@ -7,6 +7,8 @@ import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { Hand, Trophy, CheckCircle2, Clock10 } from "lucide-react";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { useDaoData } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -32,14 +34,6 @@ export const DelegateProposalsActivity = ({
     skip,
     limit: itemsPerPage,
   });
-
-  useEffect(() => {
-    console.log("DelegateProposalsActivity hook response:", {
-      data,
-      loading,
-      error,
-    });
-  }, [data, loading, error]);
 
   // Helper function to format average time (convert seconds to days)
   const formatAvgTime = (avgTimeBeforeEndSeconds: number): string => {

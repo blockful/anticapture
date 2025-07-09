@@ -7,6 +7,7 @@ import {
   SkeletonRow,
   TextIconLeft,
   SimpleProgressBar,
+  ActivityIndicator,
 } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
@@ -23,13 +24,12 @@ import {
 import { useParams } from "next/navigation";
 import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-
-// Activity Indicator Component for Ongoing state
-const ActivityIndicator = ({ className }: { className?: string }) => (
-  <div className={cn("flex items-center justify-center", className)}>
-    <div className="border-warning size-4 animate-spin rounded-full border-2 border-t-transparent" />
-  </div>
-);
+import {
+  Query_ProposalsActivity_Proposals_Items,
+  Query_ProposalsActivity_Proposals_Items_Proposal,
+  Query_ProposalsActivity_Proposals_Items_UserVote,
+} from "@anticapture/graphql-client";
+import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
 
 // Vote mapping object
 const voteMapping = {
@@ -89,7 +89,7 @@ const finalResultMapping = {
 };
 
 interface ProposalTableData {
-  id: string;
+  proposalId: string;
   proposalName: string;
   finalResult: { text: string; icon: React.ReactNode };
   userVote: { text: string; icon: React.ReactNode };
@@ -99,7 +99,7 @@ interface ProposalTableData {
 }
 
 interface ProposalsTableProps {
-  proposals: any[];
+  proposals: Query_ProposalsActivity_Proposals_Items[];
   loading: boolean;
   error: Error | null;
 }
@@ -119,20 +119,21 @@ const extractProposalName = (description: string): string => {
 
 // Helper function to get user vote data for TextIconLeft
 const getUserVoteData = (
-  support: number | null | undefined,
-  proposalStatus: string | undefined,
+  support: string | null | undefined,
+  finalResultStatus: string | undefined,
 ): { text: string; icon: React.ReactNode } => {
   // If user voted
   if (support !== null && support !== undefined) {
-    const voteData = voteMapping[support as keyof typeof voteMapping];
+    const supportNumber = Number(support);
+    const voteData = voteMapping[supportNumber as keyof typeof voteMapping];
     if (voteData) {
       return { text: voteData.text, icon: voteData.icon };
     }
   }
 
-  // If user didn't vote, check proposal status
-  const status = proposalStatus?.toLowerCase();
-  if (status === "active" || status === "pending") {
+  // If user didn't vote, check final result status
+  const status = finalResultStatus?.toLowerCase();
+  if (status === "ongoing") {
     return { text: voteMapping.waiting.text, icon: voteMapping.waiting.icon };
   }
 
@@ -145,56 +146,118 @@ const getUserVoteData = (
 // Status to result mapping
 const statusToResultMapping: Record<string, keyof typeof finalResultMapping> = {
   active: "ongoing",
-  pending: "ongoing",
   executed: "yes",
   succeeded: "yes",
-  defeated: "no",
   failed: "no",
   canceled: "cancel",
-  cancelled: "cancel",
   "no-quorum": "no-quorum",
   noquorum: "no-quorum",
 };
 
+// Helper function to determine the actual status of a proposal
+const determineProposalStatus = (
+  proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
+  daoVotingPeriod: number | undefined,
+  daoQuorum: number | undefined,
+): keyof typeof finalResultMapping => {
+  if (!proposal) return "unknown";
+
+  const status = proposal.status?.toLowerCase();
+
+  // For pending proposals, check if voting period has ended
+  if (status === "pending") {
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    const proposalStartTime = Number(proposal.timestamp);
+
+    // Use DAO's voting period if available, otherwise fallback to 30 days
+    const votingDuration = Number(daoVotingPeriod); // DAO voting period or 30 days in seconds
+    const votingEndTime = proposalStartTime + votingDuration;
+
+    // If voting period has ended, check if it met quorum
+    if (currentTime > votingEndTime) {
+      if (daoQuorum) {
+        const totalVotes =
+          Number(proposal.forVotes) +
+          Number(proposal.againstVotes) +
+          Number(proposal.abstainVotes);
+        const quorumThreshold = Number(daoQuorum);
+
+        // If total votes didn't reach quorum, it's no-quorum
+        if (totalVotes < quorumThreshold) {
+          return "no-quorum";
+        }
+      }
+      return "cancel";
+    }
+
+    // Otherwise, it's still ongoing
+    return "ongoing";
+  }
+
+  // For defeated/failed proposals, check if they met quorum
+  if (status === "defeated" || status === "failed") {
+    if (daoQuorum) {
+      const totalVotes =
+        Number(proposal.forVotes) +
+        Number(proposal.againstVotes) +
+        Number(proposal.abstainVotes);
+      const quorumThreshold = Number(daoQuorum);
+
+      // If total votes didn't reach quorum, it's no-quorum
+      if (totalVotes < quorumThreshold) {
+        return "no-quorum";
+      }
+    }
+    // If quorum was met, it's a regular "no" result
+    return "no";
+  }
+
+  // For all other statuses, use the existing mapping
+  return statusToResultMapping[status] || "unknown";
+};
+
 // Helper function to get final result data for TextIconLeft
 const getFinalResultData = (
-  proposal: any,
+  proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
+  daoVotingPeriod: number | undefined,
+  daoQuorum: number | undefined,
 ): { text: string; icon: React.ReactNode } => {
   if (!proposal) return finalResultMapping.unknown;
 
-  const status = proposal.status?.toLowerCase();
-  const resultKey = statusToResultMapping[status] || "unknown";
+  const resultKey = determineProposalStatus(
+    proposal,
+    daoVotingPeriod,
+    daoQuorum,
+  );
   return finalResultMapping[resultKey];
 };
 
 // Helper function to check if proposal is finished
-const isProposalFinished = (proposalStatus: string | undefined): boolean => {
-  const status = proposalStatus?.toLowerCase();
-  return status !== "active" && status !== "pending";
+const isProposalFinished = (finalResultStatus: string | undefined): boolean => {
+  const status = finalResultStatus?.toLowerCase();
+  return status !== "ongoing";
 };
 
 // Helper function to format vote timing and calculate percentage
 const getVoteTimingData = (
-  userVote: any,
-  proposal: any,
+  userVote: Query_ProposalsActivity_Proposals_Items_UserVote | null | undefined,
+  proposal: Query_ProposalsActivity_Proposals_Items_Proposal,
+  finalResultStatus: string | undefined,
+  daoVotingPeriod: number | undefined,
 ): { text: string; percentage: number } => {
   // If user didn't vote
   if (!userVote || !userVote.timestamp) {
-    // Check if proposal is finished
-    if (isProposalFinished(proposal?.status)) {
+    // Check if proposal is finished using final result status
+    if (isProposalFinished(finalResultStatus)) {
       return { text: "Didn't vote", percentage: 0 };
     }
     return { text: "Waiting", percentage: 0 };
   }
 
-  if (!proposal || !proposal.startBlock || !proposal.endBlock) {
-    return { text: "Early", percentage: 25 };
-  }
-
   // Convert timestamps to numbers for calculation
   const voteTime = Number(userVote.timestamp);
   const startTime = Number(proposal.timestamp); // Proposal start time
-  const duration = 30 * 24 * 60 * 60; // 30 days in seconds
+  const duration = Number(daoVotingPeriod ?? 0); // Use DAO voting period or fallback to 30 days
   const endTime = startTime + duration;
 
   if (voteTime >= endTime) {
@@ -208,9 +271,7 @@ const getVoteTimingData = (
   const timeDiff = endTime - voteTime;
   const daysLeft = Math.floor(timeDiff / (24 * 60 * 60));
 
-  if (daysLeft <= 0) {
-    return { text: "Late", percentage };
-  } else if (daysLeft >= 10) {
+  if (daysLeft >= 4) {
     return { text: `Early (${daysLeft}d left)`, percentage };
   } else {
     return { text: `Late (${daysLeft}d left)`, percentage };
@@ -230,23 +291,34 @@ export const ProposalsTable = ({
   const tableData = useMemo(() => {
     if (!proposals || proposals.length === 0) return [];
 
-    return proposals.map(
-      (item): ProposalTableData => ({
-        id: item.proposal?.id || "",
+    return proposals.map((item): ProposalTableData => {
+      const finalResult = getFinalResultData(
+        item.proposal,
+        Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
+        daoData?.quorum,
+      );
+      const userVote = getUserVoteData(
+        item.userVote?.support,
+        finalResult.text,
+      );
+      return {
+        proposalId: item.proposal?.id || "",
         proposalName: extractProposalName(item.proposal?.description || ""),
-        finalResult: getFinalResultData(item.proposal),
-        userVote: getUserVoteData(
-          item.userVote?.support,
-          item.proposal?.status,
-        ),
+        finalResult,
+        userVote,
         votingPower: item.userVote?.votingPower
           ? formatNumberUserReadable(Number(item.userVote.votingPower) / 1e18)
           : "-",
-        voteTiming: getVoteTimingData(item.userVote, item.proposal),
+        voteTiming: getVoteTimingData(
+          item.userVote,
+          item.proposal,
+          finalResult.text,
+          Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
+        ),
         status: item.proposal?.status || "unknown",
-      }),
-    );
-  }, [proposals]);
+      };
+    });
+  }, [proposals, daoData?.votingPeriod, daoData?.quorum]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
@@ -457,11 +529,10 @@ export const ProposalsTable = ({
       enableSorting: true,
     },
     {
-      accessorKey: "redirect",
+      accessorKey: "proposalId",
       size: 38,
       cell: ({ row }) => {
-        const proposalId = row.getValue("id") as string;
-
+        const proposalId = row.getValue("proposalId") as string;
         if (loading) {
           return (
             <div className="flex h-10 items-center justify-center py-2 pr-0.5 pl-1">
@@ -503,14 +574,13 @@ export const ProposalsTable = ({
         <TheTable
           columns={proposalColumns}
           data={Array.from({ length: 5 }, (_, i) => ({
-            id: `loading-${i}`,
+            proposalId: `loading-${i}`,
             proposalName: "",
             finalResult: { text: "", icon: null },
             userVote: { text: "", icon: null },
             votingPower: "",
             voteTiming: { text: "", percentage: 0 },
             status: "",
-            redirect: "",
           }))}
           withPagination={false}
           withSorting={true}
