@@ -57,15 +57,23 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const handleSort = (field: string) => {
     if (field === "date") {
       const newOrderBy = "timestamp";
+      // Toggle direction if we're already sorting by date, otherwise start with desc
       const newOrderDirection =
-        orderBy === "timestamp" && orderDirection === "asc" ? "desc" : "asc";
+        sortBy === "date" &&
+        orderBy === "timestamp" &&
+        orderDirection === "desc"
+          ? "asc"
+          : "desc";
       setOrderBy(newOrderBy);
       setOrderDirection(newOrderDirection);
       setSortBy("date");
     } else if (field === "amount") {
       const newOrderBy = "amount";
+      // Toggle direction if we're already sorting by amount, otherwise start with desc
       const newOrderDirection =
-        orderBy === "amount" && orderDirection === "asc" ? "desc" : "asc";
+        sortBy === "amount" && orderBy === "amount" && orderDirection === "desc"
+          ? "asc"
+          : "desc";
       setOrderBy(newOrderBy);
       setOrderDirection(newOrderDirection);
       setSortBy("amount");
@@ -103,7 +111,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
       accessorKey: "date",
-      size: 150,
+      size: 160,
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
 
@@ -143,7 +151,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           />
         </Button>
       ),
-      enableSorting: true,
     },
     {
       accessorKey: "amount",
@@ -189,7 +196,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           />
         </Button>
       ),
-      enableSorting: true,
     },
     {
       accessorKey: "type",
@@ -283,7 +289,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         </div>
       ),
-      enableSorting: false,
     },
     {
       accessorKey: "fromAddress",
@@ -319,7 +324,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         );
       },
       header: () => <h4 className="text-table-header px-4">From</h4>,
-      enableSorting: false,
     },
     {
       accessorKey: "toAddress",
@@ -355,17 +359,12 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         );
       },
       header: () => <h4 className="text-table-header px-4">To</h4>,
-      enableSorting: false,
     },
   ];
 
   return (
     <div className="flex w-full flex-col gap-2 p-4">
-      <TheTable
-        columns={balanceHistoryColumns}
-        data={tableData}
-        withSorting={true}
-      />
+      <TheTable columns={balanceHistoryColumns} data={tableData} />
 
       {/* Pagination */}
       <Pagination
