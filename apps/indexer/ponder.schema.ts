@@ -32,7 +32,6 @@ export const token = onchainTable("token", (drizzle) => ({
 
 export const account = onchainTable("account", (drizzle) => ({
   id: drizzle.text().primaryKey(),
-  type: drizzle.text().default("EOA").notNull(),
 }));
 
 export const accountBalance = onchainTable(
@@ -82,6 +81,7 @@ export const votingPowerHistory = onchainTable(
     daoId: drizzle.text("dao_id").notNull(),
     accountId: drizzle.text("account_id"),
     votingPower: drizzle.bigint("voting_power").notNull(),
+    delta: drizzle.bigint("delta").notNull(),
     timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({

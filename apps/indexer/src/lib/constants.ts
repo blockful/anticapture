@@ -1,9 +1,6 @@
-import { Abi, Address, zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 
 import { DaoIdEnum, NetworkEnum } from "./enums";
-import { UNITokenAbi } from "@/indexer/uni";
-import { ENSTokenAbi } from "@/indexer/ens";
-import { ARBTokenAbi } from "@/indexer/arb";
 
 export const DAYS_IN_YEAR = 365;
 export const SECONDS_PER_BLOCK = 12; // Ethereum average
@@ -17,36 +14,49 @@ export const CONTRACT_ADDRESSES: Record<
         token: { address: Address; decimals: number; abi: Abi };
         governor?: Address;
         blockTime: number; // Block time in seconds
+        token: { address: Address; decimals: number; startBlock: number };
+        governor?: { address: Address; startBlock: number };
       }
     >
   >
 > = {
   [NetworkEnum.ETHEREUM]: {
     [DaoIdEnum.UNI]: {
+      // https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
       token: {
         address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
         decimals: 18,
-        abi: UNITokenAbi,
+        startBlock: 10861674,
       },
-      governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+      // https://etherscan.io/address/0x408ED6354d4973f66138C91495F2f2FCbd8724C3
+      governor: {
+        address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+        startBlock: 13059157,
+      },
       blockTime: 12, // Ethereum average block time
     },
     [DaoIdEnum.ENS]: {
+      // https://etherscan.io/address/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72
       token: {
         address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
         decimals: 18,
-        abi: ENSTokenAbi,
+        startBlock: 9380410,
       },
-      governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      // https://etherscan.io/address/0x323a76393544d5ecca80cd6ef2a560c6a395b7e3
+      governor: {
+        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+        startBlock: 13533772,
+      },
       blockTime: 12, // Ethereum average block time
     },
   },
   [NetworkEnum.ARBITRUM]: {
     [DaoIdEnum.ARB]: {
+      // https://arbiscan.io/address/0x912CE59144191C1204E64559FE8253a0e49E6548
       token: {
         address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
         decimals: 18,
-        abi: ARBTokenAbi,
+        startBlock: 70398200,
       },
       blockTime: 0.25, // Arbitrum average block time
     },
@@ -56,9 +66,12 @@ export const CONTRACT_ADDRESSES: Record<
       token: {
         address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
         decimals: 18,
-        abi: ENSTokenAbi,
+        startBlock: 22635098,
       },
-      governor: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+      governor: {
+        address: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+        startBlock: 22635098,
+      },
       blockTime: 1, // Anvil default block time
     },
   },
