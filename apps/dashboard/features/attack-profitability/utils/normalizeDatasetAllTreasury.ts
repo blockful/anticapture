@@ -27,7 +27,7 @@ export function normalizeDatasetAllTreasury(
   const sortedGovernanceTokenTreasuries = [...(governanceTokenTreasuries ?? [])]
     .map((item) => ({
       timestamp: Number(item.date) * 1000,
-      close: Number(item.close) / 1e18,
+      close: Number(item.close) / 1e18, // close is the price in the end of the day, for treasury is better if we use this instead of high because generally speaking there is not too many changes in the treasury during the year
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
