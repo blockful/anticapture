@@ -1,4 +1,4 @@
-import { Address, zeroAddress } from "viem";
+import { Address, zeroAddress, Abi } from "viem";
 
 import { DaoIdEnum, NetworkEnum } from "./enums";
 
@@ -11,11 +11,9 @@ export const CONTRACT_ADDRESSES: Record<
     Record<
       DaoIdEnum,
       {
-        token: { address: Address; decimals: number; abi: Abi };
-        governor?: Address;
-        blockTime: number; // Block time in seconds
         token: { address: Address; decimals: number; startBlock: number };
         governor?: { address: Address; startBlock: number };
+        blockTime: number; // Block time in seconds
       }
     >
   >
