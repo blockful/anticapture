@@ -63,7 +63,7 @@ export class HistoricalVotingPowerService {
       return await this.getVotingPowerWithMulticall(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     } catch (error) {
       console.error("Error fetching historical voting power:", error);
@@ -71,7 +71,7 @@ export class HistoricalVotingPowerService {
       return await this.getVotingPowerIndividually(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     }
   }
@@ -82,7 +82,7 @@ export class HistoricalVotingPowerService {
   private async getVotingPowerWithMulticall(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalVotingPower[]> {
     const results = await multicall(this.client, {
       contracts: addresses.map((address) => ({
@@ -117,7 +117,7 @@ export class HistoricalVotingPowerService {
   private async getVotingPowerIndividually(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalVotingPower[]> {
     const votingPowers = await Promise.allSettled(
       addresses.map((address) =>
@@ -129,8 +129,8 @@ export class HistoricalVotingPowerService {
           functionName: "getVotes",
           args: [address],
           blockNumber: BigInt(blockNumber),
-        })
-      )
+        }),
+      ),
     );
 
     // Transform results into HistoricalVotingPower objects

@@ -2,7 +2,6 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
-import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
   HistoricalBalancesRequest,
@@ -12,7 +11,7 @@ import {
   HistoricalVotingPowerRequest,
 } from "../services/historical-voting-power";
 
-export function historicalOnchain(app: Hono) {
+export function historicalOnchain(app: Hono, daoId: DaoIdEnum) {
   const balancesService = new HistoricalBalancesService();
   const votingPowerService = new HistoricalVotingPowerService();
 
@@ -21,15 +20,12 @@ export function historicalOnchain(app: Hono) {
     createRoute({
       method: "get",
       operationId: "historicalBalances",
-      path: "/historical-balances/{daoId}",
+      path: "/historical-balances",
       summary: "Get historical token balances",
       description:
         "Fetch historical token balances for multiple addresses at a specific block number using multicall",
       tags: ["historical-onchain"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           addresses: z
             .array(z.string())
@@ -68,7 +64,6 @@ export function historicalOnchain(app: Hono) {
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalBalancesRequest = {
@@ -88,15 +83,12 @@ export function historicalOnchain(app: Hono) {
     createRoute({
       method: "get",
       operationId: "historicalVotingPower",
-      path: "/historical-voting-power/{daoId}",
+      path: "/historical-voting-power",
       summary: "Get historical voting power",
       description:
         "Fetch historical voting power for multiple addresses at a specific block number using multicall",
       tags: ["historical-onchain"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           addresses: z
             .array(z.string())
@@ -135,7 +127,6 @@ export function historicalOnchain(app: Hono) {
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const { addresses, blockNumber } = context.req.valid("query");
 
       const request: HistoricalVotingPowerRequest = {
