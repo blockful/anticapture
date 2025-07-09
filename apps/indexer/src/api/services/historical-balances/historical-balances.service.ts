@@ -8,8 +8,7 @@ import {
 } from "viem";
 import { readContract, multicall } from "viem/actions";
 
-import { DaoIdEnum } from "@/lib/enums";
-import { DaysEnum } from "@/lib/daysEnum";
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getChain } from "@/lib/utils";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
@@ -60,7 +59,7 @@ export class HistoricalBalancesService {
     const blockNumber = calculateHistoricalBlockNumber(
       daysInSeconds,
       currentBlockNumber,
-      daoId
+      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
     );
     try {
       return await this.getBalancesWithMulticall(
