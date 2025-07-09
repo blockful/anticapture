@@ -20,10 +20,7 @@ interface ProposalsActivity {
 interface Delegate {
   votingPower: any;
   delegationsCount: number;
-  account?: {
-    type: string;
-    id: string;
-  } | null;
+  accountId: string;
   proposalsActivity?: ProposalsActivity;
   historicalVotingPower?: string;
 }
@@ -130,7 +127,7 @@ export const useDelegates = ({
   const delegateAddresses = useMemo(() => {
     return (
       delegatesData?.accountPowers?.items
-        ?.map((delegate) => delegate?.account?.id)
+        ?.map((delegate) => delegate?.accountId)
         .filter(Boolean) || []
     );
   }, [delegatesData]);
@@ -230,7 +227,7 @@ export const useDelegates = ({
     if (!baseData) return null;
 
     return baseData.map((delegate) => {
-      const address = delegate.account?.id;
+      const address = delegate.accountId;
 
       // Get proposals activity for this specific delegate
       const proposalsActivity =
@@ -241,7 +238,7 @@ export const useDelegates = ({
       // Find historical voting power for this delegate
       const historicalVotingPowerData =
         historicalData?.historicalVotingPower?.find(
-          (historical) => historical?.address === delegate.account?.id,
+          (historical) => historical?.address === delegate.accountId,
         );
 
       return {

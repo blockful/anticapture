@@ -114,7 +114,6 @@ export const useTokenHolders = ({
       balance: holder.balance,
       delegate: holder.delegate,
       tokenId: holder.tokenId,
-      account: holder.account,
     }));
   }, [tokenHoldersData]);
 
