@@ -16,6 +16,17 @@ on:
     types: [created]
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment'
+    steps:
+      - name: Debug comment event
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Comment body: ${{ github.event.comment.body }}"
+          echo "Is PR: ${{ !!github.event.issue.pull_request }}"
+          echo "Contains deploy-dev: ${{ contains(github.event.comment.body, '/deploy-dev') }}"
+
   get-daos:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/deploy-dev'))
