@@ -1,31 +1,27 @@
 "use client";
 
 import { ThePieChart } from "@/features/holders-and-delegates/components/ThePieChart";
-import { Address } from "viem";
-import { formatNumberUserReadable } from "@/shared/utils";
 import { VotingPowerTable } from "@/features/holders-and-delegates/components/VotingPowerTable";
-
-interface DelegatorItem {
-  address: Address;
-  delegated: number;
-}
+import { DaoIdEnum } from "@/shared/types/daos";
+import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
+import { formatNumberUserReadable } from "@/shared/utils/";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
     label: "Delegated Supply",
-    color: "#3B82F6",
+    color: "var(--base-chart-1)",
   },
   cexSupply: {
     label: "CEX Supply",
-    color: "#FB923C",
+    color: "var(--base-chart-3)",
   },
   dexSupply: {
     label: "DEX Supply",
-    color: "#22C55E",
+    color: "var(--base-chart-5)",
   },
   lendingSupply: {
     label: "Lending Supply",
-    color: "#ffbb28",
+    color: "var(--base-chart-7)",
   },
 };
 
@@ -47,31 +43,31 @@ const ChartLegend = ({
   </div>
 );
 
-// Temporary mock – replace with real data when hook is ready
-const mockDelegators: DelegatorItem[] = [
-  {
-    address: "0x1234567890abcdef1234567890abcdef12345678",
-    delegated: 12345.67,
-  },
-];
-
 export const VotingPower = ({
   address,
   daoId,
 }: {
   address: string;
-  daoId: string;
+  daoId: DaoIdEnum;
 }) => {
-  // TODO: fetch real values with dedicated hook
-  const currentVotingPower = 0;
+  const { data: votingPowerData, loading } = useVotingPower({
+    daoId,
+    address,
+  });
+
+  // Calculate total voting power from all delegators
+  const totalVotingPower =
+    votingPowerData?.reduce((total, item) => {
+      return total + (parseFloat(item.balance) || 0);
+    }, 0) || 0;
 
   return (
     <>
-      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 border p-4 sm:flex-row">
-        <div className="fle h-full w-full flex-col">
+      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
+        <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-row gap-4">
             <div className="size-56">
-              <ThePieChart />
+              <ThePieChart daoId={daoId} address={address} />
             </div>
 
             <div className="flex w-full flex-col gap-6">
@@ -81,7 +77,11 @@ export const VotingPower = ({
                   Current Voting Power
                 </p>
                 <p className="text-md font-normal">
-                  {formatNumberUserReadable(currentVotingPower)}
+                  {loading ? (
+                    <span className="text-secondary">Loading...</span>
+                  ) : (
+                    formatNumberUserReadable(totalVotingPower)
+                  )}
                 </p>
               </div>
 
@@ -90,18 +90,38 @@ export const VotingPower = ({
               {/* Delegators */}
               <div className="flex flex-col gap-2">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Delegators
+                  Delegators ({votingPowerData?.length || 0})
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  {mockDelegators.map((d) => (
-                    <div
-                      key={d.address}
-                      className="flex items-center gap-2 rounded-md"
-                    >
-                      <ChartLegend items={Object.values(chartConfig)} />
+                  {loading ? (
+                    <div className="text-secondary text-sm">
+                      Loading delegators...
                     </div>
-                  ))}
+                  ) : votingPowerData && votingPowerData.length > 0 ? (
+                    votingPowerData.map((delegator) => (
+                      <div
+                        key={delegator.delegate}
+                        className="hover:bg-surface-hover flex items-center justify-between gap-2 rounded-md p-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="bg-surface-action size-2 rounded-xs" />
+                          <span className="text-sm font-medium">
+                            {delegator.delegate}
+                          </span>
+                        </div>
+                        <span className="text-secondary text-sm">
+                          {formatNumberUserReadable(
+                            parseFloat(delegator.balance) || 0,
+                          )}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-secondary text-sm">
+                      No delegators found
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

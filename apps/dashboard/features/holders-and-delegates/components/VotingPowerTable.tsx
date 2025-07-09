@@ -5,24 +5,12 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Address } from "viem";
-import { useDelegationHistory } from "../hooks/useDelegationHistory";
-import { formatUnits } from "viem";
-import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client/hooks";
-import {
-  formatNumberUserReadable,
-  formatDateUserReadable,
-} from "@/shared/utils/";
+import { formatNumberUserReadable } from "@/shared/utils/";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { AlertOctagon, Inbox } from "lucide-react";
-import { Pagination2 } from "@/shared/components/design-system/table/Pagination2";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-
-interface DelegationData {
-  address: string;
-  amount: string;
-  date: string;
-  timestamp: number;
-}
+import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const VotingPowerTable = ({
   address,
@@ -33,53 +21,34 @@ export const VotingPowerTable = ({
 }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [sortBy, setSortBy] = useState<"timestamp" | "delegatedValue">(
-    "timestamp",
-  );
+  const [sortBy, setSortBy] = useState<"balance">("balance");
+
   const {
-    data: delegationHistory,
+    data: votingPowerData,
     loading,
     error,
-    pagination,
-    fetchNextPage,
-    fetchPreviousPage,
-    fetchingMore,
-  } = useDelegationHistory({
-    daoId: daoId as QueryInput_HistoricalVotingPower_DaoId,
-    delegatorAccountId: address,
-    orderBy: sortBy,
-    orderDirection: sortOrder,
+    pageInfo,
+    fetchMore,
+  } = useVotingPower({
+    daoId: daoId as DaoIdEnum,
+    address: address,
   });
+
+  console.log("votingPowerData = ", votingPowerData);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const data: DelegationData[] =
-    delegationHistory?.map((delegation) => {
-      const delegateAddress = delegation.delegate?.id || "";
-      const votingPower =
-        delegation.delegate?.powers?.items?.[0]?.votingPower || "0";
-      const timestamp = delegation.timestamp || 0;
+  // Mapear votingPowerData para o formato da tabela
+  const data = (votingPowerData || [])
+    .filter((item) => Number(item.balance) > 0)
+    .map((item) => ({
+      address: item.delegate,
+      amount: Number(item.balance),
+    }));
 
-      const formattedAmount =
-        votingPower !== "0"
-          ? Number(formatUnits(BigInt(votingPower), 18)).toFixed(2)
-          : "0";
-
-      const date = timestamp
-        ? formatDateUserReadable(new Date(Number(timestamp) * 1000))
-        : "Unknown";
-
-      return {
-        address: delegateAddress,
-        amount: formattedAmount,
-        date,
-        timestamp: Number(timestamp),
-      };
-    }) || [];
-
-  const delegationHistoryColumns: ColumnDef<DelegationData>[] = [
+  const columns: ColumnDef<{ address: string; amount: number }>[] = [
     {
       accessorKey: "address",
       header: () => (
@@ -102,7 +71,6 @@ export const VotingPowerTable = ({
             </div>
           );
         }
-
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex h-10 w-full items-center gap-2 px-2">
@@ -111,6 +79,7 @@ export const VotingPowerTable = ({
               size="sm"
               variant="rounded"
             />
+            <span className="truncate text-xs">{addressValue}</span>
           </div>
         );
       },
@@ -120,11 +89,10 @@ export const VotingPowerTable = ({
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("delegatedValue");
+          setSortBy("balance");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
         };
-
         return (
           <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
             Amount ({daoId})
@@ -135,7 +103,7 @@ export const VotingPowerTable = ({
               <ArrowUpDown
                 props={{ className: "ml-2 size-4" }}
                 activeState={
-                  sortBy === "delegatedValue" && sortOrder === "asc"
+                  sortBy === "balance" && sortOrder === "asc"
                     ? ArrowState.UP
                     : ArrowState.DOWN
                 }
@@ -153,61 +121,10 @@ export const VotingPowerTable = ({
             />
           );
         }
-
-        const amount: string = row.getValue("amount");
-
+        const amount: number = row.getValue("amount");
         return (
           <div className="flex h-10 w-full items-center justify-end px-2 text-sm">
-            {formatNumberUserReadable(Number(amount), 1)}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "date",
-      header: ({ column }) => {
-        const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("timestamp");
-          setSortOrder(newSortOrder);
-          column.toggleSorting(newSortOrder === "desc");
-        };
-        return (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            Date
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
-              onClick={handleSortToggle}
-            >
-              <ArrowUpDown
-                props={{ className: "ml-2 size-4" }}
-                activeState={
-                  sortBy === "timestamp"
-                    ? sortOrder === "asc"
-                      ? ArrowState.UP
-                      : ArrowState.DOWN
-                    : ArrowState.DEFAULT
-                }
-              />
-            </button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        if (!isMounted || loading) {
-          return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse"
-              className="h-4 w-20"
-            />
-          );
-        }
-
-        const date: string = row.getValue("date");
-
-        return (
-          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
-            {date}
+            {formatNumberUserReadable(amount, 1)}
           </div>
         );
       },
@@ -233,7 +150,7 @@ export const VotingPowerTable = ({
         <BlankState
           variant="default"
           icon={Inbox}
-          description="No delegation history found for this address"
+          description="No voting power data found for this address"
         />
       </div>
     );
@@ -243,23 +160,13 @@ export const VotingPowerTable = ({
     <div className="flex flex-col gap-4">
       <div className="w-full">
         <TheTable
-          columns={delegationHistoryColumns}
+          columns={columns}
           data={loading ? Array(5).fill({}) : data}
           withSorting={true}
-          withPagination={true}
+          withPagination={false}
           filterColumn="address"
         />
       </div>
-
-      <Pagination2
-        currentPage={pagination.currentPage}
-        totalPages={pagination.totalPages}
-        onPrevious={fetchPreviousPage}
-        onNext={fetchNextPage}
-        hasNextPage={pagination.hasNextPage}
-        hasPreviousPage={pagination.hasPreviousPage}
-        isLoading={fetchingMore}
-      />
     </div>
   );
 };

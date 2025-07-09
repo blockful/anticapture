@@ -19,6 +19,8 @@ export const useVotingPower = ({
     },
   });
 
+  console.log("data voting power = ", data);
+
   const { data: countingData } = useGetVotingPowerQuery({
     context: {
       headers: {
