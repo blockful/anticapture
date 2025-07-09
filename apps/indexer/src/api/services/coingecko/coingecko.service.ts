@@ -12,7 +12,7 @@ export class CoingeckoService {
 
   async getHistoricalTokenData(
     tokenId: CoingeckoTokenId,
-    days: number = DAYS_IN_YEAR
+    days: number = DAYS_IN_YEAR,
   ): Promise<CoingeckoHistoricalMarketData> {
     try {
       const response = await fetch(
@@ -21,7 +21,7 @@ export class CoingeckoService {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,
           },
-        }
+        },
       );
 
       if (!response.ok) {

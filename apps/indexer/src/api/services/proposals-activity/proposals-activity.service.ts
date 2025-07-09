@@ -197,7 +197,7 @@ export class ProposalsActivityService {
       winRate: Math.round(winRate * 100) / 100,
       yesRate: Math.round(yesRate * 100) / 100,
       avgTimeBeforeEnd, // This parameter is in seconds
-    }
+    };
   }
 
   private calculateWinRate(proposals: DbProposal[], userVotes: DbVote[]) {
