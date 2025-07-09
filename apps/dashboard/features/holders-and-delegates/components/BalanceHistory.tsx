@@ -82,14 +82,44 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
   // Transform transfers to table data format
   const transformedData = useMemo(() => {
-    return transfers.map((transfer) => ({
-      id: transfer.transactionHash,
-      date: new Date(parseInt(transfer.timestamp) * 1000).toLocaleDateString(),
-      amount: formatNumberUserReadable(parseFloat(transfer.amount)),
-      type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
-      fromAddress: transfer.fromAccountId || "",
-      toAddress: transfer.toAccountId || "",
-    }));
+    return transfers.map((transfer) => {
+      const transferDate = new Date(parseInt(transfer.timestamp) * 1000);
+      const now = new Date();
+      const diffInMs = now.getTime() - transferDate.getTime();
+      const diffInSeconds = Math.floor(diffInMs / 1000);
+      const diffInMinutes = Math.floor(diffInSeconds / 60);
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      const diffInDays = Math.floor(diffInHours / 24);
+      const diffInWeeks = Math.floor(diffInDays / 7);
+      const diffInMonths = Math.floor(diffInDays / 30);
+      const diffInYears = Math.floor(diffInDays / 365);
+
+      let relativeTime;
+      if (diffInYears > 0) {
+        relativeTime = `${diffInYears} year${diffInYears > 1 ? "s" : ""} ago`;
+      } else if (diffInMonths > 0) {
+        relativeTime = `${diffInMonths} month${diffInMonths > 1 ? "s" : ""} ago`;
+      } else if (diffInWeeks > 0) {
+        relativeTime = `${diffInWeeks} week${diffInWeeks > 1 ? "s" : ""} ago`;
+      } else if (diffInDays > 0) {
+        relativeTime = `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+      } else if (diffInHours > 0) {
+        relativeTime = `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+      } else if (diffInMinutes > 0) {
+        relativeTime = `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+      } else {
+        relativeTime = "Just now";
+      }
+
+      return {
+        id: transfer.transactionHash,
+        date: relativeTime,
+        amount: formatNumberUserReadable(parseFloat(transfer.amount)),
+        type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
+        fromAddress: transfer.fromAccountId || "",
+        toAddress: transfer.toAccountId || "",
+      };
+    });
   }, [transfers]);
 
   // Handle loading state with skeleton data
@@ -111,7 +141,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
       accessorKey: "date",
-      size: 160,
+      size: 100,
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
 
@@ -292,7 +322,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "fromAddress",
-      size: 280,
+      size: 200,
       cell: ({ row }) => {
         const fromAddress = row.getValue("fromAddress") as string;
         const fromEns = row.original.fromEns;
@@ -327,7 +357,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "toAddress",
-      size: 280,
+      size: 200,
       cell: ({ row }) => {
         const toAddress = row.getValue("toAddress") as string;
         const toEns = row.original.toEns;
