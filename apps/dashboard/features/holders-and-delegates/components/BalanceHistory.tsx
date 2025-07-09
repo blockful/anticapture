@@ -2,11 +2,12 @@ import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { TheTable, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { Filter } from "lucide-react";
+import { ArrowRight, ExternalLink, Filter } from "lucide-react";
 import { useBalanceHistory, Transfer } from "../hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
@@ -158,7 +159,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex h-10 items-center px-4 py-2">
-            <span className="text-secondary text-sm">{date}</span>
+            <span className="text-primary text-sm">{date}</span>
           </div>
         );
       },
@@ -201,7 +202,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex h-10 items-center justify-end px-4 py-2">
-            <span className="text-primary text-sm font-medium">
+            <span className="text-secondary text-sm font-medium">
               {amount} ENS
             </span>
           </div>
@@ -246,16 +247,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex h-10 items-center px-4 py-2">
-            <span
-              className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium",
-                type === "Buy"
-                  ? "bg-success/20 text-success"
-                  : "bg-error/20 text-error",
-              )}
-            >
-              {type}
-            </span>
+            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
@@ -343,13 +335,14 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 px-4 py-2">
+          <div className="flex h-10 w-full items-center justify-between gap-3 px-4 py-2">
             <EnsAvatar
               address={fromAddress as `0x${string}`}
               size="sm"
               variant="rounded"
               showName={true}
             />
+            <ArrowRight className="text-primary size-4" />
           </div>
         );
       },
@@ -378,13 +371,14 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 px-4 py-2">
+          <div className="flex h-10 w-full items-center justify-between gap-3 px-4 py-2">
             <EnsAvatar
               address={toAddress as `0x${string}`}
               size="sm"
               variant="rounded"
               showName={true}
             />
+            <ExternalLink className="text-primary size-4" />
           </div>
         );
       },
