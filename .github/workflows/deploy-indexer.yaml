@@ -2,17 +2,12 @@ name: Deploy Indexers and API Gateway to Railway
 
 on:
   push:
-    branches: [dev, main]
+    branches: [main, dev]
     paths:
       - "apps/indexer/**/*.ts"
       - "apps/api-gateway/**/*.ts"
       - "infra/**"
-  pull_request:
-    branches: [dev]
-    paths:
-      - "apps/indexer/**/*.ts"
-      - "apps/api-gateway/**/*.ts"
-      - "infra/**"
+  workflow_dispatch:
 
 jobs:
   get-daos:
