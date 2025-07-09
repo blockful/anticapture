@@ -63,7 +63,7 @@ export const storeDailyBucket = async (
     .onConflictDoUpdate((row) => ({
       average:
         (row.average * BigInt(row.count) + newValue) / BigInt(row.count + 1),
-      high: max(newValue, row.low),
+      high: max(newValue, row.high),
       low: min(newValue, row.low),
       close: newValue,
       volume: row.volume + volume,
