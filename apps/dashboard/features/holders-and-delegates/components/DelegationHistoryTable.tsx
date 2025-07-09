@@ -14,8 +14,8 @@ import {
 } from "@/shared/utils/";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { AlertOctagon, Inbox } from "lucide-react";
-import { Pagination2 } from "@/shared/components/design-system/table/Pagination2";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 interface DelegationData {
   address: string;
@@ -251,7 +251,7 @@ export const DelegationHistoryTable = ({
         />
       </div>
 
-      <Pagination2
+      <Pagination
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
         onPrevious={fetchPreviousPage}
