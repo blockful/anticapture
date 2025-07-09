@@ -1,8 +1,7 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
-import { DaoIdEnum } from "@/lib/enums";
-import { DaysEnum, DaysOpts } from "@/lib/daysEnum";
+import { DaoIdEnum, DaysOpts } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
@@ -44,9 +43,10 @@ export function historicalOnchain(app: Hono) {
                 .refine((addr) => isAddress(addr), "Invalid Ethereum address")
                 .transform((addr) => [addr]),
             ),
-          days: z.enum(DaysOpts, {
-            errorMap: () => ({ message: "Invalid days parameter. Must be one of: 7d, 30d, 90d, 180d, 365d" }),
-          }),
+            days: z
+            .enum(DaysOpts)
+            .default("7d")
+            .transform((val) => parseInt(val.replace("d", ""))),
         }),
       },
       responses: {
@@ -73,7 +73,7 @@ export function historicalOnchain(app: Hono) {
 
       const request: HistoricalBalancesRequest = {
         addresses,
-        daysInSeconds: DaysEnum[days],
+        daysInSeconds: days,
         daoId,
       };
 
@@ -110,9 +110,10 @@ export function historicalOnchain(app: Hono) {
                 .refine((addr) => isAddress(addr), "Invalid Ethereum address")
                 .transform((addr) => [addr]),
             ),
-          days: z.enum(DaysOpts, {
-            errorMap: () => ({ message: "Invalid days parameter. Must be one of: 7d, 30d, 90d, 180d, 365d" }),
-          }),
+            days: z
+            .enum(DaysOpts)
+            .default("7d")
+            .transform((val) => parseInt(val.replace("d", ""))),
         }),
       },
       responses: {
@@ -139,7 +140,7 @@ export function historicalOnchain(app: Hono) {
 
       const request: HistoricalVotingPowerRequest = {
         addresses,
-        daysInSeconds: DaysEnum[days],
+        daysInSeconds: days,
         daoId,
       };
 
