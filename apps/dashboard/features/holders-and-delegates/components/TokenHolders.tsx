@@ -406,8 +406,6 @@ export const TokenHolders = ({
             onRowClick={() => {}}
             isTableSmall={true}
           />
-        </div>
-        <div>
           <Pagination
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
