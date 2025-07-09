@@ -25,7 +25,7 @@ export function normalizeDataset(
   // Prepare multipliers sorted by timestamp
   const sortedMultipliers = multiplierDataSet
     .map((item) => ({
-      timestamp: Number(item.date),
+      timestamp: Number(item.date) * 1000,
       high: Number(item.high) / 1e18,
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
@@ -34,19 +34,21 @@ export function normalizeDataset(
   const sortedTokenPrices = [...tokenPrices].sort((a, b) => a[0] - b[0]);
 
   // Transform price data with appropriate multipliers
-  return sortedTokenPrices.map(([timestamp, price]) => ({
-    date: timestamp,
-    [key]:
-      price *
-      findMostRecentValue(
-        sortedMultipliers,
-        timestamp,
-        "high",
-        multiplier != null
-          ? multiplier
-          : sortedMultipliers.length > 0
-            ? sortedMultipliers[0].high
-            : 1,
-      ),
-  }));
+  return sortedTokenPrices.map(([timestamp, price]) => {
+    return {
+      date: timestamp,
+      [key]:
+        price *
+        findMostRecentValue(
+          sortedMultipliers,
+          timestamp,
+          "high",
+          multiplier != null
+            ? multiplier
+            : sortedMultipliers.length > 0
+              ? sortedMultipliers[0].high
+              : 1,
+        ),
+    };
+  });
 }
