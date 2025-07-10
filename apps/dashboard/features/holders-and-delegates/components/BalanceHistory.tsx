@@ -142,7 +142,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
       accessorKey: "date",
-      size: 100,
+      size: 120,
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
 
@@ -158,7 +158,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center px-4 py-2">
+          <div className="flex h-10 items-center px-2 py-2">
             <span className="text-primary text-sm">{date}</span>
           </div>
         );
@@ -166,10 +166,10 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-4"
+          className="!text-table-header w-full justify-start px-4 text-sm"
           onClick={() => handleSort("date")}
         >
-          Date
+          <span className="text-xs">Date</span>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
@@ -185,7 +185,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "amount",
-      size: 200,
+      size: 120,
       cell: ({ row }) => {
         const amount = row.getValue("amount") as string;
 
@@ -202,21 +202,19 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex h-10 items-center justify-end px-4 py-2">
-            <span className="text-secondary text-sm font-medium">
-              {amount} ENS
-            </span>
+            <span className="text-secondary text-sm font-medium">{amount}</span>
           </div>
         );
       },
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-end px-4"
+          className="!text-table-header w-full justify-end px-4 text-sm"
           onClick={() => handleSort("amount")}
         >
-          Amount
+          <span className="text-xs">Amount (ENS)</span>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: " size-4" }}
             activeState={
               sortBy === "amount"
                 ? orderDirection === "asc"
@@ -253,7 +251,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       },
       header: () => (
         <div className="flex items-center gap-2 px-4">
-          <h4 className="text-table-header">Type</h4>
+          <h4 className="text-table-header text-xs">Type</h4>
           <div className="relative">
             <button
               onClick={() => setShowTypeFilter(!showTypeFilter)}
@@ -314,7 +312,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "fromAddress",
-      size: 200,
+      size: 204,
       cell: ({ row }) => {
         const fromAddress = row.getValue("fromAddress") as string;
         const fromEns = row.original.fromEns;
@@ -341,16 +339,20 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
               size="sm"
               variant="rounded"
               showName={true}
+              nameClassName={cn(
+                "text-secondary",
+                fromAddress === accountId && "text-primary",
+              )}
             />
-            <ArrowRight className="text-primary size-4" />
+            <ArrowRight className="text-secondary size-4" />
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-4">From</h4>,
+      header: () => <h4 className="text-table-header px-4 text-xs">From</h4>,
     },
     {
       accessorKey: "toAddress",
-      size: 200,
+      size: 204,
       cell: ({ row }) => {
         const toAddress = row.getValue("toAddress") as string;
         const toEns = row.original.toEns;
@@ -377,12 +379,16 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
               size="sm"
               variant="rounded"
               showName={true}
+              nameClassName={cn(
+                "text-secondary",
+                toAddress === accountId && "text-primary",
+              )}
             />
             <ExternalLink className="text-primary size-4" />
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-4">To</h4>,
+      header: () => <h4 className="text-table-header px-4 text-xs">To</h4>,
     },
   ];
 
