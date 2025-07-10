@@ -3,8 +3,7 @@
 import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address, isAddress } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
+import { Address } from "viem";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
@@ -286,15 +285,10 @@ export const TokenHolders = ({
           );
         }
 
-        const delegate: string = row.getValue("delegate");
-        const delegateAddress = isAddress(delegate)
-          ? formatAddress(delegate)
-          : "Invalid address";
-
         return (
           <div className="flex h-10 items-center gap-1.5 px-4 py-2">
             <EnsAvatar
-              address={delegate as Address}
+              address={row.getValue("delegate") as Address}
               size="sm"
               variant="rounded"
             />
