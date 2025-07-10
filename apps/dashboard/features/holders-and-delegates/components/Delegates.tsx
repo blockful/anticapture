@@ -66,7 +66,7 @@ const getTimeDataFromPeriod = (period: TimeInterval) => {
 
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
-  daoId = DaoIdEnum.ENS,
+  daoId,
 }: DelegatesProps) => {
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
@@ -246,9 +246,7 @@ export const Delegates = ({
           className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">
-            Voting Power ({daoId === DaoIdEnum.ENS ? "ENS" : "UNI"})
-          </h4>
+          <h4 className="text-table-header">Voting Power ({daoId})</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
@@ -496,7 +494,7 @@ export const Delegates = ({
         address={
           selectedDelegate || "0x0000000000000000000000000000000000000000"
         }
-        daoId={daoId}
+        daoId={daoId as DaoIdEnum}
       />
     </>
   );
