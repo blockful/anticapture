@@ -35,7 +35,7 @@ export const VotingPowerTable = ({
 
   const tableData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
     .map((balanceData: any) => ({
-      address: balanceData.delegate || "",
+      address: balanceData.accountId || "",
       amount: Number(balanceData.balance) || 0,
       date: "",
     }))

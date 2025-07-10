@@ -55,7 +55,7 @@ export const ThePieChart = ({
   const pieData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
     .filter((item: any) => Number(item.balance) > 0)
     .map((item: any) => ({
-      name: item.delegate || "",
+      name: item.accountId || "",
       value: Number(item.balance),
     }))
     .filter((item: any) => item.name !== "");

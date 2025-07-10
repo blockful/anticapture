@@ -5,7 +5,7 @@ query GetDelegatorVotingPowerDetails($address: String!) {
   }
   accountBalances(orderBy: "balance", orderDirection: "desc", limit: 10, where: {delegate: $address}) {
     items {
-      delegate
+      accountId
       balance
     }
     pageInfo {
