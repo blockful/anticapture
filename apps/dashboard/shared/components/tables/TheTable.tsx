@@ -94,16 +94,17 @@ export const TheTable = <TData, TValue>({
               return (
                 <TableHead
                   key={header.id}
-                  className={cn(isTableSmall && "h-8")}
+                  className={cn(
+                    isTableSmall && "h-8",
+                    header.column.getIndex() === 0 &&
+                      stickyFirstColumn &&
+                      "bg-surface-contrast sticky left-0 z-50",
+                  )}
                   style={{
                     width:
                       header.column.getSize() !== 150
                         ? header.column.getSize()
                         : "auto",
-                    position:
-                      header.column.getIndex() === 0 && stickyFirstColumn
-                        ? "sticky"
-                        : "static",
                   }}
                 >
                   {header.isPlaceholder
@@ -132,12 +133,13 @@ export const TheTable = <TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
+                    className={cn(
+                      cell.column.getIndex() === 0 &&
+                        stickyFirstColumn &&
+                        "bg-surface-default sticky left-0 z-50",
+                    )}
                     style={{
                       width: cell.column.getSize(),
-                      position:
-                        cell.column.getIndex() === 0 && stickyFirstColumn
-                          ? "sticky"
-                          : "static",
                     }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
