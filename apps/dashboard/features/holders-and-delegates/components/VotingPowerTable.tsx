@@ -1,16 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SkeletonRow, TheTable } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
 import { Address } from "viem";
-import { formatNumberUserReadable } from "@/shared/utils/";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 export const VotingPowerTable = ({
   address,
@@ -21,34 +21,45 @@ export const VotingPowerTable = ({
 }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [sortBy, setSortBy] = useState<"balance">("balance");
+  const [sortBy, setSortBy] = useState<"balance" | "timestamp">("balance");
 
   const {
-    data: votingPowerData,
+    delegatorsVotingPowerDetails,
+    votingPowerHistoryData,
     loading,
     error,
-    pageInfo,
-    fetchMore,
   } = useVotingPower({
     daoId: daoId as DaoIdEnum,
     address: address,
   });
 
-  console.log("votingPowerData = ", votingPowerData);
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Mapear votingPowerData para o formato da tabela
-  const data = (votingPowerData || [])
-    .filter((item) => Number(item.balance) > 0)
-    .map((item) => ({
-      address: item.delegate,
-      amount: Number(item.balance),
-    }));
+  const accBalanceMapping = Object.fromEntries(
+    delegatorsVotingPowerDetails?.accountBalances?.items.map((accBalance) => [
+      accBalance.delegate,
+      accBalance.balance,
+    ]) || [],
+  );
 
-  const columns: ColumnDef<{ address: string; amount: number }>[] = [
+  const tableData = votingPowerHistoryData
+    .map((delegationData) => ({
+      address: delegationData.delegation?.delegatorAccountId || "",
+      amount:
+        accBalanceMapping[
+          delegationData.delegation?.delegatorAccountId || ""
+        ] || 0,
+      date: delegationData.timestamp || "",
+    }))
+    .filter((item) => item.address !== "");
+
+  const columns: ColumnDef<{
+    address: string;
+    amount: number;
+    date: string;
+  }>[] = [
     {
       accessorKey: "address",
       header: () => (
@@ -79,7 +90,6 @@ export const VotingPowerTable = ({
               size="sm"
               variant="rounded"
             />
-            <span className="truncate text-xs">{addressValue}</span>
           </div>
         );
       },
@@ -124,7 +134,58 @@ export const VotingPowerTable = ({
         const amount: number = row.getValue("amount");
         return (
           <div className="flex h-10 w-full items-center justify-end px-2 text-sm">
-            {formatNumberUserReadable(amount, 1)}
+            {amount}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "date",
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          setSortBy("timestamp");
+          setSortOrder(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+        return (
+          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+            Date
+            <button
+              className="!text-table-header cursor-pointer justify-end text-end"
+              onClick={handleSortToggle}
+            >
+              <ArrowUpDown
+                props={{ className: "ml-2 size-4" }}
+                activeState={
+                  sortBy === "timestamp" && sortOrder === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                }
+              />
+            </button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        if (!isMounted || loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-20"
+            />
+          );
+        }
+
+        const date: string = row.getValue("date");
+
+        return (
+          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
+            {new Date(Number(date) * 1000).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
         );
       },
@@ -144,7 +205,7 @@ export const VotingPowerTable = ({
     );
   }
 
-  if (!loading && data.length === 0) {
+  if (!loading && tableData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-4">
         <BlankState
@@ -161,12 +222,18 @@ export const VotingPowerTable = ({
       <div className="w-full">
         <TheTable
           columns={columns}
-          data={loading ? Array(5).fill({}) : data}
+          data={loading ? Array(5).fill({}) : tableData}
           withSorting={true}
-          withPagination={false}
+          withPagination={true}
           filterColumn="address"
         />
       </div>
+      {/* <Pagination
+        currentPage={1}
+        totalPages={1}
+        onPageChange={() => {}}
+        onPageSizeChange={() => {}}
+      /> */}
     </div>
   );
 };

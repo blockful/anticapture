@@ -1,17 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "./DelegationHistoryTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { VotingPower } from "./VotingPower";
+import { VotingPower } from "@/features/holders-and-delegates/components/VotingPower";
 
 export type EntityType = "delegate" | "tokenHolder";
 

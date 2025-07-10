@@ -4,7 +4,8 @@ import { ThePieChart } from "@/features/holders-and-delegates/components/ThePieC
 import { VotingPowerTable } from "@/features/holders-and-delegates/components/VotingPowerTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
-import { formatNumberUserReadable } from "@/shared/utils/";
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -50,20 +51,25 @@ export const VotingPower = ({
   address: string;
   daoId: DaoIdEnum;
 }) => {
-  const { data: votingPowerData, loading } = useVotingPower({
+  const delegate: string = address;
+  const {
+    delegatorsVotingPowerDetails,
+    loading,
+    votingPowerHistoryData: votingPowerHistoryDelegators,
+  } = useVotingPower({
     daoId,
-    address,
+    address: delegate,
   });
 
-  // Calculate total voting power from all delegators
-  const totalVotingPower =
-    votingPowerData?.reduce((total, item) => {
-      return total + (parseFloat(item.balance) || 0);
-    }, 0) || 0;
+  const accountBalnceMapping = (address: string) => {
+    return delegatorsVotingPowerDetails?.accountBalances?.items.find(
+      (accBalance) => accBalance.delegate === address,
+    )?.balance;
+  };
 
   return (
-    <>
-      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
+    <div className="flex h-full w-full flex-col gap-4">
+      <div className="border-light-dark text-primary flex h-full w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-row gap-4">
             <div className="size-56">
@@ -71,7 +77,6 @@ export const VotingPower = ({
             </div>
 
             <div className="flex w-full flex-col gap-6">
-              {/* Current voting power */}
               <div className="flex flex-col gap-1">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
                   Current Voting Power
@@ -80,7 +85,14 @@ export const VotingPower = ({
                   {loading ? (
                     <span className="text-secondary">Loading...</span>
                   ) : (
-                    formatNumberUserReadable(totalVotingPower)
+                    formatNumberUserReadable(
+                      Number(
+                        BigInt(
+                          delegatorsVotingPowerDetails?.accountPower
+                            ?.votingPower,
+                        ) / BigInt(10 ** 18),
+                      ),
+                    ) || 0
                   )}
                 </p>
               </div>
@@ -90,7 +102,7 @@ export const VotingPower = ({
               {/* Delegators */}
               <div className="flex flex-col gap-2">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Delegators ({votingPowerData?.length || 0})
+                  Delegators
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
@@ -98,22 +110,31 @@ export const VotingPower = ({
                     <div className="text-secondary text-sm">
                       Loading delegators...
                     </div>
-                  ) : votingPowerData && votingPowerData.length > 0 ? (
-                    votingPowerData.map((delegator) => (
+                  ) : votingPowerHistoryDelegators &&
+                    votingPowerHistoryDelegators.length > 0 ? (
+                    votingPowerHistoryDelegators.map((delegator, index) => (
                       <div
-                        key={delegator.delegate}
+                        key={index}
                         className="hover:bg-surface-hover flex items-center justify-between gap-2 rounded-md p-2"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="bg-surface-action size-2 rounded-xs" />
+                          <span
+                            className="bg-surface-action size-2 rounded-xs"
+                            style={{
+                              backgroundColor:
+                                PIE_CHART_COLORS[
+                                  index % PIE_CHART_COLORS.length
+                                ],
+                            }}
+                          />
                           <span className="text-sm font-medium">
-                            {delegator.delegate}
+                            {delegator.delegation?.delegatorAccountId}
                           </span>
                         </div>
                         <span className="text-secondary text-sm">
-                          {formatNumberUserReadable(
-                            parseFloat(delegator.balance) || 0,
-                          )}
+                          {accountBalnceMapping(
+                            delegator.delegation?.delegatorAccountId ?? "",
+                          ) || 0}
                         </span>
                       </div>
                     ))
@@ -131,6 +152,6 @@ export const VotingPower = ({
       <div className="flex w-full gap-4">
         <VotingPowerTable address={address} daoId={daoId} />
       </div>
-    </>
+    </div>
   );
 };

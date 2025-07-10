@@ -1,0 +1,20 @@
+query GetVotingPowerHistorys($address: String!) {
+  votingPowerHistorys(where: {accountId: $address}) {
+    items {
+      accountId
+      daoId
+      timestamp
+      transactionHash
+      votingPower
+      delegation {
+        daoId
+        delegateAccountId
+        delegatedValue
+        delegatorAccountId
+        previousDelegate
+        timestamp
+        transactionHash
+      }
+    }
+  }
+}

@@ -1889,6 +1889,13 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
 
+export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', delegate: string, balance: any }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   blockNumber: Scalars['NonNegativeInt']['input'];
@@ -1926,3 +1933,10 @@ export type GetVotingPowerCountingQueryVariables = Exact<{
 
 
 export type GetVotingPowerCountingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
+
+export type GetVotingPowerHistorysQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetVotingPowerHistorysQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', items: Array<{ __typename?: 'votingPowerHistory', accountId?: string | null, daoId?: string | null, timestamp: any, transactionHash: string, votingPower: any, delegation?: { __typename?: 'delegation', daoId?: string | null, delegateAccountId?: string | null, delegatedValue: any, delegatorAccountId?: string | null, previousDelegate?: string | null, timestamp?: any | null, transactionHash: string } | null }> } };

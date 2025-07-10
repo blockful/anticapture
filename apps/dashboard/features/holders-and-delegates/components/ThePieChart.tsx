@@ -3,15 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
-
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884d8",
-  "#FF69B4",
-];
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({
@@ -39,10 +31,9 @@ const renderCustomizedLabel = ({
       x={x}
       y={y}
       fill="#000"
-      fontWeight="bold"
-      fontSize={16}
       textAnchor="middle"
       dominantBaseline="central"
+      className="text-alternative-sm font-mono font-medium"
     >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
@@ -56,12 +47,12 @@ export const ThePieChart = ({
   daoId: DaoIdEnum;
   address: string;
 }) => {
-  const { data: votingPowerData, loading } = useVotingPower({
+  const { delegatorsVotingPowerDetails } = useVotingPower({
     daoId,
     address,
   });
 
-  const pieData = (votingPowerData || [])
+  const pieData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
     .filter((item) => Number(item.balance) > 0)
     .map((item) => ({
       name: item.delegate,
@@ -69,7 +60,7 @@ export const ThePieChart = ({
     }));
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width={200} height={200}>
       <PieChart>
         <Pie
           data={pieData}
@@ -78,11 +69,15 @@ export const ThePieChart = ({
           labelLine={false}
           label={renderCustomizedLabel}
           outerRadius={80}
-          fill="#8884d8"
           dataKey="value"
+          blendStroke={true}
+          stroke="none"
         >
           {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell
+              key={`cell-${index}`}
+              fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]}
+            />
           ))}
         </Pie>
       </PieChart>

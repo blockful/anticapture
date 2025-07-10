@@ -1,0 +1,28 @@
+query GetDelegatorVotingPowerDetails($address: String!) {
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
+  accountBalances(orderBy: "balance", orderDirection: "desc", limit: 10, where: {delegate: $address}) {
+    items {
+      delegate
+      balance
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+
+
+# delegation = null ( To que mudou o poder de voto foi um ransfer )
+
+# VotingPowerHistory
+# votingPowerHistory.filter(({delegation !! delegation ) 
+
+# -----------
+
+# votingPowerHistory.filter(({delegation)})=>delegation.delegateAccountId=="DelegatorAddress)
