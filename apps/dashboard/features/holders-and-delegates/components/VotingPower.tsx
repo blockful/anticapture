@@ -6,6 +6,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -61,18 +62,12 @@ export const VotingPower = ({
     address: delegate,
   });
 
-  const accountBalnceMapping = (address: string) => {
-    return delegatorsVotingPowerDetails?.accountBalances?.items.find(
-      (accBalance) => accBalance.delegate === address,
-    )?.balance;
-  };
-
   return (
     <div className="flex h-full w-full flex-col gap-4">
-      <div className="border-light-dark text-primary flex h-full w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
+      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-row gap-4">
-            <div className="size-56">
+            <div>
               <ThePieChart daoId={daoId} address={address} />
             </div>
 
@@ -112,32 +107,106 @@ export const VotingPower = ({
                     </div>
                   ) : votingPowerHistoryDelegators &&
                     votingPowerHistoryDelegators.length > 0 ? (
-                    votingPowerHistoryDelegators.map((delegator, index) => (
-                      <div
-                        key={index}
-                        className="hover:bg-surface-hover flex items-center justify-between gap-2 rounded-md p-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="bg-surface-action size-2 rounded-xs"
-                            style={{
-                              backgroundColor:
-                                PIE_CHART_COLORS[
-                                  index % PIE_CHART_COLORS.length
-                                ],
-                            }}
-                          />
-                          <span className="text-sm font-medium">
-                            {delegator.delegation?.delegatorAccountId}
-                          </span>
-                        </div>
-                        <span className="text-secondary text-sm">
-                          {accountBalnceMapping(
-                            delegator.delegation?.delegatorAccountId ?? "",
-                          ) || 0}
-                        </span>
-                      </div>
-                    ))
+                    (() => {
+                      const sorted = [...votingPowerHistoryDelegators].sort(
+                        (a, b) =>
+                          Number(b.delegation?.delegatedValue) -
+                          Number(a.delegation?.delegatedValue),
+                      );
+                      const total = sorted.reduce(
+                        (acc, d) => acc + Number(d.delegation?.delegatedValue),
+                        0,
+                      );
+                      const top5 = sorted.slice(0, 5);
+                      const others = sorted.slice(5);
+                      const othersValue = others.reduce(
+                        (acc, d) => acc + Number(d.delegation?.delegatedValue),
+                        0,
+                      );
+
+                      console.log("top5", top5);
+
+                      return (
+                        <>
+                          <div className="flex w-full flex-col gap-4">
+                            <div className="flex flex-wrap gap-2">
+                              {top5.length > 0 &&
+                                top5.map((delegator, idx) => (
+                                  <div
+                                    key={
+                                      delegator.delegation
+                                        ?.delegatorAccountId || idx
+                                    }
+                                    className="flex items-center"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className="size-2 rounded-xs"
+                                        style={{
+                                          backgroundColor:
+                                            PIE_CHART_COLORS[
+                                              idx % PIE_CHART_COLORS.length
+                                            ],
+                                        }}
+                                      />
+                                      <span className="text-sm font-medium">
+                                        {formatAddress(
+                                          delegator.delegation
+                                            ?.delegatorAccountId || "",
+                                        )}
+                                      </span>
+                                      <span
+                                        className="text-sm font-bold"
+                                        style={{
+                                          color:
+                                            PIE_CHART_COLORS[
+                                              idx % PIE_CHART_COLORS.length
+                                            ],
+                                        }}
+                                      >
+                                        {total > 0
+                                          ? `${(
+                                              (Number(
+                                                delegator.delegation
+                                                  ?.delegatedValue,
+                                              ) /
+                                                total) *
+                                              100
+                                            ).toFixed(0)}%`
+                                          : "-"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              {others.length > 0 && (
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className="size-2 rounded-xs"
+                                      style={{ backgroundColor: "#9CA3AF" }}
+                                    />
+                                    <span className="text-sm font-medium">
+                                      Others
+                                    </span>
+                                  </div>
+                                  <span
+                                    className="text-sm font-bold"
+                                    style={{ color: "#9CA3AF" }}
+                                  >
+                                    {total > 0
+                                      ? `${(
+                                          (othersValue / total) *
+                                          100
+                                        ).toFixed(0)}%`
+                                      : "-"}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()
                   ) : (
                     <div className="text-secondary text-sm">
                       No delegators found

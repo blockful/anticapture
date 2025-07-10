@@ -1,9 +1,9 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({
@@ -47,17 +47,18 @@ export const ThePieChart = ({
   daoId: DaoIdEnum;
   address: string;
 }) => {
-  const { delegatorsVotingPowerDetails } = useVotingPower({
+  const { votingPowerHistoryData } = useVotingPower({
     daoId,
     address,
   });
 
-  const pieData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
-    .filter((item) => Number(item.balance) > 0)
-    .map((item) => ({
-      name: item.delegate,
-      value: Number(item.balance),
-    }));
+  const pieData = votingPowerHistoryData
+    .filter((item: any) => Number(item.delegation?.delegatedValue) > 0)
+    .map((item: any) => ({
+      name: item.delegation?.delegatorAccountId || "",
+      value: Number(item.delegation?.delegatedValue),
+    }))
+    .filter((item: any) => item.name !== "");
 
   return (
     <ResponsiveContainer width={200} height={200}>

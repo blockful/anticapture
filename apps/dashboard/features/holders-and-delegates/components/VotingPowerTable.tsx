@@ -11,6 +11,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const VotingPowerTable = ({
   address,
@@ -23,12 +24,7 @@ export const VotingPowerTable = ({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortBy, setSortBy] = useState<"balance" | "timestamp">("balance");
 
-  const {
-    delegatorsVotingPowerDetails,
-    votingPowerHistoryData,
-    loading,
-    error,
-  } = useVotingPower({
+  const { votingPowerHistoryData, loading, error } = useVotingPower({
     daoId: daoId as DaoIdEnum,
     address: address,
   });
@@ -37,23 +33,13 @@ export const VotingPowerTable = ({
     setIsMounted(true);
   }, []);
 
-  const accBalanceMapping = Object.fromEntries(
-    delegatorsVotingPowerDetails?.accountBalances?.items.map((accBalance) => [
-      accBalance.delegate,
-      accBalance.balance,
-    ]) || [],
-  );
-
   const tableData = votingPowerHistoryData
-    .map((delegationData) => ({
+    .map((delegationData: any) => ({
       address: delegationData.delegation?.delegatorAccountId || "",
-      amount:
-        accBalanceMapping[
-          delegationData.delegation?.delegatorAccountId || ""
-        ] || 0,
+      amount: Number(delegationData.delegation?.delegatedValue) || 0,
       date: delegationData.timestamp || "",
     }))
-    .filter((item) => item.address !== "");
+    .filter((item: any) => item.address !== "");
 
   const columns: ColumnDef<{
     address: string;
@@ -134,7 +120,9 @@ export const VotingPowerTable = ({
         const amount: number = row.getValue("amount");
         return (
           <div className="flex h-10 w-full items-center justify-end px-2 text-sm">
-            {amount}
+            {formatNumberUserReadable(
+              Number(BigInt(amount) / BigInt(10 ** 18)) || 0,
+            )}
           </div>
         );
       },
