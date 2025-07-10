@@ -84,11 +84,11 @@ export type Query = {
   daos: DaoPage;
   delegation?: Maybe<Delegation>;
   delegations: DelegationPage;
-  /** Fetch historical token balances for multiple addresses at a specific block number using multicall */
+  /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
   /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
-  /** Fetch historical voting power for multiple addresses at a specific block number using multicall */
+  /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
@@ -268,8 +268,8 @@ export type QueryDelegationsArgs = {
 
 export type QueryHistoricalBalancesArgs = {
   addresses: Scalars['JSON']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
   daoId: QueryInput_HistoricalBalances_DaoId;
+  days?: InputMaybe<QueryInput_HistoricalBalances_Days>;
 };
 
 
@@ -280,8 +280,8 @@ export type QueryHistoricalTokenDataArgs = {
 
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
   daoId: QueryInput_HistoricalVotingPower_DaoId;
+  days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
 };
 
 
@@ -1344,6 +1344,14 @@ export enum QueryInput_HistoricalBalances_DaoId {
   Uni = 'UNI'
 }
 
+export enum QueryInput_HistoricalBalances_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
 export enum QueryInput_HistoricalTokenData_DaoId {
   Arb = 'ARB',
   Ens = 'ENS',
@@ -1354,6 +1362,14 @@ export enum QueryInput_HistoricalVotingPower_DaoId {
   Arb = 'ARB',
   Ens = 'ENS',
   Uni = 'UNI'
+}
+
+export enum QueryInput_HistoricalVotingPower_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
 }
 
 export enum QueryInput_ProposalsActivity_DaoId {
@@ -1840,7 +1856,7 @@ export type GetDelegatesCountQuery = { __typename?: 'Query', accountPowers: { __
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   address: Scalars['String']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
+  days: QueryInput_HistoricalVotingPower_Days;
   daoId: QueryInput_HistoricalVotingPower_DaoId;
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   proposalsDaoId: QueryInput_ProposalsActivity_DaoId;
@@ -1860,7 +1876,7 @@ export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposal
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
+  days: QueryInput_HistoricalBalances_Days;
   daoId: QueryInput_HistoricalBalances_DaoId;
 }>;
 
@@ -2028,12 +2044,8 @@ export type GetDelegatesCountLazyQueryHookResult = ReturnType<typeof useGetDeleg
 export type GetDelegatesCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesCountSuspenseQuery>;
 export type GetDelegatesCountQueryResult = Apollo.QueryResult<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>;
 export const GetHistoricalVotingAndActivityDocument = gql`
-    query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalVotingPower_daoId!, $fromDate: NonNegativeInt, $proposalsDaoId: queryInput_proposalsActivity_daoId!) {
-  historicalVotingPower(
-    addresses: $addresses
-    blockNumber: $blockNumber
-    daoId: $daoId
-  ) {
+    query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $days: queryInput_historicalVotingPower_days!, $daoId: queryInput_historicalVotingPower_daoId!, $fromDate: NonNegativeInt, $proposalsDaoId: queryInput_proposalsActivity_daoId!) {
+  historicalVotingPower(addresses: $addresses, days: $days, daoId: $daoId) {
     address
     votingPower
   }
@@ -2063,7 +2075,7 @@ export const GetHistoricalVotingAndActivityDocument = gql`
  *   variables: {
  *      addresses: // value for 'addresses'
  *      address: // value for 'address'
- *      blockNumber: // value for 'blockNumber'
+ *      days: // value for 'days'
  *      daoId: // value for 'daoId'
  *      fromDate: // value for 'fromDate'
  *      proposalsDaoId: // value for 'proposalsDaoId'
@@ -2132,12 +2144,8 @@ export type GetDelegateProposalsActivityLazyQueryHookResult = ReturnType<typeof 
 export type GetDelegateProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivitySuspenseQuery>;
 export type GetDelegateProposalsActivityQueryResult = Apollo.QueryResult<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
-    query getHistoricalBalances($addresses: JSON!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalBalances_daoId!) {
-  historicalBalances(
-    addresses: $addresses
-    blockNumber: $blockNumber
-    daoId: $daoId
-  ) {
+    query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!, $daoId: queryInput_historicalBalances_daoId!) {
+  historicalBalances(addresses: $addresses, days: $days, daoId: $daoId) {
     address
     balance
     blockNumber
@@ -2159,7 +2167,7 @@ export const GetHistoricalBalancesDocument = gql`
  * const { data, loading, error } = useGetHistoricalBalancesQuery({
  *   variables: {
  *      addresses: // value for 'addresses'
- *      blockNumber: // value for 'blockNumber'
+ *      days: // value for 'days'
  *      daoId: // value for 'daoId'
  *   },
  * });

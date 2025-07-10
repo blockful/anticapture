@@ -12,9 +12,8 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ProgressCircle } from "./ProgressCircle";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 interface DelegateTableData {
   address: string;
@@ -53,14 +52,7 @@ const getTimeDataFromPeriod = (period: TimeInterval) => {
       daysBack = 30;
   }
 
-  const fromDate = Math.floor((now - daysBack * msPerDay) / 1000);
-
-  // Rough estimation: 1 block every 12 seconds on Ethereum
-  const currentBlock = 20161841;
-  const blocksBack = Math.floor((daysBack * 24 * 60 * 60) / 12);
-  const blockNumber = currentBlock - blocksBack;
-
-  return { fromDate, blockNumber };
+  return Math.floor((now - daysBack * msPerDay) / 1000);
 };
 
 export const Delegates = ({
@@ -72,7 +64,7 @@ export const Delegates = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Calculate time-based parameters
-  const { fromDate, blockNumber } = useMemo(
+  const fromDate = useMemo(
     () => getTimeDataFromPeriod(timePeriod),
     [timePeriod],
   );
@@ -87,7 +79,7 @@ export const Delegates = ({
     fetchingMore,
     historicalDataLoading,
   } = useDelegates({
-    blockNumber,
+    days: timePeriod,
     fromDate,
     daoId,
     orderBy: sortBy,
@@ -164,7 +156,7 @@ export const Delegates = ({
       return {
         address: delegate.accountId || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation: variation,
+        variation,
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,
@@ -195,12 +187,12 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center gap-3 p-2">
-            <EnsAvatar
+            {/* <EnsAvatar
               address={address as `0x${string}`}
               size="sm"
               variant="rounded"
               showName={true}
-            />
+            /> */}
             <button
               className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
               tabIndex={-1}

@@ -6,10 +6,12 @@ import {
 } from "@anticapture/graphql-client/hooks";
 import {
   QueryInput_HistoricalVotingPower_DaoId,
+  QueryInput_HistoricalVotingPower_Days,
   QueryInput_ProposalsActivity_DaoId,
 } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
+import { TimeInterval } from "@/shared/types/enums";
 
 interface ProposalsActivity {
   totalProposals: number;
@@ -50,7 +52,7 @@ interface UseDelegatesResult {
 }
 
 interface UseDelegatesParams {
-  blockNumber: number;
+  days: TimeInterval;
   fromDate: number;
   daoId: QueryInput_HistoricalVotingPower_DaoId;
   orderBy?: string;
@@ -58,7 +60,7 @@ interface UseDelegatesParams {
 }
 
 export const useDelegates = ({
-  blockNumber,
+  days,
   fromDate,
   daoId,
   orderBy = "votingPower",
@@ -106,6 +108,8 @@ export const useDelegates = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
+  if (delegatesData) debugger;
+
   const { data: countingData } = useGetDelegatesCountQuery({
     context: {
       headers: {
@@ -141,7 +145,7 @@ export const useDelegates = ({
     variables: {
       addresses: delegateAddresses,
       address: delegateAddresses[0] || "", // This is still needed for the query structure
-      blockNumber,
+      days: QueryInput_HistoricalVotingPower_Days[days],
       daoId,
       proposalsDaoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
       fromDate,
@@ -153,6 +157,8 @@ export const useDelegates = ({
     },
     skip: delegateAddresses.length === 0,
   });
+
+  if (historicalData) debugger;
 
   // Lazy query for individual delegate proposals activity
   const [getDelegateProposalsActivity] =

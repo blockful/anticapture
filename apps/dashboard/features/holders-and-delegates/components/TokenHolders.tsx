@@ -10,7 +10,6 @@ import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -83,7 +82,7 @@ export const TokenHolders = ({
       // Calculate absolute change in tokens
       const absoluteChange = current - historical;
       // Calculate percentage variation
-      const percentageChange = ((current - historical) / historical) * 100;
+      const percentageChange = (absoluteChange / historical) * 100;
 
       return {
         percentageChange: Number(percentageChange.toFixed(2)),
@@ -294,11 +293,11 @@ export const TokenHolders = ({
 
         return (
           <div className="flex h-10 items-center gap-1.5 px-4 py-2">
-            <EnsAvatar
+            {/* <EnsAvatar
               address={delegate as Address}
               size="sm"
               variant="rounded"
-            />
+            /> */}
           </div>
         );
       },
@@ -420,12 +419,14 @@ export const TokenHolders = ({
           />
         </div>
       </div>
-        <HoldersAndDelegatesDrawer
-          isOpen={!!selectedTokenHolder}
-          onClose={handleCloseDrawer}
-          entityType="tokenHolder"
-          address={selectedTokenHolder || "0x0000000000000000000000000000000000000000"}
-        />
+      <HoldersAndDelegatesDrawer
+        isOpen={!!selectedTokenHolder}
+        onClose={handleCloseDrawer}
+        entityType="tokenHolder"
+        address={
+          selectedTokenHolder || "0x0000000000000000000000000000000000000000"
+        }
+      />
     </>
   );
 };
