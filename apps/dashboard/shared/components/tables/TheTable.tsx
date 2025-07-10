@@ -32,6 +32,7 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void;
   disableRowClick?: (row: TData) => boolean;
   isTableSmall?: boolean;
+  stickyFirstColumn?: boolean;
 }
 
 export const TheTable = <TData, TValue>({
@@ -43,6 +44,7 @@ export const TheTable = <TData, TValue>({
   onRowClick,
   disableRowClick,
   isTableSmall = false,
+  stickyFirstColumn = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -81,15 +83,12 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table className="bg-surface-background text-secondary md:bg-surface-default table-auto md:table-fixed">
-      <TableHeader className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium">
+    <Table className="text-secondary md:bg-surface-default table-fixed bg-transparent">
+      <TableHeader className="text-secondary text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
-            className={cn(
-              "border-light-dark",
-              isTableSmall && "border-surface-default border-b-4",
-            )}
+            className={cn("border-light-dark", isTableSmall && "border-b-4")}
           >
             {headerGroup.headers.map((header) => {
               return (
@@ -101,6 +100,10 @@ export const TheTable = <TData, TValue>({
                       header.column.getSize() !== 150
                         ? header.column.getSize()
                         : "auto",
+                    position:
+                      header.column.getIndex() === 0 && stickyFirstColumn
+                        ? "sticky"
+                        : "static",
                   }}
                 >
                   {header.isPlaceholder
@@ -129,7 +132,13 @@ export const TheTable = <TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    style={{ width: cell.column.getSize() }}
+                    style={{
+                      width: cell.column.getSize(),
+                      position:
+                        cell.column.getIndex() === 0 && stickyFirstColumn
+                          ? "sticky"
+                          : "static",
+                    }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

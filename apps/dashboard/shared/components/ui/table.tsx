@@ -25,7 +25,7 @@ function TableHeader({
     <thead
       data-slot="table-header"
       className={cn(
-        "font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b",
+        "bg-surface-contrast font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b",
         // "[&_th:first-child]:shadow-[2px_0px_8px_2px_rgba(0,0,0,1.00)] sm:[&_th:first-child]:shadow-none",
         className,
       )}
