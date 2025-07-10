@@ -1,7 +1,7 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
 
-import { DaoIdEnum, DaysOpts } from "@/lib/enums";
+import { DaoIdEnum, DaysOpts, DaysEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
@@ -46,7 +46,7 @@ export function historicalOnchain(app: Hono) {
             days: z
             .enum(DaysOpts)
             .default("7d")
-            .transform((val) => parseInt(val.replace("d", ""))),
+            .transform((val) => DaysEnum[val]),
         }),
       },
       responses: {
@@ -113,7 +113,7 @@ export function historicalOnchain(app: Hono) {
             days: z
             .enum(DaysOpts)
             .default("7d")
-            .transform((val) => parseInt(val.replace("d", ""))),
+            .transform((val) => DaysEnum[val]),
         }),
       },
       responses: {
