@@ -187,12 +187,12 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center gap-3 p-2">
-            {/* <EnsAvatar
+            <EnsAvatar
               address={address as `0x${string}`}
               size="sm"
               variant="rounded"
               showName={true}
-            /> */}
+            />
             <button
               className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
               tabIndex={-1}

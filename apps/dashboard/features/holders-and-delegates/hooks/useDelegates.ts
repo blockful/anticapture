@@ -108,8 +108,6 @@ export const useDelegates = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
-  if (delegatesData) debugger;
-
   const { data: countingData } = useGetDelegatesCountQuery({
     context: {
       headers: {
@@ -157,8 +155,6 @@ export const useDelegates = ({
     },
     skip: delegateAddresses.length === 0,
   });
-
-  if (historicalData) debugger;
 
   // Lazy query for individual delegate proposals activity
   const [getDelegateProposalsActivity] =

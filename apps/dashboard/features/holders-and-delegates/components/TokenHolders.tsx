@@ -293,11 +293,11 @@ export const TokenHolders = ({
 
         return (
           <div className="flex h-10 items-center gap-1.5 px-4 py-2">
-            {/* <EnsAvatar
+            <EnsAvatar
               address={delegate as Address}
               size="sm"
               variant="rounded"
-            /> */}
+            />
           </div>
         );
       },
