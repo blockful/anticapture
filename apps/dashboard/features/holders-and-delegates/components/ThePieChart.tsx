@@ -47,16 +47,16 @@ export const ThePieChart = ({
   daoId: DaoIdEnum;
   address: string;
 }) => {
-  const { votingPowerHistoryData } = useVotingPower({
+  const { delegatorsVotingPowerDetails } = useVotingPower({
     daoId,
     address,
   });
 
-  const pieData = votingPowerHistoryData
-    .filter((item: any) => Number(item.delegation?.delegatedValue) > 0)
+  const pieData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
+    .filter((item: any) => Number(item.balance) > 0)
     .map((item: any) => ({
-      name: item.delegation?.delegatorAccountId || "",
-      value: Number(item.delegation?.delegatedValue),
+      name: item.delegate || "",
+      value: Number(item.balance),
     }))
     .filter((item: any) => item.name !== "");
 

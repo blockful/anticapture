@@ -24,7 +24,7 @@ export const VotingPowerTable = ({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortBy, setSortBy] = useState<"balance" | "timestamp">("balance");
 
-  const { votingPowerHistoryData, loading, error } = useVotingPower({
+  const { delegatorsVotingPowerDetails, loading, error } = useVotingPower({
     daoId: daoId as DaoIdEnum,
     address: address,
   });
@@ -33,11 +33,11 @@ export const VotingPowerTable = ({
     setIsMounted(true);
   }, []);
 
-  const tableData = votingPowerHistoryData
-    .map((delegationData: any) => ({
-      address: delegationData.delegation?.delegatorAccountId || "",
-      amount: Number(delegationData.delegation?.delegatedValue) || 0,
-      date: delegationData.timestamp || "",
+  const tableData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
+    .map((balanceData: any) => ({
+      address: balanceData.delegate || "",
+      amount: Number(balanceData.balance) || 0,
+      date: "",
     }))
     .filter((item: any) => item.address !== "");
 
@@ -169,11 +169,13 @@ export const VotingPowerTable = ({
 
         return (
           <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
-            {new Date(Number(date) * 1000).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {date
+              ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "N/A"}
           </div>
         );
       },
