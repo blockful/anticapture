@@ -1894,6 +1894,11 @@ export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposal
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -2371,15 +2376,17 @@ export type GetDelegateProposalsActivityLazyQueryHookResult = ReturnType<typeof 
 export type GetDelegateProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivitySuspenseQuery>;
 export type GetDelegateProposalsActivityQueryResult = Apollo.QueryResult<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>;
 export const GetDelegatorVotingPowerDetailsDocument = gql`
-    query GetDelegatorVotingPowerDetails($address: String!) {
+    query GetDelegatorVotingPowerDetails($address: String!, $after: String, $before: String, $orderBy: String, $orderDirection: String, $limit: Int) {
   accountPower(accountId: $address) {
     votingPower
     accountId
   }
   accountBalances(
-    orderBy: "balance"
-    orderDirection: "desc"
-    limit: 10
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    after: $after
+    before: $before
     where: {delegate: $address}
   ) {
     items {
@@ -2409,6 +2416,11 @@ export const GetDelegatorVotingPowerDetailsDocument = gql`
  * const { data, loading, error } = useGetDelegatorVotingPowerDetailsQuery({
  *   variables: {
  *      address: // value for 'address'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      limit: // value for 'limit'
  *   },
  * });
  */

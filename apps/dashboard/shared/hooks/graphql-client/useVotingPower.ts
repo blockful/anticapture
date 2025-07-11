@@ -1,8 +1,13 @@
 import {
+  GetDelegatorVotingPowerDetailsQuery,
+  GetDelegationsTimestampQuery,
   useGetDelegationsTimestampQuery,
   useGetDelegatorVotingPowerDetailsQuery,
+  useGetVotingPowerCountingQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { NetworkStatus } from "@apollo/client";
 
 interface PaginationInfo {
   hasNextPage: boolean;
@@ -16,19 +21,56 @@ interface PaginationInfo {
   currentItemsCount: number;
 }
 
+type DelegationItem =
+  GetDelegationsTimestampQuery["delegations"]["items"][number];
+type AccountBalanceBase =
+  GetDelegatorVotingPowerDetailsQuery["accountBalances"]["items"][number];
+type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
+
+interface UseVotingPowerResult {
+  delegatorsVotingPowerDetails: GetDelegatorVotingPowerDetailsQuery | null;
+  votingPowerHistoryData: DelegationItem[];
+  balances: BalanceWithTimestamp[];
+  loading: boolean;
+  error: Error | null;
+  refetch: () => void;
+  pagination: PaginationInfo;
+  fetchNextPage: () => Promise<void>;
+  fetchPreviousPage: () => Promise<void>;
+  fetchingMore: boolean;
+  historicalDataLoading: boolean;
+}
+interface UseVotingPowerParams {
+  daoId: DaoIdEnum;
+  address: string;
+  orderBy?: string;
+  orderDirection?: string;
+}
+
 export const useVotingPower = ({
   daoId,
   address,
-}: {
-  daoId: DaoIdEnum;
-  address: string;
-}) => {
+  orderBy = "balance",
+  orderDirection = "desc",
+}: UseVotingPowerParams): UseVotingPowerResult => {
+  const itemsPerPage = 6;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+
+  // Reset to page 1 and refetch when sorting changes (new query)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderBy, orderDirection]);
+
+  // Main data query
   const {
-    data: delegatorsVotingPowerDetails, // Here i have the accountBalances Id
+    data: delegatorsVotingPowerDetails,
     loading,
     error,
     refetch,
     fetchMore,
+    networkStatus,
   } = useGetDelegatorVotingPowerDetailsQuery({
     context: {
       headers: {
@@ -36,9 +78,37 @@ export const useVotingPower = ({
       },
     },
     variables: {
-      address: address,
+      address,
+      after: undefined,
+      before: undefined,
+      orderBy,
+      orderDirection,
+      limit: itemsPerPage,
+    },
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network",
+  });
+
+  // Count query
+  const { data: countingData } = useGetVotingPowerCountingQuery({
+    variables: { address }, // TODO: Check if this is correct
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
     },
   });
+
+  // Refetch data when sorting changes to ensure we start from page 1
+  useEffect(() => {
+    refetch({
+      after: undefined,
+      before: undefined,
+      orderBy,
+      orderDirection,
+    });
+  }, [orderBy, orderDirection, refetch]);
+
   console.log("delegatorsVotingPowerDetails2121", delegatorsVotingPowerDetails);
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
@@ -92,144 +162,153 @@ export const useVotingPower = ({
   }));
 
   console.log("delegationsTimestampData", delegationsTimestampData);
+  /* ------------------------------------------------------------------ */
+  /* Pagination helpers                                                  */
+  /* ------------------------------------------------------------------ */
 
-  const handleFetchMore = (
-    cursor: string,
-    direction: "forward" | "backward",
-  ) => {
-    if (direction === "forward") {
-      fetchMore({
-        variables: { after: cursor },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          return fetchMoreResult || prev;
-        },
-      });
-    } else {
-      fetchMore({
-        variables: { before: cursor },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          return fetchMoreResult || prev;
-        },
-      });
+  // Build pagination info combining GraphQL and local state
+  const pagination = useMemo<PaginationInfo>(() => {
+    const pageInfo = delegatorsVotingPowerDetails?.accountBalances?.pageInfo;
+    const totalCount = countingData?.accountBalances?.totalCount || 0;
+    const currentItemsCount =
+      delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+
+    return {
+      hasNextPage: pageInfo?.hasNextPage ?? false,
+      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
+      endCursor: pageInfo?.endCursor,
+      startCursor: pageInfo?.startCursor,
+      totalCount,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      currentItemsCount,
+    };
+  }, [
+    delegatorsVotingPowerDetails?.accountBalances?.pageInfo,
+    countingData?.accountBalances?.totalCount,
+    delegatorsVotingPowerDetails?.accountBalances?.items?.length,
+    currentPage,
+    itemsPerPage,
+  ]);
+
+  // Next page
+  const fetchNextPage = useCallback(async () => {
+    if (
+      !pagination.hasNextPage ||
+      !pagination.endCursor ||
+      isPaginationLoading
+    ) {
+      console.warn("No next page available or already loading");
+      return;
     }
-  };
 
-  // // Fetch next page function
-  // const fetchNextPage = useCallback(async () => {
-  //   if (
-  //     !pagination.hasNextPage ||
-  //     !pagination.endCursor ||
-  //     isPaginationLoading
-  //   ) {
-  //     console.warn("No next page available or already loading");
-  //     return;
-  //   }
+    setIsPaginationLoading(true);
 
-  //   setIsPaginationLoading(true);
+    try {
+      await fetchMore({
+        variables: {
+          after: pagination.endCursor,
+          before: undefined,
+          orderBy,
+          orderDirection,
+        } as any,
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
 
-  //   try {
-  //     await fetchMore({
-  //       variables: {
-  //         after: pagination.endCursor,
-  //         before: undefined,
-  //         orderBy,
-  //         orderDirection,
-  //       },
-  //       updateQuery: (previousResult, { fetchMoreResult }) => {
-  //         if (!fetchMoreResult) return previousResult;
+          return {
+            ...fetchMoreResult,
+            accountBalances: {
+              ...fetchMoreResult.accountBalances,
+              items: fetchMoreResult.accountBalances.items,
+            },
+          };
+        },
+      });
 
-  //         // Replace the current data with the new page data
-  //         return {
-  //           ...fetchMoreResult,
-  //           accountPowers: {
-  //             ...fetchMoreResult.accountPowers,
-  //             items: fetchMoreResult.accountPowers.items,
-  //           },
-  //         };
-  //       },
-  //     });
+      setCurrentPage((prev) => prev + 1);
+    } catch (err) {
+      console.error("Error fetching next page:", err);
+    } finally {
+      setIsPaginationLoading(false);
+    }
+  }, [
+    fetchMore,
+    pagination.hasNextPage,
+    pagination.endCursor,
+    orderBy,
+    orderDirection,
+    isPaginationLoading,
+  ]);
 
-  //     // Update page number after successful fetch
-  //     setCurrentPage((prev) => prev + 1);
-  //   } catch (error) {
-  //     console.error("Error fetching next page:", error);
-  //   } finally {
-  //     setIsPaginationLoading(false);
-  //   }
-  // }, [
-  //   fetchMore,
-  //   pagination.hasNextPage,
-  //   pagination.endCursor,
-  //   orderBy,
-  //   orderDirection,
-  //   isPaginationLoading,
-  // ]);
+  // Previous page
+  const fetchPreviousPage = useCallback(async () => {
+    if (
+      !pagination.hasPreviousPage ||
+      !pagination.startCursor ||
+      isPaginationLoading
+    ) {
+      console.warn("No previous page available or already loading");
+      return;
+    }
 
-  // // Fetch previous page function
-  // const fetchPreviousPage = useCallback(async () => {
-  //   if (
-  //     !pagination.hasPreviousPage ||
-  //     !pagination.startCursor ||
-  //     isPaginationLoading
-  //   ) {
-  //     console.warn("No previous page available or already loading");
-  //     return;
-  //   }
+    setIsPaginationLoading(true);
 
-  //   setIsPaginationLoading(true);
+    try {
+      await fetchMore({
+        variables: {
+          after: undefined,
+          before: pagination.startCursor,
+          orderBy,
+          orderDirection,
+        } as any,
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
 
-  //   try {
-  //     await fetchMore({
-  //       variables: {
-  //         after: undefined,
-  //         before: pagination.startCursor,
-  //         orderBy,
-  //         orderDirection,
-  //       },
-  //       updateQuery: (previousResult, { fetchMoreResult }) => {
-  //         if (!fetchMoreResult) return previousResult;
+          return {
+            ...fetchMoreResult,
+            accountBalances: {
+              ...fetchMoreResult.accountBalances,
+              items: fetchMoreResult.accountBalances.items,
+            },
+          };
+        },
+      });
 
-  //         // Replace the current data with the new page data
-  //         return {
-  //           ...fetchMoreResult,
-  //           accountPowers: {
-  //             ...fetchMoreResult.accountPowers,
-  //             items: fetchMoreResult.accountPowers.items,
-  //           },
-  //         };
-  //       },
-  //     });
+      setCurrentPage((prev) => prev - 1);
+    } catch (err) {
+      console.error("Error fetching previous page:", err);
+    } finally {
+      setIsPaginationLoading(false);
+    }
+  }, [
+    fetchMore,
+    pagination.hasPreviousPage,
+    pagination.startCursor,
+    orderBy,
+    orderDirection,
+    isPaginationLoading,
+  ]);
 
-  //     // Update page number after successful fetch
-  //     setCurrentPage((prev) => prev - 1);
-  //   } catch (error) {
-  //     console.error("Error fetching previous page:", error);
-  //   } finally {
-  //     setIsPaginationLoading(false);
-  //   }
-  // }, [
-  //   fetchMore,
-  //   pagination.hasPreviousPage,
-  //   pagination.startCursor,
-  //   orderBy,
-  //   orderDirection,
-  //   isPaginationLoading,
-  // ]);
-
-  // // Enhanced refetch that resets pagination
-  // const handleRefetch = useCallback(() => {
-  //   setCurrentPage(1);
-  //   refetch();
-  // }, [refetch]);
+  // Reset pagination on refetch
+  const handleRefetch = useCallback(() => {
+    setCurrentPage(1);
+    refetch();
+  }, [refetch]);
 
   return {
-    delegatorsVotingPowerDetails,
+    delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,
     loading: loading || tsLoading,
-    error: error || tsError,
-    refetch,
-    pageInfo: delegatorsVotingPowerDetails?.accountBalances?.pageInfo,
-    fetchMore: handleFetchMore,
+    error: error || tsError || null,
+    refetch: handleRefetch,
+    pagination,
+    fetchNextPage,
+    fetchPreviousPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+    historicalDataLoading: tsLoading,
   };
 };

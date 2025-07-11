@@ -7,6 +7,7 @@ import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -57,7 +58,10 @@ export const VotingPower = ({
     delegatorsVotingPowerDetails,
     loading,
     votingPowerHistoryData,
-    fetchMore,
+    pagination,
+    fetchPreviousPage,
+    fetchNextPage,
+    fetchingMore,
   } = useVotingPower({
     daoId,
     address: delegate,
@@ -241,8 +245,18 @@ export const VotingPower = ({
           </div>
         </div>
       </div>
-      <div className="flex w-full gap-4">
+      <div className="flex w-full flex-col gap-4">
         <VotingPowerTable address={address} daoId={daoId} />
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          className="text-white"
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
+        />
       </div>
     </div>
   );

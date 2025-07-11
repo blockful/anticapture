@@ -1,9 +1,9 @@
-query GetDelegatorVotingPowerDetails($address: String!) {
+query GetDelegatorVotingPowerDetails($address: String!, $after: String, $before: String, $orderBy: String, $orderDirection: String, $limit: Int) {
   accountPower(accountId: $address) {
     votingPower
     accountId
   }
-  accountBalances(orderBy: "balance", orderDirection: "desc", limit: 10, where: {delegate: $address}) {
+  accountBalances(orderBy: $orderBy, orderDirection: $orderDirection, limit: $limit, after: $after, before: $before, where: {delegate: $address}) {
     items {
       accountId
       balance
