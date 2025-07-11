@@ -1,8 +1,11 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import {
-  useMyQueryQuery,
-  useMyQueryBuyQuery,
-  useMyQuerySellQuery,
+  useBalanceHistoryQuery,
+  useBalanceHistoryBuyQuery,
+  useBalanceHistorySellQuery,
+  useBalanceHistoryTotalCountQuery,
+  useBalanceHistoryBuyTotalCountQuery,
+  useBalanceHistorySellTotalCountQuery,
 } from "@anticapture/graphql-client/hooks";
 
 import { formatUnits } from "viem";
@@ -75,25 +78,54 @@ export function useBalanceHistory(
   };
 
   // Use different queries based on transaction type
-  const allQuery = useMyQueryQuery({
+  const allQuery = useBalanceHistoryQuery({
     variables: queryVariables,
     ...queryOptions,
     skip: !accountId || transactionType !== "all",
   });
 
-  const buyQuery = useMyQueryBuyQuery({
+  const buyQuery = useBalanceHistoryBuyQuery({
     variables: queryVariables,
     ...queryOptions,
     skip: !accountId || transactionType !== "buy",
   });
 
-  const sellQuery = useMyQuerySellQuery({
+  const sellQuery = useBalanceHistorySellQuery({
     variables: queryVariables,
     ...queryOptions,
     skip: !accountId || transactionType !== "sell",
   });
 
-  // Select the active query based on transaction type
+  // Use separate totalCount queries (called only once or when filters change)
+  const totalCountQueryOptions = {
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+    skip: !accountId,
+    fetchPolicy: "cache-first" as const, // Use cache-first for totalCount to reduce calls
+  };
+
+  const allTotalCountQuery = useBalanceHistoryTotalCountQuery({
+    variables: { account: accountId },
+    ...totalCountQueryOptions,
+    skip: !accountId || transactionType !== "all",
+  });
+
+  const buyTotalCountQuery = useBalanceHistoryBuyTotalCountQuery({
+    variables: { account: accountId },
+    ...totalCountQueryOptions,
+    skip: !accountId || transactionType !== "buy",
+  });
+
+  const sellTotalCountQuery = useBalanceHistorySellTotalCountQuery({
+    variables: { account: accountId },
+    ...totalCountQueryOptions,
+    skip: !accountId || transactionType !== "sell",
+  });
+
+  // Select the active queries based on transaction type
   const activeQuery =
     transactionType === "buy"
       ? buyQuery
@@ -101,7 +133,15 @@ export function useBalanceHistory(
         ? sellQuery
         : allQuery;
 
+  const activeTotalCountQuery =
+    transactionType === "buy"
+      ? buyTotalCountQuery
+      : transactionType === "sell"
+        ? sellTotalCountQuery
+        : allTotalCountQuery;
+
   const { data, loading, error, fetchMore } = activeQuery;
+  const { data: totalCountData } = activeTotalCountQuery;
 
   // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
@@ -122,7 +162,7 @@ export function useBalanceHistory(
   // Real pagination info from GraphQL query
   const paginationInfo: PaginationInfo = useMemo(() => {
     const pageInfo = data?.transfers?.pageInfo;
-    const totalCount = data?.transfers?.totalCount || 0;
+    const totalCount = totalCountData?.transfers?.totalCount || 0;
     const currentItemsCount = data?.transfers?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -139,7 +179,7 @@ export function useBalanceHistory(
     };
   }, [
     data?.transfers?.pageInfo,
-    data?.transfers?.totalCount,
+    totalCountData?.transfers?.totalCount,
     data?.transfers?.items?.length,
     currentPage,
     itemsPerPage,
@@ -164,7 +204,10 @@ export function useBalanceHistory(
           ...queryVariables,
           after: paginationInfo.endCursor,
         },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
+        updateQuery: (
+          previousResult: any,
+          { fetchMoreResult }: { fetchMoreResult: any },
+        ) => {
           if (!fetchMoreResult) return previousResult;
 
           return {
@@ -210,7 +253,10 @@ export function useBalanceHistory(
           ...queryVariables,
           before: paginationInfo.startCursor,
         },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
+        updateQuery: (
+          previousResult: any,
+          { fetchMoreResult }: { fetchMoreResult: any },
+        ) => {
           if (!fetchMoreResult) return previousResult;
 
           return {

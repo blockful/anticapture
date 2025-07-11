@@ -14,13 +14,20 @@ query BalanceHistory($account: String!, $after: String, $before: String, $limit:
       toAccountId
       transactionHash
     }
-    totalCount
     pageInfo {
       endCursor
       hasNextPage
       hasPreviousPage
       startCursor
     }    
+  }
+}
+
+query BalanceHistoryTotalCount($account: String!) {
+  transfers(
+    where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
+  ) {
+    totalCount
   }
 }
 
@@ -40,13 +47,20 @@ query BalanceHistoryBuy($account: String!, $after: String, $before: String, $lim
       toAccountId
       transactionHash
     }
-    totalCount
     pageInfo {
       endCursor
       hasNextPage
       hasPreviousPage
       startCursor
     }    
+  }
+}
+
+query BalanceHistoryBuyTotalCount($account: String!) {
+  transfers(
+    where: {toAccountId: $account}
+  ) {
+    totalCount
   }
 }
 
@@ -66,13 +80,20 @@ query BalanceHistorySell($account: String!, $after: String, $before: String, $li
       toAccountId
       transactionHash
     }
-    totalCount
     pageInfo {
       endCursor
       hasNextPage
       hasPreviousPage
       startCursor
     }    
+  }
+}
+
+query BalanceHistorySellTotalCount($account: String!) {
+  transfers(
+    where: {fromAccountId: $account}
+  ) {
+    totalCount
   }
 }
 
