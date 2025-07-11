@@ -1913,6 +1913,14 @@ export type GetDelegationsTimestampQueryVariables = Exact<{
 
 export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId?: string | null, timestamp?: any | null }> } };
 
+export type GetTop5DelegatorsQueryVariables = Exact<{
+  delegate: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetTop5DelegatorsQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
+
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   blockNumber: Scalars['NonNegativeInt']['input'];
@@ -1946,6 +1954,7 @@ export type GetVotingPowerQuery = { __typename?: 'Query', accountBalances: { __t
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -2487,6 +2496,55 @@ export type GetDelegationsTimestampQueryHookResult = ReturnType<typeof useGetDel
 export type GetDelegationsTimestampLazyQueryHookResult = ReturnType<typeof useGetDelegationsTimestampLazyQuery>;
 export type GetDelegationsTimestampSuspenseQueryHookResult = ReturnType<typeof useGetDelegationsTimestampSuspenseQuery>;
 export type GetDelegationsTimestampQueryResult = Apollo.QueryResult<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>;
+export const GetTop5DelegatorsDocument = gql`
+    query GetTop5Delegators($delegate: String!, $limit: Int = 5) {
+  accountBalances(
+    where: {delegate: $delegate}
+    orderBy: "balance"
+    orderDirection: "desc"
+    limit: $limit
+  ) {
+    items {
+      accountId
+      balance
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetTop5DelegatorsQuery__
+ *
+ * To run a query within a React component, call `useGetTop5DelegatorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTop5DelegatorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTop5DelegatorsQuery({
+ *   variables: {
+ *      delegate: // value for 'delegate'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetTop5DelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables> & ({ variables: GetTop5DelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>(GetTop5DelegatorsDocument, options);
+      }
+export function useGetTop5DelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>(GetTop5DelegatorsDocument, options);
+        }
+export function useGetTop5DelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>(GetTop5DelegatorsDocument, options);
+        }
+export type GetTop5DelegatorsQueryHookResult = ReturnType<typeof useGetTop5DelegatorsQuery>;
+export type GetTop5DelegatorsLazyQueryHookResult = ReturnType<typeof useGetTop5DelegatorsLazyQuery>;
+export type GetTop5DelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetTop5DelegatorsSuspenseQuery>;
+export type GetTop5DelegatorsQueryResult = Apollo.QueryResult<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $blockNumber: NonNegativeInt!, $daoId: queryInput_historicalBalances_daoId!) {
   historicalBalances(
@@ -2691,11 +2749,11 @@ export type GetVotingPowerLazyQueryHookResult = ReturnType<typeof useGetVotingPo
 export type GetVotingPowerSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerSuspenseQuery>;
 export type GetVotingPowerQueryResult = Apollo.QueryResult<GetVotingPowerQuery, GetVotingPowerQueryVariables>;
 export const GetVotingPowerCountingDocument = gql`
-    query GetVotingPowerCounting($address: String!) {
+    query GetVotingPowerCounting($address: String!, $limit: Int) {
   accountBalances(
     orderBy: "balance"
     orderDirection: "desc"
-    limit: 10
+    limit: $limit
     where: {delegate: $address}
   ) {
     totalCount
@@ -2716,6 +2774,7 @@ export const GetVotingPowerCountingDocument = gql`
  * const { data, loading, error } = useGetVotingPowerCountingQuery({
  *   variables: {
  *      address: // value for 'address'
+ *      limit: // value for 'limit'
  *   },
  * });
  */

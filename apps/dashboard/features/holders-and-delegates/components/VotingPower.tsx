@@ -55,6 +55,7 @@ export const VotingPower = ({
 }) => {
   const delegate: string = address;
   const {
+    top5Delegators,
     delegatorsVotingPowerDetails,
     loading,
     votingPowerHistoryData,
@@ -128,26 +129,25 @@ export const VotingPower = ({
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  {loading ? (
+                  {!top5Delegators ? (
                     <div className="text-secondary text-sm">
                       Loading delegators...
                     </div>
-                  ) : votingPowerHistoryDelegators &&
-                    votingPowerHistoryDelegators.length > 0 ? (
+                  ) : top5Delegators &&
+                    top5Delegators.accountBalances.items.length > 0 ? (
                     (() => {
-                      const sorted = [...votingPowerHistoryDelegators].sort(
-                        (a, b) =>
-                          Number(b.delegation?.delegatedValue) -
-                          Number(a.delegation?.delegatedValue),
-                      );
+                      const sorted = [
+                        ...top5Delegators.accountBalances.items,
+                      ].sort((a, b) => Number(b.balance) - Number(a.balance));
+
                       const total = sorted.reduce(
-                        (acc, d) => acc + Number(d.delegation?.delegatedValue),
+                        (acc, d) => acc + Number(d.balance),
                         0,
                       );
                       const top5 = sorted.slice(0, 5);
                       const others = sorted.slice(5);
                       const othersValue = others.reduce(
-                        (acc, d) => acc + Number(d.delegation?.delegatedValue),
+                        (acc, d) => acc + Number(d.balance),
                         0,
                       );
 
@@ -160,10 +160,7 @@ export const VotingPower = ({
                               {top5.length > 0 &&
                                 top5.map((delegator, idx) => (
                                   <div
-                                    key={
-                                      delegator.delegation
-                                        ?.delegatorAccountId || idx
-                                    }
+                                    key={delegator.accountId || idx}
                                     className="flex items-center"
                                   >
                                     <div className="flex items-center gap-2">
@@ -178,8 +175,7 @@ export const VotingPower = ({
                                       />
                                       <span className="text-sm font-medium">
                                         {formatAddress(
-                                          delegator.delegation
-                                            ?.delegatorAccountId || "",
+                                          delegator.accountId || "",
                                         )}
                                       </span>
                                       <span
@@ -193,10 +189,7 @@ export const VotingPower = ({
                                       >
                                         {total > 0
                                           ? `${(
-                                              (Number(
-                                                delegator.delegation
-                                                  ?.delegatedValue,
-                                              ) /
+                                              (Number(delegator.balance) /
                                                 total) *
                                               100
                                             ).toFixed(0)}%`

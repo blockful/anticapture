@@ -4,6 +4,8 @@ import {
   useGetDelegationsTimestampQuery,
   useGetDelegatorVotingPowerDetailsQuery,
   useGetVotingPowerCountingQuery,
+  useGetTop5DelegatorsQuery,
+  GetTop5DelegatorsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState, useCallback, useMemo, useEffect } from "react";
@@ -28,6 +30,7 @@ type AccountBalanceBase =
 type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
 
 interface UseVotingPowerResult {
+  top5Delegators: GetTop5DelegatorsQuery | null;
   delegatorsVotingPowerDetails: GetDelegatorVotingPowerDetailsQuery | null;
   votingPowerHistoryData: DelegationItem[];
   balances: BalanceWithTimestamp[];
@@ -91,7 +94,10 @@ export const useVotingPower = ({
 
   // Count query
   const { data: countingData } = useGetVotingPowerCountingQuery({
-    variables: { address }, // TODO: Check if this is correct
+    variables: {
+      address,
+      limit: itemsPerPage,
+    },
     context: {
       headers: {
         "anticapture-dao-id": daoId,
@@ -160,6 +166,18 @@ export const useVotingPower = ({
     ...ab,
     timestamp: timestampMap[ab.accountId.toLowerCase()],
   }));
+
+  const { data: top5Delegators } = useGetTop5DelegatorsQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+    variables: {
+      delegate: address,
+      limit: 5,
+    },
+  });
 
   console.log("delegationsTimestampData", delegationsTimestampData);
   /* ------------------------------------------------------------------ */
@@ -298,6 +316,7 @@ export const useVotingPower = ({
   }, [refetch]);
 
   return {
+    top5Delegators: top5Delegators || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,

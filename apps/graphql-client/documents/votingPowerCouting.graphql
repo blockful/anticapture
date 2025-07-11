@@ -1,8 +1,8 @@
-query GetVotingPowerCounting ($address: String!) {
+query GetVotingPowerCounting ($address: String!, $limit: Int) {
   accountBalances(
     orderBy: "balance"
     orderDirection: "desc"
-    limit: 10
+    limit: $limit
     where: {delegate: $address}
   ) {
     totalCount

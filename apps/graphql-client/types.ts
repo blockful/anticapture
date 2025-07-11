@@ -1910,6 +1910,14 @@ export type GetDelegationsTimestampQueryVariables = Exact<{
 
 export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId?: string | null, timestamp?: any | null }> } };
 
+export type GetTop5DelegatorsQueryVariables = Exact<{
+  delegate: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetTop5DelegatorsQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
+
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   blockNumber: Scalars['NonNegativeInt']['input'];
@@ -1943,6 +1951,7 @@ export type GetVotingPowerQuery = { __typename?: 'Query', accountBalances: { __t
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
