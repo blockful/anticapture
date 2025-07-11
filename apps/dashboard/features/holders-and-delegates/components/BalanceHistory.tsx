@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { ArrowRight, ExternalLink, Filter } from "lucide-react";
+import { ArrowRight, ExternalLink, Filter, Check } from "lucide-react";
 import { useBalanceHistory } from "../hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
@@ -265,7 +265,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
             </button>
 
             {showTypeFilter && (
-              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-9 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
+              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-9 min-w-[150px] rounded-md border border-[#3F3F46] py-1">
                 <button
                   onClick={() => {
                     setTypeFilter("all");
@@ -276,9 +276,12 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
                     typeFilter === "all" && "bg-surface-hover",
                   )}
                 >
-                  <span className="text-primary text-sm font-normal">
+                  <span className="text-primary text-sm font-normal whitespace-nowrap">
                     Remove All
                   </span>
+                  {typeFilter === "all" && (
+                    <Check className="text-primary size-4" />
+                  )}
                 </button>
                 <button
                   onClick={() => {
@@ -291,6 +294,9 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
                   )}
                 >
                   <span className="text-primary text-sm font-normal">Buy</span>
+                  {typeFilter === "Buy" && (
+                    <Check className="text-primary size-4" />
+                  )}
                 </button>
                 <button
                   onClick={() => {
@@ -303,6 +309,9 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
                   )}
                 >
                   <span className="text-primary text-sm font-normal">Sell</span>
+                  {typeFilter === "Sell" && (
+                    <Check className="text-primary size-4" />
+                  )}
                 </button>
               </div>
             )}
