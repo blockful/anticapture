@@ -13,7 +13,6 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
-import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
 
 // import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 // import { Info, Send } from "lucide-react";
