@@ -148,7 +148,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center px-4 py-2">
+            <div className="flex h-10 items-center px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="h-4 w-20"
@@ -166,7 +166,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header h-8 w-full justify-start px-4 text-sm"
+          className="!text-table-header h-8 w-full justify-start px-2 text-sm"
           onClick={() => handleSort("date")}
         >
           <span className="text-xs">Date</span>
@@ -191,7 +191,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-end px-4 py-2">
+            <div className="flex h-10 items-center justify-end px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
@@ -201,7 +201,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center justify-end px-4 py-2">
+          <div className="flex h-10 items-center justify-end px-2 py-2">
             <span className="text-secondary text-sm font-medium">{amount}</span>
           </div>
         );
@@ -209,7 +209,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header h-8 w-full justify-end px-4 text-sm"
+          className="!text-table-header h-8 w-full justify-end px-2 text-sm"
           onClick={() => handleSort("amount")}
         >
           <span className="text-xs">Amount (ENS)</span>
@@ -234,7 +234,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center px-4 py-2">
+            <div className="flex h-10 items-center px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="h-6 w-12 rounded-full"
@@ -244,13 +244,13 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center px-4 py-2">
+          <div className="flex h-10 items-center px-2 py-2">
             <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
       header: () => (
-        <div className="flex items-center gap-2 px-4">
+        <div className="flex items-center gap-2 px-2">
           <h4 className="text-table-header text-xs">Type</h4>
           <div className="relative">
             <button
@@ -319,7 +319,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 px-4 py-2">
+            <div className="flex h-10 items-center gap-3 px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -333,7 +333,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 w-full items-center justify-between gap-3 px-4 py-2">
+          <div className="flex h-10 w-full items-center justify-between gap-3 px-2 py-2">
             <EnsAvatar
               address={fromAddress as `0x${string}`}
               size="sm"
@@ -348,7 +348,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-4 text-xs">From</h4>,
+      header: () => <h4 className="text-table-header px-2 text-xs">From</h4>,
     },
     {
       accessorKey: "toAddress",
@@ -359,7 +359,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 px-4 py-2">
+            <div className="flex h-10 items-center gap-3 px-2 py-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -373,7 +373,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 w-full items-center justify-between gap-3 px-4 py-2">
+          <div className="flex h-10 w-full items-center justify-between gap-3 px-2 py-2">
             <EnsAvatar
               address={toAddress as `0x${string}`}
               size="sm"
@@ -388,7 +388,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-4 text-xs">To</h4>,
+      header: () => <h4 className="text-table-header px-2 text-xs">To</h4>,
     },
   ];
 
