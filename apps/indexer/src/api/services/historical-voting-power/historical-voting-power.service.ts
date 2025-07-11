@@ -3,10 +3,9 @@ import {
   createPublicClient,
   http,
   PublicClient,
-  isAddress,
   parseAbi,
 } from "viem";
-import { readContract, multicall } from "viem/actions";
+import { multicall } from "viem/actions";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -63,7 +62,7 @@ export class HistoricalVotingPowerService {
       return await this.getVotingPowerWithMulticall(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     } catch (error) {
       console.error("Error fetching historical voting power:", error);
@@ -71,7 +70,7 @@ export class HistoricalVotingPowerService {
       return await this.getVotingPowerIndividually(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     }
   }
@@ -82,7 +81,7 @@ export class HistoricalVotingPowerService {
   private async getVotingPowerWithMulticall(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalVotingPower[]> {
     const results = await multicall(this.client, {
       contracts: addresses.map((address) => ({
@@ -117,7 +116,7 @@ export class HistoricalVotingPowerService {
   private async getVotingPowerIndividually(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalVotingPower[]> {
     const votingPowers = await Promise.allSettled(
       addresses.map((address) =>
@@ -129,8 +128,8 @@ export class HistoricalVotingPowerService {
           functionName: "getVotes",
           args: [address],
           blockNumber: BigInt(blockNumber),
-        })
-      )
+        }),
+      ),
     );
 
     // Transform results into HistoricalVotingPower objects
@@ -149,8 +148,7 @@ export class HistoricalVotingPowerService {
    * Maps DAO ID to corresponding token contract address
    */
   private getTokenAddress(daoId: DaoIdEnum): Address | null {
-    const { NETWORK: network } = env;
-    const contractInfo = CONTRACT_ADDRESSES[network]?.[daoId];
+    const contractInfo = CONTRACT_ADDRESSES[daoId];
     return contractInfo?.token?.address || null;
   }
 

@@ -6,7 +6,6 @@ import {
   DbProposal,
   DbVote,
 } from "@/api/repositories/proposals-activity.repository";
-import { SECONDS_PER_BLOCK } from "@/lib/constants";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
@@ -16,6 +15,7 @@ export interface ProposalActivityRequest {
   daoId: DaoIdEnum;
   skip?: number;
   limit?: number;
+  blockTime: number;
 }
 
 export interface ProposalWithUserVote {
@@ -64,6 +64,7 @@ export class ProposalsActivityService {
     daoId,
     skip = 0,
     limit = 10,
+    blockTime,
   }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
     // Check if user has ever voted
     const firstVoteTimestamp = await this.repository.getFirstVoteTimestamp(
@@ -77,7 +78,7 @@ export class ProposalsActivityService {
 
     // Get voting period for the DAO
     const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
-    const votingPeriodSeconds = votingPeriodBlocks * SECONDS_PER_BLOCK;
+    const votingPeriodSeconds = votingPeriodBlocks * blockTime;
 
     // Calculate activity start time
     const activityStart = this.calculateActivityStart(
@@ -197,7 +198,7 @@ export class ProposalsActivityService {
       winRate: Math.round(winRate * 100) / 100,
       yesRate: Math.round(yesRate * 100) / 100,
       avgTimeBeforeEnd, // This parameter is in seconds
-    }
+    };
   }
 
   private calculateWinRate(proposals: DbProposal[], userVotes: DbVote[]) {

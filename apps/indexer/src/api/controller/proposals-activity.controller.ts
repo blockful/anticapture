@@ -1,10 +1,11 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 export function proposalsActivity(
   app: Hono,
@@ -100,12 +101,15 @@ export function proposalsActivity(
       const { daoId } = context.req.valid("param");
       const { address, fromDate, skip, limit } = context.req.valid("query");
 
+      const blockTime = CONTRACT_ADDRESSES[daoId].blockTime;
+
       const result = await service.getProposalsActivity({
         address,
         fromDate,
         daoId,
         skip,
         limit,
+        blockTime,
       });
 
       return context.json(result, 200);
