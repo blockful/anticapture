@@ -389,7 +389,15 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
                 )}
               />
             </div>
-            <ExternalLink className="text-primary size-4" />
+            <a
+              href={`https://etherscan.io/tx/${row.original.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="ghost" size="icon">
+                <ExternalLink className="text-primary size-4" />
+              </Button>
+            </a>
           </div>
         );
       },
