@@ -166,7 +166,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-4 text-sm"
+          className="!text-table-header h-8 w-full justify-start px-4 text-sm"
           onClick={() => handleSort("date")}
         >
           <span className="text-xs">Date</span>
@@ -209,7 +209,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-end px-4 text-sm"
+          className="!text-table-header h-8 w-full justify-end px-4 text-sm"
           onClick={() => handleSort("amount")}
         >
           <span className="text-xs">Amount (ENS)</span>
@@ -394,7 +394,11 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
   return (
     <div className="flex w-full flex-col gap-2 p-4">
-      <TheTable columns={balanceHistoryColumns} data={tableData} />
+      <TheTable
+        columns={balanceHistoryColumns}
+        data={tableData}
+        isTableSmall={true}
+      />
 
       {/* Pagination */}
       <Pagination
