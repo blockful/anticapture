@@ -1,11 +1,11 @@
 import { createConfig } from "ponder";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
 import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
 
-const UNI_CONTRACTS = CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!;
+const UNI_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.UNI];
 
 export default createConfig({
   database: {
