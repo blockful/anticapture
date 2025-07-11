@@ -1,1 +1,1 @@
-export * from "./abi/ARBTokenAbi";
+export * from "./abi/token";

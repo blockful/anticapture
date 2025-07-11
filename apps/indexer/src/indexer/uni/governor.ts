@@ -1,78 +1,58 @@
-import { Account, Address, Chain, Client, Transport } from "viem";
-import { readContract } from "viem/actions";
+import { ponder } from "ponder:registry";
 
+import {
+  proposalCanceled,
+  proposalCreated,
+  proposalExecuted,
+  voteCast,
+  delegateChanged,
+  delegatedVotesChanged,
+} from "@/eventHandlers";
+import { DaoIdEnum } from "@/lib/enums";
 import { Governor } from "@/interfaces/governor";
-import { UNIGovernorAbi } from "./abi";
+import { dao } from "ponder:schema";
 
-export class UNIGovernor<
-  TTransport extends Transport = Transport,
-  TChain extends Chain = Chain,
-  TAccount extends Account | undefined = Account | undefined,
-> implements Governor
-{
-  private client: Client<TTransport, TChain, TAccount>;
-  private abi: typeof UNIGovernorAbi;
-  private address: Address;
+export function GovernorIndexer(governor: Governor) {
+  const daoId = DaoIdEnum.UNI;
 
-  constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
-    this.client = client;
-    this.address = address;
-    this.abi = UNIGovernorAbi;
-  }
+  ponder.on("UNIGovernor:setup", async ({ context }) => {
+    const votingPeriod = await governor.getVotingPeriod();
+    const quorum = await governor.getQuorum();
+    const votingDelay = await governor.getVotingDelay();
+    const timelockDelay = await governor.getTimelockDelay();
+    const proposalThreshold = await governor.getProposalThreshold();
 
-  async getQuorum(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorumVotes",
-      args: [],
+    await context.db.insert(dao).values({
+      id: daoId,
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
     });
-  }
+  });
 
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
+  ponder.on("UNIGovernor:VoteCast", async ({ event, context }) => {
+    await voteCast(event, context, daoId);
+  });
 
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
+  ponder.on("UNIGovernor:ProposalCreated", async ({ event, context }) => {
+    await proposalCreated(event, context, daoId);
+  });
 
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
-    });
-  }
+  ponder.on("UNIGovernor:ProposalCanceled", async ({ event, context }) => {
+    await proposalCanceled(event, context, daoId);
+  });
 
-  async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          constant: true,
-          inputs: [],
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          payable: false,
-          stateMutability: "view",
-          type: "function",
-          name: "delay",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "delay",
-    });
-  }
+  ponder.on("UNIGovernor:ProposalExecuted", async ({ event, context }) => {
+    await proposalExecuted(event, context, daoId);
+  });
+
+  ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
+    await delegateChanged(event, context, daoId);
+  });
+
+  ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
+    await delegatedVotesChanged(event, context, daoId);
+  });
 }
