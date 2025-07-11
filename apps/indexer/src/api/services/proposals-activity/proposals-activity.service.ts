@@ -10,12 +10,21 @@ import { SECONDS_PER_BLOCK } from "@/lib/constants";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
+export type OrderByField =
+  | "finalResult"
+  | "userVote"
+  | "votingPower"
+  | "voteTiming";
+export type OrderDirection = "asc" | "desc";
+
 export interface ProposalActivityRequest {
   address: Address;
   fromDate?: number;
   daoId: DaoIdEnum;
   skip?: number;
   limit?: number;
+  orderBy?: OrderByField;
+  orderDirection?: OrderDirection;
 }
 
 export interface ProposalWithUserVote {
@@ -64,6 +73,8 @@ export class ProposalsActivityService {
     daoId,
     skip = 0,
     limit = 10,
+    orderBy = "voteTiming",
+    orderDirection = "desc",
   }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
     // Check if user has ever voted
     const firstVoteTimestamp = await this.repository.getFirstVoteTimestamp(
@@ -107,7 +118,15 @@ export class ProposalsActivityService {
       proposals,
       userVotes,
     );
-    const paginatedProposals = proposalsWithVotes.slice(skip, skip + limit);
+
+    // Sort proposals based on the specified criteria
+    const sortedProposals = this.sortProposals(
+      proposalsWithVotes,
+      orderBy,
+      orderDirection,
+    );
+
+    const paginatedProposals = sortedProposals.slice(skip, skip + limit);
     const analytics = this.calculateAnalytics(proposals, userVotes);
 
     return {
@@ -197,7 +216,7 @@ export class ProposalsActivityService {
       winRate: Math.round(winRate * 100) / 100,
       yesRate: Math.round(yesRate * 100) / 100,
       avgTimeBeforeEnd, // This parameter is in seconds
-    }
+    };
   }
 
   private calculateWinRate(proposals: DbProposal[], userVotes: DbVote[]) {
@@ -283,5 +302,63 @@ export class ProposalsActivityService {
       avgTimeBeforeEnd: 0,
       proposals: [],
     };
+  }
+
+  private sortProposals(
+    proposals: ProposalWithUserVote[],
+    orderBy: OrderByField,
+    orderDirection: OrderDirection,
+  ): ProposalWithUserVote[] {
+    return proposals.sort((a, b) => {
+      let comparison = 0;
+
+      switch (orderBy) {
+        case "finalResult":
+          // TODO: Implement finalResult sorting when the new column is available
+          // For now, sort by proposal timestamp as fallback
+          comparison =
+            Number(a.proposal.timestamp) - Number(b.proposal.timestamp);
+          break;
+
+        case "userVote":
+          // Sort by user vote support: null votes first, then "0", "1", "2"
+          const aSupport = a.userVote?.support ?? null;
+          const bSupport = b.userVote?.support ?? null;
+
+          if (aSupport === null && bSupport !== null) comparison = -1;
+          else if (aSupport !== null && bSupport === null) comparison = 1;
+          else if (aSupport === null && bSupport === null) comparison = 0;
+          else comparison = Number(aSupport) - Number(bSupport);
+          break;
+
+        case "votingPower":
+          // Sort by voting power (null votes have 0 voting power)
+          const aVotingPower = a.userVote?.votingPower
+            ? Number(a.userVote.votingPower)
+            : 0;
+          const bVotingPower = b.userVote?.votingPower
+            ? Number(b.userVote.votingPower)
+            : 0;
+          comparison = aVotingPower - bVotingPower;
+          break;
+
+        case "voteTiming":
+          // Sort by vote timing (userVote.timestamp - proposal.timestamp)
+          const aVoteTime = a.userVote?.timestamp
+            ? Number(a.userVote.timestamp) - Number(a.proposal.timestamp)
+            : 0;
+          const bVoteTime = b.userVote?.timestamp
+            ? Number(b.userVote.timestamp) - Number(b.proposal.timestamp)
+            : 0;
+          comparison = aVoteTime - bVoteTime;
+          break;
+
+        default:
+          comparison = 0;
+      }
+
+      // Apply direction
+      return orderDirection === "desc" ? -comparison : comparison;
+    });
   }
 }

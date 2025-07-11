@@ -47,6 +47,11 @@ export function proposalsActivity(
             .max(100, "Limit cannot exceed 100")
             .default(10)
             .optional(),
+          orderBy: z
+            .enum(["finalResult", "userVote", "votingPower", "voteTiming"])
+            .default("voteTiming")
+            .optional(),
+          orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
         }),
       },
       responses: {
@@ -98,7 +103,8 @@ export function proposalsActivity(
     }),
     async (context) => {
       const { daoId } = context.req.valid("param");
-      const { address, fromDate, skip, limit } = context.req.valid("query");
+      const { address, fromDate, skip, limit, orderBy, orderDirection } =
+        context.req.valid("query");
 
       const result = await service.getProposalsActivity({
         address,
@@ -106,6 +112,8 @@ export function proposalsActivity(
         daoId,
         skip,
         limit,
+        orderBy,
+        orderDirection,
       });
 
       return context.json(result, 200);
