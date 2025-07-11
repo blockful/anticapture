@@ -8,7 +8,7 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ArrowRight, ExternalLink, Filter } from "lucide-react";
-import { useBalanceHistory, Transfer } from "../hooks/useBalanceHistory";
+import { useBalanceHistory } from "../hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface BalanceHistoryData {
@@ -228,7 +228,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "type",
-      size: 120,
+      size: 80,
       cell: ({ row }) => {
         const type = row.getValue("type") as "Buy" | "Sell";
 
@@ -334,16 +334,19 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex h-10 w-full items-center justify-between gap-3 px-2 py-2">
-            <EnsAvatar
-              address={fromAddress as `0x${string}`}
-              size="sm"
-              variant="rounded"
-              showName={true}
-              nameClassName={cn(
-                "text-secondary",
-                fromAddress === accountId && "text-primary",
-              )}
-            />
+            <div className="text-primary flex max-w-[160px] items-center gap-2 overflow-hidden">
+              <EnsAvatar
+                address={fromAddress as `0x${string}`}
+                size="sm"
+                variant="rounded"
+                showName={true}
+                nameClassName={cn(
+                  "text-secondary truncate max-w-[120px]",
+                  fromAddress === accountId && "text-primary",
+                )}
+              />
+            </div>
+
             <ArrowRight className="text-secondary size-4" />
           </div>
         );
@@ -374,16 +377,18 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex h-10 w-full items-center justify-between gap-3 px-2 py-2">
-            <EnsAvatar
-              address={toAddress as `0x${string}`}
-              size="sm"
-              variant="rounded"
-              showName={true}
-              nameClassName={cn(
-                "text-secondary",
-                toAddress === accountId && "text-primary",
-              )}
-            />
+            <div className="text-primary flex max-w-[160px] items-center gap-2 overflow-hidden">
+              <EnsAvatar
+                address={toAddress as `0x${string}`}
+                size="sm"
+                variant="rounded"
+                showName={true}
+                nameClassName={cn(
+                  "text-secondary truncate max-w-[120px]",
+                  toAddress === accountId && "text-primary",
+                )}
+              />
+            </div>
             <ExternalLink className="text-primary size-4" />
           </div>
         );
