@@ -265,45 +265,45 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
             </button>
 
             {showTypeFilter && (
-              <div className="bg-surface-default absolute top-8 left-0 z-10 min-w-[100px] rounded-md border border-white/10 shadow-lg">
-                <div className="p-1">
-                  <button
-                    onClick={() => {
-                      setTypeFilter("all");
-                      setShowTypeFilter(false);
-                    }}
-                    className={cn(
-                      "hover:bg-surface-hover w-full rounded px-2 py-1 text-left text-sm",
-                      typeFilter === "all" && "bg-surface-hover",
-                    )}
-                  >
-                    Remove all
-                  </button>
-                  <button
-                    onClick={() => {
-                      setTypeFilter("Buy");
-                      setShowTypeFilter(false);
-                    }}
-                    className={cn(
-                      "hover:bg-surface-hover w-full rounded px-2 py-1 text-left text-sm",
-                      typeFilter === "Buy" && "bg-surface-hover",
-                    )}
-                  >
-                    Buy
-                  </button>
-                  <button
-                    onClick={() => {
-                      setTypeFilter("Sell");
-                      setShowTypeFilter(false);
-                    }}
-                    className={cn(
-                      "hover:bg-surface-hover w-full rounded px-2 py-1 text-left text-sm",
-                      typeFilter === "Sell" && "bg-surface-hover",
-                    )}
-                  >
-                    Sell
-                  </button>
-                </div>
+              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
+                <button
+                  onClick={() => {
+                    setTypeFilter("all");
+                    setShowTypeFilter(false);
+                  }}
+                  className={cn(
+                    "hover:bg-surface-hover flex w-full items-center justify-between border-b border-[#3F3F46] px-3 py-2 text-left",
+                    typeFilter === "all" && "bg-surface-hover",
+                  )}
+                >
+                  <span className="text-primary text-sm font-normal">
+                    Remove All
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    setTypeFilter("Buy");
+                    setShowTypeFilter(false);
+                  }}
+                  className={cn(
+                    "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
+                    typeFilter === "Buy" && "bg-surface-hover",
+                  )}
+                >
+                  <span className="text-primary text-sm font-normal">Buy</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setTypeFilter("Sell");
+                    setShowTypeFilter(false);
+                  }}
+                  className={cn(
+                    "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
+                    typeFilter === "Sell" && "bg-surface-hover",
+                  )}
+                >
+                  <span className="text-primary text-sm font-normal">Sell</span>
+                </button>
               </div>
             )}
           </div>
