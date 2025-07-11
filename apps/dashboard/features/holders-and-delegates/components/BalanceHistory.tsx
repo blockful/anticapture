@@ -212,7 +212,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           className="!text-table-header h-8 w-full justify-end px-2 text-sm"
           onClick={() => handleSort("amount")}
         >
-          <span className="text-xs">Amount (ENS)</span>
+          <span className="text-xs">Amount ({daoId.toUpperCase()})</span>
           <ArrowUpDown
             props={{ className: " size-4" }}
             activeState={
