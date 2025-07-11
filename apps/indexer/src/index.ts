@@ -1,20 +1,21 @@
-import { Address, createPublicClient, http } from "viem";
+import { createPublicClient, http } from "viem";
 
 import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { ERC20Indexer, GovernorIndexer } from "@/indexer";
-import { Governor } from "@/interfaces";
-import { ENSGovernor } from "@/indexer/ens";
-import { UNIGovernor } from "@/indexer/uni";
+import { ERC20Indexer } from "@/indexer";
+import {
+  ENSGovernor,
+  GovernorIndexer as ENSGovernorIndexer,
+} from "@/indexer/ens";
+import {
+  UNIGovernor,
+  GovernorIndexer as UNIGovernorIndexer,
+} from "@/indexer/uni";
+import { OPGovernor, GovernorIndexer as OPGovernorIndexer } from "@/indexer/op";
 
-const {
-  NETWORK: network,
-  DAO_ID: daoId,
-  CHAIN_ID: chainId,
-  RPC_URL: rpcUrl,
-} = env;
+const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
 const chain = getChain(chainId);
 if (!chain) {
@@ -27,20 +28,27 @@ const client = createPublicClient({
   transport: http(rpcUrl),
 });
 
-const { token, governor } = CONTRACT_ADDRESSES[network][daoId]!;
-
-ERC20Indexer(daoId, token.address, token.decimals);
-if (governor) GovernorIndexer(daoId, getGovernorClient(daoId, governor.address));
-
-function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
-  switch (id) {
-    case DaoIdEnum.ENS:
-      return new ENSGovernor(client, address);
-    case DaoIdEnum.UNI:
-      return new UNIGovernor(client, address);
-    default:
-      throw new Error(`${id} Governor unavailable`);
+switch (daoId) {
+  case DaoIdEnum.ENS: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    ERC20Indexer(daoId, token.address, token.decimals);
+    ENSGovernorIndexer(new ENSGovernor(client, governor.address));
+    break;
   }
+  case DaoIdEnum.UNI: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    ERC20Indexer(daoId, token.address, token.decimals);
+    UNIGovernorIndexer(new UNIGovernor(client, governor.address));
+    break;
+  }
+  case DaoIdEnum.OP: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    ERC20Indexer(daoId, token.address, token.decimals);
+    OPGovernorIndexer(new OPGovernor(client, governor.address));
+    break;
+  }
+  default:
+    throw new Error(`${daoId} Governor unavailable`);
 }
 
 //@ts-ignore
