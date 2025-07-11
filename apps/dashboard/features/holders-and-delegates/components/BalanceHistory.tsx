@@ -265,7 +265,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
             </button>
 
             {showTypeFilter && (
-              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-10 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
+              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-9 min-w-[100px] rounded-md border border-[#3F3F46] py-1">
                 <button
                   onClick={() => {
                     setTypeFilter("all");
