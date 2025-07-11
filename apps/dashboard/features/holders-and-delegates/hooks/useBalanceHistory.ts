@@ -51,15 +51,10 @@ export function useBalanceHistory(
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
-  // Reset page to 1 when transaction type changes
+  // Reset page to 1 when transaction type or sorting changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [transactionType]);
-
-  // Reset page to 1 when sorting changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [orderBy, orderDirection]);
+  }, [transactionType, orderBy, orderDirection]);
 
   const queryVariables = {
     account: accountId,
