@@ -16,6 +16,7 @@ export type OrderByField =
   | "votingPower"
   | "voteTiming";
 export type OrderDirection = "asc" | "desc";
+export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
 
 export interface ProposalActivityRequest {
   address: Address;
@@ -25,6 +26,7 @@ export interface ProposalActivityRequest {
   limit?: number;
   orderBy?: OrderByField;
   orderDirection?: OrderDirection;
+  userVoteFilter?: VoteFilterType[];
 }
 
 export interface ProposalWithUserVote {
@@ -75,6 +77,7 @@ export class ProposalsActivityService {
     limit = 10,
     orderBy = "voteTiming",
     orderDirection = "desc",
+    userVoteFilter,
   }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
     // Check if user has ever voted
     const firstVoteTimestamp = await this.repository.getFirstVoteTimestamp(
@@ -119,9 +122,15 @@ export class ProposalsActivityService {
       userVotes,
     );
 
+    // Apply vote filter if provided and not empty
+    const filteredProposals =
+      userVoteFilter && userVoteFilter.length > 0
+        ? this.filterProposalsByVote(proposalsWithVotes, userVoteFilter)
+        : proposalsWithVotes;
+
     // Sort proposals based on the specified criteria
     const sortedProposals = this.sortProposals(
-      proposalsWithVotes,
+      filteredProposals,
       orderBy,
       orderDirection,
     );
@@ -302,6 +311,38 @@ export class ProposalsActivityService {
       avgTimeBeforeEnd: 0,
       proposals: [],
     };
+  }
+
+  private filterProposalsByVote(
+    proposals: ProposalWithUserVote[],
+    userVoteFilter: VoteFilterType[],
+  ): ProposalWithUserVote[] {
+    return proposals.filter((proposal) => {
+      const userVote = proposal.userVote;
+
+      // Check if "no-vote" is in filter and user didn't vote
+      if (userVoteFilter.includes("no-vote") && !userVote) {
+        return true;
+      }
+
+      // Check if user voted and the vote type matches filter
+      if (userVote) {
+        const support = userVote.support;
+
+        // Map support values to filter types
+        if (support === "1" && userVoteFilter.includes("yes")) {
+          return true;
+        }
+        if (support === "0" && userVoteFilter.includes("no")) {
+          return true;
+        }
+        if (support === "2" && userVoteFilter.includes("abstain")) {
+          return true;
+        }
+      }
+
+      return false;
+    });
   }
 
   private sortProposals(

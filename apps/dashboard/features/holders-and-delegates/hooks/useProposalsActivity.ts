@@ -2,6 +2,14 @@ import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks"
 import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
 import { useMemo } from "react";
 
+export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
+export type OrderByField =
+  | "finalResult"
+  | "userVote"
+  | "votingPower"
+  | "voteTiming";
+export type OrderDirection = "asc" | "desc";
+
 interface UseProposalsActivityParams {
   address: string;
   daoId: QueryInput_ProposalsActivity_DaoId;

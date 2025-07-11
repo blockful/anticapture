@@ -52,6 +52,12 @@ export function proposalsActivity(
             .default("voteTiming")
             .optional(),
           orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
+          userVoteFilter: z
+            .array(z.enum(["yes", "no", "abstain", "no-vote"]))
+            .optional()
+            .describe(
+              "Filter proposals by vote type. Can include: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",
+            ),
         }),
       },
       responses: {
@@ -103,8 +109,15 @@ export function proposalsActivity(
     }),
     async (context) => {
       const { daoId } = context.req.valid("param");
-      const { address, fromDate, skip, limit, orderBy, orderDirection } =
-        context.req.valid("query");
+      const {
+        address,
+        fromDate,
+        skip,
+        limit,
+        orderBy,
+        orderDirection,
+        userVoteFilter,
+      } = context.req.valid("query");
 
       const result = await service.getProposalsActivity({
         address,
@@ -114,6 +127,7 @@ export function proposalsActivity(
         limit,
         orderBy,
         orderDirection,
+        userVoteFilter,
       });
 
       return context.json(result, 200);
