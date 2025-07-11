@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { SkeletonRow, TheTable } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
@@ -10,8 +11,13 @@ import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils";
+// Strongly-typed GraphQL objects
+import type {
+  AccountBalance,
+  VotingPowerHistory,
+} from "@anticapture/graphql-client/hooks";
+// We will rely on the types that come with the hook return and avoid direct package imports
 
 export const VotingPowerTable = ({
   address,
@@ -24,22 +30,69 @@ export const VotingPowerTable = ({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortBy, setSortBy] = useState<"balance" | "timestamp">("balance");
 
-  const { delegatorsVotingPowerDetails, loading, error } = useVotingPower({
+  const {
+    delegatorsVotingPowerDetails,
+    loading,
+    error,
+    votingPowerHistoryData,
+  } = useVotingPower({
     daoId: daoId as DaoIdEnum,
     address: address,
   });
+
+  console.log("delegatorsVotingPowerDetails", delegatorsVotingPowerDetails);
+  console.log("votingPowerHistoryData", votingPowerHistoryData);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const tableData = (delegatorsVotingPowerDetails?.accountBalances?.items || [])
-    .map((balanceData: any) => ({
-      address: balanceData.accountId || "",
-      amount: Number(balanceData.balance) || 0,
-      date: "",
-    }))
-    .filter((item: any) => item.address !== "");
+  /**
+   * ------------------------------------------------------------------
+   * Map <delegatorId> -> latest delegation timestamp
+   * ------------------------------------------------------------------
+   */
+
+  //   const delegatorTimestampMapping = Object.fromEntries(votingPowerHistories.map(vp=>[vp.delegation.delegatorAccountId, vp.delegation.timestamp]))
+
+  // const accountBalancesWithTimestamp = accountBalances.map(ab=>({...ab, timestamp: delegatorTimestampMapping[ab.accountId]}))
+
+  const votingPowerHistories: VotingPowerHistory[] =
+    (votingPowerHistoryData as VotingPowerHistory[]) || [];
+
+  const delegatorTimestampMapping: Record<string, string | number | undefined> =
+    Object.fromEntries(
+      votingPowerHistories.map((vp) => [
+        (vp as any).delegatorAccountId?.toLowerCase?.() ?? // TODO: Check the type of this. It's not typed correctly but any is working.
+          vp.delegation?.delegatorAccountId?.toLowerCase(),
+        (vp as any).timestamp ?? vp.delegation?.timestamp ?? vp.timestamp,
+      ]),
+    );
+
+  /**
+   * ------------------------------------------------------------------
+   * Enrich each AccountBalance with its timestamp
+   * ------------------------------------------------------------------
+   */
+  const accountBalances: AccountBalance[] =
+    (delegatorsVotingPowerDetails?.accountBalances
+      ?.items as AccountBalance[]) || [];
+
+  const accountBalancesWithTimestamp = accountBalances.map((ab) => ({
+    ...ab,
+    timestamp: delegatorTimestampMapping[ab.accountId.toLowerCase()],
+  }));
+
+  /**
+   * Shape data for the table component
+   */
+  const tableData = accountBalancesWithTimestamp.map((ab) => ({
+    address: ab.accountId,
+    amount: Number(ab.balance) || 0,
+    date: ab.timestamp,
+  }));
+
+  console.debug("VotingPowerTable → tableData", tableData);
 
   const columns: ColumnDef<{
     address: string;

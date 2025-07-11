@@ -1,6 +1,6 @@
 import {
+  useGetDelegationsTimestampQuery,
   useGetDelegatorVotingPowerDetailsQuery,
-  useGetVotingPowerHistorysQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 
@@ -24,7 +24,7 @@ export const useVotingPower = ({
   address: string;
 }) => {
   const {
-    data: delegatorsVotingPowerDetails,
+    data: delegatorsVotingPowerDetails, // Here i have the accountBalances Id
     loading,
     error,
     refetch,
@@ -39,35 +39,59 @@ export const useVotingPower = ({
       address: address,
     },
   });
+  console.log("delegatorsVotingPowerDetails2121", delegatorsVotingPowerDetails);
+  const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
-  console.log("delegatorsVotingPowerDetails = ", delegatorsVotingPowerDetails);
+  // ------------------------------------------------------------------
+  // Prepare the array of delegator addresses once balances are fetched
+  // ------------------------------------------------------------------
+  const delegatorAddresses: string[] = accountBalances
+    ? accountBalances.map((item) => item.accountId)
+    : [];
 
-  const { data: votingPowerHistoryData } = useGetVotingPowerHistorysQuery({
+  console.log("delegatorAddress221", delegatorAddresses);
+
+  // ------------------------------------------------------------------
+  // Fetch delegation timestamps (skipped until we have delegatorAddresses)
+  // ------------------------------------------------------------------
+  const {
+    data: delegationsTimestampData,
+    loading: tsLoading,
+    error: tsError,
+  } = useGetDelegationsTimestampQuery({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
     variables: {
-      address: address,
+      delegate: address,
+      delegator: delegatorAddresses,
+      daoId: daoId,
     },
+    skip: delegatorAddresses.length === 0,
   });
 
-  console.log("votingPowerHistoryData = ", votingPowerHistoryData);
+  // ------------------------------------------------------------------
+  // Build timestamp lookup <delegatorAccountId> -> timestamp
+  // ------------------------------------------------------------------
+  const timestampMap: Record<string, string | number | undefined> =
+    Object.fromEntries(
+      (delegationsTimestampData?.delegations.items || []).map((d) => [
+        d.delegatorAccountId?.toLowerCase(),
+        d.timestamp,
+      ]),
+    );
 
-  const votingPowerHistory =
-    votingPowerHistoryData?.votingPowerHistorys?.items.filter(
-      ({ delegation }) => !!delegation,
-    ) || [];
-  console.log("votingPowerHistory 1 Filtered= ", votingPowerHistory);
-  const votingPowerHistoryWithDelegation =
-    votingPowerHistory?.filter(
-      ({ delegation }) => delegation?.delegateAccountId === address,
-    ) || [];
-  console.log(
-    "votingPowerHistory 2 Filtered= ",
-    votingPowerHistoryWithDelegation,
-  );
+  // ------------------------------------------------------------------
+  // Enrich balances with timestamp (fallback to undefined)
+  // ------------------------------------------------------------------
+  const balancesWithTimestamp = (accountBalances || []).map((ab) => ({
+    ...ab,
+    timestamp: timestampMap[ab.accountId.toLowerCase()],
+  }));
+
+  console.log("delegationsTimestampData", delegationsTimestampData);
 
   const handleFetchMore = (
     cursor: string,
@@ -199,10 +223,11 @@ export const useVotingPower = ({
   // }, [refetch]);
 
   return {
-    delegatorsVotingPowerDetails: delegatorsVotingPowerDetails,
-    votingPowerHistoryData: votingPowerHistoryWithDelegation,
-    loading,
-    error,
+    delegatorsVotingPowerDetails,
+    votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
+    balances: balancesWithTimestamp,
+    loading: loading || tsLoading,
+    error: error || tsError,
     refetch,
     pageInfo: delegatorsVotingPowerDetails?.accountBalances?.pageInfo,
     fetchMore: handleFetchMore,

@@ -56,11 +56,34 @@ export const VotingPower = ({
   const {
     delegatorsVotingPowerDetails,
     loading,
-    votingPowerHistoryData: votingPowerHistoryDelegators,
+    votingPowerHistoryData,
+    fetchMore,
   } = useVotingPower({
     daoId,
     address: delegate,
   });
+
+  // Adapt the returned items to the structure previously expected by the UI
+  const votingPowerHistoryDelegators = (votingPowerHistoryData || []).map(
+    (item) => {
+      const balanceMatch =
+        delegatorsVotingPowerDetails?.accountBalances?.items.find(
+          (ab) =>
+            ab.accountId.toLowerCase() ===
+            (item.delegatorAccountId || "").toLowerCase(),
+        );
+
+      return {
+        delegation: {
+          delegatorAccountId: item.delegatorAccountId,
+          delegatedValue: balanceMatch?.balance ?? "0",
+        },
+      } as const;
+    },
+  );
+
+  console.log("delegatorsVotingPowerDetails", delegatorsVotingPowerDetails);
+  console.log("loading", loading);
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
