@@ -1,4 +1,4 @@
-query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+query BalanceHistory($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   transfers(
     where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
     orderBy: $orderBy
@@ -24,7 +24,7 @@ query MyQuery($account: String!, $after: String, $before: String, $limit: Int = 
   }
 }
 
-query MyQueryBuy($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+query BalanceHistoryBuy($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   transfers(
     where: {toAccountId: $account}
     orderBy: $orderBy
@@ -50,7 +50,7 @@ query MyQueryBuy($account: String!, $after: String, $before: String, $limit: Int
   }
 }
 
-query MyQuerySell($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+query BalanceHistorySell($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   transfers(
     where: {fromAccountId: $account}
     orderBy: $orderBy
