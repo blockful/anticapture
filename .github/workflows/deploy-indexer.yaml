@@ -1,0 +1,77 @@
+name: Deploy Indexers and API Gateway to Railway
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "apps/indexer/**/*.ts"
+      - "apps/api-gateway/**/*.ts"
+      - "infra/**"
+
+jobs:
+  get-daos:
+    runs-on: ubuntu-latest
+    outputs:
+      daos: ${{ steps.get-daos.outputs.daos }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get available DAOs
+        id: get-daos
+        run: |
+          # Extract DAO names from config files (excluding local configs)
+          daos=$(ls apps/indexer/config/*.config.ts | grep -v local | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
+
+          # Create DAO array
+          dao_array="["
+          for dao in $daos; do
+            dao_array="${dao_array}\"${dao}\","
+          done
+          dao_array="${dao_array%,}]"
+
+          echo "daos=$dao_array" >> $GITHUB_OUTPUT
+          echo "Detected DAOs: $dao_array"
+
+  deploy-indexers:
+    needs: get-daos
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+    strategy:
+      matrix:
+        dao: ${{ fromJson(needs.get-daos.outputs.daos) }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+      - name: Deploy ${{ matrix.dao }}-indexer
+        run: railway up -s ${{ matrix.dao }}-indexer -e ${{ steps.env.outputs.environment }} --ci -d
+      - name: Deploy ${{ matrix.dao }}-api
+        run: railway up -s ${{ matrix.dao }}-api -e ${{ steps.env.outputs.environment }} --ci
+
+  deploy-api-gateway:
+    needs: deploy-indexers
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+      - name: Deploy api-gateway
+        run: railway up -s api-gateway -e ${{ steps.env.outputs.environment }} --ci

@@ -17,12 +17,3 @@ query GetDelegatorVotingPowerDetails($address: String!, $after: String, $before:
   }
 }
 
-
-# delegation = null ( To que mudou o poder de voto foi um ransfer )
-
-# VotingPowerHistory
-# votingPowerHistory.filter(({delegation !! delegation ) 
-
-# -----------
-
-# votingPowerHistory.filter(({delegation)})=>delegation.delegateAccountId=="DelegatorAddress)
