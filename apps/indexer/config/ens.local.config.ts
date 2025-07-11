@@ -42,8 +42,8 @@ export default createConfig({
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "anvil",
-      address: CONTRACTS.governor!.address,
-      startBlock: CONTRACTS.governor!.startBlock, // Block where ENS Governor was deployed
+      address: CONTRACTS.governor.address,
+      startBlock: CONTRACTS.governor.startBlock, // Block where ENS Governor was deployed
     },
   },
 });

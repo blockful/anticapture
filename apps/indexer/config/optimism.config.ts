@@ -5,7 +5,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { env } from "@/env";
 import { GovernorAbi, TokenAbi } from "@/indexer/op";
 
-const OP_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.OP]!;
+const OP_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.OP];
 
 export default createConfig({
   database: {

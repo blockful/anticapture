@@ -30,8 +30,8 @@ export default createConfig({
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "ethereum_mainnet",
-      address: ENS_CONTRACTS.governor!.address,
-      startBlock: ENS_CONTRACTS.governor!.startBlock,
+      address: ENS_CONTRACTS.governor.address,
+      startBlock: ENS_CONTRACTS.governor.startBlock,
     },
   },
 });
