@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
 import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
+import { TimeInterval } from "@/shared/types/enums";
+import { getTimeDataFromPeriod } from "./Delegates";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -19,7 +21,6 @@ interface HoldersAndDelegatesDrawerProps {
   entityType: EntityType;
   address: string;
   daoId: QueryInput_ProposalsActivity_DaoId;
-  fromDate?: number;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -28,9 +29,8 @@ export const HoldersAndDelegatesDrawer = ({
   entityType,
   address,
   daoId,
-  fromDate
 }: HoldersAndDelegatesDrawerProps) => {
-
+  const { fromDate } = getTimeDataFromPeriod(TimeInterval.ONE_YEAR)
   const entities = {
     delegate: {
       title: "Delegate",

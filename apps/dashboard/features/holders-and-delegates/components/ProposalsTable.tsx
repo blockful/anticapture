@@ -337,7 +337,7 @@ export const ProposalsTable = ({
 
         return (
           <div className="flex h-10 items-center px-4 py-2">
-            <span className="text-primary truncate text-sm font-medium">
+            <span className="text-primary font-regular truncate text-sm">
               {proposalName}
             </span>
           </div>
@@ -371,7 +371,7 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-2"
+          className="!text-table-header font-regular h-8 w-full justify-start px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           Final Result
@@ -415,7 +415,7 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-2"
+          className="!text-table-header h-8 w-full justify-start px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           User Vote
@@ -458,7 +458,7 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-2"
+          className="flex h-8 w-full justify-end px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Voting Power</h4>
@@ -503,14 +503,16 @@ export const ProposalsTable = ({
             <div className="text-secondary text-xs font-normal">
               {voteTiming.text}
             </div>
-            <SimpleProgressBar percentage={voteTiming.percentage} />
+            {voteTiming.text !== "Didn't vote" && (
+              <SimpleProgressBar percentage={voteTiming.percentage} />
+            )}
           </div>
         );
       },
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex w-full justify-start px-2"
+          className="flex h-8 w-full justify-start px-2"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Vote Timing</h4>
@@ -555,7 +557,7 @@ export const ProposalsTable = ({
           <div className="flex h-10 items-center justify-center py-2 pr-0.5 pl-1">
             <button
               onClick={handleRedirect}
-              className="hover:text-primary cursor-pointer text-white transition-colors"
+              className="hover:text-secondary cursor-pointer text-white transition-colors"
               title="View on Tally"
             >
               <ExternalLink className="size-4" />

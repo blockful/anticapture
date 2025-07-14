@@ -5,7 +5,7 @@ import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client"
 import { useEffect, useState } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
-import { Hand, Trophy, CheckCircle2, Clock10 } from "lucide-react";
+import { Hand, Trophy, CheckCircle2, Clock10, Check, Zap } from "lucide-react";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -90,12 +90,12 @@ export const DelegateProposalsActivity = ({
             value={winRateValue}
           />
           <MetricCard
-            icon={<CheckCircle2 className="size-3.5" />}
+            icon={<Check className="size-3.5" />}
             title="Yes Rate"
             value={yesRateValue}
           />
           <MetricCard
-            icon={<Clock10 className="size-3.5" />}
+            icon={<Zap className="size-3.5" />}
             title="Avg. Vote Timing"
             value={avgTimingValue}
           />
