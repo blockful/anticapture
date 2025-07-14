@@ -8,7 +8,6 @@ import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { groupDelegatorsByPercentage } from "../utils/groupDelegatorsByPercentage";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -69,25 +68,31 @@ export const VotingPower = ({
     address: delegate,
   });
 
-  // Adapt the returned items to the structure previously expected by the UI
-  const votingPowerHistoryDelegators = (votingPowerHistoryData || []).map(
-    (item) => {
-      const balanceMatch =
-        delegatorsVotingPowerDetails?.accountBalances?.items.find(
-          (ab) =>
-            ab.accountId.toLowerCase() ===
-            (item.delegatorAccountId || "").toLowerCase(),
-        );
+  if (
+    !top5Delegators ||
+    top5Delegators.length === 0 ||
+    !delegatorsVotingPowerDetails ||
+    !delegatorsVotingPowerDetails.accountPower ||
+    !delegatorsVotingPowerDetails.accountPower.votingPower
+  ) {
+    return null;
+  }
 
-      return {
-        delegation: {
-          delegatorAccountId: item.delegatorAccountId,
-          delegatedValue: balanceMatch?.balance ?? "0",
-        },
-      } as const;
-    },
+  const currentVotingPower = Number(
+    BigInt(delegatorsVotingPowerDetails?.accountPower?.votingPower) /
+      BigInt(10 ** 18),
   );
 
+  console.log("currentVotingPower", currentVotingPower);
+  const totalTop5Delegators = top5Delegators?.reduce((acc, item) => {
+    return acc + Number(item.balance);
+  }, 0);
+
+  console.log("totalTop5Delegators", totalTop5Delegators);
+
+  const othersValue = Math.abs(totalTop5Delegators - currentVotingPower);
+
+  console.log("otherValue", othersValue);
   return (
     <div className="flex h-full w-full flex-col gap-4">
       <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
@@ -106,14 +111,7 @@ export const VotingPower = ({
                   {loading ? (
                     <span className="text-secondary">Loading...</span>
                   ) : (
-                    formatNumberUserReadable(
-                      Number(
-                        BigInt(
-                          delegatorsVotingPowerDetails?.accountPower
-                            ?.votingPower,
-                        ) / BigInt(10 ** 18),
-                      ),
-                    ) || 0
+                    formatNumberUserReadable(currentVotingPower)
                   )}
                 </p>
               </div>
@@ -133,19 +131,12 @@ export const VotingPower = ({
                     </div>
                   ) : top5Delegators && top5Delegators.length > 0 ? (
                     (() => {
-                      const {
-                        significantDelegators,
-                        minorDelegators,
-                        othersValue,
-                        total,
-                      } = groupDelegatorsByPercentage(top5Delegators);
-
                       return (
                         <>
                           <div className="flex w-full flex-col gap-4">
                             <div className="flex flex-wrap gap-2">
-                              {significantDelegators.length > 0 &&
-                                significantDelegators.map((delegator, idx) => (
+                              {top5Delegators.length > 0 &&
+                                top5Delegators.map((delegator, idx) => (
                                   <div
                                     key={delegator.accountId || idx}
                                     className="flex items-center"
@@ -174,10 +165,10 @@ export const VotingPower = ({
                                             ],
                                         }}
                                       >
-                                        {total > 0
+                                        {top5Delegators.length > 0
                                           ? `${(
                                               (Number(delegator.balance) /
-                                                total) *
+                                                currentVotingPower) *
                                               100
                                             ).toFixed(0)}%`
                                           : "-"}
@@ -185,31 +176,30 @@ export const VotingPower = ({
                                     </div>
                                   </div>
                                 ))}
-                              {minorDelegators.length > 0 &&
-                                othersValue > 0 && (
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2">
-                                      <span
-                                        className="size-2 rounded-xs"
-                                        style={{ backgroundColor: "#9CA3AF" }}
-                                      />
-                                      <span className="text-sm font-medium">
-                                        Others
-                                      </span>
-                                    </div>
+                              {othersValue > 0 && (
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
                                     <span
-                                      className="text-sm font-bold"
-                                      style={{ color: "#9CA3AF" }}
-                                    >
-                                      {total > 0
-                                        ? `${(
-                                            (othersValue / total) *
-                                            100
-                                          ).toFixed(2)}%`
-                                        : "-"}
+                                      className="size-2 rounded-xs"
+                                      style={{ backgroundColor: "#9CA3AF" }}
+                                    />
+                                    <span className="text-sm font-medium">
+                                      Others
                                     </span>
                                   </div>
-                                )}
+                                  <span
+                                    className="text-sm font-bold"
+                                    style={{ color: "#9CA3AF" }}
+                                  >
+                                    {othersValue > 0
+                                      ? `${(
+                                          (othersValue / currentVotingPower) *
+                                          100
+                                        ).toFixed(2)}%`
+                                      : "-"}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </>

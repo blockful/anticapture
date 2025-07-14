@@ -40,9 +40,6 @@ export const VotingPowerTable = ({
     address: address,
   });
 
-  console.log("delegatorsVotingPowerDetails", delegatorsVotingPowerDetails);
-  console.log("votingPowerHistoryData", votingPowerHistoryData);
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -91,8 +88,6 @@ export const VotingPowerTable = ({
     amount: Number(ab.balance) || 0,
     date: ab.timestamp,
   }));
-
-  console.debug("VotingPowerTable → tableData", tableData);
 
   const columns: ColumnDef<{
     address: string;

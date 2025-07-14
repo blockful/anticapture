@@ -115,7 +115,6 @@ export const useVotingPower = ({
     });
   }, [orderBy, orderDirection, refetch]);
 
-  console.log("delegatorsVotingPowerDetails2121", delegatorsVotingPowerDetails);
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
   // ------------------------------------------------------------------
@@ -124,8 +123,6 @@ export const useVotingPower = ({
   const delegatorAddresses: string[] = accountBalances
     ? accountBalances.map((item) => item.accountId)
     : [];
-
-  console.log("delegatorAddress221", delegatorAddresses);
 
   // ------------------------------------------------------------------
   // Fetch delegation timestamps (skipped until we have delegatorAddresses)
@@ -315,8 +312,14 @@ export const useVotingPower = ({
     refetch();
   }, [refetch]);
 
+  const top5DelegatorsWithBalance = top5Delegators?.accountBalances.items.map(
+    (item) => ({
+      ...item,
+      balance: Number(BigInt(item.balance) / BigInt(10 ** 18)),
+    }),
+  );
   return {
-    top5Delegators: top5Delegators?.accountBalances.items || null,
+    top5Delegators: top5DelegatorsWithBalance || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,

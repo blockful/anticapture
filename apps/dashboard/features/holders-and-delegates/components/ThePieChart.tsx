@@ -3,7 +3,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
-import { groupDelegatorsByPercentage } from "../utils/groupDelegatorsByPercentage";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 
 const RADIAN = Math.PI / 180;
@@ -48,36 +47,39 @@ export const ThePieChart = ({
   daoId: DaoIdEnum;
   address: string;
 }) => {
-  const { top5Delegators } = useVotingPower({
-    daoId,
-    address,
-  });
-
-  console.log("top5Delegators", top5Delegators);
-
-  // Use the utility function to group delegators
-  const { significantDelegators, othersValue } =
-    groupDelegatorsByPercentage(top5Delegators);
+  const { top5Delegators, delegatorsVotingPowerDetails, loading } =
+    useVotingPower({
+      daoId,
+      address,
+    });
 
   if (!top5Delegators || top5Delegators.length === 0) {
     return null;
   }
 
-  // Create pie data with significant items
-  const pieData = significantDelegators.map((item) => ({
+  const currentVotingPower = Number(
+    BigInt(delegatorsVotingPowerDetails?.accountPower?.votingPower || 0) /
+      BigInt(10 ** 18),
+  );
+
+  const totalTop5Delegators = top5Delegators?.reduce((acc, item) => {
+    return acc + Number(item.balance);
+  }, 0);
+
+  const othersValue = Math.abs(totalTop5Delegators - currentVotingPower);
+
+  const pieData = top5Delegators.map((item) => ({
     name: item.accountId || "",
     value: Number(item.balance),
   }));
 
-  // Add "Others" category if there are minor items
+  // Add "Others" slice to pie chart if there's remaining voting power
   if (othersValue > 0) {
     pieData.push({
       name: "Others",
       value: othersValue,
     });
   }
-
-  console.log("pieData", pieData);
 
   return (
     <ResponsiveContainer width={200} height={200}>
@@ -94,13 +96,11 @@ export const ThePieChart = ({
           stroke="none"
         >
           {pieData.map((entry, index) => {
-            let color;
-            if (entry.name === "Others") {
-              color = "#9CA3AF";
-            } else {
-              color = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length];
-            }
-
+            // Use gray color for "Others" slice, otherwise use the color scheme
+            const color =
+              entry.name === "Others"
+                ? "#9CA3AF"
+                : PIE_CHART_COLORS[index % PIE_CHART_COLORS.length];
             return <Cell key={`cell-${index}`} fill={color} />;
           })}
         </Pie>
