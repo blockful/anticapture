@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { BalanceHistory } from "./BalanceHistory";
+import { DelegateDelegationHistory } from "./DelegateDelegationHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
@@ -41,7 +42,9 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "delegationHistory",
           label: "Delegation History",
-          content: <>Delegation History</>,
+          content: (
+            <DelegateDelegationHistory accountId={address} daoId={daoId} />
+          ),
         },
       ],
     },
