@@ -20,12 +20,12 @@ export const MetricCard = ({
   return (
     <div
       className={cn(
-        "border-middle-dark flex flex-col items-start gap-2 border bg-transparent px-3 py-2",
+        "border-border-default flex flex-col items-start gap-1 border bg-transparent px-3 py-2",
         className,
       )}
     >
       {/* Icon and Title Row */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <div className="text-secondary flex items-center justify-center">
           {icon}
         </div>
@@ -35,7 +35,7 @@ export const MetricCard = ({
       </div>
 
       {/* Value */}
-      <div className="text-primary text-sm font-thin">
+      <div className="text-primary text-sm font-regular">
         {value !== undefined ? value : <SkeletonRow className="h-5 w-16" />}
       </div>
     </div>

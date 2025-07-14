@@ -158,9 +158,7 @@ export const EnsAvatar = ({
               className="h-4 w-24"
             />
           ) : (
-            <span
-              className={cn("text-primary text-sm font-medium", nameClassName)}
-            >
+            <span className={cn("text-primary text-sm", nameClassName)}>
               {displayName}
             </span>
           )}

@@ -338,7 +338,7 @@ export const ProposalsTable = ({
 
         return (
           <div className="flex h-10 items-center px-4 py-2">
-            <span className="text-primary truncate text-sm font-medium">
+            <span className="text-primary font-regular truncate text-sm">
               {proposalName}
             </span>
           </div>
@@ -348,7 +348,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "finalResult",
-      size: 112,
+      size: 118,
       cell: ({ row }) => {
         const finalResult = row.getValue("finalResult") as {
           text: string;
@@ -372,12 +372,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-2"
+          className="!text-table-header font-regular h-8 w-full justify-start gap-1 px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           Final Result
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -392,7 +392,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "userVote",
-      size: 112,
+      size: 118,
       cell: ({ row }) => {
         const userVote = row.getValue("userVote") as {
           text: string;
@@ -416,12 +416,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-2"
+          className="!text-table-header h-8 w-full justify-start gap-1 px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           User Vote
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -436,7 +436,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "votingPower",
-      size: 112,
+      size: 118,
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
@@ -459,12 +459,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-2"
+          className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Voting Power</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -484,7 +484,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "voteTiming",
-      size: 172,
+      size: 154,
       cell: ({ row }) => {
         const voteTiming = row.getValue("voteTiming") as {
           text: string;
@@ -504,19 +504,21 @@ export const ProposalsTable = ({
             <div className="text-secondary text-xs font-normal">
               {voteTiming.text}
             </div>
-            <SimpleProgressBar percentage={voteTiming.percentage} />
+            {voteTiming.text !== "Didn't vote" && (
+              <SimpleProgressBar percentage={voteTiming.percentage} />
+            )}
           </div>
         );
       },
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex w-full justify-start px-2"
+          className="flex h-8 w-full justify-start gap-1 px-2"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Vote Timing</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -556,7 +558,7 @@ export const ProposalsTable = ({
           <div className="flex h-10 items-center justify-center py-2 pr-0.5 pl-1">
             <button
               onClick={handleRedirect}
-              className="hover:text-primary cursor-pointer text-white transition-colors"
+              className="hover:text-secondary cursor-pointer text-white transition-colors"
               title="View on Tally"
             >
               <ExternalLink className="size-4" />
@@ -618,6 +620,7 @@ export const ProposalsTable = ({
         withPagination={false}
         withSorting={true}
         stickyFirstColumn={true}
+        mobileTableFixed={true}
       />
     </div>
   );

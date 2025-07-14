@@ -11,8 +11,6 @@ import { SECONDS_PER_BLOCK } from "@/lib/constants";
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
 export type OrderByField =
-  | "finalResult"
-  | "userVote"
   | "votingPower"
   | "voteTiming";
 export type OrderDirection = "asc" | "desc";
@@ -354,24 +352,6 @@ export class ProposalsActivityService {
       let comparison = 0;
 
       switch (orderBy) {
-        case "finalResult":
-          // TODO: Implement finalResult sorting when the new column is available
-          // For now, sort by proposal timestamp as fallback
-          comparison =
-            Number(a.proposal.timestamp) - Number(b.proposal.timestamp);
-          break;
-
-        case "userVote":
-          // Sort by user vote support: null votes first, then "0", "1", "2"
-          const aSupport = a.userVote?.support ?? null;
-          const bSupport = b.userVote?.support ?? null;
-
-          if (aSupport === null && bSupport !== null) comparison = -1;
-          else if (aSupport !== null && bSupport === null) comparison = 1;
-          else if (aSupport === null && bSupport === null) comparison = 0;
-          else comparison = Number(aSupport) - Number(bSupport);
-          break;
-
         case "votingPower":
           // Sort by voting power (null votes have 0 voting power)
           const aVotingPower = a.userVote?.votingPower

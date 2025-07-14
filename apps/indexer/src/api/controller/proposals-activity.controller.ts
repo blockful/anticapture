@@ -48,7 +48,7 @@ export function proposalsActivity(
             .default(10)
             .optional(),
           orderBy: z
-            .enum(["finalResult", "userVote", "votingPower", "voteTiming"])
+            .enum(["votingPower", "voteTiming"])
             .default("voteTiming")
             .optional(),
           orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),

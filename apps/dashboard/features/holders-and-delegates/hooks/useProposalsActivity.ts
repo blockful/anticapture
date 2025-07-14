@@ -1,5 +1,9 @@
 import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
-import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
+import {
+  GetProposalsActivityQuery,
+  GetProposalsActivityQueryVariables,
+  QueryInput_ProposalsActivity_DaoId,
+} from "@anticapture/graphql-client";
 import { useMemo } from "react";
 
 export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
@@ -9,14 +13,6 @@ export type OrderByField =
   | "votingPower"
   | "voteTiming";
 export type OrderDirection = "asc" | "desc";
-
-interface UseProposalsActivityParams {
-  address: string;
-  daoId: QueryInput_ProposalsActivity_DaoId;
-  fromDate?: number;
-  skip?: number;
-  limit?: number;
-}
 
 interface UseProposalsActivityResult {
   data: any;
@@ -31,11 +27,11 @@ export const useProposalsActivity = ({
   fromDate,
   skip,
   limit,
-}: UseProposalsActivityParams): UseProposalsActivityResult => {
+}: GetProposalsActivityQueryVariables): UseProposalsActivityResult => {
   const { data, loading, error, refetch } = useGetProposalsActivityQuery({
     variables: {
       address,
-      daoId,
+      daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
       fromDate,
       skip,
       limit,
