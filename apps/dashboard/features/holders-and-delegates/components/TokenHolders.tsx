@@ -10,7 +10,6 @@ import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -19,6 +18,7 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { zeroAddress } from "viem";
 
 interface TokenHolderTableData {
   address: Address;
@@ -424,9 +424,7 @@ export const TokenHolders = ({
         isOpen={!!selectedTokenHolder}
         onClose={handleCloseDrawer}
         entityType="tokenHolder"
-        address={
-          selectedTokenHolder || "0x0000000000000000000000000000000000000000"
-        }
+        address={selectedTokenHolder || zeroAddress}
         daoId={daoId}
       />
     </>
