@@ -8,10 +8,11 @@ import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
-import { DelegationHistoryTable } from "./DelegationHistoryTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { VotingPower } from "@/features/holders-and-delegates/components/VotingPower";
+import { BalanceHistory } from "./BalanceHistory";
+import { DelegationHistoryTable } from "./DelegationHistoryTable";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -58,7 +59,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "balanceHistory",
           label: "Balance History",
-          content: <>Balance History</>,
+          content: <BalanceHistory accountId={address} daoId={daoId} />,
         },
       ],
     },
