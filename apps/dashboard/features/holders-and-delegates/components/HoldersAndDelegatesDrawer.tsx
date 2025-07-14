@@ -8,7 +8,7 @@ import { cn } from "@/shared/utils";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
-import { DelegationHistoryTable } from "./DelegationHistoryTable";
+import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 

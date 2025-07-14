@@ -5,7 +5,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Address } from "viem";
-import { useDelegationHistory } from "../hooks/useDelegationHistory";
+import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
 import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client/hooks";
 import {
