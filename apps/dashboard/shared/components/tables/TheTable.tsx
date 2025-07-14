@@ -33,6 +33,7 @@ interface DataTableProps<TData, TValue> {
   disableRowClick?: (row: TData) => boolean;
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
+  mobileTableFixed?: boolean;
 }
 
 export const TheTable = <TData, TValue>({
@@ -45,6 +46,7 @@ export const TheTable = <TData, TValue>({
   disableRowClick,
   isTableSmall = false,
   stickyFirstColumn = false,
+  mobileTableFixed = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -83,8 +85,13 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table className="text-secondary md:bg-surface-default table-fixed bg-transparent">
-      <TableHeader className="text-secondary text-xs font-semibold sm:font-medium">
+    <Table
+      className={cn(
+        "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
+        mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
+      )}
+    >
+      <TableHeader className="bg-surface-contrast text-secondary text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
