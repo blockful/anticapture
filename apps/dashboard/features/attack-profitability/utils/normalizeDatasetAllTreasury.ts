@@ -26,8 +26,8 @@ export function normalizeDatasetAllTreasury(
 
   const sortedGovernanceTokenTreasuries = [...(governanceTokenTreasuries ?? [])]
     .map((item) => ({
-      timestamp: Number(item.date),
-      high: Number(item.high) / 1e18,
+      timestamp: Number(item.date) * 1000,
+      close: Number(item.close) / 1e18, // close is the price in the end of the day, for treasury is better if we use this instead of high because generally speaking there is not too many changes in the treasury during the year
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
@@ -47,9 +47,9 @@ export function normalizeDatasetAllTreasury(
     const lastHighValue = findMostRecentValue(
       sortedGovernanceTokenTreasuries,
       timestamp,
-      "high",
+      "close",
       sortedGovernanceTokenTreasuries.length > 0
-        ? sortedGovernanceTokenTreasuries[0].high
+        ? sortedGovernanceTokenTreasuries[0].close
         : 1,
     );
 
