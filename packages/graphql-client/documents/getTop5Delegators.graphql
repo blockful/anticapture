@@ -3,7 +3,7 @@ query GetTop5Delegators(
   $limit: Int = 6
 ) {
   accountBalances(
-    where: { delegate: $delegate }
+    where: { delegate: $delegate, balance_gt: 0 }
     orderBy: "balance"
     orderDirection: "desc"
     limit: $limit

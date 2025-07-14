@@ -2494,7 +2494,7 @@ export type GetDelegationsTimestampQueryResult = Apollo.QueryResult<GetDelegatio
 export const GetTop5DelegatorsDocument = gql`
     query GetTop5Delegators($delegate: String!, $limit: Int = 6) {
   accountBalances(
-    where: {delegate: $delegate}
+    where: {delegate: $delegate, balance_gt: 0}
     orderBy: "balance"
     orderDirection: "desc"
     limit: $limit
