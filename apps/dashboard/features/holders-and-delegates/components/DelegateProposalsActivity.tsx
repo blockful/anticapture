@@ -29,7 +29,7 @@ export const DelegateProposalsActivity = ({
 
   const { data, loading, error, refetch } = useProposalsActivity({
     address,
-    daoId,
+    daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
     fromDate,
     skip,
     limit: itemsPerPage,
