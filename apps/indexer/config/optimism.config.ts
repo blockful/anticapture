@@ -25,13 +25,13 @@ export default createConfig({
       abi: TokenAbi,
       chain: "optimism_mainnet",
       address: OP_CONTRACTS.token.address,
-      // startBlock: OP_CONTRACTS.token.startBlock,
+      startBlock: OP_CONTRACTS.token.startBlock,
     },
     OPGovernor: {
       abi: GovernorAbi,
       chain: "optimism_mainnet",
       address: OP_CONTRACTS.governor.address,
-      // startBlock: OP_CONTRACTS.governor.startBlock,
+      startBlock: OP_CONTRACTS.governor.startBlock,
     },
   },
 });

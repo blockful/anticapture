@@ -8,7 +8,7 @@ import { tokenTransfer } from "@/eventHandlers";
 export function OPTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.OP;
 
-  ponder.on(`OPToken:setup`, async ({ context }) => {
+  ponder.on("OPToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
       id: address,
       name: daoId,
@@ -16,7 +16,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
     });
   });
 
-  ponder.on(`OPToken:Transfer`, async ({ event, context }) => {
+  ponder.on("OPToken:Transfer", async ({ event, context }) => {
     const e = event as any;
 
     await tokenTransfer(context, daoId, {

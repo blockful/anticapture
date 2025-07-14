@@ -16,11 +16,19 @@ export function GovernorIndexer(governor: Governor) {
   const daoId = DaoIdEnum.UNI;
 
   ponder.on("UNIGovernor:setup", async ({ context }) => {
-    const votingPeriod = await governor.getVotingPeriod();
-    const quorum = await governor.getQuorum();
-    const votingDelay = await governor.getVotingDelay();
-    const timelockDelay = await governor.getTimelockDelay();
-    const proposalThreshold = await governor.getProposalThreshold();
+    const [
+      votingPeriod,
+      quorum,
+      votingDelay,
+      timelockDelay,
+      proposalThreshold,
+    ] = await Promise.all([
+      governor.getVotingPeriod(),
+      governor.getQuorum(),
+      governor.getVotingDelay(),
+      governor.getTimelockDelay(),
+      governor.getProposalThreshold(),
+    ]);
 
     await context.db.insert(dao).values({
       id: daoId,

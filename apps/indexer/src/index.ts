@@ -19,6 +19,7 @@ import {
   GovernorIndexer as OPGovernorIndexer,
   OPTokenIndexer,
 } from "@/indexer/op";
+import { ARBTokenIndexer } from "./indexer/arb";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -46,6 +47,11 @@ switch (daoId) {
     UNIGovernorIndexer(new UNIGovernor(client, governor.address));
     break;
   }
+  case DaoIdEnum.ARB: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    ARBTokenIndexer(token.address, token.decimals);
+    break;
+  }
   case DaoIdEnum.OP: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     OPTokenIndexer(token.address, token.decimals);
@@ -53,7 +59,7 @@ switch (daoId) {
     break;
   }
   default:
-    throw new Error(`${daoId} Governor unavailable`);
+    throw new Error(`DAO ${daoId} not supported`);
 }
 
 //@ts-ignore

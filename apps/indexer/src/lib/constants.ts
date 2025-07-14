@@ -44,11 +44,13 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.OP]: {
     blockTime: 2,
+    // https://optimistic.etherscan.io/token/0x4200000000000000000000000000000000000042
     token: {
       address: "0x4200000000000000000000000000000000000042",
       decimals: 18,
       startBlock: 71801427,
     },
+    // https://optimistic.etherscan.io/address/0xcDF27F107725988f2261Ce2256bDfCdE8B382B10
     governor: {
       address: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
       startBlock: 71801427,
