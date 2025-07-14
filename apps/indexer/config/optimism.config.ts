@@ -14,7 +14,7 @@ export default createConfig({
   },
   chains: {
     optimism_mainnet: {
-      id: 42161,
+      id: 10,
       rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
@@ -25,13 +25,13 @@ export default createConfig({
       abi: TokenAbi,
       chain: "optimism_mainnet",
       address: OP_CONTRACTS.token.address,
-      startBlock: OP_CONTRACTS.token.startBlock,
+      // startBlock: OP_CONTRACTS.token.startBlock,
     },
     OPGovernor: {
       abi: GovernorAbi,
       chain: "optimism_mainnet",
       address: OP_CONTRACTS.governor.address,
-      startBlock: OP_CONTRACTS.governor.startBlock,
+      // startBlock: OP_CONTRACTS.governor.startBlock,
     },
   },
 });

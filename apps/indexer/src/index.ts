@@ -4,16 +4,21 @@ import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { ERC20Indexer } from "@/indexer";
 import {
   ENSGovernor,
   GovernorIndexer as ENSGovernorIndexer,
+  ENSTokenIndexer,
 } from "@/indexer/ens";
 import {
   UNIGovernor,
   GovernorIndexer as UNIGovernorIndexer,
+  UNITokenIndexer,
 } from "@/indexer/uni";
-import { OPGovernor, GovernorIndexer as OPGovernorIndexer } from "@/indexer/op";
+import {
+  OPGovernor,
+  GovernorIndexer as OPGovernorIndexer,
+  OPTokenIndexer,
+} from "@/indexer/op";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -31,19 +36,19 @@ const client = createPublicClient({
 switch (daoId) {
   case DaoIdEnum.ENS: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
-    ERC20Indexer(daoId, token.address, token.decimals);
+    ENSTokenIndexer(token.address, token.decimals);
     ENSGovernorIndexer(new ENSGovernor(client, governor.address));
     break;
   }
   case DaoIdEnum.UNI: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
-    ERC20Indexer(daoId, token.address, token.decimals);
+    UNITokenIndexer(token.address, token.decimals);
     UNIGovernorIndexer(new UNIGovernor(client, governor.address));
     break;
   }
   case DaoIdEnum.OP: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
-    ERC20Indexer(daoId, token.address, token.decimals);
+    OPTokenIndexer(token.address, token.decimals);
     OPGovernorIndexer(new OPGovernor(client, governor.address));
     break;
   }
