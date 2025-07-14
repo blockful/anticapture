@@ -73,6 +73,7 @@ export const useDelegationHistory = ({
       before: undefined,
       orderBy,
       orderDirection,
+      limit: itemsPerPage,
     },
     context: {
       headers: {
@@ -90,6 +91,7 @@ export const useDelegationHistory = ({
       before: undefined,
       orderBy,
       orderDirection,
+      limit: itemsPerPage,
     });
   }, [orderBy, orderDirection, refetch]);
 
@@ -165,6 +167,7 @@ export const useDelegationHistory = ({
           before: undefined,
           orderBy,
           orderDirection,
+          limit: itemsPerPage,
         },
         updateQuery: (
           previousResult: GetDelegationHistoryItemsQuery,
@@ -221,6 +224,7 @@ export const useDelegationHistory = ({
           before: pagination.startCursor,
           orderBy,
           orderDirection,
+          limit: itemsPerPage,
         },
         updateQuery: (
           previousResult: GetDelegationHistoryItemsQuery,

@@ -1,9 +1,9 @@
-query GetDelegationHistory($delegator: String!, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+query GetDelegationHistoryItems($delegator: String!, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10) {
   delegations(
-    where: {delegatorAccountId: $delegator},
+    where: {delegatorAccountId: $delegator}
     orderBy: $orderBy
     orderDirection: $orderDirection
-    limit: 10
+    limit: $limit
     after: $after
     before: $before
   ) {
@@ -25,4 +25,4 @@ query GetDelegationHistory($delegator: String!, $after: String, $before: String,
       endCursor
     }
   }
-}
+} 
