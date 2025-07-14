@@ -8,7 +8,7 @@ import { UserCheck } from "lucide-react";
 import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { TokenHolders } from "@/features/holders-and-delegates/components/TokenHolders";
+import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 
 type TabId = "tokenHolders" | "delegates";
 

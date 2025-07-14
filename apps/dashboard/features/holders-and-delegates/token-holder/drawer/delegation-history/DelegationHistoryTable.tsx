@@ -5,7 +5,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Address } from "viem";
-import { useDelegationHistory } from "../hooks/useDelegationHistory";
+import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
 import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client/hooks";
 import {
@@ -14,8 +14,8 @@ import {
 } from "@/shared/utils/";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { AlertOctagon, Inbox } from "lucide-react";
-import { Pagination2 } from "@/shared/components/design-system/table/Pagination2";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 interface DelegationData {
   address: string;
@@ -90,7 +90,7 @@ export const DelegationHistoryTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 items-center gap-2">
+            <div className="flex h-10 items-center gap-2 px-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -135,9 +135,11 @@ export const DelegationHistoryTable = ({
               <ArrowUpDown
                 props={{ className: "ml-2 size-4" }}
                 activeState={
-                  sortBy === "delegatedValue" && sortOrder === "asc"
-                    ? ArrowState.UP
-                    : ArrowState.DOWN
+                  sortBy === "delegatedValue"
+                    ? sortOrder === "asc"
+                      ? ArrowState.UP
+                      : ArrowState.DOWN
+                    : ArrowState.DEFAULT
                 }
               />
             </button>
@@ -147,10 +149,12 @@ export const DelegationHistoryTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end"
-              className="h-4 w-16"
-            />
+            <div className="flex h-10 w-full items-center justify-end px-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
+            </div>
           );
         }
 
@@ -240,8 +244,8 @@ export const DelegationHistoryTable = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="w-full">
+    <div className="flex h-full w-full flex-col gap-4 p-4">
+      <div className="h-full w-full overflow-y-auto">
         <TheTable
           columns={delegationHistoryColumns}
           data={loading ? Array(5).fill({}) : data}
@@ -251,7 +255,7 @@ export const DelegationHistoryTable = ({
         />
       </div>
 
-      <Pagination2
+      <Pagination
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
         onPrevious={fetchPreviousPage}

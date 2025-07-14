@@ -8,11 +8,11 @@ import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { VotingPower } from "@/features/holders-and-delegates/components/VotingPower";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { VotingPower } from "./VotingPower";
 import { BalanceHistory } from "./BalanceHistory";
-import { DelegationHistoryTable } from "./DelegationHistoryTable";
+import { DelegationHistoryTable } from "../token-holder";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -81,7 +81,7 @@ export const HoldersAndDelegatesDrawer = ({
     >
       <DrawerContent>
         <div className="bg-surface-default h-full w-full">
-          <div className="bg-surface-contrast h-[100px] w-full">
+          <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
               <div className="flex flex-col gap-1">
@@ -135,9 +135,7 @@ export const HoldersAndDelegatesDrawer = ({
               </TabsList>
             </Tabs>
           </div>
-          <div className="flex h-full w-full flex-col gap-4 p-4">
-            {renderTabContent(activeTab)}
-          </div>
+          {renderTabContent(activeTab)}
         </div>
       </DrawerContent>
     </Drawer>

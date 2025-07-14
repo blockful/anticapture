@@ -66,7 +66,7 @@ const getTimeDataFromPeriod = (period: TimeInterval) => {
 
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
-  daoId = DaoIdEnum.ENS,
+  daoId,
 }: DelegatesProps) => {
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
@@ -494,7 +494,7 @@ export const Delegates = ({
         address={
           selectedDelegate || "0x0000000000000000000000000000000000000000"
         }
-        daoId={daoId}
+        daoId={daoId as DaoIdEnum}
       />
     </>
   );
