@@ -18,7 +18,6 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-import { zeroAddress } from "viem";
 
 interface TokenHolderTableData {
   address: Address;
@@ -35,9 +34,7 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
-    null,
-  );
+  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const pageLimit: number = 10;
 
@@ -64,7 +61,7 @@ export const TokenHolders = ({
   };
 
   const handleCloseDrawer = () => {
-    setSelectedTokenHolder(null);
+    setSelectedTokenHolder("");
   };
 
   const calculateVariation = (
@@ -424,7 +421,7 @@ export const TokenHolders = ({
         isOpen={!!selectedTokenHolder}
         onClose={handleCloseDrawer}
         entityType="tokenHolder"
-        address={selectedTokenHolder || zeroAddress}
+        address={selectedTokenHolder}
         daoId={daoId}
       />
     </>
