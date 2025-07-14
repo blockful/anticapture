@@ -133,12 +133,11 @@ export const VotingPower = ({
                     <div className="text-secondary text-sm">
                       Loading delegators...
                     </div>
-                  ) : top5Delegators &&
-                    top5Delegators.accountBalances.items.length > 0 ? (
+                  ) : top5Delegators && top5Delegators.length > 0 ? (
                     (() => {
-                      const sorted = [
-                        ...top5Delegators.accountBalances.items,
-                      ].sort((a, b) => Number(b.balance) - Number(a.balance));
+                      const sorted = [...top5Delegators].sort(
+                        (a, b) => Number(b.balance) - Number(a.balance),
+                      );
 
                       const total = sorted.reduce(
                         (acc, d) => acc + Number(d.balance),

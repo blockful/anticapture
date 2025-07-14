@@ -52,7 +52,7 @@ export const ThePieChart = ({
     address,
   });
 
-  const pieData = (top5Delegators?.accountBalances.items || [])
+  const pieData = (top5Delegators || [])
     .filter((item: any) => Number(item.balance) > 0)
     .map((item: any) => ({
       name: item.accountId || "",

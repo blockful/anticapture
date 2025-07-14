@@ -30,7 +30,7 @@ type AccountBalanceBase =
 type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
 
 interface UseVotingPowerResult {
-  top5Delegators: GetTop5DelegatorsQuery | null;
+  top5Delegators: GetTop5DelegatorsQuery["accountBalances"]["items"] | null;
   delegatorsVotingPowerDetails: GetDelegatorVotingPowerDetailsQuery | null;
   votingPowerHistoryData: DelegationItem[];
   balances: BalanceWithTimestamp[];
@@ -316,7 +316,7 @@ export const useVotingPower = ({
   }, [refetch]);
 
   return {
-    top5Delegators: top5Delegators || null,
+    top5Delegators: top5Delegators?.accountBalances.items || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,
