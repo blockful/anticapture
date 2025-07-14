@@ -347,7 +347,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "finalResult",
-      size: 112,
+      size: 118,
       cell: ({ row }) => {
         const finalResult = row.getValue("finalResult") as {
           text: string;
@@ -371,12 +371,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header font-regular h-8 w-full justify-start px-2 text-xs"
+          className="!text-table-header font-regular h-8 w-full justify-start gap-1 px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           Final Result
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -391,7 +391,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "userVote",
-      size: 112,
+      size: 118,
       cell: ({ row }) => {
         const userVote = row.getValue("userVote") as {
           text: string;
@@ -415,12 +415,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="!text-table-header h-8 w-full justify-start px-2 text-xs"
+          className="!text-table-header h-8 w-full justify-start gap-1 px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           User Vote
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -435,7 +435,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "votingPower",
-      size: 112,
+      size: 118,
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
@@ -458,12 +458,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end px-2 text-xs"
+          className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Voting Power</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
@@ -483,7 +483,7 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "voteTiming",
-      size: 172,
+      size: 154,
       cell: ({ row }) => {
         const voteTiming = row.getValue("voteTiming") as {
           text: string;
@@ -512,12 +512,12 @@ export const ProposalsTable = ({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start px-2"
+          className="flex h-8 w-full justify-start gap-1 px-2"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Vote Timing</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               column.getIsSorted() === "asc"
                 ? ArrowState.UP
