@@ -17,15 +17,13 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on("OPToken:Transfer", async ({ event, context }) => {
-    const e = event as any;
-
     await tokenTransfer(context, daoId, {
-      from: e.args.from,
-      to: e.args.to,
+      from: event.args.from,
+      to: event.args.to,
       tokenAddress: address,
-      transactionHash: e.transaction.hash,
-      value: e.args.value,
-      timestamp: e.block.timestamp,
+      transactionHash: event.transaction.hash,
+      value: event.args.value,
+      timestamp: event.block.timestamp,
     });
   });
 }

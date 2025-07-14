@@ -17,15 +17,13 @@ export function UNITokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`UNIToken:Transfer`, async ({ event, context }) => {
-    const e = event as any;
-
     await tokenTransfer(context, daoId, {
-      from: e.args.from,
-      to: e.args.to,
+      from: event.args.from,
+      to: event.args.to,
       tokenAddress: address,
-      transactionHash: e.transaction.hash,
-      value: e.args.amount,
-      timestamp: e.block.timestamp,
+      transactionHash: event.transaction.hash,
+      value: event.args.amount,
+      timestamp: event.block.timestamp,
     });
   });
 }
