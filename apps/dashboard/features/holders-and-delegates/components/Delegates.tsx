@@ -18,6 +18,7 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { ProgressCircle } from "./ProgressCircle";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateTableData {
   address: string;
@@ -499,10 +500,10 @@ export const Delegates = ({
         isOpen={!!selectedDelegate}
         onClose={handleCloseDrawer}
         entityType="delegate"
-        daoId={daoId as unknown as QueryInput_ProposalsActivity_DaoId}
         address={
           selectedDelegate || "0x0000000000000000000000000000000000000000"
         }
+        daoId={daoId as unknown as DaoIdEnum}
       />
     </>
   );

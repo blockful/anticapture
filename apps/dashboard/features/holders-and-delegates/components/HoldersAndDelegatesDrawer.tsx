@@ -9,9 +9,10 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
-import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
 import { TimeInterval } from "@/shared/types/enums";
 import { getTimeDataFromPeriod } from "./Delegates";
+import { BalanceHistory } from "./BalanceHistory";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -20,7 +21,7 @@ interface HoldersAndDelegatesDrawerProps {
   onClose: () => void;
   entityType: EntityType;
   address: string;
-  daoId: QueryInput_ProposalsActivity_DaoId;
+  daoId: DaoIdEnum;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -59,7 +60,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "balanceHistory",
           label: "Balance History",
-          content: <>Balance History</>,
+          content: <BalanceHistory accountId={address} daoId={daoId} />,
         },
       ],
     },

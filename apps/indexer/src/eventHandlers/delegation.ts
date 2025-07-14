@@ -118,6 +118,7 @@ export const delegatedVotesChanged = async (
       transactionHash: event.transaction.hash,
       accountId: event.args.delegate,
       votingPower: newBalance,
+      delta: newBalance - oldBalance,
       timestamp: event.block.timestamp,
     })
     .onConflictDoUpdate(() => ({

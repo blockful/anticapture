@@ -5,6 +5,7 @@
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "clean": "rm -f generated.ts types.ts",
     "dev": "npm run codegen:watch"
   },
@@ -29,10 +30,11 @@
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@parcel/watcher": "^2.5.1",
     "@types/node": "^20.16.5"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "@apollo/client": "^3.9.0"
+    "@apollo/client": "^3.9.0",
+    "react": "^18.0.0"
   }
 }

@@ -2,8 +2,9 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-  schema: "./../api-gateway/schema.graphql",
+  schema: process.env.ANTICAPTURE_GRAPHQL_ENDPOINT || "../../apps/api-gateway/schema.graphql",
   documents: "./documents/**/*.graphql",
+  ignoreNoDocuments: true,
   generates: {
     // Build with React hooks (for React apps)
     "./generated.ts": {
