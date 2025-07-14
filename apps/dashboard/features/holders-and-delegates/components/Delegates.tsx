@@ -18,6 +18,7 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { ProgressCircle } from "./ProgressCircle";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateTableData {
   address: string;
@@ -34,7 +35,7 @@ interface DelegatesProps {
 }
 
 // Helper function to convert time period to timestamp and block number
-const getTimeDataFromPeriod = (period: TimeInterval) => {
+export const getTimeDataFromPeriod = (period: TimeInterval) => {
   const now = Date.now();
   const msPerDay = 24 * 60 * 60 * 1000;
 
@@ -495,14 +496,15 @@ export const Delegates = ({
           isLoading={fetchingMore}
         />
       </div>
-        <HoldersAndDelegatesDrawer
-          isOpen={!!selectedDelegate}
-          onClose={handleCloseDrawer}
-          entityType="delegate"
-          daoId={daoId as unknown as QueryInput_ProposalsActivity_DaoId}
-          fromDate={fromDate}
-          address={selectedDelegate || "0x0000000000000000000000000000000000000000"}
-        />
+      <HoldersAndDelegatesDrawer
+        isOpen={!!selectedDelegate}
+        onClose={handleCloseDrawer}
+        entityType="delegate"
+        address={
+          selectedDelegate || "0x0000000000000000000000000000000000000000"
+        }
+        daoId={daoId as unknown as DaoIdEnum}
+      />
     </>
   );
 };
