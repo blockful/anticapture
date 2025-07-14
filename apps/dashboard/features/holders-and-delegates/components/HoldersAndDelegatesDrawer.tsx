@@ -80,7 +80,7 @@ export const HoldersAndDelegatesDrawer = ({
     >
       <DrawerContent>
         <div className="bg-surface-default h-full w-full">
-          <div className="bg-surface-contrast h-[100px] w-full">
+          <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
               <div className="flex flex-col gap-1">
