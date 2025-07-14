@@ -21,14 +21,7 @@ export class OPGovernor<
   }
 
   async getQuorum(): Promise<bigint> {
-    const blockNumber = await getBlockNumber(this.client);
-    const targetBlock = blockNumber - 10n;
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [targetBlock < 0n ? 0n : targetBlock],
-    });
+    return 0n; // TODO: fetch quorum from oracle
   }
 
   async getProposalThreshold(): Promise<bigint> {
@@ -56,25 +49,6 @@ export class OPGovernor<
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          constant: true,
-          inputs: [],
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          payable: false,
-          stateMutability: "view",
-          type: "function",
-          name: "getMinDelay",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "getMinDelay",
-    });
+    return 0n;
   }
 }
