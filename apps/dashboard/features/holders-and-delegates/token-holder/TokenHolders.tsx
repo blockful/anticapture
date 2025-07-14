@@ -402,8 +402,6 @@ export const TokenHolders = ({
             onRowClick={() => {}}
             isTableSmall={true}
           />
-        </div>
-        <div>
           <Pagination
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
@@ -419,9 +417,9 @@ export const TokenHolders = ({
       <HoldersAndDelegatesDrawer
         isOpen={!!selectedTokenHolder}
         onClose={handleCloseDrawer}
+        daoId={daoId}
         entityType="tokenHolder"
         address={selectedTokenHolder}
-        daoId={daoId}
       />
     </>
   );

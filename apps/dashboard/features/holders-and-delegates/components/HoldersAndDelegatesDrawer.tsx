@@ -9,8 +9,9 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { BalanceHistory } from "./BalanceHistory";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -57,7 +58,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "balanceHistory",
           label: "Balance History",
-          content: <>Balance History</>,
+          content: <BalanceHistory accountId={address} daoId={daoId} />,
         },
       ],
     },
