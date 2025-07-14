@@ -12,7 +12,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateProposalsActivityProps {
   address: string;
-  daoId: QueryInput_ProposalsActivity_DaoId;
+  daoId: DaoIdEnum;
   fromDate?: number;
 }
 
