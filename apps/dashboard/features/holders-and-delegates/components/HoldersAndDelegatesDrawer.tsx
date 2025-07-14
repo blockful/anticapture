@@ -134,9 +134,7 @@ export const HoldersAndDelegatesDrawer = ({
               </TabsList>
             </Tabs>
           </div>
-          <div className="flex h-full w-full flex-col gap-4 p-4">
-            {renderTabContent(activeTab)}
-          </div>
+          {renderTabContent(activeTab)}
         </div>
       </DrawerContent>
     </Drawer>

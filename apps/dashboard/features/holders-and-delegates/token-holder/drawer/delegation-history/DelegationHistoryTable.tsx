@@ -90,7 +90,7 @@ export const DelegationHistoryTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 items-center gap-2">
+            <div className="flex h-10 items-center gap-2 px-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -149,10 +149,12 @@ export const DelegationHistoryTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end"
-              className="h-4 w-16"
-            />
+            <div className="flex h-10 w-full items-center justify-end px-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
+            </div>
           );
         }
 
@@ -242,7 +244,7 @@ export const DelegationHistoryTable = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full w-full flex-col gap-4 p-4">
       <div className="h-full w-full overflow-y-auto">
         <TheTable
           columns={delegationHistoryColumns}
