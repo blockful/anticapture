@@ -7,7 +7,6 @@ query GetDelegationHistory($delegator: String!, $after: String, $before: String,
     after: $after
     before: $before
   ) {
-    totalCount
     items {
       delegate {
         id

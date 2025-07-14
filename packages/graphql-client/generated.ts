@@ -16,12 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -389,7 +386,6 @@ export type Account = {
   proposals?: Maybe<ProposalsOnchainPage>;
   receivedTransfers?: Maybe<TransferPage>;
   sentTransfers?: Maybe<TransferPage>;
-  type: Scalars['String']['output'];
   votes?: Maybe<VotesOnchainPage>;
 };
 
@@ -559,16 +555,6 @@ export type AccountFilter = {
   id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
-  type?: InputMaybe<Scalars['String']['input']>;
-  type_contains?: InputMaybe<Scalars['String']['input']>;
-  type_ends_with?: InputMaybe<Scalars['String']['input']>;
-  type_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  type_not?: InputMaybe<Scalars['String']['input']>;
-  type_not_contains?: InputMaybe<Scalars['String']['input']>;
-  type_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  type_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  type_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  type_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AccountPage = {
@@ -935,7 +921,7 @@ export type DaoPage = {
 
 export type Delegation = {
   __typename?: 'delegation';
-  daoId?: Maybe<Scalars['String']['output']>;
+  daoId: Scalars['String']['output'];
   delegate?: Maybe<Account>;
   delegateAccountId?: Maybe<Scalars['String']['output']>;
   delegatedValue: Scalars['BigInt']['output'];
@@ -1055,13 +1041,13 @@ export type ProposalsActivity_200_Response = {
 
 export type ProposalsOnchain = {
   __typename?: 'proposalsOnchain';
-  abstainVotes?: Maybe<Scalars['BigInt']['output']>;
-  againstVotes?: Maybe<Scalars['BigInt']['output']>;
+  abstainVotes: Scalars['BigInt']['output'];
+  againstVotes: Scalars['BigInt']['output'];
   calldatas?: Maybe<Scalars['JSON']['output']>;
-  daoId?: Maybe<Scalars['String']['output']>;
+  daoId: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   endBlock?: Maybe<Scalars['String']['output']>;
-  forVotes?: Maybe<Scalars['BigInt']['output']>;
+  forVotes: Scalars['BigInt']['output'];
   id: Scalars['String']['output'];
   proposer?: Maybe<Account>;
   proposerAccountId?: Maybe<Scalars['String']['output']>;
@@ -1414,12 +1400,12 @@ export type Query_ProposalsActivity_Proposals_Items = {
 
 export type Query_ProposalsActivity_Proposals_Items_Proposal = {
   __typename?: 'query_proposalsActivity_proposals_items_proposal';
-  abstainVotes: Scalars['Float']['output'];
-  againstVotes: Scalars['Float']['output'];
+  abstainVotes: Scalars['String']['output'];
+  againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   endBlock: Scalars['String']['output'];
-  forVotes: Scalars['Float']['output'];
+  forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
   proposerAccountId: Scalars['String']['output'];
   startBlock: Scalars['String']['output'];
@@ -1557,7 +1543,7 @@ export type TokenPage = {
 export type Transfer = {
   __typename?: 'transfer';
   amount?: Maybe<Scalars['BigInt']['output']>;
-  daoId?: Maybe<Scalars['String']['output']>;
+  daoId: Scalars['String']['output'];
   from?: Maybe<Account>;
   fromAccountId?: Maybe<Scalars['String']['output']>;
   timestamp?: Maybe<Scalars['BigInt']['output']>;
@@ -1648,7 +1634,7 @@ export type TransferPage = {
 
 export type VotesOnchain = {
   __typename?: 'votesOnchain';
-  daoId?: Maybe<Scalars['String']['output']>;
+  daoId: Scalars['String']['output'];
   id: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
   proposalId?: Maybe<Scalars['String']['output']>;
@@ -1754,8 +1740,9 @@ export type VotingPowerHistory = {
   __typename?: 'votingPowerHistory';
   account?: Maybe<Account>;
   accountId?: Maybe<Scalars['String']['output']>;
-  daoId?: Maybe<Scalars['String']['output']>;
+  daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
+  delta: Scalars['BigInt']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
   transfer?: Maybe<Transfer>;
@@ -1785,6 +1772,14 @@ export type VotingPowerHistoryFilter = {
   daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
+  delta?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  delta_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_not?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   timestamp?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1851,7 +1846,7 @@ export type GetDelegationHistoryQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegationHistoryQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number, items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+export type GetDelegationHistoryQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetDelegationHistoryCountQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
@@ -2071,7 +2066,6 @@ export const GetDelegationHistoryDocument = gql`
     after: $after
     before: $before
   ) {
-    totalCount
     items {
       delegate {
         id
