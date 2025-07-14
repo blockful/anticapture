@@ -1,6 +1,6 @@
 query GetTop5Delegators(
   $delegate: String!,
-  $limit: Int = 5
+  $limit: Int = 6
 ) {
   accountBalances(
     where: { delegate: $delegate }
