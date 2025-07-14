@@ -246,9 +246,7 @@ export const Delegates = ({
           className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">
-            Voting Power ({daoId === DaoIdEnum.ENS ? "ENS" : "UNI"})
-          </h4>
+          <h4 className="text-table-header">Voting Power ({daoId})</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={

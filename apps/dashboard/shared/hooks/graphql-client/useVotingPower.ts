@@ -96,7 +96,6 @@ export const useVotingPower = ({
   const { data: countingData } = useGetVotingPowerCountingQuery({
     variables: {
       address,
-      limit: itemsPerPage,
     },
     context: {
       headers: {
