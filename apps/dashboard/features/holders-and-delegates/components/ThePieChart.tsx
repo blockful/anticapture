@@ -3,6 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import { groupDelegatorsByPercentage } from "../utils/groupDelegatorsByPercentage";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 
 const RADIAN = Math.PI / 180;
@@ -52,13 +53,31 @@ export const ThePieChart = ({
     address,
   });
 
-  const pieData = (top5Delegators || [])
-    .filter((item: any) => Number(item.balance) > 0)
-    .map((item: any) => ({
-      name: item.accountId || "",
-      value: Number(item.balance),
-    }))
-    .filter((item: any) => item.name !== "");
+  console.log("top5Delegators", top5Delegators);
+
+  // Use the utility function to group delegators
+  const { significantDelegators, othersValue } =
+    groupDelegatorsByPercentage(top5Delegators);
+
+  if (!top5Delegators || top5Delegators.length === 0) {
+    return null;
+  }
+
+  // Create pie data with significant items
+  const pieData = significantDelegators.map((item) => ({
+    name: item.accountId || "",
+    value: Number(item.balance),
+  }));
+
+  // Add "Others" category if there are minor items
+  if (othersValue > 0) {
+    pieData.push({
+      name: "Others",
+      value: othersValue,
+    });
+  }
+
+  console.log("pieData", pieData);
 
   return (
     <ResponsiveContainer width={200} height={200}>
@@ -74,12 +93,16 @@ export const ThePieChart = ({
           blendStroke={true}
           stroke="none"
         >
-          {pieData.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]}
-            />
-          ))}
+          {pieData.map((entry, index) => {
+            let color;
+            if (entry.name === "Others") {
+              color = "#9CA3AF";
+            } else {
+              color = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length];
+            }
+
+            return <Cell key={`cell-${index}`} fill={color} />;
+          })}
         </Pie>
       </PieChart>
     </ResponsiveContainer>
