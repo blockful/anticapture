@@ -58,8 +58,9 @@ export const useVotingPower = ({
 }: UseVotingPowerParams): UseVotingPowerResult => {
   const itemsPerPage = 6;
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isPaginationLoading, setIsPaginationLoading] =
+    useState<boolean>(false);
 
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
@@ -149,18 +150,18 @@ export const useVotingPower = ({
   // ------------------------------------------------------------------
   const timestampMap: Record<string, string | number | undefined> =
     Object.fromEntries(
-      (delegationsTimestampData?.delegations.items || []).map((d) => [
-        d.delegatorAccountId?.toLowerCase(),
-        d.timestamp,
+      (delegationsTimestampData?.delegations.items || []).map((delegation) => [
+        delegation.delegatorAccountId?.toLowerCase(),
+        delegation.timestamp,
       ]),
     );
 
   // ------------------------------------------------------------------
   // Enrich balances with timestamp (fallback to undefined)
   // ------------------------------------------------------------------
-  const balancesWithTimestamp = (accountBalances || []).map((ab) => ({
-    ...ab,
-    timestamp: timestampMap[ab.accountId.toLowerCase()],
+  const balancesWithTimestamp = (accountBalances || []).map((account) => ({
+    ...account,
+    timestamp: timestampMap[account.accountId.toLowerCase()],
   }));
 
   const { data: top5Delegators } = useGetTop5DelegatorsQuery({
