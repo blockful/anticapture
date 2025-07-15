@@ -3,15 +3,12 @@
 import { ReactElement, useState } from "react";
 import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { UserCheck } from "lucide-react";
-import {
-  TokenHolders,
-  Delegates,
-} from "@/features/holders-and-delegates/components";
+import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 
 type TabId = "tokenHolders" | "delegates";
 
@@ -24,10 +21,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const tabComponentMap: Record<TabId, ReactElement> = {
     tokenHolders: <TokenHolders days={days} daoId={daoId} />,
     delegates: (
-      <Delegates
-        daoId={daoId as unknown as QueryInput_HistoricalVotingPower_DaoId}
-        timePeriod={days}
-      />
+      <Delegates daoId={daoId as unknown as DaoIdEnum} timePeriod={days} />
     ),
   };
 

@@ -8,6 +8,8 @@ import { cn } from "@/shared/utils";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
+import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BalanceHistory } from "./BalanceHistory";
 import { DelegateDelegationHistory } from "./DelegateDelegationHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -54,7 +56,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "delegationHistory",
           label: "Delegation History",
-          content: <>Delegation History</>,
+          content: <DelegationHistoryTable address={address} daoId={daoId} />,
         },
         {
           id: "balanceHistory",
@@ -81,7 +83,7 @@ export const HoldersAndDelegatesDrawer = ({
     >
       <DrawerContent>
         <div className="bg-surface-default h-full w-full">
-          <div className="bg-surface-contrast h-[100px] w-full">
+          <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
               <div className="flex flex-col gap-1">
@@ -97,10 +99,10 @@ export const HoldersAndDelegatesDrawer = ({
                     nameClassName="text-lg leading-[18px]"
                     containerClassName="gap-2"
                   />
+                  <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
               </div>
 
-              {/* Close Button */}
               <Button
                 variant="ghost"
                 size="sm"

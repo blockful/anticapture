@@ -16,12 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -389,7 +386,6 @@ export type Account = {
   proposals?: Maybe<ProposalsOnchainPage>;
   receivedTransfers?: Maybe<TransferPage>;
   sentTransfers?: Maybe<TransferPage>;
-  type: Scalars['String']['output'];
   votes?: Maybe<VotesOnchainPage>;
 };
 
@@ -559,16 +555,6 @@ export type AccountFilter = {
   id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
-  type?: InputMaybe<Scalars['String']['input']>;
-  type_contains?: InputMaybe<Scalars['String']['input']>;
-  type_ends_with?: InputMaybe<Scalars['String']['input']>;
-  type_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  type_not?: InputMaybe<Scalars['String']['input']>;
-  type_not_contains?: InputMaybe<Scalars['String']['input']>;
-  type_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  type_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  type_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  type_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AccountPage = {
@@ -1414,12 +1400,12 @@ export type Query_ProposalsActivity_Proposals_Items = {
 
 export type Query_ProposalsActivity_Proposals_Items_Proposal = {
   __typename?: 'query_proposalsActivity_proposals_items_proposal';
-  abstainVotes: Scalars['Float']['output'];
-  againstVotes: Scalars['Float']['output'];
+  abstainVotes: Scalars['String']['output'];
+  againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   endBlock: Scalars['String']['output'];
-  forVotes: Scalars['Float']['output'];
+  forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
   proposerAccountId: Scalars['String']['output'];
   startBlock: Scalars['String']['output'];
@@ -1756,6 +1742,7 @@ export type VotingPowerHistory = {
   accountId?: Maybe<Scalars['String']['output']>;
   daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
+  delta: Scalars['BigInt']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
   transfer?: Maybe<Transfer>;
@@ -1785,6 +1772,14 @@ export type VotingPowerHistoryFilter = {
   daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
+  delta?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  delta_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_not?: InputMaybe<Scalars['BigInt']['input']>;
+  delta_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   timestamp?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1928,6 +1923,25 @@ export type GetHistoricalBalancesQueryVariables = Exact<{
 
 
 export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalances?: Array<{ __typename?: 'query_historicalBalances_items', address: string, balance: string, blockNumber: number, tokenAddress: string } | null> | null };
+
+export type GetDelegationHistoryCountQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number } };
+
+export type GetDelegationHistoryItemsQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetTopTokenHoldersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2554,6 +2568,114 @@ export type GetHistoricalBalancesQueryHookResult = ReturnType<typeof useGetHisto
 export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetHistoricalBalancesLazyQuery>;
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
+export const GetDelegationHistoryCountDocument = gql`
+    query GetDelegationHistoryCount($delegator: String!) {
+  delegations(where: {delegatorAccountId: $delegator}) {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetDelegationHistoryCountQuery__
+ *
+ * To run a query within a React component, call `useGetDelegationHistoryCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegationHistoryCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegationHistoryCountQuery({
+ *   variables: {
+ *      delegator: // value for 'delegator'
+ *   },
+ * });
+ */
+export function useGetDelegationHistoryCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables> & ({ variables: GetDelegationHistoryCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
+      }
+export function useGetDelegationHistoryCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
+        }
+export function useGetDelegationHistoryCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
+        }
+export type GetDelegationHistoryCountQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountQuery>;
+export type GetDelegationHistoryCountLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountLazyQuery>;
+export type GetDelegationHistoryCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountSuspenseQuery>;
+export type GetDelegationHistoryCountQueryResult = Apollo.QueryResult<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>;
+export const GetDelegationHistoryItemsDocument = gql`
+    query GetDelegationHistoryItems($delegator: String!, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10) {
+  delegations(
+    where: {delegatorAccountId: $delegator}
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      delegate {
+        id
+        powers {
+          items {
+            votingPower
+          }
+        }
+      }
+      timestamp
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDelegationHistoryItemsQuery__
+ *
+ * To run a query within a React component, call `useGetDelegationHistoryItemsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegationHistoryItemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegationHistoryItemsQuery({
+ *   variables: {
+ *      delegator: // value for 'delegator'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetDelegationHistoryItemsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables> & ({ variables: GetDelegationHistoryItemsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
+      }
+export function useGetDelegationHistoryItemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
+        }
+export function useGetDelegationHistoryItemsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
+        }
+export type GetDelegationHistoryItemsQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsQuery>;
+export type GetDelegationHistoryItemsLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsLazyQuery>;
+export type GetDelegationHistoryItemsSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsSuspenseQuery>;
+export type GetDelegationHistoryItemsQueryResult = Apollo.QueryResult<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>;
 export const GetTopTokenHoldersDocument = gql`
     query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String) {
   accountBalances(
