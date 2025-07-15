@@ -52,20 +52,59 @@ export function GovernorIndexer(governor: Governor) {
     });
   });
 
-  ponder.on(`OPGovernor:ProposalCreated`, async ({ event, context }) => {
-    await proposalCreated(context, daoId, {
-      proposalId: event.args.proposalId.toString(),
-      proposer: event.args.proposer,
-      targets: [...event.args.targets],
-      values: [...event.args.values],
-      signatures: [...event.args.signatures],
-      calldatas: [...event.args.calldatas],
-      startBlock: event.args.startBlock.toString(),
-      endBlock: event.args.endBlock.toString(),
-      description: event.args.description,
-      timestamp: event.block.timestamp,
-    });
-  });
+  ponder.on(
+    `OPGovernor:ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)`,
+    async ({ event, context }) => {
+      await proposalCreated(context, daoId, {
+        proposalId: event.args.proposalId.toString(),
+        proposer: event.args.proposer,
+        targets: [...event.args.targets],
+        values: [...event.args.values],
+        signatures: [...event.args.signatures],
+        calldatas: [...event.args.calldatas],
+        startBlock: event.args.startBlock.toString(),
+        endBlock: event.args.endBlock.toString(),
+        description: event.args.description,
+        timestamp: event.block.timestamp,
+      });
+    },
+  );
+
+  // ponder.on(
+  //   `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address indexed votingModule, bytes proposalData, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
+  //   async ({ event, context }) => {
+  //     await proposalCreated(context, daoId, {
+  //       proposalId: event.args.proposalId.toString(),
+  //       proposer: event.args.proposer,
+  //       targets: [...event.args.targets],
+  //       values: [...event.args.values],
+  //       signatures: [...event.args.signatures],
+  //       calldatas: [...event.args.calldatas],
+  //       startBlock: event.args.startBlock.toString(),
+  //       endBlock: event.args.endBlock.toString(),
+  //       description: event.args.description,
+  //       timestamp: event.block.timestamp,
+  //     });
+  //   },
+  // );
+
+  ponder.on(
+    `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
+    async ({ event, context }) => {
+      await proposalCreated(context, daoId, {
+        proposalId: event.args.proposalId.toString(),
+        proposer: event.args.proposer,
+        targets: [...event.args.targets],
+        values: [...event.args.values],
+        signatures: [...event.args.signatures],
+        calldatas: [...event.args.calldatas],
+        startBlock: event.args.startBlock.toString(),
+        endBlock: event.args.endBlock.toString(),
+        description: event.args.description,
+        timestamp: event.block.timestamp,
+      });
+    },
+  );
 
   ponder.on(`OPGovernor:ProposalCanceled`, async ({ event, context }) => {
     await proposalCanceled(context, event.args.proposalId.toString());

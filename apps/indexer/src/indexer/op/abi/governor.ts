@@ -124,6 +124,128 @@ export const GovernorAbi = [
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "uint256",
+        name: "proposalId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "proposer",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address[]",
+        name: "targets",
+        type: "address[]",
+      },
+      {
+        indexed: false,
+        internalType: "uint256[]",
+        name: "values",
+        type: "uint256[]",
+      },
+      {
+        indexed: false,
+        internalType: "string[]",
+        name: "signatures",
+        type: "string[]",
+      },
+      {
+        indexed: false,
+        internalType: "bytes[]",
+        name: "calldatas",
+        type: "bytes[]",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "startBlock",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "endBlock",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "description",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "proposalType",
+        type: "uint8",
+      },
+    ],
+    name: "ProposalCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "proposalId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "proposer",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "votingModule",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "proposalData",
+        type: "bytes",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "startBlock",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "endBlock",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "description",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "proposalType",
+        type: "uint8",
+      },
+    ],
+    name: "ProposalCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: false,
         internalType: "uint256",
         name: "proposalId",
