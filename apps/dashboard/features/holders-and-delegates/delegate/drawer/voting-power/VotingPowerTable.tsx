@@ -33,10 +33,10 @@ export const VotingPowerTable = ({
     setIsMounted(true);
   }, []);
 
-  const tableData = balances.map((ab) => ({
-    address: ab.accountId,
-    amount: Number(ab.balance) || 0,
-    date: ab.timestamp,
+  const tableData = balances.map((account) => ({
+    address: account.accountId,
+    amount: Number(account.balance) || 0,
+    date: account.timestamp,
   }));
 
   const columns: ColumnDef<{
