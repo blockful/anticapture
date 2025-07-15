@@ -55,7 +55,7 @@ export const GovernorAbi = [
         indexed: false,
         internalType: "string[]",
         name: "signatures",
-        type: "bytes[]",
+        type: "string[]",
       },
       {
         indexed: false,

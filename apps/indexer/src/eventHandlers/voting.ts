@@ -33,7 +33,7 @@ export const voteCast = async (
       firstVoteTimestamp: timestamp, // Set as first vote timestamp for new accounts
     })
     .onConflictDoUpdate((current) => ({
-      votesCount: (current.votesCount ?? 0) + 1,
+      votesCount: current.votesCount + 1,
       lastVoteTimestamp: timestamp,
       // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
       firstVoteTimestamp: current.firstVoteTimestamp ?? timestamp,
@@ -55,15 +55,9 @@ export const voteCast = async (
   await context.db
     .update(proposalsOnchain, { id: proposalId })
     .set((current) => ({
-      againstVotes:
-        (current.againstVotes ?? BigInt(0)) +
-        (support === 0 ? votingPower : BigInt(0)),
-      forVotes:
-        (current.forVotes ?? BigInt(0)) +
-        (support === 1 ? votingPower : BigInt(0)),
-      abstainVotes:
-        (current.abstainVotes ?? BigInt(0)) +
-        (support === 2 ? votingPower : BigInt(0)),
+      againstVotes: current.againstVotes + (support === 0 ? votingPower : 0n),
+      forVotes: current.forVotes + (support === 1 ? votingPower : 0n),
+      abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
     }));
 };
 
@@ -75,7 +69,7 @@ export const proposalCreated = async (
     proposer: Address;
     targets: Address[];
     values: bigint[];
-    signatures: Hex[];
+    signatures: string[];
     calldatas: Hex[];
     startBlock: string;
     endBlock: string;
