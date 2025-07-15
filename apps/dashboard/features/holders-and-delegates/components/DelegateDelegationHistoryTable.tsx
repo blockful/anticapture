@@ -15,15 +15,15 @@ import {
   DelegationHistoryItem,
 } from "../hooks/useDelegateDelegationHistory";
 
-interface DelegateDelegationHistoryProps {
+interface DelegateDelegationHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
 }
 
-export const DelegateDelegationHistory = ({
+export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
-}: DelegateDelegationHistoryProps) => {
+}: DelegateDelegationHistoryTableProps) => {
   const [sortBy, setSortBy] = useState<string>("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 

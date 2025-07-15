@@ -11,7 +11,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BalanceHistory } from "./BalanceHistory";
-import { DelegateDelegationHistory } from "./DelegateDelegationHistory";
+import { DelegateDelegationHistoryTable } from "./DelegateDelegationHistoryTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
@@ -45,7 +45,7 @@ export const HoldersAndDelegatesDrawer = ({
           id: "delegationHistory",
           label: "Delegation History",
           content: (
-            <DelegateDelegationHistory accountId={address} daoId={daoId} />
+            <DelegateDelegationHistoryTable accountId={address} daoId={daoId} />
           ),
         },
       ],
