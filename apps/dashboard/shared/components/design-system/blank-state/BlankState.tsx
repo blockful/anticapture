@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/shared/utils/cn";
 
 const blankStateVariants = cva(
-  "rounded-md w-full flex items-center justify-center text-secondary px-3 py-4 gap-2 bg-surface-contrast",
+  "rounded-md w-full flex items-center justify-center text-secondary px-3 py-4 gap-2 bg-surface-contrast font-normal",
   {
     variants: {
       variant: {
@@ -56,7 +56,7 @@ export const BlankState = ({
           {title}
         </div>
       )}
-      <div className="text-secondary flex text-sm font-medium">
+      <div className="text-secondary flex text-sm font-normal">
         {description}
       </div>
     </div>

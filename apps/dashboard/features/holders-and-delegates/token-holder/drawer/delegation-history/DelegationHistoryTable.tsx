@@ -247,6 +247,7 @@ export const DelegationHistoryTable = ({
     <div className="flex h-full w-full flex-col gap-4 p-4">
       <div className="h-full w-full overflow-y-auto">
         <TheTable
+          isTableSmall={true}
           columns={delegationHistoryColumns}
           data={loading ? Array(5).fill({}) : data}
           withSorting={true}
