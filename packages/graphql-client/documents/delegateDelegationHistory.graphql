@@ -1,0 +1,41 @@
+query GetDelegateDelegationHistory(
+  $accountId: String!
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
+  $limit: Int = 10
+  $after: String
+  $before: String
+) {
+  votingPowerHistorys(
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    where: { accountId: $accountId }
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      transactionHash
+      timestamp
+      delegation {
+        delegatorAccountId
+        delegatedValue
+        previousDelegate
+        delegateAccountId
+      }
+      transfer {
+        amount
+        fromAccountId
+        toAccountId
+      }
+      votingPower
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+  }
+} 

@@ -1,4 +1,20 @@
+import { useMemo, useState } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { TheTable, SkeletonRow } from "@/shared/components";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { Button } from "@/shared/components/ui/button";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { cn } from "@/shared/utils";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { formatUnits } from "viem";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  useDelegateDelegationHistory,
+  DelegationHistoryItem,
+} from "../hooks/useDelegateDelegationHistory";
 
 interface DelegateDelegationHistoryProps {
   accountId: string;
@@ -9,55 +25,346 @@ export const DelegateDelegationHistory = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryProps) => {
-  // TODO: Implement actual delegation history data fetching
-  const mockData = [
+  const [sortBy, setSortBy] = useState<string>("timestamp");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  const {
+    delegationHistory,
+    loading,
+    error,
+    paginationInfo,
+    fetchNextPage,
+    fetchPreviousPage,
+  } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
+
+  // Handle sorting
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortDirection(field === "timestamp" ? "desc" : "asc");
+    }
+  };
+
+  // Format timestamp to relative time
+  const formatRelativeTime = (timestamp: string) => {
+    const date = new Date(parseInt(timestamp) * 1000);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    const diffInMonths = Math.floor(diffInDays / 30);
+
+    if (diffInMonths > 0) {
+      return `${diffInMonths} month${diffInMonths > 1 ? "s" : ""} ago`;
+    } else if (diffInWeeks > 0) {
+      return `${diffInWeeks} week${diffInWeeks > 1 ? "s" : ""} ago`;
+    } else if (diffInDays > 0) {
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    } else if (diffInHours > 0) {
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    } else if (diffInMinutes > 0) {
+      return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+    } else {
+      return "Just now";
+    }
+  };
+
+  // Determine delegation type and color based on gain/loss
+  const getDelegationType = (item: DelegationHistoryItem) => {
+    const baseType = item.type === "delegation" ? "Delegation" : "Transfer";
+
+    if (item.isGain) {
+      return {
+        type: baseType,
+        color: "text-success",
+        symbol: "↑",
+      };
+    } else {
+      return {
+        type: baseType,
+        color: "text-error",
+        symbol: "↓",
+      };
+    }
+  };
+
+  // Table columns configuration
+  const columns: ColumnDef<DelegationHistoryItem>[] = [
     {
-      id: "1",
-      date: "2024-01-15",
-      action: "Delegated to",
-      delegate: "0x1234...5678",
-      amount: "1,000 tokens",
+      accessorKey: "timestamp",
+      size: 120,
+      header: () => (
+        <Button
+          variant="ghost"
+          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          onClick={() => handleSort("timestamp")}
+        >
+          <h4 className="text-table-header">Date</h4>
+          <ArrowUpDown
+            props={{ className: "ml-2 size-4" }}
+            activeState={
+              sortBy === "timestamp"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const timestamp = row.getValue("timestamp") as string;
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-start px-4">
+              <SkeletonRow className="h-5 w-20" />
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex h-10 items-center justify-start px-4 py-2">
+            <span className="text-primary text-sm font-medium">
+              {formatRelativeTime(timestamp)}
+            </span>
+          </div>
+        );
+      },
     },
     {
-      id: "2",
-      date: "2024-01-10",
-      action: "Redelegated from",
-      delegate: "0x9876...5432",
-      amount: "1,000 tokens",
+      accessorKey: "amount",
+      size: 200,
+      header: () => (
+        <Button
+          variant="ghost"
+          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          onClick={() => handleSort("amount")}
+        >
+          <h4 className="text-table-header">Amount (ENS)</h4>
+          <ArrowUpDown
+            props={{ className: "ml-2 size-4" }}
+            activeState={
+              sortBy === "amount"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const item = row.original;
+        const delegationType = getDelegationType(item);
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-start px-4">
+              <SkeletonRow className="h-5 w-16" />
+            </div>
+          );
+        }
+
+        let amount = "0";
+        if (item.delegation) {
+          amount = formatNumberUserReadable(
+            Number(
+              formatUnits(BigInt(item.delegation.delegatedValue || "0"), 18),
+            ),
+          );
+        } else if (item.transfer) {
+          amount = formatNumberUserReadable(
+            Number(formatUnits(BigInt(item.transfer.amount || "0"), 18)),
+          );
+        }
+
+        return (
+          <div className="flex h-10 flex-col items-start justify-center px-4 py-2">
+            <div className="flex items-center gap-1">
+              <span className={cn("text-sm font-medium", delegationType.color)}>
+                {delegationType.symbol}
+                {amount}
+              </span>
+            </div>
+            <span className="text-secondary text-xs">
+              {delegationType.type}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "delegator",
+      size: 150,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Delegator
+        </h4>
+      ),
+      cell: ({ row }) => {
+        const item = row.original;
+
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center gap-3 p-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
+            </div>
+          );
+        }
+
+        // Get delegator address based on the transaction type and direction
+        let delegatorAddress = "";
+        if (item.delegation) {
+          delegatorAddress = item.delegation.delegatorAccountId;
+        } else if (item.transfer) {
+          // For transfers, the delegator is the one who initiated the transfer
+          delegatorAddress = item.transfer.fromAccountId;
+        }
+
+        return (
+          <div className="flex h-10 items-center gap-3 p-2">
+            <EnsAvatar
+              address={delegatorAddress as `0x${string}`}
+              size="sm"
+              variant="rounded"
+              showName={true}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "arrow",
+      size: 60,
+      header: () => <div className="w-full"></div>,
+      cell: ({ row }) => {
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center justify-center px-2"></div>
+          );
+        }
+
+        return (
+          <div className="flex h-10 items-center justify-center px-2">
+            <ArrowRight className="text-secondary size-4" />
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "delegate",
+      size: 150,
+      header: () => (
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+          Delegate
+        </h4>
+      ),
+      cell: ({ row }) => {
+        const item = row.original;
+
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center gap-3 p-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
+            </div>
+          );
+        }
+
+        // Get delegate address based on the transaction type and direction
+        let delegateAddress = accountId;
+        if (item.delegation) {
+          // For delegation, delegate is the one receiving the delegation
+          delegateAddress = item.delegation.delegateAccountId;
+        } else if (item.transfer) {
+          // For transfers, delegate is the one receiving the transfer
+          delegateAddress = item.transfer.toAccountId;
+        }
+
+        return (
+          <div className="flex h-10 items-center justify-between gap-3 p-2">
+            <EnsAvatar
+              address={delegateAddress as `0x${string}`}
+              size="sm"
+              variant="rounded"
+              showName={true}
+            />
+            <ExternalLink className="text-secondary size-4" />
+          </div>
+        );
+      },
     },
   ];
 
-  return (
-    <div className="bg-surface-default h-full p-4">
-      <div className="space-y-4">
-        {mockData.length === 0 ? (
-          <div className="py-8 text-center">
-            <p className="text-secondary text-sm">
-              No delegation history found
-            </p>
+  if (loading && delegationHistory.length === 0) {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="bg-surface-default flex-1 p-4">
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
-        ) : (
-          mockData.map((item) => (
-            <div
-              key={item.id}
-              className="border-b border-white/10 pb-4 last:border-b-0"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-primary text-sm font-medium">
-                    {item.action}
-                  </p>
-                  <p className="text-secondary text-xs">{item.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-primary font-mono text-sm">
-                    {item.delegate}
-                  </p>
-                  <p className="text-secondary text-xs">{item.amount}</p>
-                </div>
-              </div>
-            </div>
-          ))
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-surface-default flex h-full flex-col items-center justify-center p-4">
+        <div className="text-danger text-center">
+          <p className="text-lg font-semibold">
+            Error loading delegation history
+          </p>
+          <p className="mt-2 text-sm">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-surface-default flex h-full flex-col">
+      {/* Table */}
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <TheTable
+          columns={columns}
+          data={delegationHistory}
+          withPagination={false}
+          withSorting={true}
+          isTableSmall={true}
+        />
+
+        {/* Pagination */}
+        {paginationInfo.totalPages > 1 && (
+          <Pagination
+            currentPage={paginationInfo.currentPage}
+            totalPages={paginationInfo.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            hasNextPage={paginationInfo.hasNextPage}
+            hasPreviousPage={paginationInfo.hasPreviousPage}
+            isLoading={loading}
+          />
         )}
       </div>
     </div>
