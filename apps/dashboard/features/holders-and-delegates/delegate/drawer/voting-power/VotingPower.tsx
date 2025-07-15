@@ -8,6 +8,7 @@ import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 
 // Create chart config for delegators with percentages
 const createDelegatorsChartConfig = (
@@ -49,34 +50,57 @@ const createDelegatorsChartConfig = (
 
 const ChartLegend = ({
   items,
+  loading,
 }: {
   items: { color: string; label: string; percentage: string }[];
-}) => (
-  <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
-    {items.map((item) => {
-      if (Number(item.percentage) < 0.08) return null;
-      return (
-        <div key={item.label} className="flex items-center gap-2">
-          <span
-            className="size-2 rounded-xs"
-            style={{ backgroundColor: item.color }}
-          />
-          <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
-            {item.label}
+  loading?: boolean;
+}) => {
+  if (loading) {
+    return (
+      <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="size-2 rounded-xs"
+            />
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-16"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
+      {items.map((item) => {
+        if (Number(item.percentage) < 0.08) return null;
+        return (
+          <div key={item.label} className="flex items-center gap-2">
             <span
-              className="text-secondary text-sm font-medium"
-              style={{
-                color: item.color,
-              }}
-            >
-              {item.percentage}%
+              className="size-2 rounded-xs"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
+              {item.label}
+              <span
+                className="text-secondary text-sm font-medium"
+                style={{
+                  color: item.color,
+                }}
+              >
+                {item.percentage}%
+              </span>
             </span>
-          </span>
-        </div>
-      );
-    })}
-  </div>
-);
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export const VotingPower = ({
   address,
@@ -118,7 +142,7 @@ export const VotingPower = ({
     return acc + Number(item.balance);
   }, 0);
 
-  const othersValue = Math.abs(totalTop5Delegators - currentVotingPower);
+  const othersValue = Math.abs(currentVotingPower - totalTop5Delegators);
 
   const chartConfig = createDelegatorsChartConfig(
     top5Delegators,
@@ -141,8 +165,14 @@ export const VotingPower = ({
                   Current Voting Power
                 </p>
                 <p className="text-md font-normal">
-                  {loading ? (
-                    <span className="text-secondary">Loading...</span>
+                  {loading &&
+                  !currentVotingPower &&
+                  !top5Delegators &&
+                  !delegatorsVotingPowerDetails ? (
+                    <SkeletonRow
+                      parentClassName="flex animate-pulse"
+                      className="h-6 w-24"
+                    />
                   ) : (
                     formatNumberUserReadable(currentVotingPower)
                   )}
@@ -158,7 +188,11 @@ export const VotingPower = ({
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  {!top5Delegators ? (
+                  {loading &&
+                  !top5Delegators &&
+                  !delegatorsVotingPowerDetails ? (
+                    <ChartLegend items={[]} loading={true} />
+                  ) : !top5Delegators ? (
                     <div className="text-secondary text-sm">
                       Loading delegators...
                     </div>

@@ -31,7 +31,7 @@ export const renderCustomizedLabel = ({
       dominantBaseline="central"
       className="text-alternative-sm font-mono font-medium"
     >
-      {`${(percent * 100).toFixed(0)}%`}
+      {`${(percent * 100).toFixed(1)}%`}
     </text>
   );
 };

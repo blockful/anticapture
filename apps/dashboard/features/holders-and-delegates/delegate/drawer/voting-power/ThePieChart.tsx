@@ -14,6 +14,7 @@ import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/voting-power/utils/renderCustomizedLabel";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 
 // Create chart config for delegators
 const createDelegatorsChartConfig = (
@@ -86,6 +87,17 @@ export const ThePieChart = ({
       address,
     });
 
+  if (loading && !top5Delegators && !delegatorsVotingPowerDetails) {
+    return (
+      <div className="flex items-center justify-center rounded-full">
+        <SkeletonRow
+          parentClassName="flex animate-pulse"
+          className="size-[200px] rounded-full"
+        />
+      </div>
+    );
+  }
+
   if (!top5Delegators || top5Delegators.length === 0) {
     return null;
   }
@@ -99,7 +111,7 @@ export const ThePieChart = ({
     return acc + Number(item.balance);
   }, 0);
 
-  const othersValue = Math.abs(totalTop5Delegators - currentVotingPower);
+  const othersValue = Math.abs(currentVotingPower - totalTop5Delegators);
 
   const chartConfig = createDelegatorsChartConfig(top5Delegators, othersValue);
 
