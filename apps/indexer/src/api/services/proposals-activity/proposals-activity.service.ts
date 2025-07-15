@@ -10,9 +10,7 @@ import { SECONDS_PER_BLOCK } from "@/lib/constants";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
-export type OrderByField =
-  | "votingPower"
-  | "voteTiming";
+export type OrderByField = "votingPower" | "voteTiming";
 export type OrderDirection = "asc" | "desc";
 export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
 
@@ -55,7 +53,7 @@ export interface ProposalWithUserVote {
 
 export interface DelegateProposalActivity {
   address: string;
-  totalProposals: number;
+  totalProposals: number; // This will be the filtered count for pagination
   votedProposals: number;
   neverVoted: boolean;
   winRate: number;
@@ -97,51 +95,73 @@ export class ProposalsActivityService {
       fromDate,
     );
 
-    // Get proposals and votes
-    const proposals = await this.repository.getProposals(
+    // Get proposals with votes, filtering, sorting, and pagination in SQL
+    const { proposals: proposalsWithVotes, totalCount } =
+      await this.repository.getProposalsWithVotesAndPagination(
+        address,
+        daoId,
+        activityStart,
+        votingPeriodSeconds,
+        skip,
+        limit,
+        orderBy,
+        orderDirection,
+        userVoteFilter,
+      );
+
+    if (proposalsWithVotes.length === 0) {
+      return this.createEmptyActivity(address, false);
+    }
+
+    // Transform to the expected format
+    const proposals = proposalsWithVotes.map((item) => ({
+      proposal: {
+        id: item.proposal.id,
+        daoId: item.proposal.dao_id,
+        proposerAccountId: item.proposal.proposer_account_id,
+        description: item.proposal.description,
+        startBlock: item.proposal.start_block,
+        endBlock: item.proposal.end_block,
+        timestamp: item.proposal.timestamp,
+        status: item.proposal.status,
+        forVotes: item.proposal.for_votes,
+        againstVotes: item.proposal.against_votes,
+        abstainVotes: item.proposal.abstain_votes,
+        proposalEndTimestamp: item.proposal.proposal_end_timestamp,
+      },
+      userVote: item.userVote
+        ? {
+            id: item.userVote.id,
+            voterAccountId: item.userVote.voter_account_id,
+            proposalId: item.userVote.proposal_id,
+            support: item.userVote.support,
+            votingPower: item.userVote.voting_power,
+            reason: item.userVote.reason,
+            timestamp: item.userVote.timestamp,
+          }
+        : null,
+    }));
+
+    // Calculate analytics (we still need this for the metrics)
+    const allProposals = await this.repository.getProposals(
       daoId,
       activityStart,
       votingPeriodSeconds,
     );
-
-    if (proposals.length === 0) {
-      return this.createEmptyActivity(address, false);
-    }
-
-    const userVotes = await this.repository.getUserVotes(
+    const allUserVotes = await this.repository.getUserVotes(
       address,
       daoId,
-      proposals.map((p: DbProposal) => p.id),
+      allProposals.map((p: DbProposal) => p.id),
     );
-
-    // Build response
-    const proposalsWithVotes = this.buildProposalsWithVotes(
-      proposals,
-      userVotes,
-    );
-
-    // Apply vote filter if provided
-    const filteredProposals = userVoteFilter
-      ? this.filterProposalsByVote(proposalsWithVotes, userVoteFilter)
-      : proposalsWithVotes;
-
-    // Sort proposals based on the specified criteria
-    const sortedProposals = this.sortProposals(
-      filteredProposals,
-      orderBy,
-      orderDirection,
-    );
-
-    const paginatedProposals = sortedProposals.slice(skip, skip + limit);
-    const analytics = this.calculateAnalytics(proposals, userVotes);
+    const analytics = this.calculateAnalytics(allProposals, allUserVotes);
 
     return {
       address,
-      totalProposals: proposals.length,
-      votedProposals: userVotes.length,
+      totalProposals: totalCount, // Use filtered count for pagination
+      votedProposals: allUserVotes.length, // Total votes for metrics
       neverVoted: false,
       ...analytics,
-      proposals: paginatedProposals,
+      proposals,
     };
   }
 
@@ -152,45 +172,6 @@ export class ProposalsActivityService {
     return fromDate && fromDate > firstVoteTimestamp
       ? fromDate
       : firstVoteTimestamp;
-  }
-
-  private buildProposalsWithVotes(
-    proposals: DbProposal[],
-    userVotes: DbVote[],
-  ): ProposalWithUserVote[] {
-    const voteMap = new Map(userVotes.map((vote) => [vote.proposal_id, vote]));
-
-    return proposals.map((proposal) => {
-      const vote = voteMap.get(proposal.id);
-
-      return {
-        proposal: {
-          id: proposal.id,
-          daoId: proposal.dao_id,
-          proposerAccountId: proposal.proposer_account_id,
-          description: proposal.description,
-          startBlock: proposal.start_block,
-          endBlock: proposal.end_block,
-          timestamp: proposal.timestamp,
-          status: proposal.status,
-          forVotes: proposal.for_votes,
-          againstVotes: proposal.against_votes,
-          abstainVotes: proposal.abstain_votes,
-          proposalEndTimestamp: proposal.proposal_end_timestamp,
-        },
-        userVote: vote
-          ? {
-              id: vote.id,
-              voterAccountId: vote.voter_account_id,
-              proposalId: vote.proposal_id,
-              support: vote.support,
-              votingPower: vote.voting_power,
-              reason: vote.reason,
-              timestamp: vote.timestamp,
-            }
-          : null,
-      };
-    });
   }
 
   private calculateAnalytics(proposals: DbProposal[], userVotes: DbVote[]) {
@@ -308,77 +289,5 @@ export class ProposalsActivityService {
       avgTimeBeforeEnd: 0,
       proposals: [],
     };
-  }
-
-  private filterProposalsByVote(
-    proposals: ProposalWithUserVote[],
-    userVoteFilter: VoteFilterType,
-  ): ProposalWithUserVote[] {
-    return proposals.filter((proposal) => {
-      const userVote = proposal.userVote;
-
-      // Check if "no-vote" filter and user didn't vote
-      if (userVoteFilter === "no-vote" && !userVote) {
-        return true;
-      }
-
-      // Check if user voted and the vote type matches filter
-      if (userVote) {
-        const support = userVote.support;
-
-        // Map support values to filter types
-        if (support === "1" && userVoteFilter === "yes") {
-          return true;
-        }
-        if (support === "0" && userVoteFilter === "no") {
-          return true;
-        }
-        if (support === "2" && userVoteFilter === "abstain") {
-          return true;
-        }
-      }
-
-      return false;
-    });
-  }
-
-  private sortProposals(
-    proposals: ProposalWithUserVote[],
-    orderBy: OrderByField,
-    orderDirection: OrderDirection,
-  ): ProposalWithUserVote[] {
-    return proposals.sort((a, b) => {
-      let comparison = 0;
-
-      switch (orderBy) {
-        case "votingPower":
-          // Sort by voting power (null votes have 0 voting power)
-          const aVotingPower = a.userVote?.votingPower
-            ? Number(a.userVote.votingPower)
-            : 0;
-          const bVotingPower = b.userVote?.votingPower
-            ? Number(b.userVote.votingPower)
-            : 0;
-          comparison = aVotingPower - bVotingPower;
-          break;
-
-        case "voteTiming":
-          // Sort by vote timing (userVote.timestamp - proposal.timestamp)
-          const aVoteTime = a.userVote?.timestamp
-            ? Number(a.userVote.timestamp) - Number(a.proposal.timestamp)
-            : 0;
-          const bVoteTime = b.userVote?.timestamp
-            ? Number(b.userVote.timestamp) - Number(b.proposal.timestamp)
-            : 0;
-          comparison = aVoteTime - bVoteTime;
-          break;
-
-        default:
-          comparison = 0;
-      }
-
-      // Apply direction
-      return orderDirection === "desc" ? -comparison : comparison;
-    });
   }
 }

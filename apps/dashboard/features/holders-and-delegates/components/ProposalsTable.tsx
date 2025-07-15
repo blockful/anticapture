@@ -364,7 +364,7 @@ export const ProposalsTable = ({
     );
   }
 
-  if (!proposals || proposals.length === 0 && !userVoteFilter) {
+  if (!proposals || (proposals.length === 0 && userVoteFilter === "all")) {
     return (
       <BlankSlate
         variant="default"
