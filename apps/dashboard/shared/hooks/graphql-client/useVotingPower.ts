@@ -176,7 +176,6 @@ export const useVotingPower = ({
     },
   });
 
-  console.log("delegationsTimestampData", delegationsTimestampData);
   /* ------------------------------------------------------------------ */
   /* Pagination helpers                                                  */
   /* ------------------------------------------------------------------ */
