@@ -10,9 +10,9 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPower } from "../delegate/drawer/voting-power/VotingPower";
-import { BalanceHistory } from "./BalanceHistory";
-import { DelegationHistoryTable } from "../token-holder";
+import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
+import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
+import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
 
 export type EntityType = "delegate" | "tokenHolder";
 
