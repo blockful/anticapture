@@ -1959,6 +1959,25 @@ export type GetProposalsActivityQueryVariables = Exact<{
 
 export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: string, endBlock: string, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
+export type GetDelegationHistoryCountQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number } };
+
+export type GetDelegationHistoryItemsQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', timestamp?: any | null, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+
 export type GetTopTokenHoldersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;

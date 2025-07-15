@@ -1,30 +1,13 @@
 import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetProposalsActivityQuery,
+  GetProposalsActivityQueryVariables,
   QueryInput_ProposalsActivity_DaoId,
-  QueryInput_ProposalsActivity_OrderBy,
-  QueryInput_ProposalsActivity_OrderDirection,
-  QueryInput_ProposalsActivity_UserVoteFilter_Items,
 } from "@anticapture/graphql-client";
 import { useMemo } from "react";
 
-export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
-export type OrderByField =
-  | "finalResult"
-  | "userVote"
-  | "votingPower"
-  | "voteTiming";
-export type OrderDirection = "asc" | "desc";
-
-interface UseProposalsActivityParams {
-  address: string;
-  daoId: QueryInput_ProposalsActivity_DaoId;
-  fromDate?: number;
-  skip?: number;
-  limit?: number;
-  orderBy?: QueryInput_ProposalsActivity_OrderBy;
-  orderDirection?: QueryInput_ProposalsActivity_OrderDirection;
-  userVoteFilter?: QueryInput_ProposalsActivity_UserVoteFilter_Items;
+interface UseProposalsActivityParams
+  extends GetProposalsActivityQueryVariables {
+  itemsPerPage: number;
 }
 
 interface UseProposalsActivityResult {
@@ -32,6 +15,12 @@ interface UseProposalsActivityResult {
   loading: boolean;
   error: Error | null;
   refetch: () => void;
+  pagination: {
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    currentPage: number;
+  };
 }
 
 export const useProposalsActivity = ({
@@ -43,6 +32,7 @@ export const useProposalsActivity = ({
   orderBy,
   orderDirection,
   userVoteFilter,
+  itemsPerPage,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
   const { data, loading, error, refetch } = useGetProposalsActivityQuery({
     variables: {
@@ -80,10 +70,28 @@ export const useProposalsActivity = ({
     };
   }, [data]);
 
+  // Calculate pagination values
+  const pagination = useMemo(() => {
+    const totalPages = processedData?.totalProposals
+      ? Math.ceil(processedData.totalProposals / itemsPerPage)
+      : 1;
+    const currentPage = skip ? Math.floor(skip / itemsPerPage) + 1 : 1;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+
+    return {
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+      currentPage,
+    };
+  }, [processedData?.totalProposals, skip, itemsPerPage]);
+
   return {
     data: processedData,
     loading,
     error: error || null,
     refetch,
+    pagination,
   };
 };

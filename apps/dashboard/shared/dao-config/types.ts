@@ -72,6 +72,7 @@ export interface DaoOverviewConfig {
   };
   cancelFunction?: string;
   snapshot?: string;
+  tally?: string;
   rules?: {
     delay?: boolean;
     changeVote?: boolean;
@@ -109,6 +110,7 @@ export interface DaoConfiguration extends BaseInfo {
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
+  dataTables?: boolean;
   showSupport?: {
     snapshotProposal: string;
     snapshotSpace: string;

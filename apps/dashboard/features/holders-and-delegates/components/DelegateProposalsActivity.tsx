@@ -5,17 +5,16 @@ import {
   QueryInput_ProposalsActivity_DaoId,
   QueryInput_ProposalsActivity_UserVoteFilter,
 } from "@anticapture/graphql-client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
-import { Hand, Trophy, CheckCircle2, Clock10, Check, Zap } from "lucide-react";
+import { Hand, Trophy, Check, Zap } from "lucide-react";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
-  FilterDropdown,
   FilterOption,
 } from "@/shared/components/dropdowns/FilterDropdown";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -52,7 +51,7 @@ export const DelegateProposalsActivity = ({
   // Calculate skip for pagination
   const skip = (currentPage - 1) * itemsPerPage;
 
-  const { data, loading, error, refetch } = useProposalsActivity({
+  const { data, loading, error, refetch, pagination } = useProposalsActivity({
     address,
     daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
     fromDate,
@@ -64,11 +63,19 @@ export const DelegateProposalsActivity = ({
       userVoteFilter === "all"
         ? undefined
         : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
+    itemsPerPage,
   });
 
   // Helper function to format average time (convert seconds to days)
-  const formatAvgTime = (avgTimeBeforeEndSeconds: number): string => {
-    const avgTimeBeforeEndDays = avgTimeBeforeEndSeconds / (24 * 60 * 60);
+  const formatAvgTime = (
+    avgTimeBeforeEndSeconds: number,
+    votedProposals: number,
+  ): string => {
+    const avgTimeBeforeEndDays = avgTimeBeforeEndSeconds / SECONDS_PER_DAY;
+
+    if (!votedProposals) {
+      return "-";
+    }
 
     if (avgTimeBeforeEndDays < 1) {
       return "< 1 day before end";
@@ -76,15 +83,8 @@ export const DelegateProposalsActivity = ({
     return `${Math.round(avgTimeBeforeEndDays)} days before end`;
   };
 
-  // Calculate pagination values
-  const totalPages = data?.totalProposals
-    ? Math.ceil(data.totalProposals / itemsPerPage)
-    : 1;
-  const hasNextPage = currentPage < totalPages;
-  const hasPreviousPage = currentPage > 1;
-
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 1 && page <= pagination.totalPages) {
       setCurrentPage(page);
     }
   };
@@ -104,7 +104,7 @@ export const DelegateProposalsActivity = ({
   const avgTimingValue =
     loading || error || !data
       ? undefined
-      : formatAvgTime(data.avgTimeBeforeEnd);
+      : formatAvgTime(data.avgTimeBeforeEnd, data.votedProposals);
 
   return (
     <>
@@ -146,17 +146,18 @@ export const DelegateProposalsActivity = ({
             orderBy={orderBy}
             orderDirection={orderDirection}
             onSortChange={handleSortChange}
+            daoIdEnum={daoId}
           />
 
           {/* Pagination Controls */}
           {data && data.totalProposals > itemsPerPage && (
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPrevious={() => handlePageChange(currentPage - 1)}
-              onNext={() => handlePageChange(currentPage + 1)}
-              hasNextPage={hasNextPage}
-              hasPreviousPage={hasPreviousPage}
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPrevious={() => handlePageChange(pagination.currentPage - 1)}
+              onNext={() => handlePageChange(pagination.currentPage + 1)}
+              hasNextPage={pagination.hasNextPage}
+              hasPreviousPage={pagination.hasPreviousPage}
               className="text-white"
             />
           )}

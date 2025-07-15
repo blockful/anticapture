@@ -31,7 +31,7 @@ interface DelegateTableData {
 
 interface DelegatesProps {
   timePeriod?: TimeInterval; // Use TimeInterval enum directly
-  daoId?: QueryInput_HistoricalVotingPower_DaoId;
+  daoId?: DaoIdEnum;
 }
 
 // Helper function to convert time period to timestamp and block number
@@ -69,7 +69,7 @@ export const getTimeDataFromPeriod = (period: TimeInterval) => {
 
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
-  daoId = QueryInput_HistoricalVotingPower_DaoId.Ens,
+  daoId,
 }: DelegatesProps) => {
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
@@ -93,7 +93,7 @@ export const Delegates = ({
   } = useDelegates({
     blockNumber,
     fromDate,
-    daoId,
+    daoId: daoId as unknown as QueryInput_HistoricalVotingPower_DaoId,
     orderBy: sortBy,
     orderDirection: sortDirection,
   });
@@ -249,13 +249,7 @@ export const Delegates = ({
           className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">
-            Voting Power (
-            {daoId === QueryInput_HistoricalVotingPower_DaoId.Ens
-              ? "ENS"
-              : "UNI"}
-            )
-          </h4>
+          <h4 className="text-table-header">Voting Power ({daoId})</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
@@ -503,7 +497,7 @@ export const Delegates = ({
         address={
           selectedDelegate || "0x0000000000000000000000000000000000000000"
         }
-        daoId={daoId as unknown as DaoIdEnum}
+        daoId={daoId as DaoIdEnum}
       />
     </>
   );

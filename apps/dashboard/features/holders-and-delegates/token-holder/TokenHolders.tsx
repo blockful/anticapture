@@ -1,25 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address, isAddress } from "viem";
+import { Address, isAddress, formatUnits } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { Plus } from "lucide-react";
-import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
-import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates"; 
 
 interface TokenHolderTableData {
   address: Address;
@@ -36,9 +33,7 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string | null>(
-    null,
-  );
+  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const pageLimit: number = 10;
 
@@ -65,7 +60,7 @@ export const TokenHolders = ({
   };
 
   const handleCloseDrawer = () => {
-    setSelectedTokenHolder(null);
+    setSelectedTokenHolder("");
   };
 
   const calculateVariation = (
@@ -424,9 +419,7 @@ export const TokenHolders = ({
         onClose={handleCloseDrawer}
         daoId={daoId}
         entityType="tokenHolder"
-        address={
-          selectedTokenHolder || "0x0000000000000000000000000000000000000000"
-        }
+        address={selectedTokenHolder}
       />
     </>
   );

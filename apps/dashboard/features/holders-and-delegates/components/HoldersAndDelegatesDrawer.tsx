@@ -11,6 +11,8 @@ import { useScreenSize } from "@/shared/hooks";
 import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
 import { TimeInterval } from "@/shared/types/enums";
 import { getTimeDataFromPeriod } from "./Delegates";
+import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BalanceHistory } from "./BalanceHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 
@@ -55,7 +57,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "delegationHistory",
           label: "Delegation History",
-          content: <>Delegation History</>,
+          content: <DelegationHistoryTable address={address} daoId={daoId} />,
         },
         {
           id: "balanceHistory",
@@ -82,7 +84,7 @@ export const HoldersAndDelegatesDrawer = ({
     >
       <DrawerContent>
         <div className="bg-surface-default h-full w-full">
-          <div className="bg-surface-contrast h-[100px] w-full">
+          <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
               <div className="flex flex-col gap-1">
@@ -98,10 +100,10 @@ export const HoldersAndDelegatesDrawer = ({
                     nameClassName="text-lg leading-[18px]"
                     containerClassName="gap-2"
                   />
+                  <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
               </div>
 
-              {/* Close Button */}
               <Button
                 variant="ghost"
                 size="sm"
