@@ -30,6 +30,10 @@ import {
   Query_ProposalsActivity_Proposals_Items_UserVote,
 } from "@anticapture/graphql-client";
 import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
+import {
+  FilterDropdown,
+  FilterOption,
+} from "@/shared/components/dropdowns/FilterDropdown";
 
 // Vote mapping object
 const voteMapping = {
@@ -102,6 +106,12 @@ interface ProposalsTableProps {
   proposals: Query_ProposalsActivity_Proposals_Items[];
   loading: boolean;
   error: Error | null;
+  userVoteFilter?: string;
+  onUserVoteFilterChange?: (filter: string) => void;
+  userVoteFilterOptions?: FilterOption[];
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  onSortChange?: (field: string, direction: "asc" | "desc") => void;
 }
 
 // Helper function to extract proposal name from description
@@ -282,6 +292,12 @@ export const ProposalsTable = ({
   proposals,
   loading,
   error,
+  userVoteFilter,
+  onUserVoteFilterChange,
+  userVoteFilterOptions,
+  orderBy,
+  orderDirection,
+  onSortChange,
 }: ProposalsTableProps) => {
   // Get DAO data for token symbol
   const { daoId }: { daoId: string } = useParams();
@@ -370,25 +386,8 @@ export const ProposalsTable = ({
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header font-regular h-8 w-full justify-start gap-1 px-2 text-xs"
-          onClick={() => column.toggleSorting()}
-        >
-          Final Result
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        <h4 className="text-table-header pl-4">Final Result</h4>
       ),
-      enableSorting: true,
     },
     {
       accessorKey: "userVote",
@@ -414,23 +413,16 @@ export const ProposalsTable = ({
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header h-8 w-full justify-start gap-1 px-2 text-xs"
-          onClick={() => column.toggleSorting()}
-        >
+        <div className="flex items-center gap-2 px-2 font-medium">
           User Vote
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+          {userVoteFilterOptions && onUserVoteFilterChange && (
+            <FilterDropdown
+              options={userVoteFilterOptions}
+              selectedValue={userVoteFilter || "all"}
+              onValueChange={onUserVoteFilterChange}
+            />
+          )}
+        </div>
       ),
       enableSorting: true,
     },
@@ -460,27 +452,29 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
-          onClick={() => column.toggleSorting()}
+          onClick={() => {
+            if (onSortChange) {
+              const newDirection =
+                orderBy === "votingPower" && orderDirection === "desc"
+                  ? "asc"
+                  : "desc";
+              onSortChange("votingPower", newDirection);
+            }
+          }}
         >
           <h4 className="text-table-header">Voting Power</h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              orderBy === "votingPower"
+                ? orderDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => {
-        const a = parseFloat(rowA.getValue("votingPower") as string) || 0;
-        const b = parseFloat(rowB.getValue("votingPower") as string) || 0;
-        return a - b;
-      },
     },
     {
       accessorKey: "voteTiming",
@@ -514,22 +508,29 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-start gap-1 px-2"
-          onClick={() => column.toggleSorting()}
+          onClick={() => {
+            if (onSortChange) {
+              const newDirection =
+                orderBy === "voteTiming" && orderDirection === "desc"
+                  ? "asc"
+                  : "desc";
+              onSortChange("voteTiming", newDirection);
+            }
+          }}
         >
           <h4 className="text-table-header">Vote Timing</h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              orderBy === "voteTiming"
+                ? orderDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
     },
     {
       accessorKey: "proposalId",
@@ -602,16 +603,7 @@ export const ProposalsTable = ({
     );
   }
 
-  if (!proposals || proposals.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-secondary">
-          No proposals found for this delegate.
-        </div>
-      </div>
-    );
-  }
-
+  // Always render the table, even if there are no proposals
   return (
     <div className="flex flex-col gap-4">
       <TheTable
@@ -621,6 +613,7 @@ export const ProposalsTable = ({
         withSorting={true}
         stickyFirstColumn={true}
         mobileTableFixed={true}
+        emptyMessage="No proposals found for this delegate."
       />
     </div>
   );

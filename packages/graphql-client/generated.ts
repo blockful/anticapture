@@ -296,7 +296,7 @@ export type QueryProposalsActivityArgs = {
   orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_ProposalsActivity_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  userVoteFilter?: InputMaybe<Array<InputMaybe<QueryInput_ProposalsActivity_UserVoteFilter_Items>>>;
+  userVoteFilter?: InputMaybe<QueryInput_ProposalsActivity_UserVoteFilter>;
 };
 
 
@@ -1369,8 +1369,6 @@ export enum QueryInput_ProposalsActivity_DaoId {
 }
 
 export enum QueryInput_ProposalsActivity_OrderBy {
-  FinalResult = 'finalResult',
-  UserVote = 'userVote',
   VoteTiming = 'voteTiming',
   VotingPower = 'votingPower'
 }
@@ -1380,7 +1378,8 @@ export enum QueryInput_ProposalsActivity_OrderDirection {
   Desc = 'desc'
 }
 
-export enum QueryInput_ProposalsActivity_UserVoteFilter_Items {
+/** Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote) */
+export enum QueryInput_ProposalsActivity_UserVoteFilter {
   Abstain = 'abstain',
   No = 'no',
   NoVote = 'no_vote',
@@ -1955,6 +1954,9 @@ export type GetProposalsActivityQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_ProposalsActivity_OrderDirection>;
+  userVoteFilter?: InputMaybe<QueryInput_ProposalsActivity_UserVoteFilter>;
 }>;
 
 
@@ -2586,13 +2588,16 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const GetProposalsActivityDocument = gql`
-    query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt) {
+    query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
   proposalsActivity(
     address: $address
     daoId: $daoId
     fromDate: $fromDate
     skip: $skip
     limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    userVoteFilter: $userVoteFilter
   ) {
     totalProposals
     votedProposals
@@ -2645,6 +2650,9 @@ export const GetProposalsActivityDocument = gql`
  *      fromDate: // value for 'fromDate'
  *      skip: // value for 'skip'
  *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      userVoteFilter: // value for 'userVoteFilter'
  *   },
  * });
  */

@@ -53,10 +53,10 @@ export function proposalsActivity(
             .optional(),
           orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
           userVoteFilter: z
-            .array(z.enum(["yes", "no", "abstain", "no-vote"]))
+            .enum(["yes", "no", "abstain", "no-vote"])
             .optional()
             .describe(
-              "Filter proposals by vote type. Can include: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",
+              "Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",
             ),
         }),
       },

@@ -24,7 +24,7 @@ export interface ProposalActivityRequest {
   limit?: number;
   orderBy?: OrderByField;
   orderDirection?: OrderDirection;
-  userVoteFilter?: VoteFilterType[];
+  userVoteFilter?: VoteFilterType;
 }
 
 export interface ProposalWithUserVote {
@@ -120,11 +120,10 @@ export class ProposalsActivityService {
       userVotes,
     );
 
-    // Apply vote filter if provided and not empty
-    const filteredProposals =
-      userVoteFilter && userVoteFilter.length > 0
-        ? this.filterProposalsByVote(proposalsWithVotes, userVoteFilter)
-        : proposalsWithVotes;
+    // Apply vote filter if provided
+    const filteredProposals = userVoteFilter
+      ? this.filterProposalsByVote(proposalsWithVotes, userVoteFilter)
+      : proposalsWithVotes;
 
     // Sort proposals based on the specified criteria
     const sortedProposals = this.sortProposals(
@@ -313,13 +312,13 @@ export class ProposalsActivityService {
 
   private filterProposalsByVote(
     proposals: ProposalWithUserVote[],
-    userVoteFilter: VoteFilterType[],
+    userVoteFilter: VoteFilterType,
   ): ProposalWithUserVote[] {
     return proposals.filter((proposal) => {
       const userVote = proposal.userVote;
 
-      // Check if "no-vote" is in filter and user didn't vote
-      if (userVoteFilter.includes("no-vote") && !userVote) {
+      // Check if "no-vote" filter and user didn't vote
+      if (userVoteFilter === "no-vote" && !userVote) {
         return true;
       }
 
@@ -328,13 +327,13 @@ export class ProposalsActivityService {
         const support = userVote.support;
 
         // Map support values to filter types
-        if (support === "1" && userVoteFilter.includes("yes")) {
+        if (support === "1" && userVoteFilter === "yes") {
           return true;
         }
-        if (support === "0" && userVoteFilter.includes("no")) {
+        if (support === "0" && userVoteFilter === "no") {
           return true;
         }
-        if (support === "2" && userVoteFilter.includes("abstain")) {
+        if (support === "2" && userVoteFilter === "abstain") {
           return true;
         }
       }
