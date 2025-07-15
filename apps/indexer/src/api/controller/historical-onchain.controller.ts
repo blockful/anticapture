@@ -2,7 +2,6 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
 
 import { DaoIdEnum, DaysOpts, DaysEnum } from "@/lib/enums";
-import { caseInsensitiveEnum } from "../middlewares";
 import {
   HistoricalBalancesService,
   HistoricalBalancesRequest,
