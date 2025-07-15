@@ -43,9 +43,14 @@ export const DelegateDelegationHistory = ({
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field);
-      setSortDirection(field === "timestamp" ? "desc" : "asc");
+      setSortDirection("desc"); // Always start with desc for new sort field
     }
   };
+
+  // Log errors for debugging
+  if (error) {
+    console.error("DelegateDelegationHistory error:", error);
+  }
 
   // Format timestamp to relative time
   const formatRelativeTime = (timestamp: string) => {
@@ -158,13 +163,13 @@ export const DelegateDelegationHistory = ({
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-start rounded-b-none px-4"
-          onClick={() => handleSort("amount")}
+          onClick={() => handleSort("delta")}
         >
           <h4 className="text-table-header">Amount (ENS)</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
-              sortBy === "amount"
+              sortBy === "delta"
                 ? sortDirection === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN

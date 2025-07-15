@@ -64,7 +64,7 @@ export function useDelegateDelegationHistory(
   const queryVariables = {
     accountId,
     limit: itemsPerPage,
-    orderBy,
+    orderBy, // Now using backend field names directly
     orderDirection,
   };
 
@@ -79,11 +79,22 @@ export function useDelegateDelegationHistory(
     fetchPolicy: "cache-and-network" as const,
   };
 
+  // Debug logging
+  console.log("useDelegateDelegationHistory query variables:", queryVariables);
+
   const { data, loading, error, fetchMore } =
     useGetDelegateDelegationHistoryQuery({
       variables: queryVariables,
       ...queryOptions,
     });
+
+  // Debug logging
+  if (error) {
+    console.error("GraphQL error in useDelegateDelegationHistory:", error);
+  }
+  if (data) {
+    console.log("GraphQL data in useDelegateDelegationHistory:", data);
+  }
 
   // Transform raw data to our format
   const transformedData = useMemo(() => {
