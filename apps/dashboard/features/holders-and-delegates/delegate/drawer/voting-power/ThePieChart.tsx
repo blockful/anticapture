@@ -13,8 +13,7 @@ import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatAddress } from "@/shared/utils/formatAddress";
-
-const RADIAN = Math.PI / 180;
+import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/voting-power/utils/renderCustomizedLabel";
 
 // Create chart config for delegators
 const createDelegatorsChartConfig = (
@@ -71,43 +70,6 @@ const PieChartCustomTooltip: React.FC<
         </p>
       </div>
     </div>
-  );
-};
-
-const renderCustomizedLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-  index,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-  index: number;
-}) => {
-  // Early return if percentage is below 8% (0.08)
-  if (percent < 0.08) return null;
-
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="#000"
-      textAnchor="middle"
-      dominantBaseline="central"
-      className="text-alternative-sm font-mono font-medium"
-    >
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
   );
 };
 
