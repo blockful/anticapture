@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPower } from "./VotingPower";
+import { VotingPower } from "../delegate/drawer/voting-power/VotingPower";
 import { BalanceHistory } from "./BalanceHistory";
 import { DelegationHistoryTable } from "../token-holder";
 

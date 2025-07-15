@@ -1,7 +1,7 @@
 "use client";
 
-import { ThePieChart } from "@/features/holders-and-delegates/components/ThePieChart";
-import { VotingPowerTable } from "@/features/holders-and-delegates/components/VotingPowerTable";
+import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/voting-power/ThePieChart";
+import { VotingPowerTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPowerTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
