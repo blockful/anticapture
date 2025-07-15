@@ -11,7 +11,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ExternalLink } from "lucide-react";
+import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDaoData, useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -25,6 +25,7 @@ import {
   extractProposalName,
   getVoteTimingData,
 } from "../utils/proposalsTableUtils";
+import { BlankSlate } from "@/shared/components/design-system/blank-state/BlankState";
 
 interface ProposalTableData {
   proposalId: string;
@@ -353,21 +354,23 @@ export const ProposalsTable = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-error">
-          Error loading proposals: {error.message}
-        </div>
-      </div>
+      <BlankSlate
+        variant="default"
+        icon={AlertOctagon}
+        title="FAILED TO LOAD API DEFINITION"
+        description="Please check your network connection and refresh the page."  
+      />
     );
   }
 
   if (!proposals || proposals.length === 0) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-secondary">
-          No proposals found for this delegate.
-        </div>
-      </div>
+      <BlankSlate
+        variant="default"
+        icon={Inbox}
+        title=""
+        description="No voted proposals to show"
+      />
     );
   }
 

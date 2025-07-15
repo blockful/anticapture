@@ -12,7 +12,7 @@ import {
   formatNumberUserReadable,
   formatDateUserReadable,
 } from "@/shared/utils/";
-import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
+import { BlankSlate } from "@/shared/components/design-system/blank-state/BlankState";
 import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
@@ -221,7 +221,7 @@ export const DelegationHistoryTable = ({
   if (error) {
     return (
       <div className="flex items-center justify-center p-4">
-        <BlankState
+        <BlankSlate
           variant="title"
           icon={AlertOctagon}
           title="Failed to load the API definition"
@@ -234,7 +234,7 @@ export const DelegationHistoryTable = ({
   if (!loading && data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-4">
-        <BlankState
+        <BlankSlate
           variant="default"
           icon={Inbox}
           description="No delegation history found for this address"
