@@ -27,26 +27,22 @@ const createDelegatorsChartConfig = (
     currentVotingPower,
   });
 
+  let delegatorsSumPercentage = 0;
+
   // Add delegators to config
   delegators.forEach((delegator, index) => {
     const key = delegator.accountId || `delegator-${index}`;
 
     if (delegator.rawBalance === 0) return;
 
-    console.log({
-      othersValue,
-      currentVotingPower,
-      delegator,
-    });
-
     const percentage =
       (Number(BigInt(delegator.rawBalance)) / Number(currentVotingPower)) * 100;
-    console.log("percentagepercentage", percentage);
     config[key] = {
       label: `${formatAddress(delegator.accountId || "")}`,
       color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
       percentage: percentage.toFixed(2),
     };
+    delegatorsSumPercentage += percentage;
   });
 
   // Add Others if there's remaining voting power
@@ -56,10 +52,13 @@ const createDelegatorsChartConfig = (
       (Number(othersValue) / Number(currentVotingPower)) * 100,
     );
     console.log("percentagepercentageothers", percentage);
+    console.log("delegatorsSumPercentage", delegatorsSumPercentage);
+
+    const others = Math.abs(delegatorsSumPercentage - 100) + percentage;
     config["others"] = {
       label: "Others",
       color: "#9CA3AF", // Gray color for Others
-      percentage: percentage.toFixed(2),
+      percentage: others.toFixed(2),
     };
   }
 
@@ -225,7 +224,13 @@ export const VotingPower = ({
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-row gap-4">
             <div>
-              <ThePieChart daoId={daoId} address={address} />
+              <ThePieChart
+                top5Delegators={top5Delegators}
+                currentVotingPower={
+                  Number(delegateCurrentVotingPower) / 10 ** 18
+                }
+                loading={loading}
+              />
             </div>
 
             <div className="flex w-full flex-col gap-6">
