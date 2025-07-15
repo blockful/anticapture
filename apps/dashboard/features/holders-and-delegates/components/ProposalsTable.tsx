@@ -358,7 +358,7 @@ export const ProposalsTable = ({
         variant="default"
         icon={AlertOctagon}
         title="FAILED TO LOAD API DEFINITION"
-        description="Please check your network connection and refresh the page."  
+        description="Please check your network connection and refresh the page."
       />
     );
   }
@@ -383,7 +383,7 @@ export const ProposalsTable = ({
         withSorting={true}
         stickyFirstColumn={true}
         mobileTableFixed={true}
-        isTableSmall={isMobile}
+        isTableSmall={true}
       />
     </div>
   );
