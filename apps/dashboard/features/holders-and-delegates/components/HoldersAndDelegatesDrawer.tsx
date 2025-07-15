@@ -11,7 +11,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BalanceHistory } from "./BalanceHistory";
-import { DelegateDelegationHistoryTable } from "./DelegateDelegationHistoryTable";
+import { DelegateDelegationsHistory } from "./DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
@@ -45,7 +45,7 @@ export const HoldersAndDelegatesDrawer = ({
           id: "delegationHistory",
           label: "Delegation History",
           content: (
-            <DelegateDelegationHistoryTable accountId={address} daoId={daoId} />
+            <DelegateDelegationsHistory accountId={address} daoId={daoId} />
           ),
         },
       ],
@@ -82,7 +82,7 @@ export const HoldersAndDelegatesDrawer = ({
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerContent>
-        <div className="bg-surface-default h-full w-full">
+        <div className="bg-surface-default h-full w-full overflow-y-auto">
           <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
