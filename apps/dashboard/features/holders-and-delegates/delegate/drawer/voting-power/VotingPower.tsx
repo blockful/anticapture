@@ -13,35 +13,53 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 // Create chart config for delegators with percentages
 const createDelegatorsChartConfig = (
   delegators: any[],
-  othersValue: number,
-  currentVotingPower: number,
+  othersValue: bigint,
+  currentVotingPower: bigint,
 ): Record<string, { label: string; color: string; percentage: string }> => {
   const config: Record<
     string,
     { label: string; color: string; percentage: string }
   > = {};
 
+  console.log({
+    delegators,
+    othersValue,
+    currentVotingPower,
+  });
+
   // Add delegators to config
   delegators.forEach((delegator, index) => {
     const key = delegator.accountId || `delegator-${index}`;
-    const percentage = (
-      (Number(delegator.balance) / currentVotingPower) *
-      100
-    ).toFixed(1);
+
+    if (delegator.rawBalance === 0) return;
+
+    console.log({
+      othersValue,
+      currentVotingPower,
+      delegator,
+    });
+
+    const percentage =
+      (Number(BigInt(delegator.rawBalance)) / Number(currentVotingPower)) * 100;
+    console.log("percentagepercentage", percentage);
     config[key] = {
       label: `${formatAddress(delegator.accountId || "")}`,
       color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
-      percentage: percentage,
+      percentage: percentage.toFixed(2),
     };
   });
 
   // Add Others if there's remaining voting power
-  if (othersValue > 0) {
-    const percentage = ((othersValue / currentVotingPower) * 100).toFixed(1);
+  if (othersValue > BigInt(0)) {
+    console.log("erntrou", othersValue);
+    const percentage = Number(
+      (Number(othersValue) / Number(currentVotingPower)) * 100,
+    );
+    console.log("percentagepercentageothers", percentage);
     config["others"] = {
       label: "Others",
       color: "#9CA3AF", // Gray color for Others
-      percentage: percentage,
+      percentage: percentage.toFixed(2),
     };
   }
 
@@ -77,7 +95,8 @@ const ChartLegend = ({
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
       {items.map((item) => {
-        if (Number(item.percentage) < 0.08) return null;
+        console.log("itemitem", item);
+        if (Number(item.percentage) < 1 && item.label !== "Others") return null;
         return (
           <div key={item.label} className="flex items-center gap-2">
             <span
@@ -85,7 +104,7 @@ const ChartLegend = ({
               style={{ backgroundColor: item.color }}
             />
             <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
-              {item.label}
+              {item.label}xas
               <span
                 className="text-secondary text-sm font-medium"
                 style={{
@@ -133,22 +152,72 @@ export const VotingPower = ({
     return null;
   }
 
-  const currentVotingPower = Number(
-    BigInt(delegatorsVotingPowerDetails?.accountPower?.votingPower) /
-      BigInt(10 ** 18),
+  console.log("delegatorsVotingPowerDetails", delegatorsVotingPowerDetails);
+  const delegateCurrentVotingPower = BigInt(
+    delegatorsVotingPowerDetails?.accountPower?.votingPower,
   );
 
-  const totalTop5Delegators = top5Delegators?.reduce((acc, item) => {
-    return acc + Number(item.balance);
-  }, 0);
+  console.log("top5Delegatorstop5Delegators", top5Delegators);
+  const otherValues: ({
+    __typename?: "accountBalance";
+    accountId: string;
+    balance: any;
+  } & { rawBalance: bigint })[] = [];
 
-  const othersValue = Math.abs(currentVotingPower - totalTop5Delegators);
+  // Filtrar delegators com menos de 1% do voting power
+  top5Delegators.forEach((item) => {
+    if (item.rawBalance === 0n) return;
+
+    // Calcular porcentagem usando Number para evitar divisão inteira
+    const percentage = Number(
+      (Number(BigInt(item.rawBalance)) / Number(delegateCurrentVotingPower)) *
+        100,
+    );
+
+    if (percentage < 1) {
+      console.log(
+        "Delegator com menos de 1%:",
+        item.accountId,
+        "percentage:",
+        percentage,
+      );
+      otherValues.push(item);
+    }
+  });
+
+  console.log(
+    "delegateCurrentVotingPowerdelegateCurrentVotingPower",
+    delegateCurrentVotingPower,
+  ); // 110747223760546237403783n
+
+  const totalBalanceTop5Delegators = top5Delegators.reduce((acc, item) => {
+    return acc + BigInt(item.rawBalance);
+  }, BigInt(0));
+
+  console.log(
+    "totalBalanceTop5DelegatorstotalBalanceTop5Delegators",
+    totalBalanceTop5Delegators,
+  ); // 110747223760546237403783n
+
+  const othersValue = otherValues.reduce(
+    (acc, item) => acc + item.rawBalance,
+    BigInt(0),
+  );
+
+  console.log("otherValues array:", otherValues);
+  console.log("othersValue total:", othersValue);
+  console.log("otherValues count:", otherValues.length);
 
   const chartConfig = createDelegatorsChartConfig(
     top5Delegators,
     othersValue,
-    currentVotingPower,
+    delegateCurrentVotingPower,
   );
+
+  console.log("top5Delegators", {
+    top5Delegators,
+    delegatorsVotingPowerDetails,
+  });
 
   return (
     <div className="flex h-full w-full flex-col gap-4 p-4">
@@ -166,7 +235,7 @@ export const VotingPower = ({
                 </p>
                 <p className="text-md font-normal">
                   {loading &&
-                  !currentVotingPower &&
+                  !delegateCurrentVotingPower &&
                   !top5Delegators &&
                   !delegatorsVotingPowerDetails ? (
                     <SkeletonRow
@@ -174,7 +243,7 @@ export const VotingPower = ({
                       className="h-6 w-24"
                     />
                   ) : (
-                    formatNumberUserReadable(currentVotingPower)
+                    formatNumberUserReadable(Number(delegateCurrentVotingPower))
                   )}
                 </p>
               </div>

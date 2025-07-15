@@ -29,8 +29,13 @@ type AccountBalanceBase =
   GetDelegatorVotingPowerDetailsQuery["accountBalances"]["items"][number];
 type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
 
+type Top5DelegatorsWithBalance =
+  GetTop5DelegatorsQuery["accountBalances"]["items"][number] & {
+    rawBalance: bigint;
+  };
+
 interface UseVotingPowerResult {
-  top5Delegators: GetTop5DelegatorsQuery["accountBalances"]["items"] | null;
+  top5Delegators: Top5DelegatorsWithBalance[] | null;
   delegatorsVotingPowerDetails: GetDelegatorVotingPowerDetailsQuery | null;
   votingPowerHistoryData: DelegationItem[];
   balances: BalanceWithTimestamp[];
@@ -311,14 +316,16 @@ export const useVotingPower = ({
     refetch();
   }, [refetch]);
 
-  const top5DelegatorsWithBalance = top5Delegators?.accountBalances.items.map(
+  const topDelegatorsItems = top5Delegators?.accountBalances.items?.map(
     (item) => ({
       ...item,
       balance: Number(BigInt(item.balance) / BigInt(10 ** 18)),
+      rawBalance: BigInt(item.balance),
     }),
   );
+
   return {
-    top5Delegators: top5DelegatorsWithBalance || null,
+    top5Delegators: topDelegatorsItems || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,
