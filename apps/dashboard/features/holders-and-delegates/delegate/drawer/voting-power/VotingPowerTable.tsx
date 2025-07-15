@@ -34,7 +34,6 @@ export const VotingPowerTable = ({
   }, []);
 
   const tableData = balances.map((account) => {
-    console.log("account", account);
     return {
       address: account.accountId,
       amount: Number(account.balance) || 0,
@@ -119,14 +118,6 @@ export const VotingPowerTable = ({
           );
         }
         const amount: number = row.getValue("amount");
-        console.log("amount original:", amount);
-        console.log("amount como BigInt:", BigInt(amount));
-        console.log("divisor:", BigInt(10 ** 18));
-        console.log("resultado da divisão:", BigInt(amount) / BigInt(10 ** 18));
-        console.log(
-          "resultado final:",
-          Number(BigInt(amount) / BigInt(10 ** 18)),
-        );
         return (
           <div className="flex h-10 w-full items-center justify-end px-2 text-sm">
             {formatNumberUserReadable(
