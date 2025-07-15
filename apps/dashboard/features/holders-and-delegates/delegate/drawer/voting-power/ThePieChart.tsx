@@ -54,7 +54,7 @@ const PieChartCustomTooltip: React.FC<
   const data = payload[0];
   const value = data.value !== undefined ? data.value : 0;
   const name = data.name || "";
-  const percentage = ((value / currentVotingPower) * 100).toFixed(1);
+  const percentage = ((value / currentVotingPower) * 100).toFixed(2);
 
   const config = chartConfig[name];
   const label = config?.label || name;
