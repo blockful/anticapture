@@ -15,6 +15,7 @@ query GetDelegateDelegationHistory(
     before: $before
   ) {
     items {
+      delta
       transactionHash
       timestamp
       delegation {

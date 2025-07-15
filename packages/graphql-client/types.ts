@@ -1886,7 +1886,7 @@ export type GetDelegateDelegationHistoryQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId?: string | null, delegatedValue: any, previousDelegate?: string | null, delegateAccountId?: string | null } | null, transfer?: { __typename?: 'transfer', amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId?: string | null, delegatedValue: any, previousDelegate?: string | null, delegateAccountId?: string | null } | null, transfer?: { __typename?: 'transfer', amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetDelegatesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;

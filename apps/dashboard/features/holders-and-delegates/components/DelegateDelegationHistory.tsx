@@ -76,17 +76,31 @@ export const DelegateDelegationHistory = ({
 
   // Determine delegation type and color based on gain/loss
   const getDelegationType = (item: DelegationHistoryItem) => {
-    const baseType = item.type === "delegation" ? "Delegation" : "Transfer";
+    let statusText = "";
+
+    if (item.type === "transfer") {
+      if (item.isGain) {
+        statusText = "Delegator Balance Increase";
+      } else {
+        statusText = "Delegator Balance Decrease";
+      }
+    } else if (item.type === "delegation") {
+      if (item.isGain) {
+        statusText = "Delegation";
+      } else {
+        statusText = "Redelegation";
+      }
+    }
 
     if (item.isGain) {
       return {
-        type: baseType,
+        type: statusText,
         color: "text-success",
         symbol: "↑",
       };
     } else {
       return {
-        type: baseType,
+        type: statusText,
         color: "text-error",
         symbol: "↓",
       };
@@ -230,8 +244,11 @@ export const DelegateDelegationHistory = ({
         if (item.delegation) {
           delegatorAddress = item.delegation.delegatorAccountId;
         } else if (item.transfer) {
-          // For transfers, the delegator is the one who initiated the transfer
-          delegatorAddress = item.transfer.fromAccountId;
+          // For transfers: if delta is negative, fromAccountId is delegator
+          // If delta is positive, toAccountId is delegator
+          delegatorAddress = item.isGain
+            ? item.transfer.fromAccountId
+            : item.transfer.toAccountId;
         }
 
         return (
@@ -296,8 +313,8 @@ export const DelegateDelegationHistory = ({
           // For delegation, delegate is the one receiving the delegation
           delegateAddress = item.delegation.delegateAccountId;
         } else if (item.transfer) {
-          // For transfers, delegate is the one receiving the transfer
-          delegateAddress = item.transfer.toAccountId;
+          // For transfers, the selected address should always be at the delegates column
+          delegateAddress = accountId;
         }
 
         return (

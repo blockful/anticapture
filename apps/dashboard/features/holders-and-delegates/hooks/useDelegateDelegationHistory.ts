@@ -5,6 +5,7 @@ import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-clien
 export interface DelegationHistoryItem {
   timestamp: string;
   transactionHash: string;
+  delta: string; // Amount the selected address won or lost in votingPower
   delegation: {
     delegatorAccountId: string;
     delegatedValue: string;
@@ -89,39 +90,41 @@ export function useDelegateDelegationHistory(
     if (!data?.votingPowerHistorys?.items) return [];
 
     return data.votingPowerHistorys.items.map((item: any) => {
-      // Determine the type, action, and direction based on the data
+      // Determine the type, action, and direction based on the data and delta
       let type: "delegation" | "transfer" = "delegation";
       let action = "Unknown";
       let isGain = false;
+
+      // Parse delta to determine if it's a gain or loss
+      const deltaValue = parseFloat(item.delta || "0");
+      isGain = deltaValue > 0;
 
       if (item.delegation) {
         type = "delegation";
         // Check if delegate gains or loses voting power
         if (item.delegation.delegateAccountId === accountId) {
           // Delegate gains voting power - someone delegated to them
-          isGain = true;
           action = `Received delegation from ${item.delegation.delegatorAccountId}`;
         } else {
           // Delegate loses voting power - delegator transferred delegation to someone else
-          isGain = false;
           action = `Lost delegation from ${item.delegation.delegatorAccountId}`;
         }
       } else if (item.transfer) {
         type = "transfer";
-        if (item.transfer.toAccountId === accountId) {
-          // Delegate gains voting power - received transfer
-          isGain = true;
+        // For transfers, the selected address should always be at the delegates column
+        // If delta is negative, fromAccountId should be at the delegator column
+        // If delta is positive, toAccountId should be at the delegator column
+        if (isGain) {
           action = `Received transfer from ${item.transfer.fromAccountId}`;
-        } else if (item.transfer.fromAccountId === accountId) {
-          // Delegate loses voting power - sent transfer to someone else
-          isGain = false;
-          action = `Transferred to ${item.transfer.toAccountId}`;
+        } else {
+          action = `Sent transfer to ${item.transfer.toAccountId}`;
         }
       }
 
       return {
         timestamp: item.timestamp?.toString() || "",
         transactionHash: item.transactionHash || "",
+        delta: item.delta || "0",
         delegation: item.delegation || null,
         transfer: item.transfer || null,
         votingPower: item.votingPower || "0",
