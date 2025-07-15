@@ -26,7 +26,7 @@ interface VotingPowerVariationGraphProps {
 const chartConfig = {
   votingPower: {
     label: "Voting Power",
-    color: "hsl(var(--chart-1))",
+    color: "#3b82f6",
   },
 };
 
@@ -278,8 +278,11 @@ export const VotingPowerVariationGraph = ({
             <Line
               dataKey="votingPower"
               stroke={chartConfig.votingPower.color}
-              strokeWidth={2}
+              strokeWidth={1}
               dot={<CustomDot />}
+              connectNulls={true}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </LineChart>
         </ChartContainer>

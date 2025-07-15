@@ -36,8 +36,8 @@ export function useDelegateDelegationHistoryGraph(
       timePeriod === "30d"
         ? 30 * 24 * 60 * 60 * 1000
         : 90 * 24 * 60 * 60 * 1000;
-    const fromTimestamp = BigInt(Math.floor((now - daysInMs) / 1000));
-    const toTimestamp = BigInt(Math.floor(now / 1000));
+    const fromTimestamp = Math.floor((now - daysInMs) / 1000);
+    const toTimestamp = Math.floor(now / 1000);
 
     return { fromTimestamp, toTimestamp };
   }, [timePeriod]);
