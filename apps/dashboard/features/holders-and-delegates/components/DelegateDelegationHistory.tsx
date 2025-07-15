@@ -47,11 +47,6 @@ export const DelegateDelegationHistory = ({
     }
   };
 
-  // Log errors for debugging
-  if (error) {
-    console.error("DelegateDelegationHistory error:", error);
-  }
-
   // Format timestamp to relative time
   const formatRelativeTime = (timestamp: string) => {
     const date = new Date(parseInt(timestamp) * 1000);
