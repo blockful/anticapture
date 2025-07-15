@@ -258,6 +258,11 @@ export const DelegateDelegationHistory = ({
               size="sm"
               variant="rounded"
               showName={true}
+              nameClassName={
+                delegatorAddress === accountId
+                  ? "text-primary"
+                  : "text-secondary"
+              }
             />
           </div>
         );
@@ -324,6 +329,11 @@ export const DelegateDelegationHistory = ({
               size="sm"
               variant="rounded"
               showName={true}
+              nameClassName={
+                delegateAddress === accountId
+                  ? "text-primary"
+                  : "text-secondary"
+              }
             />
             <ExternalLink className="text-secondary size-4" />
           </div>
