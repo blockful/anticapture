@@ -266,12 +266,6 @@ export const VotingPowerTable = ({
           filterColumn="address"
         />
       </div>
-      {/* <Pagination
-        currentPage={1}
-        totalPages={1}
-        onPageChange={() => {}}
-        onPageSizeChange={() => {}}
-      /> */}
     </div>
   );
 };
