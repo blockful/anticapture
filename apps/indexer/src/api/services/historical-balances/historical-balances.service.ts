@@ -8,9 +8,10 @@ import {
 } from "viem";
 import { readContract, multicall } from "viem/actions";
 
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getChain } from "@/lib/utils";
+import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { env } from "@/env";
 
 export interface HistoricalBalance {
@@ -22,7 +23,7 @@ export interface HistoricalBalance {
 
 export interface HistoricalBalancesRequest {
   addresses: Address[];
-  blockNumber: number;
+  daysInSeconds: DaysEnum;
   daoId: DaoIdEnum;
 }
 
@@ -44,16 +45,22 @@ export class HistoricalBalancesService {
   }
 
   /**
-   * Fetches historical balances for multiple addresses at a specific block
+   * Fetches historical balances for multiple addresses at a specific time period
    * Uses Multicall3 for efficient batch queries when available (block 19+)
    * Falls back to individual calls for earlier blocks
    */
   async getHistoricalBalances({
     addresses,
-    blockNumber,
+    daysInSeconds,
     daoId,
   }: HistoricalBalancesRequest): Promise<HistoricalBalance[]> {
     const tokenAddress = this.getTokenAddress(daoId);
+    const currentBlockNumber = await this.getCurrentBlockNumber();
+    const blockNumber = calculateHistoricalBlockNumber(
+      daysInSeconds,
+      currentBlockNumber,
+      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
+    );
     try {
       return await this.getBalancesWithMulticall(
         addresses,
