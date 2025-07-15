@@ -2,13 +2,10 @@ import {
   useGetDelegationHistoryItemsQuery,
   useGetDelegationHistoryCountQuery,
 } from "@anticapture/graphql-client/hooks";
-import {
-  GetDelegationHistoryItemsQuery,
-  GetDelegationHistoryCountQuery,
-  QueryInput_HistoricalVotingPower_DaoId,
-} from "@anticapture/graphql-client";
+import { GetDelegationHistoryItemsQuery } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface PaginationInfo {
   hasNextPage: boolean;
@@ -35,7 +32,7 @@ interface UseDelegationHistoryResult {
 
 interface UseDelegationHistoryParams {
   delegatorAccountId: string;
-  daoId: QueryInput_HistoricalVotingPower_DaoId;
+  daoId: DaoIdEnum;
   orderBy?: string;
   orderDirection?: string;
 }

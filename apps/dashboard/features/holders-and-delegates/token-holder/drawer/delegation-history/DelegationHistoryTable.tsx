@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { Address } from "viem";
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
-import { QueryInput_HistoricalVotingPower_DaoId } from "@anticapture/graphql-client/hooks";
 import {
   formatNumberUserReadable,
   formatDateUserReadable,
@@ -16,6 +15,7 @@ import { BlankState } from "@/shared/components/design-system/blank-state/BlankS
 import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegationData {
   address: string;
@@ -29,7 +29,7 @@ export const DelegationHistoryTable = ({
   daoId,
 }: {
   address: string;
-  daoId: string;
+  daoId: DaoIdEnum;
 }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -45,7 +45,7 @@ export const DelegationHistoryTable = ({
     fetchPreviousPage,
     fetchingMore,
   } = useDelegationHistory({
-    daoId: daoId as QueryInput_HistoricalVotingPower_DaoId,
+    daoId,
     delegatorAccountId: address,
     orderBy: sortBy,
     orderDirection: sortOrder,
