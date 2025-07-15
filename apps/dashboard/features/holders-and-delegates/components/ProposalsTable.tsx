@@ -22,7 +22,7 @@ import {
   UserX,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useDaoData } from "@/shared/hooks";
+import { useDaoData, useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
   Query_ProposalsActivity_Proposals_Items,
@@ -287,6 +287,7 @@ export const ProposalsTable = ({
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { data: daoData } = useDaoData(daoIdEnum);
+  const { isMobile } = useScreenSize();
 
   const tableData = useMemo(() => {
     if (!proposals || proposals.length === 0) return [];
@@ -323,7 +324,7 @@ export const ProposalsTable = ({
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
       accessorKey: "proposalName",
-      size: 220,
+      size: isMobile ? 160 : 220,
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
 
@@ -618,6 +619,8 @@ export const ProposalsTable = ({
         data={tableData}
         withPagination={false}
         withSorting={true}
+        stickyFirstColumn={true}
+        mobileTableFixed={true}
       />
     </div>
   );
