@@ -56,7 +56,9 @@ export const BlankSlate = ({
           {title}
         </div>
       )}
-      <div className="text-secondary flex text-sm font-thin">{description}</div>
+      <div className="text-secondary font-regular flex text-sm">
+        {description}
+      </div>
     </div>
   );
 };

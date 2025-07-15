@@ -14,7 +14,7 @@ import {
 import React, { ReactNode } from "react";
 
 // Vote mapping object
-export const voteMapping = {
+export const proposalsUserVoteMapping = {
   0: {
     support: "0",
     text: "No",
@@ -43,7 +43,7 @@ export const voteMapping = {
 };
 
 // Final result mapping object
-export const finalResultMapping = {
+export const proposalsFinalResultMapping = {
   ongoing: {
     text: "Ongoing",
     icon: <ActivityIndicator className="text-warning" />,
@@ -91,7 +91,7 @@ export const getUserVoteData = (
   // If user voted
   if (support !== null && support !== undefined) {
     const supportNumber = Number(support);
-    const voteData = voteMapping[supportNumber as keyof typeof voteMapping];
+    const voteData = proposalsUserVoteMapping[supportNumber as keyof typeof proposalsUserVoteMapping];
     if (voteData) {
       return { text: voteData.text, icon: voteData.icon };
     }
@@ -100,17 +100,17 @@ export const getUserVoteData = (
   // If user didn't vote, check final result status
   const status = finalResultStatus?.toLowerCase();
   if (status === "ongoing") {
-    return { text: voteMapping.waiting.text, icon: voteMapping.waiting.icon };
+    return { text: proposalsUserVoteMapping.waiting.text, icon: proposalsUserVoteMapping.waiting.icon };
   }
 
   return {
-    text: voteMapping["didnt-vote"].text,
-    icon: voteMapping["didnt-vote"].icon,
+    text: proposalsUserVoteMapping["didnt-vote"].text,
+    icon: proposalsUserVoteMapping["didnt-vote"].icon,
   };
 };
 
 // Status to result mapping
-const statusToResultMapping: Record<string, keyof typeof finalResultMapping> = {
+const statusToResultMapping: Record<string, keyof typeof proposalsFinalResultMapping> = {
   active: "ongoing",
   executed: "yes",
   succeeded: "yes",
@@ -125,7 +125,7 @@ const determineProposalStatus = (
   proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
   daoVotingPeriod: number | undefined,
   daoQuorum: number | undefined,
-): keyof typeof finalResultMapping => {
+): keyof typeof proposalsFinalResultMapping => {
   if (!proposal) return "unknown";
 
   const status = proposal.status?.toLowerCase();
@@ -188,14 +188,14 @@ export const getFinalResultData = (
   daoVotingPeriod: number | undefined,
   daoQuorum: number | undefined,
 ): { text: string; icon: ReactNode } => {
-  if (!proposal) return finalResultMapping.unknown;
+  if (!proposal) return proposalsFinalResultMapping.unknown;
 
   const resultKey = determineProposalStatus(
     proposal,
     daoVotingPeriod,
     daoQuorum,
   );
-  return finalResultMapping[resultKey];
+  return proposalsFinalResultMapping[resultKey];
 };
 
 // Helper function to check if proposal is finished
