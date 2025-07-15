@@ -1891,6 +1891,17 @@ export type GetDelegateDelegationHistoryQueryVariables = Exact<{
 
 export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId?: string | null, delegatedValue: any, previousDelegate?: string | null, delegateAccountId?: string | null } | null, transfer?: { __typename?: 'transfer', amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
+export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
+  accountId: Scalars['String']['input'];
+  fromTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  toTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId?: string | null, delegatedValue: any, previousDelegate?: string | null, delegateAccountId?: string | null } | null, transfer?: { __typename?: 'transfer', amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null } | null }> } };
+
 export type GetDelegatesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2403,6 +2414,72 @@ export type GetDelegateDelegationHistoryQueryHookResult = ReturnType<typeof useG
 export type GetDelegateDelegationHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryLazyQuery>;
 export type GetDelegateDelegationHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistorySuspenseQuery>;
 export type GetDelegateDelegationHistoryQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>;
+export const GetDelegateDelegationHistoryGraphDocument = gql`
+    query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: BigInt, $toTimestamp: BigInt, $orderBy: String = "timestamp", $orderDirection: String = "asc") {
+  votingPowerHistorys(
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    where: {accountId: $accountId, timestamp_gte: $fromTimestamp, timestamp_lte: $toTimestamp}
+    limit: 1000
+  ) {
+    items {
+      delta
+      transactionHash
+      timestamp
+      delegation {
+        delegatorAccountId
+        delegatedValue
+        previousDelegate
+        delegateAccountId
+      }
+      transfer {
+        amount
+        fromAccountId
+        toAccountId
+      }
+      votingPower
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetDelegateDelegationHistoryGraphQuery__
+ *
+ * To run a query within a React component, call `useGetDelegateDelegationHistoryGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegateDelegationHistoryGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegateDelegationHistoryGraphQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *      fromTimestamp: // value for 'fromTimestamp'
+ *      toTimestamp: // value for 'toTimestamp'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useGetDelegateDelegationHistoryGraphQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables> & ({ variables: GetDelegateDelegationHistoryGraphQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
+      }
+export function useGetDelegateDelegationHistoryGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
+        }
+export function useGetDelegateDelegationHistoryGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
+        }
+export type GetDelegateDelegationHistoryGraphQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphQuery>;
+export type GetDelegateDelegationHistoryGraphLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphLazyQuery>;
+export type GetDelegateDelegationHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphSuspenseQuery>;
+export type GetDelegateDelegationHistoryGraphQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>;
 export const GetDelegatesDocument = gql`
     query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
   accountPowers(

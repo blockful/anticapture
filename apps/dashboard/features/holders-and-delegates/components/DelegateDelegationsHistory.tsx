@@ -15,12 +15,7 @@ export const DelegateDelegationsHistory = ({
     <div className="bg-surface-default flex h-full flex-col">
       {/* Graph Section */}
       <div className="flex-shrink-0 p-4 pb-2">
-        <VotingPowerVariationGraph
-          accountId={accountId}
-          daoId={daoId}
-          data={[]}
-          loading={false}
-        />
+        <VotingPowerVariationGraph accountId={accountId} daoId={daoId} />
       </div>
 
       {/* Table Section */}
