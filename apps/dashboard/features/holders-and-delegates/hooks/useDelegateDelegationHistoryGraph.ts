@@ -48,7 +48,7 @@ export function useDelegateDelegationHistoryGraph(
       fromTimestamp,
       toTimestamp,
       orderBy: "timestamp",
-      orderDirection: "asc",
+      orderDirection: "desc",
     },
     context: {
       headers: {
@@ -64,23 +64,27 @@ export function useDelegateDelegationHistoryGraph(
       return [];
     }
 
-    return data.votingPowerHistorys.items.map((item) => {
-      const delta = item.delta.toString();
-      const deltaNum = parseFloat(delta);
-      const isGain = deltaNum > 0;
+    return data.votingPowerHistorys.items
+      .map((item) => {
+        const delta = item.delta.toString();
+        const deltaNum = parseFloat(delta);
+        const isGain = deltaNum > 0;
 
-      // Determine transaction type
-      const type = item.delegation ? "delegation" : "transfer";
+        // Determine transaction type
+        const type: "delegation" | "transfer" = item.delegation
+          ? "delegation"
+          : "transfer";
 
-      return {
-        timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
-        votingPower: parseFloat(item.votingPower.toString()),
-        delta,
-        type,
-        isGain,
-        transactionHash: item.transactionHash,
-      };
-    });
+        return {
+          timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
+          votingPower: parseFloat(item.votingPower.toString()),
+          delta,
+          type,
+          isGain,
+          transactionHash: item.transactionHash,
+        };
+      })
+      .sort((a, b) => a.timestamp - b.timestamp); // Sort chronologically for chart display
   }, [data]);
 
   return {

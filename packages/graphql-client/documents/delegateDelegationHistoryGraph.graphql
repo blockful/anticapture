@@ -3,7 +3,7 @@ query GetDelegateDelegationHistoryGraph(
   $fromTimestamp: BigInt
   $toTimestamp: BigInt
   $orderBy: String = "timestamp"
-  $orderDirection: String = "asc"
+      $orderDirection: String = "desc"
 ) {
   votingPowerHistorys(
     orderBy: $orderBy
