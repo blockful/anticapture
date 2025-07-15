@@ -11,7 +11,6 @@ export const SimpleProgressBar = ({
   percentage,
   className,
 }: SimpleProgressBarProps) => {
-  // Ensure percentage is between 0 and 100
   const clampedPercentage = Math.max(0, Math.min(100, percentage));
 
   return (
