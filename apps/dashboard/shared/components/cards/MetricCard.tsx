@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { cn } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components";
 

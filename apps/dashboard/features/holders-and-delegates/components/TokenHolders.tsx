@@ -10,7 +10,6 @@ import { useState } from "react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { formatUnits } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -18,8 +17,7 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates"; 
 
 interface TokenHolderTableData {
   address: Address;

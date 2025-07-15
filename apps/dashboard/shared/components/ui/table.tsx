@@ -88,7 +88,7 @@ function TableHead({
   return (
     <th
       data-slot="table-head"
-      className={cn("h-8 text-left [&:has([role=checkbox])]:pr-0", className)}
+      className={cn("text-left [&:has([role=checkbox])]:pr-0", className)}
       {...props}
     />
   );

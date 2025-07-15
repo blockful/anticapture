@@ -6,11 +6,22 @@ import {
 } from "@anticapture/graphql-client";
 import { useMemo } from "react";
 
+interface UseProposalsActivityParams
+  extends GetProposalsActivityQueryVariables {
+  itemsPerPage: number;
+}
+
 interface UseProposalsActivityResult {
   data: any;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
+  pagination: {
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    currentPage: number;
+  };
 }
 
 export const useProposalsActivity = ({
@@ -19,7 +30,8 @@ export const useProposalsActivity = ({
   fromDate,
   skip,
   limit,
-}: GetProposalsActivityQueryVariables): UseProposalsActivityResult => {
+  itemsPerPage,
+}: UseProposalsActivityParams): UseProposalsActivityResult => {
   const { data, loading, error, refetch } = useGetProposalsActivityQuery({
     variables: {
       address,
@@ -53,10 +65,28 @@ export const useProposalsActivity = ({
     };
   }, [data]);
 
+  // Calculate pagination values
+  const pagination = useMemo(() => {
+    const totalPages = processedData?.totalProposals
+      ? Math.ceil(processedData.totalProposals / itemsPerPage)
+      : 1;
+    const currentPage = skip ? Math.floor(skip / itemsPerPage) + 1 : 1;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+
+    return {
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+      currentPage,
+    };
+  }, [processedData?.totalProposals, skip, itemsPerPage]);
+
   return {
     data: processedData,
     loading,
     error: error || null,
     refetch,
+    pagination,
   };
 };

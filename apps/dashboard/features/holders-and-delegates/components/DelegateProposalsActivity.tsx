@@ -9,6 +9,7 @@ import { Hand, Trophy, CheckCircle2, Clock10, Check, Zap } from "lucide-react";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -27,17 +28,25 @@ export const DelegateProposalsActivity = ({
   // Calculate skip for pagination
   const skip = (currentPage - 1) * itemsPerPage;
 
-  const { data, loading, error, refetch } = useProposalsActivity({
+  const { data, loading, error, refetch, pagination } = useProposalsActivity({
     address,
     daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
     fromDate,
     skip,
     limit: itemsPerPage,
+    itemsPerPage,
   });
 
   // Helper function to format average time (convert seconds to days)
-  const formatAvgTime = (avgTimeBeforeEndSeconds: number): string => {
-    const avgTimeBeforeEndDays = avgTimeBeforeEndSeconds / (24 * 60 * 60);
+  const formatAvgTime = (
+    avgTimeBeforeEndSeconds: number,
+    votedProposals: number,
+  ): string => {
+    const avgTimeBeforeEndDays = avgTimeBeforeEndSeconds / SECONDS_PER_DAY;
+
+    if (!votedProposals) {
+      return "-";
+    }
 
     if (avgTimeBeforeEndDays < 1) {
       return "< 1 day before end";
@@ -45,15 +54,8 @@ export const DelegateProposalsActivity = ({
     return `${Math.round(avgTimeBeforeEndDays)} days before end`;
   };
 
-  // Calculate pagination values
-  const totalPages = data?.totalProposals
-    ? Math.ceil(data.totalProposals / itemsPerPage)
-    : 1;
-  const hasNextPage = currentPage < totalPages;
-  const hasPreviousPage = currentPage > 1;
-
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 1 && page <= pagination.totalPages) {
       setCurrentPage(page);
     }
   };
@@ -73,12 +75,12 @@ export const DelegateProposalsActivity = ({
   const avgTimingValue =
     loading || error || !data
       ? undefined
-      : formatAvgTime(data.avgTimeBeforeEnd);
+      : formatAvgTime(data.avgTimeBeforeEnd, data.votedProposals);
 
   return (
     <>
       <div className="p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricCard
             icon={<Hand className="size-3.5" />}
             title="Voted Proposals"
@@ -109,17 +111,18 @@ export const DelegateProposalsActivity = ({
             proposals={data?.proposals || []}
             loading={loading}
             error={error}
+            daoIdEnum={daoId}
           />
 
           {/* Pagination Controls */}
           {data && data.totalProposals > itemsPerPage && (
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPrevious={() => handlePageChange(currentPage - 1)}
-              onNext={() => handlePageChange(currentPage + 1)}
-              hasNextPage={hasNextPage}
-              hasPreviousPage={hasPreviousPage}
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPrevious={() => handlePageChange(pagination.currentPage - 1)}
+              onNext={() => handlePageChange(pagination.currentPage + 1)}
+              hasNextPage={pagination.hasNextPage}
+              hasPreviousPage={pagination.hasPreviousPage}
               className="text-white"
             />
           )}
