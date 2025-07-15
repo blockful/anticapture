@@ -111,7 +111,7 @@ export const DelegateDelegationHistory = ({
   const columns: ColumnDef<DelegationHistoryItem>[] = [
     {
       accessorKey: "timestamp",
-      size: 120,
+      size: 150,
       header: () => (
         <Button
           variant="ghost"
