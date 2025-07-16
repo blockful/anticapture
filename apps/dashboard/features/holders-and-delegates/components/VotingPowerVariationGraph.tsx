@@ -147,7 +147,7 @@ export const VotingPowerVariationGraph = ({
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <LineChart
           data={chartData}
-          margin={{ top: 25, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 25, right: 30, left: -20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
           <XAxis
