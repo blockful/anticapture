@@ -10,6 +10,7 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 import { formatUnits } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
+import Link from "next/link";
 import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
@@ -334,7 +335,14 @@ export const DelegateDelegationHistoryTable = ({
                   : "text-secondary"
               }
             />
-            <ExternalLink className="text-secondary size-4" />
+            <Link
+              href={`https://etherscan.io/tx/${item.transactionHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer"
+            >
+              <ExternalLink className="text-secondary hover:text-primary size-4 transition-colors" />
+            </Link>
           </div>
         );
       },
