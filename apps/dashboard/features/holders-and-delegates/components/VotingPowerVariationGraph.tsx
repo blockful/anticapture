@@ -154,7 +154,13 @@ export const VotingPowerVariationGraph = ({
             type="number"
             scale="time"
             domain={["dataMin", "dataMax"]}
-            tickFormatter={(value) => timestampToReadableDate(value / 1000)}
+            tickFormatter={(value) => {
+              const date = new Date(value);
+              return date.toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              });
+            }}
             stroke="#9ca3af"
             fontSize={12}
           />
