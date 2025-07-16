@@ -217,8 +217,7 @@ export class DrizzleProposalsActivityRepository
       SELECT COUNT(*) as total_count
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address} AND v.dao_id = ${daoId}
-      WHERE p.dao_id = ${daoId}
-        AND (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+      WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${sql.raw(voteFilterCondition)}
     `;
 
