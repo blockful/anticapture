@@ -105,7 +105,6 @@ export class ProposalsActivityService {
     const { proposals: proposalsWithVotes, totalCount } =
       await this.repository.getProposalsWithVotesAndPagination(
         address,
-        daoId,
         activityStart,
         votingPeriodSeconds,
         skip,

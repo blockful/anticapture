@@ -59,7 +59,6 @@ export interface ProposalsActivityRepository {
 
   getProposalsWithVotesAndPagination(
     address: Address,
-    daoId: DaoIdEnum,
     activityStart: number,
     votingPeriodSeconds: number,
     skip: number,
@@ -203,9 +202,8 @@ export class DrizzleProposalsActivityRepository
         (p.timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp,
         v.id as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
       FROM proposals_onchain p
-      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address} AND v.dao_id = ${daoId}
-      WHERE p.dao_id = ${daoId}
-        AND (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
+      WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${sql.raw(voteFilterCondition)}
       ${sql.raw(orderByClause)}
       LIMIT ${limit} OFFSET ${skip}
@@ -215,7 +213,7 @@ export class DrizzleProposalsActivityRepository
     const countQuery = sql`
       SELECT COUNT(*) as total_count
       FROM proposals_onchain p
-      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address} AND v.dao_id = ${daoId}
+      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${sql.raw(voteFilterCondition)}
     `;
