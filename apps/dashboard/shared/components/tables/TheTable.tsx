@@ -32,6 +32,8 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void;
   disableRowClick?: (row: TData) => boolean;
   isTableSmall?: boolean;
+  stickyFirstColumn?: boolean;
+  mobileTableFixed?: boolean;
 }
 
 export const TheTable = <TData, TValue>({
@@ -43,6 +45,8 @@ export const TheTable = <TData, TValue>({
   onRowClick,
   disableRowClick,
   isTableSmall = false,
+  stickyFirstColumn = false,
+  mobileTableFixed = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -81,21 +85,28 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table className="bg-surface-background text-secondary md:bg-surface-default table-auto md:table-fixed">
-      <TableHeader className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium">
+    <Table
+      className={cn(
+        "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
+        mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
+      )}
+    >
+      <TableHeader className="bg-surface-contrast text-secondary text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
-            className={cn(
-              "border-light-dark",
-              isTableSmall && "border-surface-default border-b-4",
-            )}
+            className={cn("border-light-dark", isTableSmall && "border-b-4")}
           >
             {headerGroup.headers.map((header) => {
               return (
                 <TableHead
                   key={header.id}
-                  className={cn(isTableSmall && "h-8")}
+                  className={cn(
+                    isTableSmall && "h-8",
+                    header.column.getIndex() === 0 &&
+                      stickyFirstColumn &&
+                      "bg-surface-contrast sticky left-0 z-50",
+                  )}
                   style={{
                     width:
                       header.column.getSize() !== 150
@@ -129,7 +140,14 @@ export const TheTable = <TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    style={{ width: cell.column.getSize() }}
+                    className={cn(
+                      cell.column.getIndex() === 0 &&
+                        stickyFirstColumn &&
+                        "bg-surface-default sticky left-0 z-50",
+                    )}
+                    style={{
+                      width: cell.column.getSize(),
+                    }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

@@ -13,6 +13,9 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
 import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
+import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
+import { TimeInterval } from "@/shared/types/enums";
+import { getTimeDataFromPeriod } from "./Delegates";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -31,11 +34,22 @@ export const HoldersAndDelegatesDrawer = ({
   address,
   daoId,
 }: HoldersAndDelegatesDrawerProps) => {
+  const { fromDate } = getTimeDataFromPeriod(TimeInterval.ONE_YEAR);
   const entities = {
     delegate: {
       title: "Delegate",
       tabs: [
-        { id: "votes", label: "Votes", content: <>Votes</> },
+        {
+          id: "votes",
+          label: "Votes",
+          content: (
+            <DelegateProposalsActivity
+              address={address}
+              daoId={daoId}
+              fromDate={fromDate}
+            />
+          ),
+        },
         {
           id: "votingPower",
           label: "Voting Power",
