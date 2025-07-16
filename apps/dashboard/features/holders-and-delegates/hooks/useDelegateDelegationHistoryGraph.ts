@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { VotingPowerTimePeriod } from "../components/VotingPowerTimePeriodSwitcher";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -22,20 +23,31 @@ export interface UseDelegateDelegationHistoryGraphResult {
 export function useDelegateDelegationHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
-  timePeriod: "30d" | "90d" | "all" = "all",
+  timePeriod: VotingPowerTimePeriod = "all",
 ): UseDelegateDelegationHistoryGraphResult {
   // Calculate timestamp range based on time period
   const { fromTimestamp, toTimestamp } = useMemo(() => {
     const now = Date.now();
 
+    // For "all", treat as all time by not setting limits
     if (timePeriod === "all") {
       return { fromTimestamp: undefined, toTimestamp: undefined };
     }
 
-    const daysInMs =
-      timePeriod === "30d"
-        ? 30 * 24 * 60 * 60 * 1000
-        : 90 * 24 * 60 * 60 * 1000;
+    let daysInMs: number;
+    switch (timePeriod) {
+      case "30d":
+        daysInMs = 30 * 24 * 60 * 60 * 1000;
+        break;
+      case "90d":
+        daysInMs = 90 * 24 * 60 * 60 * 1000;
+        break;
+      default:
+        // Default to 30 days if unknown
+        daysInMs = 30 * 24 * 60 * 60 * 1000;
+        break;
+    }
+
     const fromTimestamp = Math.floor((now - daysInMs) / 1000);
     const toTimestamp = Math.floor(now / 1000);
 
@@ -66,9 +78,13 @@ export function useDelegateDelegationHistoryGraph(
 
     return data.votingPowerHistorys.items
       .map((item) => {
-        const delta = item.delta.toString();
-        const deltaNum = parseFloat(delta);
-        const isGain = deltaNum > 0;
+        // Convert from wei to token units (divide by 10^18)
+        const votingPowerWei = BigInt(item.votingPower.toString());
+        const deltaWei = BigInt(item.delta.toString());
+
+        const votingPower = Number(votingPowerWei) / Math.pow(10, 18);
+        const delta = Number(deltaWei) / Math.pow(10, 18);
+        const isGain = delta > 0;
 
         // Determine transaction type
         const type: "delegation" | "transfer" = item.delegation
@@ -77,8 +93,8 @@ export function useDelegateDelegationHistoryGraph(
 
         return {
           timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
-          votingPower: parseFloat(item.votingPower.toString()),
-          delta,
+          votingPower,
+          delta: delta.toString(),
           type,
           isGain,
           transactionHash: item.transactionHash,

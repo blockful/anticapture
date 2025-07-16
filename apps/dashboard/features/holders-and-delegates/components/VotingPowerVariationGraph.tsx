@@ -13,10 +13,12 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/utils";
 import { useState } from "react";
 import { useDelegateDelegationHistoryGraph } from "../hooks/useDelegateDelegationHistoryGraph";
+import {
+  VotingPowerTimePeriodSwitcher,
+  VotingPowerTimePeriod,
+} from "./VotingPowerTimePeriodSwitcher";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -30,13 +32,12 @@ const chartConfig = {
   },
 };
 
-type TimePeriod = "30d" | "90d" | "all";
-
 export const VotingPowerVariationGraph = ({
   accountId,
   daoId,
 }: VotingPowerVariationGraphProps) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("all");
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<VotingPowerTimePeriod>("all");
 
   const { delegationHistory, loading, error } =
     useDelegateDelegationHistoryGraph(accountId, daoId, selectedPeriod);
@@ -48,11 +49,11 @@ export const VotingPowerVariationGraph = ({
           <h3 className="text-primary text-lg font-semibold">
             VOTING POWER VARIATION
           </h3>
-          <div className="flex gap-2">
-            <div className="bg-surface-contrast h-8 w-12 animate-pulse rounded-md" />
-            <div className="bg-surface-contrast h-8 w-12 animate-pulse rounded-md" />
-            <div className="bg-surface-contrast h-8 w-16 animate-pulse rounded-md" />
-          </div>
+          <VotingPowerTimePeriodSwitcher
+            defaultValue="all"
+            setTimePeriod={setSelectedPeriod}
+            isSmall={true}
+          />
         </div>
         <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
           <div className="text-secondary text-sm">Loading...</div>
@@ -68,32 +69,11 @@ export const VotingPowerVariationGraph = ({
           <h3 className="text-primary text-lg font-semibold">
             VOTING POWER VARIATION
           </h3>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-3 py-1 text-xs"
-              disabled
-            >
-              30d
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-3 py-1 text-xs"
-              disabled
-            >
-              90d
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-3 py-1 text-xs"
-              disabled
-            >
-              All time
-            </Button>
-          </div>
+          <VotingPowerTimePeriodSwitcher
+            defaultValue="all"
+            setTimePeriod={setSelectedPeriod}
+            isSmall={true}
+          />
         </div>
         <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
           <div className="text-secondary text-sm">Error loading data</div>
@@ -109,32 +89,11 @@ export const VotingPowerVariationGraph = ({
           <h3 className="text-primary text-lg font-semibold">
             VOTING POWER VARIATION
           </h3>
-          <div className="flex gap-2">
-            <Button
-              variant={selectedPeriod === "30d" ? "default" : "outline"}
-              size="sm"
-              className="px-3 py-1 text-xs"
-              onClick={() => setSelectedPeriod("30d")}
-            >
-              30d
-            </Button>
-            <Button
-              variant={selectedPeriod === "90d" ? "default" : "outline"}
-              size="sm"
-              className="px-3 py-1 text-xs"
-              onClick={() => setSelectedPeriod("90d")}
-            >
-              90d
-            </Button>
-            <Button
-              variant={selectedPeriod === "all" ? "default" : "outline"}
-              size="sm"
-              className="px-3 py-1 text-xs"
-              onClick={() => setSelectedPeriod("all")}
-            >
-              All time
-            </Button>
-          </div>
+          <VotingPowerTimePeriodSwitcher
+            defaultValue="all"
+            setTimePeriod={setSelectedPeriod}
+            isSmall={true}
+          />
         </div>
         <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
           <div className="text-secondary text-sm">
@@ -178,115 +137,69 @@ export const VotingPowerVariationGraph = ({
         <h3 className="text-primary text-lg font-semibold">
           VOTING POWER VARIATION
         </h3>
-        <div className="flex gap-2">
-          <Button
-            variant={selectedPeriod === "30d" ? "default" : "outline"}
-            size="sm"
-            className="px-3 py-1 text-xs"
-            onClick={() => setSelectedPeriod("30d")}
-          >
-            30d
-          </Button>
-          <Button
-            variant={selectedPeriod === "90d" ? "default" : "outline"}
-            size="sm"
-            className="px-3 py-1 text-xs"
-            onClick={() => setSelectedPeriod("90d")}
-          >
-            90d
-          </Button>
-          <Button
-            variant={selectedPeriod === "all" ? "default" : "outline"}
-            size="sm"
-            className="px-3 py-1 text-xs"
-            onClick={() => setSelectedPeriod("all")}
-          >
-            All time
-          </Button>
-        </div>
+        <VotingPowerTimePeriodSwitcher
+          defaultValue="all"
+          setTimePeriod={setSelectedPeriod}
+          isSmall={true}
+        />
       </div>
-      <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-        <ChartContainer className="h-full w-full" config={chartConfig}>
-          <LineChart data={chartData}>
-            <CartesianGrid vertical={false} stroke="#27272a" />
-            <XAxis
-              dataKey="timestamp"
-              scale="time"
-              type="number"
-              domain={["auto", "auto"]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(timestamp) => timestampToReadableDate(timestamp)}
-            />
-            <YAxis
-              domain={["auto", "auto"]}
-              tickFormatter={(value) =>
-                formatNumberUserReadable(
-                  Number(BigInt(Number(value)) / BigInt(10 ** 18)),
-                )
+      <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <LineChart
+          data={chartData}
+          margin={{ top: 25, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <XAxis
+            dataKey="timestamp"
+            type="number"
+            scale="time"
+            domain={["dataMin", "dataMax"]}
+            tickFormatter={(value) => timestampToReadableDate(value / 1000)}
+            stroke="#9ca3af"
+            fontSize={12}
+          />
+          <YAxis
+            tickFormatter={(value) => formatNumberUserReadable(value)}
+            stroke="#9ca3af"
+            fontSize={12}
+          />
+          <Tooltip
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
+                    <p className="text-primary text-sm font-medium">
+                      {timestampToReadableDate(data.timestamp / 1000)}
+                    </p>
+                    <p className="text-secondary text-xs">
+                      Voting Power: {formatNumberUserReadable(data.votingPower)}
+                    </p>
+                    <p className="text-secondary text-xs">Type: {data.type}</p>
+                    <p
+                      className={`text-xs ${data.isGain ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {data.isGain ? "+" : ""}
+                      {formatNumberUserReadable(parseFloat(data.delta))}
+                    </p>
+                  </div>
+                );
               }
-            />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0].payload;
-                  return (
-                    <div className="bg-surface-contrast border-middle-dark rounded-lg border p-3 shadow-lg">
-                      <p className="text-primary text-sm font-medium">
-                        {timestampToReadableDate(label as number)}
-                      </p>
-                      <p className="text-secondary text-sm">
-                        Voting Power:{" "}
-                        <span className="text-primary font-medium">
-                          {formatNumberUserReadable(
-                            Number(
-                              BigInt(Number(payload[0].value)) /
-                                BigInt(10 ** 18),
-                            ),
-                          )}
-                        </span>
-                      </p>
-                      <p className="text-secondary text-sm">
-                        Type:{" "}
-                        <span className="text-primary font-medium capitalize">
-                          {data.type}
-                        </span>
-                      </p>
-                      <p className="text-secondary text-sm">
-                        Change:{" "}
-                        <span
-                          className={cn(
-                            "font-medium",
-                            data.isGain ? "text-green-500" : "text-red-500",
-                          )}
-                        >
-                          {data.isGain ? "+" : ""}
-                          {formatNumberUserReadable(
-                            Number(
-                              BigInt(Number(data.delta)) / BigInt(10 ** 18),
-                            ),
-                          )}
-                        </span>
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Line
-              dataKey="votingPower"
-              stroke={chartConfig.votingPower.color}
-              strokeWidth={1}
-              dot={<CustomDot />}
-              connectNulls={true}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </LineChart>
-        </ChartContainer>
-      </div>
+              return null;
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="votingPower"
+            stroke="#ffffff"
+            strokeWidth={1}
+            dot={<CustomDot />}
+            connectNulls={true}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </LineChart>
+      </ChartContainer>
     </div>
   );
 };

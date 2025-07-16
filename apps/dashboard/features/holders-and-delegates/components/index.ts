@@ -4,3 +4,4 @@ export * from "@/features/holders-and-delegates/components/DelegateDelegationHis
 export * from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 export * from "@/features/holders-and-delegates/components/VotingPowerVariationGraph";
 export * from "@/features/holders-and-delegates/components/DelegateDelegationsHistory";
+export * from "@/features/holders-and-delegates/components/VotingPowerTimePeriodSwitcher";
