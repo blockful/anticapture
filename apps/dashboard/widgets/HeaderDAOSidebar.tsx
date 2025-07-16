@@ -6,6 +6,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
   BottomNavigationButtons,
+  ConnectWallet,
 } from "@/shared/components";
 import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
@@ -82,9 +83,6 @@ export const HeaderDAOSidebar = () => {
                 label={SECTIONS_CONSTANTS.tokenDistribution.title}
               />
             )}
-          </div>
-          <div className="p-4">
-            <BottomNavigationButtons />
           </div>
         </div>
       </div>
