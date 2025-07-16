@@ -253,17 +253,20 @@ export const DelegateDelegationHistoryTable = ({
 
         return (
           <div className="flex h-10 items-center gap-3 p-2">
-            <EnsAvatar
-              address={delegatorAddress as `0x${string}`}
-              size="sm"
-              variant="rounded"
-              showName={true}
-              nameClassName={
-                delegatorAddress === accountId
-                  ? "text-primary"
-                  : "text-secondary"
-              }
-            />
+            <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
+              <EnsAvatar
+                address={delegatorAddress as `0x${string}`}
+                size="sm"
+                variant="rounded"
+                showName={true}
+                nameClassName={cn(
+                  "truncate max-w-[125px]",
+                  delegatorAddress === accountId
+                    ? "text-primary"
+                    : "text-secondary",
+                )}
+              />
+            </div>
           </div>
         );
       },
@@ -324,17 +327,20 @@ export const DelegateDelegationHistoryTable = ({
 
         return (
           <div className="flex h-10 items-center justify-between gap-3 p-2">
-            <EnsAvatar
-              address={delegateAddress as `0x${string}`}
-              size="sm"
-              variant="rounded"
-              showName={true}
-              nameClassName={
-                delegateAddress === accountId
-                  ? "text-primary"
-                  : "text-secondary"
-              }
-            />
+            <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
+              <EnsAvatar
+                address={delegateAddress as `0x${string}`}
+                size="sm"
+                variant="rounded"
+                showName={true}
+                nameClassName={cn(
+                  "truncate max-w-[125px]",
+                  delegateAddress === accountId
+                    ? "text-primary"
+                    : "text-secondary",
+                )}
+              />
+            </div>
             <Link
               href={`https://etherscan.io/tx/${item.transactionHash}`}
               target="_blank"
