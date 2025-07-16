@@ -19,6 +19,7 @@ import {
   VotingPowerTimePeriodSwitcher,
   VotingPowerTimePeriod,
 } from "./VotingPowerTimePeriodSwitcher";
+import { SkeletonRow } from "@/shared/components";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -55,8 +56,8 @@ export const VotingPowerVariationGraph = ({
             isSmall={true}
           />
         </div>
-        <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-          <div className="text-secondary text-sm">Loading...</div>
+        <div className="h-[300px] w-full">
+          <SkeletonRow className="h-[300px] w-full" />
         </div>
       </div>
     );
