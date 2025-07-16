@@ -24,7 +24,7 @@ import {
   getUserVoteData,
   extractProposalName,
   getVoteTimingData,
-} from "../utils/proposalsTableUtils";
+} from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { BlankSlate } from "@/shared/components/design-system/blank-state/BlankState";
 
 interface ProposalTableData {
