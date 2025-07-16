@@ -10,9 +10,15 @@ import { SECONDS_PER_BLOCK } from "@/lib/constants";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
+export enum VoteFilter {
+  YES = "yes",
+  NO = "no",
+  ABSTAIN = "abstain",
+  NO_VOTE = "no_vote",
+}
+
 export type OrderByField = "votingPower" | "voteTiming";
 export type OrderDirection = "asc" | "desc";
-export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
 
 export interface ProposalActivityRequest {
   address: Address;
@@ -22,7 +28,7 @@ export interface ProposalActivityRequest {
   limit?: number;
   orderBy?: OrderByField;
   orderDirection?: OrderDirection;
-  userVoteFilter?: VoteFilterType;
+  userVoteFilter?: VoteFilter;
 }
 
 export interface ProposalWithUserVote {

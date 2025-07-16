@@ -2,6 +2,7 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import { sql } from "ponder";
 import { db } from "ponder:api";
+import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
 
 export type DbProposal = {
   id: string;
@@ -35,7 +36,6 @@ export type DbProposalWithVote = {
 
 export type OrderByField = "votingPower" | "voteTiming";
 export type OrderDirection = "asc" | "desc";
-export type VoteFilterType = "yes" | "no" | "abstain" | "no-vote";
 
 export interface ProposalsActivityRepository {
   getFirstVoteTimestamp(
@@ -66,7 +66,7 @@ export interface ProposalsActivityRepository {
     limit: number,
     orderBy: OrderByField,
     orderDirection: OrderDirection,
-    userVoteFilter?: VoteFilterType,
+    userVoteFilter?: VoteFilter,
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
@@ -159,29 +159,29 @@ export class DrizzleProposalsActivityRepository
     limit: number,
     orderBy: OrderByField,
     orderDirection: OrderDirection,
-    userVoteFilter?: VoteFilterType,
+    userVoteFilter?: VoteFilter,
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
   }> {
     // Build the vote filter condition
     let voteFilterCondition = "";
-    if (userVoteFilter) {
-      switch (userVoteFilter) {
-        case "yes":
-          voteFilterCondition = "AND v.support = '1'";
-          break;
-        case "no":
-          voteFilterCondition = "AND v.support = '0'";
-          break;
-        case "abstain":
-          voteFilterCondition = "AND v.support = '2'";
-          break;
-        case "no-vote":
-          voteFilterCondition = "AND v.support IS NULL";
-          break;
+          if (userVoteFilter) {
+        switch (userVoteFilter) {
+          case VoteFilter.YES:
+            voteFilterCondition = "AND v.support = '1'";
+            break;
+          case VoteFilter.NO:
+            voteFilterCondition = "AND v.support = '0'";
+            break;
+          case VoteFilter.ABSTAIN:
+            voteFilterCondition = "AND v.support = '2'";
+            break;
+          case VoteFilter.NO_VOTE:
+            voteFilterCondition = "AND v.support IS NULL";
+            break;
+        }
       }
-    }
 
     // Build the ORDER BY clause
     let orderByClause = "";

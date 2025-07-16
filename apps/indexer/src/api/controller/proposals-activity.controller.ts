@@ -5,6 +5,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
+import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
 
 export function proposalsActivity(
   app: Hono,
@@ -53,7 +54,7 @@ export function proposalsActivity(
             .optional(),
           orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
           userVoteFilter: z
-            .enum(["yes", "no", "abstain", "no-vote"])
+            .nativeEnum(VoteFilter)
             .optional()
             .describe(
               "Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",

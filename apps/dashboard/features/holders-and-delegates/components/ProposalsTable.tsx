@@ -12,7 +12,6 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useDaoData, useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
@@ -77,6 +76,7 @@ export const ProposalsTable = ({
         item.proposal,
         Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
         daoData?.quorum,
+        daoConfigByDaoId[daoIdEnum], // Pass the DAO config to use quorum logic
       );
       const userVote = getUserVoteData(
         item.userVote?.support,
@@ -99,7 +99,7 @@ export const ProposalsTable = ({
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoData?.quorum]);
+  }, [proposals, daoData?.votingPeriod, daoData?.quorum, daoIdEnum]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
