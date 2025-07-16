@@ -152,7 +152,6 @@ export class DrizzleProposalsActivityRepository
 
   async getProposalsWithVotesAndPagination(
     address: Address,
-    daoId: DaoIdEnum,
     activityStart: number,
     votingPeriodSeconds: number,
     skip: number,
