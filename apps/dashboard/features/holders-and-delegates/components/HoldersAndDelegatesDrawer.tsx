@@ -11,7 +11,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BalanceHistory } from "./BalanceHistory";
-import { DelegateDelegationsHistory } from "./DelegateDelegationsHistory";
+import { DelegateDelegationsHistory } from "./DelegatesDelegationHistory/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";

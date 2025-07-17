@@ -14,7 +14,7 @@ import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
-import { useDelegateDelegationHistoryGraph } from "../hooks/useDelegateDelegationHistoryGraph";
+import { useDelegateDelegationHistoryGraph } from "../../hooks/useDelegateDelegationHistoryGraph";
 import {
   VotingPowerTimePeriodSwitcher,
   VotingPowerTimePeriod,

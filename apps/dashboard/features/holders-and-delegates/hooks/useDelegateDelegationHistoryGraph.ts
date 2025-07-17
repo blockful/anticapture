@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPowerTimePeriod } from "../components/VotingPowerTimePeriodSwitcher";
+import { VotingPowerTimePeriod } from "../components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
