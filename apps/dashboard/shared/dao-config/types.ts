@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
-import { Address } from "viem";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { ReactNode } from 'react';
+import { Address } from 'viem';
+import { DaoIdEnum } from '@/shared/types/daos';
+import { MetricTypesEnum } from '@/shared/types/enums/metric-type';
 import {
   RiskLevel,
   SupportStageEnum,
@@ -77,7 +77,7 @@ export interface DaoOverviewConfig {
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
-    logic: "For" | "For + Abstain";
+    logic: "For" | "For + Abstain" | "For + Abstain + Against";
   };
   securityCouncil?: {
     isActive: boolean;
