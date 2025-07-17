@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { Address } from 'viem';
-import { DaoIdEnum } from '@/shared/types/daos';
-import { MetricTypesEnum } from '@/shared/types/enums/metric-type';
+import { ReactNode } from "react";
+import { Address } from "viem";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import {
   RiskLevel,
   SupportStageEnum,
