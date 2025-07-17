@@ -29,13 +29,13 @@ const PieChartCustomTooltip: React.FC<
   const label = config?.label || name;
 
   return (
-    <div className="rounded border bg-white p-3 text-black shadow-lg">
+    <div className="bg-surface-contrast text-primary border-border-contrast rounded-md border p-2 shadow-lg">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">{label}</p>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs">
           Voting Power: <strong>{formatNumberUserReadable(value)}</strong>
         </p>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs">
           Percentage: <strong>{percentage}%</strong>
         </p>
       </div>
