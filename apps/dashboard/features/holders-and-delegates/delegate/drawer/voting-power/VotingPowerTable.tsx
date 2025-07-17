@@ -220,6 +220,7 @@ export const VotingPowerTable = ({
           withSorting={true}
           withPagination={true}
           filterColumn="address"
+          isTableSmall={true}
         />
       </div>
     </div>
