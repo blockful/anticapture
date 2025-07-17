@@ -25,7 +25,7 @@ import {
   extractProposalName,
   getVoteTimingData,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
-import { BlankSlate } from "@/shared/components/design-system/blank-state/BlankState";
+import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 
 interface ProposalTableData {
   proposalId: string;
@@ -354,7 +354,7 @@ export const ProposalsTable = ({
 
   if (error) {
     return (
-      <BlankSlate
+      <BlankState
         variant="default"
         icon={AlertOctagon}
         title="FAILED TO LOAD API DEFINITION"
@@ -365,7 +365,7 @@ export const ProposalsTable = ({
 
   if (!proposals || proposals.length === 0) {
     return (
-      <BlankSlate
+      <BlankState
         variant="default"
         icon={Inbox}
         title=""
