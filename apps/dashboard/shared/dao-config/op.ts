@@ -1,24 +1,9 @@
-
-export const OP: DaoConfiguration = {
-  name: "Optimism",
-  icon: OptimismIcon,
-  supportStage: SupportStageEnum.ANALYSIS,
-  disableDaoPage: true,
-  daoOverview: {
-    chainId: 10,
-    contracts: {
-      token: "0x4200000000000000000000000000000000000042",
-    },
-  },
-};
-
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { OptimismIcon } from "@/shared/components/icons";
 
@@ -91,10 +76,10 @@ export const OP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ].description,
-          requirements: [
-            "The Foundation, as manager of the contract, is the only one that can propose, so there's no risk of proposal flashloan attacks.",
-            "The flashloan protection in the contract is commented out, due to the onlyManagerOrTimelock bein used on the propose() function.",
-          ],
+        requirements: [
+          "The Foundation, as manager of the contract, is the only one that can propose, so there's no risk of proposal flashloan attacks.",
+          "The flashloan protection in the contract is commented out, due to the onlyManagerOrTimelock bein used on the propose() function.",
+        ],
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
         value: "0",
@@ -156,9 +141,7 @@ export const OP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        requirements: [
-          "The timelock is not used for governance execution.",
-        ],
+        requirements: ["The timelock is not used for governance execution."],
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
         value: "Does not apply",
