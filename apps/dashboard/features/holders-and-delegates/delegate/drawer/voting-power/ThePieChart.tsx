@@ -86,7 +86,13 @@ export const ThePieChart = ({
           >
             {pieData.map((entry, index) => {
               const color = chartConfig[entry.name]?.color || "#9CA3AF";
-              return <Cell key={`cell-${index}`} fill={color} />;
+              return (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={color}
+                  className="transition-all duration-200 hover:opacity-80"
+                />
+              );
             })}
           </Pie>
           <Tooltip
