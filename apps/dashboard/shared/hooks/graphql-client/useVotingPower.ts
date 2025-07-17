@@ -67,7 +67,7 @@ export const useVotingPower = ({
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
 
-  // Reset to page 1 and refetch when sorting changes (new query)
+  // Reset to page 1 when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
   }, [orderBy, orderDirection]);
@@ -117,8 +117,9 @@ export const useVotingPower = ({
       before: undefined,
       orderBy,
       orderDirection,
+      limit: itemsPerPage,
     });
-  }, [orderBy, orderDirection, refetch]);
+  }, [orderBy, orderDirection, refetch, itemsPerPage]);
 
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
@@ -232,6 +233,7 @@ export const useVotingPower = ({
           before: undefined,
           orderBy,
           orderDirection,
+          limit: itemsPerPage,
         } as any,
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -259,6 +261,7 @@ export const useVotingPower = ({
     orderBy,
     orderDirection,
     isPaginationLoading,
+    itemsPerPage,
   ]);
 
   // Previous page
@@ -281,6 +284,7 @@ export const useVotingPower = ({
           before: pagination.startCursor,
           orderBy,
           orderDirection,
+          limit: itemsPerPage,
         } as any,
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -308,6 +312,7 @@ export const useVotingPower = ({
     orderBy,
     orderDirection,
     isPaginationLoading,
+    itemsPerPage,
   ]);
 
   // Reset pagination on refetch

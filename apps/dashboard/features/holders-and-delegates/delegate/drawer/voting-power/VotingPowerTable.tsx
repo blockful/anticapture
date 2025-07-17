@@ -12,6 +12,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { Pagination } from "@/shared/components/design-system/table/Pagination";
 
 export const VotingPowerTable = ({
   address,
@@ -22,11 +23,21 @@ export const VotingPowerTable = ({
 }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [sortBy, setSortBy] = useState<"balance" | "timestamp">("balance");
+  const [sortBy, setSortBy] = useState<"balance">("balance");
 
-  const { balances, loading, error } = useVotingPower({
+  const {
+    balances,
+    loading,
+    error,
+    pagination,
+    fetchNextPage,
+    fetchPreviousPage,
+    fetchingMore,
+  } = useVotingPower({
     daoId: daoId as DaoIdEnum,
     address: address,
+    orderBy: sortBy,
+    orderDirection: sortOrder,
   });
 
   useEffect(() => {
@@ -132,30 +143,9 @@ export const VotingPowerTable = ({
     {
       accessorKey: "date",
       header: ({ column }) => {
-        const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("timestamp");
-          setSortOrder(newSortOrder);
-          column.toggleSorting(newSortOrder === "desc");
-        };
         return (
           <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
             Date
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
-              onClick={handleSortToggle}
-            >
-              <ArrowUpDown
-                props={{ className: "ml-2 size-4" }}
-                activeState={
-                  sortBy === "timestamp" && sortOrder === "asc"
-                    ? ArrowState.UP
-                    : sortBy === "timestamp" && sortOrder === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </button>
           </div>
         );
       },
@@ -215,7 +205,7 @@ export const VotingPowerTable = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-full">
+      <div className="flex w-full flex-col gap-2">
         <TheTable
           columns={columns}
           data={loading ? Array(5).fill({}) : tableData}
@@ -223,6 +213,16 @@ export const VotingPowerTable = ({
           withPagination={true}
           filterColumn="address"
           isTableSmall={true}
+        />
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          className="text-white"
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+          isLoading={fetchingMore}
         />
       </div>
     </div>

@@ -4,10 +4,8 @@ import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vo
 import { VotingPowerTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPowerTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useVotingPowerData } from "./hooks/useVotingPowerData";
-import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { Inbox } from "lucide-react";
 
@@ -80,11 +78,6 @@ export const VotingPower = ({
     chartConfig,
     loading: loadingVotingPowerData,
   } = useVotingPowerData(daoId, address);
-  const { pagination, fetchPreviousPage, fetchNextPage, fetchingMore } =
-    useVotingPower({
-      daoId,
-      address: address,
-    });
 
   if (
     !topFiveDelegators ||
@@ -117,7 +110,7 @@ export const VotingPower = ({
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
                   Current Voting Power
                 </p>
-                <p className="text-md font-normal">
+                <div className="text-md font-normal">
                   {!currentVotingPower ? (
                     <SkeletonRow
                       parentClassName="flex animate-pulse"
@@ -126,7 +119,7 @@ export const VotingPower = ({
                   ) : (
                     formatNumberUserReadable(currentVotingPower)
                   )}
-                </p>
+                </div>
               </div>
 
               <div className="h-px w-full bg-[#27272A]" />
@@ -159,16 +152,6 @@ export const VotingPower = ({
       </div>
       <div className="flex w-full flex-col gap-4">
         <VotingPowerTable address={address} daoId={daoId} />
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          className="text-white"
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
-        />
       </div>
     </div>
   );
