@@ -37,14 +37,10 @@ export function useDelegateDelegationHistoryGraph(
 
     let daysInSeconds: number;
     switch (timePeriod) {
-      case "30d":
-        daysInSeconds = 30 * SECONDS_PER_DAY;
-        break;
       case "90d":
         daysInSeconds = 90 * SECONDS_PER_DAY;
         break;
       default:
-        // Default to 30 days if unknown
         daysInSeconds = 30 * SECONDS_PER_DAY;
         break;
     }
