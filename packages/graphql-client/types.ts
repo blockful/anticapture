@@ -1897,13 +1897,13 @@ export type GetDelegationsTimestampQueryVariables = Exact<{
 
 export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId?: string | null, timestamp?: any | null }> } };
 
-export type GetTop5DelegatorsQueryVariables = Exact<{
+export type GetTopFiveDelegatorsQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetTop5DelegatorsQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
+export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   address: Scalars['String']['input'];

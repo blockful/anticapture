@@ -5,7 +5,7 @@ import { formatAddress } from "@/shared/utils/formatAddress";
 
 export interface VotingPowerData {
   // Dados básicos
-  top5Delegators: any[];
+  topFiveDelegators: any[];
   currentVotingPower: number;
   loading: boolean;
 
@@ -33,7 +33,7 @@ export const useVotingPowerData = (
   daoId: DaoIdEnum,
   address: string,
 ): VotingPowerData => {
-  const { top5Delegators, delegatorsVotingPowerDetails, loading } =
+  const { topFiveDelegators, delegatorsVotingPowerDetails, loading } =
     useVotingPower({
       daoId,
       address,
@@ -41,7 +41,7 @@ export const useVotingPowerData = (
 
   // default Value when there is no data
   const defaultData: VotingPowerData = {
-    top5Delegators: [],
+    topFiveDelegators: [],
     currentVotingPower: 0,
     loading,
     chartConfig: {},
@@ -54,8 +54,8 @@ export const useVotingPowerData = (
 
   // return default data when there is no valid data
   if (
-    !top5Delegators ||
-    top5Delegators.length === 0 ||
+    !topFiveDelegators ||
+    topFiveDelegators.length === 0 ||
     !delegatorsVotingPowerDetails ||
     !delegatorsVotingPowerDetails.accountPower ||
     !delegatorsVotingPowerDetails.accountPower.votingPower
@@ -72,7 +72,7 @@ export const useVotingPowerData = (
   );
 
   // Calculate the total value of the delegators that will be shown individually (>= 1%)
-  const totalIndividualDelegators = top5Delegators.reduce((acc, item) => {
+  const totalIndividualDelegators = topFiveDelegators.reduce((acc, item) => {
     if (item.rawBalance === 0n) return acc;
 
     const percentage = Number(
@@ -100,7 +100,7 @@ export const useVotingPowerData = (
   > = {};
 
   // Add delegators to config (only those with >= 1%)
-  top5Delegators.forEach((delegator, index) => {
+  topFiveDelegators.forEach((delegator, index) => {
     const key = delegator.accountId || `delegator-${index}`;
 
     if (delegator.rawBalance === 0n) return;
@@ -134,7 +134,7 @@ export const useVotingPowerData = (
   const pieData: { name: string; value: number }[] = [];
 
   // Add delegators with >= 1%
-  top5Delegators.forEach((item) => {
+  topFiveDelegators.forEach((item) => {
     if (item.rawBalance === 0n) return;
 
     const percentage = Number(
@@ -171,7 +171,7 @@ export const useVotingPowerData = (
   );
 
   return {
-    top5Delegators,
+    topFiveDelegators,
     currentVotingPower: currentVotingPowerNumber,
     loading,
     chartConfig,

@@ -1900,13 +1900,13 @@ export type GetDelegationsTimestampQueryVariables = Exact<{
 
 export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId?: string | null, timestamp?: any | null }> } };
 
-export type GetTop5DelegatorsQueryVariables = Exact<{
+export type GetTopFiveDelegatorsQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetTop5DelegatorsQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
+export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -2475,8 +2475,8 @@ export type GetDelegationsTimestampQueryHookResult = ReturnType<typeof useGetDel
 export type GetDelegationsTimestampLazyQueryHookResult = ReturnType<typeof useGetDelegationsTimestampLazyQuery>;
 export type GetDelegationsTimestampSuspenseQueryHookResult = ReturnType<typeof useGetDelegationsTimestampSuspenseQuery>;
 export type GetDelegationsTimestampQueryResult = Apollo.QueryResult<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>;
-export const GetTop5DelegatorsDocument = gql`
-    query GetTop5Delegators($delegate: String!, $limit: Int = 6) {
+export const GetTopFiveDelegatorsDocument = gql`
+    query GetTopFiveDelegators($delegate: String!, $limit: Int = 5) {
   accountBalances(
     where: {delegate: $delegate, balance_gt: 0}
     orderBy: "balance"
@@ -2492,38 +2492,38 @@ export const GetTop5DelegatorsDocument = gql`
     `;
 
 /**
- * __useGetTop5DelegatorsQuery__
+ * __useGetTopFiveDelegatorsQuery__
  *
- * To run a query within a React component, call `useGetTop5DelegatorsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetTop5DelegatorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetTopFiveDelegatorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTopFiveDelegatorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetTop5DelegatorsQuery({
+ * const { data, loading, error } = useGetTopFiveDelegatorsQuery({
  *   variables: {
  *      delegate: // value for 'delegate'
  *      limit: // value for 'limit'
  *   },
  * });
  */
-export function useGetTop5DelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables> & ({ variables: GetTop5DelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetTopFiveDelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables> & ({ variables: GetTopFiveDelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>(GetTop5DelegatorsDocument, options);
+        return Apollo.useQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
       }
-export function useGetTop5DelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>) {
+export function useGetTopFiveDelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>(GetTop5DelegatorsDocument, options);
+          return Apollo.useLazyQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
         }
-export function useGetTop5DelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>) {
+export function useGetTopFiveDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>(GetTop5DelegatorsDocument, options);
+          return Apollo.useSuspenseQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
         }
-export type GetTop5DelegatorsQueryHookResult = ReturnType<typeof useGetTop5DelegatorsQuery>;
-export type GetTop5DelegatorsLazyQueryHookResult = ReturnType<typeof useGetTop5DelegatorsLazyQuery>;
-export type GetTop5DelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetTop5DelegatorsSuspenseQuery>;
-export type GetTop5DelegatorsQueryResult = Apollo.QueryResult<GetTop5DelegatorsQuery, GetTop5DelegatorsQueryVariables>;
+export type GetTopFiveDelegatorsQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsQuery>;
+export type GetTopFiveDelegatorsLazyQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsLazyQuery>;
+export type GetTopFiveDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsSuspenseQuery>;
+export type GetTopFiveDelegatorsQueryResult = Apollo.QueryResult<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>;
 export const GetVotingPowerCountingDocument = gql`
     query GetVotingPowerCounting($address: String!) {
   accountBalances(where: {delegate: $address}) {

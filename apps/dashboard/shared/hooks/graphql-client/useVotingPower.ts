@@ -4,8 +4,8 @@ import {
   useGetDelegationsTimestampQuery,
   useGetDelegatorVotingPowerDetailsQuery,
   useGetVotingPowerCountingQuery,
-  useGetTop5DelegatorsQuery,
-  GetTop5DelegatorsQuery,
+  useGetTopFiveDelegatorsQuery,
+  GetTopFiveDelegatorsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState, useCallback, useMemo, useEffect } from "react";
@@ -29,13 +29,13 @@ type AccountBalanceBase =
   GetDelegatorVotingPowerDetailsQuery["accountBalances"]["items"][number];
 type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
 
-type Top5DelegatorsWithBalance =
-  GetTop5DelegatorsQuery["accountBalances"]["items"][number] & {
+type TopFiveDelegatorsWithBalance =
+  GetTopFiveDelegatorsQuery["accountBalances"]["items"][number] & {
     rawBalance: bigint;
   };
 
 interface UseVotingPowerResult {
-  top5Delegators: Top5DelegatorsWithBalance[] | null;
+  topFiveDelegators: TopFiveDelegatorsWithBalance[] | null;
   delegatorsVotingPowerDetails: GetDelegatorVotingPowerDetailsQuery | null;
   votingPowerHistoryData: DelegationItem[];
   balances: BalanceWithTimestamp[];
@@ -169,7 +169,7 @@ export const useVotingPower = ({
     timestamp: timestampMap[account.accountId.toLowerCase()],
   }));
 
-  const { data: top5Delegators } = useGetTop5DelegatorsQuery({
+  const { data: topFiveDelegators } = useGetTopFiveDelegatorsQuery({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
@@ -316,7 +316,7 @@ export const useVotingPower = ({
     refetch();
   }, [refetch]);
 
-  const topDelegatorsItems = top5Delegators?.accountBalances.items?.map(
+  const topDelegatorsItems = topFiveDelegators?.accountBalances.items?.map(
     (item) => ({
       ...item,
       balance: Number(BigInt(item.balance) / BigInt(10 ** 18)),
@@ -325,7 +325,7 @@ export const useVotingPower = ({
   );
 
   return {
-    top5Delegators: topDelegatorsItems || null,
+    topFiveDelegators: topDelegatorsItems || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,

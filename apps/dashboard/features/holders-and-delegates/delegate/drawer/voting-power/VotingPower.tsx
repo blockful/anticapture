@@ -8,6 +8,8 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useVotingPowerData } from "./hooks/useVotingPowerData";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
+import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
+import { Inbox } from "lucide-react";
 
 const ChartLegend = ({
   items,
@@ -71,9 +73,8 @@ export const VotingPower = ({
   daoId: DaoIdEnum;
 }) => {
   const {
-    top5Delegators,
+    topFiveDelegators,
     currentVotingPower,
-    loading,
     legendItems,
     pieData,
     chartConfig,
@@ -84,8 +85,14 @@ export const VotingPower = ({
       address: address,
     });
 
-  if (!top5Delegators || top5Delegators.length === 0) {
-    return null;
+  if (!topFiveDelegators || topFiveDelegators.length === 0) {
+    return (
+      <BlankState
+        variant="default"
+        icon={Inbox}
+        description="No delegators found"
+      />
+    );
   }
 
   return (
@@ -127,13 +134,13 @@ export const VotingPower = ({
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  {!legendItems || !top5Delegators ? (
+                  {!legendItems || !topFiveDelegators ? (
                     <ChartLegend items={[]} loading={true} />
-                  ) : !top5Delegators ? (
+                  ) : !topFiveDelegators ? (
                     <div className="text-secondary text-sm">
                       Loading delegators...
                     </div>
-                  ) : top5Delegators && top5Delegators.length > 0 ? (
+                  ) : topFiveDelegators && topFiveDelegators.length > 0 ? (
                     <ChartLegend items={legendItems} />
                   ) : (
                     <div className="text-secondary text-sm">
