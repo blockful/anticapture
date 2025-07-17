@@ -5,10 +5,6 @@ import { Badge } from "@/shared/components";
 import { DonationCardProps } from "@/features/donation/types";
 import { ExternalLink, Copy, Eye, BookOpen, Shield } from "lucide-react";
 
-interface ExtendedDonationCardProps extends DonationCardProps {
-  benefits?: string[];
-}
-
 export const DonationCard = ({
   title,
   description,
@@ -17,12 +13,10 @@ export const DonationCard = ({
   qrCodeUrl,
   supportedChains = [],
   chainLinks = {},
-  benefits = [],
-}: ExtendedDonationCardProps) => {
+}: DonationCardProps) => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -34,106 +28,112 @@ export const DonationCard = ({
   };
 
   return (
-    <Card className="bg-surface-default w-full border-0 shadow-sm">
+    <Card className="bg-surface-default w-full rounded-none border-0 shadow-sm">
       <CardContent className="p-5">
-        <div className="space-y-6">
-          {/* Title and Description */}
-          <div>
-            <h2 className="text-primary mb-3 text-xl font-semibold">{title}</h2>
-            <p className="text-secondary mb-4 text-sm leading-relaxed">
-              {description}
-            </p>
-          </div>
-
-          {/* Benefits Section - Integrated */}
-          {benefits.length > 0 && (
+        <div className="flex flex-row gap-2">
+          <div className="space-y-6">
+            {/* Title and Description */}
+            <div className="mb-4 flex flex-col gap-3">
+              <h2 className="text-primary text-xl font-semibold">{title}</h2>
+              <p className="text-secondary text-sm">{description}</p>
+            </div>
             <div>
-              <h3 className="text-primary mb-4 text-base font-medium">
+              <h3 className="text-secondary mb-4 text-sm">
                 As a public good, your support allows us to:
               </h3>
               <ul className="mb-6 space-y-2">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="mt-1.5">
-                      {index === 0 && <Eye className="text-primary h-4 w-4" />}
-                      {index === 1 && (
-                        <BookOpen className="text-primary h-4 w-4" />
-                      )}
-                      {index === 2 && (
-                        <Shield className="text-primary h-4 w-4" />
-                      )}
-                    </div>
-                    <span className="text-secondary text-sm leading-relaxed">
-                      {benefit}
-                    </span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-3">
+                  <div className="mt-1.5">
+                    <Eye className="text-secondary size-4" />
+                  </div>
+                  <span className="text-secondary text-sm leading-relaxed">
+                    Make DAO security visible, measurable, and accountable.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="mt-1.5">
+                    <BookOpen className="text-secondary size-4" />
+                  </div>
+                  <span className="text-secondary text-sm leading-relaxed">
+                    Improve Ethereum's legibility—without compromising credible
+                    neutrality.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="mt-1.5">
+                    <Shield className="text-secondary size-4" />
+                  </div>
+                  <span className="text-secondary text-sm leading-relaxed">
+                    Push DAOs and the ecosystem to take action.
+                  </span>
+                </li>
               </ul>
             </div>
-          )}
 
-          {/* Main Content Area with Flexbox Layout */}
-          <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
-            {/* Left side - Donation Info */}
-            <div className="flex-1 space-y-6">
-              {/* Supported chains */}
-              {supportedChains.length > 0 && (
-                <div>
-                  <p className="text-primary !text-alternative-sm mb-3 font-mono font-medium tracking-wide uppercase">
-                    Donate Through Any EVM
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {supportedChains.map((chain) => {
-                      const chainLink = chainLinks[chain];
-                      const BadgeContent = (
-                        <Badge
-                          variant="outline"
-                          className="border-secondary/30 hover:border-secondary/50 px-3 py-1 text-xs transition-colors"
-                        >
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          {chain}
-                        </Badge>
-                      );
+            {/* Main Content Area with Flexbox Layout */}
+            <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
+              {/* Left side - Donation Info */}
+              <div className="flex-1 space-y-6">
+                {/* Supported chains */}
+                {supportedChains.length > 0 && (
+                  <div>
+                    <p className="text-primary !text-alternative-sm mb-3 font-mono font-medium tracking-wider uppercase">
+                      Donate Through Any EVM
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {supportedChains.map((chain) => {
+                        const chainLink = chainLinks[chain];
+                        const BadgeContent = (
+                          <Badge
+                            variant="outline"
+                            className="border-light-dark hover:text-secondary text-primary gap-2 px-2 py-1 text-sm transition-colors"
+                          >
+                            <ExternalLink className="size-4" />
+                            {chain}
+                          </Badge>
+                        );
 
-                      return chainLink ? (
-                        <a
-                          key={chain}
-                          href={chainLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block"
-                        >
-                          {BadgeContent}
-                        </a>
-                      ) : (
-                        <div key={chain}>{BadgeContent}</div>
-                      );
-                    })}
+                        return chainLink ? (
+                          <a
+                            key={chain}
+                            href={chainLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block"
+                          >
+                            {BadgeContent}
+                          </a>
+                        ) : (
+                          <div key={chain}>{BadgeContent}</div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
+          </div>
+          {/* Right side - QR Code with Orange Corner Brackets and Gradient */}
+          {qrCodeUrl && (
+            <div className="mt-6 flex-shrink-0 lg:mt-0">
+              <div className="relative">
+                {/* Orange corner brackets */}
+                <div className="border-tangerine absolute h-4 w-4 border-t-2 border-l-2"></div>
+                <div className="border-tangerine absolute -top-0 -right-0 h-4 w-4 border-t-2 border-r-2"></div>
+                <div className="border-tangerine absolute -bottom-0 -left-0 h-4 w-4 border-b-2 border-l-2"></div>
+                <div className="border-tangerine absolute -right-0 -bottom-0 h-4 w-4 border-r-2 border-b-2"></div>
 
-            {/* Right side - QR Code with Orange Corner Brackets and Gradient */}
-            {qrCodeUrl && (
-              <div className="mt-6 flex-shrink-0 lg:mt-0">
-                <div className="relative">
-                  {/* Orange corner brackets */}
-                  <div className="border-tangerine absolute -top-2 -left-2 h-4 w-4 border-t-2 border-l-2"></div>
-                  <div className="border-tangerine absolute -top-2 -right-2 h-4 w-4 border-t-2 border-r-2"></div>
-                  <div className="border-tangerine absolute -bottom-2 -left-2 h-4 w-4 border-b-2 border-l-2"></div>
-                  <div className="border-tangerine absolute -right-2 -bottom-2 h-4 w-4 border-r-2 border-b-2"></div>
-
-                  {/* QR Code container with gradient background */}
-                  <div
-                    className="border-secondary/20 rounded-lg border p-4"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, rgba(236, 118, 46, 0.00) 0%, rgba(236, 118, 46, 0.08) 100%)",
-                    }}
-                  >
+                {/* QR Code container with gradient background */}
+                <div
+                  className="border-light-dark gap-3 border p-4"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, rgba(236, 118, 46, 0.00) 0%, rgba(236, 118, 46, 0.08) 100%)",
+                  }}
+                >
+                  <div className="flex flex-col items-center gap-3">
                     <div className="mb-3 text-center">
-                      <p className="text-secondary text-xs">
+                      <p className="text-secondary text-sm font-normal">
                         Scan the QR code in your wallet app
                       </p>
                     </div>
@@ -145,54 +145,56 @@ export const DonationCard = ({
                         style={{ filter: "invert(1)" }}
                       />
                     </div>
-                    <div className="mt-3 text-center">
-                      <p className="text-secondary text-xs">
+                  </div>
+                  <div className="flex flex-col items-center gap-2 pt-3">
+                    <div className="flex w-full items-center gap-3">
+                      <div className="border-light-dark flex-1 border-t"></div>
+                      <p className="text-secondary text-sm font-normal">
                         or enter the address
                       </p>
+                      <div className="border-light-dark flex-1 border-t"></div>
                     </div>
-
-                    {/* ENS Domain - moved inside QR box */}
-                    {ensAddress && (
-                      <div className="mt-4">
-                        <p className="text-primary !text-alternative-sm mb-2 font-mono font-medium tracking-wide uppercase">
+                    <div className="flex flex-col gap-3">
+                      <div>
+                        <p className="text-secondary !text-alternative-xs font-regular font-mono tracking-wide uppercase">
                           ENS Domain
                         </p>
-                        <div className="flex items-center gap-2">
-                          <code className="bg-surface-background text-primary px-3 py-2 font-mono text-xs">
+                        <div className="flex items-center gap-1">
+                          <code className="text-primary font-mono text-sm">
                             {ensAddress}
                           </code>
                           <button
                             onClick={() => copyToClipboard(ensAddress)}
                             className="text-secondary hover:text-primary flex items-center gap-1 p-1 text-xs transition-colors"
                           >
-                            <Copy className="h-3 w-3" />
+                            <Copy className="size-4" />
                           </button>
                         </div>
                       </div>
-                    )}
 
-                    {/* Address - moved inside QR box */}
-                    <div className="mt-4">
-                      <p className="text-primary !text-alternative-sm mb-2 font-mono font-medium tracking-wide uppercase">
-                        Address
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <code className="bg-surface-background text-primary px-3 py-2 font-mono text-xs">
-                          {truncateAddress(address)}
-                        </code>
-                        <button
-                          onClick={() => copyToClipboard(address)}
-                          className="text-secondary hover:text-primary flex items-center gap-1 p-1 text-xs transition-colors"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </button>
+                      {/* Address - moved inside QR box */}
+                      <div>
+                        <p className="text-secondary !text-alternative-xs font-regular font-mono tracking-wide uppercase">
+                          Address
+                        </p>
+                        <div className="flex items-center gap-1">
+                          <code className="text-primary font-mono text-sm">
+                            {truncateAddress(address)}
+                          </code>
+                          <button
+                            onClick={() => copyToClipboard(address)}
+                            className="text-secondary hover:text-primary flex items-center gap-1 p-1 text-xs transition-colors"
+                          >
+                            <Copy className="size-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

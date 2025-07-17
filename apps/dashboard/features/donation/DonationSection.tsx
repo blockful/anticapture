@@ -30,7 +30,6 @@ export const DonationSection = () => {
           qrCodeUrl={donation.qrCodeUrl}
           supportedChains={donation.supportedChains}
           chainLinks={donation.chainLinks}
-          benefits={donation.benefits}
         />
 
         {/* Funding sources */}

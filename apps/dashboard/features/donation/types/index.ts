@@ -9,23 +9,24 @@ export interface DonationData {
   benefits: string[];
 }
 
+import { DaoIdEnum } from "@/shared/types/daos";
+
 export interface FundingSource {
   name: string;
   amount: string;
   date: string;
-  logo?: string;
-  link?: string;
+  daoId: DaoIdEnum;
+  link: string;
 }
 
 export interface DonationCardProps {
   title: string;
   description: string;
   address: string;
-  ensAddress?: string;
-  qrCodeUrl?: string;
-  supportedChains?: string[];
-  chainLinks?: Record<string, string>;
-  benefits?: string[];
+  ensAddress: string;
+  qrCodeUrl: string;
+  supportedChains: string[];
+  chainLinks: Record<string, string>;
 }
 
 export interface FundingSourcesCardProps {

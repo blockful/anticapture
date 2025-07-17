@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { FundingSourcesCardProps } from "@/features/donation/types";
+import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
 import { ExternalLink } from "lucide-react";
 
 export const FundingSourcesCard = ({
@@ -10,11 +12,11 @@ export const FundingSourcesCard = ({
   sources,
 }: FundingSourcesCardProps) => {
   return (
-    <Card className="bg-surface-default w-full border-0 shadow-sm">
+    <Card className="bg-surface-default w-full rounded-none border-0 shadow-sm">
       <CardContent className="p-5">
         <div className="space-y-6">
           <div>
-            <h3 className="text-primary !text-alternative-sm mb-2 font-mono font-medium tracking-wide uppercase">
+            <h3 className="text-primary !text-alternative-sm mb-2 font-mono font-medium uppercase">
               {title}
             </h3>
             <p className="text-secondary text-sm leading-relaxed">
@@ -23,52 +25,37 @@ export const FundingSourcesCard = ({
           </div>
 
           {/* Horizontal layout for funding sources */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {sources.map((source, index) => {
-              const SourceContent = (
-                <div className="bg-surface-background hover:bg-surface-background/80 flex h-full items-center gap-4 rounded-lg p-4 transition-colors">
-                  {source.logo && (
-                    <div className="bg-surface-secondary flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-                      <img
-                        src={source.logo}
-                        alt={`${source.name} logo`}
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                    </div>
-                  )}
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+            {sources.map((source, index) => (
+              <Link
+                key={index}
+                href={source.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block h-full cursor-pointer"
+              >
+                <div className="text-primary border-light-dark flex h-full items-center gap-3 border bg-transparent p-3 transition-colors hover:bg-white/5">
+                  <DaoAvatarIcon
+                    daoId={source.daoId}
+                    className="size-9"
+                    isRounded={true}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex items-center justify-between">
-                      <h4 className="text-primary flex items-center gap-1 truncate text-sm font-medium">
+                      <h4 className="text-md flex items-center gap-1 truncate font-medium">
                         {source.name}
-                        {source.link && (
-                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                        )}
                       </h4>
-                      <span className="text-accent ml-2 text-sm font-medium whitespace-nowrap">
-                        {source.amount}
-                      </span>
+                      <div className="bg-success/12 text-success flex items-center gap-1 rounded-full px-1.5 py-0.5">
+                        <span className="text-accent text-xs font-medium whitespace-nowrap">
+                          {source.amount}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-secondary text-xs">{source.date}</p>
                   </div>
                 </div>
-              );
-
-              return source.link ? (
-                <a
-                  key={index}
-                  href={source.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block h-full cursor-pointer"
-                >
-                  {SourceContent}
-                </a>
-              ) : (
-                <div key={index} className="h-full">
-                  {SourceContent}
-                </div>
-              );
-            })}
+              </Link>
+            ))}
           </div>
         </div>
       </CardContent>
