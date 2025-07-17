@@ -14,7 +14,10 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 
 const PieChartCustomTooltip: React.FC<
   TooltipProps<number, string> & {
-    chartConfig: Record<string, { label: string; color: string }>;
+    chartConfig: Record<
+      string,
+      { label: string; color: string; ensName?: string }
+    >;
     currentVotingPower: number;
   }
 > = ({ active, payload, chartConfig, currentVotingPower }) => {
@@ -50,7 +53,10 @@ export const ThePieChart = ({
 }: {
   currentVotingPower: number;
   pieData: { name: string; value: number }[];
-  chartConfig: Record<string, { label: string; color: string }>;
+  chartConfig: Record<
+    string,
+    { label: string; color: string; ensName?: string }
+  >;
 }) => {
   if (!pieData || pieData.length === 0) {
     return (

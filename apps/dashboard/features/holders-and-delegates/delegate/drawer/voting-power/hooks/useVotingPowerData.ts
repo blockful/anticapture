@@ -1,6 +1,8 @@
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import { Address } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 export interface VotingPowerData {
@@ -12,7 +14,7 @@ export interface VotingPowerData {
   // Dados calculados
   chartConfig: Record<
     string,
-    { label: string; color: string; percentage: string }
+    { label: string; color: string; percentage: string; ensName?: string }
   >;
   pieData: { name: string; value: number }[];
   legendItems: { color: string; label: string; percentage: string }[];
@@ -38,6 +40,15 @@ export const useVotingPowerData = (
       daoId,
       address,
     });
+
+  // Extract addresses for ENS lookup
+  const delegatorAddresses: Address[] =
+    topFiveDelegators
+      ?.filter((delegator) => delegator.accountId && delegator.rawBalance > 0n)
+      .map((delegator) => delegator.accountId as Address) || [];
+
+  // Fetch ENS data for all delegators
+  const { data: ensData } = useMultipleEnsData(delegatorAddresses);
 
   // default Value when there is no data
   const defaultData: VotingPowerData = {
@@ -96,7 +107,7 @@ export const useVotingPowerData = (
   // Create chart config (only those with >= 1%)
   const chartConfig: Record<
     string,
-    { label: string; color: string; percentage: string }
+    { label: string; color: string; percentage: string; ensName?: string }
   > = {};
 
   // Add delegators to config (only those with >= 1%)
@@ -113,10 +124,14 @@ export const useVotingPowerData = (
 
     // Only add delegators with >= 1% to individual config
     if (percentage >= 1) {
+      const ensName = ensData?.[delegator.accountId as Address]?.ens;
+      const displayLabel = ensName || formatAddress(delegator.accountId) || "";
+
       chartConfig[key] = {
-        label: formatAddress(delegator.accountId || ""),
+        label: displayLabel,
         color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
         percentage: percentage.toFixed(2),
+        ensName,
       };
     }
   });
@@ -162,7 +177,7 @@ export const useVotingPowerData = (
   const legendItems = Object.entries(chartConfig).map(
     ([key, config]: [
       string,
-      { color: string; label: string; percentage: string },
+      { color: string; label: string; percentage: string; ensName?: string },
     ]) => ({
       color: config.color,
       label: config.label,
