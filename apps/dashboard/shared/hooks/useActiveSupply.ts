@@ -26,8 +26,9 @@ export const fetchActiveSupply = async ({
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
-  const response: { data: { data: { compareActiveSupply: ActiveSupplyResponse } } } =
-    await axios.post(`${BACKEND_ENDPOINT}`, { query });
+  const response: {
+    data: { data: { compareActiveSupply: ActiveSupplyResponse } };
+  } = await axios.post(`${BACKEND_ENDPOINT}`, { query });
   const { compareActiveSupply } = response.data.data as {
     compareActiveSupply: ActiveSupplyResponse;
   };

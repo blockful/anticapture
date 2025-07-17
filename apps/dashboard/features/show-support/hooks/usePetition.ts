@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { Address, createPublicClient, Hex, http, parseAbi } from "viem";
@@ -13,7 +13,7 @@ import daoConfig from "@/shared/dao-config";
 import { getChain } from "@/shared/utils/chain";
 
 /**
- * 
+ *
  * Interface for the petition API response
  */
 export interface PetitionResponse {
@@ -23,7 +23,6 @@ export interface PetitionResponse {
   userSigned: boolean;
 }
 
-
 const GET_SIGNERS_QUERY = /* GraphQL */ `
   query Votes($proposal: String!) {
     votes(where: { proposal: $proposal }) {
@@ -31,7 +30,6 @@ const GET_SIGNERS_QUERY = /* GraphQL */ `
     }
   }
 `;
-
 
 /**
  * Hook for fetching petition signatures
@@ -41,7 +39,7 @@ const GET_SIGNERS_QUERY = /* GraphQL */ `
  */
 export const usePetitionSignatures = (
   daoId: DaoIdEnum,
-  userAddress?: Address
+  userAddress?: Address,
 ) => {
   const { data: walletClient } = useWalletClient();
   const [writeError, setWriteError] = useState<string | null>(null);
@@ -51,12 +49,13 @@ export const usePetitionSignatures = (
 
   const client = createPublicClient({
     chain: getChain(config.daoOverview.chainId),
-    transport: http()
+    transport: http(),
   });
 
-  const fetchPetitionSignatures = async (
-    [, userAddress]: [string, Address | undefined]
-  ): Promise<PetitionResponse> => {
+  const fetchPetitionSignatures = async ([, userAddress]: [
+    string,
+    Address | undefined,
+  ]): Promise<PetitionResponse> => {
     const response = await fetch("https://hub.snapshot.org/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -68,18 +67,19 @@ export const usePetitionSignatures = (
       }),
     });
 
-    if (!response.ok) return {
-      signers: [],
-      totalSignatures: 0,
-      totalSignaturesPower: "0",
-      userSigned: false,
-    };
+    if (!response.ok)
+      return {
+        signers: [],
+        totalSignatures: 0,
+        totalSignaturesPower: "0",
+        userSigned: false,
+      };
 
     const { data } = await response.json();
     const signers = data.votes.map(({ voter }: any) => voter);
     const tokenAddress = config.daoOverview.contracts.token;
 
-    const votePowers = await multicall(client, {
+    const votePowers = (await multicall(client, {
       contracts: signers.map((signer: Address) => ({
         abi: parseAbi([
           "function getVotes(address account) view returns (uint256)",
@@ -88,7 +88,7 @@ export const usePetitionSignatures = (
         functionName: "getVotes",
         args: [signer],
       })),
-    }) as [{ result: bigint }];
+    })) as [{ result: bigint }];
 
     const totalSignaturesPower = votePowers
       .reduce((acc, curr) => acc + curr.result, 0n)
@@ -103,10 +103,11 @@ export const usePetitionSignatures = (
   };
 
   const swrKey: [string, Address?] = ["petitionSignatures", userAddress];
-  const { data: signatures, error, isLoading } = useSWR<PetitionResponse>(
-    swrKey,
-    fetchPetitionSignatures
-  );
+  const {
+    data: signatures,
+    error,
+    isLoading,
+  } = useSWR<PetitionResponse>(swrKey, fetchPetitionSignatures);
 
   const submitSignature = async (userAddress: Address) => {
     const { snapshotProposal: proposal, snapshotSpace: space } =
@@ -123,7 +124,7 @@ export const usePetitionSignatures = (
         space,
         app: "Anticapture",
         from: userAddress,
-        reason: `I support ${config.name} fully integrated into the Anticapture`
+        reason: `I support ${config.name} fully integrated into the Anticapture`,
       });
 
       mutate(swrKey);

@@ -29,10 +29,11 @@ export const fetchDelegatedSupply = async ({
       changeRate
     }
   }`;
-  const response: { data: { data: { compareDelegatedSupply: DelegatedSupplyResponse } } } =
-    await axios.post(`${BACKEND_ENDPOINT}`, {
-      query,
-    });
+  const response: {
+    data: { data: { compareDelegatedSupply: DelegatedSupplyResponse } };
+  } = await axios.post(`${BACKEND_ENDPOINT}`, {
+    query,
+  });
   const { compareDelegatedSupply } = response.data.data as {
     compareDelegatedSupply: DelegatedSupplyResponse;
   };

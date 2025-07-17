@@ -24,10 +24,10 @@ export const fetchVotes = async ({
       changeRate
     }
   }`;
-  const response: { data: { data: { compareVotes: VotesResponse } } } = await axios.post(`${BACKEND_ENDPOINT}`, {
+  const response: { data: { data: { compareVotes: VotesResponse } } } =
+    await axios.post(`${BACKEND_ENDPOINT}`, {
       query,
-    },
-  );
+    });
   const { compareVotes } = response.data.data as {
     compareVotes: VotesResponse;
   };
