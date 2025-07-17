@@ -58,7 +58,13 @@ export const voteCast = async (
       againstVotes: current.againstVotes + (support === 0 ? votingPower : 0n),
       forVotes: current.forVotes + (support === 1 ? votingPower : 0n),
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
-    }));
+    }))
+    .catch((e) =>
+      console.error({
+        message: "Error updating proposal vote totals",
+        error: e,
+      }),
+    );
 };
 
 export const proposalCreated = async (
