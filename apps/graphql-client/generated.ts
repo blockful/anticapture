@@ -293,10 +293,7 @@ export type QueryProposalsActivityArgs = {
   daoId: QueryInput_ProposalsActivity_DaoId;
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_ProposalsActivity_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  userVoteFilter?: InputMaybe<QueryInput_ProposalsActivity_UserVoteFilter>;
 };
 
 
@@ -1366,24 +1363,6 @@ export enum QueryInput_ProposalsActivity_DaoId {
   Arb = 'ARB',
   Ens = 'ENS',
   Uni = 'UNI'
-}
-
-export enum QueryInput_ProposalsActivity_OrderBy {
-  VoteTiming = 'voteTiming',
-  VotingPower = 'votingPower'
-}
-
-export enum QueryInput_ProposalsActivity_OrderDirection {
-  Asc = 'asc',
-  Desc = 'desc'
-}
-
-/** Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote) */
-export enum QueryInput_ProposalsActivity_UserVoteFilter {
-  Abstain = 'abstain',
-  No = 'no',
-  NoVote = 'no_vote',
-  Yes = 'yes'
 }
 
 export enum QueryInput_TotalAssets_DaoId {
