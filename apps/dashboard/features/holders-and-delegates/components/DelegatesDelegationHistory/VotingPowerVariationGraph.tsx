@@ -19,7 +19,7 @@ import {
   VotingPowerTimePeriodSwitcher,
   VotingPowerTimePeriod,
 } from "./VotingPowerTimePeriodSwitcher";
-import { SkeletonRow } from "@/shared/components";
+import { ChartExceptionState } from "@/shared/components";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -45,63 +45,51 @@ export const VotingPowerVariationGraph = ({
 
   if (loading) {
     return (
-      <div className="w-full">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-primary text-lg font-semibold">
-            VOTING POWER VARIATION
-          </h3>
+      <ChartExceptionState
+        state="loading"
+        title="VOTING POWER VARIATION"
+        headerContent={
           <VotingPowerTimePeriodSwitcher
             defaultValue="all"
             setTimePeriod={setSelectedPeriod}
             isSmall={true}
           />
-        </div>
-        <div className="h-[300px] w-full">
-          <SkeletonRow className="h-[300px] w-full" />
-        </div>
-      </div>
+        }
+      />
     );
   }
 
   if (error) {
     return (
-      <div className="w-full">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-primary text-lg font-semibold">
-            VOTING POWER VARIATION
-          </h3>
+      <ChartExceptionState
+        state="error"
+        title="VOTING POWER VARIATION"
+        errorMessage="Error loading data"
+        headerContent={
           <VotingPowerTimePeriodSwitcher
             defaultValue="all"
             setTimePeriod={setSelectedPeriod}
             isSmall={true}
           />
-        </div>
-        <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-          <div className="text-secondary text-sm">Error loading data</div>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
   if (!delegationHistory || delegationHistory.length === 0) {
     return (
-      <div className="w-full">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-primary text-lg font-semibold">
-            VOTING POWER VARIATION
-          </h3>
+      <ChartExceptionState
+        state="no-data"
+        title="VOTING POWER VARIATION"
+        noDataMessage="No voting power data available"
+        headerContent={
           <VotingPowerTimePeriodSwitcher
             defaultValue="all"
             setTimePeriod={setSelectedPeriod}
             isSmall={true}
           />
-        </div>
-        <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-          <div className="text-secondary text-sm">
-            No voting power data available
-          </div>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
