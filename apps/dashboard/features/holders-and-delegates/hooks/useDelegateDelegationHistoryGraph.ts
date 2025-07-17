@@ -27,29 +27,29 @@ export function useDelegateDelegationHistoryGraph(
 ): UseDelegateDelegationHistoryGraphResult {
   // Calculate timestamp range based on time period
   const { fromTimestamp, toTimestamp } = useMemo(() => {
-    const now = Date.now();
+    const nowInSeconds = Date.now()/1000;
 
     // For "all", treat as all time by not setting limits
     if (timePeriod === "all") {
       return { fromTimestamp: undefined, toTimestamp: undefined };
     }
 
-    let daysInMs: number;
+    let daysInSeconds: number;
     switch (timePeriod) {
       case "30d":
-        daysInMs = 30 * 24 * 60 * 60 * 1000;
+        daysInSeconds = 30 * SECONDS_PER_DAY;
         break;
       case "90d":
-        daysInMs = 90 * 24 * 60 * 60 * 1000;
+        daysInSeconds = 90  * SECONDS_PER_DAY;
         break;
       default:
         // Default to 30 days if unknown
-        daysInMs = 30 * 24 * 60 * 60 * 1000;
+        daysInSeconds = 30 * SECONDS_PER_DAY;
         break;
     }
 
-    const fromTimestamp = Math.floor((now - daysInMs) / 1000);
-    const toTimestamp = Math.floor(now / 1000);
+    const fromTimestamp = Math.floor((nowInSeconds - daysInSeconds));
+    const toTimestamp = Math.floor(nowInSeconds);
 
     return { fromTimestamp, toTimestamp };
   }, [timePeriod]);
