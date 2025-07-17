@@ -101,7 +101,9 @@ export const VotingPowerTable = ({
                 activeState={
                   sortBy === "balance" && sortOrder === "asc"
                     ? ArrowState.UP
-                    : ArrowState.DOWN
+                    : sortBy === "balance" && sortOrder === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
                 }
               />
             </button>
@@ -148,7 +150,9 @@ export const VotingPowerTable = ({
                 activeState={
                   sortBy === "timestamp" && sortOrder === "asc"
                     ? ArrowState.UP
-                    : ArrowState.DOWN
+                    : sortBy === "timestamp" && sortOrder === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
                 }
               />
             </button>
@@ -159,7 +163,7 @@ export const VotingPowerTable = ({
         if (!isMounted || loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse"
+              parentClassName="flex animate-pulse px-2"
               className="h-4 w-20"
             />
           );
