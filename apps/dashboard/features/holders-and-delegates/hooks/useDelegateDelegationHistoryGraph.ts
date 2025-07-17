@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPowerTimePeriod } from "../components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -27,7 +28,7 @@ export function useDelegateDelegationHistoryGraph(
 ): UseDelegateDelegationHistoryGraphResult {
   // Calculate timestamp range based on time period
   const { fromTimestamp, toTimestamp } = useMemo(() => {
-    const nowInSeconds = Date.now()/1000;
+    const nowInSeconds = Date.now() / 1000;
 
     // For "all", treat as all time by not setting limits
     if (timePeriod === "all") {
@@ -40,7 +41,7 @@ export function useDelegateDelegationHistoryGraph(
         daysInSeconds = 30 * SECONDS_PER_DAY;
         break;
       case "90d":
-        daysInSeconds = 90  * SECONDS_PER_DAY;
+        daysInSeconds = 90 * SECONDS_PER_DAY;
         break;
       default:
         // Default to 30 days if unknown
@@ -48,7 +49,7 @@ export function useDelegateDelegationHistoryGraph(
         break;
     }
 
-    const fromTimestamp = Math.floor((nowInSeconds - daysInSeconds));
+    const fromTimestamp = Math.floor(nowInSeconds - daysInSeconds);
     const toTimestamp = Math.floor(nowInSeconds);
 
     return { fromTimestamp, toTimestamp };
