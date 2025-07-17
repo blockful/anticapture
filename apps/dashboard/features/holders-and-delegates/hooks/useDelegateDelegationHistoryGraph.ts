@@ -3,6 +3,7 @@ import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPowerTimePeriod } from "../components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { formatUnits } from "viem";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -75,12 +76,11 @@ export function useDelegateDelegationHistoryGraph(
 
     return data.votingPowerHistorys.items
       .map((item) => {
-        // Convert from wei to token units (divide by 10^18)
-        const votingPowerWei = BigInt(item.votingPower.toString());
-        const deltaWei = BigInt(item.delta.toString());
-
-        const votingPower = Number(votingPowerWei) / Math.pow(10, 18);
-        const delta = Number(deltaWei) / Math.pow(10, 18);
+        // Convert from wei to token units using Viem's formatUnits
+        const votingPower = Number(
+          formatUnits(BigInt(item.votingPower.toString()), 18),
+        );
+        const delta = Number(formatUnits(BigInt(item.delta.toString()), 18));
         const isGain = delta > 0;
 
         // Determine transaction type
