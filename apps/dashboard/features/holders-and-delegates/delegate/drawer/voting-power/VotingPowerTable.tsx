@@ -56,7 +56,7 @@ export const VotingPowerTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 items-center gap-2">
+            <div className="flex h-10 w-full items-center gap-2 px-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -162,10 +162,12 @@ export const VotingPowerTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse px-2"
-              className="h-4 w-20"
-            />
+            <div className="flex w-full px-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse px-2"
+                className="h-4 w-20"
+              />
+            </div>
           );
         }
 
