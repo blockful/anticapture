@@ -1,15 +1,220 @@
-import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import { DaoConfiguration } from "@/shared/dao-config/types";
+import {
+  RiskLevel,
+  SupportStageEnum,
+  GovernanceImplementationEnum,
+} from "@/shared/types/enums";
+import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { OptimismIcon } from "@/shared/components/icons";
+
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  supportStage: SupportStageEnum.FULL,
   icon: OptimismIcon,
-  supportStage: SupportStageEnum.ANALYSIS,
-  disableDaoPage: true,
   daoOverview: {
     chainId: 10,
+    snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
+      governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
       token: "0x4200000000000000000000000000000000000042",
+      timelock: "0x0eDd4B2cCCf41453D8B5443FBB96cc577d1d06bF",
+    },
+    cancelFunction: undefined,
+    rules: {
+      delay: false,
+      changeVote: false,
+      timelock: true,
+      cancelFunction: true,
+      logic: "For + Abstain + Against",
     },
   },
+  attackProfitability: {
+    riskLevel: RiskLevel.LOW,
+    supportsLiquidTreasuryCall: false,
+  },
+  riskAnalysis: true,
+  governanceImplementation: {
+    // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
+    fields: {
+      [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.AUDITED_CONTRACTS
+          ].description,
+      },
+      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+        value: "No",
+        riskLevel: RiskLevel.HIGH,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.INTERFACE_HIJACK
+          ].description,
+        requirements: [
+          "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
+          "Currently, the DAO’s domains have no publicly verifiable DNS-level protections (High Risk).",
+          "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
+        ],
+      },
+      [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
+        value: "No Treasury",
+        riskLevel: RiskLevel.NONE,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
+          ].description,
+        requirements: [
+          "The DAO has no treasury directly controllable by governance, so there is no risk of attack profitability.",
+          "The treasury risks in the Collective are related to mistakes or malicious actions by the Foundation.",
+        ],
+      },
+      [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
+        value: "Does not apply",
+        riskLevel: RiskLevel.NONE,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
+          ].description,
+        requirements: [
+          "The Foundation, as manager of the contract, is the only one that can propose, so there's no risk of proposal flashloan attacks.",
+          "The flashloan protection in the contract is commented out, due to the onlyManagerOrTimelock bein used on the propose() function.",
+        ],
+      },
+      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
+        value: "0",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSAL_THRESHOLD
+          ].description,
+        requirements: [
+          "The proposal threshold is 0, but the propose() function is only callable by the manager, which is the Foundation.",
+        ],
+      },
+      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
+        value: "Manager Only",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
+          ].description,
+        requirements: [
+          "Only the manager, timelock or proposer can cancel a proposal. As the manager is also the only possible proposer, this means only the manager (OP Foundation) can propose or cancel proposals.",
+        ],
+      },
+      [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.SECURITY_COUNCIL
+          ].description,
+      },
+      [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
+        value: "Does not apply",
+        riskLevel: RiskLevel.NONE,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.SPAM_RESISTANCE
+          ].description,
+        requirements: [
+          "The Foundation is the only allowed proposer, so there is no risk of spam attacks.",
+        ],
+      },
+      [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
+        value: "No",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.TIMELOCK_ADMIN
+          ].description,
+        requirements: [
+          "The timelock holds no assets and is not used for governance execution.",
+          "The timelock roles have not been audited, but the timelock is not used for governance execution.",
+        ],
+      },
+      [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
+        value: "Does not apply",
+        riskLevel: RiskLevel.NONE,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.TIMELOCK_DELAY
+          ].description,
+        requirements: ["The timelock is not used for governance execution."],
+      },
+      [GovernanceImplementationEnum.VETO_STRATEGY]: {
+        value: "Does not apply",
+        riskLevel: RiskLevel.NONE,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VETO_STRATEGY
+          ].description,
+        requirements: [
+          "Proposals are not executed by the timelock, but by the Foundation, so there is no need for an explicit veto strategy.",
+          "The Foundation can veto proposals by calling the cancel() function during voting, or by just not executing the proposal after approved.",
+        ],
+      },
+      [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
+        value: "No",
+        riskLevel: RiskLevel.MEDIUM,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTE_MUTABILITY
+          ].description,
+        requirements: [
+          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
+          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through an adapted castVoteWithReasonAndParams call or equivalent.",
+        ],
+      },
+      [GovernanceImplementationEnum.VOTING_DELAY]: {
+        value: "0 seconds",
+        riskLevel: RiskLevel.NONE,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_DELAY
+          ].description,
+        requirements: [
+          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 0 blocks delay means proposals are live for voting as soon as created by the Foundation.",
+          "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
+          "The Foundation is the only allowed proposer, and it follows a voting schedule, so there's no reason to have a voting delay.",
+        ],
+      },
+      [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
+        value: "Yes(default)",
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
+          ].description,
+      },
+      [GovernanceImplementationEnum.VOTING_PERIOD]: {
+        value: "6 days",
+        riskLevel: RiskLevel.MEDIUM,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_PERIOD
+          ].description,
+        requirements: [
+          "The voting period is 6 days, with the recommended safety being of 7 or more for a low level of risk.",
+          "The Foundation is the only allowed proposer, and it follows a voting schedule, reducing the impact of this risk.",
+        ],
+      },
+      [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
+        value: "No",
+        riskLevel: RiskLevel.HIGH,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VOTING_SUBSIDY
+          ].description,
+        requirements: [
+          "The voting subsidy is not applied, requiring delegates to pay gas on the proposals they vote on.",
+          "With no voting subsidy, the structure is more vulnerable to spam attacks, as it's more costly for the defense than the attacker",
+          "The Foundation is the only allowed proposer, so the risk of spam attacks are low. Still, the DAO should consider applying a voting subsidy to make its structure more resilient.",
+        ],
+      },
+    },
+  },
+  resilienceStages: true,
+  tokenDistribution: true,
 };
