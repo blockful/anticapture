@@ -15,8 +15,8 @@ export const renderCustomizedLabel = ({
   percent: number;
   index: number;
 }) => {
-  // Early return if percentage is below 8% (0.08)
-  if (percent < 0.08) return null;
+  // Early return if percentage is below 15% (0.15)
+  if (percent < 0.15) return null;
   const RADIAN = Math.PI / 180;
 
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;

@@ -90,7 +90,7 @@ export const ThePieChart = ({
                 <Cell
                   key={`cell-${index}`}
                   fill={color}
-                  className="transition-all duration-200 hover:opacity-80"
+                  className="transition-all duration-200 hover:opacity-60"
                 />
               );
             })}

@@ -78,6 +78,7 @@ export const VotingPower = ({
     legendItems,
     pieData,
     chartConfig,
+    loading: loadingVotingPowerData,
   } = useVotingPowerData(daoId, address);
   const { pagination, fetchPreviousPage, fetchNextPage, fetchingMore } =
     useVotingPower({
@@ -85,7 +86,10 @@ export const VotingPower = ({
       address: address,
     });
 
-  if (!topFiveDelegators || topFiveDelegators.length === 0) {
+  if (
+    !topFiveDelegators ||
+    (topFiveDelegators.length === 0 && !loadingVotingPowerData)
+  ) {
     return (
       <BlankState
         variant="default"
