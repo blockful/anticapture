@@ -84,12 +84,8 @@ function calculateTimeLeft(targetTimestamp: number = 0): CountdownTime {
   }
 
   const days = Math.floor(diffSeconds / (60 * 60 * 24));
-  const hours = Math.floor(
-    (diffSeconds % (60 * 60 * 24)) / (60 * 60),
-  );
-  const minutes = Math.floor(
-    (diffSeconds % (60 * 60)) / (60),
-  );
+  const hours = Math.floor((diffSeconds % (60 * 60 * 24)) / (60 * 60));
+  const minutes = Math.floor((diffSeconds % (60 * 60)) / 60);
   const seconds = Math.floor(diffSeconds % 60);
 
   return {

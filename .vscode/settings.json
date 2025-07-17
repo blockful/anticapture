@@ -51,5 +51,8 @@
   "prettier.configPath": "",
   "prettier.useEditorConfig": false,
   "prettier.requireConfig": true,
-  "prettier.resolveGlobalModules": false
+  "prettier.resolveGlobalModules": false,
+  
+  // Line endings - Force Unix line endings (LF) to avoid CRLF issues
+  "files.eol": "\n"
 }

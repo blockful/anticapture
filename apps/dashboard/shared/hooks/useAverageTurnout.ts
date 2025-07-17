@@ -29,8 +29,9 @@ export const fetchAverageTurnout = async ({
         changeRate
     }
   }`;
-  const response: { data: { data: { compareAverageTurnout: AverageTurnoutResponse } } } =
-    await axios.post(`${BACKEND_ENDPOINT}`, { query });
+  const response: {
+    data: { data: { compareAverageTurnout: AverageTurnoutResponse } };
+  } = await axios.post(`${BACKEND_ENDPOINT}`, { query });
   const { compareAverageTurnout } = response.data.data as {
     compareAverageTurnout: AverageTurnoutResponse;
   };

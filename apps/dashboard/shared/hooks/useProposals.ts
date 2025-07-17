@@ -24,10 +24,10 @@ export const fetchProposals = async ({
         changeRate
     }
   }`;
-  const response: { data: { data: { compareProposals: ProposalsResponse } } } = await axios.post(`${BACKEND_ENDPOINT}`, {
+  const response: { data: { data: { compareProposals: ProposalsResponse } } } =
+    await axios.post(`${BACKEND_ENDPOINT}`, {
       query,
-    },
-  );
+    });
   const { compareProposals } = response.data.data as {
     compareProposals: ProposalsResponse;
   };
