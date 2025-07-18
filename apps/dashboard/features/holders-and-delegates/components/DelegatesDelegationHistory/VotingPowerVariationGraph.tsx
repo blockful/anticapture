@@ -163,10 +163,11 @@ export const VotingPowerVariationGraph = ({
             domain={["dataMin", "dataMax"]}
             tickFormatter={(value) => {
               const date = new Date(value);
-              return date.toLocaleDateString("en-US", {
+              const month = date.toLocaleDateString("en-US", {
                 month: "short",
-                year: "numeric",
               });
+              const year = date.getFullYear().toString().slice(-2);
+              return `${month} '${year}`;
             }}
             stroke="var(--base-dimmed)"
             fontSize={12}
