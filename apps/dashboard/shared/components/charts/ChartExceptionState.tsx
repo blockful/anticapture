@@ -12,7 +12,7 @@ interface ChartExceptionStateProps {
 export const ChartExceptionState = ({
   state,
   title,
-  height = "h-[300px]",
+  height = "h-[200px]",
   errorMessage = "Error loading data",
   noDataMessage = "No data available",
   headerContent,
@@ -48,8 +48,10 @@ export const ChartExceptionState = ({
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-primary text-lg font-semibold">{title}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
+          {title}
+        </h3>
         {headerContent}
       </div>
       {renderContent()}

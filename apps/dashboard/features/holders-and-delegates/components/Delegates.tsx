@@ -15,6 +15,8 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { Plus } from "lucide-react";
 import { ProgressCircle } from "./ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { useScreenSize } from "@/shared/hooks";
+import { Address } from "viem";
 
 interface DelegateTableData {
   address: string;
@@ -88,6 +90,8 @@ export const Delegates = ({
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
+  const { isMobile } = useScreenSize();
+
   // Handle sorting for voting power and delegators
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -194,14 +198,16 @@ export const Delegates = ({
               variant="rounded"
               showName={true}
             />
-            <button
-              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
-              tabIndex={-1}
-              onClick={(e) => handleOpenDrawer(address)}
-            >
-              <Plus className="size-3.5" />
-              <span className="text-sm font-medium">Details</span>
-            </button>
+            {!isMobile && (
+              <button
+                className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
+                tabIndex={-1}
+                onClick={(e) => handleOpenDrawer(address)}
+              >
+                <Plus className="size-3.5" />
+                <span className="text-sm font-medium">Details</span>
+              </button>
+            )}
           </div>
         );
       },
@@ -238,7 +244,9 @@ export const Delegates = ({
           className="flex h-8 w-full justify-end rounded-b-none px-4"
           onClick={() => handleSort("votingPower")}
         >
-          <h4 className="text-table-header">Voting Power ({daoId})</h4>
+          <h4 className="text-table-header whitespace-nowrap">
+            Voting Power ({daoId})
+          </h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
@@ -463,9 +471,7 @@ export const Delegates = ({
           data={tableData}
           withPagination={true}
           withSorting={true}
-          onRowClick={(row) => {
-            // Row click handler - can be used for navigation or actions
-          }}
+          onRowClick={(row) => handleOpenDrawer(row.address as Address)}
           isTableSmall={true}
         />
 

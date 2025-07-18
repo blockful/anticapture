@@ -10,7 +10,10 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { useBalanceHistory } from "../hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { FilterDropdown, FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
+import {
+  FilterDropdown,
+  FilterOption,
+} from "@/shared/components/dropdowns/FilterDropdown";
 
 interface BalanceHistoryData {
   id: string;
@@ -165,7 +168,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center px-2 py-2">
+          <div className="flex h-10 items-center px-2 py-2 whitespace-nowrap">
             <span className="text-primary text-sm">{date}</span>
           </div>
         );

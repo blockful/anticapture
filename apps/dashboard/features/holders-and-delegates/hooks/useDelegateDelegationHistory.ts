@@ -57,7 +57,7 @@ export function useDelegateDelegationHistory(
   orderBy: string = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
 ): UseDelegateDelegationHistoryResult {
-  const itemsPerPage = 10;
+  const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);

@@ -61,51 +61,57 @@ export const VotingPowerVariationGraph = ({
 
   if (loading) {
     return (
-      <ChartExceptionState
-        state="loading"
-        title="VOTING POWER VARIATION"
-        headerContent={
-          <VotingPowerTimePeriodSwitcher
-            value={selectedPeriod}
-            setTimePeriod={setSelectedPeriod}
-            isSmall={true}
-          />
-        }
-      />
+      <div className="w-full">
+        <ChartExceptionState
+          state="loading"
+          title="VOTING POWER VARIATION"
+          headerContent={
+            <VotingPowerTimePeriodSwitcher
+              value={selectedPeriod}
+              setTimePeriod={setSelectedPeriod}
+              isSmall={true}
+            />
+          }
+        />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <ChartExceptionState
-        state="error"
-        title="VOTING POWER VARIATION"
-        errorMessage="Error loading data"
-        headerContent={
-          <VotingPowerTimePeriodSwitcher
-            value={selectedPeriod}
-            setTimePeriod={setSelectedPeriod}
-            isSmall={true}
-          />
-        }
-      />
+      <div className="w-full">
+        <ChartExceptionState
+          state="error"
+          title="VOTING POWER VARIATION"
+          errorMessage="Error loading data"
+          headerContent={
+            <VotingPowerTimePeriodSwitcher
+              value={selectedPeriod}
+              setTimePeriod={setSelectedPeriod}
+              isSmall={true}
+            />
+          }
+        />
+      </div>
     );
   }
 
   if (!delegationHistory || delegationHistory.length === 0) {
     return (
-      <ChartExceptionState
-        state="no-data"
-        title="VOTING POWER VARIATION"
-        noDataMessage="No voting power data available"
-        headerContent={
-          <VotingPowerTimePeriodSwitcher
-            value={selectedPeriod}
-            setTimePeriod={setSelectedPeriod}
-            isSmall={true}
-          />
-        }
-      />
+      <div className="w-full">
+        <ChartExceptionState
+          state="no-data"
+          title="VOTING POWER VARIATION"
+          noDataMessage="No voting power data available"
+          headerContent={
+            <VotingPowerTimePeriodSwitcher
+              value={selectedPeriod}
+              setTimePeriod={setSelectedPeriod}
+              isSmall={true}
+            />
+          }
+        />
+      </div>
     );
   }
 
@@ -140,8 +146,8 @@ export const VotingPowerVariationGraph = ({
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-primary text-lg font-semibold">
+      <div className="flex items-center justify-between">
+        <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
           VOTING POWER VARIATION
         </h3>
         <VotingPowerTimePeriodSwitcher
@@ -150,7 +156,7 @@ export const VotingPowerVariationGraph = ({
           isSmall={true}
         />
       </div>
-      <ChartContainer config={chartConfig} className="h-[300px] w-full">
+      <ChartContainer config={chartConfig} className="h-[200px] w-full">
         <LineChart
           data={chartData}
           margin={{ top: 25, right: 30, left: -20, bottom: 5 }}

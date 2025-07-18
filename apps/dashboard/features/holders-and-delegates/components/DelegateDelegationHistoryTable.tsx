@@ -144,7 +144,7 @@ export const DelegateDelegationHistoryTable = ({
 
         return (
           <div className="flex h-10 items-center justify-start px-4 py-2">
-            <span className="text-primary text-sm font-medium">
+            <span className="text-primary text-sm font-medium whitespace-nowrap">
               {formatRelativeTime(timestamp)}
             </span>
           </div>
@@ -206,7 +206,7 @@ export const DelegateDelegationHistoryTable = ({
                 {amount}
               </span>
             </div>
-            <span className="text-secondary text-xs">
+            <span className="text-secondary text-xs whitespace-nowrap">
               {delegationType.type}
             </span>
           </div>
@@ -357,9 +357,9 @@ export const DelegateDelegationHistoryTable = ({
 
   if (loading && delegationHistory.length === 0) {
     return (
-      <div className="bg-surface-default flex h-full flex-col">
+      <div className="bg-surface-default flex flex-col">
         {/* Table */}
-        <div className="flex flex-1 flex-col gap-2 p-4">
+        <div className="flex flex-col gap-2 p-4">
           <TheTable
             columns={columns}
             data={Array.from({ length: 10 }, (_, i) => ({
@@ -396,7 +396,7 @@ export const DelegateDelegationHistoryTable = ({
 
   if (error) {
     return (
-      <div className="bg-surface-default flex h-full flex-col items-center justify-center p-4">
+      <div className="bg-surface-default flex flex-col items-center justify-center p-4">
         <div className="text-danger text-center">
           <p className="text-lg font-semibold">
             Error loading delegation history
@@ -408,9 +408,9 @@ export const DelegateDelegationHistoryTable = ({
   }
 
   return (
-    <div className="bg-surface-default flex h-full flex-col">
+    <div className="bg-surface-default flex flex-col">
       {/* Table */}
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-col gap-2 p-4">
         <TheTable
           columns={columns}
           data={delegationHistory}
