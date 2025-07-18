@@ -1,5 +1,10 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
+import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
+import { ApolloError } from "@apollo/client";
+
+type VotingPowerHistoryItem =
+  GetDelegateDelegationHistoryQuery["votingPowerHistorys"]["items"][0];
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -40,7 +45,7 @@ export interface PaginationInfo {
 export interface UseDelegateDelegationHistoryResult {
   delegationHistory: DelegationHistoryItem[];
   loading: boolean;
-  error: any;
+  error: ApolloError | undefined;
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
@@ -89,50 +94,65 @@ export function useDelegateDelegationHistory(
   const transformedData = useMemo(() => {
     if (!data?.votingPowerHistorys?.items) return [];
 
-    return data.votingPowerHistorys.items.map((item: any) => {
-      // Determine the type, action, and direction based on the data and delta
-      let type: "delegation" | "transfer" = "delegation";
-      let action = "Unknown";
-      let isGain = false;
+    return data.votingPowerHistorys.items.map(
+      (item: VotingPowerHistoryItem) => {
+        // Determine the type, action, and direction based on the data and delta
+        let type: "delegation" | "transfer" = "delegation";
+        let action = "Unknown";
+        let isGain = false;
 
-      // Parse delta to determine if it's a gain or loss
-      const deltaValue = parseFloat(item.delta || "0");
-      isGain = deltaValue > 0;
+        // Parse delta to determine if it's a gain or loss
+        const deltaValue = parseFloat(item.delta || "0");
+        isGain = deltaValue > 0;
 
-      if (item.delegation) {
-        type = "delegation";
-        // Check if delegate gains or loses voting power
-        if (item.delegation.delegateAccountId === accountId) {
-          // Delegate gains voting power - someone delegated to them
-          action = `Received delegation from ${item.delegation.delegatorAccountId}`;
-        } else {
-          // Delegate loses voting power - delegator transferred delegation to someone else
-          action = `Lost delegation from ${item.delegation.delegatorAccountId}`;
+        if (item.delegation) {
+          type = "delegation";
+          // Check if delegate gains or loses voting power
+          if (item.delegation.delegateAccountId === accountId) {
+            // Delegate gains voting power - someone delegated to them
+            action = `Received delegation from ${item.delegation.delegatorAccountId}`;
+          } else {
+            // Delegate loses voting power - delegator transferred delegation to someone else
+            action = `Lost delegation from ${item.delegation.delegatorAccountId}`;
+          }
+        } else if (item.transfer) {
+          type = "transfer";
+          // For transfers, the selected address should always be at the delegates column
+          // If delta is negative, fromAccountId should be at the delegator column
+          // If delta is positive, toAccountId should be at the delegator column
+          if (isGain) {
+            action = `Received transfer from ${item.transfer.fromAccountId}`;
+          } else {
+            action = `Sent transfer to ${item.transfer.toAccountId}`;
+          }
         }
-      } else if (item.transfer) {
-        type = "transfer";
-        // For transfers, the selected address should always be at the delegates column
-        // If delta is negative, fromAccountId should be at the delegator column
-        // If delta is positive, toAccountId should be at the delegator column
-        if (isGain) {
-          action = `Received transfer from ${item.transfer.fromAccountId}`;
-        } else {
-          action = `Sent transfer to ${item.transfer.toAccountId}`;
-        }
-      }
 
-      return {
-        timestamp: item.timestamp?.toString() || "",
-        transactionHash: item.transactionHash || "",
-        delta: item.delta || "0",
-        delegation: item.delegation || null,
-        transfer: item.transfer || null,
-        votingPower: item.votingPower || "0",
-        type,
-        action,
-        isGain,
-      };
-    });
+        return {
+          timestamp: item.timestamp?.toString() || "",
+          transactionHash: item.transactionHash || "",
+          delta: item.delta || "0",
+          delegation: item.delegation
+            ? {
+                delegatorAccountId: item.delegation.delegatorAccountId || "",
+                delegatedValue: item.delegation.delegatedValue || "0",
+                previousDelegate: item.delegation.previousDelegate || null,
+                delegateAccountId: item.delegation.delegateAccountId || "",
+              }
+            : null,
+          transfer: item.transfer
+            ? {
+                amount: item.transfer.amount || "0",
+                fromAccountId: item.transfer.fromAccountId || "",
+                toAccountId: item.transfer.toAccountId || "",
+              }
+            : null,
+          votingPower: item.votingPower || "0",
+          type,
+          action,
+          isGain,
+        };
+      },
+    );
   }, [data, accountId]);
 
   // Pagination info
@@ -181,8 +201,10 @@ export function useDelegateDelegationHistory(
           after: paginationInfo.endCursor,
         },
         updateQuery: (
-          previousResult: any,
-          { fetchMoreResult }: { fetchMoreResult: any },
+          previousResult: GetDelegateDelegationHistoryQuery,
+          {
+            fetchMoreResult,
+          }: { fetchMoreResult: GetDelegateDelegationHistoryQuery },
         ) => {
           if (!fetchMoreResult) return previousResult;
 
@@ -230,8 +252,10 @@ export function useDelegateDelegationHistory(
           before: paginationInfo.startCursor,
         },
         updateQuery: (
-          previousResult: any,
-          { fetchMoreResult }: { fetchMoreResult: any },
+          previousResult: GetDelegateDelegationHistoryQuery,
+          {
+            fetchMoreResult,
+          }: { fetchMoreResult: GetDelegateDelegationHistoryQuery },
         ) => {
           if (!fetchMoreResult) return previousResult;
 
