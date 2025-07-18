@@ -1,13 +1,13 @@
-import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
-import {
-  GetProposalsActivityQueryVariables,
-  QueryInput_ProposalsActivity_DaoId,
-} from "@anticapture/graphql-client";
 import { useMemo } from "react";
+
+import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
+import { GetProposalsActivityQueryVariables } from "@anticapture/graphql-client";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseProposalsActivityParams
   extends GetProposalsActivityQueryVariables {
   itemsPerPage: number;
+  daoId: DaoIdEnum;
 }
 
 interface UseProposalsActivityResult {
@@ -37,7 +37,6 @@ export const useProposalsActivity = ({
   const { data, loading, error, refetch } = useGetProposalsActivityQuery({
     variables: {
       address,
-      daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
       fromDate,
       skip,
       limit,

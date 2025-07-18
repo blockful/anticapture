@@ -1,19 +1,14 @@
 "use client";
 
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
-import {
-  QueryInput_ProposalsActivity_DaoId,
-  QueryInput_ProposalsActivity_UserVoteFilter,
-} from "@anticapture/graphql-client";
+import { QueryInput_ProposalsActivity_UserVoteFilter } from "@anticapture/graphql-client";
 import { useState } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
+import { FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface DelegateProposalsActivityProps {
@@ -51,9 +46,9 @@ export const DelegateProposalsActivity = ({
   // Calculate skip for pagination
   const skip = (currentPage - 1) * itemsPerPage;
 
-  const { data, loading, error, refetch, pagination } = useProposalsActivity({
+  const { data, loading, error, pagination } = useProposalsActivity({
     address,
-    daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
+    daoId,
     fromDate,
     skip,
     limit: itemsPerPage,

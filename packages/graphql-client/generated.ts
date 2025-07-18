@@ -16,12 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -89,6 +86,8 @@ export type Query = {
   delegations: DelegationPage;
   /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
+  /** Get historical market data for a specific token */
+  historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
@@ -97,6 +96,8 @@ export type Query = {
   proposalsOnchains: ProposalsOnchainPage;
   token?: Maybe<Token>;
   tokens: TokenPage;
+  /** Get total assets */
+  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transfer?: Maybe<Transfer>;
   transfers: TransferPage;
   votesOnchain?: Maybe<VotesOnchain>;
@@ -270,7 +271,10 @@ export type QueryProposalsActivityArgs = {
   address: Scalars['String']['input'];
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_ProposalsActivity_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  userVoteFilter?: InputMaybe<QueryInput_ProposalsActivity_UserVoteFilter>;
 };
 
 
@@ -301,6 +305,11 @@ export type QueryTokensArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TokenFilter>;
+};
+
+
+export type QueryTotalAssetsArgs = {
+  days?: InputMaybe<QueryInput_TotalAssets_Days>;
 };
 
 
@@ -984,6 +993,13 @@ export type DelegationPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type HistoricalTokenData_200_Response = {
+  __typename?: 'historicalTokenData_200_response';
+  market_caps: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
+  prices: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
+  total_volumes: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
+};
+
 export enum MetricType {
   CexSupply = 'CEX_SUPPLY',
   CirculatingSupply = 'CIRCULATING_SUPPLY',
@@ -1255,6 +1271,32 @@ export enum QueryInput_HistoricalVotingPower_Days {
   '365d' = '_365d'
 }
 
+export enum QueryInput_ProposalsActivity_OrderBy {
+  VoteTiming = 'voteTiming',
+  VotingPower = 'votingPower'
+}
+
+export enum QueryInput_ProposalsActivity_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+/** Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote) */
+export enum QueryInput_ProposalsActivity_UserVoteFilter {
+  Abstain = 'abstain',
+  No = 'no',
+  NoVote = 'no_vote',
+  Yes = 'yes'
+}
+
+export enum QueryInput_TotalAssets_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
 export type Query_HistoricalBalances_Items = {
   __typename?: 'query_historicalBalances_items';
   address: Scalars['String']['output'];
@@ -1301,6 +1343,12 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   timestamp: Scalars['String']['output'];
   voterAccountId: Scalars['String']['output'];
   votingPower?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_TotalAssets_Items = {
+  __typename?: 'query_totalAssets_items';
+  date: Scalars['String']['output'];
+  totalAssets: Scalars['String']['output'];
 };
 
 export type Token = {
@@ -1873,7 +1921,6 @@ export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalan
 
 export type GetProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  daoId: QueryInput_ProposalsActivity_DaoId;
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -2945,10 +2992,9 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const GetProposalsActivityDocument = gql`
-    query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
+    query GetProposalsActivity($address: String!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
   proposalsActivity(
     address: $address
-    daoId: $daoId
     fromDate: $fromDate
     skip: $skip
     limit: $limit
@@ -3003,7 +3049,6 @@ export const GetProposalsActivityDocument = gql`
  * const { data, loading, error } = useGetProposalsActivityQuery({
  *   variables: {
  *      address: // value for 'address'
- *      daoId: // value for 'daoId'
  *      fromDate: // value for 'fromDate'
  *      skip: // value for 'skip'
  *      limit: // value for 'limit'
