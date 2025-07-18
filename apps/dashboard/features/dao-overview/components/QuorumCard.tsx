@@ -117,7 +117,10 @@ export const QuorumCard = () => {
           ? [
               <TextCardDaoInfoItem
                 key="text-proposal-threshold"
-                item={{ value: proposalThresholdText, daoId: daoData.id }}
+                item={{
+                  value: proposalThresholdText,
+                  daoId: daoData.id as DaoIdEnum,
+                }}
               />,
             ]
           : [

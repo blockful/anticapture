@@ -31,6 +31,7 @@ import {
   useTreasuryAssetNonDaoToken,
   useVetoCouncilVotingPower,
 } from "@/features/attack-profitability/hooks";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 interface StackedValue {
   value: number;
@@ -75,10 +76,16 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData(selectedDaoId);
 
+  const daoConfig = daoConfigByDaoId[selectedDaoId];
+  const attackCostBarChart =
+    daoConfig?.attackProfitability?.attackCostBarChart || {};
+  const daoAddresses: string[] = Object.values(attackCostBarChart);
+  const tokenAddress = daoConfig?.daoOverview.contracts.token;
+
   const {
     data: daoTopTokenHolderExcludingTheDao,
-    isLoading: daoTopTokenHolderExcludingTheDaoLoading,
-  } = useTopTokenHolderNonDao(selectedDaoId);
+    loading: daoTopTokenHolderExcludingTheDaoLoading,
+  } = useTopTokenHolderNonDao(selectedDaoId, tokenAddress, daoAddresses);
 
   const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);

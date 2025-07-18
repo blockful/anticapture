@@ -20,18 +20,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const ogImage: Record<
-    Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>,
-    string
-  > = {
+  const ogImage: Record<Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>, string> = {
     [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
+    [DaoIdEnum.OPTIMISM]: `${baseUrl}/opengraph-images/op.png`,
   };
 
   const imageUrl =
-    ogImage[
-      daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>
-    ] || `${baseUrl}/opengraph-images/default.png`;
+    ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>] ||
+    `${baseUrl}/opengraph-images/default.png`;
 
   // Generate title and description based on support stage
   let title = `Anticapture - ${daoId} DAO`;
