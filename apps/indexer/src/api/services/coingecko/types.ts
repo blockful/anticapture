@@ -14,7 +14,7 @@ export interface CoingeckoHistoricalMarketData {
 }
 
 export const isCoingeckoHistoricalMarketData = (
-  data: any
+  data: any,
 ): data is CoingeckoHistoricalMarketData => {
   return data.prices && data.market_caps && data.total_volumes;
 };

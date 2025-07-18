@@ -17,11 +17,16 @@ export * from "@/shared/components/carroussels/SupportersCarroussel";
 export * from "@/shared/components/badges/SupporterBadge";
 export * from "@/shared/components/cards/SwitchCardDaoInfoItem";
 export * from "@/shared/components/charts/SwitcherChart";
+export * from "@/shared/components/charts/ChartExceptionState";
 export * from "@/shared/components/switchers/SwitcherDate";
 export * from "@/shared/components/cards/TheCardChartLayout";
 export * from "@/shared/components/containers/TheSectionLayout";
 export * from "@/shared/components/tables/TheTable";
 export * from "@/shared/components/tooltips/TooltipInfo";
 export * from "@/shared/components/cards/RiskAreaCard";
+export * from "@/shared/components/cards/MetricCard";
+export * from "@/shared/components/design-system/TextIconLeft";
+export * from "@/shared/components/design-system/SimpleProgressBar";
+export * from "@/shared/components/design-system/ActivityIndicator";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";

@@ -22,7 +22,7 @@ export const fetchDaoTokenHistoricalData = async ({
     return null;
   }
   const query = `query GetHistoricalTokenData {
-  historicalTokenData(daoId: ${daoId}) {
+  historicalTokenData {
     total_volumes
     market_caps
     prices
@@ -30,9 +30,17 @@ export const fetchDaoTokenHistoricalData = async ({
 }`;
   const response: {
     data: { data: { historicalTokenData: DaoTokenHistoricalDataResponse } };
-  } = await axios.post(`${BACKEND_ENDPOINT}`, {
-    query,
-  });
+  } = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    {
+      query,
+    },
+    {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  );
   const { historicalTokenData } = response.data.data as {
     historicalTokenData: DaoTokenHistoricalDataResponse;
   };
