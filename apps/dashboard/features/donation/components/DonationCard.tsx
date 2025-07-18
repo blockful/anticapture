@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components";
 import { DonationCardProps } from "@/features/donation/types";
 import { ExternalLink, Copy, Eye, BookOpen, Shield } from "lucide-react";
+import Link from "next/link";
 
 export const DonationCard = ({
   title,
@@ -94,7 +95,7 @@ export const DonationCard = ({
                         );
 
                         return chainLink ? (
-                          <a
+                          <Link
                             key={chain}
                             href={chainLink}
                             target="_blank"
@@ -102,7 +103,7 @@ export const DonationCard = ({
                             className="inline-block"
                           >
                             {BadgeContent}
-                          </a>
+                          </Link>
                         ) : (
                           <div key={chain}>{BadgeContent}</div>
                         );
