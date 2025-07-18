@@ -24,5 +24,7 @@ export * from "@/shared/components/tables/TheTable";
 export * from "@/shared/components/tooltips/TooltipInfo";
 export * from "@/shared/components/cards/RiskAreaCard";
 export * from "@/shared/components/buttons/BottomNavigationButtons";
+export * from "@/shared/components/design-system/blank-state/BlankState";
+export * from "@/shared/components/accordions";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";

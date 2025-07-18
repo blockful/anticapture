@@ -55,7 +55,7 @@ export const ConnectWallet = ({
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className={cn("btn-connect-wallet", className)}
+                    className={cn("btn-connect-wallet size-[36px]", className)}
                   >
                     <Wallet className="size-3.5" />
                     {label}
