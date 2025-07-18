@@ -144,7 +144,7 @@ export const DelegateDelegationHistoryTable = ({
 
         return (
           <div className="flex h-10 items-center justify-start px-4 py-2">
-            <span className="text-primary text-sm font-medium">
+            <span className="text-primary text-sm font-medium whitespace-nowrap">
               {formatRelativeTime(timestamp)}
             </span>
           </div>
@@ -206,7 +206,7 @@ export const DelegateDelegationHistoryTable = ({
                 {amount}
               </span>
             </div>
-            <span className="text-secondary text-xs">
+            <span className="text-secondary text-xs whitespace-nowrap">
               {delegationType.type}
             </span>
           </div>
