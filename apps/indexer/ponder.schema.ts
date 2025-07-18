@@ -1,11 +1,5 @@
-import { metricTypeArray } from "@/lib/constants";
-import {
-  onchainTable,
-  index,
-  onchainEnum,
-  primaryKey,
-  relations,
-} from "ponder";
+import { MetricTypesEnum } from "@/lib/constants";
+import { onchainTable, index, primaryKey, relations } from "ponder";
 import { zeroAddress } from "viem";
 
 export const dao = onchainTable("dao", (drizzle) => ({
@@ -136,11 +130,11 @@ export const votesOnchain = onchainTable(
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text("dao_id").notNull(),
     voterAccountId: drizzle.text("voter_account_id"),
-    proposalId: drizzle.text("proposal_id"),
-    support: drizzle.text(),
-    votingPower: drizzle.text(),
-    reason: drizzle.text(),
-    timestamp: drizzle.bigint(),
+    proposalId: drizzle.text("proposal_id").notNull(),
+    support: drizzle.text().notNull(),
+    votingPower: drizzle.text().notNull(),
+    reason: drizzle.text().notNull(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     votesOnchainVoterIdx: index().on(table.voterAccountId),
@@ -148,21 +142,41 @@ export const votesOnchain = onchainTable(
   }),
 );
 
+export enum ProposalStatus {
+  // Pre-voting statuses
+  PENDING = "pending",
+  ACTIVE = "active",
+  QUEUED = "queued",
+
+  // Final statuses
+  EXECUTED = "executed",
+  DEFEATED = "defeated",
+  CANCELED = "canceled",
+  EXPIRED = "expired",
+}
+
+// Type for the status column
+export type ProposalStatusType = `${ProposalStatus}`;
+
 export const proposalsOnchain = onchainTable(
   "proposals_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text("dao_id").notNull(),
-    proposerAccountId: drizzle.text("proposer_account_id"),
-    targets: drizzle.json(),
-    values: drizzle.json(),
-    signatures: drizzle.json(),
-    calldatas: drizzle.json(),
-    startBlock: drizzle.text("start_block"),
-    endBlock: drizzle.text("end_block"),
+    proposerAccountId: drizzle.text("proposer_account_id").notNull(),
+    targets: drizzle.json().notNull(),
+    values: drizzle.json().notNull(),
+    signatures: drizzle.json().notNull(),
+    calldatas: drizzle.json().notNull(),
+    startBlock: drizzle.text("start_block").notNull(),
+    endBlock: drizzle.text("end_block").notNull(),
     description: drizzle.text(),
-    timestamp: drizzle.bigint(),
-    status: drizzle.text(),
+    timestamp: drizzle.bigint().notNull(),
+    status: drizzle
+      .text()
+      .$type<ProposalStatusType>()
+      .notNull()
+      .default(ProposalStatus.PENDING),
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
     abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
@@ -172,10 +186,7 @@ export const proposalsOnchain = onchainTable(
   }),
 );
 
-export const metricType = onchainEnum(
-  "metricType",
-  metricTypeArray as [string, ...string[]],
-);
+export type MetricType = `${MetricTypesEnum}`;
 
 export const daoMetricsDayBucket = onchainTable(
   "dao_metrics_day_buckets",
@@ -183,7 +194,7 @@ export const daoMetricsDayBucket = onchainTable(
     date: drizzle.bigint().notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     tokenId: drizzle.text("token_id").notNull(),
-    metricType: metricType("metricType").notNull(),
+    metricType: drizzle.text().$type<MetricType>().notNull(),
     open: drizzle.bigint().notNull(),
     close: drizzle.bigint().notNull(),
     low: drizzle.bigint().notNull(),

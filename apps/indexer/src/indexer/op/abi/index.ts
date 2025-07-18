@@ -1,2 +1,2 @@
-export { TokenAbi } from "./token";
 export { GovernorAbi } from "./governor";
+export { TokenAbi } from "./token";

@@ -1,2 +1,2 @@
-export { ENSGovernorAbi } from "./ENSGovernorAbi";
-export { ENSTokenAbi } from "./ENSTokenAbi";
+export { GovernorAbi as ENSGovernorAbi } from "./governor";
+export { TokenAbi as ENSTokenAbi } from "./token";

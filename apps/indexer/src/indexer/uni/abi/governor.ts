@@ -1,4 +1,4 @@
-export const UNIGovernorAbi = [
+export const GovernorAbi = [
   ...[
     {
       inputs: [
