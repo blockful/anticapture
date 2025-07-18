@@ -1,6 +1,5 @@
 import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetProposalsActivityQuery,
   GetProposalsActivityQueryVariables,
   QueryInput_ProposalsActivity_DaoId,
 } from "@anticapture/graphql-client";
@@ -30,6 +29,9 @@ export const useProposalsActivity = ({
   fromDate,
   skip,
   limit,
+  orderBy,
+  orderDirection,
+  userVoteFilter,
   itemsPerPage,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
   const { data, loading, error, refetch } = useGetProposalsActivityQuery({
@@ -39,6 +41,9 @@ export const useProposalsActivity = ({
       fromDate,
       skip,
       limit,
+      orderBy,
+      orderDirection,
+      userVoteFilter,
     },
     context: {
       headers: {

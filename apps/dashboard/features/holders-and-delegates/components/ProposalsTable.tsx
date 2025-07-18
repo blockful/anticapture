@@ -12,11 +12,14 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useDaoData, useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
+import {
+  FilterDropdown,
+  FilterOption,
+} from "@/shared/components/dropdowns/FilterDropdown";
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import {
@@ -41,6 +44,12 @@ interface ProposalsTableProps {
   proposals: Query_ProposalsActivity_Proposals_Items[];
   loading: boolean;
   error: Error | null;
+  userVoteFilter?: string;
+  onUserVoteFilterChange?: (filter: string) => void;
+  userVoteFilterOptions?: FilterOption[];
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  onSortChange?: (field: string, direction: "asc" | "desc") => void;
   daoIdEnum: DaoIdEnum;
 }
 
@@ -48,6 +57,12 @@ export const ProposalsTable = ({
   proposals,
   loading,
   error,
+  userVoteFilter,
+  onUserVoteFilterChange,
+  userVoteFilterOptions,
+  orderBy,
+  orderDirection,
+  onSortChange,
   daoIdEnum,
 }: ProposalsTableProps) => {
   const { data: daoData } = useDaoData(daoIdEnum);
@@ -61,6 +76,7 @@ export const ProposalsTable = ({
         item.proposal,
         Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
         daoData?.quorum,
+        daoConfigByDaoId[daoIdEnum], // Pass the DAO config to use quorum logic
       );
       const userVote = getUserVoteData(
         item.userVote?.support,
@@ -83,7 +99,7 @@ export const ProposalsTable = ({
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoData?.quorum]);
+  }, [proposals, daoData?.votingPeriod, daoData?.quorum, daoIdEnum]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
@@ -134,25 +150,8 @@ export const ProposalsTable = ({
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header font-regular h-8 w-full justify-start gap-1 px-2 text-xs"
-          onClick={() => column.toggleSorting()}
-        >
-          Final Result
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        <h4 className="text-table-header pl-4">Final Result</h4>
       ),
-      enableSorting: true,
     },
     {
       accessorKey: "userVote",
@@ -178,23 +177,16 @@ export const ProposalsTable = ({
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="!text-table-header h-8 w-full justify-start gap-1 px-2 text-xs"
-          onClick={() => column.toggleSorting()}
-        >
+        <div className="flex items-center gap-2 px-2 font-medium">
           User Vote
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+          {userVoteFilterOptions && onUserVoteFilterChange && (
+            <FilterDropdown
+              options={userVoteFilterOptions}
+              selectedValue={userVoteFilter || "all"}
+              onValueChange={onUserVoteFilterChange}
+            />
+          )}
+        </div>
       ),
       enableSorting: true,
     },
@@ -224,27 +216,29 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
-          onClick={() => column.toggleSorting()}
+          onClick={() => {
+            if (onSortChange) {
+              const newDirection =
+                orderBy === "votingPower" && orderDirection === "desc"
+                  ? "asc"
+                  : "desc";
+              onSortChange("votingPower", newDirection);
+            }
+          }}
         >
           <h4 className="text-table-header">Voting Power</h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              orderBy === "votingPower"
+                ? orderDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => {
-        const a = parseFloat(rowA.getValue("votingPower") as string) || 0;
-        const b = parseFloat(rowB.getValue("votingPower") as string) || 0;
-        return a - b;
-      },
     },
     {
       accessorKey: "voteTiming",
@@ -282,22 +276,29 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-start gap-1 px-2"
-          onClick={() => column.toggleSorting()}
+          onClick={() => {
+            if (onSortChange) {
+              const newDirection =
+                orderBy === "voteTiming" && orderDirection === "desc"
+                  ? "asc"
+                  : "desc";
+              onSortChange("voteTiming", newDirection);
+            }
+          }}
         >
           <h4 className="text-table-header">Vote Timing</h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+              orderBy === "voteTiming"
+                ? orderDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
             }
           />
         </Button>
       ),
-      enableSorting: true,
     },
     {
       accessorKey: "proposalId",
@@ -363,7 +364,7 @@ export const ProposalsTable = ({
     );
   }
 
-  if (!proposals || proposals.length === 0) {
+  if (!proposals || (proposals.length === 0 && userVoteFilter === "all")) {
     return (
       <BlankState
         variant="default"

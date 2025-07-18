@@ -1,5 +1,12 @@
-query GetProposalsActivity($address: String!, $daoId: queryInput_proposalsActivity_daoId!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt) {
-  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate, skip: $skip, limit: $limit) {
+query GetProposalsActivity($address: String!, 
+$daoId: queryInput_proposalsActivity_daoId!,
+ $fromDate: NonNegativeInt, 
+ $skip: NonNegativeInt,
+  $limit: PositiveInt,
+   $orderBy: queryInput_proposalsActivity_orderBy,
+ $orderDirection: queryInput_proposalsActivity_orderDirection, 
+ $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
+  proposalsActivity(address: $address, daoId: $daoId, fromDate: $fromDate, skip: $skip, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection, userVoteFilter: $userVoteFilter) {
     totalProposals
     votedProposals
     neverVoted

@@ -5,6 +5,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { caseInsensitiveEnum } from "../middlewares";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
+import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
 
 export function proposalsActivity(
   app: Hono,
@@ -47,6 +48,17 @@ export function proposalsActivity(
             .max(100, "Limit cannot exceed 100")
             .default(10)
             .optional(),
+          orderBy: z
+            .enum(["votingPower", "voteTiming"])
+            .default("voteTiming")
+            .optional(),
+          orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
+          userVoteFilter: z
+            .nativeEnum(VoteFilter)
+            .optional()
+            .describe(
+              "Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",
+            ),
         }),
       },
       responses: {
@@ -98,7 +110,15 @@ export function proposalsActivity(
     }),
     async (context) => {
       const { daoId } = context.req.valid("param");
-      const { address, fromDate, skip, limit } = context.req.valid("query");
+      const {
+        address,
+        fromDate,
+        skip,
+        limit,
+        orderBy,
+        orderDirection,
+        userVoteFilter,
+      } = context.req.valid("query");
 
       const result = await service.getProposalsActivity({
         address,
@@ -106,6 +126,9 @@ export function proposalsActivity(
         daoId,
         skip,
         limit,
+        orderBy,
+        orderDirection,
+        userVoteFilter,
       });
 
       return context.json(result, 200);

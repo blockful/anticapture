@@ -91,7 +91,10 @@ export const getUserVoteData = (
   // If user voted
   if (support !== null && support !== undefined) {
     const supportNumber = Number(support);
-    const voteData = proposalsUserVoteMapping[supportNumber as keyof typeof proposalsUserVoteMapping];
+    const voteData =
+      proposalsUserVoteMapping[
+        supportNumber as keyof typeof proposalsUserVoteMapping
+      ];
     if (voteData) {
       return { text: voteData.text, icon: voteData.icon };
     }
@@ -100,7 +103,10 @@ export const getUserVoteData = (
   // If user didn't vote, check final result status
   const status = finalResultStatus?.toLowerCase();
   if (status === "ongoing") {
-    return { text: proposalsUserVoteMapping.waiting.text, icon: proposalsUserVoteMapping.waiting.icon };
+    return {
+      text: proposalsUserVoteMapping.waiting.text,
+      icon: proposalsUserVoteMapping.waiting.icon,
+    };
   }
 
   return {
@@ -110,7 +116,10 @@ export const getUserVoteData = (
 };
 
 // Status to result mapping
-const statusToResultMapping: Record<string, keyof typeof proposalsFinalResultMapping> = {
+const statusToResultMapping: Record<
+  string,
+  keyof typeof proposalsFinalResultMapping
+> = {
   active: "ongoing",
   executed: "yes",
   succeeded: "yes",
@@ -125,6 +134,7 @@ const determineProposalStatus = (
   proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
   daoVotingPeriod: number | undefined,
   daoQuorum: number | undefined,
+  daoConfig?: any,
 ): keyof typeof proposalsFinalResultMapping => {
   if (!proposal) return "unknown";
 
@@ -142,18 +152,26 @@ const determineProposalStatus = (
     // If voting period has ended, check if it met quorum
     if (currentTime > votingEndTime) {
       if (daoQuorum) {
-        const totalVotes =
-          Number(proposal.forVotes) +
-          Number(proposal.againstVotes) +
-          Number(proposal.abstainVotes);
+        const quorumLogic = daoConfig?.daoOverview?.rules?.logic;
+        let totalVotesForQuorum = 0;
+
+        // Calculate quorum based on DAO's logic
+        if (quorumLogic === "For + Abstain") {
+          totalVotesForQuorum =
+            Number(proposal.forVotes) + Number(proposal.abstainVotes);
+        } else {
+          // Default to "For" logic - only forVotes count for quorum
+          totalVotesForQuorum = Number(proposal.forVotes);
+        }
+
         const quorumThreshold = Number(daoQuorum);
 
         // If total votes didn't reach quorum, it's no-quorum
-        if (totalVotes < quorumThreshold) {
+        if (totalVotesForQuorum < quorumThreshold) {
           return "no-quorum";
         }
       }
-      return "cancel";
+      return "no";
     }
 
     // Otherwise, it's still ongoing
@@ -163,14 +181,22 @@ const determineProposalStatus = (
   // For defeated/failed proposals, check if they met quorum
   if (status === "defeated" || status === "failed") {
     if (daoQuorum) {
-      const totalVotes =
-        Number(proposal.forVotes) +
-        Number(proposal.againstVotes) +
-        Number(proposal.abstainVotes);
+      const quorumLogic = daoConfig?.daoOverview?.rules?.logic;
+      let totalVotesForQuorum = 0;
+
+      // Calculate quorum based on DAO's logic
+      if (quorumLogic === "For + Abstain") {
+        totalVotesForQuorum =
+          Number(proposal.forVotes) + Number(proposal.abstainVotes);
+      } else {
+        // Default to "For" logic - only forVotes count for quorum
+        totalVotesForQuorum = Number(proposal.forVotes);
+      }
+
       const quorumThreshold = Number(daoQuorum);
 
       // If total votes didn't reach quorum, it's no-quorum
-      if (totalVotes < quorumThreshold) {
+      if (totalVotesForQuorum < quorumThreshold) {
         return "no-quorum";
       }
     }
@@ -187,6 +213,7 @@ export const getFinalResultData = (
   proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
   daoVotingPeriod: number | undefined,
   daoQuorum: number | undefined,
+  daoConfig?: any,
 ): { text: string; icon: ReactNode } => {
   if (!proposal) return proposalsFinalResultMapping.unknown;
 
@@ -194,6 +221,7 @@ export const getFinalResultData = (
     proposal,
     daoVotingPeriod,
     daoQuorum,
+    daoConfig,
   );
   return proposalsFinalResultMapping[resultKey];
 };

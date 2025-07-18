@@ -2005,6 +2005,9 @@ export type GetProposalsActivityQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_ProposalsActivity_OrderDirection>;
+  userVoteFilter?: InputMaybe<QueryInput_ProposalsActivity_UserVoteFilter>;
 }>;
 
 

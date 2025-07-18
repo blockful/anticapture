@@ -1,14 +1,19 @@
 "use client";
 
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
-import { QueryInput_ProposalsActivity_DaoId } from "@anticapture/graphql-client";
-import { useEffect, useState } from "react";
+import {
+  QueryInput_ProposalsActivity_DaoId,
+  QueryInput_ProposalsActivity_UserVoteFilter,
+} from "@anticapture/graphql-client";
+import { useState } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
-import { Hand, Trophy, CheckCircle2, Clock10, Check, Zap } from "lucide-react";
+import { Hand, Trophy, Check, Zap } from "lucide-react";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  FilterOption,
+} from "@/shared/components/dropdowns/FilterDropdown";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface DelegateProposalsActivityProps {
@@ -23,7 +28,25 @@ export const DelegateProposalsActivity = ({
   fromDate,
 }: DelegateProposalsActivityProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
+  const [orderBy, setOrderBy] = useState<string>("voteTiming");
+  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
   const itemsPerPage = 10;
+
+  // Filter options for user vote
+  const userVoteFilterOptions: FilterOption[] = [
+    { value: "all", label: "All Votes" },
+    { value: "yes", label: "Yes" },
+    { value: "no", label: "No" },
+    { value: "abstain", label: "Abstain" },
+    { value: "no_vote", label: "Didn't Vote" },
+  ];
+
+  // Handle sorting changes
+  const handleSortChange = (field: string, direction: "asc" | "desc") => {
+    setOrderBy(field);
+    setOrderDirection(direction);
+  };
 
   // Calculate skip for pagination
   const skip = (currentPage - 1) * itemsPerPage;
@@ -34,6 +57,12 @@ export const DelegateProposalsActivity = ({
     fromDate,
     skip,
     limit: itemsPerPage,
+    orderBy: orderBy as any,
+    orderDirection: orderDirection as any,
+    userVoteFilter:
+      userVoteFilter === "all"
+        ? undefined
+        : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
     itemsPerPage,
   });
 
@@ -111,6 +140,12 @@ export const DelegateProposalsActivity = ({
             proposals={data?.proposals || []}
             loading={loading}
             error={error}
+            userVoteFilter={userVoteFilter}
+            onUserVoteFilterChange={setUserVoteFilter}
+            userVoteFilterOptions={userVoteFilterOptions}
+            orderBy={orderBy}
+            orderDirection={orderDirection}
+            onSortChange={handleSortChange}
             daoIdEnum={daoId}
           />
 
