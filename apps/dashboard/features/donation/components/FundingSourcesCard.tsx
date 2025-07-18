@@ -12,11 +12,11 @@ export const FundingSourcesCard = ({
   sources,
 }: FundingSourcesCardProps) => {
   return (
-    <Card className="bg-surface-default w-full rounded-none border-0 shadow-sm">
-      <CardContent className="p-5">
-        <div className="space-y-6">
+    <Card className="bg-surface-background sm:bg-surface-default w-full rounded-none border-0 shadow-sm">
+      <CardContent className="px-0 py-5 sm:p-5">
+        <div className="flex flex-col gap-4">
           <div>
-            <h3 className="text-primary !text-alternative-sm mb-2 font-mono font-medium uppercase">
+            <h3 className="text-primary !text-alternative-sm font-mono font-medium uppercase">
               {title}
             </h3>
             <p className="text-secondary text-sm leading-relaxed">
@@ -34,14 +34,14 @@ export const FundingSourcesCard = ({
                 rel="noopener noreferrer"
                 className="block h-full cursor-pointer"
               >
-                <div className="text-primary border-light-dark flex h-full items-center gap-3 border bg-transparent p-3 transition-colors hover:bg-white/5">
+                <div className="bg-surface-default text-primary border-light-dark hover:bg-middle-dark flex h-full items-center gap-3 border p-3 transition-colors sm:bg-transparent">
                   <DaoAvatarIcon
                     daoId={source.daoId}
                     className="size-9"
                     isRounded={true}
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="mb-1 flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                       <h4 className="text-md flex items-center gap-1 truncate font-medium">
                         {source.name}
                       </h4>

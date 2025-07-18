@@ -20,7 +20,10 @@ export const DonationSection = () => {
       anchorId={SECTIONS_CONSTANTS.donate.anchorId}
       className="bg-surface-background! mt-[56px]! sm:mt-0!"
     >
-      <div className="space-y-8">
+      <div className="flex flex-col gap-2">
+        {/* Dashed line separator - Mobile only */}
+        <div className="border-light-dark -mx-4 border-t border-dashed sm:hidden" />
+
         {/* Main donation card with integrated benefits */}
         <DonationCard
           title={donation.title}
@@ -31,7 +34,7 @@ export const DonationSection = () => {
           supportedChains={donation.supportedChains}
           chainLinks={donation.chainLinks}
         />
-
+        <div className="border-light-dark -mx-4 border-t sm:hidden" />
         {/* Funding sources */}
         <FundingSourcesCard
           title="FUNDING SOURCES"
