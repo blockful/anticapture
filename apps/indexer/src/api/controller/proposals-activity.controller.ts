@@ -2,7 +2,6 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
-import { caseInsensitiveEnum } from "../middlewares";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
@@ -10,6 +9,7 @@ import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity
 export function proposalsActivity(
   app: Hono,
   repository: ProposalsActivityRepository,
+  daoId: DaoIdEnum,
 ) {
   const service = new ProposalsActivityService(repository);
 
@@ -17,15 +17,12 @@ export function proposalsActivity(
     createRoute({
       method: "get",
       operationId: "proposalsActivity",
-      path: "/proposals-activity/{daoId}",
+      path: "/proposals-activity",
       summary: "Get proposals activity for delegate",
       description:
         "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
       tags: ["proposals-activity"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           address: z
             .string()
@@ -109,7 +106,6 @@ export function proposalsActivity(
       },
     }),
     async (context) => {
-      const { daoId } = context.req.valid("param");
       const {
         address,
         fromDate,

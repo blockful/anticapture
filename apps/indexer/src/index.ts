@@ -30,7 +30,8 @@ const client = createPublicClient({
 const { token, governor } = CONTRACT_ADDRESSES[network][daoId]!;
 
 ERC20Indexer(daoId, token.address, token.decimals);
-if (governor) GovernorIndexer(daoId, getGovernorClient(daoId, governor.address));
+if (governor)
+  GovernorIndexer(daoId, getGovernorClient(daoId, governor.address));
 
 function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
   switch (id) {
