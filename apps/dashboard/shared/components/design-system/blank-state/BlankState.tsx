@@ -1,6 +1,6 @@
 "use client";
 
-import { ElementType } from "react";
+import { ElementType, ReactNode } from "react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/shared/utils/cn";
 
