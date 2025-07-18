@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -35,7 +35,7 @@ interface DataTableProps<TData, TValue> {
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
   mobileTableFixed?: boolean;
-  emptyMessage?: string; // new prop
+  showWhenEmpty?: ReactNode; // new prop
 }
 
 export const TheTable = <TData, TValue>({
@@ -50,7 +50,7 @@ export const TheTable = <TData, TValue>({
   isTableSmall = false,
   stickyFirstColumn = false,
   mobileTableFixed = false,
-  emptyMessage,
+  showWhenEmpty,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -162,11 +162,8 @@ export const TheTable = <TData, TValue>({
           })
         ) : (
           <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="h-[530px] text-center"
-            >
-              {emptyMessage || "No results."}
+            <TableCell colSpan={columns.length} className="h-full text-center">
+              {showWhenEmpty || "No results."}
             </TableCell>
           </TableRow>
         )}
