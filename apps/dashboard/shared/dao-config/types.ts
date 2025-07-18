@@ -95,9 +95,33 @@ export interface DaoOverviewConfig {
   };
 }
 
+export interface DaoAddresses {
+  [DaoIdEnum.UNISWAP]: {
+    UniTimelock: string;
+    UniTokenDistributor: string;
+    Univ3Uni: string;
+  };
+  [DaoIdEnum.ENS]: {
+    ENSTokenTimelock: string;
+    ENSDaoWallet: string;
+    ENSColdWallet: string;
+  };
+  [DaoIdEnum.OPTIMISM]: {
+    OptimismTimelock: string;
+    OptimismTokenDistributor: string;
+    OptimismUniv3Uni: string;
+  };
+  [DaoIdEnum.ARBITRUM]: {
+    ArbitrumTimelock: string;
+    ArbitrumTokenDistributor: string;
+    ArbitrumDaoWallet: string;
+  };
+}
+
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
   supportsLiquidTreasuryCall?: boolean;
+  attackCostBarChart: DaoAddresses[DaoIdEnum];
 }
 export interface GovernanceImplementationConfig
   extends GovernanceImplementation {}
