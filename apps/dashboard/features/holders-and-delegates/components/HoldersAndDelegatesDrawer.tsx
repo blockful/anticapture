@@ -35,7 +35,7 @@ export const HoldersAndDelegatesDrawer = ({
   address,
   daoId,
 }: HoldersAndDelegatesDrawerProps) => {
-  const { fromDate } = getTimeDataFromPeriod(TimeInterval.ONE_YEAR);
+  const fromDate = getTimeDataFromPeriod(TimeInterval.ONE_YEAR);
   const entities = {
     delegate: {
       title: "Delegate",
