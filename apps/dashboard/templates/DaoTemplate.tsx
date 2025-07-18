@@ -77,7 +77,9 @@ export const DaoTemplate = () => {
         )}
 
         {daoConstants.tokenDistribution && <TokenDistributionSection />}
-        <HoldersAndDelegatesSection daoId={daoIdEnum} />
+        {daoConstants.dataTables && (
+          <HoldersAndDelegatesSection daoId={daoIdEnum} />
+        )}
       </div>
       <ShowYourSupportStickyBar />
     </DaoPageInteractionProvider>

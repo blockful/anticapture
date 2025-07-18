@@ -1,8 +1,15 @@
-import { useGetDaoDataQuery } from "@anticapture/graphql-client/hooks";
+import {
+  GetDaoDataQuery,
+  useGetDaoDataQuery,
+} from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseDaoDataResult {
-  data: any | null; // You can type this more specifically based on your DAO type
+  data:
+    | (GetDaoDataQuery["dao"] & {
+        id: DaoIdEnum;
+      })
+    | null;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -14,7 +21,7 @@ export const useDaoData = (daoId: DaoIdEnum): UseDaoDataResult => {
   });
 
   return {
-    data: data?.dao || null,
+    data: data?.dao ? { ...data.dao, id: daoId } : null,
     loading,
     error: error || null,
     refetch,

@@ -7,3 +7,6 @@ export {
   type UseDelegateDelegationHistoryResult,
 } from "./useDelegateDelegationHistory";
 export * from "./useDelegateDelegationHistoryGraph";
+export { useDelegationHistory } from "./useDelegationHistory";
+export { useTokenHolders } from "./useTokenHolders";
+export { useDelegates } from "./useDelegates";
