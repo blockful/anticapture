@@ -60,7 +60,7 @@ export const DonationCard = ({
           <div className="flex-1 space-y-6">
             {/* Title and Description */}
             <div className="mb-4 flex flex-col gap-3">
-              <h2 className="text-primary text-lg font-semibold">{title}</h2>
+              <h2 className="text-primary text-lg font-medium">{title}</h2>
               <p className="text-secondary text-sm">{description}</p>
             </div>
             <div>
