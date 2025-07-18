@@ -26,6 +26,19 @@ interface VotingPowerVariationGraphProps {
   daoId: DaoIdEnum;
 }
 
+interface CustomDotProps {
+  cx: number;
+  cy: number;
+  payload: {
+    timestamp: number;
+    votingPower: number;
+    delta: number;
+    type: string;
+    isGain: boolean;
+    transactionHash: string;
+  };
+}
+
 const chartConfig = {
   votingPower: {
     label: "Voting Power",
@@ -105,7 +118,7 @@ export const VotingPowerVariationGraph = ({
     .sort((a, b) => a.timestamp - b.timestamp);
 
   // Custom dot component to show each transfer/delegation point
-  const CustomDot = (props: any) => {
+  const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
     return (
       <Dot
@@ -172,9 +185,9 @@ export const VotingPowerVariationGraph = ({
                     </p>
                     <p className="text-secondary text-xs">Type: {data.type}</p>
                     <p
-                      className={`text-xs ${data.isGain ? "text-green-500" : "text-red-500"}`}
+                      className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
                     >
-                      {data.isGain ? "+" : ""}
+                      {data.isGain && "+"}
                       {formatNumberUserReadable(parseFloat(data.delta))}
                     </p>
                   </div>
@@ -188,7 +201,7 @@ export const VotingPowerVariationGraph = ({
             dataKey="votingPower"
             stroke="var(--base-primary)"
             strokeWidth={1}
-            dot={<CustomDot />}
+            dot={CustomDot}
             connectNulls={true}
             strokeLinecap="round"
             strokeLinejoin="round"
