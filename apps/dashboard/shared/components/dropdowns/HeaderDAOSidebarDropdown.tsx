@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -7,6 +8,8 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { SupportStageEnum } from "@/shared/types/enums";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -52,6 +55,9 @@ export const HeaderDAOSidebarDropdown = () => {
         ),
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
         name: DaoIdEnum.UNISWAP,
+        isDisabled:
+          daoConfigByDaoId[DaoIdEnum.UNISWAP].supportStage ===
+          SupportStageEnum.ANALYSIS,
       },
       {
         id: 1,
@@ -65,6 +71,9 @@ export const HeaderDAOSidebarDropdown = () => {
         ),
         href: `/${DaoIdEnum.ENS.toLowerCase()}`,
         name: DaoIdEnum.ENS,
+        isDisabled:
+          daoConfigByDaoId[DaoIdEnum.ENS].supportStage ===
+          SupportStageEnum.ANALYSIS,
       },
       {
         id: 2,
@@ -78,6 +87,9 @@ export const HeaderDAOSidebarDropdown = () => {
         ),
         href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
         name: DaoIdEnum.ARBITRUM,
+        isDisabled:
+          daoConfigByDaoId[DaoIdEnum.ARBITRUM].supportStage ===
+          SupportStageEnum.ANALYSIS,
       },
       {
         id: 3,
@@ -91,7 +103,9 @@ export const HeaderDAOSidebarDropdown = () => {
         ),
         href: `/${DaoIdEnum.OPTIMISM.toLowerCase()}`,
         name: DaoIdEnum.OPTIMISM,
-        isDisabled: true,
+        isDisabled:
+          daoConfigByDaoId[DaoIdEnum.OPTIMISM].supportStage ===
+          SupportStageEnum.ANALYSIS,
       },
     ],
     [],
