@@ -16,7 +16,8 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates"; 
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { useScreenSize } from "@/shared/hooks";
 
 interface TokenHolderTableData {
   address: Address;
@@ -36,6 +37,7 @@ export const TokenHolders = ({
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const pageLimit: number = 10;
+  const { isMobile } = useScreenSize();
 
   const {
     data: tokenHoldersData,
@@ -161,14 +163,12 @@ export const TokenHolders = ({
               size="sm"
               variant="rounded"
             />
-            <button
-              className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              tabIndex={-1}
-              onClick={() => handleOpenDrawer(addressValue as Address)}
-            >
-              <Plus className="size-3.5" />
-              <span className="text-sm font-medium">Details</span>
-            </button>
+            {!isMobile && (
+              <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <Plus className="size-3.5" />
+                <span className="text-sm font-medium">Details</span>
+              </div>
+            )}
           </div>
         );
       },
@@ -183,7 +183,7 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
+          <div className="text-table-header flex h-8 w-full items-center justify-end px-2 whitespace-nowrap">
             Balance ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -399,7 +399,7 @@ export const TokenHolders = ({
             columns={tokenHoldersColumns}
             data={tableData}
             withSorting={true}
-            onRowClick={() => {}}
+            onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
           />
           <Pagination
