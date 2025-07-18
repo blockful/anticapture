@@ -33,7 +33,7 @@ export const VotingPowerTimePeriodSwitcher = ({
   };
 
   const formatPeriod = (period: VotingPowerTimePeriod) =>
-    period === "all" ? "All time" : period;
+    period === "all" ? "Max available data" : period;
 
   return isMobile ? (
     <div
