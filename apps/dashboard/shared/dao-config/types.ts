@@ -52,6 +52,7 @@ export type GovernanceImplementationField = {
   description: string;
   riskLevel: RiskLevel;
   requirements?: string[];
+  riskExplanation?: string;
 };
 
 // Base DAO information
