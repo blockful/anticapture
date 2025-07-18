@@ -21,6 +21,7 @@ interface EnsAvatarProps
   className?: string;
   alt?: string;
   showName?: boolean;
+  showAvatar?: boolean;
   nameClassName?: string;
   containerClassName?: string;
   showFullAddress?: boolean;
@@ -54,6 +55,7 @@ export const EnsAvatar = ({
   className,
   alt,
   showName = true,
+  showAvatar = true,
   nameClassName,
   containerClassName,
   showFullAddress = false,
@@ -143,6 +145,14 @@ export const EnsAvatar = ({
   // If showName is false, return just the avatar
   if (!showName) {
     return avatarElement();
+  }
+
+  if (!showAvatar) {
+    return (
+      <span className={cn("text-primary text-sm", nameClassName)}>
+        {displayName}
+      </span>
+    );
   }
 
   // Return avatar with name

@@ -31,7 +31,7 @@ interface DelegatesProps {
 }
 
 // Helper function to convert time period to timestamp and block number
-const getTimeDataFromPeriod = (period: TimeInterval) => {
+export const getTimeDataFromPeriod = (period: TimeInterval) => {
   const now = Date.now();
   const msPerDay = 24 * 60 * 60 * 1000;
 
