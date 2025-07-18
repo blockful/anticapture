@@ -12,7 +12,7 @@ interface ChartExceptionStateProps {
 export const ChartExceptionState = ({
   state,
   title,
-  height = "h-[300px]",
+  height = "h-[200px]",
   errorMessage = "Error loading data",
   noDataMessage = "No data available",
   headerContent,
