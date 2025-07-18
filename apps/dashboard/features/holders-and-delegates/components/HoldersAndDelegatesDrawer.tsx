@@ -1,17 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
-import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { BalanceHistory } from "./BalanceHistory";
+import { DelegateDelegationsHistory } from "./DelegatesDelegationHistory/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
+import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
+import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
+import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
+import { TimeInterval } from "@/shared/types/enums";
+import { getTimeDataFromPeriod } from "./Delegates";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -30,20 +35,33 @@ export const HoldersAndDelegatesDrawer = ({
   address,
   daoId,
 }: HoldersAndDelegatesDrawerProps) => {
+  const { fromDate } = getTimeDataFromPeriod(TimeInterval.ONE_YEAR);
   const entities = {
     delegate: {
       title: "Delegate",
       tabs: [
-        { id: "votes", label: "Votes", content: <>Votes</> },
+        {
+          id: "votes",
+          label: "Votes",
+          content: (
+            <DelegateProposalsActivity
+              address={address}
+              daoId={daoId}
+              fromDate={fromDate}
+            />
+          ),
+        },
         {
           id: "votingPower",
           label: "Voting Power",
-          content: <>Voting Power</>,
+          content: <VotingPower address={address} daoId={daoId} />,
         },
         {
           id: "delegationHistory",
           label: "Delegation History",
-          content: <>Delegation History</>,
+          content: (
+            <DelegateDelegationsHistory accountId={address} daoId={daoId} />
+          ),
         },
       ],
     },
@@ -79,7 +97,7 @@ export const HoldersAndDelegatesDrawer = ({
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerContent>
-        <div className="bg-surface-default h-full w-full">
+        <div className="bg-surface-default h-full w-full overflow-y-auto">
           <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">

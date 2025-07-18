@@ -7,9 +7,10 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { ArrowRight, ExternalLink, Filter, Check } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { useBalanceHistory } from "../hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { FilterDropdown, FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
 
 interface BalanceHistoryData {
   id: string;
@@ -29,10 +30,16 @@ interface BalanceHistoryProps {
 
 export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const [sortBy, setSortBy] = useState<string>("date");
-  const [typeFilter, setTypeFilter] = useState<"all" | "Buy" | "Sell">("all");
-  const [showTypeFilter, setShowTypeFilter] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<string>("timestamp");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
+
+  // Filter options for transaction type
+  const typeFilterOptions: FilterOption[] = [
+    { value: "all", label: "All Transactions" },
+    { value: "Buy", label: "Buy" },
+    { value: "Sell", label: "Sell" },
+  ];
 
   // Convert UI filter to hook filter format
   const transactionType =
@@ -252,70 +259,11 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: () => (
         <div className="flex items-center gap-2 px-2">
           <h4 className="text-table-header text-xs">Type</h4>
-          <div className="relative">
-            <button
-              onClick={() => setShowTypeFilter(!showTypeFilter)}
-              className={cn(
-                "group flex cursor-pointer items-center rounded-sm border p-1 transition-colors",
-                "hover:border-highlight bg-surface-hover border-transparent",
-                showTypeFilter && "border-highlight bg-surface-hover",
-              )}
-            >
-              <Filter className="text-primary size-3" />
-            </button>
-
-            {showTypeFilter && (
-              <div className="bg-surface-contrast absolute top-0 left-0 z-50 mt-9 min-w-[150px] rounded-md border border-[#3F3F46] py-1">
-                <button
-                  onClick={() => {
-                    setTypeFilter("all");
-                    setShowTypeFilter(false);
-                  }}
-                  className={cn(
-                    "hover:bg-surface-hover flex w-full items-center justify-between border-b border-[#3F3F46] px-3 py-2 text-left",
-                    typeFilter === "all" && "bg-surface-hover",
-                  )}
-                >
-                  <span className="text-primary text-sm font-normal whitespace-nowrap">
-                    Remove All
-                  </span>
-                  {typeFilter === "all" && (
-                    <Check className="text-primary size-4" />
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    setTypeFilter("Buy");
-                    setShowTypeFilter(false);
-                  }}
-                  className={cn(
-                    "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
-                    typeFilter === "Buy" && "bg-surface-hover",
-                  )}
-                >
-                  <span className="text-primary text-sm font-normal">Buy</span>
-                  {typeFilter === "Buy" && (
-                    <Check className="text-primary size-4" />
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    setTypeFilter("Sell");
-                    setShowTypeFilter(false);
-                  }}
-                  className={cn(
-                    "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
-                    typeFilter === "Sell" && "bg-surface-hover",
-                  )}
-                >
-                  <span className="text-primary text-sm font-normal">Sell</span>
-                  {typeFilter === "Sell" && (
-                    <Check className="text-primary size-4" />
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
+          <FilterDropdown
+            options={typeFilterOptions}
+            selectedValue={typeFilter}
+            onValueChange={setTypeFilter}
+          />
         </div>
       ),
     },

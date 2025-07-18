@@ -56,7 +56,7 @@ export const BlankState = ({
           {title}
         </div>
       )}
-      <div className="text-secondary flex text-sm font-medium">
+      <div className="text-secondary font-regular flex text-sm">
         {description}
       </div>
     </div>
