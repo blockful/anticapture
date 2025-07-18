@@ -1,33 +1,14 @@
-import { Address } from "viem";
-
 import { DaoIdEnum } from "@/lib/enums";
 import {
   ProposalsActivityRepository,
   type ProposalWithVotes,
   type Proposal,
-  type Vote,
 } from "@/api/repositories/proposals-activity.repository";
 import { ProposalAPI, ProposalMapper } from "@/api/mappers/proposals";
-
-export interface ProposalActivityRequest {
-  address: Address;
-  fromDate?: number;
-  daoId: DaoIdEnum;
-  skip?: number;
-  limit?: number;
-  blockTime: number;
-}
-
-export interface DelegateProposalActivity {
-  address: string;
-  totalProposals?: number;
-  votedProposals?: number;
-  neverVoted?: boolean;
-  winRate?: number;
-  yesRate?: number;
-  avgTimeBeforeEnd?: number;
-  proposals: ProposalWithVotes[];
-}
+import {
+  ProposalActivityRequest,
+  ProposalActivityResponse,
+} from "@/api/mappers/proposalActivity";
 
 export class ProposalsActivityService {
   private readonly proposalMapper = ProposalMapper;
@@ -67,16 +48,27 @@ export class ProposalsActivityService {
     skip = 0,
     limit = 10,
     blockTime,
-  }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
+  }: ProposalActivityRequest & {
+    daoId: DaoIdEnum;
+    blockTime: number;
+  }): Promise<ProposalActivityResponse> {
     // Check if user has ever voted
     const firstVoteTimestamp =
       await this.repository.getFirstVoteTimestamp(address);
 
-    if (!firstVoteTimestamp) return { address, proposals: [] };
+    if (!firstVoteTimestamp)
+      return {
+        address,
+        proposals: [],
+        totalProposals: 0,
+        votedProposals: 0,
+        neverVoted: false,
+        winRate: 0,
+        yesRate: 0,
+        avgTimeBeforeEnd: 0,
+      };
 
-    // Get voting period for the DAO
     const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
-
     if (!votingPeriodBlocks) {
       throw new Error(`DAO ${daoId} not found or missing voting period`);
     }
@@ -95,17 +87,26 @@ export class ProposalsActivityService {
       limit,
     );
 
-    const analytics = this.calculateAnalytics(proposals);
+    const { winRate, yesRate, avgTimeBeforeEnd } = this.calculateAnalytics(
+      proposals,
+      votingPeriodSeconds,
+    );
 
     return {
       address,
       totalProposals: proposals.length,
       votedProposals: 0,
+      winRate,
+      yesRate,
+      avgTimeBeforeEnd,
       // votedProposals: userVotes.length,
       neverVoted: false,
-      winRate: 0,
-      // ...analytics,
-      proposals,
+      proposals: proposals.map((proposal) =>
+        this.proposalMapper.toAPI(proposal, {
+          quorumReached: false,
+          currentQuorum: "0",
+        }),
+      ),
     };
   }
 
@@ -118,46 +119,48 @@ export class ProposalsActivityService {
       : firstVoteTimestamp;
   }
 
-  private calculateAnalytics(proposals: ProposalWithVotes[]) {
-    // // Calculate yes rate (support = "1" means "For")
-    // const yesVotes = userVotes.filter((vote) => vote.support === "1").length;
-    // const yesRate = (yesVotes / userVotes.length) * 100;
-    // // Calculate win rate for finished proposals only
-    // const { winningVotes, finishedProposalsVoted } = this.calculateWinRate(
-    //   proposals,
-    //   userVotes,
-    // );
-    // const winRate =
-    //   finishedProposalsVoted > 0
-    //     ? (winningVotes / finishedProposalsVoted) * 100
-    //     : 0;
-    // // Calculate average time before end
-    // const avgTimeBeforeEnd = this.calculateAvgTimeBeforeEnd(
-    //   proposals,
-    //   userVotes,
-    // );
-    // return {
-    //   winRate: Math.round(winRate * 100) / 100,
-    //   yesRate: Math.round(yesRate * 100) / 100,
-    //   avgTimeBeforeEnd, // This parameter is in seconds
-    // };
+  private calculateAnalytics(
+    proposals: ProposalWithVotes[],
+    votingPeriodSeconds: number,
+  ) {
+    const votes = proposals.flatMap((proposal) => proposal.votes);
+
+    // Calculate yes rate (support = "1" means "For")
+    const yesVotes = votes.filter((vote) => vote.support === "1").length;
+    const yesRate = (yesVotes / votes.length) * 100;
+
+    const { winningVotes, finishedProposalsVoted } =
+      this.calculateWinRate(proposals);
+    const winRate =
+      finishedProposalsVoted > 0
+        ? (winningVotes / finishedProposalsVoted) * 100
+        : 0;
+    // Calculate average time before end
+    const avgTimeBeforeEnd = this.calculateAvgTimeBeforeEnd(
+      proposals,
+      votingPeriodSeconds,
+    );
+    return {
+      winRate: Math.round(winRate * 100) / 100,
+      yesRate: Math.round(yesRate * 100) / 100,
+      avgTimeBeforeEnd, // This parameter is in seconds
+    };
   }
 
-  private calculateWinRate(proposals: Proposal[], userVotes: Vote[]) {
+  private calculateWinRate(proposals: ProposalWithVotes[]) {
     let winningVotes = 0;
     let finishedProposalsVoted = 0;
 
-    for (const vote of userVotes) {
-      const proposal = proposals.find((p) => p.id === vote.proposalId);
-
+    for (const proposal of proposals) {
       if (!this.isFinishedProposal(proposal)) continue;
 
       finishedProposalsVoted++;
 
-      const winningSide = this.getWinningSide(proposal!.status!);
-      if (vote.support === winningSide) {
-        winningVotes++;
-      }
+      const winningSide = this.getWinningSide(proposal.status);
+      winningVotes += proposal.votes.reduce(
+        (acc, vote) => acc + Number(vote.support === winningSide),
+        0,
+      );
     }
 
     return { winningVotes, finishedProposalsVoted };
@@ -181,37 +184,29 @@ export class ProposalsActivityService {
   }
 
   private calculateAvgTimeBeforeEnd(
-    proposals: Proposal[],
-    userVotes: Vote[],
+    proposals: ProposalWithVotes[],
+    votingPeriodSeconds: number,
   ): number {
-    // if (userVotes.length === 0) {
-    //   return 0;
-    // }
+    let totalTimeBeforeEnd = 0;
+    let validVotes = 0;
 
-    // const proposalMap = new Map(proposals.map((p) => [p.id, p]));
-    // let totalTimeBeforeEnd = 0;
-    // let validVotes = 0;
+    for (const proposal of proposals) {
+      for (const vote of proposal.votes) {
+        const voteTimestamp = Number(vote.timestamp);
+        const proposalEndTimestamp =
+          Number(proposal.timestamp) + votingPeriodSeconds;
 
-    // for (const vote of userVotes) {
-    //   const proposal = proposalMap.get(vote.proposalId);
-    //   if (!proposal || !proposal.proposalEndTimestamp) {
-    //     continue;
-    //   }
+        // Calculate time difference in seconds
+        const timeBeforeEndSeconds = proposalEndTimestamp - voteTimestamp;
 
-    //   const voteTimestamp = Number(vote.timestamp);
-    //   const proposalEndTimestamp = Number(proposal.proposalEndTimestamp);
+        // Only count positive values (votes cast before proposal ended)
+        if (timeBeforeEndSeconds > 0) {
+          totalTimeBeforeEnd += timeBeforeEndSeconds;
+          validVotes++;
+        }
+      }
+    }
 
-    //   // Calculate time difference in seconds
-    //   const timeBeforeEndSeconds = proposalEndTimestamp - voteTimestamp;
-
-    //   // Only count positive values (votes cast before proposal ended)
-    //   if (timeBeforeEndSeconds > 0) {
-    //     totalTimeBeforeEnd += timeBeforeEndSeconds;
-    //     validVotes++;
-    //   }
-    // }
-
-    // return validVotes > 0 ? Math.round(totalTimeBeforeEnd / validVotes) : 0;
-    return 0;
+    return validVotes > 0 ? Math.round(totalTimeBeforeEnd / validVotes) : 0;
   }
 }

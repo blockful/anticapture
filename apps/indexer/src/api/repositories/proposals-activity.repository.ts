@@ -1,6 +1,6 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
-import { desc, eq, sql } from "ponder";
+import { eq, sql } from "ponder";
 import { db } from "ponder:api";
 import {
   accountPower,

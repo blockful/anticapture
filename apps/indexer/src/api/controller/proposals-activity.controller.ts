@@ -7,6 +7,10 @@ import { ProposalsActivityService } from "@/api/services/proposals-activity/prop
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { ProposalSchema } from "@/api/mappers/proposals";
+import {
+  ProposalActivityRequestSchema,
+  ProposalActivityResponseSchema,
+} from "@/api/mappers/proposalActivity";
 
 export function proposalsActivity(
   app: Hono,
@@ -27,71 +31,14 @@ export function proposalsActivity(
         params: z.object({
           daoId: caseInsensitiveEnum(DaoIdEnum),
         }),
-        query: z.object({
-          address: z
-            .string()
-            .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
-          fromDate: z.coerce
-            .number()
-            .int()
-            .positive("From date must be a positive timestamp")
-            .optional(),
-          skip: z.coerce
-            .number()
-            .int()
-            .min(0, "Skip must be a non-negative integer")
-            .default(0)
-            .optional(),
-          limit: z.coerce
-            .number()
-            .int()
-            .min(1, "Limit must be a positive integer")
-            .max(100, "Limit cannot exceed 100")
-            .default(10)
-            .optional(),
-        }),
+        query: ProposalActivityRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved proposals activity",
           content: {
             "application/json": {
-              schema: z.object({
-                address: z.string(),
-                totalProposals: z.number().optional().default(0),
-                votedProposals: z.number().optional().default(0),
-                neverVoted: z.boolean().optional().default(false),
-                winRate: z.number().optional().default(0),
-                yesRate: z.number().optional().default(0),
-                avgTimeBeforeEnd: z.number().optional().default(0),
-                proposals: z.array(
-                  z.object({
-                    proposal: z.object({
-                      id: z.string(),
-                      daoId: z.string(),
-                      proposerAccountId: z.string(),
-                      description: z.string().nullable(),
-                      startBlock: z.string(),
-                      endBlock: z.string(),
-                      timestamp: z.string(),
-                      status: z.string(),
-                      forVotes: z.string(),
-                      againstVotes: z.string(),
-                      abstainVotes: z.string(),
-                      votes: z.array(
-                        z.object({
-                          id: z.string(),
-                          voterAccountId: z.string(),
-                          support: z.string().nullable(),
-                          votingPower: z.string().default("0"),
-                          reason: z.string().nullable(),
-                          timestamp: z.string(),
-                        }),
-                      ),
-                    }),
-                  }),
-                ),
-              }),
+              schema: ProposalActivityResponseSchema,
             },
           },
         },
