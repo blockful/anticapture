@@ -112,8 +112,8 @@ export const VotingPowerVariationGraph = ({
         cx={cx}
         cy={cy}
         r={4}
-        fill={payload.isGain ? "#10b981" : "#ef4444"}
-        stroke={payload.isGain ? "#10b981" : "#ef4444"}
+        fill={payload.isGain ? "var(--base-success)" : "var(--base-error)"}
+        stroke={payload.isGain ? "var(--base-success)" : "var(--base-error)"}
         strokeWidth={2}
         className="cursor-pointer"
       />
@@ -137,7 +137,7 @@ export const VotingPowerVariationGraph = ({
           data={chartData}
           margin={{ top: 25, right: 30, left: -20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--base-border)" />
           <XAxis
             dataKey="timestamp"
             type="number"
@@ -150,12 +150,12 @@ export const VotingPowerVariationGraph = ({
                 year: "numeric",
               });
             }}
-            stroke="#9ca3af"
+            stroke="var(--base-dimmed)"
             fontSize={12}
           />
           <YAxis
             tickFormatter={(value) => formatNumberUserReadable(value)}
-            stroke="#9ca3af"
+            stroke="var(--base-dimmed)"
             fontSize={12}
           />
           <Tooltip
@@ -186,7 +186,7 @@ export const VotingPowerVariationGraph = ({
           <Line
             type="monotone"
             dataKey="votingPower"
-            stroke="#ffffff"
+            stroke="var(--base-primary)"
             strokeWidth={1}
             dot={<CustomDot />}
             connectNulls={true}

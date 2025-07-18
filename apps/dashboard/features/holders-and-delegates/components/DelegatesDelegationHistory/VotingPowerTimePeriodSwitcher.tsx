@@ -52,7 +52,7 @@ export const VotingPowerTimePeriodSwitcher = ({
         className={cn(
           "text-primary flex min-w-[70px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           isOpen
-            ? "border-tangerine bg-[#26262A]"
+            ? "border-tangerine bg-light-dark"
             : "bg-surface-contrast border-transparent",
         )}
       >
@@ -66,12 +66,12 @@ export const VotingPowerTimePeriodSwitcher = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+        <div className="border-border-contrast bg-surface-contrast absolute top-full right-0 z-50 mt-1 min-w-[100px] rounded-md border py-1">
           {activeTimePeriods.map((period) => (
             <button
               key={period}
               className={cn(
-                "text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal hover:bg-[#26262A]",
+                "text-primary hover:bg-surface-hover flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal",
                 isSelected == period && "bg-middle-dark",
               )}
               onClick={() => handleSelect(period)}
