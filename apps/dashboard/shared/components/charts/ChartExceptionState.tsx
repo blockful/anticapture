@@ -48,7 +48,7 @@ export const ChartExceptionState = ({
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
           {title}
         </h3>
