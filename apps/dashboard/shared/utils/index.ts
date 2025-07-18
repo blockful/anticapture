@@ -7,4 +7,3 @@ export * from "@/shared/utils/formatVariation";
 export * from "@/shared/utils/timestampToReadableDate";
 export * from "@/shared/utils/calculateMonthsBefore";
 export * from "@/shared/utils/getDateRange";
-export * from "@/shared/utils/formatAddress";
