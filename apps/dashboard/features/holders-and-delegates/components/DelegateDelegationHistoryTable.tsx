@@ -357,13 +357,38 @@ export const DelegateDelegationHistoryTable = ({
 
   if (loading && delegationHistory.length === 0) {
     return (
-      <div className="flex h-full flex-col">
-        <div className="bg-surface-default flex-1 p-4">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))}
-          </div>
+      <div className="bg-surface-default flex h-full flex-col">
+        {/* Table */}
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <TheTable
+            columns={columns}
+            data={Array.from({ length: 10 }, (_, i) => ({
+              timestamp: "1716153600",
+              transactionHash: "0x1234567890",
+              delta: "1000000000000000000",
+              delegation: null,
+              transfer: null,
+              votingPower: "1000000000000000000",
+              type: "delegation" as const,
+              action: "Delegation",
+              isGain: true,
+              delegator: "0x1234567890",
+              delegate: "0x1234567890",
+            }))}
+            withPagination={true}
+            withSorting={true}
+            isTableSmall={true}
+          />
+
+          <Pagination
+            currentPage={paginationInfo.currentPage}
+            totalPages={paginationInfo.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            hasNextPage={paginationInfo.hasNextPage}
+            hasPreviousPage={paginationInfo.hasPreviousPage}
+            isLoading={loading}
+          />
         </div>
       </div>
     );

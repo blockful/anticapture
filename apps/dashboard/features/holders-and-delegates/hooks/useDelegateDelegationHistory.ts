@@ -59,7 +59,8 @@ export function useDelegateDelegationHistory(
 ): UseDelegateDelegationHistoryResult {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isPaginationLoading, setIsPaginationLoading] = useState<boolean>(false);
+  const [isPaginationLoading, setIsPaginationLoading] =
+    useState<boolean>(false);
 
   // Reset page to 1 when sorting changes
   useEffect(() => {
