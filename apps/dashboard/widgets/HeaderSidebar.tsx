@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BarChart4 } from "lucide-react";
-import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
+import {
+  ButtonHeaderSidebar,
+  ConnectWallet,
+  BottomNavigationButtons,
+} from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
 export const HeaderSidebar = () => {
   const router = useRouter();
@@ -59,8 +63,13 @@ export const HeaderSidebar = () => {
               />
             ))}
           </div>
-          <div className="flex px-3 py-4">
-            <ConnectWallet label="" />
+          <div className="flex flex-col">
+            <div className="border-middle-dark flex flex-col gap-2 border-t border-b px-1 py-2">
+              <BottomNavigationButtons isCompact />
+            </div>
+            <div className="flex flex-col px-3 py-4">
+              <ConnectWallet label="" />
+            </div>
           </div>
         </div>
       </div>
