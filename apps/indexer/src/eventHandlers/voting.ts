@@ -110,7 +110,7 @@ export const proposalCreated = async (
     endBlock,
     description,
     timestamp,
-    status: "Pending",
+    status: "pending",
   });
 
   // Update proposer's proposal count
@@ -130,9 +130,17 @@ export const proposalCanceled = async (
   context: Context,
   proposalId: string,
 ) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "CANCELED",
-  });
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set({
+      status: "canceled",
+    })
+    .catch((e) =>
+      console.error({
+        message: "Error canceling proposal",
+        error: e,
+      }),
+    );
 };
 
 export const proposalExecuted = async (
@@ -140,6 +148,6 @@ export const proposalExecuted = async (
   proposalId: string,
 ) => {
   await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "EXECUTED",
+    status: "executed",
   });
 };
