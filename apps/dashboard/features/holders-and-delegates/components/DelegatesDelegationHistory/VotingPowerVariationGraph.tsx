@@ -66,7 +66,7 @@ export const VotingPowerVariationGraph = ({
         title="VOTING POWER VARIATION"
         headerContent={
           <VotingPowerTimePeriodSwitcher
-            defaultValue="all"
+            value={selectedPeriod}
             setTimePeriod={setSelectedPeriod}
             isSmall={true}
           />
@@ -83,7 +83,7 @@ export const VotingPowerVariationGraph = ({
         errorMessage="Error loading data"
         headerContent={
           <VotingPowerTimePeriodSwitcher
-            defaultValue="all"
+            value={selectedPeriod}
             setTimePeriod={setSelectedPeriod}
             isSmall={true}
           />
@@ -100,7 +100,7 @@ export const VotingPowerVariationGraph = ({
         noDataMessage="No voting power data available"
         headerContent={
           <VotingPowerTimePeriodSwitcher
-            defaultValue="all"
+            value={selectedPeriod}
             setTimePeriod={setSelectedPeriod}
             isSmall={true}
           />
@@ -145,7 +145,7 @@ export const VotingPowerVariationGraph = ({
           VOTING POWER VARIATION
         </h3>
         <VotingPowerTimePeriodSwitcher
-          defaultValue="all"
+          value={selectedPeriod}
           setTimePeriod={setSelectedPeriod}
           isSmall={true}
         />

@@ -10,25 +10,22 @@ export type VotingPowerTimePeriod = "30d" | "90d" | "all";
 
 interface VotingPowerTimePeriodSwitcherProps {
   setTimePeriod: (timePeriod: VotingPowerTimePeriod) => void;
-  defaultValue: VotingPowerTimePeriod;
+  value: VotingPowerTimePeriod;
   isSmall?: boolean;
 }
 
 export const VotingPowerTimePeriodSwitcher = ({
   setTimePeriod,
-  defaultValue,
+  value,
   isSmall = false,
 }: VotingPowerTimePeriodSwitcherProps) => {
   const { isMobile } = useScreenSize();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isSelected, setIsSelected] =
-    useState<VotingPowerTimePeriod>(defaultValue);
 
   const activeTimePeriods: VotingPowerTimePeriod[] = ["30d", "90d", "all"];
 
-  const handleSelect = (value: VotingPowerTimePeriod) => {
-    setIsSelected(value);
-    setTimePeriod(value);
+  const handleSelect = (period: VotingPowerTimePeriod) => {
+    setTimePeriod(period);
     setIsOpen(false);
   };
 
@@ -56,7 +53,7 @@ export const VotingPowerTimePeriodSwitcher = ({
             : "bg-surface-contrast border-transparent",
         )}
       >
-        <span className="font-medium- text-sm">{formatPeriod(isSelected)}</span>
+        <span className="font-medium- text-sm">{formatPeriod(value)}</span>
         <ChevronDown
           className={cn(
             "size-3 transition-transform duration-200",
@@ -72,19 +69,19 @@ export const VotingPowerTimePeriodSwitcher = ({
               key={period}
               className={cn(
                 "text-primary hover:bg-surface-hover flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal",
-                isSelected == period && "bg-middle-dark",
+                value == period && "bg-middle-dark",
               )}
               onClick={() => handleSelect(period)}
             >
               {formatPeriod(period)}
-              {isSelected == period && <CheckIcon className="size-3.5" />}
+              {value == period && <CheckIcon className="size-3.5" />}
             </button>
           ))}
         </div>
       )}
     </div>
   ) : (
-    <Tabs defaultValue={defaultValue} className="gap-1">
+    <Tabs value={value} className="gap-1">
       <TabsList>
         {activeTimePeriods.map((period) => (
           <TabsTrigger
