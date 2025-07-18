@@ -31,7 +31,7 @@ export const DonationCard = ({
     <Card className="bg-surface-default w-full rounded-none border-0 shadow-sm">
       <CardContent className="p-5">
         <div className="flex flex-row gap-2">
-          <div className="space-y-6">
+          <div className="flex-1 space-y-6">
             {/* Title and Description */}
             <div className="mb-4 flex flex-col gap-3">
               <h2 className="text-primary text-xl font-semibold">{title}</h2>
