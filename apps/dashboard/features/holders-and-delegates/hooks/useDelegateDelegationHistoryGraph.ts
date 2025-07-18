@@ -13,6 +13,8 @@ export interface DelegationHistoryGraphItem {
   type: "delegation" | "transfer";
   isGain: boolean;
   transactionHash: string;
+  fromAddress?: string; // Address that initiated the transaction
+  toAddress?: string; // Address that received the delegation/transfer
 }
 
 // Interface for the hook result
@@ -83,10 +85,23 @@ export function useDelegateDelegationHistoryGraph(
         const delta = Number(formatUnits(BigInt(item.delta.toString()), 18));
         const isGain = delta > 0;
 
-        // Determine transaction type
+        // Determine transaction type and extract address information
         const type: "delegation" | "transfer" = item.delegation
           ? "delegation"
           : "transfer";
+
+        let fromAddress: string | undefined;
+        let toAddress: string | undefined;
+
+        if (item.delegation) {
+          // For delegation: delegatorAccountId is the one delegating to delegateAccountId
+          fromAddress = item.delegation.delegatorAccountId || undefined;
+          toAddress = item.delegation.delegateAccountId || undefined;
+        } else if (item.transfer) {
+          // For transfer: fromAccountId is sending to toAccountId
+          fromAddress = item.transfer.fromAccountId || undefined;
+          toAddress = item.transfer.toAccountId || undefined;
+        }
 
         return {
           timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
@@ -95,6 +110,8 @@ export function useDelegateDelegationHistoryGraph(
           type,
           isGain,
           transactionHash: item.transactionHash,
+          fromAddress,
+          toAddress,
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp); // Sort chronologically for chart display

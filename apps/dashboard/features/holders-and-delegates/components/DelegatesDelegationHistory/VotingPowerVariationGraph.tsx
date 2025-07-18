@@ -20,6 +20,7 @@ import {
   VotingPowerTimePeriod,
 } from "./VotingPowerTimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -36,6 +37,8 @@ interface CustomDotProps {
     type: string;
     isGain: boolean;
     transactionHash: string;
+    fromAddress?: string;
+    toAddress?: string;
   };
 }
 
@@ -114,6 +117,8 @@ export const VotingPowerVariationGraph = ({
       type: dataPoint.type,
       isGain: dataPoint.isGain,
       transactionHash: dataPoint.transactionHash,
+      fromAddress: dataPoint.fromAddress,
+      toAddress: dataPoint.toAddress,
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
@@ -175,6 +180,23 @@ export const VotingPowerVariationGraph = ({
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
+
+                // Determine which address to show based on transaction type and direction
+                const getDisplayAddress = () => {
+                  if (data.type === "delegation") {
+                    return data.isGain ? data.fromAddress : data.toAddress;
+                  } else if (data.type === "transfer") {
+                    return data.isGain ? data.fromAddress : data.toAddress;
+                  }
+                  return null;
+                };
+
+                const displayAddress = getDisplayAddress();
+                const addressLabel =
+                  data.type === "delegation"
+                    ? "Delegated from"
+                    : "Transferred from";
+
                 return (
                   <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
                     <p className="text-primary text-sm font-medium">
@@ -190,6 +212,17 @@ export const VotingPowerVariationGraph = ({
                       {data.isGain && "+"}
                       {formatNumberUserReadable(parseFloat(data.delta))}
                     </p>
+                    <p className="text-secondary text-xs">{addressLabel}:</p>
+                    {displayAddress && (
+                      <EnsAvatar
+                        address={displayAddress}
+                        showAvatar={false}
+                        size="xs"
+                        className="mt-2"
+                        nameClassName="text-xs"
+                        containerClassName="mt-2 flex h-10 items-center gap-2 bg-blue-400"
+                      />
+                    )}
                   </div>
                 );
               }
