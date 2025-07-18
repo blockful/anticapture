@@ -42,7 +42,7 @@ export const FundingSourcesCard = ({
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-md flex items-center gap-1 truncate font-medium">
+                      <h4 className="text-sm flex items-center gap-1 truncate font-medium">
                         {source.name}
                       </h4>
                       <div className="bg-success/12 text-success flex items-center gap-1 rounded-full px-1.5 py-0.5">
