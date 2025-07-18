@@ -9,6 +9,7 @@ import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { DelegateDelegationsHistory } from "./DelegatesDelegationHistory/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
 import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
@@ -58,7 +59,9 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "delegationHistory",
           label: "Delegation History",
-          content: <>Delegation History</>,
+          content: (
+            <DelegateDelegationsHistory accountId={address} daoId={daoId} />
+          ),
         },
       ],
     },
@@ -94,7 +97,7 @@ export const HoldersAndDelegatesDrawer = ({
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerContent>
-        <div className="bg-surface-default h-full w-full">
+        <div className="bg-surface-default h-full w-full overflow-y-auto">
           <div className="bg-surface-contrast w-full">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
