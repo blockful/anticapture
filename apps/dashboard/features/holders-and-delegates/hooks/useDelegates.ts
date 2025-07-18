@@ -3,13 +3,12 @@ import {
   useGetHistoricalVotingAndActivityQuery,
   useGetDelegatesCountQuery,
   useGetDelegateProposalsActivityLazyQuery,
+  QueryInput_HistoricalVotingPower_Days,
 } from "@anticapture/graphql-client/hooks";
-import {
-  QueryInput_HistoricalVotingPower_DaoId,
-  QueryInput_ProposalsActivity_DaoId,
-} from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 
 interface ProposalsActivity {
   totalProposals: number;
@@ -50,19 +49,19 @@ interface UseDelegatesResult {
 }
 
 interface UseDelegatesParams {
-  blockNumber: number;
   fromDate: number;
-  daoId: QueryInput_HistoricalVotingPower_DaoId;
+  daoId: DaoIdEnum;
   orderBy?: string;
   orderDirection?: string;
+  days: TimeInterval;
 }
 
 export const useDelegates = ({
-  blockNumber,
   fromDate,
   daoId,
   orderBy = "votingPower",
   orderDirection = "desc",
+  days,
 }: UseDelegatesParams): UseDelegatesResult => {
   const itemsPerPage = 10; // This should match the limit in the GraphQL query
 
@@ -141,10 +140,8 @@ export const useDelegates = ({
     variables: {
       addresses: delegateAddresses,
       address: delegateAddresses[0] || "", // This is still needed for the query structure
-      blockNumber,
-      daoId,
-      proposalsDaoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
       fromDate,
+      days: QueryInput_HistoricalVotingPower_Days[days],
     },
     context: {
       headers: {
@@ -177,7 +174,6 @@ export const useDelegates = ({
           const result = await getDelegateProposalsActivity({
             variables: {
               address,
-              daoId: daoId as unknown as QueryInput_ProposalsActivity_DaoId,
               fromDate,
             },
           });

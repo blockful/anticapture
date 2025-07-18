@@ -13,9 +13,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -81,11 +84,9 @@ export type Query = {
   daos: DaoPage;
   delegation?: Maybe<Delegation>;
   delegations: DelegationPage;
-  /** Fetch historical token balances for multiple addresses at a specific block number using multicall */
+  /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
-  /** Get historical market data for a specific token */
-  historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
-  /** Fetch historical voting power for multiple addresses at a specific block number using multicall */
+  /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
@@ -93,8 +94,6 @@ export type Query = {
   proposalsOnchains: ProposalsOnchainPage;
   token?: Maybe<Token>;
   tokens: TokenPage;
-  /** Get total assets */
-  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transfer?: Maybe<Transfer>;
   transfers: TransferPage;
   votesOnchain?: Maybe<VotesOnchain>;
@@ -151,67 +150,56 @@ export type QueryAccountsArgs = {
 
 
 export type QueryCompareActiveSupplyArgs = {
-  daoId: QueryInput_CompareActiveSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareActiveSupply_Days>;
 };
 
 
 export type QueryCompareAverageTurnoutArgs = {
-  daoId: QueryInput_CompareAverageTurnout_DaoId;
   days?: InputMaybe<QueryInput_CompareAverageTurnout_Days>;
 };
 
 
 export type QueryCompareCexSupplyArgs = {
-  daoId: QueryInput_CompareCexSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareCexSupply_Days>;
 };
 
 
 export type QueryCompareCirculatingSupplyArgs = {
-  daoId: QueryInput_CompareCirculatingSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareCirculatingSupply_Days>;
 };
 
 
 export type QueryCompareDelegatedSupplyArgs = {
-  daoId: QueryInput_CompareDelegatedSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareDelegatedSupply_Days>;
 };
 
 
 export type QueryCompareDexSupplyArgs = {
-  daoId: QueryInput_CompareDexSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareDexSupply_Days>;
 };
 
 
 export type QueryCompareLendingSupplyArgs = {
-  daoId: QueryInput_CompareLendingSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareLendingSupply_Days>;
 };
 
 
 export type QueryCompareProposalsArgs = {
-  daoId: QueryInput_CompareProposals_DaoId;
   days?: InputMaybe<QueryInput_CompareProposals_Days>;
 };
 
 
 export type QueryCompareTotalSupplyArgs = {
-  daoId: QueryInput_CompareTotalSupply_DaoId;
   days?: InputMaybe<QueryInput_CompareTotalSupply_Days>;
 };
 
 
 export type QueryCompareTreasuryArgs = {
-  daoId: QueryInput_CompareTreasury_DaoId;
   days?: InputMaybe<QueryInput_CompareTreasury_Days>;
 };
 
 
 export type QueryCompareVotesArgs = {
-  daoId: QueryInput_CompareVotes_DaoId;
   days?: InputMaybe<QueryInput_CompareVotes_Days>;
 };
 
@@ -265,26 +253,18 @@ export type QueryDelegationsArgs = {
 
 export type QueryHistoricalBalancesArgs = {
   addresses: Scalars['JSON']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
-  daoId: QueryInput_HistoricalBalances_DaoId;
-};
-
-
-export type QueryHistoricalTokenDataArgs = {
-  daoId: QueryInput_HistoricalTokenData_DaoId;
+  days?: InputMaybe<QueryInput_HistoricalBalances_Days>;
 };
 
 
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
-  daoId: QueryInput_HistoricalVotingPower_DaoId;
+  days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
 };
 
 
 export type QueryProposalsActivityArgs = {
   address: Scalars['String']['input'];
-  daoId: QueryInput_ProposalsActivity_DaoId;
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -318,12 +298,6 @@ export type QueryTokensArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TokenFilter>;
-};
-
-
-export type QueryTotalAssetsArgs = {
-  daoId: QueryInput_TotalAssets_DaoId;
-  days?: InputMaybe<QueryInput_TotalAssets_Days>;
 };
 
 
@@ -1007,13 +981,6 @@ export type DelegationPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type HistoricalTokenData_200_Response = {
-  __typename?: 'historicalTokenData_200_response';
-  market_caps: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  prices: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  total_volumes: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-};
-
 export enum MetricType {
   CexSupply = 'CEX_SUPPLY',
   CirculatingSupply = 'CIRCULATING_SUPPLY',
@@ -1181,24 +1148,12 @@ export type ProposalsOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export enum QueryInput_CompareActiveSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
-}
-
-export enum QueryInput_CompareAverageTurnout_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
@@ -1209,24 +1164,12 @@ export enum QueryInput_CompareAverageTurnout_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_CompareCexSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
 export enum QueryInput_CompareCexSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
-}
-
-export enum QueryInput_CompareCirculatingSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
@@ -1237,24 +1180,12 @@ export enum QueryInput_CompareCirculatingSupply_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_CompareDelegatedSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
 export enum QueryInput_CompareDelegatedSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
-}
-
-export enum QueryInput_CompareDexSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
 }
 
 export enum QueryInput_CompareDexSupply_Days {
@@ -1265,24 +1196,12 @@ export enum QueryInput_CompareDexSupply_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_CompareLendingSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
 export enum QueryInput_CompareLendingSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
-}
-
-export enum QueryInput_CompareProposals_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
 }
 
 export enum QueryInput_CompareProposals_Days {
@@ -1293,24 +1212,12 @@ export enum QueryInput_CompareProposals_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_CompareTotalSupply_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
 export enum QueryInput_CompareTotalSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
-}
-
-export enum QueryInput_CompareTreasury_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
 }
 
 export enum QueryInput_CompareTreasury_Days {
@@ -1321,12 +1228,6 @@ export enum QueryInput_CompareTreasury_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_CompareVotes_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
 export enum QueryInput_CompareVotes_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1335,37 +1236,15 @@ export enum QueryInput_CompareVotes_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_HistoricalBalances_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
+export enum QueryInput_HistoricalBalances_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
 }
 
-export enum QueryInput_HistoricalTokenData_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
-export enum QueryInput_HistoricalVotingPower_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
-export enum QueryInput_ProposalsActivity_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
-export enum QueryInput_TotalAssets_DaoId {
-  Arb = 'ARB',
-  Ens = 'ENS',
-  Uni = 'UNI'
-}
-
-export enum QueryInput_TotalAssets_Days {
+export enum QueryInput_HistoricalVotingPower_Days {
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1419,12 +1298,6 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   timestamp: Scalars['String']['output'];
   voterAccountId: Scalars['String']['output'];
   votingPower?: Maybe<Scalars['String']['output']>;
-};
-
-export type Query_TotalAssets_Items = {
-  __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
 };
 
 export type Token = {
@@ -1972,10 +1845,8 @@ export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   address: Scalars['String']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
-  daoId: QueryInput_HistoricalVotingPower_DaoId;
+  days: QueryInput_HistoricalVotingPower_Days;
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  proposalsDaoId: QueryInput_ProposalsActivity_DaoId;
 }>;
 
 
@@ -1983,7 +1854,6 @@ export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', histor
 
 export type GetDelegateProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  daoId: QueryInput_ProposalsActivity_DaoId;
   fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 }>;
 
@@ -1992,8 +1862,7 @@ export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposal
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
-  blockNumber: Scalars['NonNegativeInt']['input'];
-  daoId: QueryInput_HistoricalBalances_DaoId;
+  days: QueryInput_HistoricalBalances_Days;
 }>;
 
 

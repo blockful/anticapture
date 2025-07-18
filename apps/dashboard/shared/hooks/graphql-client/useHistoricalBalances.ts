@@ -1,11 +1,9 @@
 import {
-  QueryInput_HistoricalBalances_DaoId,
+  QueryInput_HistoricalBalances_Days,
   useGetHistoricalBalancesQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useEffect, useState } from "react";
 import { TimeInterval } from "@/shared/types/enums";
-import { getHistoricalBlockNumber } from "@/shared/utils/calculateHistoricalBlockNumber";
 
 interface HistoricalBalance {
   address: string;
@@ -26,37 +24,17 @@ export const useHistoricalBalances = (
   addresses: string[],
   days: TimeInterval,
 ): UseHistoricalBalancesResult => {
-  const [blockNumber, setBlockNumber] = useState<number>(0);
-
-  useEffect(() => {
-    const fetchBlockNumber = async () => {
-      try {
-        const historicalBlock = await getHistoricalBlockNumber({
-          period: days,
-        });
-
-        setBlockNumber(Math.abs(historicalBlock));
-      } catch (error) {
-        console.error("Error fetching historical block:", error);
-        setBlockNumber(0);
-      }
-    };
-
-    fetchBlockNumber();
-  }, [days]);
-
   const { data, loading, error, refetch } = useGetHistoricalBalancesQuery({
     variables: {
       addresses,
-      blockNumber,
-      daoId: daoId as unknown as QueryInput_HistoricalBalances_DaoId,
+      days: QueryInput_HistoricalBalances_Days[days],
     },
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
-    skip: blockNumber === 0 || !addresses.length,
+    skip: !addresses.length,
   });
 
   return {
