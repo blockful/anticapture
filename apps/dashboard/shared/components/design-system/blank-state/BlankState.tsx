@@ -4,7 +4,7 @@ import { ElementType } from "react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/shared/utils/cn";
 
-const blankSlateVariants = cva(
+const blankStateVariants = cva(
   "rounded-md w-full flex items-center justify-center text-secondary px-3 py-4 gap-2 bg-surface-contrast",
   {
     variants: {
@@ -31,7 +31,7 @@ const iconVariants = cva("size-6", {
   },
 });
 
-interface BlankSlateProps {
+interface BlankStateProps {
   variant: "default" | "title";
   icon: ElementType;
   title?: string;
@@ -39,15 +39,15 @@ interface BlankSlateProps {
   description: string;
 }
 
-export const BlankSlate = ({
+export const BlankState = ({
   variant,
   icon: Icon,
   title,
   className,
   description,
-}: BlankSlateProps) => {
+}: BlankStateProps) => {
   return (
-    <div className={cn(blankSlateVariants({ variant }), className)}>
+    <div className={cn(blankStateVariants({ variant }), className)}>
       <div className="flex">
         <Icon className={cn(iconVariants({ variant }))} />
       </div>
