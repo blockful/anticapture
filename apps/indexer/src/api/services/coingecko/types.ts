@@ -2,6 +2,7 @@ export const CoingeckoTokenIdEnum = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
+  OP: "optimism",
 } as const;
 
 export type CoingeckoTokenId =

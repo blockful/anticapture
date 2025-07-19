@@ -1,4 +1,4 @@
-export const ENSGovernorAbi = [
+export const GovernorAbi = [
   {
     inputs: [
       { internalType: "contract ERC20Votes", name: "_token", type: "address" },

@@ -1,9 +1,10 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
 
 export function proposalsActivity(
@@ -116,12 +117,15 @@ export function proposalsActivity(
         userVoteFilter,
       } = context.req.valid("query");
 
+      const blockTime = CONTRACT_ADDRESSES[daoId].blockTime;
+
       const result = await service.getProposalsActivity({
         address,
         fromDate,
         daoId,
         skip,
         limit,
+        blockTime,
         orderBy,
         orderDirection,
         userVoteFilter,

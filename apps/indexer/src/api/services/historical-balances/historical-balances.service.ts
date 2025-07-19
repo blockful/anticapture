@@ -149,9 +149,7 @@ export class HistoricalBalancesService {
    * Maps DAO ID to corresponding token contract address
    */
   private getTokenAddress(daoId: DaoIdEnum): Address {
-    const { NETWORK: network } = env;
-    const contractInfo = CONTRACT_ADDRESSES[network]?.[daoId];
-    return contractInfo?.token?.address || "0x";
+    return CONTRACT_ADDRESSES[daoId].token.address;
   }
 
   /**

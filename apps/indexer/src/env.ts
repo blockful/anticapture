@@ -1,6 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 
 dotenv.config();
 
@@ -12,7 +12,6 @@ const envSchema = z.object({
     .default("postgres://postgres:postgres@localhost:5432/postgres"),
   POLLING_INTERVAL: z.coerce.number().default(10000), // 10s
   MAX_REQUESTS_PER_SECOND: z.coerce.number().default(20),
-  NETWORK: z.nativeEnum(NetworkEnum),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
   DUNE_API_URL: z.string().optional(),
