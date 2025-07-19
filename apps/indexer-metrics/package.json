@@ -3,7 +3,8 @@
   "version": "0.3.1",
   "description": "Grafana and Prometheus for Indexer metrics",
   "scripts": {
-    "start": "docker compose -p ponder-monitoring -f ./docker-monitoring.yml up"
+    "start": "docker compose -p ponder-monitoring -f ./docker-monitoring.yml up",
+    "clean": "rm -rf node_modules"
   },
   "author": "",
   "license": "ISC"

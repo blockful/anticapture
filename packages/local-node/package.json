@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.10.0",
   "scripts": {
-    "start": "sh ./entrypoint.sh"
+    "start": "sh ./entrypoint.sh",
+    "clean": "rm -rf node_modules cache out lib broadcast"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1",

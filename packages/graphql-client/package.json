@@ -6,7 +6,7 @@
     "codegen:watch": "graphql-codegen --watch",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "clean": "rm -f generated.ts types.ts",
+    "clean": "rm -rf node_modules dist generated.ts types.ts *.tsbuildinfo",
     "dev": "concurrently \"npm run codegen:watch\" \"npm run build:watch\""
   },
   "main": "dist/generated.js",

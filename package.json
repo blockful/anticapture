@@ -9,7 +9,9 @@
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
     "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
-    "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client"
+    "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
+    "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
+    "lint": "turbo lint"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
