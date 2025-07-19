@@ -35,9 +35,9 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "run",
-        "serve",
+        "dev",
         "--config",
-        "config/ens.config.ts"
+        "config/ens.local.config.ts"
       ],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",

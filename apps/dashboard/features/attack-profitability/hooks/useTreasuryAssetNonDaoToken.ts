@@ -17,14 +17,22 @@ export const fetchTreasuryAssetNonDaoToken = async ({
 }): Promise<TreasuryAssetNonDaoToken[]> => {
   const query = `
   query getTotalAssets {
-  totalAssets(daoId:${daoId}, days:_${days}){
+  totalAssets(days:_${days}){
     totalAssets
     date
   }
 }`;
-  const response = await axios.post(`${BACKEND_ENDPOINT}`, {
-    query,
-  });
+  const response = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    {
+      query,
+    },
+    {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  );
   const { totalAssets } = response.data.data as {
     totalAssets: TreasuryAssetNonDaoToken[];
   };

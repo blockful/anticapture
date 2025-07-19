@@ -1,4 +1,4 @@
-import { Address, zeroAddress } from "viem";
+import { Address, zeroAddress, Abi } from "viem";
 
 import { DaoIdEnum } from "./enums";
 

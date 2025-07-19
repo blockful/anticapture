@@ -1,17 +1,15 @@
 import { createConfig } from "ponder";
 
-import { env } from "@/env";
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 
 export default createConfig({
-  database: {
-    kind: "postgres",
-    connectionString: env.DATABASE_URL,
-  },
   chains: {
     anvil: {
       id: 31337,
-      rpc: env.RPC_URL,
+      rpc: "http://localhost:8545",
+      maxRequestsPerSecond: 10,
+      pollingInterval: 1000,
+      disableCache: true,
     },
   },
   // NOTE: These addresses are deterministic for Anvil local development
