@@ -2,11 +2,10 @@ import {
   Address,
   createPublicClient,
   http,
-  PublicClient,
-  isAddress,
   parseAbi,
+  PublicClient,
 } from "viem";
-import { readContract, multicall } from "viem/actions";
+import { multicall } from "viem/actions";
 
 import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";

@@ -2,7 +2,6 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import {
   ProposalsActivityRepository,
-  DrizzleProposalsActivityRepository,
   DbProposal,
   DbVote,
 } from "@/api/repositories/proposals-activity.repository";
