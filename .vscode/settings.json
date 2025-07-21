@@ -46,5 +46,7 @@
   "eslint.codeActionsOnSave.mode": "problems",
   // Prettier settings - Force it to use local config
   "prettier.useEditorConfig": false,
-  "prettier.resolveGlobalModules": false
+  "prettier.resolveGlobalModules": false,
+  // Line endings - Force Unix line endings (LF) to avoid CRLF issues
+  "files.eol": "\n"
 }
