@@ -6,7 +6,8 @@
     "dev": "ponder dev --schema public",
     "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
     "serve": "ponder serve --schema=anticapture",
-    "lint": "eslint . --ext .ts --fix",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc",
     "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },

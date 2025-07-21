@@ -11,7 +11,8 @@
     "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
     "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
