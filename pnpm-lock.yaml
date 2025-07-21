@@ -13630,9 +13630,12 @@ packages:
       }
     engines: { node: ">=10" }
 
-  ponder@0.11.35:
-    resolution: {integrity: sha512-fYSD4RjLfGHIg8ACGnFTk3SJtPsNZMWwLkxjo0c1q0rLVLz+dKU5L96OD/mSHKPAX1iWaRHwPS2mlt0GjWjoSQ==}
-    engines: {node: '>=18.14'}
+  ponder@0.11.27:
+    resolution:
+      {
+        integrity: sha512-dEQJ+LRDA11vAfpRyypOwLKhxwWFwWPSkWPvBiFyJuT7UvpZh3ga6sXGDNBazw71HoLLiScOYkfU6pkZtH/v/w==,
+      }
+    engines: { node: ">=18.14" }
     hasBin: true
     peerDependencies:
       hono: ">=4.5"
