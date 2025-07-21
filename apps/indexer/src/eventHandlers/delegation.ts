@@ -6,14 +6,9 @@ import {
   votingPowerHistory,
   token,
 } from "ponder:schema";
-import { zeroAddress } from "viem";
+import { Address, Hex, zeroAddress } from "viem";
 
-import { getValueFromEventArgs } from "@/lib/utils";
 import { MetricTypesEnum } from "@/lib/constants";
-import {
-  DaoDelegateChangedEvent,
-  DaoDelegateVotesChangedEvent,
-} from "@/indexer/types";
 import {
   ensureAccountExists,
   ensureAccountsExist,
@@ -21,53 +16,57 @@ import {
 } from "./shared";
 
 export const delegateChanged = async (
-  event: DaoDelegateChangedEvent,
   context: Context,
   daoId: string,
+  args: {
+    delegator: Address;
+    toDelegate: Address;
+    tokenId: Address;
+    fromDelegate: Address;
+    txHash: Hex;
+    timestamp: bigint;
+  },
 ) => {
+  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp } =
+    args;
+
   // Ensure all required accounts exist in parallel
-  await ensureAccountsExist(context, [
-    event.args.delegator,
-    event.args.toDelegate,
-  ]);
+  await ensureAccountsExist(context, [delegator, toDelegate]);
 
   // Get the delegator's current balance
   const delegatorBalance = await context.db.find(accountBalance, {
-    accountId: event.args.delegator,
-    tokenId: event.log.address,
+    accountId: delegator,
+    tokenId,
   });
 
-  const delegatedValue = delegatorBalance?.balance ?? BigInt(0);
-
-  // Create a new delegation record
   await context.db.insert(delegation).values({
-    transactionHash: event.transaction.hash,
+    transactionHash: txHash,
     daoId,
-    delegateAccountId: event.args.toDelegate,
-    delegatorAccountId: event.args.delegator,
-    delegatedValue,
-    previousDelegate: event.args.fromDelegate,
-    timestamp: event.block.timestamp,
+    delegateAccountId: toDelegate,
+    delegatorAccountId: delegator,
+    delegatedValue: delegatorBalance?.balance ?? BigInt(0),
+    previousDelegate: fromDelegate,
+    timestamp,
   });
 
   // Update the delegator's delegate
   await context.db
     .insert(accountBalance)
     .values({
-      accountId: event.args.delegator,
-      tokenId: event.log.address,
-      delegate: event.args.toDelegate,
+      accountId: delegator,
+      tokenId,
+      delegate: toDelegate,
       balance: BigInt(0),
     })
     .onConflictDoUpdate({
-      delegate: event.args.toDelegate,
+      delegate: toDelegate,
     });
 
   // Update the old delegate's delegations count
-  if (event.args.fromDelegate != zeroAddress) {
+  if (fromDelegate != zeroAddress) {
     await context.db
       .update(accountPower, {
-        accountId: event.args.fromDelegate,
+        accountId: fromDelegate,
       })
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
@@ -76,7 +75,7 @@ export const delegateChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: event.args.toDelegate,
+      accountId: toDelegate,
       daoId,
       delegationsCount: 1,
     })
@@ -86,40 +85,30 @@ export const delegateChanged = async (
 };
 
 export const delegatedVotesChanged = async (
-  event: DaoDelegateVotesChangedEvent,
   context: Context,
   daoId: string,
+  args: {
+    tokenId: Address;
+    delegate: Address;
+    txHash: Hex;
+    newBalance: bigint;
+    oldBalance: bigint;
+    timestamp: bigint;
+  },
 ) => {
-  // Ensure delegate account exists
-  await ensureAccountExists(context, event.args.delegate);
+  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId } = args;
 
-  const newBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
-    [
-      { name: "newBalance", daos: ["ENS", "COMP", "UNI"] },
-      { name: "newVotes", daos: ["SHU"] },
-    ],
-    event.args,
-    daoId,
-  );
-
-  const oldBalance = getValueFromEventArgs<bigint, (typeof event)["args"]>(
-    [
-      { name: "previousBalance", daos: ["ENS", "COMP", "UNI"] },
-      { name: "previousVotes", daos: ["SHU"] },
-    ],
-    event.args,
-    daoId,
-  );
+  await ensureAccountExists(context, delegate);
 
   await context.db
     .insert(votingPowerHistory)
     .values({
       daoId,
-      transactionHash: event.transaction.hash,
-      accountId: event.args.delegate,
+      transactionHash: txHash,
+      accountId: delegate,
       votingPower: newBalance,
       delta: newBalance - oldBalance,
-      timestamp: event.block.timestamp,
+      timestamp,
     })
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
@@ -129,7 +118,7 @@ export const delegatedVotesChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: event.args.delegate,
+      accountId: delegate,
       daoId,
       votingPower: newBalance,
     })
@@ -138,23 +127,29 @@ export const delegatedVotesChanged = async (
     }));
 
   const currentDelegatedSupply = (await context.db.find(token, {
-    id: event.log.address,
+    id: tokenId,
   }))!.delegatedSupply;
 
   // Update the delegated supply
   const newDelegatedSupply = (
-    await context.db.update(token, { id: event.log.address }).set((row) => ({
+    await context.db.update(token, { id: tokenId }).set((row) => ({
       delegatedSupply: row.delegatedSupply + (newBalance - oldBalance),
     }))
   ).delegatedSupply;
 
+  const date = BigInt(
+    new Date(parseInt(timestamp.toString() + "000")).setHours(0, 0, 0, 0) /
+      1000,
+  );
+
   // Store delegated supply on daily bucket
   await storeDailyBucket(
     context,
-    event,
     MetricTypesEnum.DELEGATED_SUPPLY,
     currentDelegatedSupply,
     newDelegatedSupply,
     daoId,
+    date,
+    tokenId,
   );
 };

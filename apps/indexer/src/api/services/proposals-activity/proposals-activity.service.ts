@@ -6,7 +6,6 @@ import {
   DbProposal,
   DbVote,
 } from "@/api/repositories/proposals-activity.repository";
-import { SECONDS_PER_BLOCK } from "@/lib/constants";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
@@ -26,6 +25,7 @@ export interface ProposalActivityRequest {
   daoId: DaoIdEnum;
   skip?: number;
   limit?: number;
+  blockTime: number;
   orderBy?: OrderByField;
   orderDirection?: OrderDirection;
   userVoteFilter?: VoteFilter;
@@ -77,6 +77,7 @@ export class ProposalsActivityService {
     daoId,
     skip = 0,
     limit = 10,
+    blockTime,
     orderBy = "voteTiming",
     orderDirection = "desc",
     userVoteFilter,
@@ -93,7 +94,7 @@ export class ProposalsActivityService {
 
     // Get voting period for the DAO
     const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
-    const votingPeriodSeconds = votingPeriodBlocks * SECONDS_PER_BLOCK;
+    const votingPeriodSeconds = votingPeriodBlocks * blockTime;
 
     // Calculate activity start time
     const activityStart = this.calculateActivityStart(

@@ -1,2 +1,2 @@
-export { UNITokenAbi } from "./UNITokenAbi";
-export { UNIGovernorAbi } from "./UNIGovernorAbi";
+export { TokenAbi } from "./token";
+export { GovernorAbi } from "./governor";

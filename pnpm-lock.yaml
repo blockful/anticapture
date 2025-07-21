@@ -263,8 +263,8 @@ importers:
         specifier: ^4.7.10
         version: 4.7.11
       ponder:
-        specifier: ^0.11.24
-        version: 0.11.24(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51)
+        specifier: ^0.11.27
+        version: 0.11.27(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51)
       viem:
         specifier: ^2.29.4
         version: 2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51)
@@ -3031,8 +3031,8 @@ packages:
       webpack-plugin-serve:
         optional: true
 
-  '@ponder/utils@0.2.8':
-    resolution: {integrity: sha512-eI3ijbE/eLeA4tEYA7QoIDPRsf+qhTKs1oTW33Ik4CaJPmTAxsYN5KZYxQwNqGwOPFHQn60QvAQ7+Ti2n9ql6Q==}
+  '@ponder/utils@0.2.9':
+    resolution: {integrity: sha512-lyvxgHXQbJugLFaNMIHB0oLy6uRfUC0SddxOgx/CSTnv/fT2RXM6/pXz9D9ODfPY7LcAu3fNOZBbCCU0PoVO+g==}
     peerDependencies:
       typescript: '>=5.0.4'
       viem: '>=2'
@@ -8289,8 +8289,8 @@ packages:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
     engines: {node: '>=10'}
 
-  ponder@0.11.24:
-    resolution: {integrity: sha512-82EOud1l0DqVX5k6apdEBIwJ2K72lO0N3fhYHtGGsJ3dvxQZJSwOZT431nhSJI0y1xw78bNRa8H2jZVCzqpfPQ==}
+  ponder@0.11.27:
+    resolution: {integrity: sha512-dEQJ+LRDA11vAfpRyypOwLKhxwWFwWPSkWPvBiFyJuT7UvpZh3ga6sXGDNBazw71HoLLiScOYkfU6pkZtH/v/w==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -13895,7 +13895,7 @@ snapshots:
       type-fest: 4.41.0
       webpack-hot-middleware: 2.26.1
 
-  '@ponder/utils@0.2.8(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))':
+  '@ponder/utils@0.2.9(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))':
     dependencies:
       viem: 2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51)
     optionalDependencies:
@@ -20535,7 +20535,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.27.4
 
-  ponder@0.11.24(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51):
+  ponder@0.11.27(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -20544,7 +20544,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-depth': 2.4.0
       '@escape.tech/graphql-armor-max-tokens': 2.5.0
       '@hono/node-server': 1.13.3(hono@4.7.11)
-      '@ponder/utils': 0.2.8(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))
+      '@ponder/utils': 0.2.9(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))
       abitype: 0.10.3(typescript@5.8.3)(zod@3.25.51)
       ansi-escapes: 7.0.0
       commander: 12.1.0
