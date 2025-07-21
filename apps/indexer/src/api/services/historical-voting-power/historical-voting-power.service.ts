@@ -62,7 +62,7 @@ export class HistoricalVotingPowerService {
     const blockNumber = calculateHistoricalBlockNumber(
       daysInSeconds,
       currentBlockNumber,
-      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
+      CONTRACT_ADDRESSES[daoId].blockTime,
     );
 
     try {

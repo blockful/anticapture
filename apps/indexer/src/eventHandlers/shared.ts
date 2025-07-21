@@ -39,9 +39,6 @@ export const storeDailyBucket = async (
   tokenAddress: Address,
 ) => {
   const volume = delta(newValue, currentValue);
-  // const dayStartTimestampInSeconds =
-  //   new Date(parseInt(timestamp.toString() + "000")).setHours(0, 0, 0, 0) /
-  //   1000;
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
