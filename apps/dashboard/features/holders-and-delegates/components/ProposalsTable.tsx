@@ -385,6 +385,15 @@ export const ProposalsTable = ({
         stickyFirstColumn={true}
         mobileTableFixed={true}
         isTableSmall={true}
+        showWhenEmpty={ 
+          <BlankState
+            variant="default"
+            icon={Inbox}
+            title=""
+            className="h-full rounded-none"
+            description="No voted proposals to show"
+          />
+        }
       />
     </div>
   );

@@ -188,7 +188,9 @@ export class DrizzleProposalsActivityRepository
         orderByClause = `ORDER BY COALESCE(v.voting_power, '0')::numeric ${orderDirection.toUpperCase()}`;
         break;
       case "voteTiming":
-        orderByClause = `ORDER BY COALESCE(v.timestamp, p.timestamp) ${orderDirection.toUpperCase()}`;
+        // Sort by how much time elapsed between proposal launch and user vote
+        // For proposals without votes, use a large number to put them at the end
+        orderByClause = `ORDER BY COALESCE(v.timestamp - p.timestamp, 999999999) ${orderDirection.toUpperCase()}`;
         break;
       default:
         orderByClause = `ORDER BY p.timestamp DESC`;
