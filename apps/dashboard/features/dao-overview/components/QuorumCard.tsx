@@ -158,6 +158,7 @@ export const QuorumCard = () => {
         items: daoData
           ? [
               <TextCardDaoInfoItem
+                className="!text-xs !font-medium"
                 key="text-proposal-threshold"
                 item={{
                   value:
