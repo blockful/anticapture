@@ -5,8 +5,6 @@ import {
   proposalCreated,
   proposalExecuted,
   voteCast,
-  delegateChanged,
-  delegatedVotesChanged,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { Governor } from "@/interfaces/governor";
@@ -71,6 +69,24 @@ export function GovernorIndexer(governor: Governor) {
   );
 
   ponder.on(
+    `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
+    async ({ event, context }) => {
+      await proposalCreated(context, daoId, {
+        proposalId: event.args.proposalId.toString(),
+        proposer: event.args.proposer,
+        targets: [...event.args.targets],
+        values: [...event.args.values],
+        signatures: [...event.args.signatures],
+        calldatas: [...event.args.calldatas],
+        startBlock: event.args.startBlock.toString(),
+        endBlock: event.args.endBlock.toString(),
+        description: event.args.description,
+        timestamp: event.block.timestamp,
+      });
+    },
+  );
+
+  ponder.on(
     `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address indexed votingModule, bytes proposalData, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
     async ({ event, context }) => {
       await proposalCreated(context, daoId, {
@@ -89,15 +105,15 @@ export function GovernorIndexer(governor: Governor) {
   );
 
   ponder.on(
-    `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
+    `OPGovernor:ProposalCreated(uint256 proposalId, address proposer, address votingModule, bytes proposalData, uint256 startBlock, uint256 endBlock, string description)`,
     async ({ event, context }) => {
       await proposalCreated(context, daoId, {
         proposalId: event.args.proposalId.toString(),
         proposer: event.args.proposer,
-        targets: [...event.args.targets],
-        values: [...event.args.values],
-        signatures: [...event.args.signatures],
-        calldatas: [...event.args.calldatas],
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
         startBlock: event.args.startBlock.toString(),
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
@@ -112,27 +128,5 @@ export function GovernorIndexer(governor: Governor) {
 
   ponder.on(`OPGovernor:ProposalExecuted`, async ({ event, context }) => {
     await proposalExecuted(context, event.args.proposalId.toString());
-  });
-
-  ponder.on(`OPToken:DelegateChanged`, async ({ event, context }) => {
-    await delegateChanged(context, daoId, {
-      delegator: event.args.delegator,
-      toDelegate: event.args.toDelegate,
-      tokenId: event.log.address,
-      fromDelegate: event.args.fromDelegate,
-      txHash: event.transaction.hash,
-      timestamp: event.block.timestamp,
-    });
-  });
-
-  ponder.on(`OPToken:DelegateVotesChanged`, async ({ event, context }) => {
-    await delegatedVotesChanged(context, daoId, {
-      tokenId: event.log.address,
-      delegate: event.args.delegate,
-      txHash: event.transaction.hash,
-      newBalance: event.args.newBalance,
-      oldBalance: event.args.previousBalance,
-      timestamp: event.block.timestamp,
-    });
   });
 }

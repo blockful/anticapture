@@ -3,7 +3,11 @@ import { token } from "ponder:schema";
 import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
-import { tokenTransfer } from "@/eventHandlers";
+import {
+  delegateChanged,
+  delegatedVotesChanged,
+  tokenTransfer,
+} from "@/eventHandlers";
 
 export function UNITokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.UNI;
@@ -23,6 +27,27 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       tokenAddress: address,
       transactionHash: event.transaction.hash,
       value: event.args.amount,
+      timestamp: event.block.timestamp,
+    });
+  });
+  ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
+    await delegateChanged(context, daoId, {
+      delegator: event.args.delegator,
+      toDelegate: event.args.toDelegate,
+      tokenId: event.log.address,
+      fromDelegate: event.args.fromDelegate,
+      txHash: event.transaction.hash,
+      timestamp: event.block.timestamp,
+    });
+  });
+
+  ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
+    await delegatedVotesChanged(context, daoId, {
+      tokenId: event.log.address,
+      delegate: event.args.delegate,
+      txHash: event.transaction.hash,
+      newBalance: event.args.newBalance,
+      oldBalance: event.args.previousBalance,
       timestamp: event.block.timestamp,
     });
   });

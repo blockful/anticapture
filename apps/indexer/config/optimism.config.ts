@@ -1,9 +1,9 @@
-import { createConfig } from "ponder";
+import { createConfig, mergeAbis } from "ponder";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { GovernorAbi, TokenAbi } from "@/indexer/op";
+import { GovernorAbi, LegacyGovernorAbi, TokenAbi } from "@/indexer/op";
 
 const OP_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.OP];
 
@@ -28,7 +28,7 @@ export default createConfig({
       startBlock: OP_CONTRACTS.token.startBlock,
     },
     OPGovernor: {
-      abi: GovernorAbi,
+      abi: mergeAbis([GovernorAbi, LegacyGovernorAbi]),
       chain: "optimism_mainnet",
       address: OP_CONTRACTS.governor.address,
       startBlock: OP_CONTRACTS.governor.startBlock,

@@ -5,8 +5,6 @@ import {
   proposalCreated,
   proposalExecuted,
   voteCast,
-  delegateChanged,
-  delegatedVotesChanged,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { Governor } from "@/interfaces/governor";
@@ -73,27 +71,5 @@ export function GovernorIndexer(governor: Governor) {
 
   ponder.on("UNIGovernor:ProposalExecuted", async ({ event, context }) => {
     await proposalExecuted(context, event.args.id.toString());
-  });
-
-  ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
-    await delegateChanged(context, daoId, {
-      delegator: event.args.delegator,
-      toDelegate: event.args.toDelegate,
-      tokenId: event.log.address,
-      fromDelegate: event.args.fromDelegate,
-      txHash: event.transaction.hash,
-      timestamp: event.block.timestamp,
-    });
-  });
-
-  ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
-    await delegatedVotesChanged(context, daoId, {
-      tokenId: event.log.address,
-      delegate: event.args.delegate,
-      txHash: event.transaction.hash,
-      newBalance: event.args.newBalance,
-      oldBalance: event.args.previousBalance,
-      timestamp: event.block.timestamp,
-    });
   });
 }
