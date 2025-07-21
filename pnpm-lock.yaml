@@ -289,8 +289,8 @@ importers:
         specifier: ^4.7.10
         version: 4.7.11
       ponder:
-        specifier: ^0.11.27
-        version: 0.11.27(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51)
+        specifier: ^0.11.35
+        version: 0.11.35(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51)
       viem:
         specifier: ^2.29.4
         version: 2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51)
@@ -13630,12 +13630,9 @@ packages:
       }
     engines: { node: ">=10" }
 
-  ponder@0.11.27:
-    resolution:
-      {
-        integrity: sha512-dEQJ+LRDA11vAfpRyypOwLKhxwWFwWPSkWPvBiFyJuT7UvpZh3ga6sXGDNBazw71HoLLiScOYkfU6pkZtH/v/w==,
-      }
-    engines: { node: ">=18.14" }
+  ponder@0.11.35:
+    resolution: {integrity: sha512-fYSD4RjLfGHIg8ACGnFTk3SJtPsNZMWwLkxjo0c1q0rLVLz+dKU5L96OD/mSHKPAX1iWaRHwPS2mlt0GjWjoSQ==}
+    engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
       hono: ">=4.5"
@@ -27362,7 +27359,7 @@ snapshots:
     dependencies:
       "@babel/runtime": 7.27.4
 
-  ponder@0.11.27(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51):
+  ponder@0.11.35(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51):
     dependencies:
       "@babel/code-frame": 7.27.1
       "@commander-js/extra-typings": 12.1.0(commander@12.1.0)
