@@ -1,0 +1,22 @@
+query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $days: queryInput_historicalVotingPower_days!, $fromDate: NonNegativeInt) {
+  historicalVotingPower(addresses: $addresses, days: $days) {
+    address
+    votingPower
+  }
+  
+  proposalsActivity(address: $address, fromDate: $fromDate) {
+    totalProposals
+    votedProposals
+    neverVoted
+  }
+}
+
+# Simple query for individual delegate proposals activity
+query GetDelegateProposalsActivity($address: String!, $fromDate: NonNegativeInt) {
+  proposalsActivity(address: $address, fromDate: $fromDate) {
+    address
+    totalProposals
+    votedProposals
+    neverVoted
+  }
+}

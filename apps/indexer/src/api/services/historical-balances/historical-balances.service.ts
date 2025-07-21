@@ -8,9 +8,10 @@ import {
 } from "viem";
 import { readContract, multicall } from "viem/actions";
 
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getChain } from "@/lib/utils";
+import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { env } from "@/env";
 
 export interface HistoricalBalance {
@@ -22,7 +23,7 @@ export interface HistoricalBalance {
 
 export interface HistoricalBalancesRequest {
   addresses: Address[];
-  blockNumber: number;
+  daysInSeconds: DaysEnum;
   daoId: DaoIdEnum;
 }
 
@@ -44,21 +45,27 @@ export class HistoricalBalancesService {
   }
 
   /**
-   * Fetches historical balances for multiple addresses at a specific block
+   * Fetches historical balances for multiple addresses at a specific time period
    * Uses Multicall3 for efficient batch queries when available (block 19+)
    * Falls back to individual calls for earlier blocks
    */
   async getHistoricalBalances({
     addresses,
-    blockNumber,
+    daysInSeconds,
     daoId,
   }: HistoricalBalancesRequest): Promise<HistoricalBalance[]> {
     const tokenAddress = this.getTokenAddress(daoId);
+    const currentBlockNumber = await this.getCurrentBlockNumber();
+    const blockNumber = calculateHistoricalBlockNumber(
+      daysInSeconds,
+      currentBlockNumber,
+      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
+    );
     try {
       return await this.getBalancesWithMulticall(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     } catch (error) {
       console.error("Error fetching historical balances:", error);
@@ -66,7 +73,7 @@ export class HistoricalBalancesService {
       return await this.getBalancesIndividually(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     }
   }
@@ -77,7 +84,7 @@ export class HistoricalBalancesService {
   private async getBalancesWithMulticall(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
     const results = await multicall(this.client, {
       contracts: addresses.map((address) => ({
@@ -111,7 +118,7 @@ export class HistoricalBalancesService {
   private async getBalancesIndividually(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalBalance[]> {
     const balances = await Promise.allSettled(
       addresses.map((address) =>
@@ -123,8 +130,8 @@ export class HistoricalBalancesService {
           functionName: "balanceOf",
           args: [address],
           blockNumber: BigInt(blockNumber),
-        })
-      )
+        }),
+      ),
     );
     // Transform results into HistoricalBalance objects
     return addresses.map((address, index) => ({

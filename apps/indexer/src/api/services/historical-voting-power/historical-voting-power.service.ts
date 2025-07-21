@@ -8,9 +8,10 @@ import {
 } from "viem";
 import { readContract, multicall } from "viem/actions";
 
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getChain } from "@/lib/utils";
+import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { env } from "@/env";
 
 export interface HistoricalVotingPower {
@@ -22,7 +23,7 @@ export interface HistoricalVotingPower {
 
 export interface HistoricalVotingPowerRequest {
   addresses: Address[];
-  blockNumber: number;
+  daysInSeconds: DaysEnum;
   daoId: DaoIdEnum;
 }
 
@@ -44,13 +45,13 @@ export class HistoricalVotingPowerService {
   }
 
   /**
-   * Fetches historical voting power for multiple addresses at a specific block
+   * Fetches historical voting power for multiple addresses at a specific time period
    * Uses Multicall3 for efficient batch queries when available (block 19+)
    * Falls back to individual calls for earlier blocks
    */
   async getHistoricalVotingPower({
     addresses,
-    blockNumber,
+    daysInSeconds,
     daoId,
   }: HistoricalVotingPowerRequest): Promise<HistoricalVotingPower[]> {
     const tokenAddress = this.getTokenAddress(daoId);
@@ -58,12 +59,18 @@ export class HistoricalVotingPowerService {
     if (!tokenAddress) {
       throw new Error(`Token address not found for DAO: ${daoId}`);
     }
+    const currentBlockNumber = await this.getCurrentBlockNumber();
+    const blockNumber = calculateHistoricalBlockNumber(
+      daysInSeconds,
+      currentBlockNumber,
+      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
+    );
 
     try {
       return await this.getVotingPowerWithMulticall(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     } catch (error) {
       console.error("Error fetching historical voting power:", error);
@@ -71,7 +78,7 @@ export class HistoricalVotingPowerService {
       return await this.getVotingPowerIndividually(
         addresses,
         blockNumber,
-        tokenAddress
+        tokenAddress,
       );
     }
   }
@@ -82,7 +89,7 @@ export class HistoricalVotingPowerService {
   private async getVotingPowerWithMulticall(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalVotingPower[]> {
     const results = await multicall(this.client, {
       contracts: addresses.map((address) => ({
@@ -117,7 +124,7 @@ export class HistoricalVotingPowerService {
   private async getVotingPowerIndividually(
     addresses: Address[],
     blockNumber: number,
-    tokenAddress: Address
+    tokenAddress: Address,
   ): Promise<HistoricalVotingPower[]> {
     const votingPowers = await Promise.allSettled(
       addresses.map((address) =>
@@ -129,8 +136,8 @@ export class HistoricalVotingPowerService {
           functionName: "getVotes",
           args: [address],
           blockNumber: BigInt(blockNumber),
-        })
-      )
+        }),
+      ),
     );
 
     // Transform results into HistoricalVotingPower objects

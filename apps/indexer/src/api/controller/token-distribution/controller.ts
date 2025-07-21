@@ -3,8 +3,6 @@ import { formatUnits, parseEther } from "viem";
 
 import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { MetricTypesEnum } from "@/lib/constants";
-import { DaoIdEnum } from "@/lib/enums";
-import { caseInsensitiveEnum } from "@/api/middlewares";
 
 interface TokenDistributionRepository {
   getSupplyComparison(
@@ -95,13 +93,10 @@ export function tokenDistribution(
       createRoute({
         method: "get",
         operationId: `compare${resultKey}`,
-        path: `/dao/{daoId}/${path}/compare`,
+        path: `/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
         request: {
-          params: z.object({
-            daoId: caseInsensitiveEnum(DaoIdEnum),
-          }),
           query: z.object({
             days: z
               .enum(DaysOpts)
