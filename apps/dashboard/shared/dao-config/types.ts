@@ -77,7 +77,11 @@ export interface DaoOverviewConfig {
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
-    logic: "For" | "For + Abstain" | "For + Abstain + Against";
+    logic:
+      | "For"
+      | "For + Abstain"
+      | "For + Abstain + Against"
+      | "All Votes Cast";
     quorumCalculation: "Total Supply" | "Del. Supply";
     proposalThreshold?: string;
   };
