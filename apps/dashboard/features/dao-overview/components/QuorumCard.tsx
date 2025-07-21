@@ -9,7 +9,10 @@ import {
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { formatEther } from "viem";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
-import { calculateChangeRate } from "@/features/token-distribution/contexts";
+import {
+  calculateChangeRate,
+  useTokenDistributionContext,
+} from "@/features/token-distribution/contexts";
 import { Clock, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
@@ -23,6 +26,7 @@ export const QuorumCard = () => {
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { data: daoData, loading: isDaoDataLoading } = useDaoData(daoIdEnum);
   const daoConfig = daoConfigByDaoId[daoIdEnum];
+  const { delegatedSupply } = useTokenDistributionContext();
 
   const { data: timeSeriesData, isLoading: isTimeSeriesDataLoading } =
     useTimeSeriesData(
@@ -33,10 +37,22 @@ export const QuorumCard = () => {
 
   let loading = isDaoDataLoading || isTimeSeriesDataLoading;
 
+  const delegatedSupplyValueOp = !!delegatedSupply.value
+    ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
+    : delegatedSupply.value;
+
   const totalSupply = {
     value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
     changeRate: calculateChangeRate(
       timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY],
+    ),
+  };
+
+  const delSupply = {
+    value:
+      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high ?? null,
+    changeRate: calculateChangeRate(
+      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
     ),
   };
 
@@ -52,6 +68,14 @@ export const QuorumCard = () => {
         BigInt(totalSupply.value ?? ("1" as string)),
     );
 
+  const quorumMinPercentageDelSupply =
+    delegatedSupplyValueOp &&
+    delSupply.value !== undefined &&
+    formatEther(
+      (BigInt(delegatedSupplyValueOp) * BigInt(30) * BigInt(1e18)) /
+        BigInt(100),
+    );
+
   const proposalThresholdPercentage =
     daoData?.proposalThreshold &&
     totalSupply.value !== undefined &&
@@ -60,13 +84,31 @@ export const QuorumCard = () => {
         BigInt(totalSupply.value ?? ("1" as string)),
     );
 
-  const quorumValue = daoData?.quorum
+  const quorumValueTotalSupply = daoData?.quorum
     ? `${formatNumberUserReadable(Number(daoData.quorum) / 10 ** 18)} `
     : "No Quorum";
 
-  const quorumPercentage = quorumMinPercentage
+  const quorumValueDelSupply = quorumMinPercentageDelSupply
+    ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
+    : "No Quorum";
+
+  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
+    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
+    : "(N/A)";
+
+  const quorumPercentageTotalSupply = quorumMinPercentage
     ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
     : "(N/A)";
+
+  const quorumPercentage =
+    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+      ? quorumPercentageDelSupply
+      : quorumPercentageTotalSupply;
+
+  const quorumValue =
+    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+      ? quorumValueDelSupply
+      : quorumValueTotalSupply;
 
   const proposalThresholdValue = daoData?.proposalThreshold
     ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
