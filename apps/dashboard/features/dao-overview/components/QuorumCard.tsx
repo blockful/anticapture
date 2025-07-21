@@ -124,7 +124,7 @@ export const QuorumCard = () => {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,
     optionalHeaderValue: daoData && (
-      <p className="text-link flex text-sm">
+      <p className="text-link flex text-xs font-medium">
         {quorumValue} {daoData?.id || "Unknown ID"} {quorumPercentage}
       </p>
     ),
@@ -137,6 +137,7 @@ export const QuorumCard = () => {
           daoData && daoConfig.daoOverview.rules?.logic
             ? [
                 <TextCardDaoInfoItem
+                  className="items-center"
                   key="text-logic"
                   item={{
                     label: daoConfig.daoOverview.rules.logic,
@@ -150,7 +151,6 @@ export const QuorumCard = () => {
                 </Badge>,
               ],
       },
-
       {
         title: "Proposal Threshold",
         tooltip:
@@ -158,7 +158,6 @@ export const QuorumCard = () => {
         items: daoData
           ? [
               <TextCardDaoInfoItem
-                className="!text-xs !font-medium"
                 key="text-proposal-threshold"
                 item={{
                   value:
