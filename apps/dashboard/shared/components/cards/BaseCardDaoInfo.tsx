@@ -38,10 +38,15 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
           )}
         >
           <CardTitle className="!text-alternative-sm text-primary flex items-center gap-2 font-mono !font-medium !tracking-wide uppercase">
-            {data.icon}
+            <div>{data.icon}</div>
             {data.title}
+            {data.optionalHeaderValue && (
+              <>
+                <div className="hidden size-1 rounded-full bg-gray-600 sm:flex" />
+                {data.optionalHeaderValue}
+              </>
+            )}
           </CardTitle>
-          {data.optionalHeaderValue}
         </div>
       </CardHeader>
 

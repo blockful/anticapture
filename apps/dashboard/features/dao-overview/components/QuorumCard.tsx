@@ -124,12 +124,9 @@ export const QuorumCard = () => {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,
     optionalHeaderValue: daoData && (
-      <div className="flex items-center gap-1.5 pl-1.5 sm:flex">
-        <div className="hidden size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
-        <p className="text-link flex text-xs font-medium">
-          {quorumValue} {daoData?.id || "Unknown ID"} {quorumPercentage}
-        </p>
-      </div>
+      <p className="text-link flex text-xs font-medium">
+        {quorumValue} {daoData?.id || "Unknown ID"} {quorumPercentage}
+      </p>
     ),
     sections: [
       {
