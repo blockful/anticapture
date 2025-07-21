@@ -27,6 +27,7 @@ export const OP: DaoConfiguration = {
       cancelFunction: true,
       logic: "For + Abstain + Against",
       quorumCalculation: "Del. Supply",
+      proposalThreshold: "Only Foundation Proposes",
     },
   },
   attackProfitability: {

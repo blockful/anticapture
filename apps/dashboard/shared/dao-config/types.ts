@@ -79,6 +79,7 @@ export interface DaoOverviewConfig {
     cancelFunction?: boolean;
     logic: "For" | "For + Abstain" | "For + Abstain + Against";
     quorumCalculation: "Total Supply" | "Del. Supply";
+    proposalThreshold?: string;
   };
   securityCouncil?: {
     isActive: boolean;
