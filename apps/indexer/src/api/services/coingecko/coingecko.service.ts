@@ -1,8 +1,8 @@
 import { HTTPException } from "hono/http-exception";
 import {
   CoingeckoHistoricalMarketData,
+  CoingeckoHistoricalMarketDataSchema,
   CoingeckoTokenId,
-  isCoingeckoHistoricalMarketData,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
 
@@ -29,10 +29,7 @@ export class CoingeckoService {
       }
 
       const data = await response.json();
-      if (!isCoingeckoHistoricalMarketData(data)) {
-        throw new Error("Invalid response data format");
-      }
-      return data as CoingeckoHistoricalMarketData;
+      return CoingeckoHistoricalMarketDataSchema.parse(data);
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch historical token data",

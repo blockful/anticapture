@@ -62,7 +62,7 @@ switch (daoId) {
     throw new Error(`DAO ${daoId} not supported`);
 }
 
-//@ts-ignore
+//@ts-expect-error ignore linting error
 //This line is to avoid the error "Do not know how to serialize a BigInt"
 BigInt.prototype.toJSON = function () {
   return this.toString();

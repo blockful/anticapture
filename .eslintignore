@@ -1,0 +1,14 @@
+test/**
+node_modules/**
+dist/**
+build/**
+.next/**
+out/**
+coverage/**
+.turbo/**
+.parcel-cache/**
+*.log
+generated/**
+.ponder/**
+dump/**
+storybook-static/**

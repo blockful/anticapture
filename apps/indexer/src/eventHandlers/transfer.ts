@@ -1,4 +1,4 @@
-import { Context, Event } from "ponder:registry";
+import { Context } from "ponder:registry";
 import { Address, Hex, zeroAddress } from "viem";
 import { account, accountBalance, transfer, token } from "ponder:schema";
 
@@ -36,7 +36,7 @@ const updateSupplyMetric = async (
   const isFromRelevant = addressList.includes(from);
 
   if ((isToRelevant || isFromRelevant) && !(isToRelevant && isFromRelevant)) {
-    const updateObject = {} as Record<string, any>;
+    const updateObject = {} as Record<string, bigint>;
     updateObject[supplyField] = isToRelevant
       ? tokenData[supplyField] + value
       : tokenData[supplyField] - value;

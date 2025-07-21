@@ -1,5 +1,5 @@
 import { Account, Address, Chain, Client, Transport } from "viem";
-import { getBlockNumber, readContract } from "viem/actions";
+import { readContract } from "viem/actions";
 
 import { Governor } from "@/interfaces/governor";
 import { GovernorAbi } from "./abi";

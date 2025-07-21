@@ -1,5 +1,4 @@
 import { ponder } from "ponder:registry";
-import { decodeAbiParameters, parseAbiParameters } from "viem";
 
 import {
   proposalCanceled,

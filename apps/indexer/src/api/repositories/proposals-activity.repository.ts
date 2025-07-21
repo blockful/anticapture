@@ -164,22 +164,22 @@ export class DrizzleProposalsActivityRepository
   }> {
     // Build the vote filter condition
     let voteFilterCondition = "";
-          if (userVoteFilter) {
-        switch (userVoteFilter) {
-          case VoteFilter.YES:
-            voteFilterCondition = "AND v.support = '1'";
-            break;
-          case VoteFilter.NO:
-            voteFilterCondition = "AND v.support = '0'";
-            break;
-          case VoteFilter.ABSTAIN:
-            voteFilterCondition = "AND v.support = '2'";
-            break;
-          case VoteFilter.NO_VOTE:
-            voteFilterCondition = "AND v.support IS NULL";
-            break;
-        }
+    if (userVoteFilter) {
+      switch (userVoteFilter) {
+        case VoteFilter.YES:
+          voteFilterCondition = "AND v.support = '1'";
+          break;
+        case VoteFilter.NO:
+          voteFilterCondition = "AND v.support = '0'";
+          break;
+        case VoteFilter.ABSTAIN:
+          voteFilterCondition = "AND v.support = '2'";
+          break;
+        case VoteFilter.NO_VOTE:
+          voteFilterCondition = "AND v.support IS NULL";
+          break;
       }
+    }
 
     // Build the ORDER BY clause
     let orderByClause = "";
