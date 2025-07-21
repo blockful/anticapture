@@ -24,6 +24,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
+      quorumCalculation: "Total Supply",
     },
   },
   governanceImplementation: {

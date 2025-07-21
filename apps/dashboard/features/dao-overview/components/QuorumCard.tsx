@@ -65,7 +65,7 @@ export const QuorumCard = () => {
     : "No Quorum";
 
   const quorumPercentage = quorumMinPercentage
-    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}%)`
+    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
     : "(N/A)";
 
   const proposalThresholdValue = daoData?.proposalThreshold

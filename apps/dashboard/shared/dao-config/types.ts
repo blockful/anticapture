@@ -78,6 +78,7 @@ export interface DaoOverviewConfig {
     timelock?: boolean;
     cancelFunction?: boolean;
     logic: "For" | "For + Abstain" | "For + Abstain + Against";
+    quorumCalculation: "Total Supply" | "Del. Supply";
   };
   securityCouncil?: {
     isActive: boolean;

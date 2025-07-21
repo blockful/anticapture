@@ -26,6 +26,7 @@ export const OP: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For + Abstain + Against",
+      quorumCalculation: "Del. Supply",
     },
   },
   attackProfitability: {
