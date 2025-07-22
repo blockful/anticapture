@@ -9,6 +9,21 @@ on:
     #   - "infra/**"
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      triggers: ${{ steps.filter.outputs.triggers }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          base: ${{ github.ref_name }}
+          filters: |
+            indexer:
+              - 'apps/indexer/**/*.ts'
+              - '!apps/indexer/src/api/**'
+
   get-daos:
     runs-on: ubuntu-latest
     outputs:
@@ -32,7 +47,7 @@ jobs:
           echo "Detected DAOs: $dao_array"
 
   deploy-indexers:
-    needs: get-daos
+    needs: [get-daos, changes]
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
@@ -51,14 +66,6 @@ jobs:
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          base: ${{ github.ref_name }}
-          filters: |
-            indexer:
-              - 'apps/indexer/**/*.ts'
-              - '!apps/indexer/src/api/**'
       - name: Deploy ${{ matrix.dao }}-indexer
         if: ${{ steps.changes.outputs.indexer == 'true' }}
         # run: railway up -s ${{ matrix.dao }}-indexer -e ${{ steps.env.outputs.environment }} --ci -d
