@@ -198,7 +198,7 @@ export class DrizzleProposalsActivityRepository
         p.id, p.dao_id, p.proposer_account_id, p.description, p.start_block, p.end_block,
         p.timestamp, p.status, p.for_votes, p.against_votes, p.abstain_votes,
         (p.timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp,
-        v.id as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
+        v.tx_hash as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
