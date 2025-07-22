@@ -2,10 +2,13 @@ import { HeaderSidebar } from "@/widgets";
 import { TheSectionLayout } from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BookOpen } from "lucide-react";
-import { SAMPLE_GLOSSARY_DATA, getAvailableLetters } from "@/features/glossary";
+import {
+  SAMPLE_GLOSSARY_DATA,
+  getAvailableLetters,
+  GlossaryKeyboard,
+} from "@/features/glossary";
 
 export default function GlossaryPage() {
-  // Example usage of the data structure
   const availableLetters = getAvailableLetters(SAMPLE_GLOSSARY_DATA);
   const totalTerms = Object.values(SAMPLE_GLOSSARY_DATA).flat().length;
 
@@ -22,48 +25,52 @@ export default function GlossaryPage() {
               anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
               className="bg-surface-background! mt-[56px]! sm:mt-0!"
             >
-              <div className="space-y-6">
-                {/* Example: Show available letters */}
-                <div>
-                  <h3 className="text-primary mb-2 text-lg font-semibold">
-                    Available Letters ({totalTerms} total terms):
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {availableLetters.map((letter) => (
-                      <span
-                        key={letter}
-                        className="bg-surface-primary text-primary rounded px-3 py-1"
-                      >
-                        {letter} ({SAMPLE_GLOSSARY_DATA[letter].length})
-                      </span>
-                    ))}
+              <div className="flex gap-8">
+                {/* Sticky Keyboard - Left Side */}
+                <div className="w-80 flex-shrink-0">
+                  <div className="sticky top-4">
+                    <div className="mb-4 text-center">
+                      <h3 className="text-primary text-lg font-semibold">
+                        Browse by Letter
+                      </h3>
+                      <p className="text-secondary mt-1 text-sm">
+                        {totalTerms} total terms
+                      </p>
+                    </div>
+                    <GlossaryKeyboard glossaryData={SAMPLE_GLOSSARY_DATA} />
                   </div>
                 </div>
 
-                {/* Example: Show terms by letter */}
-                <div className="space-y-4">
-                  {availableLetters.map((letter) => (
-                    <div key={letter}>
-                      <h4 className="text-md text-primary mb-2 font-medium">
-                        {letter}
-                      </h4>
-                      <div className="space-y-2">
-                        {SAMPLE_GLOSSARY_DATA[letter].map((term, index) => (
-                          <div
-                            key={index}
-                            className="bg-surface-secondary rounded-lg p-3"
-                          >
-                            <h5 className="text-primary font-semibold">
-                              {term.term}
-                            </h5>
-                            <p className="text-secondary mt-1 text-sm">
-                              {term.definition}
-                            </p>
-                          </div>
-                        ))}
+                {/* Glossary Content - Right Side */}
+                <div className="min-w-0 flex-1">
+                  <div className="space-y-8">
+                    {availableLetters.map((letter) => (
+                      <div
+                        key={letter}
+                        id={`letter-${letter}`}
+                        className="scroll-mt-4"
+                      >
+                        <h4 className="text-primary border-surface-border mb-4 border-b pb-2 text-2xl font-bold">
+                          {letter}
+                        </h4>
+                        <div className="grid gap-4">
+                          {SAMPLE_GLOSSARY_DATA[letter].map((term, index) => (
+                            <div
+                              key={index}
+                              className="bg-surface-secondary rounded-lg p-4"
+                            >
+                              <h5 className="text-primary mb-2 text-lg font-semibold">
+                                {term.term}
+                              </h5>
+                              <p className="text-secondary leading-relaxed">
+                                {term.definition}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </TheSectionLayout>

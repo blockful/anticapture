@@ -141,15 +141,6 @@ export function getAvailableLetters(
     .map(([letter]) => letter as GlossaryLetter);
 }
 
-export function isLetterAvailable(
-  glossaryData: GlossaryData,
-  term: string,
-): GlossaryTerm[] {
-  return Object.values(glossaryData)
-    .flat()
-    .filter((t) => t.term !== term);
-}
-
 /**
  * Search terms across all letters
  */
