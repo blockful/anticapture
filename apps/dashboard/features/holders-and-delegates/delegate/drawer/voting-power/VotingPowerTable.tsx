@@ -101,7 +101,7 @@ export const VotingPowerTable = ({
           column.toggleSorting(newSortOrder === "desc");
         };
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
+          <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
             Amount ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -164,7 +164,7 @@ export const VotingPowerTable = ({
         const date: string = row.getValue("date");
 
         return (
-          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
+          <div className="flex h-10 w-full items-center justify-start whitespace-nowrap px-2 text-sm">
             {date
               ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
                   year: "numeric",
