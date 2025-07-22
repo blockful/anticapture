@@ -84,6 +84,10 @@ export class ProposalsActivityService {
 
     // Get voting period for the DAO
     const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
+    if (!votingPeriodBlocks) {
+      throw new Error(`DAO ${daoId} not found or missing voting period`);
+    }
+
     const votingPeriodSeconds = votingPeriodBlocks * blockTime;
 
     // Calculate activity start time

@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import { eq, sql } from "ponder";
 import { db } from "ponder:api";
-import { accountPower } from "ponder:schema";
+import { accountPower, dao } from "ponder:schema";
 
 export type DbProposal = {
   id: string;
@@ -46,7 +46,7 @@ export type OrderDirection = "asc" | "desc";
 export interface ProposalsActivityRepository {
   getFirstVoteTimestamp(address: Address): Promise<number | null>;
 
-  getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number>;
+  getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined>;
 
   getProposals(
     daoId: DaoIdEnum,
@@ -90,22 +90,14 @@ export class DrizzleProposalsActivityRepository
       : null;
   }
 
-  async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number> {
-    const query = sql`
-      SELECT voting_period
-      FROM dao
-      WHERE id = ${daoId}
-      LIMIT 1
-    `;
-
-    const result = await db.execute<{ voting_period: string }>(query);
-    const votingPeriod = result.rows[0]?.voting_period;
-
-    if (!votingPeriod) {
-      throw new Error(`DAO ${daoId} not found or missing voting period`);
-    }
-
-    return Number(votingPeriod);
+  async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined> {
+    const _dao = await db.query.dao.findFirst({
+      where: eq(dao.id, daoId),
+      columns: {
+        votingPeriod: true,
+      },
+    });
+    return _dao?.votingPeriod ? Number(_dao.votingPeriod) : undefined;
   }
 
   async getProposals(
