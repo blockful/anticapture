@@ -65,7 +65,10 @@ export const MultilineChartTokenDistribution = ({
   return (
     <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}
-      <ChartContainer className="h-full w-full" config={chartConfig}>
+      <ChartContainer
+        className="h-full w-full justify-start"
+        config={chartConfig}
+      >
         <LineChart data={chartData}>
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
