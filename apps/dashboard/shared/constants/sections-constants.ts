@@ -60,4 +60,22 @@ export const SECTIONS_CONSTANTS = {
       "Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression.",
     anchorId: "resilienceStagesSection",
   },
+  donate: {
+    title: "Donate",
+    description:
+      "Support Anticapture's mission to protect DAOs and prevent governance attacks.",
+    anchorId: "donateSection",
+  },
+  glossary: {
+    title: "Glossary",
+    description:
+      "Find answers to common questions about DAO security and how Anticapture works.",
+    anchorId: "glossarySection",
+  },
+  faq: {
+    title: "FAQ",
+    description:
+      "Find answers to common questions about DAO security and how Anticapture works.",
+    anchorId: "faqSection",
+  },
 };
