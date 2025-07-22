@@ -5,7 +5,7 @@ import { VotingPowerTable } from "@/features/holders-and-delegates/delegate/draw
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { useVotingPowerData } from "./hooks/useVotingPowerData";
+import { useVotingPowerData } from "@/features/holders-and-delegates/delegate/drawer/voting-power/hooks/useVotingPowerData";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { Inbox } from "lucide-react";
 
@@ -23,7 +23,7 @@ const ChartLegend = ({
           <div key={i} className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"
-              className="size-2 rounded-xs"
+              className="rounded-xs size-2"
             />
             <SkeletonRow
               parentClassName="flex animate-pulse"
@@ -42,7 +42,7 @@ const ChartLegend = ({
         return (
           <div key={item.label} className="flex items-center gap-2">
             <span
-              className="size-2 rounded-xs"
+              className="rounded-xs size-2"
               style={{ backgroundColor: item.color }}
             />
             <span className="text-secondary flex flex-row gap-2 text-sm font-medium">

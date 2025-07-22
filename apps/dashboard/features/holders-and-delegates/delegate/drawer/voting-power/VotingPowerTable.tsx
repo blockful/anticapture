@@ -67,7 +67,7 @@ export const VotingPowerTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 w-full items-center gap-2 px-2">
+            <div className="flex h-10 w-full items-center gap-3 px-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -142,7 +142,7 @@ export const VotingPowerTable = ({
     },
     {
       accessorKey: "date",
-      header: ({ column }) => {
+      header: () => {
         return (
           <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
             Date
@@ -208,7 +208,7 @@ export const VotingPowerTable = ({
       <div className="flex w-full flex-col gap-2">
         <TheTable
           columns={columns}
-          data={loading ? Array(5).fill({}) : tableData}
+          data={loading ? Array(6).fill({}) : tableData}
           withSorting={true}
           withPagination={true}
           filterColumn="address"
