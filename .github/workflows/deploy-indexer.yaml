@@ -59,10 +59,8 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "environment=production" >> $GITHUB_OUTPUT
-            echo "railway_token=${{ secrets.RAILWAY_TOKEN_PROD }}" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
-            echo "railway_token=${{ secrets.RAILWAY_TOKEN_DEV }}" >> $GITHUB_OUTPUT
           fi
           echo "Deploying to: $([ '${{ github.ref }}' == 'refs/heads/main' ] && echo 'production' || echo 'dev')"
 
@@ -75,7 +73,7 @@ jobs:
       matrix:
         dao: ${{ fromJson(needs.get-daos.outputs.daos) }}
     env:
-      RAILWAY_TOKEN: ${{ needs.environment.outputs.railway_token }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - name: Deploy ${{ matrix.dao }}-indexer
@@ -95,7 +93,7 @@ jobs:
     container: ghcr.io/railwayapp/cli:latest
     environment: ${{ needs.environment.outputs.environment }}
     env:
-      RAILWAY_TOKEN: ${{ needs.environment.outputs.railway_token }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - name: Deploy api-gateway
