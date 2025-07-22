@@ -2,11 +2,11 @@ name: Deploy Indexers and API Gateway to Railway
 
 on:
   push:
-    branches: [dev, main, chore/test-ci]
-    # paths:
-    #   - "apps/indexer/**/*.ts"
-    #   - "apps/api-gateway/**/*.ts"
-    #   - "infra/**"
+    branches: [dev, main]
+    paths:
+      - "apps/indexer/**/*.ts"
+      - "apps/api-gateway/**/*.ts"
+      - "infra/**"
 
 jobs:
   changes:
@@ -79,28 +79,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Deploy ${{ matrix.dao }}-indexer
-        # if: ${{ needs.changes.outputs.indexer == 'true' }}
+        if: ${{ needs.changes.outputs.indexer == 'true' }}
         run: |
           echo "Deploying ${{ matrix.dao }}-indexer to ${{ needs.environment.outputs.environment }}"
-          echo ${{ matrix.dao }}-indexer -e ${{ needs.environment.outputs.environment }} --ci -d
-          echo ${{ needs.changes.outputs.indexer }}
-        # railway up -s ${{ matrix.dao }}-indexer -e ${{ needs.environment.outputs.environment }} --ci -d
-      # - name: Deploy ${{ matrix.dao }}-api
-      #   if: ${{ needs.changes.outputs.api == 'true' }}
-      #   run: |
-      #     echo "Deploying ${{ matrix.dao }}-api to ${{ needs.environment.outputs.environment }}"
-      #     railway up -s ${{ matrix.dao }}-api -e ${{ needs.environment.outputs.environment }} --ci
+          railway up -s ${{ matrix.dao }}-indexer -e ${{ needs.environment.outputs.environment }} --ci -d
+      - name: Deploy ${{ matrix.dao }}-api
+        if: ${{ needs.changes.outputs.api == 'true' }}
+        run: |
+          echo "Deploying ${{ matrix.dao }}-api to ${{ needs.environment.outputs.environment }}"
+          railway up -s ${{ matrix.dao }}-api -e ${{ needs.environment.outputs.environment }} --ci
 
-  # deploy-api-gateway:
-  #   needs: [deploy-indexers, environment]
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/railwayapp/cli:latest
-  #   environment: ${{ needs.environment.outputs.environment }}
-  #   env:
-  #     RAILWAY_TOKEN: ${{ needs.environment.outputs.railway_token }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Deploy api-gateway
-  #       run: |
-  #         echo "Deploying api-gateway to ${{ needs.environment.outputs.environment }}"
-  #         railway up -s api-gateway -e ${{ needs.environment.outputs.environment }} --ci
+  deploy-api-gateway:
+    needs: [deploy-indexers, environment]
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ needs.environment.outputs.environment }}
+    env:
+      RAILWAY_TOKEN: ${{ needs.environment.outputs.railway_token }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy api-gateway
+        run: |
+          echo "Deploying api-gateway to ${{ needs.environment.outputs.environment }}"
+          railway up -s api-gateway -e ${{ needs.environment.outputs.environment }} --ci
