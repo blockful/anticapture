@@ -344,6 +344,7 @@ export const ProposalsTable = ({
             voteTiming: { text: "", percentage: 0 },
             status: "",
           }))}
+          isTableSmall={true}
           withPagination={false}
           withSorting={true}
         />
