@@ -126,7 +126,7 @@ export class DrizzleProposalsActivityRepository
     if (proposalIds.length === 0) return [];
 
     const query = sql`
-      SELECT id, voter_account_id, proposal_id, support, voting_power, reason, timestamp
+      SELECT txHash as id, voter_account_id, proposal_id, support, voting_power, reason, timestamp
       FROM votes_onchain
       WHERE voter_account_id = ${address}
         AND dao_id = ${daoId}
