@@ -1,6 +1,6 @@
 import { DaoIdEnum } from "@/shared/types/daos";
-import { DelegateDelegationHistoryTable } from "../DelegateDelegationHistoryTable";
-import { VotingPowerVariationGraph } from "./VotingPowerVariationGraph";
+import { DelegateDelegationHistoryTable } from "@/features/holders-and-delegates/components/DelegateDelegationHistoryTable";
+import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerVariationGraph";
 
 interface DelegateDelegationsHistoryProps {
   accountId: string;

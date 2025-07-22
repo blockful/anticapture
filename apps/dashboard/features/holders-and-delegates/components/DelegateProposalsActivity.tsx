@@ -1,7 +1,11 @@
 "use client";
 
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
-import { QueryInput_ProposalsActivity_UserVoteFilter } from "@anticapture/graphql-client";
+import {
+  QueryInput_ProposalsActivity_OrderBy,
+  QueryInput_ProposalsActivity_OrderDirection,
+  QueryInput_ProposalsActivity_UserVoteFilter,
+} from "@anticapture/graphql-client";
 import { useState } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
@@ -52,8 +56,9 @@ export const DelegateProposalsActivity = ({
     fromDate,
     skip,
     limit: itemsPerPage,
-    orderBy: orderBy as any,
-    orderDirection: orderDirection as any,
+    orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
+    orderDirection:
+      orderDirection as QueryInput_ProposalsActivity_OrderDirection,
     userVoteFilter:
       userVoteFilter === "all"
         ? undefined

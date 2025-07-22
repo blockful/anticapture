@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, HeaderContext } from "@tanstack/react-table";
 
 import {
   useDelegates,
@@ -13,7 +13,7 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { Plus } from "lucide-react";
-import { ProgressCircle } from "./ProgressCircle";
+import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
@@ -202,7 +202,7 @@ export const Delegates = ({
               <button
                 className="bg-surface-default text-primary hover:bg-surface-contrast flex cursor-pointer items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity duration-300 [tr:hover_&]:opacity-100"
                 tabIndex={-1}
-                onClick={(e) => handleOpenDrawer(address)}
+                onClick={() => handleOpenDrawer(address)}
               >
                 <Plus className="size-3.5" />
                 <span className="text-sm font-medium">Details</span>
@@ -279,7 +279,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center justify-start gap-1 px-4 py-2 text-end text-sm whitespace-nowrap">
+          <div className="flex h-10 items-center justify-start gap-1 whitespace-nowrap px-4 py-2 text-end text-sm">
             <span className="text-secondary">{variation.split(" ")[0]}</span>
             <span
               className={cn(
@@ -379,7 +379,7 @@ export const Delegates = ({
       <div className="flex flex-col gap-2">
         <TheTable
           columns={delegateColumns}
-          data={Array.from({ length: 10 }, (_, i) => ({
+          data={Array.from({ length: 10 }, () => ({
             address: `0x${"0".repeat(40)}`,
             type: "",
             votingPower: "0",
@@ -411,7 +411,7 @@ export const Delegates = ({
       <div className="flex flex-col gap-2">
         <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
           <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
-            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_tr]:border-b">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r md:[&_th]:border-none [&_tr]:border-b">
               <tr className="border-light-dark">
                 {delegateColumns.map((column, index) => (
                   <th
@@ -427,7 +427,7 @@ export const Delegates = ({
                             getIsSorted: () => false,
                             toggleSorting: () => {},
                           },
-                        } as any)
+                        } as HeaderContext<DelegateTableData, unknown>)
                       : column.header}
                   </th>
                 ))}
