@@ -86,9 +86,9 @@ export const DelegateProposalsActivity = ({
     }
 
     if (avgTimeBeforeEndDays < 1) {
-      return "< 1 day before end";
+      return "< 1 day before the end";
     }
-    return `${Math.round(avgTimeBeforeEndDays)} days before end`;
+    return `${Math.round(avgTimeBeforeEndDays)} days before the end`;
   };
 
   const handlePageChange = (page: number) => {
