@@ -51,7 +51,16 @@ jobs:
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          base: ${{ github.ref_name }}
+          filters: |
+            indexer:
+              - 'apps/indexer/**/*.ts'
+              - '!apps/indexer/src/api/**'
       - name: Deploy ${{ matrix.dao }}-indexer
+        if: ${{ steps.changes.outputs.indexer == 'true' }}
         run: railway up -s ${{ matrix.dao }}-indexer -e ${{ steps.env.outputs.environment }} --ci -d
       - name: Deploy ${{ matrix.dao }}-api
         run: railway up -s ${{ matrix.dao }}-api -e ${{ steps.env.outputs.environment }} --ci

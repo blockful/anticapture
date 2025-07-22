@@ -1,20 +1,27 @@
-import { Address, createPublicClient, http } from "viem";
+import { createPublicClient, http } from "viem";
 
 import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { ERC20Indexer, GovernorIndexer } from "@/indexer";
-import { Governor } from "@/interfaces";
-import { ENSGovernor } from "@/indexer/ens";
-import { UNIGovernor } from "@/indexer/uni";
+import {
+  ENSGovernor,
+  GovernorIndexer as ENSGovernorIndexer,
+  ENSTokenIndexer,
+} from "@/indexer/ens";
+import {
+  UNIGovernor,
+  GovernorIndexer as UNIGovernorIndexer,
+  UNITokenIndexer,
+} from "@/indexer/uni";
+import {
+  OPGovernor,
+  GovernorIndexer as OPGovernorIndexer,
+  OPTokenIndexer,
+} from "@/indexer/op";
+import { ARBTokenIndexer } from "./indexer/arb";
 
-const {
-  NETWORK: network,
-  DAO_ID: daoId,
-  CHAIN_ID: chainId,
-  RPC_URL: rpcUrl,
-} = env;
+const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
 const chain = getChain(chainId);
 if (!chain) {
@@ -27,23 +34,35 @@ const client = createPublicClient({
   transport: http(rpcUrl),
 });
 
-const { token, governor } = CONTRACT_ADDRESSES[network][daoId]!;
-
-ERC20Indexer(daoId, token.address, token.decimals);
-if (governor) GovernorIndexer(daoId, getGovernorClient(daoId, governor.address));
-
-function getGovernorClient(id: DaoIdEnum, address: Address): Governor {
-  switch (id) {
-    case DaoIdEnum.ENS:
-      return new ENSGovernor(client, address);
-    case DaoIdEnum.UNI:
-      return new UNIGovernor(client, address);
-    default:
-      throw new Error(`${id} Governor unavailable`);
+switch (daoId) {
+  case DaoIdEnum.ENS: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    ENSTokenIndexer(token.address, token.decimals);
+    ENSGovernorIndexer(new ENSGovernor(client, governor.address));
+    break;
   }
+  case DaoIdEnum.UNI: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    UNITokenIndexer(token.address, token.decimals);
+    UNIGovernorIndexer(new UNIGovernor(client, governor.address));
+    break;
+  }
+  case DaoIdEnum.ARB: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    ARBTokenIndexer(token.address, token.decimals);
+    break;
+  }
+  case DaoIdEnum.OP: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    OPTokenIndexer(token.address, token.decimals);
+    OPGovernorIndexer(new OPGovernor(client, governor.address));
+    break;
+  }
+  default:
+    throw new Error(`DAO ${daoId} not supported`);
 }
 
-//@ts-ignore
+//@ts-expect-error ignore linting error
 //This line is to avoid the error "Do not know how to serialize a BigInt"
 BigInt.prototype.toJSON = function () {
   return this.toString();

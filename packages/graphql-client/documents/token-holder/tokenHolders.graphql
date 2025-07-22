@@ -1,0 +1,16 @@
+query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String ) {
+  accountBalances(orderBy: "balance", orderDirection: $orderDirection, limit: $limit, after: $after, before: $before, where: {balance_gt: 0}) {
+    items {
+      accountId
+      balance
+      delegate
+      tokenId
+    },
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+      }
+  }
+}

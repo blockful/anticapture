@@ -1,7 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaoIdEnum, DaysOpts } from "@/lib/enums";
-import { caseInsensitiveEnum } from "../middlewares";
+import { DaysOpts } from "@/lib/enums";
 import { DuneResponse } from "../services/dune/types";
 
 interface AssetsClient {
@@ -13,14 +12,11 @@ export function assets(app: Hono, service: AssetsClient) {
     createRoute({
       method: "get",
       operationId: "totalAssets",
-      path: "/dao/{daoId}/total-assets",
+      path: "/total-assets",
       summary: "Get total assets",
       description: "Get total assets",
       tags: ["assets"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           days: z
             .enum(DaysOpts)

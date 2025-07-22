@@ -1,16 +1,16 @@
 {
+  "prettier.configPath": ".prettierrc",
+  "prettier.requireConfig": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "cSpell.words": [
     "anticapture",
     "Anticapture"
   ],
   // Editor settings
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "never"
-  },
-  
   // Language-specific settings
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -32,11 +32,9 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
-  
   // Disable conflicting formatters
   "typescript.format.enable": false,
   "javascript.format.enable": false,
-  
   // ESLint settings
   "eslint.validate": [
     "javascript",
@@ -46,10 +44,9 @@
   ],
   "eslint.format.enable": false,
   "eslint.codeActionsOnSave.mode": "problems",
-
   // Prettier settings - Force it to use local config
-  "prettier.configPath": "",
   "prettier.useEditorConfig": false,
-  "prettier.requireConfig": true,
-  "prettier.resolveGlobalModules": false
+  "prettier.resolveGlobalModules": false,
+  // Line endings - Force Unix line endings (LF) to avoid CRLF issues
+  "files.eol": "\n"
 }
