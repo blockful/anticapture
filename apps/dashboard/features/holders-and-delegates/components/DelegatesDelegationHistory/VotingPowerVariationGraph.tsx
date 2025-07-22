@@ -133,6 +133,7 @@ export const VotingPowerVariationGraph = ({
     const { cx, cy, payload } = props;
     return (
       <Dot
+        key={payload.transactionHash}
         cx={cx}
         cy={cy}
         r={4}
