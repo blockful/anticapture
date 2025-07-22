@@ -1,8 +1,8 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
-import { sql } from "ponder";
+import { eq, sql } from "ponder";
 import { db } from "ponder:api";
-import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
+import { accountPower } from "ponder:schema";
 
 export type DbProposal = {
   id: string;
@@ -34,14 +34,17 @@ export type DbProposalWithVote = {
   userVote: DbVote | null;
 };
 
-export type OrderByField = "votingPower" | "voteTiming";
+export enum VoteFilter {
+  YES = "yes",
+  NO = "no",
+  ABSTAIN = "abstain",
+  NO_VOTE = "no_vote",
+}
+export type OrderByField = "votingPower" | "voteTiming" | "timestamp";
 export type OrderDirection = "asc" | "desc";
 
 export interface ProposalsActivityRepository {
-  getFirstVoteTimestamp(
-    address: Address,
-    daoId: DaoIdEnum,
-  ): Promise<number | null>;
+  getFirstVoteTimestamp(address: Address): Promise<number | null>;
 
   getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number>;
 
@@ -75,23 +78,16 @@ export interface ProposalsActivityRepository {
 export class DrizzleProposalsActivityRepository
   implements ProposalsActivityRepository
 {
-  async getFirstVoteTimestamp(
-    address: Address,
-    daoId: DaoIdEnum,
-  ): Promise<number | null> {
-    const query = sql`
-      SELECT first_vote_timestamp
-      FROM account_power
-      WHERE account_id = ${address} AND dao_id = ${daoId}
-      LIMIT 1
-    `;
-
-    const result = await db.execute<{ first_vote_timestamp: string | null }>(
-      query,
-    );
-    const timestamp = result.rows[0]?.first_vote_timestamp;
-
-    return timestamp ? Number(timestamp) : null;
+  async getFirstVoteTimestamp(address: Address): Promise<number | null> {
+    const account = await db.query.accountPower.findFirst({
+      where: eq(accountPower.accountId, address),
+      columns: {
+        firstVoteTimestamp: true,
+      },
+    });
+    return account?.firstVoteTimestamp
+      ? Number(account.firstVoteTimestamp)
+      : null;
   }
 
   async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number> {
@@ -193,7 +189,7 @@ export class DrizzleProposalsActivityRepository
         orderByClause = `ORDER BY COALESCE(v.timestamp - p.timestamp, 999999999) ${orderDirection.toUpperCase()}`;
         break;
       default:
-        orderByClause = `ORDER BY p.timestamp DESC`;
+        orderByClause = `ORDER BY p.timestamp ${orderDirection.toUpperCase()}`;
     }
 
     // Main query with LEFT JOIN to get proposals and their votes
