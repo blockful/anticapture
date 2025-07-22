@@ -8,6 +8,8 @@
     "clean": {
     },
     "lint": {
+    },
+    "lint:fix": {
     }
   }
 }
