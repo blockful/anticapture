@@ -362,7 +362,7 @@ export const DelegateDelegationHistoryTable = ({
         <div className="flex flex-col gap-2 p-4">
           <TheTable
             columns={columns}
-            data={Array.from({ length: 10 }, () => ({
+            data={Array.from({ length: 7 }, () => ({
               timestamp: "1716153600",
               transactionHash: "0x1234567890",
               delta: "1000000000000000000",
