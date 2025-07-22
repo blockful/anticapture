@@ -17,7 +17,7 @@ export default function GlossaryPage() {
               anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
               className="bg-surface-background! mt-[56px]! sm:mt-0!"
             >
-              <div className="text-secondary"></div>
+              <div className="text-secondary">glossary</div>
             </TheSectionLayout>
           </div>
         </div>
