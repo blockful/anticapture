@@ -41,7 +41,7 @@ export function GlossaryKeyboard({
   };
 
   return (
-    <div className="bg-surface-background border-surface-border mx-auto w-full max-w-lg rounded-xl border p-4">
+    <div className="mx-auto w-full max-w-lg">
       <div className="space-y-3">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="flex justify-center gap-2">

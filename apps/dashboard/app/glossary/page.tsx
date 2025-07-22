@@ -10,7 +10,6 @@ import {
 
 export default function GlossaryPage() {
   const availableLetters = getAvailableLetters(SAMPLE_GLOSSARY_DATA);
-  const totalTerms = Object.values(SAMPLE_GLOSSARY_DATA).flat().length;
 
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
@@ -29,14 +28,6 @@ export default function GlossaryPage() {
                 {/* Sticky Keyboard - Left Side */}
                 <div className="w-80 flex-shrink-0">
                   <div className="sticky top-4">
-                    <div className="mb-4 text-center">
-                      <h3 className="text-primary text-lg font-semibold">
-                        Browse by Letter
-                      </h3>
-                      <p className="text-secondary mt-1 text-sm">
-                        {totalTerms} total terms
-                      </p>
-                    </div>
                     <GlossaryKeyboard glossaryData={SAMPLE_GLOSSARY_DATA} />
                   </div>
                 </div>
