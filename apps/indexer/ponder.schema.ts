@@ -133,7 +133,7 @@ export const transfer = onchainTable(
 export const votesOnchain = onchainTable(
   "votes_onchain",
   (drizzle) => ({
-    id: drizzle.text().primaryKey(),
+    txHash: drizzle.text("tx_hash"),
     daoId: drizzle.text("dao_id").notNull(),
     voterAccountId: drizzle.text("voter_account_id"),
     proposalId: drizzle.text("proposal_id"),
@@ -143,8 +143,9 @@ export const votesOnchain = onchainTable(
     timestamp: drizzle.bigint(),
   }),
   (table) => ({
-    votesOnchainVoterIdx: index().on(table.voterAccountId),
-    votesOnchainProposalIdx: index().on(table.proposalId),
+    pk: primaryKey({
+      columns: [table.txHash, table.voterAccountId, table.proposalId],
+    }),
   }),
 );
 
