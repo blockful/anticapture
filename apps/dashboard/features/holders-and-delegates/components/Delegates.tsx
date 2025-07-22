@@ -210,7 +210,7 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Address
         </h4>
       ),
