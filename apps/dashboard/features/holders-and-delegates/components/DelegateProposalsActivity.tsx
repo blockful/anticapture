@@ -86,9 +86,9 @@ export const DelegateProposalsActivity = ({
     }
 
     if (avgTimeBeforeEndDays < 1) {
-      return "< 1 day before the end";
+      return "< 1d before the end";
     }
-    return `${Math.round(avgTimeBeforeEndDays)} days before the end`;
+    return `${Math.round(avgTimeBeforeEndDays)}d before the end`;
   };
 
   const handlePageChange = (page: number) => {
@@ -130,7 +130,7 @@ export const DelegateProposalsActivity = ({
           />
           <MetricCard
             icon={<Check className="size-3.5" />}
-            title="Yes Rate"
+            title="For Rate"
             value={yesRateValue}
           />
           <MetricCard
