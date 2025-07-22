@@ -136,14 +136,14 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start px-2">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start px-4 py-2">
+          <div className="flex h-10 items-center justify-start px-2 py-2">
             <span className="text-primary whitespace-nowrap text-sm font-medium">
               {formatRelativeTime(timestamp)}
             </span>
