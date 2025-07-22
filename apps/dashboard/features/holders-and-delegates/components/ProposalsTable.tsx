@@ -124,7 +124,33 @@ export const ProposalsTable = ({
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Proposal Name</h4>,
+      header: () => (
+        <Button
+          variant="ghost"
+          className="flex h-8 w-full justify-start gap-1 px-2 text-xs"
+          onClick={() => {
+            if (onSortChange) {
+              const newDirection =
+                orderBy === "timestamp" && orderDirection === "desc"
+                  ? "asc"
+                  : "desc";
+              onSortChange("timestamp", newDirection);
+            }
+          }}
+        >
+          <h4 className="text-table-header">Proposal Name</h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              orderBy === "timestamp"
+                ? orderDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
     },
     {
       accessorKey: "finalResult",
