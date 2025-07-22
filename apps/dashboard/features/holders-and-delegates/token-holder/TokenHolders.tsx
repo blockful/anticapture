@@ -4,8 +4,7 @@ import { useState } from "react";
 import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address, isAddress, formatUnits } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
+import { Address, formatUnits } from "viem";
 import { Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -133,7 +132,7 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Address
         </div>
       ),
@@ -162,6 +161,8 @@ export const TokenHolders = ({
               address={addressValue as Address}
               size="sm"
               variant="rounded"
+              isDashed={true}
+              nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
               <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
@@ -183,7 +184,7 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-end px-2 whitespace-nowrap">
+          <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
             Balance ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -284,9 +285,6 @@ export const TokenHolders = ({
         }
 
         const delegate: string = row.getValue("delegate");
-        const delegateAddress = isAddress(delegate)
-          ? formatAddress(delegate)
-          : "Invalid address";
 
         return (
           <div className="flex h-10 items-center gap-1.5 px-4 py-2">
@@ -339,7 +337,7 @@ export const TokenHolders = ({
       <div className="flex flex-col gap-2">
         <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
           <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
-            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium md:[&_th]:border-none [&_th:first-child]:border-r [&_th:first-child]:border-white/10 [&_tr]:border-b">
+            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
               <tr className="border-light-dark">
                 {tokenHoldersColumns.map((column, index) => (
                   <th

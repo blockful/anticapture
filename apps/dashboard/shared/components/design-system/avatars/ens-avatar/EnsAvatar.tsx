@@ -24,6 +24,7 @@ interface EnsAvatarProps
   showAvatar?: boolean;
   nameClassName?: string;
   containerClassName?: string;
+  isDashed?: boolean;
   showFullAddress?: boolean;
 }
 
@@ -59,6 +60,7 @@ export const EnsAvatar = ({
   nameClassName,
   containerClassName,
   showFullAddress = false,
+  isDashed = false,
   ...imageProps
 }: EnsAvatarProps) => {
   const [imageError, setImageError] = useState<boolean>(false);
@@ -168,7 +170,13 @@ export const EnsAvatar = ({
               className="h-4 w-24"
             />
           ) : (
-            <span className={cn("text-primary text-sm", nameClassName)}>
+            <span
+              className={cn(
+                "text-primary text-sm",
+                isDashed && "border-b border-dashed border-[#3F3F46]",
+                nameClassName,
+              )}
+            >
               {displayName}
             </span>
           )}

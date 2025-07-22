@@ -14,11 +14,11 @@ import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
-import { useDelegateDelegationHistoryGraph } from "../../hooks/useDelegateDelegationHistoryGraph";
+import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import {
   VotingPowerTimePeriodSwitcher,
   VotingPowerTimePeriod,
-} from "./VotingPowerTimePeriodSwitcher";
+} from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 
@@ -133,6 +133,7 @@ export const VotingPowerVariationGraph = ({
     const { cx, cy, payload } = props;
     return (
       <Dot
+        key={payload.transactionHash}
         cx={cx}
         cy={cy}
         r={4}
