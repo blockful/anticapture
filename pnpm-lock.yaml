@@ -290,7 +290,7 @@ importers:
         version: 4.8.5
       ponder:
         specifier: ^0.11.35
-        version: 0.11.35(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.11.35(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51)
       viem:
         specifier: ^2.29.4
         version: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -26940,7 +26940,7 @@ snapshots:
     dependencies:
       "@babel/runtime": 7.27.6
 
-  ponder@0.11.35(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  ponder@0.11.35(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/node@20.17.57)(@types/pg@8.15.4)(better-sqlite3@11.5.0)(hono@4.7.11)(lightningcss@1.30.1)(prisma@5.22.0)(terser@5.40.0)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.51))(zod@3.25.51):
     dependencies:
       "@babel/code-frame": 7.27.1
       "@commander-js/extra-typings": 12.1.0(commander@12.1.0)
