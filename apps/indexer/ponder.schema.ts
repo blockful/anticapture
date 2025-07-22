@@ -144,7 +144,7 @@ export const votesOnchain = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.txHash, table.voterAccountId, table.proposalId],
+      columns: [table.voterAccountId, table.proposalId],
     }),
   }),
 );
