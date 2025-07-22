@@ -11,6 +11,8 @@ import {
   GlossaryKeyboard,
   GlossarySearch,
   GlossarySearchResult,
+  GlossarySearchResults,
+  GlossaryContent,
 } from "@/features/glossary";
 
 export default function GlossaryPage() {
@@ -64,74 +66,12 @@ export default function GlossaryPage() {
                 {/* Content - Right Side */}
                 <div className="min-w-0 flex-1">
                   {isSearching ? (
-                    /* Search Results */
-                    <div className="space-y-6">
-                      <div className="mb-4">
-                        <h3 className="text-primary text-lg font-semibold">
-                          Search Results ({searchResults.length} found)
-                        </h3>
-                      </div>
-                      <div className="space-y-4">
-                        {searchResults.length > 0 ? (
-                          searchResults.map((result, index) => (
-                            <div
-                              key={index}
-                              className="bg-surface-secondary rounded-lg p-4"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h5 className="text-primary mb-2 text-lg font-semibold">
-                                    {result.term.term}
-                                  </h5>
-                                  <p className="text-secondary leading-relaxed">
-                                    {result.term.definition}
-                                  </p>
-                                </div>
-                                <span className="bg-surface-background text-secondary ml-4 rounded px-2 py-1 text-xs">
-                                  {result.letter}
-                                </span>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="py-12 text-center">
-                            <p className="text-secondary">
-                              No terms found matching your search.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <GlossarySearchResults results={searchResults} />
                   ) : (
-                    /* Regular Glossary Content */
-                    <div className="space-y-8">
-                      {availableLetters.map((letter) => (
-                        <div
-                          key={letter}
-                          id={`letter-${letter}`}
-                          className="scroll-mt-4"
-                        >
-                          <h4 className="text-primary border-surface-border mb-4 border-b pb-2 text-2xl font-bold">
-                            {letter}
-                          </h4>
-                          <div className="grid gap-4">
-                            {SAMPLE_GLOSSARY_DATA[letter].map((term, index) => (
-                              <div
-                                key={index}
-                                className="bg-surface-secondary rounded-lg p-4"
-                              >
-                                <h5 className="text-primary mb-2 text-lg font-semibold">
-                                  {term.term}
-                                </h5>
-                                <p className="text-secondary leading-relaxed">
-                                  {term.definition}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <GlossaryContent
+                      glossaryData={SAMPLE_GLOSSARY_DATA}
+                      availableLetters={availableLetters}
+                    />
                   )}
                 </div>
               </div>
