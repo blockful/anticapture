@@ -24,10 +24,10 @@ export * from "@/shared/components/containers/TheSectionLayout";
 export * from "@/shared/components/tables/TheTable";
 export * from "@/shared/components/tooltips/TooltipInfo";
 export * from "@/shared/components/cards/RiskAreaCard";
+export * from "@/shared/components/buttons/BottomNavigationButtons";
 export * from "@/shared/components/cards/MetricCard";
 export * from "@/shared/components/design-system/TextIconLeft";
 export * from "@/shared/components/design-system/SimpleProgressBar";
 export * from "@/shared/components/design-system/ActivityIndicator";
-export * from "@/shared/components/buttons/BottomNavigationButtons";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";
