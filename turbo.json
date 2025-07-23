@@ -4,6 +4,12 @@
   "tasks": {
     "build": {
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+    },
+    "clean": {
+    },
+    "lint": {
+    },
+    "lint:fix": {
     }
   }
 }

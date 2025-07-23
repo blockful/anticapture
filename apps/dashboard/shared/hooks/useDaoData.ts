@@ -17,7 +17,7 @@ export const useDaoData = (daoId: DaoIdEnum): UseDaoDataResult => {
   });
 
   return {
-    data: data?.dao || null,
+    data: data?.dao ? { ...data.dao, id: daoId } : null,
     loading,
     error: error || null,
     refetch,

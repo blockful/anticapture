@@ -29,6 +29,7 @@ export const ENS: DaoConfiguration = {
       logic: "For + Abstain",
       quorumCalculation: "Total Supply",
     },
+    tally: "https://tally.xyz/gov/ens",
     securityCouncil: {
       isActive: true,
       multisig: {
@@ -240,4 +241,5 @@ export const ENS: DaoConfiguration = {
   },
   resilienceStages: true,
   tokenDistribution: true,
+  dataTables: false,
 };

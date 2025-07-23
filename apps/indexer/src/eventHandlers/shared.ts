@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { Context, Event } from "ponder:registry";
+import { Context } from "ponder:registry";
 import { account, daoMetricsDayBucket } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
@@ -31,25 +31,19 @@ export const ensureAccountsExist = async (
 
 export const storeDailyBucket = async (
   context: Context,
-  event: Event,
   metricType: MetricTypesEnum,
   currentValue: bigint,
   newValue: bigint,
   daoId: string,
+  date: bigint,
+  tokenAddress: Address,
 ) => {
   const volume = delta(newValue, currentValue);
-  const dayStartTimestampInSeconds =
-    new Date(parseInt(event.block.timestamp.toString() + "000")).setHours(
-      0,
-      0,
-      0,
-      0,
-    ) / 1000;
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
-      date: BigInt(dayStartTimestampInSeconds),
-      tokenId: event.log.address,
+      date,
+      tokenId: tokenAddress,
       metricType,
       daoId,
       average: newValue,

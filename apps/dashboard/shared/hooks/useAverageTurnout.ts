@@ -23,14 +23,23 @@ export const fetchAverageTurnout = async ({
     return null;
   }
   const query = `query AverageTurnout {
-    compareAverageTurnout(daoId: ${daoId}, days: _${days}) {
+    compareAverageTurnout(days: _${days}) {
         currentAverageTurnout
         oldAverageTurnout
         changeRate
     }
   }`;
-  const response: { data: { data: { compareAverageTurnout: AverageTurnoutResponse } } } =
-    await axios.post(`${BACKEND_ENDPOINT}`, { query });
+  const response: {
+    data: { data: { compareAverageTurnout: AverageTurnoutResponse } };
+  } = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    { query },
+    {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  );
   const { compareAverageTurnout } = response.data.data as {
     compareAverageTurnout: AverageTurnoutResponse;
   };

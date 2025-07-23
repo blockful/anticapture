@@ -30,13 +30,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>] ||
     `${baseUrl}/opengraph-images/default.png`;
 
-  // Generate title and description based on support stage
-  let title = `Anticapture - ${daoId} DAO`;
-  let description = `Explore and mitigate governance risks in ${daoId} DAO.`;
-
   return {
-    title,
-    description,
+    title: `Anticapture - ${daoId} DAO`,
+    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
     openGraph: {
       title: `Anticapture - ${daoId} DAO`,
       description: `Explore and mitigate governance risks in ${daoId} DAO.`,

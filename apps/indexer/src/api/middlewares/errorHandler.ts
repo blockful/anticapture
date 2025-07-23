@@ -15,7 +15,7 @@ export const errorHandler: ErrorHandler = (err, c) => {
         error: "Validation Error",
         message: validationError.message,
       },
-      400
+      400,
     );
   }
 
@@ -24,6 +24,6 @@ export const errorHandler: ErrorHandler = (err, c) => {
       error: "Internal Server Error",
       message: err instanceof Error ? err.message : "Unknown error",
     },
-    500
+    500,
   );
 };

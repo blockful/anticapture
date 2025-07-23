@@ -1,1 +1,2 @@
-export * from "./abi/ARBTokenAbi";
+export * from "./abi/token";
+export * from "./erc20";

@@ -7,8 +7,8 @@ import { fromZodError } from "zod-validation-error";
 
 import {
   governanceActivity,
-  tokenDistribution,
   tokenHistoricalData,
+  tokenDistribution,
   assets,
   proposalsActivity,
   historicalOnchain,
@@ -50,7 +50,7 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
 
 if (env.COINGECKO_API_KEY) {
   const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
-  tokenHistoricalData(app, coingeckoClient);
+  tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
 }
 
 const repo = new DrizzleRepository();
@@ -58,8 +58,8 @@ const proposalsRepo = new DrizzleProposalsActivityRepository();
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
-proposalsActivity(app, proposalsRepo);
-historicalOnchain(app);
+proposalsActivity(app, proposalsRepo, env.DAO_ID);
+historicalOnchain(app, env.DAO_ID);
 docs(app);
 
 export default app;
