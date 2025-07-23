@@ -5,17 +5,8 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
-  BottomNavigationButtons,
-  ConnectWallet,
 } from "@/shared/components";
-import {
-  BarChart,
-  Gauge,
-  HeartIcon,
-  Lightbulb,
-  Activity,
-  UserCheck,
-} from "lucide-react";
+import { BarChart, Gauge, HeartIcon, Lightbulb, UserCheck } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
