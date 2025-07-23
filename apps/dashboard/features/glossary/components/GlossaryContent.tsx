@@ -22,13 +22,13 @@ export function GlossaryContent({
             {glossaryData[letter].map((term, index) => (
               <div
                 key={index}
-                className="bg-surface-secondary grid grid-cols-5 p-4"
+                className="bg-surface-secondary grid grid-cols-1 p-4 md:grid-cols-5"
               >
                 <h5 className="text-primary font-roboto-mono text-[13px] font-medium uppercase leading-[20px] tracking-[0.78px]">
                   {term.term}
                 </h5>
                 <p
-                  className="font-inter text-secondary col-span-4 text-[14px] font-normal leading-[20px]"
+                  className="font-inter text-secondary text-[14px] font-normal leading-[20px] md:col-span-4"
                   style={{ fontStyle: "normal" }}
                 >
                   {term.definition}
