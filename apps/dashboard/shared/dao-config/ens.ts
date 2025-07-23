@@ -27,6 +27,7 @@ export const ENS: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain",
+      quorumCalculation: "Total Supply",
     },
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {
@@ -51,6 +52,11 @@ export const ENS: DaoConfiguration = {
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
     supportsLiquidTreasuryCall: true,
+    attackCostBarChart: {
+      ENSTokenTimelock: "0xd7A029Db2585553978190dB5E85eC724Aa4dF23f",
+      ENSDaoWallet: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
+      ENSColdWallet: "0x690F0581eCecCf8389c223170778cD9D029606F2",
+    },
   },
   riskAnalysis: true,
   governanceImplementation: {

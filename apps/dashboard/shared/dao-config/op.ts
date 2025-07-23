@@ -26,12 +26,19 @@ export const OP: DaoConfiguration = {
       changeVote: false,
       timelock: true,
       cancelFunction: true,
-      logic: "For + Abstain + Against",
+      logic: "All Votes Cast",
+      quorumCalculation: "Del. Supply",
+      proposalThreshold: "Only Foundation Proposes",
     },
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: false,
+    attackCostBarChart: {
+      OptimismTimelock: "",
+      OptimismTokenDistributor: "",
+      OptimismUniv3Uni: "",
+    },
   },
   riskAnalysis: true,
   governanceImplementation: {
