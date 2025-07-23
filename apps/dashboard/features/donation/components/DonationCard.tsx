@@ -19,6 +19,7 @@ import {
   TooltipContent,
 } from "@/shared/components/ui/tooltip";
 import Image from "next/image";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 export const DonationCard = ({
   title,
@@ -45,11 +46,6 @@ export const DonationCard = ({
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
-  };
-
-  const truncateAddress = (addr: string) => {
-    if (addr.length <= 42) return addr;
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   return (
@@ -218,7 +214,7 @@ export const DonationCard = ({
                         </p>
                         <div className="flex items-center gap-1">
                           <code className="text-primary max-w-[calc(100vw-100px)] truncate font-sans text-sm font-normal">
-                            {truncateAddress(address)}
+                            {formatAddress(address)}
                           </code>
                           <Tooltip>
                             <TooltipTrigger asChild>
