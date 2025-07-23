@@ -124,9 +124,13 @@ export const transfer = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash],
+      columns: [
+        table.transactionHash,
+        table.tokenId,
+        table.fromAccountId,
+        table.toAccountId,
+      ],
     }),
-    transfersTokenIdx: index().on(table.tokenId),
   }),
 );
 
