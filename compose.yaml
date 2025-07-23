@@ -1,5 +1,4 @@
 services:
-
   contracts:
     build:
       context: packages/local-node
@@ -15,23 +14,12 @@ services:
       retries: 5
       start_period: 30s
 
-  indexer-db:
-    image: postgres:16.2
-    ports:
-      - "5432:5432"
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: postgres
-    networks:
-      - backend
-
   indexer:
     build:
       context: .
       dockerfile: infra/indexer/Dockerfile.indexer
-    command: ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
+    command:
+      ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
@@ -40,8 +28,6 @@ services:
       - CHAIN_ID=31337
       - PORT=42069
     depends_on:
-      indexer-db:
-        condition: service_started
       contracts:
         condition: service_healthy
     ports:
