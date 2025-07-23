@@ -9,7 +9,7 @@ import {
   Trigger,
 } from "@radix-ui/react-dialog";
 import { CardTitle } from "@/shared/components/ui/card";
-import { X, Plus, PlusIcon } from "lucide-react";
+import { X, Plus, PlusIcon, Check } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/cn";
@@ -69,7 +69,7 @@ export const ChartMetricsDialog = ({
       </Trigger>
       <Portal>
         <Overlay className="fixed inset-0 z-50 bg-black/80" />
-        <Content className="z-60 bg-surface-default fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-md shadow-lg">
+        <Content className="z-60 fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-[#18181b] shadow-lg">
           <Title className="text-primary m-0 px-4 py-3.5 text-[17px] font-medium">
             Add metrics to chart
           </Title>
@@ -100,11 +100,18 @@ export const ChartMetricsDialog = ({
                         <div
                           key={metric.label}
                           onClick={() => handleSelectMetric(metric)}
-                          className={`border-light-dark flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm hover:opacity-80 ${
-                            isSelected ? "bg-white text-black" : "text-primary"
-                          }`}
+                          className={cn(
+                            `bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm`,
+                            isSelected
+                              ? "border-tangerine"
+                              : "border-transparent",
+                          )}
                         >
-                          <Plus className="h-3 w-3" />
+                          {isSelected ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <Plus className="h-3 w-3" />
+                          )}
                           {metric.label}
                         </div>
                       );

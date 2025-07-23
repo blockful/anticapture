@@ -28,7 +28,6 @@ export const MultilineChartTokenDistribution = ({
   filterData,
   mocked = false,
 }: MultilineChartTokenDistributionProps) => {
-  console.log("datasets", datasets);
   if (!datasets || Object.keys(datasets).length === 0) {
     return null;
   }
@@ -50,7 +49,7 @@ export const MultilineChartTokenDistribution = ({
         const entry = datasets[key as keyof typeof datasets]?.find(
           (item) => item.date === date,
         );
-        dataPoint[key] = entry ? Number(entry.high) : null;
+        dataPoint[key] = entry ? Number(entry.high) / 1e18 : null;
       });
 
       return dataPoint;
@@ -84,11 +83,7 @@ export const MultilineChartTokenDistribution = ({
           />
           <YAxis
             domain={["auto", "auto"]}
-            tickFormatter={(value) =>
-              formatNumberUserReadable(
-                Number(BigInt(Number(value)) / BigInt(10 ** 18)),
-              )
-            }
+            tickFormatter={(value) => formatNumberUserReadable(Number(value))}
           />
           <Tooltip
             content={
