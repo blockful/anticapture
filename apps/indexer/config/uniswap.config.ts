@@ -1,11 +1,11 @@
 import { createConfig } from "ponder";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
+import { GovernorAbi, TokenAbi } from "@/indexer/uni/abi";
 
-const UNI_CONTRACTS = CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!;
+const UNI_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.UNI];
 
 export default createConfig({
   database: {
@@ -22,16 +22,16 @@ export default createConfig({
   },
   contracts: {
     UNIToken: {
-      abi: UNITokenAbi,
+      abi: TokenAbi,
       chain: "ethereum_mainnet",
       address: UNI_CONTRACTS.token.address,
       startBlock: UNI_CONTRACTS.token.startBlock,
     },
     UNIGovernor: {
-      abi: UNIGovernorAbi,
+      abi: GovernorAbi,
       chain: "ethereum_mainnet",
-      address: UNI_CONTRACTS.governor!.address,
-      startBlock: UNI_CONTRACTS.governor!.startBlock,
+      address: UNI_CONTRACTS.governor.address,
+      startBlock: UNI_CONTRACTS.governor.startBlock,
     },
   },
 });

@@ -18,16 +18,24 @@ export const fetchVotes = async ({
   days: string;
 }): Promise<VotesResponse> => {
   const query = `query Votes {
-    compareVotes(daoId: ${daoId}, days: _${days}) {
+    compareVotes(days: _${days}) {
       currentVotes
       oldVotes
       changeRate
     }
   }`;
-  const response: { data: { data: { compareVotes: VotesResponse } } } = await axios.post(`${BACKEND_ENDPOINT}`, {
-      query,
-    },
-  );
+  const response: { data: { data: { compareVotes: VotesResponse } } } =
+    await axios.post(
+      `${BACKEND_ENDPOINT}`,
+      {
+        query,
+      },
+      {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
+    );
   const { compareVotes } = response.data.data as {
     compareVotes: VotesResponse;
   };
