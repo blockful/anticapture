@@ -49,6 +49,27 @@ const chartConfig = {
   },
 };
 
+const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
+  if (!chartData.length) return [];
+
+  const firstTimestamp = Math.min(...chartData.map((d) => d.timestamp));
+  const lastTimestamp = Math.max(...chartData.map((d) => d.timestamp));
+
+  const ticks = [];
+  const startDate = new Date(firstTimestamp);
+  const endDate = new Date(lastTimestamp);
+
+  // Start from the first day of the month containing the first data point
+  const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+
+  while (current <= endDate) {
+    ticks.push(current.getTime());
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return ticks;
+};
+
 export const VotingPowerVariationGraph = ({
   accountId,
   daoId,
@@ -168,6 +189,7 @@ export const VotingPowerVariationGraph = ({
             type="number"
             scale="time"
             domain={["dataMin", "dataMax"]}
+            ticks={generateMonthlyTicks(chartData)}
             tickFormatter={(value) => {
               const date = new Date(value);
               const month = date.toLocaleDateString("en-US", {
