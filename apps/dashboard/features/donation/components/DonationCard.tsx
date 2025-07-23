@@ -42,6 +42,7 @@ export const DonationCard = ({
       } else {
         setCopiedAddress(true);
         setTimeout(() => setCopiedAddress(false), 2000);
+        //asdas
       }
     } catch (err) {
       console.error("Failed to copy text: ", err);
