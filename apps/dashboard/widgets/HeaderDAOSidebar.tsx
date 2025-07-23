@@ -6,7 +6,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, HeartIcon, Lightbulb } from "lucide-react";
+import { BarChart, Gauge, HeartIcon, Lightbulb, UserCheck } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
@@ -24,7 +24,7 @@ export const HeaderDAOSidebar = () => {
 
   return (
     <aside
-      className={`border-light-dark bg-surface-background fixed top-0 left-[68px] z-50 hidden h-screen w-[258px] border-r sm:block`}
+      className={`border-light-dark bg-surface-background fixed left-[68px] top-0 z-50 hidden h-screen w-[258px] border-r sm:block`}
     >
       <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
@@ -79,6 +79,13 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
                 icon={ArrowRightLeft}
                 label={SECTIONS_CONSTANTS.tokenDistribution.title}
+              />
+            )}
+            {daoConfig.dataTables && (
+              <ButtonHeaderSidebar
+                anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+                icon={UserCheck}
+                label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
               />
             )}
           </div>

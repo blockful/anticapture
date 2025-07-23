@@ -2,12 +2,7 @@ export enum DaoIdEnum {
   UNI = "UNI",
   ENS = "ENS",
   ARB = "ARB",
-}
-
-export enum NetworkEnum {
-  ETHEREUM = "ethereum",
-  ARBITRUM = "arbitrum",
-  ANVIL = "anvil",
+  OP = "OP",
 }
 
 const SECONDS_IN_DAY = 24 * 60 * 60;

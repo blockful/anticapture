@@ -25,6 +25,12 @@ export const SECTIONS_CONSTANTS = {
       "Takes into account the maximum cost and the minimum profit possible. If it looks bad, it’s bad. If it looks good, it’s better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets.",
     anchorId: "attackProfitabilitySection",
   },
+  holdersAndDelegates: {
+    title: "Holders & Delegates",
+    description:
+      "Explore top token holders and high-power delegates. Click on any row to view more details.",
+    anchorId: "holdersAndDelegatesSection",
+  },
   tokenDistribution: {
     title: "Token Distribution",
     description:

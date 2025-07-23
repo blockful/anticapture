@@ -18,6 +18,7 @@ export const UNI: DaoConfiguration = {
     cancelFunction:
       "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC#writeContract%23F2",
     snapshot: "https://snapshot.box/#/s:uniswapgovernance.eth",
+    tally: "https://tally.xyz/gov/uniswap",
     rules: {
       delay: true,
       changeVote: true,
@@ -182,4 +183,5 @@ export const UNI: DaoConfiguration = {
   riskAnalysis: true,
   tokenDistribution: true,
   resilienceStages: true,
+  dataTables: false,
 };
