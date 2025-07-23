@@ -6,11 +6,9 @@ import { DonationCardProps } from "@/features/donation/types";
 import {
   ExternalLink,
   Copy,
-  Check,
   Eye,
   BookOpen,
   Shield,
-  CheckCircle,
   CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +18,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/shared/components/ui/tooltip";
+import Image from "next/image";
 
 export const DonationCard = ({
   title,
@@ -81,8 +80,8 @@ export const DonationCard = ({
                     <BookOpen className="text-primary size-4" />
                   </div>
                   <span className="text-secondary text-sm leading-relaxed">
-                    Improve Ethereum's legibility—without compromising credible
-                    neutrality.
+                    Improve Ethereum&apos;s legibility—without compromising
+                    credible neutrality.
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
@@ -103,7 +102,7 @@ export const DonationCard = ({
                 {/* Supported chains */}
                 {supportedChains.length > 0 && (
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-primary !text-alternative-sm font-mono font-medium tracking-wider uppercase">
+                    <p className="text-primary !text-alternative-sm font-mono font-medium uppercase tracking-wider">
                       Donate Through Any EVM
                     </p>
                     <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -138,10 +137,10 @@ export const DonationCard = ({
             <div className="mt-6 flex-shrink-0 lg:mt-0">
               <div className="relative">
                 {/* Orange corner brackets */}
-                <div className="border-tangerine absolute size-4 border-t-2 border-l-2" />
-                <div className="border-tangerine absolute -top-0 -right-0 size-4 border-t-2 border-r-2" />
+                <div className="border-tangerine absolute size-4 border-l-2 border-t-2" />
+                <div className="border-tangerine absolute -right-0 -top-0 size-4 border-r-2 border-t-2" />
                 <div className="border-tangerine absolute -bottom-0 -left-0 size-4 border-b-2 border-l-2" />
-                <div className="border-tangerine absolute -right-0 -bottom-0 size-4 border-r-2 border-b-2" />
+                <div className="border-tangerine absolute -bottom-0 -right-0 size-4 border-b-2 border-r-2" />
 
                 {/* QR Code container with gradient background */}
                 <div
@@ -158,7 +157,7 @@ export const DonationCard = ({
                       </p>
                     </div>
                     <div className="border-light-dark mx-auto flex h-32 w-32 items-center justify-center border bg-transparent p-2">
-                      <img
+                      <Image
                         src={qrCodeUrl}
                         alt="Donation QR Code"
                         className="h-full w-full object-contain"
@@ -175,7 +174,7 @@ export const DonationCard = ({
                     </div>
                     <div className="flex flex-col gap-3">
                       <div>
-                        <p className="text-secondary !text-alternative-xs font-regular font-mono tracking-wide uppercase">
+                        <p className="text-secondary !text-alternative-xs font-regular font-mono uppercase tracking-wide">
                           ENS Domain
                         </p>
                         <div className="flex items-center gap-1">
@@ -214,7 +213,7 @@ export const DonationCard = ({
 
                       {/* Address - moved inside QR box */}
                       <div>
-                        <p className="text-secondary !text-alternative-xs font-mono font-normal tracking-wide uppercase">
+                        <p className="text-secondary !text-alternative-xs font-mono font-normal uppercase tracking-wide">
                           Address
                         </p>
                         <div className="flex items-center gap-1">
