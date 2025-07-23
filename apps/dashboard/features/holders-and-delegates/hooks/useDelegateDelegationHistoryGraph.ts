@@ -21,7 +21,7 @@ export interface DelegationHistoryGraphItem {
 export interface UseDelegateDelegationHistoryGraphResult {
   delegationHistory: DelegationHistoryGraphItem[];
   loading: boolean;
-  error: any;
+  error: unknown;
 }
 
 export function useDelegateDelegationHistoryGraph(

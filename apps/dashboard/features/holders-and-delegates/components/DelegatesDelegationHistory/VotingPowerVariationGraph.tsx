@@ -13,6 +13,7 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useState } from "react";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import {
@@ -207,9 +208,10 @@ export const VotingPowerVariationGraph = ({
             fontSize={12}
           />
           <Tooltip
-            content={({ active, payload }: { active: boolean; payload: any }) => {
+            content={(props) => {
+              const { active, payload } = props;
               if (active && payload && payload.length) {
-                const data = payload[0].payload;
+                const data = payload[0]?.payload as DelegationHistoryGraphItem;
 
                 // Determine which address to show based on transaction type and direction
                 const getDisplayAddress = () => {
@@ -245,7 +247,7 @@ export const VotingPowerVariationGraph = ({
                     <p className="text-secondary text-xs">{addressLabel}:</p>
                     {displayAddress && (
                       <EnsAvatar
-                        address={displayAddress}
+                        address={displayAddress as `0x${string}`}
                         showAvatar={false}
                         size="xs"
                         className="mt-2"
