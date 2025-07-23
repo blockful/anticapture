@@ -12,23 +12,22 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
           Search Results ({results.length} found)
         </h3>
       </div>
-      <div className="space-y-4">
+      <div className="divide-border-default space-y-4 divide-y">
         {results.length > 0 ? (
           results.map((result, index) => (
-            <div key={index} className="bg-surface-secondary rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h5 className="text-primary mb-2 text-lg font-semibold">
-                    {result.term.term}
-                  </h5>
-                  <p className="text-secondary leading-relaxed">
-                    {result.term.definition}
-                  </p>
-                </div>
-                <span className="bg-surface-background text-secondary ml-4 rounded px-2 py-1 text-xs">
-                  {result.letter}
-                </span>
-              </div>
+            <div
+              key={index}
+              className="bg-surface-secondary grid grid-cols-5 p-4"
+            >
+              <h5 className="text-primary font-roboto-mono text-[13px] font-medium uppercase leading-[20px] tracking-[0.78px]">
+                {result.term.term}
+              </h5>
+              <p
+                className="font-inter text-secondary col-span-4 text-[14px] font-normal leading-[20px]"
+                style={{ fontStyle: "normal" }}
+              >
+                {result.term.definition}
+              </p>
             </div>
           ))
         ) : (
