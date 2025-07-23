@@ -45,7 +45,7 @@ export default function GlossaryPage() {
               anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
               className="bg-surface-background! sm:mt-0!"
             >
-              <div className="flex flex-col gap-10 md:flex-row">
+              <div className="flex flex-col gap-2 md:flex-row md:gap-10">
                 {/* Sticky Sidebar - Left Side */}
                 <div className="flex-shrink-0">
                   <div className="sticky top-4 space-y-6">
