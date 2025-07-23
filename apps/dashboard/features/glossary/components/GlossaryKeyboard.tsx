@@ -59,18 +59,13 @@ export function GlossaryKeyboard({
                       ? `${termCount} term${termCount !== 1 ? "s" : ""}`
                       : "No terms available"
                   }
-                  className={`relative h-7 w-8 rounded-lg text-sm font-bold transition-all duration-200 ${
+                  className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-bold transition-all duration-200 ${
                     isAvailable
-                      ? "bg-surface-secondary border-surface-border text-primary hover:bg-surface-primary hover:border-primary hover:text-primary transform cursor-pointer border-2 shadow-sm hover:scale-105 hover:shadow-md"
-                      : "bg-surface-background border-surface-border text-secondary cursor-not-allowed border opacity-40"
+                      ? "bg-primary-foreground border-border text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:scale-105 hover:shadow-md"
+                      : "bg-background border-border text-secondary cursor-not-allowed opacity-40"
                   } `}
                 >
                   {letter}
-                  {isAvailable && termCount > 0 && (
-                    <span className="bg-primary text-primary absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center rounded-full text-xs">
-                      {termCount}
-                    </span>
-                  )}
                 </button>
               );
             })}
