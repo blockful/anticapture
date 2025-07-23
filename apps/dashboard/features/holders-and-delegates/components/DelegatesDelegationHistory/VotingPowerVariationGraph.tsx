@@ -190,7 +190,7 @@ export const VotingPowerVariationGraph = ({
             scale="time"
             domain={["dataMin", "dataMax"]}
             ticks={generateMonthlyTicks(chartData)}
-            tickFormatter={(value) => {
+            tickFormatter={(value: number) => {
               const date = new Date(value);
               const month = date.toLocaleDateString("en-US", {
                 month: "short",
@@ -202,12 +202,12 @@ export const VotingPowerVariationGraph = ({
             fontSize={12}
           />
           <YAxis
-            tickFormatter={(value) => formatNumberUserReadable(value)}
+            tickFormatter={(value: number) => formatNumberUserReadable(value)}
             stroke="var(--base-dimmed)"
             fontSize={12}
           />
           <Tooltip
-            content={({ active, payload }) => {
+            content={({ active, payload }: { active: boolean; payload: any }) => {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
 
