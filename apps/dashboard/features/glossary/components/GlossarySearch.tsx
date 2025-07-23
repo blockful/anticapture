@@ -34,15 +34,15 @@ export function GlossarySearch({
   };
 
   return (
-    <div className="relative mx-auto w-full max-w-lg">
-      <div className="relative">
-        <Search className="text-secondary absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform" />
+    <div className="mx-auto w-[274px]">
+      <div className="border-secondary bg-primary-foreground flex items-center gap-2.5 rounded-md border px-2.5 py-2 transition-all duration-200">
+        <Search className="text-secondary h-5 w-5 flex-shrink-0" />
         <input
           type="text"
           placeholder="Search the word..."
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          className="bg-surface-background border-surface-border text-primary placeholder:text-secondary focus:ring-primary focus:border-primary w-full rounded-lg border py-3 pl-10 pr-4 transition-all duration-200 focus:outline-none focus:ring-2"
+          className="text-primary placeholder:text-secondary w-full bg-transparent focus:outline-none focus:ring-0"
         />
       </div>
     </div>

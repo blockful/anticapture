@@ -45,9 +45,9 @@ export default function GlossaryPage() {
               anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
               className="bg-surface-background! mt-[56px]! sm:mt-0!"
             >
-              <div className="flex gap-8">
+              <div className="flex gap-10">
                 {/* Sticky Sidebar - Left Side */}
-                <div className="w-80 flex-shrink-0">
+                <div className="flex-shrink-0">
                   <div className="sticky top-4 space-y-6">
                     {/* Search Input */}
                     <GlossarySearch
