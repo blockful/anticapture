@@ -70,23 +70,13 @@ export function GlossaryKeyboard({
           const termCount = glossaryData[letter]?.length || 0;
 
           return (
-            <button
+            <KeyboardButton
               key={letter}
+              letter={letter}
+              isAvailable={isAvailable}
+              termCount={termCount}
               onClick={() => handleLetterClick(letter)}
-              disabled={!isAvailable}
-              title={
-                isAvailable
-                  ? `${termCount} term${termCount !== 1 ? "s" : ""}`
-                  : "No terms available"
-              }
-              className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-bold transition-all duration-200 ${
-                isAvailable
-                  ? "bg-primary-foreground border-border text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
-                  : "bg-background border-border text-secondary cursor-not-allowed opacity-40"
-              } `}
-            >
-              {letter}
-            </button>
+            />
           );
         })}
       </div>
@@ -97,23 +87,13 @@ export function GlossaryKeyboard({
             const termCount = glossaryData[letter]?.length || 0;
 
             return (
-              <button
+              <KeyboardButton
                 key={letter}
+                letter={letter}
+                isAvailable={isAvailable}
+                termCount={termCount}
                 onClick={() => handleLetterClick(letter)}
-                disabled={!isAvailable}
-                title={
-                  isAvailable
-                    ? `${termCount} term${termCount !== 1 ? "s" : ""}`
-                    : "No terms available"
-                }
-                className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-bold transition-all duration-200 ${
-                  isAvailable
-                    ? "bg-primary-foreground border-border text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
-                    : "bg-background border-border text-secondary cursor-not-allowed opacity-40"
-                } `}
-              >
-                {letter}
-              </button>
+              />
             );
           })}
         </div>
@@ -121,3 +101,34 @@ export function GlossaryKeyboard({
     </>
   );
 }
+
+const KeyboardButton = ({
+  letter,
+  isAvailable,
+  termCount,
+  onClick,
+}: {
+  letter: GlossaryLetter;
+  isAvailable: boolean;
+  termCount: number;
+  onClick: () => void;
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={!isAvailable}
+      title={
+        isAvailable
+          ? `${termCount} term${termCount !== 1 ? "s" : ""}`
+          : "No terms available"
+      }
+      className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-bold transition-all duration-200 ${
+        isAvailable
+          ? "bg-primary-foreground border-border text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
+          : "bg-background border-border text-secondary cursor-not-allowed opacity-40"
+      } `}
+    >
+      {letter}
+    </button>
+  );
+};
