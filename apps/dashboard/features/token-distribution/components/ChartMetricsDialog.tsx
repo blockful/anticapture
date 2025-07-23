@@ -1,7 +1,6 @@
 import {
   Close,
   Content,
-  Description,
   Overlay,
   Portal,
   Root,
@@ -74,7 +73,7 @@ export const ChartMetricsDialog = ({
             Add metrics to chart
           </Title>
           <div className="border-light-dark h-px w-full border-t" />
-          <Description className="flex flex-col px-4 pt-4">
+          <div className="flex flex-col px-4 pt-4">
             {Object.entries(allMetrics).map(([category, metrics], index) => {
               if (appliedMetrics[category]?.length === metrics.length)
                 return null;
@@ -123,7 +122,7 @@ export const ChartMetricsDialog = ({
                 </div>
               );
             })}
-          </Description>
+          </div>
           <div className="border-light-dark h-px w-full border-t" />
           <div className="flex justify-end gap-2 px-4 py-3">
             <Close asChild>
