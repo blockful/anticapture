@@ -44,46 +44,115 @@ export interface GlossarySearchResult {
 export const SAMPLE_GLOSSARY_DATA: GlossaryData = {
   A: [
     {
-      term: "Airdrop",
+      term: "Average Turnout ",
       definition:
-        "The distribution of cryptocurrency tokens to multiple wallet addresses for free, often used as a marketing strategy or to reward community members.",
+        "A metric that measures the average participation of delegates/voters in a decentralized organization. It can be calculated as the number of proposals divided by the number of votes obtained.",
     },
     {
-      term: "APY",
+      term: "Active Supply",
       definition:
-        "Annual Percentage Yield - the annualized rate of return including compound interest effects.",
+        "Number of tokens in a project that are actively used in votes, DeFi, etc. It can be calculated as the current voting power of members who have voted in a defined period of time.",
     },
   ],
   B: [
     {
-      term: "Blockchain",
+      term: "BPT (Balancer Pool Token)",
       definition:
-        "A distributed ledger technology that maintains a continuously growing list of records, secured using cryptography.",
+        "A deposit representation in a Balancer pool. An LP at Balancer.",
+    },
+    {
+      term: "Bribes",
+      definition:
+        "Bribes can be understood as a reward to encourage people to perform a behavior. In the context of DAOs, a reward to encourage holders of a governance token to vote in a proposal or in a specific choice in a proposal.",
     },
   ],
   C: [
     {
-      term: "DAO",
+      term: "Cancel Function",
       definition:
-        "Decentralized Autonomous Organization - an organization governed by smart contracts and community voting rather than traditional management structures.",
+        "A function present in governance contracts to cancel proposals submitted in a DAO, either in its proposal, delay, or execution phase. A defense mechanism, present in the Anticapture framework.",
+    },
+    {
+      term: "Capital Raid",
+      definition:
+        "The most common type of attack on DAOs, where an attacker aims to capture the governance of an organization in order to steal its treasure.",
+    },
+    {
+      term: "CEX",
+      definition: "Centralized exchange, such as Binance, Coinbase, etc.",
+    },
+    {
+      term: "Circulating Supply",
+      definition:
+        "Tokens of a project that can be freely traded on the secondary market, which are already in circulation.",
+    },
+    {
+      term: "Cost of attack",
+      definition:
+        "Cost of attacking a DAO. To arrive at this amount, we analyzed the cost to approve a proposal, in relation to its Average Turnout and Delegated Supply.",
     },
   ],
   D: [
     {
-      term: "Delegation",
+      term: "dcf god",
       definition:
-        "The process of assigning voting power to another address in governance systems, allowing token holders to participate indirectly in decision-making.",
+        "Leader of the RFV Raiders and responsible for attacks on DAOs.",
     },
-  ],
-  E: [],
-  F: [],
-  G: [
     {
-      term: "Governance",
+      term: "Delegated Cap",
       definition:
-        "The process by which decisions are made in decentralized protocols, typically involving token holder voting on proposals.",
+        "Number of tokens delegated to addresses multiplied by their market value. So, if 1000 tokens have been delegated and 1 token = U$1, the Delegated Supply is equivalent to U$1K.",
+    },
+    {
+      term: "Delegated Supply",
+      definition:
+        "Number of tokens delegated to addresses. Defines the current total voting power available to be cast in proposals.",
+    },
+    {
+      term: "Delegates",
+      definition:
+        "People who actively participate in the DAO and hold delegations - voting power given by wallets that hold the governance tokens (votes) in the organization.",
+    },
+    {
+      term: "Depth Order Chart (Gráfico de Profundidade)",
+      definition:
+        "It measures the liquidity of a token in a specific price range. It is important for measuring the ability to move the price of a currency (appreciate/devalue) and profit from attacks, as well as undermine a decentralized organization.",
+    },
+    {
+      term: "DEX",
+      definition: "Decentralized exchange, such as Uniswap and Pancake Swap.",
+    },
+    {
+      term: "DNS Attack",
+      definition:
+        "DNS (Domain Name Service) is what allows people to access websites through words, without the need to use the IP of each platform. A DNS attack takes advantage of this mechanism, carrying out strategies such as hijacking, stealing and redirecting to steal people. They can be done on governance voting platforms.",
     },
   ],
+  E: [
+    {
+      term: "Extractable Value",
+      definition:
+        "A metric that compares the cost of approving a proposal in a DAO in relation to its Average Turnout and Delegated Supply, in comparison to the value that can be obtained from the treasury through such a proposal. Indicates how much can be extracted from an attack on a decentralized organization.",
+    },
+  ],
+  F: [
+    {
+      term: "Fully Diluted Valuation",
+      definition:
+        "The valuation of a token. To find its value, simply multiply Max Supply by the price of the token.",
+    },
+    {
+      term: "Flash Loan",
+      definition:
+        "A loan made and paid back in a single block. A type of loan that allows people to borrow money and pay it back immediately, in order to take advantage of market inefficiencies. Commonly applied to sandwich attacks or automating DeFi operations, it can also be used to borrow governance tokens and vote on a proposal in a DAO.",
+    },
+    {
+      term: "Funding Rate",
+      definition:
+        "Cost of opening a long/short on a token. The cost comes from borrowing money from the exchange in order to leverage itself in the token.",
+    },
+  ],
+  G: [],
   H: [],
   I: [],
   J: [],
@@ -92,37 +161,13 @@ export const SAMPLE_GLOSSARY_DATA: GlossaryData = {
   M: [],
   N: [],
   O: [],
-  P: [
-    {
-      term: "Proposal",
-      definition:
-        "A formal suggestion for changes or actions in a DAO, submitted for community voting.",
-    },
-  ],
+  P: [],
   Q: [],
   R: [],
-  S: [
-    {
-      term: "Smart Contract",
-      definition:
-        "Self-executing contracts with terms directly written into code, automatically enforcing agreements without intermediaries.",
-    },
-  ],
-  T: [
-    {
-      term: "Token",
-      definition:
-        "A digital asset that represents ownership, access rights, or voting power within a blockchain ecosystem.",
-    },
-  ],
+  S: [],
+  T: [],
   U: [],
-  V: [
-    {
-      term: "Voting",
-      definition:
-        "The process of casting ballots on governance proposals, typically weighted by token holdings or delegation.",
-    },
-  ],
+  V: [],
   W: [],
   X: [],
   Y: [],
