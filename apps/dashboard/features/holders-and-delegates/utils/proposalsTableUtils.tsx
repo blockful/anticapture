@@ -17,12 +17,12 @@ import React, { ReactNode } from "react";
 export const proposalsUserVoteMapping = {
   0: {
     support: "0",
-    text: "No",
+    text: "Against",
     icon: <XCircle className="text-error size-4" />,
   },
   1: {
     support: "1",
-    text: "Yes",
+    text: "For",
     icon: <CheckCircle className="text-success size-4" />,
   },
   2: {
@@ -49,11 +49,11 @@ export const proposalsFinalResultMapping = {
     icon: <ActivityIndicator className="text-warning" />,
   },
   yes: {
-    text: "Yes",
+    text: "Passed",
     icon: <CheckCircle className="text-success size-4" />,
   },
   no: {
-    text: "No",
+    text: "Defeated",
     icon: <XCircle className="text-error size-4" />,
   },
   cancel: {

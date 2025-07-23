@@ -5,7 +5,7 @@ import { VotingPowerTable } from "@/features/holders-and-delegates/delegate/draw
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { useVotingPowerData } from "./hooks/useVotingPowerData";
+import { useVotingPowerData } from "@/features/holders-and-delegates/delegate/drawer/voting-power/hooks/useVotingPowerData";
 import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
 import { Inbox } from "lucide-react";
 
@@ -23,7 +23,7 @@ const ChartLegend = ({
           <div key={i} className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"
-              className="size-2 rounded-xs"
+              className="rounded-xs size-2"
             />
             <SkeletonRow
               parentClassName="flex animate-pulse"
@@ -42,7 +42,7 @@ const ChartLegend = ({
         return (
           <div key={item.label} className="flex items-center gap-2">
             <span
-              className="size-2 rounded-xs"
+              className="rounded-xs size-2"
               style={{ backgroundColor: item.color }}
             />
             <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
@@ -96,7 +96,7 @@ export const VotingPower = ({
     <div className="flex h-full w-full flex-col gap-4 p-4">
       <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
         <div className="flex h-full w-full flex-col">
-          <div className="flex w-full flex-row gap-4">
+          <div className="flex w-full flex-col gap-4 md:flex-row">
             <div>
               <ThePieChart
                 currentVotingPower={currentVotingPower}
@@ -122,10 +122,10 @@ export const VotingPower = ({
                 </div>
               </div>
 
-              <div className="h-px w-full bg-[#27272A]" />
+              <div className="hidden h-px w-full bg-[#27272A] sm:flex" />
 
               {/* Delegators */}
-              <div className="flex flex-col gap-2">
+              <div className="hidden flex-col gap-2 sm:flex">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
                   Delegators
                 </p>

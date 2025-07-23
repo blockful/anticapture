@@ -7,8 +7,8 @@ import { fromZodError } from "zod-validation-error";
 
 import {
   governanceActivity,
-  tokenDistribution,
   tokenHistoricalData,
+  tokenDistribution,
   assets,
   proposalsActivity,
   historicalOnchain,

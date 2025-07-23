@@ -9,14 +9,14 @@ import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DelegateDelegationsHistory } from "./DelegatesDelegationHistory/DelegateDelegationsHistory";
+import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
 import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
-import { DelegateProposalsActivity } from "./DelegateProposalsActivity";
+import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
 import { TimeInterval } from "@/shared/types/enums";
-import { getTimeDataFromPeriod } from "./Delegates";
+import { getTimeDataFromPeriod } from "@/features/holders-and-delegates/components/Delegates";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -100,10 +100,10 @@ export const HoldersAndDelegatesDrawer = ({
         <div className="bg-surface-default h-full w-full overflow-y-auto">
           <div className="bg-surface-contrast w-full">
             {/* Header */}
-            <div className="bg-surface-contrast flex justify-between px-4 pt-4 pb-2">
+            <div className="bg-surface-contrast flex justify-between px-4 pb-2 pt-4">
               <div className="flex flex-col gap-1">
                 {/* Title */}
-                <div className="text-secondary font-mono text-xs font-medium tracking-wide uppercase">
+                <div className="text-secondary font-mono text-xs font-medium uppercase tracking-wide">
                   {entities[entityType].title}
                 </div>
                 <div className="flex items-center justify-center gap-2">
@@ -138,9 +138,9 @@ export const HoldersAndDelegatesDrawer = ({
                 {entities[entityType].tabs.map((tab) => (
                   <TabsTrigger
                     className={cn(
-                      "text-secondary relative cursor-pointer gap-2 px-2 py-2 text-xs font-medium whitespace-nowrap",
+                      "text-secondary relative cursor-pointer gap-2 whitespace-nowrap px-2 py-2 text-xs font-medium",
                       "data-[state=active]:text-link",
-                      "after:absolute after:right-0 after:-bottom-px after:left-0 after:h-px after:bg-transparent after:content-['']",
+                      "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
                       "data-[state=active]:after:bg-surface-solid-brand",
                     )}
                     key={tab.id}

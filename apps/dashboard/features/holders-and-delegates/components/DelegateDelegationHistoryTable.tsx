@@ -14,7 +14,7 @@ import Link from "next/link";
 import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
-} from "../hooks/useDelegateDelegationHistory";
+} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -136,15 +136,15 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start px-2">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start px-4 py-2">
-            <span className="text-primary text-sm font-medium whitespace-nowrap">
+          <div className="flex h-10 items-center justify-start px-2 py-2">
+            <span className="text-primary whitespace-nowrap text-sm font-medium">
               {formatRelativeTime(timestamp)}
             </span>
           </div>
@@ -206,7 +206,7 @@ export const DelegateDelegationHistoryTable = ({
                 {amount}
               </span>
             </div>
-            <span className="text-secondary text-xs whitespace-nowrap">
+            <span className="text-secondary whitespace-nowrap text-xs">
               {delegationType.type}
             </span>
           </div>
@@ -275,7 +275,7 @@ export const DelegateDelegationHistoryTable = ({
       accessorKey: "arrow",
       size: 60,
       header: () => <div className="w-full"></div>,
-      cell: ({ row }) => {
+      cell: () => {
         if (loading) {
           return (
             <div className="flex h-10 items-center justify-center px-2"></div>
@@ -362,7 +362,7 @@ export const DelegateDelegationHistoryTable = ({
         <div className="flex flex-col gap-2 p-4">
           <TheTable
             columns={columns}
-            data={Array.from({ length: 10 }, (_, i) => ({
+            data={Array.from({ length: 7 }, () => ({
               timestamp: "1716153600",
               transactionHash: "0x1234567890",
               delta: "1000000000000000000",

@@ -8,7 +8,7 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ArrowRight, ExternalLink } from "lucide-react";
-import { useBalanceHistory } from "../hooks/useBalanceHistory";
+import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import {
   FilterDropdown,
@@ -52,7 +52,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   const {
     transfers,
     loading,
-    error,
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
@@ -168,12 +167,12 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center px-2 py-2 whitespace-nowrap">
+          <div className="flex h-10 items-center whitespace-nowrap px-2 py-2">
             <span className="text-primary text-sm">{date}</span>
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
           className="!text-table-header h-8 w-full justify-start px-2 text-sm"
@@ -216,7 +215,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
           className="!text-table-header h-8 w-full justify-end px-2 text-sm"
@@ -275,7 +274,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       size: 204,
       cell: ({ row }) => {
         const fromAddress = row.getValue("fromAddress") as string;
-        const fromEns = row.original.fromEns;
 
         if (loading) {
           return (
@@ -318,7 +316,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       size: 204,
       cell: ({ row }) => {
         const toAddress = row.getValue("toAddress") as string;
-        const toEns = row.original.toEns;
 
         if (loading) {
           return (
