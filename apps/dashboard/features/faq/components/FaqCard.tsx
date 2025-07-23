@@ -2,7 +2,7 @@
 
 import { MouseEvent } from "react";
 import { AccordionContentArea } from "@/shared/components";
-import { FaqItem } from "../utils/faq-constants";
+import { FaqItem } from "@/features/faq/utils/faq-constants";
 
 export const FaqCard = ({
   faqItem,
