@@ -1,15 +1,17 @@
 {
-  "extends": ["next/core-web-vitals", "plugin:storybook/recommended"],
-  "plugins": ["prettier"],
+  "extends": [
+    "../../.eslintrc.json",
+    "next/core-web-vitals",
+    "plugin:storybook/recommended"
+  ],
   "rules": {
-    "prettier/prettier": "error",
     "no-restricted-imports": [
       "error",
       {
-        "patterns": ["../*", "./*"]
-      },
-      {
-        "endOfLine": "auto"
+        "patterns": [
+          "../*",
+          "./*"
+        ]
       }
     ]
   }

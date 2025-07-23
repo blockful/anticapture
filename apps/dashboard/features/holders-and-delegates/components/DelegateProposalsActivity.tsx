@@ -1,8 +1,12 @@
 "use client";
 
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
-import { QueryInput_ProposalsActivity_UserVoteFilter } from "@anticapture/graphql-client";
-import { useState } from "react";
+import {
+  QueryInput_ProposalsActivity_OrderBy,
+  QueryInput_ProposalsActivity_OrderDirection,
+  QueryInput_ProposalsActivity_UserVoteFilter,
+} from "@anticapture/graphql-client";
+import { useState, useEffect } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
@@ -23,6 +27,7 @@ export const DelegateProposalsActivity = ({
   fromDate,
 }: DelegateProposalsActivityProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<string>("voteTiming");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
@@ -52,14 +57,22 @@ export const DelegateProposalsActivity = ({
     fromDate,
     skip,
     limit: itemsPerPage,
-    orderBy: orderBy as any,
-    orderDirection: orderDirection as any,
+    orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
+    orderDirection:
+      orderDirection as QueryInput_ProposalsActivity_OrderDirection,
     userVoteFilter:
       userVoteFilter === "all"
         ? undefined
         : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
     itemsPerPage,
   });
+
+  // Update totalPages when not loading to preserve it during loading
+  useEffect(() => {
+    if (!loading && pagination.totalPages) {
+      setTotalPages(pagination.totalPages);
+    }
+  }, [loading, pagination.totalPages]);
 
   // Helper function to format average time (convert seconds to days)
   const formatAvgTime = (
@@ -73,13 +86,13 @@ export const DelegateProposalsActivity = ({
     }
 
     if (avgTimeBeforeEndDays < 1) {
-      return "< 1 day before end";
+      return "< 1d before the end";
     }
-    return `${Math.round(avgTimeBeforeEndDays)} days before end`;
+    return `${Math.round(avgTimeBeforeEndDays)}d before the end`;
   };
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= pagination.totalPages) {
+    if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
@@ -117,7 +130,7 @@ export const DelegateProposalsActivity = ({
           />
           <MetricCard
             icon={<Check className="size-3.5" />}
-            title="Yes Rate"
+            title="For Rate"
             value={yesRateValue}
           />
           <MetricCard
@@ -130,7 +143,7 @@ export const DelegateProposalsActivity = ({
 
       {/* Proposals Table */}
       <div className="px-4 pb-4">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <ProposalsTable
             proposals={data?.proposals || []}
             loading={loading}
@@ -145,17 +158,15 @@ export const DelegateProposalsActivity = ({
           />
 
           {/* Pagination Controls */}
-          {data && data.totalProposals > itemsPerPage && (
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPrevious={() => handlePageChange(pagination.currentPage - 1)}
-              onNext={() => handlePageChange(pagination.currentPage + 1)}
-              hasNextPage={pagination.hasNextPage}
-              hasPreviousPage={pagination.hasPreviousPage}
-              className="text-white"
-            />
-          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={() => handlePageChange(currentPage - 1)}
+            onNext={() => handlePageChange(currentPage + 1)}
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            className="text-white"
+          />
         </div>
       </div>
     </>

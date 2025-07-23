@@ -6,7 +6,10 @@ export function calculateHistoricalBlockNumber(
   blockTime: number,
 ): number {
   const blocksToGoBack = Math.floor(days / blockTime);
-  const historicalBlockNumber = Math.max(0, currentBlockNumber - blocksToGoBack);
+  const historicalBlockNumber = Math.max(
+    0,
+    currentBlockNumber - blocksToGoBack,
+  );
 
   return historicalBlockNumber;
 }

@@ -1,7 +1,10 @@
+import { z } from "zod";
+
 export const CoingeckoTokenIdEnum = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
+  OP: "optimism",
 } as const;
 
 export type CoingeckoTokenId =
@@ -13,8 +16,8 @@ export interface CoingeckoHistoricalMarketData {
   total_volumes: [number, number][];
 }
 
-export const isCoingeckoHistoricalMarketData = (
-  data: any,
-): data is CoingeckoHistoricalMarketData => {
-  return data.prices && data.market_caps && data.total_volumes;
-};
+export const CoingeckoHistoricalMarketDataSchema = z.object({
+  prices: z.array(z.tuple([z.number(), z.number()])),
+  market_caps: z.array(z.tuple([z.number(), z.number()])),
+  total_volumes: z.array(z.tuple([z.number(), z.number()])),
+});

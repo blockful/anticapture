@@ -2,11 +2,10 @@ import {
   Address,
   createPublicClient,
   http,
-  PublicClient,
-  isAddress,
   parseAbi,
+  PublicClient,
 } from "viem";
-import { readContract, multicall } from "viem/actions";
+import { multicall } from "viem/actions";
 
 import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -54,12 +53,12 @@ export class HistoricalBalancesService {
     daysInSeconds,
     daoId,
   }: HistoricalBalancesRequest): Promise<HistoricalBalance[]> {
-    const tokenAddress = this.getTokenAddress(daoId);
+    const tokenAddress = CONTRACT_ADDRESSES[daoId].token.address;
     const currentBlockNumber = await this.getCurrentBlockNumber();
     const blockNumber = calculateHistoricalBlockNumber(
       daysInSeconds,
       currentBlockNumber,
-      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
+      CONTRACT_ADDRESSES[daoId].blockTime,
     );
     try {
       return await this.getBalancesWithMulticall(
@@ -143,15 +142,6 @@ export class HistoricalBalancesService {
       blockNumber,
       tokenAddress,
     }));
-  }
-
-  /**
-   * Maps DAO ID to corresponding token contract address
-   */
-  private getTokenAddress(daoId: DaoIdEnum): Address {
-    const { NETWORK: network } = env;
-    const contractInfo = CONTRACT_ADDRESSES[network]?.[daoId];
-    return contractInfo?.token?.address || "0x";
   }
 
   /**

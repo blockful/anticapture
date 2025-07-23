@@ -1,7 +1,6 @@
 {
-  "extends": "ponder",
-  "plugins": ["prettier"],
-  "rules": {
-    "prettier/prettier": "error"
-  }
+  "extends": [
+    "../../.eslintrc.json",
+    "ponder"
+  ]
 }

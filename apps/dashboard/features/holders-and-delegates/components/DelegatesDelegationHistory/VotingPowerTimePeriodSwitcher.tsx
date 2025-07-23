@@ -63,7 +63,7 @@ export const VotingPowerTimePeriodSwitcher = ({
       </button>
 
       {isOpen && (
-        <div className="border-border-contrast bg-surface-contrast absolute top-full right-0 z-50 mt-1 min-w-[100px] rounded-md border py-1">
+        <div className="border-border-contrast bg-surface-contrast absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border py-1">
           {activeTimePeriods.map((period) => (
             <button
               key={period}

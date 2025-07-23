@@ -8,7 +8,8 @@
     "serve": "ponder serve --schema=anticapture",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },
   "dependencies": {
     "@hono/zod-openapi": "^0.19.6",
@@ -16,7 +17,7 @@
     "drizzle-kit": "^0.31.0",
     "drizzle-orm": "^0.39.3",
     "hono": "^4.7.10",
-    "ponder": "^0.11.24",
+    "ponder": "^0.11.35",
     "viem": "^2.29.4",
     "zod": "^3.25.3",
     "zod-validation-error": "^3.4.1"

@@ -1,10 +1,6 @@
 import { createConfig } from "ponder";
 
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
-
-const ENS_CONTRACTS = CONTRACT_ADDRESSES[NetworkEnum.ANVIL][DaoIdEnum.ENS]!;
 
 export default createConfig({
   chains: {
@@ -24,16 +20,14 @@ export default createConfig({
     ENSToken: {
       abi: ENSTokenAbi,
       chain: "anvil",
-      address: ENS_CONTRACTS.token.address,
-      startBlock: ENS_CONTRACTS.token.startBlock, // Block where ENS Token was deployed
-      endBlock: ENS_CONTRACTS.token.startBlock + 30,
+      address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+      startBlock: 22635098,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "anvil",
-      address: ENS_CONTRACTS.governor!.address,
-      startBlock: ENS_CONTRACTS.governor!.startBlock, // Block where ENS Governor was deployed
-      endBlock: ENS_CONTRACTS.governor!.startBlock + 30,
+      address: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+      startBlock: 22635098,
     },
   },
 });

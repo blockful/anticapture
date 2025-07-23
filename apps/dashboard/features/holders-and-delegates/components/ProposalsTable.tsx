@@ -149,9 +149,7 @@ export const ProposalsTable = ({
           </div>
         );
       },
-      header: ({ column }) => (
-        <h4 className="text-table-header pl-4">Final Result</h4>
-      ),
+      header: () => <h4 className="text-table-header pl-4">Final Result</h4>,
     },
     {
       accessorKey: "userVote",
@@ -176,7 +174,7 @@ export const ProposalsTable = ({
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <div className="flex items-center gap-2 px-2 font-medium">
           User Vote
           {userVoteFilterOptions && onUserVoteFilterChange && (
@@ -212,7 +210,7 @@ export const ProposalsTable = ({
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
@@ -272,7 +270,7 @@ export const ProposalsTable = ({
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <Button
           variant="ghost"
           className="flex h-8 w-full justify-start gap-1 px-2"
@@ -307,14 +305,14 @@ export const ProposalsTable = ({
         const proposalId = row.getValue("proposalId") as string;
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-center py-2 pr-0.5 pl-1">
+            <div className="flex h-10 items-center justify-center py-2 pl-1 pr-0.5">
               <SkeletonRow className="h-4 w-4" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-center py-2 pr-0.5 pl-1">
+          <div className="flex h-10 items-center justify-center py-2 pl-1 pr-0.5">
             <Link
               href={`${daoConfigByDaoId[daoIdEnum]?.daoOverview?.tally}/proposal/${proposalId}`}
               target="_blank"
@@ -346,6 +344,7 @@ export const ProposalsTable = ({
             voteTiming: { text: "", percentage: 0 },
             status: "",
           }))}
+          isTableSmall={true}
           withPagination={false}
           withSorting={true}
         />
@@ -385,6 +384,15 @@ export const ProposalsTable = ({
         stickyFirstColumn={true}
         mobileTableFixed={true}
         isTableSmall={true}
+        showWhenEmpty={
+          <BlankState
+            variant="default"
+            icon={Inbox}
+            title=""
+            className="h-full rounded-none"
+            description="No voted proposals to show"
+          />
+        }
       />
     </div>
   );

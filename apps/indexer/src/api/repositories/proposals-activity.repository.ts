@@ -164,22 +164,22 @@ export class DrizzleProposalsActivityRepository
   }> {
     // Build the vote filter condition
     let voteFilterCondition = "";
-          if (userVoteFilter) {
-        switch (userVoteFilter) {
-          case VoteFilter.YES:
-            voteFilterCondition = "AND v.support = '1'";
-            break;
-          case VoteFilter.NO:
-            voteFilterCondition = "AND v.support = '0'";
-            break;
-          case VoteFilter.ABSTAIN:
-            voteFilterCondition = "AND v.support = '2'";
-            break;
-          case VoteFilter.NO_VOTE:
-            voteFilterCondition = "AND v.support IS NULL";
-            break;
-        }
+    if (userVoteFilter) {
+      switch (userVoteFilter) {
+        case VoteFilter.YES:
+          voteFilterCondition = "AND v.support = '1'";
+          break;
+        case VoteFilter.NO:
+          voteFilterCondition = "AND v.support = '0'";
+          break;
+        case VoteFilter.ABSTAIN:
+          voteFilterCondition = "AND v.support = '2'";
+          break;
+        case VoteFilter.NO_VOTE:
+          voteFilterCondition = "AND v.support IS NULL";
+          break;
       }
+    }
 
     // Build the ORDER BY clause
     let orderByClause = "";
@@ -188,7 +188,9 @@ export class DrizzleProposalsActivityRepository
         orderByClause = `ORDER BY COALESCE(v.voting_power, '0')::numeric ${orderDirection.toUpperCase()}`;
         break;
       case "voteTiming":
-        orderByClause = `ORDER BY COALESCE(v.timestamp, p.timestamp) ${orderDirection.toUpperCase()}`;
+        // Sort by how much time elapsed between proposal launch and user vote
+        // For proposals without votes, use a large number to put them at the end
+        orderByClause = `ORDER BY COALESCE(v.timestamp - p.timestamp, 999999999) ${orderDirection.toUpperCase()}`;
         break;
       default:
         orderByClause = `ORDER BY p.timestamp DESC`;

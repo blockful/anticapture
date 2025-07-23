@@ -24,7 +24,6 @@ interface StageAccordionProps {
 }
 
 export const StageAccordion = ({
-  daoStage,
   highRiskFields,
   mediumRiskFields,
 }: StageAccordionProps) => {
@@ -110,9 +109,7 @@ const CustomAccordionItem = ({
   isCompleted,
   riskFields,
   stage,
-  title,
   description,
-  subtitle,
   content,
   isLastItem = false,
 }: CustomAccordionItemProps) => {

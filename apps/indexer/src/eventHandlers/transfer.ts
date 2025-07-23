@@ -1,8 +1,7 @@
-import { Context, Event } from "ponder:registry";
-import { Address, zeroAddress } from "viem";
+import { Context } from "ponder:registry";
+import { Address, Hex, zeroAddress } from "viem";
 import { account, accountBalance, transfer, token } from "ponder:schema";
 
-import { getValueFromEventArgs } from "@/lib/utils";
 import {
   BurningAddresses,
   CEXAddresses,
@@ -12,12 +11,10 @@ import {
   TREASURY_ADDRESSES,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { DaoTransferEvent } from "@/indexer/types";
 import { storeDailyBucket } from "./shared";
 
 const updateSupplyMetric = async (
   context: Context,
-  event: Event,
   tokenData: {
     lendingSupply: bigint;
     cexSupply: bigint;
@@ -31,37 +28,39 @@ const updateSupplyMetric = async (
   to: Address,
   value: bigint,
   daoId: string,
+  tokenAddress: Address,
+  timestamp: bigint,
 ) => {
   const currentSupply = tokenData[supplyField] ?? BigInt(0);
   const isToRelevant = addressList.includes(to);
   const isFromRelevant = addressList.includes(from);
 
   if ((isToRelevant || isFromRelevant) && !(isToRelevant && isFromRelevant)) {
-    const updateObject = {} as Record<string, any>;
+    const updateObject = {} as Record<string, bigint>;
     updateObject[supplyField] = isToRelevant
       ? tokenData[supplyField] + value
       : tokenData[supplyField] - value;
 
     const newSupply = (
       await context.db
-        .update(token, { id: event.log.address })
+        .update(token, { id: tokenAddress })
         .set(() => updateObject)
     )[supplyField];
 
     await storeDailyBucket(
       context,
-      event,
       metricType,
       currentSupply,
       newSupply,
       daoId,
+      timestamp,
+      tokenAddress,
     );
   }
 };
 
 const updateTotalSupplyMetric = async (
   context: Context,
-  event: Event,
   tokenData: { totalSupply: bigint },
   addressList: Address[],
   metricType: MetricTypesEnum,
@@ -69,6 +68,8 @@ const updateTotalSupplyMetric = async (
   to: Address,
   value: bigint,
   daoId: string,
+  tokenAddress: Address,
+  timestamp: bigint,
 ) => {
   const currentTotalSupply = tokenData.totalSupply ?? BigInt(0);
   const isToBurningAddress = addressList.includes(to);
@@ -80,7 +81,7 @@ const updateTotalSupplyMetric = async (
   if (isTotalSupplyTransaction) {
     const isBurningTokens = addressList.includes(to);
     const newTotalSupply = (
-      await context.db.update(token, { id: event.log.address }).set((row) => ({
+      await context.db.update(token, { id: tokenAddress }).set((row) => ({
         totalSupply: isBurningTokens
           ? row.totalSupply - value
           : row.totalSupply + value,
@@ -89,23 +90,25 @@ const updateTotalSupplyMetric = async (
 
     await storeDailyBucket(
       context,
-      event,
       metricType,
       currentTotalSupply,
       newTotalSupply,
       daoId,
+      timestamp,
+      tokenAddress,
     );
   }
 };
 
 const updateCirculatingSupplyMetric = async (
   context: Context,
-  event: Event,
   tokenData: { circulatingSupply: bigint },
   isTotalSupplyTransaction: boolean,
   isTreasuryTransaction: boolean,
   metricType: MetricTypesEnum,
   daoId: string,
+  tokenAddress: Address,
+  timestamp: bigint,
 ) => {
   const currentCirculatingSupply = tokenData.circulatingSupply ?? BigInt(0);
   const isCirculatingSupplyTransaction =
@@ -113,39 +116,36 @@ const updateCirculatingSupplyMetric = async (
 
   if (isCirculatingSupplyTransaction) {
     const newCirculatingSupply = (
-      await context.db.update(token, { id: event.log.address }).set((row) => ({
+      await context.db.update(token, { id: tokenAddress }).set((row) => ({
         circulatingSupply: row.totalSupply - row.treasury,
       }))
     ).circulatingSupply;
 
     await storeDailyBucket(
       context,
-      event,
       metricType,
       currentCirculatingSupply,
       newCirculatingSupply,
       daoId,
+      timestamp,
+      tokenAddress,
     );
   }
 };
 
 export const tokenTransfer = async (
-  event: DaoTransferEvent,
   context: Context,
   daoId: DaoIdEnum,
-  tokenAddress: Address,
+  args: {
+    from: Address;
+    to: Address;
+    tokenAddress: Address;
+    transactionHash: Hex;
+    value: bigint;
+    timestamp: bigint;
+  },
 ) => {
-  //Picking "value" from the event.args if the dao is ENS or SHU, otherwise picking "amount"
-  const value = getValueFromEventArgs<bigint, (typeof event)["args"]>(
-    [
-      { name: "value", daos: ["ENS", "SHU", "ARB"] },
-      { name: "amount", daos: ["COMP", "UNI"] },
-    ],
-    event.args,
-    daoId,
-  );
-
-  const { from, to } = event.args;
+  const { from, to, tokenAddress, transactionHash, value, timestamp } = args;
 
   await context.db
     .insert(account)
@@ -164,17 +164,16 @@ export const tokenTransfer = async (
   await context.db
     .insert(transfer)
     .values({
-      transactionHash: event.transaction.hash,
+      transactionHash,
       daoId,
       tokenId: tokenAddress,
       amount: value,
       fromAccountId: from,
       toAccountId: to,
-      timestamp: event.block.timestamp,
+      timestamp,
     })
     .onConflictDoNothing();
 
-  // Update the to account's balance
   await context.db
     .insert(accountBalance)
     .values({
@@ -204,7 +203,7 @@ export const tokenTransfer = async (
 
   // Single token query for all supply calculations
   const tokenData = await context.db.find(token, {
-    id: event.log.address,
+    id: tokenAddress,
   });
 
   if (!tokenData) {
@@ -221,7 +220,6 @@ export const tokenTransfer = async (
   // Update lending supply
   await updateSupplyMetric(
     context,
-    event,
     tokenData,
     "lendingSupply",
     lendingAddressList,
@@ -230,12 +228,13 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
+    tokenAddress,
+    timestamp,
   );
 
   // Update CEX supply
   await updateSupplyMetric(
     context,
-    event,
     tokenData,
     "cexSupply",
     cexAddressList,
@@ -244,12 +243,13 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
+    tokenAddress,
+    timestamp,
   );
 
   // Update DEX supply
   await updateSupplyMetric(
     context,
-    event,
     tokenData,
     "dexSupply",
     dexAddressList,
@@ -258,6 +258,8 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
+    tokenAddress,
+    timestamp,
   );
 
   // Update treasury supply
@@ -268,7 +270,6 @@ export const tokenTransfer = async (
 
   await updateSupplyMetric(
     context,
-    event,
     tokenData,
     "treasury",
     treasuryAddressList,
@@ -277,6 +278,8 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
+    tokenAddress,
+    timestamp,
   );
 
   // Update total supply
@@ -288,7 +291,6 @@ export const tokenTransfer = async (
 
   await updateTotalSupplyMetric(
     context,
-    event,
     tokenData,
     burningAddressList,
     MetricTypesEnum.TOTAL_SUPPLY,
@@ -296,16 +298,19 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
+    tokenAddress,
+    timestamp,
   );
 
   // Update circulating supply
   await updateCirculatingSupplyMetric(
     context,
-    event,
     tokenData,
     isTotalSupplyTransaction,
     isTreasuryTransaction,
     MetricTypesEnum.CIRCULATING_SUPPLY,
     daoId,
+    tokenAddress,
+    timestamp,
   );
 };

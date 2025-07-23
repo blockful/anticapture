@@ -3,10 +3,9 @@ import {
   createPublicClient,
   http,
   PublicClient,
-  isAddress,
   parseAbi,
 } from "viem";
-import { readContract, multicall } from "viem/actions";
+import { multicall } from "viem/actions";
 
 import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -63,7 +62,7 @@ export class HistoricalVotingPowerService {
     const blockNumber = calculateHistoricalBlockNumber(
       daysInSeconds,
       currentBlockNumber,
-      CONTRACT_ADDRESSES[env.NETWORK]?.[daoId]?.blockTime || 12
+      CONTRACT_ADDRESSES[daoId].blockTime,
     );
 
     try {
@@ -156,8 +155,7 @@ export class HistoricalVotingPowerService {
    * Maps DAO ID to corresponding token contract address
    */
   private getTokenAddress(daoId: DaoIdEnum): Address | null {
-    const { NETWORK: network } = env;
-    const contractInfo = CONTRACT_ADDRESSES[network]?.[daoId];
+    const contractInfo = CONTRACT_ADDRESSES[daoId];
     return contractInfo?.token?.address || null;
   }
 
