@@ -11,23 +11,56 @@ import {
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 import { ArrowRightLeft } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
+import { useState } from "react";
 
-const chartConfig: Record<string, { label: string; color: string }> = {
+const initialChartConfig: Record<
+  string,
+  { label: string; color: string; category: string }
+> = {
   delegatedSupply: {
     label: "Delegated Supply",
     color: "#3B82F6",
+    category: "SUPPLY",
   },
   cexSupply: {
     label: "CEX Supply",
     color: "#FB923C",
+    category: "SUPPLY",
   },
   dexSupply: {
     label: "DEX Supply",
     color: "#22C55E",
+    category: "SUPPLY",
   },
   lendingSupply: {
     label: "Lending Supply",
     color: "#A855F7",
+    category: "SUPPLY",
+  },
+};
+const allMetrics: Record<
+  string,
+  { label: string; color: string; category: string }
+> = {
+  delegatedSupply: {
+    label: "Delegated Supply",
+    color: "#3B82F6",
+    category: "SUPPLY",
+  },
+  cexSupply: {
+    label: "CEX Supply",
+    color: "#FB923C",
+    category: "SUPPLY",
+  },
+  dexSupply: {
+    label: "DEX Supply",
+    color: "#22C55E",
+    category: "SUPPLY",
+  },
+  lendingSupply: {
+    label: "Lending Supply",
+    color: "#A855F7",
+    category: "SUPPLY",
   },
 };
 
@@ -39,12 +72,20 @@ export const TokenDistributionSection = () => {
     lendingSupplyChart,
   } = useTokenDistributionContext();
 
+  const [appliedMetrics, setAppliedMetrics] =
+    useState<
+      Record<string, { label: string; color: string; category: string }>
+    >(initialChartConfig);
+
   const datasets: Record<string, DaoMetricsDayBucket[] | undefined> = {
     delegatedSupply: delegatedSupplyChart,
     cexSupply: cexSupplyChart,
     dexSupply: dexSupplyChart,
     lendingSupply: lendingSupplyChart,
   };
+
+  const filterData = Object.keys(appliedMetrics);
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
@@ -60,12 +101,14 @@ export const TokenDistributionSection = () => {
           {Object.values(datasets).some((value) => value!.length > 0) ? (
             <MultilineChartTokenDistribution
               datasets={datasets}
-              chartConfig={chartConfig}
+              chartConfig={initialChartConfig}
+              filterData={filterData}
             />
           ) : (
             <MultilineChartTokenDistribution
               datasets={mockedTokenMultineDatasets}
-              chartConfig={chartConfig}
+              chartConfig={initialChartConfig}
+              filterData={filterData}
               mocked={true}
             />
           )}
@@ -73,10 +116,9 @@ export const TokenDistributionSection = () => {
         <div className="border-light-dark mx-4 w-px border-r border-dashed" />
         <div className="flex w-full max-w-72 items-start sm:flex-row">
           <ChartMetrics
-          // items={Object.values(chartConfig).map(({ label, color }) => ({
-          //   label,
-          //   color,
-          // }))}
+            appliedMetrics={appliedMetrics}
+            setAppliedMetrics={setAppliedMetrics}
+            allMetrics={allMetrics}
           />
         </div>
       </Card>

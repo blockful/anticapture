@@ -18,7 +18,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;
   chartConfig: Record<string, { label: string; color: string }>;
-  filterData?: string;
+  filterData?: string[];
   mocked?: boolean;
 }
 
@@ -28,6 +28,7 @@ export const MultilineChartTokenDistribution = ({
   filterData,
   mocked = false,
 }: MultilineChartTokenDistributionProps) => {
+  console.log("datasets", datasets);
   if (!datasets || Object.keys(datasets).length === 0) {
     return null;
   }
@@ -59,7 +60,7 @@ export const MultilineChartTokenDistribution = ({
     );
 
   const visibleDataSets = Object.keys(datasets).filter(
-    (item) => item !== filterData,
+    (item) => !filterData || filterData.includes(item),
   );
 
   return (

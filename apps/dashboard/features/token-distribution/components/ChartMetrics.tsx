@@ -2,81 +2,132 @@ import * as React from "react";
 import { CardTitle } from "@/shared/components/ui/card";
 import { X } from "lucide-react";
 import { ChartMetricsDialog } from "@/features/token-distribution/components";
+import { Button } from "@/shared/components/ui/button";
 
+// TODO: move to shared when types is known
 interface Metric {
-  // TODO: move to shared when type is known
-  color: string;
   label: string;
+  color: string;
   category: string;
 }
 
-const INITIAL_METRICS = [
-  { label: "Delegated Supply", color: "#3B82F6", category: "SUPPLY" },
-  { label: "CEX Supply", color: "#FB923C", category: "SUPPLY" },
-  { label: "DEX Supply", color: "#22C55E", category: "SUPPLY" },
-  { label: "Lending Supply", color: "#A855F7", category: "SUPPLY" },
-];
+interface ChartMetricsProps {
+  appliedMetrics: Record<string, Metric>;
+  setAppliedMetrics: React.Dispatch<
+    React.SetStateAction<Record<string, Metric>>
+  >;
+  allMetrics: Record<string, Metric>;
+}
 
-export const ChartMetrics = () => {
-  const [appliedMetrics, setAppliedMetrics] =
-    React.useState<Metric[]>(INITIAL_METRICS);
+const formatMetricsByCategory = (metrics: Metric[]) => {
+  const metricsValues = Object.values(metrics);
 
-  const metricsByCategory = React.useMemo(() => {
-    return appliedMetrics.reduce<Record<string, Metric[]>>((acc, metric) => {
-      acc[metric.category] = acc[metric.category] || [];
-      acc[metric.category].push(metric);
-      return acc;
-    }, {});
-  }, [appliedMetrics]);
+  return metricsValues.reduce<Record<string, Metric[]>>(
+    (groupedMetrics, metric) => {
+      const { category } = metric;
 
-  const handleRemoveMetric = (label: string) => {
-    setAppliedMetrics((prev) =>
-      prev.filter((metric) => metric.label !== label),
-    );
+      if (!groupedMetrics[category]) {
+        groupedMetrics[category] = [];
+      }
+
+      groupedMetrics[category].push(metric);
+      return groupedMetrics;
+    },
+    {},
+  );
+};
+
+export const ChartMetrics = ({
+  appliedMetrics,
+  setAppliedMetrics,
+  allMetrics,
+}: ChartMetricsProps) => {
+  const handleRemoveMetric = (labelToRemove: string) => {
+    setAppliedMetrics((prev) => {
+      const metrics = {
+        ...prev,
+      };
+      const metricToRemove = Object.keys(metrics).find(
+        (key) => metrics[key].label === labelToRemove,
+      );
+
+      if (metricToRemove) {
+        delete metrics[metricToRemove];
+      }
+
+      return metrics;
+    });
   };
 
   const handleApplyMetric = (newMetrics: Metric[]) => {
-    setAppliedMetrics((prev) => [...prev, ...newMetrics]);
+    setAppliedMetrics((prev) => {
+      const metrics = {
+        ...prev,
+      };
+
+      newMetrics.forEach((metric) => {
+        const newMetricKey = Object.keys(allMetrics).find(
+          (key) => allMetrics[key].label === metric.label,
+        );
+
+        if (!newMetricKey) return;
+
+        metrics[newMetricKey] = metric;
+      });
+
+      return metrics;
+    });
   };
+
+  const appliedMetricsFormatted = formatMetricsByCategory(
+    Object.values(appliedMetrics),
+  );
+  const allMetricsFormatted = formatMetricsByCategory(
+    Object.values(allMetrics),
+  );
 
   return (
     <div className="flex h-full w-full flex-col justify-between">
       <div className="relative flex h-full w-full flex-col gap-4 sm:gap-6">
         <div className="scrollbar-none flex max-h-96 flex-col gap-2 overflow-y-auto">
-          {Object.entries(metricsByCategory).map(([category, metrics]) => (
-            <div key={category} className="mb-4 flex flex-col gap-2">
-              <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
-                {category}
-              </CardTitle>
-              {metrics.map((metric) => (
-                <div
-                  key={metric.label}
-                  className="border-light-dark flex w-full cursor-default items-center justify-between gap-2 rounded-sm border px-2 py-1 hover:opacity-80"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="rounded-xs size-2"
-                      style={{ backgroundColor: metric.color }}
-                    />
-                    <span className="text-primary text-sm font-medium">
-                      {metric.label}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveMetric(metric.label)}
-                    className="cursor-pointer"
+          {Object.entries(appliedMetricsFormatted).map(
+            ([category, metrics]) => (
+              <div key={category} className="mb-4 flex flex-col gap-2">
+                <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                  {category}
+                </CardTitle>
+                {metrics.map((metric) => (
+                  <div
+                    key={metric.label}
+                    className="border-light-dark flex h-7 w-full cursor-default items-center justify-between gap-2 rounded-sm border px-2 hover:opacity-80"
                   >
-                    <X className="text-secondary h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          ))}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="rounded-xs size-2"
+                        style={{ backgroundColor: metric.color }}
+                      />
+                      <span className="text-primary text-sm font-medium">
+                        {metric.label}
+                      </span>
+                    </div>
+                    <Button
+                      variant={"ghost"}
+                      onClick={() => handleRemoveMetric(metric.label)}
+                      className="cursor-pointer p-0"
+                    >
+                      <X className="text-secondary" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ),
+          )}
         </div>
         <div className="from-surface-default pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t to-transparent" />
       </div>
       <ChartMetricsDialog
-        appliedMetrics={appliedMetrics}
+        appliedMetrics={appliedMetricsFormatted}
+        allMetrics={allMetricsFormatted}
         onApply={handleApplyMetric}
       />
     </div>

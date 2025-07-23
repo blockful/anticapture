@@ -10,78 +10,62 @@ import {
 } from "@radix-ui/react-dialog";
 import { CardTitle } from "@/shared/components/ui/card";
 import { X, Plus, PlusIcon } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
+import { Button } from "@/shared/components/ui/button";
+import { cn } from "@/shared/utils/cn";
 
+// TODO: move to shared when types is known
 interface Metric {
-  // TODO: move to shared when type is known
   color: string;
   label: string;
   category: string;
 }
 
-const MOCKED_METRICS = [
-  {
-    name: "SUPPLY",
-    metrics: [
-      { label: "Delegated Supply", color: "#3B82F6" },
-      { label: "CEX Supply", color: "#FB923C" },
-      { label: "DEX Supply", color: "#22C55E" },
-      { label: "Lending Supply", color: "#A855F7" },
-    ],
-  },
-  {
-    name: "TRANSFERS VOLUME",
-    metrics: [
-      { label: "DEX Tokens", color: "#22C55E" },
-      { label: "Lending Tokens", color: "#A855F7" },
-    ],
-  },
-  {
-    name: "GOVERNANCE",
-    metrics: [
-      { label: "Proposals", color: "#FB923C" },
-      { label: "Voting Volume", color: "#3B82F6" },
-      { label: "Treasury", color: "#A855F7" },
-    ],
-  },
-  {
-    name: "MARKET",
-    metrics: [{ label: "Token Price", color: "#3B82F6" }],
-  },
-];
-
 export const ChartMetricsDialog = ({
   appliedMetrics,
+  allMetrics,
   onApply,
 }: {
-  appliedMetrics: Metric[];
+  appliedMetrics: Record<string, Metric[]>;
+  allMetrics: Record<string, Metric[]>;
   onApply: (items: Metric[]) => void;
 }) => {
-  const [selectedItems, setSelectedItems] = React.useState<Metric[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<Metric[]>([]);
 
-  const handleToggle = (metric: Metric) => {
-    setSelectedItems((prev) => {
+  const handleSelectMetric = (metric: Metric) => {
+    setSelectedMetrics((prev) => {
       const exists = prev.find((m) => m.label === metric.label);
       if (exists) return prev.filter((m) => m.label !== metric.label);
       return [...prev, metric];
     });
   };
 
-  const isSelected = (metric: Metric) =>
-    selectedItems.some((m) => m.label === metric.label);
-
   const handleApplyMetric = () => {
-    onApply(selectedItems);
-    setSelectedItems([]);
+    onApply(selectedMetrics);
+    setSelectedMetrics([]);
   };
+
+  const isAllMetricsApplied =
+    appliedMetrics &&
+    Object.entries(allMetrics).some(
+      ([category, metrics]) =>
+        appliedMetrics[category]?.length === metrics.length,
+    );
 
   return (
     <Root>
       <Trigger asChild>
-        <button className="border-light-dark mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 py-1 hover:opacity-80">
-          <PlusIcon className="text-primary h-3 w-3" />
+        <Button
+          variant={isAllMetricsApplied ? "disabled" : "ghost"}
+          className={cn(
+            "border-light-dark mt-4 flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+          disabled={isAllMetricsApplied}
+        >
+          <PlusIcon className="text-primary" />
           <span className="text-primary text-sm font-medium">Add metrics</span>
-        </button>
+        </Button>
       </Trigger>
       <Portal>
         <Overlay className="fixed inset-0 z-50 bg-black/80" />
@@ -91,54 +75,66 @@ export const ChartMetricsDialog = ({
           </Title>
           <div className="border-light-dark h-px w-full border-t" />
           <Description className="flex flex-col px-4 pt-4">
-            {MOCKED_METRICS.map((item, index) => (
-              <div key={item.name} className="mb-4">
-                <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
-                  {item.name}
-                </CardTitle>
-                <div className="flex w-full flex-wrap gap-2 sm:gap-3">
-                  {item.metrics.map((metric) => {
-                    const isAlreadyApplied = appliedMetrics.some(
-                      (i) => i.label === metric.label,
-                    );
-                    if (isAlreadyApplied) return null;
-                    const itemWithCategory = { ...metric, category: item.name };
-                    return (
-                      <div
-                        key={metric.label}
-                        onClick={() => handleToggle(itemWithCategory)}
-                        className={`border-light-dark flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm hover:opacity-80 ${
-                          isSelected(itemWithCategory)
-                            ? "bg-white text-black"
-                            : "text-primary"
-                        }`}
-                      >
-                        <Plus className="h-3 w-3" />
-                        {metric.label}
-                      </div>
-                    );
-                  })}
+            {Object.entries(allMetrics).map(([category, metrics], index) => {
+              if (appliedMetrics[category]?.length === metrics.length)
+                return null;
+
+              return (
+                <div key={category} className="mb-4">
+                  <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                    {category}
+                  </CardTitle>
+                  <div className="flex w-full flex-wrap gap-2 sm:gap-3">
+                    {metrics.map((metric) => {
+                      const isAlreadyApplied = appliedMetrics[category]?.some(
+                        (i) => i.label === metric.label,
+                      );
+
+                      const isSelected = selectedMetrics.some(
+                        (m) => m.label === metric.label,
+                      );
+
+                      if (isAlreadyApplied) return null;
+
+                      return (
+                        <div
+                          key={metric.label}
+                          onClick={() => handleSelectMetric(metric)}
+                          className={`border-light-dark flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm hover:opacity-80 ${
+                            isSelected ? "bg-white text-black" : "text-primary"
+                          }`}
+                        >
+                          <Plus className="h-3 w-3" />
+                          {metric.label}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {index !== Object.keys(allMetrics).length - 1 && (
+                    <div className="border-light-dark mt-4 h-px w-full border-t border-dashed" />
+                  )}
                 </div>
-                {index !== MOCKED_METRICS.length - 1 && (
-                  <div className="border-light-dark mt-4 h-px w-full border-t border-dashed" />
-                )}
-              </div>
-            ))}
+              );
+            })}
           </Description>
           <div className="border-light-dark h-px w-full border-t" />
           <div className="flex justify-end gap-2 px-4 py-3">
             <Close asChild>
-              <button className="text-primary bg-surface-default border-light-dark flex cursor-pointer items-center rounded-md border px-4 py-2 text-sm font-medium">
+              <Button
+                variant={"ghost"}
+                className="text-primary bg-surface-default border-light-dark flex cursor-pointer items-center rounded-md border px-4 py-2 text-sm font-medium"
+              >
                 Cancel
-              </button>
+              </Button>
             </Close>
             <Close asChild>
-              <button
+              <Button
+                variant={"ghost"}
                 onClick={handleApplyMetric}
                 className="text-inverted flex cursor-pointer items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium"
               >
                 Apply metrics
-              </button>
+              </Button>
             </Close>
           </div>
 
