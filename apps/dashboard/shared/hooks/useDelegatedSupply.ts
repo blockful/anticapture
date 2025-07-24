@@ -23,16 +23,25 @@ export const fetchDelegatedSupply = async ({
     return null;
   }
   const query = `query DelegatedSupply {
-    compareDelegatedSupply(daoId: ${daoId}, days: _${days}) {
+    compareDelegatedSupply(days: _${days}) {
       oldDelegatedSupply
       currentDelegatedSupply
       changeRate
     }
   }`;
-  const response: { data: { data: { compareDelegatedSupply: DelegatedSupplyResponse } } } =
-    await axios.post(`${BACKEND_ENDPOINT}`, {
+  const response: {
+    data: { data: { compareDelegatedSupply: DelegatedSupplyResponse } };
+  } = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    {
       query,
-    });
+    },
+    {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  );
   const { compareDelegatedSupply } = response.data.data as {
     compareDelegatedSupply: DelegatedSupplyResponse;
   };

@@ -50,6 +50,11 @@ export const HeaderNavMobile = () => {
       title: SECTIONS_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
     },
+    {
+      anchorId: SECTIONS_CONSTANTS.holdersAndDelegates.anchorId,
+      title: SECTIONS_CONSTANTS.holdersAndDelegates.title,
+      enabled: true,
+    },
   ];
 
   return (

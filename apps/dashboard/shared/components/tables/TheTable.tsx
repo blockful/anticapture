@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { cn } from "@/shared/utils";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
@@ -28,8 +29,13 @@ interface DataTableProps<TData, TValue> {
   withPagination?: boolean;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  className?: string;
   onRowClick?: (row: TData) => void;
   disableRowClick?: (row: TData) => boolean;
+  isTableSmall?: boolean;
+  stickyFirstColumn?: boolean;
+  mobileTableFixed?: boolean;
+  showWhenEmpty?: ReactNode; // new prop
 }
 
 export const TheTable = <TData, TValue>({
@@ -38,8 +44,13 @@ export const TheTable = <TData, TValue>({
   filterColumn = "",
   columns,
   data,
+  className,
   onRowClick,
   disableRowClick,
+  isTableSmall = false,
+  stickyFirstColumn = false,
+  mobileTableFixed = false,
+  showWhenEmpty,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -78,14 +89,29 @@ export const TheTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <Table className="bg-surface-background text-secondary md:bg-surface-default table-auto md:table-fixed">
-      <TableHeader className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium">
+    <Table
+      className={cn(
+        "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
+        mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
+        className,
+      )}
+    >
+      <TableHeader className="bg-surface-contrast text-secondary text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="border-light-dark">
+          <TableRow
+            key={headerGroup.id}
+            className={cn("border-light-dark", isTableSmall && "border-b-4")}
+          >
             {headerGroup.headers.map((header) => {
               return (
                 <TableHead
                   key={header.id}
+                  className={cn(
+                    isTableSmall && "h-8",
+                    header.column.getIndex() === 0 &&
+                      stickyFirstColumn &&
+                      "bg-surface-contrast sticky left-0 z-50",
+                  )}
                   style={{
                     width:
                       header.column.getSize() !== 150
@@ -105,13 +131,13 @@ export const TheTable = <TData, TValue>({
           </TableRow>
         ))}
       </TableHeader>
-      <TableBody>
+      <TableBody className="min-h-[400px]">
         {table.getRowModel().rows.length > 0 ? (
           table.getRowModel().rows.map((row) => {
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
+                className={`border-transparent transition-colors duration-300 ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
                 onClick={() =>
                   !disableRowClick?.(row.original) && onRowClick?.(row.original)
                 }
@@ -119,7 +145,14 @@ export const TheTable = <TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    style={{ width: cell.column.getSize() }}
+                    className={cn(
+                      cell.column.getIndex() === 0 &&
+                        stickyFirstColumn &&
+                        "bg-surface-default sticky left-0 z-50",
+                    )}
+                    style={{
+                      width: cell.column.getSize(),
+                    }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -129,11 +162,8 @@ export const TheTable = <TData, TValue>({
           })
         ) : (
           <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="h-[530px] text-center"
-            >
-              No results.
+            <TableCell colSpan={columns.length} className="h-full text-center">
+              {showWhenEmpty || "No results."}
             </TableCell>
           </TableRow>
         )}

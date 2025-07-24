@@ -9,7 +9,18 @@
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",
     "local-node": "dotenv -- pnpm run --filter=@anticapture/local-node",
-    "client": "pnpm run --filter=@anticapture/graphql-client"
+    "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
+    "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "turbo lint"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
@@ -17,9 +28,18 @@
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@types/node": "^20.16.5",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "dotenv-cli": "^7.4.4",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.6",
-    "turbo": "^2.3.1"
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "turbo": "^2.3.1",
+    "typescript": "^5.8.3"
   },
   "private": true,
   "workspaces": [

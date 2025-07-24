@@ -8,6 +8,23 @@ import { CardDescription, CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
 import { Info } from "lucide-react";
 
+interface TheSectionLayoutProps {
+  icon?: ReactNode;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  infoText?: string;
+  days?: string;
+  switchDate?: ReactNode;
+  isSwitchDateLinear?: boolean;
+  riskLevel?: ReactNode;
+  children: ReactNode;
+  anchorId: string;
+  className?: string;
+  subHeader?: ReactNode;
+  leftContent?: ReactNode;
+}
+
 export const TheSectionLayout = ({
   icon,
   title,
@@ -22,21 +39,8 @@ export const TheSectionLayout = ({
   anchorId,
   className,
   subHeader,
-}: {
-  icon?: ReactNode;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  infoText?: string;
-  days?: string;
-  switchDate?: ReactNode;
-  isSwitchDateLinear?: boolean;
-  riskLevel?: ReactNode;
-  children: ReactNode;
-  anchorId: string;
-  className?: string;
-  subHeader?: ReactNode;
-}) => {
+  leftContent,
+}: TheSectionLayoutProps) => {
   const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
     threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
@@ -115,19 +119,26 @@ export const TheSectionLayout = ({
             isSwitchDateLinear ? "hidden" : "flex",
           )}
         >
-          <div className="flex flex-col">
-            <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
-              {subtitle}
-            </CardTitle>
-            <p
-              className={`text-secondary font-normal ${subtitle ? "text-sm" : "text-base"}`}
-            >
-              {getDateRange(days ?? "")}
-            </p>
-          </div>
+          {leftContent ? (
+            <div className="flex h-full w-full items-center justify-between">
+              {leftContent}
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
+                {subtitle}
+              </CardTitle>
+              <p
+                className={`text-secondary font-normal ${subtitle ? "text-sm" : "text-base"}`}
+              >
+                {getDateRange(days ?? "")}
+              </p>
+            </div>
+          )}
           <div className="flex items-center">{switchDate}</div>
         </div>
       )}
+
       {infoText && (
         <CardDescription className="bg-surface-contrast flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
           <div className="mt-0.5 sm:mt-0">
