@@ -14,8 +14,8 @@
   "dependencies": {
     "@hono/zod-openapi": "^0.19.6",
     "axios": "^1.9.0",
-    "drizzle-kit": "^0.31.0",
-    "drizzle-orm": "^0.39.3",
+    "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.3",
     "hono": "^4.7.10",
     "ponder": "^0.11.35",
     "viem": "^2.29.4",
