@@ -43,9 +43,9 @@ export default function GlossaryPage() {
               icon={<BookOpen className="section-layout-icon" />}
               description={SECTIONS_CONSTANTS.glossary.description}
               anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
-              className="bg-surface-background! sm:mt-0!"
+              className="bg-surface-background! sm:mt-0! gap-4! md:gap-6!"
             >
-              <div className="flex flex-col gap-2 md:flex-row md:gap-10">
+              <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 md:flex-row md:gap-10 md:border-none">
                 {/* Sticky Sidebar - Left Side */}
                 <div className="flex-shrink-0">
                   <div className="sticky top-4 space-y-6">
