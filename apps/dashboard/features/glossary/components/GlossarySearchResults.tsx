@@ -8,8 +8,8 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
   return (
     <div className="space-y-6">
       <div className="mb-4">
-        <h3 className="text-primary text-lg font-semibold">
-          Search Results ({results.length} found)
+        <h3 className="text-primary text-lg font-medium">
+          Search Results [{results.length} found]
         </h3>
       </div>
       <div className="divide-border-default space-y-4 divide-y">
