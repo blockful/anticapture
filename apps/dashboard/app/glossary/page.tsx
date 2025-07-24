@@ -35,7 +35,7 @@ export default function GlossaryPage() {
   };
 
   return (
-    <div className="bg-surface-background dark flex h-screen overflow-hidden">
+    <div className="bg-surface-background dark flex h-screen">
       <HeaderSidebar />
 
       <main className="flex-1 overflow-auto sm:ml-[72px]">

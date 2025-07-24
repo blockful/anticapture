@@ -102,7 +102,7 @@ export const TheSectionLayout = ({
             )}
           </div>
           <div className="flex w-full">
-            <p className="text-secondary flex w-full flex-col text-justify text-[12px] leading-[18px] font-normal sm:text-sm">
+            <p className="text-secondary flex w-full flex-col text-justify text-sm leading-[18px] font-normal">
               {description}
             </p>
           </div>
