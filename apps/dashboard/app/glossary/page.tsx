@@ -14,6 +14,7 @@ import {
   GlossarySearchResults,
   GlossaryContent,
 } from "@/features/glossary";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export default function GlossaryPage() {
   const availableLetters = getAvailableLetters(SAMPLE_GLOSSARY_DATA);
@@ -35,7 +36,13 @@ export default function GlossaryPage() {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <HeaderSidebar />
+
       <main className="flex-1 overflow-auto sm:ml-[72px]">
+        <div className="sm:hidden">
+          <div className="h-[57px] w-full sm:hidden">banana</div>
+          <HeaderMobile />
+        </div>
+
         <div className="xl4k:min-h-screen flex w-full flex-col items-center">
           <div className="xl4k:max-w-7xl w-full">
             <TheSectionLayout
