@@ -5,6 +5,7 @@ import {
   GlossaryLetter,
   getAvailableLetters,
 } from "@/features/glossary/glossary";
+import { formatPlural } from "@/shared/utils";
 
 interface GlossaryKeyboardProps {
   glossaryData: GlossaryData;
@@ -119,7 +120,7 @@ const KeyboardButton = ({
       disabled={!isAvailable}
       title={
         isAvailable
-          ? `${termCount} term${termCount !== 1 ? "s" : ""}`
+          ? `${termCount} ${formatPlural(termCount, "term")}`
           : "No terms available"
       }
       className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-bold transition-all duration-200 ${
