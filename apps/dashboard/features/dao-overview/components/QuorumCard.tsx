@@ -35,9 +35,9 @@ export const QuorumCard = () => {
       TimeInterval.ONE_YEAR,
     );
 
-  let loading = isDaoDataLoading || isTimeSeriesDataLoading;
+  const loading = isDaoDataLoading || isTimeSeriesDataLoading;
 
-  const delegatedSupplyValueOp = !!delegatedSupply.value
+  const delegatedSupplyValueOp = delegatedSupply.value
     ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
     : delegatedSupply.value;
 
@@ -120,6 +120,9 @@ export const QuorumCard = () => {
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
 
+  const textCardDaoInfo =
+    daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
+
   const quorumData: CardData = {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,
@@ -160,9 +163,7 @@ export const QuorumCard = () => {
               <TextCardDaoInfoItem
                 key="text-proposal-threshold"
                 item={{
-                  value:
-                    daoConfig.daoOverview.rules?.proposalThreshold ??
-                    proposalThresholdText,
+                  value: textCardDaoInfo,
                   daoId: daoData.id as DaoIdEnum,
                 }}
               />,
