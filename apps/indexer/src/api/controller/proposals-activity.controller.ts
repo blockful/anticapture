@@ -1,11 +1,13 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { VoteFilter } from "@/api/repositories/proposals-activity.repository";
+import {
+  ProposalActivityRequest,
+  ProposalActivityResponse,
+} from "@/api/mappers";
 
 export function proposalsActivity(
   app: Hono,
@@ -24,83 +26,14 @@ export function proposalsActivity(
         "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
       tags: ["proposals-activity"],
       request: {
-        query: z.object({
-          address: z
-            .string()
-            .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
-          fromDate: z.coerce
-            .number()
-            .int()
-            .positive("From date must be a positive timestamp")
-            .optional(),
-          skip: z.coerce
-            .number()
-            .int()
-            .min(0, "Skip must be a non-negative integer")
-            .default(0)
-            .optional(),
-          limit: z.coerce
-            .number()
-            .int()
-            .min(1, "Limit must be a positive integer")
-            .max(100, "Limit cannot exceed 100")
-            .default(10)
-            .optional(),
-          orderBy: z
-            .enum(["timestamp", "votingPower", "voteTiming"])
-            .default("timestamp")
-            .optional(),
-          orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
-          userVoteFilter: z
-            .nativeEnum(VoteFilter)
-            .optional()
-            .describe(
-              "Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",
-            ),
-        }),
+        query: ProposalActivityRequest,
       },
       responses: {
         200: {
           description: "Successfully retrieved proposals activity",
           content: {
             "application/json": {
-              schema: z.object({
-                address: z.string(),
-                totalProposals: z.number(),
-                votedProposals: z.number(),
-                neverVoted: z.boolean(),
-                winRate: z.number(),
-                yesRate: z.number(),
-                avgTimeBeforeEnd: z.number(),
-                proposals: z.array(
-                  z.object({
-                    proposal: z.object({
-                      id: z.string(),
-                      daoId: z.string(),
-                      proposerAccountId: z.string(),
-                      description: z.string().nullable(),
-                      startBlock: z.string(),
-                      endBlock: z.string(),
-                      timestamp: z.string(),
-                      status: z.string(),
-                      forVotes: z.string(),
-                      againstVotes: z.string(),
-                      abstainVotes: z.string(),
-                    }),
-                    userVote: z
-                      .object({
-                        id: z.string(),
-                        voterAccountId: z.string(),
-                        proposalId: z.string(),
-                        support: z.string().nullable(),
-                        votingPower: z.string().default("0"),
-                        reason: z.string().nullable(),
-                        timestamp: z.string(),
-                      })
-                      .nullable(),
-                  }),
-                ),
-              }),
+              schema: ProposalActivityResponse,
             },
           },
         },
