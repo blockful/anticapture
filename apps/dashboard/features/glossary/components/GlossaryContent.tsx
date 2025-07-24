@@ -14,8 +14,9 @@ export function GlossaryContent({
       {availableLetters.map((letter) => (
         <div key={letter} id={`letter-${letter}`} className="scroll-mt-4">
           <div className="bg-surface-default flex items-center justify-start px-3 py-2">
-            <h4 className="text-primary font-bold">
-              {letter} <span className="text-link">_</span>
+            <h4 className="text-primary font-mono text-[13px] font-medium leading-[20px] tracking-[0.06em]">
+              {letter}
+              <span className="text-link">_</span>
             </h4>{" "}
           </div>
           <div className="divide-border-default flex flex-col divide-y">
