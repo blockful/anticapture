@@ -30,8 +30,8 @@ export const DonationCard = ({
   supportedChains = [],
   chainLinks = {},
 }: DonationCardProps) => {
-  const [copiedEns, setCopiedEns] = useState(false);
-  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedEns, setCopiedEns] = useState<boolean>(false);
+  const [copiedAddress, setCopiedAddress] = useState<boolean>(false);
 
   const copyToClipboard = async (text: string, type: "ens" | "address") => {
     try {
