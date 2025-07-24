@@ -12,34 +12,10 @@ interface GlossaryKeyboardProps {
   onLetterClick?: (letter: GlossaryLetter) => void;
 }
 
-const ALL_LETTERS: GlossaryLetter[] = [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "K",
-  "L",
-  "M",
-  "N",
-  "O",
-  "P",
-  "Q",
-  "R",
-  "S",
-  "T",
-  "U",
-  "V",
-  "W",
-  "X",
-  "Y",
-  "Z",
-];
+// Letters are from A to Z
+const ALL_LETTERS = Object.freeze(
+  Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)),
+) as GlossaryLetter[];
 
 export function GlossaryKeyboard({
   glossaryData,
