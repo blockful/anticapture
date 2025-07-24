@@ -114,7 +114,7 @@ export const SAMPLE_GLOSSARY_DATA: GlossaryData = {
         "People who actively participate in the DAO and hold delegations - voting power given by wallets that hold the governance tokens (votes) in the organization.",
     },
     {
-      title: "Depth Order Chart (Gráfico de Profundidade)",
+      title: "Depth Order Chart",
       definition:
         "It measures the liquidity of a token in a specific price range. It is important for measuring the ability to move the price of a currency (appreciate/devalue) and profit from attacks, as well as undermine a decentralized organization.",
     },
