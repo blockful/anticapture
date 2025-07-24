@@ -9,6 +9,7 @@ import {
   SAMPLE_GLOSSARY_DATA,
   getAvailableLetters,
   GlossaryKeyboard,
+  GlossaryMobileKeyboard,
   GlossarySearch,
   GlossarySearchResult,
   GlossarySearchResults,
@@ -55,7 +56,7 @@ export default function GlossaryPage() {
               <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 md:flex-row md:gap-10 md:border-none">
                 {/* Sticky Sidebar - Left Side */}
                 <div className="flex-shrink-0">
-                  <div className="sticky top-4 space-y-6">
+                  <div className="sticky top-4 md:space-y-6">
                     {/* Search Input */}
                     <GlossarySearch
                       glossaryData={SAMPLE_GLOSSARY_DATA}
@@ -63,13 +64,19 @@ export default function GlossaryPage() {
                       onClearSearch={handleClearSearch}
                     />
 
-                    {/* Keyboard (only show when not searching) */}
+                    {/* Desktop Keyboard (only show when not searching) */}
                     {!isSearching && (
                       <GlossaryKeyboard glossaryData={SAMPLE_GLOSSARY_DATA} />
                     )}
                   </div>
                 </div>
-
+                {/* Mobile Keyboard - Fixed positioning */}
+                {!isSearching && (
+                  <GlossaryMobileKeyboard
+                    className="mb-6"
+                    glossaryData={SAMPLE_GLOSSARY_DATA}
+                  />
+                )}
                 {/* Content - Right Side */}
                 <div className="min-w-0 flex-1">
                   {isSearching ? (

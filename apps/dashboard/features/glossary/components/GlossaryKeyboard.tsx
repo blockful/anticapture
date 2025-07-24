@@ -5,9 +5,10 @@ import {
   GlossaryLetter,
   getAvailableLetters,
 } from "@/features/glossary/glossary";
-import { formatPlural } from "@/shared/utils";
+import { cn, formatPlural } from "@/shared/utils";
 
 interface GlossaryKeyboardProps {
+  className?: string;
   glossaryData: GlossaryData;
   onLetterClick?: (letter: GlossaryLetter) => void;
 }
@@ -41,23 +42,6 @@ export function GlossaryKeyboard({
 
   return (
     <>
-      {/* Mobile keyboard */}
-      <div className="flex w-full gap-2 overflow-x-scroll md:hidden">
-        {ALL_LETTERS.map((letter) => {
-          const isAvailable = availableLetters.includes(letter);
-          const termCount = glossaryData[letter]?.length || 0;
-
-          return (
-            <KeyboardButton
-              key={letter}
-              letter={letter}
-              isAvailable={isAvailable}
-              termCount={termCount}
-              onClick={() => handleLetterClick(letter)}
-            />
-          );
-        })}
-      </div>
       {/* Desktop keyboard */}
       <div className="mx-auto hidden w-full max-w-lg md:block">
         <div className="grid grid-cols-7 justify-items-center gap-2">
@@ -78,6 +62,55 @@ export function GlossaryKeyboard({
         </div>
       </div>
     </>
+  );
+}
+
+// Export mobile keyboard as a separate component
+export function GlossaryMobileKeyboard({
+  className,
+  glossaryData,
+  onLetterClick,
+}: GlossaryKeyboardProps) {
+  const availableLetters = getAvailableLetters(glossaryData);
+
+  const handleLetterClick = (letter: GlossaryLetter) => {
+    if (availableLetters.includes(letter)) {
+      // Scroll to the section
+      const element = document.getElementById(`letter-${letter}`);
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+
+      // Call optional callback
+      onLetterClick?.(letter);
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "bg-surface-background border-border-default sticky top-[57px] z-10 flex w-full gap-2 overflow-x-scroll border-b px-4 py-3 md:hidden",
+        className,
+      )}
+    >
+      {ALL_LETTERS.map((letter) => {
+        const isAvailable = availableLetters.includes(letter);
+        const termCount = glossaryData[letter]?.length || 0;
+
+        return (
+          <KeyboardButton
+            key={letter}
+            letter={letter}
+            isAvailable={isAvailable}
+            termCount={termCount}
+            onClick={() => handleLetterClick(letter)}
+          />
+        );
+      })}
+    </div>
   );
 }
 
