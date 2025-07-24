@@ -67,12 +67,15 @@ export function useDelegateDelegationHistory(
     setCurrentPage(1);
   }, [orderBy, orderDirection]);
 
-  const queryVariables = {
-    accountId,
-    limit: itemsPerPage,
-    orderBy, // Now using backend field names directly
-    orderDirection,
-  };
+  const queryVariables = useMemo(
+    () => ({
+      accountId,
+      limit: itemsPerPage,
+      orderBy, // Now using backend field names directly
+      orderDirection,
+    }),
+    [accountId, itemsPerPage, orderBy, orderDirection],
+  );
 
   const queryOptions = {
     context: {
