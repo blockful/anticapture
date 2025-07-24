@@ -283,5 +283,3 @@ export enum MetricTypesEnum {
   CIRCULATING_SUPPLY = "CIRCULATING_SUPPLY",
   TREASURY = "TREASURY",
 }
-
-export const metricTypeArray = Object.values(MetricTypesEnum);
