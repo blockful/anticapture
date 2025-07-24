@@ -41,6 +41,7 @@ export function GlossaryKeyboard({
 
   return (
     <>
+      {/* Mobile keyboard */}
       <div className="flex w-full gap-2 overflow-x-scroll md:hidden">
         {ALL_LETTERS.map((letter) => {
           const isAvailable = availableLetters.includes(letter);
@@ -57,6 +58,7 @@ export function GlossaryKeyboard({
           );
         })}
       </div>
+      {/* Desktop keyboard */}
       <div className="mx-auto hidden w-full max-w-lg md:block">
         <div className="grid grid-cols-7 justify-items-center gap-2">
           {ALL_LETTERS.map((letter) => {
@@ -99,7 +101,7 @@ const KeyboardButton = ({
           ? `${termCount} ${formatPlural(termCount, "term")}`
           : "No terms available"
       }
-      className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-medium transition-all duration-200 ${
+      className={`flex w-8 flex-shrink-0 items-center justify-center rounded-md border px-2 py-1 text-sm font-medium transition-all duration-200 ${
         isAvailable
           ? "bg-surface-default border-border-contrast text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
           : "bg-surface-disabled border-border-contrast text-dimmed cursor-not-allowed"
