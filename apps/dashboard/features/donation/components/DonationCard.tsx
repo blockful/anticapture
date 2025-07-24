@@ -155,6 +155,8 @@ export const DonationCard = ({
                     </div>
                     <div className="border-light-dark mx-auto flex h-32 w-32 items-center justify-center border bg-transparent p-2">
                       <Image
+                        width={128}
+                        height={128}
                         src={qrCodeUrl}
                         alt="Donation QR Code"
                         className="h-full w-full object-contain"
