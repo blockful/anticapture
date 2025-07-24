@@ -22,7 +22,7 @@ export default function GlossaryPage() {
   );
   const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearchResults = (results: GlossarySearchResult[]) => {
+  const handleSearchGlossaryWords = (results: GlossarySearchResult[]) => {
     setSearchResults(results);
     setIsSearching(true);
   };
@@ -52,7 +52,7 @@ export default function GlossaryPage() {
                     {/* Search Input */}
                     <GlossarySearch
                       glossaryData={SAMPLE_GLOSSARY_DATA}
-                      onSearchResults={handleSearchResults}
+                      onSearchResults={handleSearchGlossaryWords}
                       onClearSearch={handleClearSearch}
                     />
 
