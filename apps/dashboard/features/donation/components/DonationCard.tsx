@@ -1,25 +1,12 @@
-"use client";
-
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components";
 import { DonationCardProps } from "@/features/donation/types";
-import {
-  ExternalLink,
-  Copy,
-  Eye,
-  BookOpen,
-  Shield,
-  CheckCircle2,
-} from "lucide-react";
+import { ExternalLink, Eye, BookOpen, Shield } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/shared/components/ui/tooltip";
+
 import Image from "next/image";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 export const DonationCard = ({
   title,
@@ -30,25 +17,6 @@ export const DonationCard = ({
   supportedChains = [],
   chainLinks = {},
 }: DonationCardProps) => {
-  const [copiedEns, setCopiedEns] = useState(false);
-  const [copiedAddress, setCopiedAddress] = useState(false);
-
-  const copyToClipboard = async (text: string, type: "ens" | "address") => {
-    try {
-      await navigator.clipboard.writeText(text);
-      if (type === "ens") {
-        setCopiedEns(true);
-        setTimeout(() => setCopiedEns(false), 2000);
-      } else {
-        setCopiedAddress(true);
-        setTimeout(() => setCopiedAddress(false), 2000);
-        //asdas
-      }
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
-
   return (
     <Card className="bg-surface-background md:bg-surface-default w-full rounded-none border-0 shadow-sm">
       <CardContent className="px-0 py-5 md:p-5">
@@ -172,42 +140,11 @@ export const DonationCard = ({
                       <div className="border-light-dark flex-1 border-t"></div>
                     </div>
                     <div className="flex flex-col gap-3">
-                      <div>
+                      <div className="flex items-center">
                         <p className="text-secondary !text-alternative-xs font-regular font-mono uppercase tracking-wide">
                           ENS Domain
                         </p>
-                        <div className="flex items-center gap-1">
-                          <code className="text-primary max-w-[300px] truncate font-sans text-sm font-normal">
-                            {ensAddress}
-                          </code>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() =>
-                                  copyToClipboard(ensAddress, "ens")
-                                }
-                                className="text-secondary hover:text-primary flex items-center gap-1 p-1 text-xs transition-colors"
-                              >
-                                {copiedEns ? (
-                                  <CheckCircle2
-                                    strokeWidth={3}
-                                    className="size-4"
-                                  />
-                                ) : (
-                                  <Copy className="size-4" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              align="center"
-                              sideOffset={8}
-                              className="border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-2 text-sm shadow-sm"
-                            >
-                              {copiedEns ? "Copied!" : "Copy"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
+                        <CopyAndPasteButton textToCopy={ensAddress} />
                       </div>
 
                       {/* Address - moved inside QR box */}
@@ -219,33 +156,7 @@ export const DonationCard = ({
                           <code className="text-primary max-w-[calc(100vw-100px)] truncate font-sans text-sm font-normal">
                             {formatAddress(address)}
                           </code>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() =>
-                                  copyToClipboard(address, "address")
-                                }
-                                className="text-secondary hover:text-primary flex items-center gap-1 p-1 text-xs transition-colors"
-                              >
-                                {copiedAddress ? (
-                                  <CheckCircle2
-                                    strokeWidth={3}
-                                    className="size-4"
-                                  />
-                                ) : (
-                                  <Copy className="size-4" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              align="center"
-                              sideOffset={8}
-                              className="border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-2 text-sm shadow-sm"
-                            >
-                              {copiedAddress ? "Copied!" : "Copy"}
-                            </TooltipContent>
-                          </Tooltip>
+                          <CopyAndPasteButton textToCopy={address} />
                         </div>
                       </div>
                     </div>
