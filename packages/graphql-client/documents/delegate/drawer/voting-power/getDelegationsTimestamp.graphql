@@ -1,0 +1,12 @@
+query getDelegationsTimestamp($delegator: [String!]!, $delegate: String!, $daoId: String!) {
+  delegations(where: {
+    daoId: $daoId
+    delegatorAccountId_in: $delegator
+    delegateAccountId: $delegate
+  }){
+    items{
+      delegatorAccountId
+      timestamp
+		}
+  }
+}

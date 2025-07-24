@@ -2,7 +2,7 @@ services:
 
   contracts:
     build:
-      context: apps/local-node
+      context: packages/local-node
       dockerfile: Dockerfile
     ports:
       - "8545:8545"

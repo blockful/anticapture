@@ -1,8 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaysEnum, DaysOpts } from "@/lib/enums";
-import { DaoIdEnum } from "@/lib/enums";
-import { caseInsensitiveEnum } from "@/api/middlewares";
 import {
   ActiveSupplyQueryResult,
   ProposalsCompareQueryResult,
@@ -29,15 +27,10 @@ export function governanceActivity(
     createRoute({
       method: "get",
       operationId: "compareActiveSupply",
-      path: "/dao/{daoId}/active-supply/compare",
+      path: "/active-supply/compare",
       summary: "Get active token supply for DAO",
       tags: ["governance"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum).openapi({
-            example: "ens",
-          }),
-        }),
         query: z.object({
           days: z
             .enum(DaysOpts)
@@ -78,13 +71,10 @@ export function governanceActivity(
     createRoute({
       method: "get",
       operationId: "compareProposals",
-      path: "/dao/{daoId}/proposals/compare",
+      path: "/proposals/compare",
       summary: "Compare number of proposals between time periods",
       tags: ["governance"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           days: z
             .enum(DaysOpts)
@@ -136,13 +126,10 @@ export function governanceActivity(
     createRoute({
       method: "get",
       operationId: "compareVotes",
-      path: "/dao/{daoId}/votes/compare",
+      path: "/votes/compare",
       summary: "Compare number of votes between time periods",
       tags: ["governance"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           days: z
             .enum(DaysOpts)
@@ -193,13 +180,10 @@ export function governanceActivity(
     createRoute({
       method: "get",
       operationId: "compareAverageTurnout",
-      path: "/dao/{daoId}/average-turnout/compare",
+      path: "/average-turnout/compare",
       summary: "Compare average turnout between time periods",
       tags: ["governance"],
       request: {
-        params: z.object({
-          daoId: caseInsensitiveEnum(DaoIdEnum),
-        }),
         query: z.object({
           days: z
             .enum(DaysOpts)

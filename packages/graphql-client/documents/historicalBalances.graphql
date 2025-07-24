@@ -1,0 +1,8 @@
+query getHistoricalBalances($addresses:  JSON!, $days: queryInput_historicalBalances_days!) {
+  historicalBalances(addresses: $addresses, days: $days) {
+    address
+    balance
+    blockNumber
+    tokenAddress
+  }
+}
