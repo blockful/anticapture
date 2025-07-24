@@ -99,10 +99,10 @@ const KeyboardButton = ({
           ? `${termCount} ${formatPlural(termCount, "term")}`
           : "No terms available"
       }
-      className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-bold transition-all duration-200 ${
+      className={`flex w-8 items-center justify-center rounded-md border px-2 py-1 text-sm font-medium transition-all duration-200 ${
         isAvailable
-          ? "bg-primary-foreground border-border text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
-          : "bg-background border-border text-secondary cursor-not-allowed opacity-40"
+          ? "bg-surface-default border-border-contrast text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
+          : "bg-surface-disabled border-border-contrast text-dimmed cursor-not-allowed"
       } `}
     >
       {letter}
