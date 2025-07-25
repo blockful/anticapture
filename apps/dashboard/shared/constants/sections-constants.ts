@@ -69,7 +69,7 @@ export const SECTIONS_CONSTANTS = {
   glossary: {
     title: "Glossary",
     description:
-      "Find answers to common questions about DAO security and how Anticapture works.",
+      "Explore the glossary of key terms and concepts in DAO security.",
     anchorId: "glossarySection",
   },
   faq: {
