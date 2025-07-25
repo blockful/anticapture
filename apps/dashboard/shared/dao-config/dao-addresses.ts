@@ -1,27 +1,5 @@
 import { DaoIdEnum } from "@/shared/types/daos";
-
-interface DaoAddresses {
-  [DaoIdEnum.UNISWAP]: {
-    UniTimelock: string;
-    UniTokenDistributor: string;
-    Univ3Uni: string;
-  };
-  [DaoIdEnum.ENS]: {
-    ENSTokenTimelock: string;
-    ENSDaoWallet: string;
-    ENSColdWallet: string;
-  };
-  [DaoIdEnum.OPTIMISM]: {
-    OptimismTimelock: string;
-    OptimismTokenDistributor: string;
-    OptimismUniv3Uni: string;
-  };
-  [DaoIdEnum.ARBITRUM]: {
-    ArbitrumTimelock: string;
-    ArbitrumTokenDistributor: string;
-    ArbitrumDaoWallet: string;
-  };
-}
+import { DaoAddresses } from "@/shared/dao-config/types";
 
 export const DAO_ADDRESSES: DaoAddresses = {
   [DaoIdEnum.UNISWAP]: {
