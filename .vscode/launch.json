@@ -8,9 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "api gateway",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/apps/api-gateway/src/index.ts",
       "runtimeExecutable": "tsx",
       "console": "integratedTerminal",
@@ -19,59 +17,22 @@
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
         "ENV_FILE": "${workspaceFolder}/apps/api-gateway/.env"
       },
-      "outFiles": [
-        "${workspaceFolder}/**/*.js",
-        "!**/node_modules/**"
-      ],
-      "cwd": "${workspaceFolder}/apps/api-gateway",
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "api",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "run",
-        "dev",
-        "--config",
-        "config/ens.local.config.ts"
-      ],
-      "env": {
-        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
-        "ENV_FILE": "${workspaceFolder}/apps/indexer/.env"
-      },
-      "outFiles": [
-        "${workspaceFolder}/**/*.js",
-        "!**/node_modules/**"
-      ],
-      "cwd": "${workspaceFolder}/apps/indexer",
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "cwd": "${workspaceFolder}/apps/api-gateway"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "indexer",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "run",
-        "dev",
-        "--config",
-        "config/ens.config.ts"
-      ],
+      "runtimeArgs": ["run", "dev", "--config", "config/ens.local.config.ts"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
         "ENV_FILE": "${workspaceFolder}/apps/indexer/.env"
       },
-      "outFiles": [
-        "${workspaceFolder}/**/*.js",
-        "!**/node_modules/**"
-      ],
-      "cwd": "${workspaceFolder}/apps/indexer",
-    },
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "cwd": "${workspaceFolder}/apps/indexer"
+    }
   ]
 }

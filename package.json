@@ -16,7 +16,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "turbo lint"
+      "eslint --fix"
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"

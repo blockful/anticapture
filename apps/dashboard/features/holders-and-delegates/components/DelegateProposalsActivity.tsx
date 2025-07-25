@@ -29,7 +29,7 @@ export const DelegateProposalsActivity = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<string>("voteTiming");
+  const [orderBy, setOrderBy] = useState<string>("timestamp");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
   const itemsPerPage = 10;
 

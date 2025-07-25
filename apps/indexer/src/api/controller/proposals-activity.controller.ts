@@ -5,7 +5,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
+import { VoteFilter } from "@/api/repositories/proposals-activity.repository";
 
 export function proposalsActivity(
   app: Hono,
@@ -47,8 +47,8 @@ export function proposalsActivity(
             .default(10)
             .optional(),
           orderBy: z
-            .enum(["votingPower", "voteTiming"])
-            .default("voteTiming")
+            .enum(["timestamp", "votingPower", "voteTiming"])
+            .default("timestamp")
             .optional(),
           orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
           userVoteFilter: z

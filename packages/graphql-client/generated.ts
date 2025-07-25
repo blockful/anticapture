@@ -16,9 +16,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -329,7 +332,8 @@ export type QueryTransfersArgs = {
 
 
 export type QueryVotesOnchainArgs = {
-  id: Scalars['String']['input'];
+  proposalId: Scalars['String']['input'];
+  voterAccountId: Scalars['String']['input'];
 };
 
 
@@ -1272,6 +1276,7 @@ export enum QueryInput_HistoricalVotingPower_Days {
 }
 
 export enum QueryInput_ProposalsActivity_OrderBy {
+  Timestamp = 'timestamp',
   VoteTiming = 'voteTiming',
   VotingPower = 'votingPower'
 }
@@ -1556,12 +1561,12 @@ export type TransferPage = {
 export type VotesOnchain = {
   __typename?: 'votesOnchain';
   daoId: Scalars['String']['output'];
-  id: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
   proposalId?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
   support?: Maybe<Scalars['String']['output']>;
   timestamp?: Maybe<Scalars['BigInt']['output']>;
+  txHash?: Maybe<Scalars['String']['output']>;
   voter?: Maybe<Account>;
   voterAccountId?: Maybe<Scalars['String']['output']>;
   votingPower?: Maybe<Scalars['String']['output']>;
@@ -1580,16 +1585,6 @@ export type VotesOnchainFilter = {
   daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  id_contains?: InputMaybe<Scalars['String']['input']>;
-  id_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not?: InputMaybe<Scalars['String']['input']>;
-  id_not_contains?: InputMaybe<Scalars['String']['input']>;
-  id_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  id_starts_with?: InputMaybe<Scalars['String']['input']>;
   proposalId?: InputMaybe<Scalars['String']['input']>;
   proposalId_contains?: InputMaybe<Scalars['String']['input']>;
   proposalId_ends_with?: InputMaybe<Scalars['String']['input']>;
@@ -1628,6 +1623,16 @@ export type VotesOnchainFilter = {
   timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  txHash?: InputMaybe<Scalars['String']['input']>;
+  txHash_contains?: InputMaybe<Scalars['String']['input']>;
+  txHash_ends_with?: InputMaybe<Scalars['String']['input']>;
+  txHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  txHash_not?: InputMaybe<Scalars['String']['input']>;
+  txHash_not_contains?: InputMaybe<Scalars['String']['input']>;
+  txHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  txHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  txHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  txHash_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_contains?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;

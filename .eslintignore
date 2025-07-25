@@ -11,3 +11,7 @@ generated/**
 .ponder/**
 dump/**
 storybook-static/**
+
+packages/graphql-client/generated.ts
+packages/graphql-client/types.ts
+

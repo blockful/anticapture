@@ -183,5 +183,5 @@ export const UNI: DaoConfiguration = {
   riskAnalysis: true,
   tokenDistribution: true,
   resilienceStages: true,
-  dataTables: false,
+  dataTables: true,
 };

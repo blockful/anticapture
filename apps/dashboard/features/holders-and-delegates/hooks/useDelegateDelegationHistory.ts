@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
 import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
 import { ApolloError } from "@apollo/client";
+import { formatUnits } from "viem";
 
 type VotingPowerHistoryItem =
   GetDelegateDelegationHistoryQuery["votingPowerHistorys"]["items"][0];
@@ -67,12 +68,15 @@ export function useDelegateDelegationHistory(
     setCurrentPage(1);
   }, [orderBy, orderDirection]);
 
-  const queryVariables = {
-    accountId,
-    limit: itemsPerPage,
-    orderBy, // Now using backend field names directly
-    orderDirection,
-  };
+  const queryVariables = useMemo(
+    () => ({
+      accountId,
+      limit: itemsPerPage,
+      orderBy, // Now using backend field names directly
+      orderDirection,
+    }),
+    [accountId, itemsPerPage, orderBy, orderDirection],
+  );
 
   const queryOptions = {
     context: {
@@ -103,7 +107,8 @@ export function useDelegateDelegationHistory(
         let isGain = false;
 
         // Parse delta to determine if it's a gain or loss
-        const deltaValue = parseFloat(item.delta || "0");
+        // Convert from wei to token units using formatUnits (same as graph hook)
+        const deltaValue = Number(formatUnits(BigInt(item.delta || "0"), 18));
         isGain = deltaValue > 0;
 
         if (item.delegation) {

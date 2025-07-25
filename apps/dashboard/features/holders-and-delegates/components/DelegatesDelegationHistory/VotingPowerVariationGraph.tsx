@@ -13,6 +13,7 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useState } from "react";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import {
@@ -47,6 +48,27 @@ const chartConfig = {
     label: "Voting Power",
     color: "#3b82f6",
   },
+};
+
+const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
+  if (!chartData.length) return [];
+
+  const firstTimestamp = Math.min(...chartData.map((d) => d.timestamp));
+  const lastTimestamp = Math.max(...chartData.map((d) => d.timestamp));
+
+  const ticks = [];
+  const startDate = new Date(firstTimestamp);
+  const endDate = new Date(lastTimestamp);
+
+  // Start from the first day of the month containing the first data point
+  const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+
+  while (current <= endDate) {
+    ticks.push(current.getTime());
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return ticks;
 };
 
 export const VotingPowerVariationGraph = ({
@@ -168,7 +190,8 @@ export const VotingPowerVariationGraph = ({
             type="number"
             scale="time"
             domain={["dataMin", "dataMax"]}
-            tickFormatter={(value) => {
+            ticks={generateMonthlyTicks(chartData)}
+            tickFormatter={(value: number) => {
               const date = new Date(value);
               const month = date.toLocaleDateString("en-US", {
                 month: "short",
@@ -180,14 +203,15 @@ export const VotingPowerVariationGraph = ({
             fontSize={12}
           />
           <YAxis
-            tickFormatter={(value) => formatNumberUserReadable(value)}
+            tickFormatter={(value: number) => formatNumberUserReadable(value)}
             stroke="var(--base-dimmed)"
             fontSize={12}
           />
           <Tooltip
-            content={({ active, payload }) => {
+            content={(props) => {
+              const { active, payload } = props;
               if (active && payload && payload.length) {
-                const data = payload[0].payload;
+                const data = payload[0]?.payload as DelegationHistoryGraphItem;
 
                 // Determine which address to show based on transaction type and direction
                 const getDisplayAddress = () => {
@@ -223,7 +247,7 @@ export const VotingPowerVariationGraph = ({
                     <p className="text-secondary text-xs">{addressLabel}:</p>
                     {displayAddress && (
                       <EnsAvatar
-                        address={displayAddress}
+                        address={displayAddress as `0x${string}`}
                         showAvatar={false}
                         size="xs"
                         className="mt-2"

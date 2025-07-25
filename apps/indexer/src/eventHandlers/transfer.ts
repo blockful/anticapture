@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
 import { Address, Hex, zeroAddress } from "viem";
-import { account, accountBalance, transfer, token } from "ponder:schema";
+import { accountBalance, transfer, token } from "ponder:schema";
 
 import {
   BurningAddresses,
@@ -11,7 +11,7 @@ import {
   TREASURY_ADDRESSES,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { storeDailyBucket } from "./shared";
+import { ensureAccountExists, storeDailyBucket } from "./shared";
 
 const updateSupplyMetric = async (
   context: Context,
@@ -147,19 +147,8 @@ export const tokenTransfer = async (
 ) => {
   const { from, to, tokenAddress, transactionHash, value, timestamp } = args;
 
-  await context.db
-    .insert(account)
-    .values({
-      id: to,
-    })
-    .onConflictDoNothing();
-
-  await context.db
-    .insert(account)
-    .values({
-      id: from,
-    })
-    .onConflictDoNothing();
+  await ensureAccountExists(context, to);
+  await ensureAccountExists(context, from);
 
   await context.db
     .insert(transfer)

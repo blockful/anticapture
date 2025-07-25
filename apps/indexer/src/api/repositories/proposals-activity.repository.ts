@@ -1,8 +1,8 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
-import { sql } from "ponder";
+import { eq, sql } from "ponder";
 import { db } from "ponder:api";
-import { VoteFilter } from "@/api/services/proposals-activity/proposals-activity.service";
+import { accountPower, dao } from "ponder:schema";
 
 export type DbProposal = {
   id: string;
@@ -34,16 +34,19 @@ export type DbProposalWithVote = {
   userVote: DbVote | null;
 };
 
-export type OrderByField = "votingPower" | "voteTiming";
+export enum VoteFilter {
+  YES = "yes",
+  NO = "no",
+  ABSTAIN = "abstain",
+  NO_VOTE = "no_vote",
+}
+export type OrderByField = "votingPower" | "voteTiming" | "timestamp";
 export type OrderDirection = "asc" | "desc";
 
 export interface ProposalsActivityRepository {
-  getFirstVoteTimestamp(
-    address: Address,
-    daoId: DaoIdEnum,
-  ): Promise<number | null>;
+  getFirstVoteTimestamp(address: Address): Promise<number | null>;
 
-  getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number>;
+  getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined>;
 
   getProposals(
     daoId: DaoIdEnum,
@@ -75,41 +78,26 @@ export interface ProposalsActivityRepository {
 export class DrizzleProposalsActivityRepository
   implements ProposalsActivityRepository
 {
-  async getFirstVoteTimestamp(
-    address: Address,
-    daoId: DaoIdEnum,
-  ): Promise<number | null> {
-    const query = sql`
-      SELECT first_vote_timestamp
-      FROM account_power
-      WHERE account_id = ${address} AND dao_id = ${daoId}
-      LIMIT 1
-    `;
-
-    const result = await db.execute<{ first_vote_timestamp: string | null }>(
-      query,
-    );
-    const timestamp = result.rows[0]?.first_vote_timestamp;
-
-    return timestamp ? Number(timestamp) : null;
+  async getFirstVoteTimestamp(address: Address): Promise<number | null> {
+    const account = await db.query.accountPower.findFirst({
+      where: eq(accountPower.accountId, address),
+      columns: {
+        firstVoteTimestamp: true,
+      },
+    });
+    return account?.firstVoteTimestamp
+      ? Number(account.firstVoteTimestamp)
+      : null;
   }
 
-  async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number> {
-    const query = sql`
-      SELECT voting_period
-      FROM dao
-      WHERE id = ${daoId}
-      LIMIT 1
-    `;
-
-    const result = await db.execute<{ voting_period: string }>(query);
-    const votingPeriod = result.rows[0]?.voting_period;
-
-    if (!votingPeriod) {
-      throw new Error(`DAO ${daoId} not found or missing voting period`);
-    }
-
-    return Number(votingPeriod);
+  async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined> {
+    const _dao = await db.query.dao.findFirst({
+      where: eq(dao.id, daoId),
+      columns: {
+        votingPeriod: true,
+      },
+    });
+    return _dao?.votingPeriod ? Number(_dao.votingPeriod) : undefined;
   }
 
   async getProposals(
@@ -138,7 +126,7 @@ export class DrizzleProposalsActivityRepository
     if (proposalIds.length === 0) return [];
 
     const query = sql`
-      SELECT id, voter_account_id, proposal_id, support, voting_power, reason, timestamp
+      SELECT tx_hash as id, voter_account_id, proposal_id, support, voting_power, reason, timestamp
       FROM votes_onchain
       WHERE voter_account_id = ${address}
         AND dao_id = ${daoId}
@@ -193,7 +181,7 @@ export class DrizzleProposalsActivityRepository
         orderByClause = `ORDER BY COALESCE(v.timestamp - p.timestamp, 999999999) ${orderDirection.toUpperCase()}`;
         break;
       default:
-        orderByClause = `ORDER BY p.timestamp DESC`;
+        orderByClause = `ORDER BY p.timestamp ${orderDirection.toUpperCase()}`;
     }
 
     // Main query with LEFT JOIN to get proposals and their votes
@@ -202,7 +190,7 @@ export class DrizzleProposalsActivityRepository
         p.id, p.dao_id, p.proposer_account_id, p.description, p.start_block, p.end_block,
         p.timestamp, p.status, p.for_votes, p.against_votes, p.abstain_votes,
         (p.timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp,
-        v.id as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
+        v.tx_hash as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
