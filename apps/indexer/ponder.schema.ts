@@ -55,16 +55,15 @@ export const accountPower = onchainTable(
     proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
     delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
     lastVoteTimestamp: drizzle
-      .integer("last_vote_timestamp")
-      .default(0)
+      .bigint("last_vote_timestamp")
+      .default(0n)
       .notNull(),
-    firstVoteTimestamp: drizzle.integer("first_vote_timestamp"),
+    firstVoteTimestamp: drizzle.bigint("first_vote_timestamp"),
   }),
   (table) => ({
     pk: primaryKey({
       columns: [table.accountId],
     }),
-    lastVoteTimestamp: index().on(table.lastVoteTimestamp),
   }),
 );
 
@@ -76,7 +75,7 @@ export const votingPowerHistory = onchainTable(
     accountId: drizzle.text("account_id"),
     votingPower: drizzle.bigint("voting_power").notNull(),
     delta: drizzle.bigint("delta").notNull(),
-    timestamp: drizzle.integer().notNull(),
+    timestamp: drizzle.bigint().notNull(),
     // the voting power change non-negative to correlate with the transfer and delegation
     deltaMod: drizzle.bigint("delta_mod").notNull(),
   }),
@@ -96,7 +95,7 @@ export const delegation = onchainTable(
     delegatorAccountId: drizzle.text("delegator_account_id").notNull(),
     delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
     previousDelegate: drizzle.text("previous_delegate"),
-    timestamp: drizzle.integer().notNull(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -118,7 +117,7 @@ export const transfer = onchainTable(
     amount: drizzle.bigint().notNull(),
     fromAccountId: drizzle.text("from_account_id").notNull(),
     toAccountId: drizzle.text("to_account_id").notNull(),
-    timestamp: drizzle.integer().notNull(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -137,7 +136,7 @@ export const votesOnchain = onchainTable(
     support: drizzle.text().notNull(),
     votingPower: drizzle.text().notNull(),
     reason: drizzle.text(),
-    timestamp: drizzle.integer().notNull(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -166,13 +165,13 @@ export const proposalsOnchain = onchainTable(
     daoId: drizzle.text("dao_id").notNull(),
     proposerAccountId: drizzle.text("proposer_account_id").notNull(),
     targets: drizzle.json().$type<string[]>().notNull().default([]),
-    values: drizzle.json().$type<string[]>().notNull().default([]),
+    values: drizzle.json().$type<bigint[]>().notNull().default([]),
     signatures: drizzle.json().$type<string[]>().notNull().default([]),
     calldatas: drizzle.json().$type<string[]>().notNull().default([]),
     startBlock: drizzle.text("start_block").notNull(),
     endBlock: drizzle.text("end_block").notNull(),
     description: drizzle.text().notNull(),
-    timestamp: drizzle.integer().notNull(),
+    timestamp: drizzle.bigint().notNull(),
     status: drizzle.text().$type<ProposalStatus>().notNull(),
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
