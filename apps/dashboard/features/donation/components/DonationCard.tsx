@@ -99,7 +99,7 @@ export const DonationCard = ({
           </div>
           {/* Right side - QR Code with Orange Corner Brackets and Gradient */}
           {qrCodeUrl && (
-            <div className="mt-6 flex-shrink-0 lg:mt-0">
+            <div className="mt-6 w-[350px] flex-shrink-0 lg:mt-0">
               <div className="relative">
                 {/* Orange corner brackets */}
                 <div className="border-tangerine absolute size-4 border-l-2 border-t-2" />

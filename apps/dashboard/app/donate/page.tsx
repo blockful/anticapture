@@ -8,7 +8,7 @@ export default function DonatePage() {
       <HeaderSidebar />
       <main className="flex-1 overflow-auto sm:ml-[72px]">
         <div className="sm:hidden">
-          <HeaderMobile />
+          <HeaderMobile overlayClassName="top-[57px]" />
         </div>
         <div className="xl4k:min-h-screen flex w-full flex-col items-center">
           <div className="xl4k:max-w-7xl w-full">
