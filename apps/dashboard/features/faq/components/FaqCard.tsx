@@ -19,6 +19,7 @@ export const FaqCard = ({
       title={faqItem.question}
       isOpen={isOpen}
       onToggle={onToggle}
+      className="hover:bg-surface-contrast"
     >
       <div className="text-secondary prose prose-sm max-w-none text-sm">
         {faqItem.answer}
