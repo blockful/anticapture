@@ -1,4 +1,6 @@
 import { GlossarySearchResult } from "@/features/glossary/glossary";
+import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
+import { SearchIcon } from "lucide-react";
 
 interface GlossarySearchResultsProps {
   results: GlossarySearchResult[];
@@ -31,11 +33,11 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
             </div>
           ))
         ) : (
-          <div className="py-12 text-center">
-            <p className="text-secondary">
-              No terms found matching your search.
-            </p>
-          </div>
+          <BlankState
+            variant="default"
+            icon={SearchIcon}
+            description="No terms found matching your search."
+          />
         )}
       </div>
     </div>
