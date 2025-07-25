@@ -44,7 +44,7 @@ export const FaqSection = () => {
       icon={<HelpCircle className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.faq.description}
       anchorId={SECTIONS_CONSTANTS.faq.anchorId}
-      className="bg-surface-background! mt-[56px]! sm:mt-0!"
+      className="bg-surface-background!"
     >
       <div className="flex flex-col gap-6">
         {/* Mobile-only dashed line separator */}
