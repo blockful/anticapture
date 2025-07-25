@@ -30,9 +30,7 @@ export const TokenDistributionCustomTooltip: React.FC<
             <strong>
               {value !== 0
                 ? formatNumberUserReadable(
-                    Number.isFinite(value)
-                      ? Number(BigInt(Math.floor(value)) / BigInt(10 ** 18))
-                      : 0,
+                    Number.isFinite(value) ? Math.floor(value) : 0,
                   )
                 : "No Data"}
             </strong>

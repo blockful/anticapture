@@ -9,7 +9,7 @@ import {
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { formatEther } from "viem";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
-import { calculateChangeRate } from "@/features/token-distribution/contexts";
+import { calculateChangeRate } from "@/features/token-distribution/utils";
 import { Clock, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
@@ -31,7 +31,7 @@ export const QuorumCard = () => {
       TimeInterval.ONE_YEAR,
     );
 
-  let loading = isDaoDataLoading || isTimeSeriesDataLoading;
+  const loading = isDaoDataLoading || isTimeSeriesDataLoading;
 
   const totalSupply = {
     value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
