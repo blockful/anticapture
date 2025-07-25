@@ -74,10 +74,10 @@ export const AccordionContentArea = ({
       </div>
       <div
         className={cn(
-          "sm:border-middle-dark sm:bg-surface-default z-20 border-transparent pt-1 sm:absolute sm:border sm:px-4",
+          "sm:border-middle-dark sm:bg-surface-default z-20 border-transparent p-3 sm:absolute sm:border",
           "-left-px top-full w-[calc(100%+2px)]",
           isOpen
-            ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"
+            ? "visible h-auto transition-all duration-500 ease-in-out"
             : "hidden transition-all duration-300 ease-in-out sm:invisible sm:h-0",
         )}
         onClick={(e) => {
@@ -86,7 +86,7 @@ export const AccordionContentArea = ({
           }
         }}
       >
-        <div className="pt-1">{children}</div>
+        <div>{children}</div>
       </div>
     </Card>
   );
