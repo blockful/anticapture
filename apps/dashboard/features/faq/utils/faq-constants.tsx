@@ -16,6 +16,7 @@ export const FAQ_ITEMS: FaqItem[] = [
         DAOs understand and improve their governance security. It works as a
         risk assessment tool.
         <br />
+        <br />
         Think of it like L2Beat, but focused on governance instead of bridges or
         rollups. We surface security risks in economic conditions, governance
         implementation, token distribution and others (read more about{" "}
@@ -28,6 +29,7 @@ export const FAQ_ITEMS: FaqItem[] = [
           Normalcy Bias
         </a>
         ).
+        <br />
         <br />
         This gives delegates, token holders, investors, foundations, and other
         contributors a way to understand potential attack risks beyond just
@@ -58,6 +60,7 @@ export const FAQ_ITEMS: FaqItem[] = [
           profit, within the rules of the game?&quot;
         </em>
         <br />
+        <br />
         Surfacing those risks gives builders, stewards, and token holders the
         clarity they need to act before it&apos;s too late.
       </>
@@ -72,10 +75,12 @@ export const FAQ_ITEMS: FaqItem[] = [
         is less conventional or not EVM-based. But our goal is to index them
         all.
         <br />
+        <br />
         We&apos;re Ethereum-first. So we prioritized DAOs, protocols, and L2s
         that are part of the Ethereum ecosystem. And we are focusing first on
         the DAOs with that could have the most impact if they were taken
         over/attacked.
+        <br />
         <br />
         Are we expanding? Yes. We don&apos;t want to leave any DAO out of this.
         Our metrics are evolving, and we&apos;ll keep abstracting them to
@@ -93,9 +98,11 @@ export const FAQ_ITEMS: FaqItem[] = [
         role is to turn raw data into something legible, because transparency
         without accessibility does not help much.
         <br />
+        <br />
         We want to increase the pressure on DAOs to improve their security
         before large, well-funded attackers start taking advantage of structural
         weaknesses.
+        <br />
         <br />
         The game is asymmetric. And no, this public data isn&apos;t dangerous.
         Attackers already know it. What we&apos;re doing is leveling the game.
@@ -120,6 +127,7 @@ export const FAQ_ITEMS: FaqItem[] = [
         </a>
         .
         <br />
+        <br />
         We also received a grant from the Uniswap Foundation to conduct a
         governance security audit for Uniswap DAO — we delivered a security
         report and integrated the DAO into the dashboard. You can check it{" "}
@@ -132,6 +140,7 @@ export const FAQ_ITEMS: FaqItem[] = [
           here
         </a>
         .
+        <br />
         <br />
         Optimism also awarded us a grant to be included in the dashboard. You
         can check it{" "}
@@ -156,6 +165,7 @@ export const FAQ_ITEMS: FaqItem[] = [
         governance implementation. A DAO is only as secure as its least secure
         part, so our stages are assigned based on the most risky aspect a DAO
         currently has on its implementation.
+        <br />
         <br />
         Those risk levels can be low, medium or high, and are based on elements
         like voting delays, proposal thresholds, veto powers, flash loan
