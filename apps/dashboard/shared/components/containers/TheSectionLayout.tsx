@@ -139,7 +139,6 @@ export const TheSectionLayout = ({
           <div className="flex items-center">{switchDate}</div>
         </div>
       )}
-      {infoText && <InlineAlert text={infoText} variant="info" />}
 
       {infoText && (
         <CardDescription className="bg-surface-contrast flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
