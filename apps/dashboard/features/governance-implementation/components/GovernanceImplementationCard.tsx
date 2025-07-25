@@ -8,13 +8,6 @@ import { useScreenSize } from "@/shared/hooks";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { RiskLevel } from "@/shared/types/enums";
 
-// const riskBorderColors: Record<RiskLevel, string> = {
-//   [RiskLevel.HIGH]: "border-error",
-//   [RiskLevel.MEDIUM]: "border-warning",
-//   [RiskLevel.LOW]: "border-success",
-//   [RiskLevel.NONE]: "border-foreground",
-// };
-
 const riskBoxStyles: Record<RiskLevel, string> = {
   [RiskLevel.HIGH]: "bg-error/12",
   [RiskLevel.MEDIUM]: "bg-warning/12",
