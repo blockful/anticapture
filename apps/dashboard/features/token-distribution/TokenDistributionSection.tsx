@@ -1,90 +1,80 @@
 "use client";
 
 import { TheSectionLayout } from "@/shared/components";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { mockedTokenMultineDatasets } from "@/shared/constants/mocked-data/mocked-token-dist-datasets";
 import {
-  MultilineChartTokenDistribution,
-  ChartMetrics,
+  TokenDistributionChart,
+  TokenDistributionMetrics,
 } from "@/features/token-distribution/components";
-import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 import { ArrowRightLeft } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { useState } from "react";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { useTimeSeriesData } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 
-const initialChartConfig: Record<
+const initialMetrics = [
+  MetricTypesEnum.DELEGATED_SUPPLY,
+  MetricTypesEnum.CEX_SUPPLY,
+  MetricTypesEnum.DEX_SUPPLY,
+  MetricTypesEnum.LENDING_SUPPLY,
+];
+
+const metricsSchema: Record<
   string,
   { label: string; color: string; category: string }
 > = {
-  delegatedSupply: {
+  DELEGATED_SUPPLY: {
     label: "Delegated Supply",
     color: "#3B82F6",
     category: "SUPPLY",
   },
-  cexSupply: {
+  CEX_SUPPLY: {
     label: "CEX Supply",
     color: "#FB923C",
     category: "SUPPLY",
   },
-  dexSupply: {
+  DEX_SUPPLY: {
     label: "DEX Supply",
     color: "#22C55E",
     category: "SUPPLY",
   },
-  lendingSupply: {
-    label: "Lending Supply",
-    color: "#A855F7",
-    category: "SUPPLY",
-  },
-};
-const allMetrics: Record<
-  string,
-  { label: string; color: string; category: string }
-> = {
-  delegatedSupply: {
-    label: "Delegated Supply",
-    color: "#3B82F6",
-    category: "SUPPLY",
-  },
-  cexSupply: {
-    label: "CEX Supply",
-    color: "#FB923C",
-    category: "SUPPLY",
-  },
-  dexSupply: {
-    label: "DEX Supply",
-    color: "#22C55E",
-    category: "SUPPLY",
-  },
-  lendingSupply: {
+  LENDING_SUPPLY: {
     label: "Lending Supply",
     color: "#A855F7",
     category: "SUPPLY",
   },
 };
 
-export const TokenDistributionSection = () => {
-  const {
-    delegatedSupplyChart,
-    cexSupplyChart,
-    dexSupplyChart,
-    lendingSupplyChart,
-  } = useTokenDistributionContext();
-
+export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const [hoveredMetricKey, setHoveredMetricKey] =
+    useState<MetricTypesEnum | null>(null);
   const [appliedMetrics, setAppliedMetrics] =
-    useState<
-      Record<string, { label: string; color: string; category: string }>
-    >(initialChartConfig);
+    useState<MetricTypesEnum[]>(initialMetrics);
 
-  const datasets: Record<string, DaoMetricsDayBucket[] | undefined> = {
-    delegatedSupply: delegatedSupplyChart,
-    cexSupply: cexSupplyChart,
-    dexSupply: dexSupplyChart,
-    lendingSupply: lendingSupplyChart,
-  };
+  const { data: timeSeriesData } = useTimeSeriesData(
+    daoId,
+    appliedMetrics,
+    TimeInterval.ONE_YEAR,
+    {
+      refreshInterval: 300000,
+      revalidateOnFocus: false,
+    },
+  );
 
-  const filterData = Object.keys(appliedMetrics);
+  const chartData = appliedMetrics.reduce(
+    (acc, metricKey) => {
+      const metric = metricsSchema[metricKey];
+
+      if (metric) {
+        acc[metricKey] = metric;
+      }
+
+      return acc;
+    },
+    {} as typeof metricsSchema,
+  );
 
   return (
     <TheSectionLayout
@@ -98,31 +88,23 @@ export const TokenDistributionSection = () => {
           <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
             GOVERNANCE SUPPLY TRENDS (CAT)
           </CardTitle>
-          {Object.values(datasets).some((value) => value!.length > 0) ? (
-            <MultilineChartTokenDistribution
-              datasets={datasets}
-              chartConfig={initialChartConfig}
-              filterData={filterData}
-            />
-          ) : (
-            <MultilineChartTokenDistribution
-              datasets={mockedTokenMultineDatasets}
-              chartConfig={initialChartConfig}
-              filterData={filterData}
-              mocked={true}
-            />
-          )}
+          <TokenDistributionChart
+            appliedMetrics={appliedMetrics}
+            timeSeriesData={timeSeriesData}
+            chartConfig={chartData}
+            hoveredMetricKey={hoveredMetricKey}
+          />
         </CardContent>
         <div className="border-light-dark mx-4 w-px border-r border-dashed" />
         <div className="flex w-full max-w-72 items-start sm:flex-row">
-          <ChartMetrics
+          <TokenDistributionMetrics
             appliedMetrics={appliedMetrics}
             setAppliedMetrics={setAppliedMetrics}
-            allMetrics={allMetrics}
+            metricsSchema={metricsSchema}
+            setHoveredMetricKey={setHoveredMetricKey}
           />
         </div>
       </Card>
-      {/* <TokenDistributionTable /> */}
     </TheSectionLayout>
   );
 };

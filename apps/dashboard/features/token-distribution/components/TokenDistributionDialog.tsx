@@ -12,31 +12,36 @@ import { X, Plus, PlusIcon, Check } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/cn";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 // TODO: move to shared when types is known
 interface Metric {
-  color: string;
   label: string;
+  color: string;
   category: string;
 }
 
-export const ChartMetricsDialog = ({
+interface MetricWithKey extends Metric {
+  key: MetricTypesEnum;
+}
+
+export const TokenDistributionDialog = ({
   appliedMetrics,
-  allMetrics,
+  metricsSchema,
   onApply,
 }: {
-  appliedMetrics: Record<string, Metric[]>;
-  allMetrics: Record<string, Metric[]>;
-  onApply: (items: Metric[]) => void;
+  appliedMetrics: Record<string, MetricWithKey[]>;
+  metricsSchema: Record<string, MetricWithKey[]>;
+  onApply: (metric: MetricTypesEnum[]) => void;
 }) => {
-  const [selectedMetrics, setSelectedMetrics] = useState<Metric[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<MetricTypesEnum[]>([]);
 
-  const handleSelectMetric = (metric: Metric) => {
-    setSelectedMetrics((prev) => {
-      const exists = prev.find((m) => m.label === metric.label);
-      if (exists) return prev.filter((m) => m.label !== metric.label);
-      return [...prev, metric];
-    });
+  const handleSelectMetric = (metricKey: MetricTypesEnum) => {
+    setSelectedMetrics((prev) =>
+      prev.includes(metricKey)
+        ? prev.filter((m) => m !== metricKey)
+        : [...prev, metricKey],
+    );
   };
 
   const handleApplyMetric = () => {
@@ -46,7 +51,7 @@ export const ChartMetricsDialog = ({
 
   const isAllMetricsApplied =
     appliedMetrics &&
-    Object.entries(allMetrics).some(
+    Object.entries(metricsSchema).some(
       ([category, metrics]) =>
         appliedMetrics[category]?.length === metrics.length,
     );
@@ -74,7 +79,7 @@ export const ChartMetricsDialog = ({
           </Title>
           <div className="border-light-dark h-px w-full border-t" />
           <div className="flex flex-col px-4 pt-4">
-            {Object.entries(allMetrics).map(([category, metrics], index) => {
+            {Object.entries(metricsSchema).map(([category, metrics], index) => {
               if (appliedMetrics[category]?.length === metrics.length)
                 return null;
 
@@ -86,19 +91,17 @@ export const ChartMetricsDialog = ({
                   <div className="flex w-full flex-wrap gap-2 sm:gap-3">
                     {metrics.map((metric) => {
                       const isAlreadyApplied = appliedMetrics[category]?.some(
-                        (i) => i.label === metric.label,
+                        (i) => i.key === metric.key,
                       );
 
-                      const isSelected = selectedMetrics.some(
-                        (m) => m.label === metric.label,
-                      );
+                      const isSelected = selectedMetrics.includes(metric.key);
 
                       if (isAlreadyApplied) return null;
 
                       return (
                         <div
                           key={metric.label}
-                          onClick={() => handleSelectMetric(metric)}
+                          onClick={() => handleSelectMetric(metric.key)}
                           className={cn(
                             `bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm`,
                             isSelected
@@ -116,7 +119,7 @@ export const ChartMetricsDialog = ({
                       );
                     })}
                   </div>
-                  {index !== Object.keys(allMetrics).length - 1 && (
+                  {index !== Object.keys(metricsSchema).length - 1 && (
                     <div className="border-light-dark mt-4 h-px w-full border-t border-dashed" />
                   )}
                 </div>

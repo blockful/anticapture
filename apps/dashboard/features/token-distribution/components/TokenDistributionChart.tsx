@@ -4,9 +4,12 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  AreaChart,
   XAxis,
   YAxis,
   Tooltip,
+  Area,
+  Brush,
 } from "recharts";
 import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
@@ -14,23 +17,36 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
-interface MultilineChartTokenDistributionProps {
-  datasets: Record<string, DaoMetricsDayBucket[] | undefined>;
+interface TokenDistributionChartProps {
+  appliedMetrics: MetricTypesEnum[];
   chartConfig: Record<string, { label: string; color: string }>;
-  filterData?: string[];
-  mocked?: boolean;
+  timeSeriesData?: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | null;
+  hoveredMetricKey?: string | null;
 }
 
-export const MultilineChartTokenDistribution = ({
-  datasets,
+export const TokenDistributionChart = ({
+  timeSeriesData,
+  appliedMetrics,
   chartConfig,
-  filterData,
-  mocked = false,
-}: MultilineChartTokenDistributionProps) => {
-  if (!datasets || Object.keys(datasets).length === 0) {
-    return null;
+  hoveredMetricKey,
+}: TokenDistributionChartProps) => {
+  if (!timeSeriesData) {
+    return (
+      <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
+        <ResearchPendingChartBlur />;
+      </div>
+    );
   }
+
+  const datasets = appliedMetrics.reduce(
+    (acc, key) => {
+      acc[key] = timeSeriesData[key];
+      return acc;
+    },
+    {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>,
+  );
 
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>
@@ -58,13 +74,13 @@ export const MultilineChartTokenDistribution = ({
       (dataPoint) => !Object.values(dataPoint).some((value) => value == null),
     );
 
-  const visibleDataSets = Object.keys(datasets).filter(
-    (item) => !filterData || filterData.includes(item),
+  const isMocked = Object.values(datasets).every(
+    (value) => value!.length === 0,
   );
 
   return (
-    <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-      {mocked && <ResearchPendingChartBlur />}
+    <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
+      {isMocked && <ResearchPendingChartBlur />}
       <ChartContainer
         className="h-full w-full justify-start"
         config={chartConfig}
@@ -76,8 +92,6 @@ export const MultilineChartTokenDistribution = ({
             scale="time"
             type="number"
             domain={["auto", "auto"]}
-            tickLine={false}
-            axisLine={false}
             tickMargin={8}
             tickFormatter={(date) => timestampToReadableDate(date)}
           />
@@ -90,17 +104,40 @@ export const MultilineChartTokenDistribution = ({
               <TokenDistributionCustomTooltip chartConfig={chartConfig} />
             }
           />
-          {Object.keys(chartConfig)
-            .filter((item) => visibleDataSets.includes(item))
-            .map((key) => (
+          {Object.keys(chartConfig).map((key) => {
+            const isOpaque = hoveredMetricKey && !(key === hoveredMetricKey);
+            return (
               <Line
                 key={key}
                 dataKey={key}
                 stroke={chartConfig[key as keyof typeof chartConfig].color}
                 strokeWidth={2}
+                strokeOpacity={isOpaque ? 0.3 : 1}
                 dot={false}
               />
-            ))}
+            );
+          })}
+          <Brush
+            dataKey="date"
+            height={32}
+            stroke="#333"
+            fill="#1f1f1f"
+            tickFormatter={(timestamp) => timestampToReadableDate(timestamp)}
+          >
+            <AreaChart height={32} width={1128} data={chartData}>
+              <XAxis dataKey="date" hide />
+              <YAxis hide />
+              <Area
+                type="monotone"
+                dataKey={appliedMetrics[0]}
+                stroke="#3F3F46"
+                fill="#1f1f1f"
+                fillOpacity={0.3}
+                strokeWidth={1}
+                dot={false}
+              />
+            </AreaChart>
+          </Brush>
         </LineChart>
       </ChartContainer>
     </div>
