@@ -1,3 +1,5 @@
+import { DaoIdEnum } from "@/shared/types/daos";
+
 export interface DonationData {
   title: string;
   description: string;
@@ -8,8 +10,6 @@ export interface DonationData {
   chainLinks?: Record<string, string>;
   benefits: string[];
 }
-
-import { DaoIdEnum } from "@/shared/types/daos";
 
 export interface FundingSource {
   name: string;
