@@ -41,8 +41,8 @@ export const AccordionContentArea = ({
       {/* Top left and right corners */}
       {isOpen && showCorners && (
         <>
-          <div className="border-primary absolute left-0 top-0 size-3 border-l-2 border-t-2" />
-          <div className="border-primary absolute right-0 top-0 size-3 border-r-2 border-t-2" />
+          <div className="border-primary border-l-1 border-t-1 absolute left-0 top-0 size-3" />
+          <div className="border-primary border-r-1 border-t-1 absolute right-0 top-0 size-3" />
         </>
       )}
 
@@ -101,8 +101,8 @@ export const AccordionContentArea = ({
         {/* Bottom left and right corners */}
         {showCorners && (
           <>
-            <div className="border-primary absolute bottom-0 left-0 size-3 border-b-2 border-l-2" />
-            <div className="border-primary absolute bottom-0 right-0 size-3 border-b-2 border-r-2" />
+            <div className="border-primary border-b-1 border-l-1 absolute bottom-0 left-0 size-3" />
+            <div className="border-primary border-b-1 border-r-1 absolute bottom-0 right-0 size-3" />
           </>
         )}
       </div>
