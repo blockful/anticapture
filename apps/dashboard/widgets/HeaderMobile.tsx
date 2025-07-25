@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { cn } from "@/shared/utils/";
-import { X, Menu, BarChart4 } from "lucide-react";
+import { X, Menu, BarChart4, BookOpen, Heart, HelpCircle } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter, usePathname } from "next/navigation";
 import { AnticaptureIcon } from "@/shared/components/icons";
@@ -41,6 +41,24 @@ export const HeaderMobile = ({
     ],
     [router],
   );
+
+  const staticPages = [
+    {
+      anchorId: "donate",
+      label: "Donate",
+      icon: Heart,
+    },
+    {
+      anchorId: "glossary",
+      label: "Glossary",
+      icon: BookOpen,
+    },
+    {
+      anchorId: "faq",
+      label: "FAQ",
+      icon: HelpCircle,
+    },
+  ];
 
   function useLockBodyScroll(isLocked: boolean) {
     useEffect(() => {
@@ -127,6 +145,22 @@ export const HeaderMobile = ({
                 label={item.label}
                 onClick={item.onClick}
               />
+            ))}
+
+            <div className="border-light-dark w-full border-t" />
+
+            {staticPages.map((item) => (
+              <Link href={`/${item.anchorId}`} key={item.anchorId}>
+                <ButtonHeaderSidebar
+                  key={item.anchorId}
+                  anchorId={item.anchorId || ""}
+                  icon={item.icon}
+                  label={item.label}
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                  }}
+                />
+              </Link>
             ))}
           </div>
         </div>
