@@ -22,8 +22,7 @@ export const ProposalActivityRequest = z.object({
     .string()
     .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
   fromDate: z.coerce
-    .number()
-    .int()
+    .bigint()
     .positive("From date must be a positive timestamp")
     .optional(),
   skip: z.coerce
@@ -62,10 +61,26 @@ const userVoteSchema = z.object({
   support: z.string(),
   votingPower: z.string().default("0"),
   reason: z.string().nullable(),
-  timestamp: z.number(),
+  timestamp: z.bigint(),
 });
 
 export type UserVote = z.infer<typeof userVoteSchema>;
+
+const proposalSchema = z.object({
+  id: z.string(),
+  proposerAccountId: z.string(),
+  description: z.string().nullable(),
+  startBlock: z.string(),
+  endBlock: z.string(),
+  timestamp: z.bigint(),
+  status: z.string(),
+  forVotes: z.string(),
+  againstVotes: z.string(),
+  abstainVotes: z.string(),
+  userVote: userVoteSchema.optional(),
+});
+
+export type APIProposal = z.infer<typeof proposalSchema>;
 
 export const ProposalActivityResponse = z.object({
   address: z.string(),
@@ -75,21 +90,25 @@ export const ProposalActivityResponse = z.object({
   winRate: z.number(),
   yesRate: z.number(),
   avgTimeBeforeEnd: z.number(),
-  proposals: z.array(
-    z.object({
-      id: z.string(),
-      proposerAccountId: z.string(),
-      description: z.string().nullable(),
-      startBlock: z.string(),
-      endBlock: z.string(),
-      timestamp: z.number(),
-      status: z.string(),
-      forVotes: z.string(),
-      againstVotes: z.string(),
-      abstainVotes: z.string(),
-      userVote: userVoteSchema.optional(),
-    }),
-  ),
+  proposals: z.array(proposalSchema),
 });
 
 export type ProposalActivityResponse = z.infer<typeof ProposalActivityResponse>;
+
+export const ProposalActivityMapper = {
+  toApi: (proposal: DbProposalWithVote): APIProposal => {
+    return {
+      id: proposal.id,
+      proposerAccountId: proposal.proposerAccountId,
+      description: proposal.description,
+      startBlock: proposal.startBlock,
+      endBlock: proposal.endBlock,
+      timestamp: proposal.timestamp,
+      status: proposal.status.toString(),
+      forVotes: proposal.forVotes.toString(),
+      againstVotes: proposal.againstVotes.toString(),
+      abstainVotes: proposal.abstainVotes.toString(),
+      userVote: proposal.votes.length === 1 ? proposal.votes[0] : undefined,
+    };
+  },
+};

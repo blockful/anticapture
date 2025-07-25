@@ -12,18 +12,18 @@ import {
 } from "@/api/mappers";
 
 export interface ProposalsActivityRepository {
-  getFirstVoteTimestamp(address: Address): Promise<number | null>;
+  getFirstVoteTimestamp(address: Address): Promise<bigint | null>;
 
   getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined>;
 
   getProposals(
-    activityStart: number,
+    activityStart: bigint,
     votingPeriodSeconds: number,
-  ): Promise<(DbProposalWithVote & { proposalEndTimestamp: number })[]>;
+  ): Promise<(DbProposalWithVote & { proposalEndTimestamp: bigint })[]>;
 
   getProposalsWithVotesAndPagination(
     address: Address,
-    activityStart: number,
+    activityStart: bigint,
     votingPeriodSeconds: number,
     skip: number,
     limit: number,
@@ -39,16 +39,14 @@ export interface ProposalsActivityRepository {
 export class DrizzleProposalsActivityRepository
   implements ProposalsActivityRepository
 {
-  async getFirstVoteTimestamp(address: Address): Promise<number | null> {
+  async getFirstVoteTimestamp(address: Address): Promise<bigint | null> {
     const account = await db.query.accountPower.findFirst({
       where: eq(accountPower.accountId, address),
       columns: {
         firstVoteTimestamp: true,
       },
     });
-    return account?.firstVoteTimestamp
-      ? Number(account.firstVoteTimestamp)
-      : null;
+    return account?.firstVoteTimestamp ? account.firstVoteTimestamp : null;
   }
 
   async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined> {
@@ -62,9 +60,9 @@ export class DrizzleProposalsActivityRepository
   }
 
   async getProposals(
-    activityStart: number,
+    activityStart: bigint,
     votingPeriodSeconds: number,
-  ): Promise<(DbProposalWithVote & { proposalEndTimestamp: number })[]> {
+  ): Promise<(DbProposalWithVote & { proposalEndTimestamp: bigint })[]> {
     const proposals = await db.query.proposalsOnchain.findMany({
       where: gte(proposalsOnchain.timestamp, activityStart),
       with: {
@@ -74,13 +72,13 @@ export class DrizzleProposalsActivityRepository
 
     return proposals.map((proposal) => ({
       ...proposal,
-      proposalEndTimestamp: proposal.timestamp + votingPeriodSeconds,
+      proposalEndTimestamp: proposal.timestamp + BigInt(votingPeriodSeconds),
     }));
   }
 
   async getProposalsWithVotesAndPagination(
     _: Address,
-    __: number,
+    __: bigint,
     ___: number,
     ____: number,
     _____: number,

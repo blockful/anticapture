@@ -3,6 +3,7 @@ import {
   type ProposalActivityRequest,
   type DbProposalWithVote,
   type ProposalActivityResponse,
+  ProposalActivityMapper,
 } from "@/api/mappers";
 import { ProposalStatus } from "ponder:schema";
 import { DaoIdEnum } from "@/lib/enums";
@@ -79,47 +80,21 @@ export class ProposalsActivityService {
         .filter(Boolean).length,
       neverVoted: false,
       ...analytics,
-      proposals: proposals.map(
-        ({
-          id,
-          proposerAccountId,
-          description,
-          startBlock,
-          endBlock,
-          timestamp,
-          status,
-          forVotes,
-          againstVotes,
-          abstainVotes,
-          votes,
-        }) => ({
-          id,
-          proposerAccountId,
-          description,
-          startBlock,
-          endBlock,
-          timestamp,
-          status: status.toString(),
-          forVotes: forVotes.toString(),
-          againstVotes: againstVotes.toString(),
-          abstainVotes: abstainVotes.toString(),
-          userVote: votes.length === 1 ? votes[0] : undefined,
-        }),
-      ),
+      proposals: proposals.map(ProposalActivityMapper.toApi),
     };
   }
 
   private calculateActivityStart(
-    firstVoteTimestamp: number,
-    fromDate?: number,
-  ): number {
+    firstVoteTimestamp: bigint,
+    fromDate?: bigint,
+  ): bigint {
     return fromDate && fromDate > firstVoteTimestamp
       ? fromDate
       : firstVoteTimestamp;
   }
 
   private calculateAnalytics(
-    proposals: (DbProposalWithVote & { proposalEndTimestamp: number })[],
+    proposals: (DbProposalWithVote & { proposalEndTimestamp: bigint })[],
   ) {
     const userVotes = proposals.map((p) => p.votes).flat();
 
@@ -179,7 +154,7 @@ export class ProposalsActivityService {
   }
 
   private calculateAvgTimeBeforeEnd(
-    proposals: (DbProposalWithVote & { proposalEndTimestamp: number })[],
+    proposals: (DbProposalWithVote & { proposalEndTimestamp: bigint })[],
   ): number {
     const userVotes = proposals.map((p) => p.votes).flat();
 
