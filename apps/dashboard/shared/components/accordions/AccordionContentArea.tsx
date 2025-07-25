@@ -30,7 +30,7 @@ export const AccordionContentArea = ({
   return (
     <Card
       className={cn(
-        "!border-b-light-dark sm:border-light-dark sm:bg-surface-default xl4k:max-w-full border-b! flex w-full flex-col flex-wrap gap-3.5 rounded-none border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border",
+        "!border-b-light-dark border-light-dark bg-surface-default xl4k:max-w-full border-b! flex w-full flex-col flex-wrap gap-3.5 rounded-none border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border",
         isOpen ? "sm:border-middle-dark z-20" : "sm:hover:bg-middle-dark",
         className,
       )}
