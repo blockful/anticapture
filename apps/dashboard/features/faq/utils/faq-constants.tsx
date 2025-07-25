@@ -157,7 +157,6 @@ export const FAQ_ITEMS: FaqItem[] = [
         part, so our stages are assigned based on the most risky aspect a DAO
         currently has on its implementation.
         <br />
-        <br />
         Those risk levels can be low, medium or high, and are based on elements
         like voting delays, proposal thresholds, veto powers, flash loan
         protections, and more. The system helps communities see where they are
@@ -165,9 +164,6 @@ export const FAQ_ITEMS: FaqItem[] = [
         now it covers mostly Governor Bravo models, but we&apos;re already
         working on broader coverage.
         <br />
-        <strong>
-          → Check out our docs to understand Anticapture metrics [GITBOOK]
-        </strong>
       </>
     ),
   },
