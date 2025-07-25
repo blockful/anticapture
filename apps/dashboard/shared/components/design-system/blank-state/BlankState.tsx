@@ -53,14 +53,17 @@ export const BlankState = ({
       <div className="flex">
         <Icon className={cn(iconVariants({ variant }))} />
       </div>
-      {title && (
-        <div className="text-primary flex font-mono text-[13px] text-sm font-medium uppercase leading-[20px]">
-          {title}
+      <div className="flex flex-col items-center justify-center">
+        {title && (
+          <div className="text-primary flex font-mono text-[13px] text-sm font-medium uppercase leading-[20px]">
+            {title}
+          </div>
+        )}
+        <div className="text-secondary font-regular flex text-sm">
+          {description}
         </div>
-      )}
-      <div className="text-secondary font-regular flex text-sm">
-        {description}
       </div>
+
       {children}
     </div>
   );
