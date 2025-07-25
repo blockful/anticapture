@@ -115,24 +115,24 @@ export const GovernanceImplementationCard = ({
             <p className="text-secondary text-sm">{field.description}</p>
           </div>
 
-          <div
-            className={cn(
-              "flex w-full flex-col gap-1 rounded-lg p-2",
-              riskBoxStyles[field.riskLevel],
-            )}
-          >
-            <p
+          {field.riskExplanation && (
+            <div
               className={cn(
-                "font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]",
-                riskTextColors[field.riskLevel],
+                "flex w-full flex-col gap-1 rounded-lg p-2",
+                riskBoxStyles[field.riskLevel],
               )}
             >
-              Risk explained
-            </p>
-            <p className="text-secondary text-sm">
-              Uniswap has no vote mutability, configuring high risk for the DAO.
-            </p>
-          </div>
+              <p
+                className={cn(
+                  "font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]",
+                  riskTextColors[field.riskLevel],
+                )}
+              >
+                Risk explained
+              </p>
+              <p className="text-secondary text-sm">{field.riskExplanation}</p>
+            </div>
+          )}
         </div>
       </div>
     </Card>
