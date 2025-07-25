@@ -31,15 +31,16 @@ export const ResilienceStagesSection = ({
 }: ResilienceStagesSectionProps) => {
   const daoConfig = daoConfigByDaoId[daoId];
 
-  const currentDaoStage = getDaoStageFromFields(
-    fieldsToArray(daoConfig.governanceImplementation?.fields),
-  );
+  const currentDaoStage = getDaoStageFromFields({
+    fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
+  });
 
   const stageToRiskMapping: Record<Stage, RiskLevel> = {
     [Stage.ZERO]: RiskLevel.HIGH,
     [Stage.ONE]: RiskLevel.MEDIUM,
     [Stage.TWO]: RiskLevel.LOW,
     [Stage.NONE]: RiskLevel.NONE,
+    [Stage.UNKNOWN]: RiskLevel.NONE,
   };
 
   const highRiskItems = filterFieldsByRiskLevel(
@@ -64,6 +65,7 @@ export const ResilienceStagesSection = ({
     [Stage.ONE]: "right-[25%]",
     [Stage.TWO]: "right-0 hidden",
     [Stage.NONE]: "",
+    [Stage.UNKNOWN]: "",
   };
 
   const StagesToLineStyle: Record<Stage, string> = {
@@ -71,6 +73,7 @@ export const ResilienceStagesSection = ({
     [Stage.ONE]: "w-[75%] bg-warning",
     [Stage.TWO]: "w-full bg-success",
     [Stage.NONE]: "",
+    [Stage.UNKNOWN]: "",
   };
 
   const StagesToBorderColor: Record<Stage, string> = {
@@ -78,6 +81,7 @@ export const ResilienceStagesSection = ({
     [Stage.ONE]: "border-warning",
     [Stage.TWO]: "border-success",
     [Stage.NONE]: "",
+    [Stage.UNKNOWN]: "",
   };
 
   return (
@@ -100,19 +104,19 @@ export const ResilienceStagesSection = ({
           ></div>
 
           {/* Stage 0 */}
-          <div className="bg-surface-default absolute top-1/2 left-0 -translate-y-1/2">
+          <div className="bg-surface-default absolute left-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
           </div>
 
           {/* Stage 1 */}
-          <div className="bg-surface-default absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="bg-surface-default absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
           </div>
 
           {/* Current Position Indicator */}
           <div
             className={cn(
-              "absolute top-1/2 translate-x-1/2 -translate-y-1/2",
+              "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
               StagesToDaoAvatarPosition[currentDaoStage],
             )}
           >
@@ -127,7 +131,7 @@ export const ResilienceStagesSection = ({
           </div>
 
           {/* Stage 2 */}
-          <div className="bg-surface-default absolute top-1/2 right-0 -translate-y-1/2">
+          <div className="bg-surface-default absolute right-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
           </div>
         </div>

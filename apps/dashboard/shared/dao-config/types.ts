@@ -147,4 +147,5 @@ export interface DaoConfiguration extends BaseInfo {
     snapshotSpace: string;
   };
   riskAnalysis?: boolean;
+  noStage?: boolean;
 }

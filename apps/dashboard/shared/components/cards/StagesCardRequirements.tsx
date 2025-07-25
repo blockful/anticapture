@@ -11,6 +11,7 @@ const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ONE]: "text-warning",
   [Stage.TWO]: "text-success",
   [Stage.NONE]: "text-middle-dark",
+  [Stage.UNKNOWN]: "text-middle-dark",
 };
 
 const STAGE_TITLES: Record<Stage, string> = {
@@ -18,6 +19,7 @@ const STAGE_TITLES: Record<Stage, string> = {
   [Stage.ONE]: "STAGE 1: MEDIUM RISK",
   [Stage.TWO]: "STAGE 2: LOW RISK",
   [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
 };
 
 const STAGE_DESCRIPTIONS: Record<Stage, string> = {
@@ -28,6 +30,7 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
   [Stage.TWO]:
     "A Stage 2 DAO has no implementation details identified as Medium or High Risk.",
   [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
@@ -35,6 +38,7 @@ const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
   [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-px",
   [Stage.TWO]: "hidden",
   [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
 };
 
 interface StagesCardRequirementsProps {
@@ -95,7 +99,7 @@ const Title = ({
   return (
     <h3
       className={cn([
-        "mb-2 font-mono text-xs leading-4 font-medium tracking-wider uppercase",
+        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
         STAGE_STYLES[daoStage],
       ])}
     >
@@ -106,7 +110,7 @@ const Title = ({
 
 const Description = ({ children }: { children: ReactNode }) => {
   return (
-    <p className="font-inter text-primary mb-4 text-sm leading-5 font-normal">
+    <p className="font-inter text-primary mb-4 text-sm font-normal leading-5">
       {children}
     </p>
   );
@@ -127,7 +131,7 @@ const Issue = ({
       {daoStage === Stage.ONE && (
         <AlertCircle className="text-warning size-4" />
       )}
-      <span className="font-inter text-primary text-sm leading-5 font-normal">
+      <span className="font-inter text-primary text-sm font-normal leading-5">
         {children}
       </span>
     </div>

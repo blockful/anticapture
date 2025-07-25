@@ -191,16 +191,17 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           return (
             <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
               <StageTag
-                daoStage={Stage.NONE}
-                tagStage={Stage.NONE}
+                daoStage={Stage.UNKNOWN}
+                tagStage={Stage.UNKNOWN}
                 showStageText
               />
             </div>
           );
         }
-        const stage = getDaoStageFromFields(
-          fieldsToArray(daoConfig.governanceImplementation?.fields),
-        );
+        const stage = getDaoStageFromFields({
+          fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
+        });
+
         return (
           <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
             <StageTag daoStage={stage} tagStage={stage} showStageText />

@@ -20,8 +20,7 @@ interface StagesDaoOverviewProps {
 }
 
 export const StagesDaoOverview = ({
-  currentStage = Stage.NONE,
-  itemsToNextStage = 3,
+  currentStage = Stage.UNKNOWN,
   highRiskItems = [],
   mediumRiskItems = [],
   lowRiskItems = [],
@@ -63,7 +62,7 @@ export const StagesDaoOverview = ({
   };
 
   const stageToText = (stage: Stage) => {
-    if (stage === Stage.NONE) {
+    if (stage === Stage.UNKNOWN) {
       return "?";
     }
     return stage;
@@ -85,7 +84,9 @@ export const StagesDaoOverview = ({
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
                   "text-success": currentStage === Stage.TWO,
-                  "text-secondary": currentStage === Stage.NONE,
+                  "text-secondary":
+                    currentStage === Stage.NONE ||
+                    currentStage === Stage.UNKNOWN,
                 },
               )}
             >
@@ -96,12 +97,12 @@ export const StagesDaoOverview = ({
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="border-foreground group text-primary border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
+              className="border-foreground text-primary group border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
               <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
-                {currentStage !== Stage.NONE
+                {currentStage !== Stage.UNKNOWN
                   ? formatPlural(
                       highRiskItems.length ||
                         mediumRiskItems.length ||
@@ -113,11 +114,13 @@ export const StagesDaoOverview = ({
               <span
                 className={cn([
                   "text-alternative-sm text-secondary duration-300",
-                  { "group-hover:text-primary": currentStage !== Stage.NONE },
+                  {
+                    "group-hover:text-primary": currentStage !== Stage.UNKNOWN,
+                  },
                 ])}
               >
                 {" "}
-                {currentStage !== Stage.NONE
+                {currentStage !== Stage.UNKNOWN
                   ? `TO STAGE ${Number(currentStage) + 1}`
                   : "TO NEXT"}
               </span>
@@ -127,40 +130,40 @@ export const StagesDaoOverview = ({
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">
           <OutlinedBox
             variant={"error"}
-            disabled={currentStage === Stage.NONE}
+            disabled={currentStage === Stage.UNKNOWN}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
             <span className="font-mono">
-              {currentStage !== Stage.NONE ? highRiskItems.length : "?"}
+              {currentStage !== Stage.UNKNOWN ? highRiskItems.length : "?"}
             </span>
           </OutlinedBox>
           <OutlinedBox
             variant="warning"
-            disabled={currentStage === Stage.NONE}
+            disabled={currentStage === Stage.UNKNOWN}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
             <span className="font-mono">
-              {currentStage !== Stage.NONE ? mediumRiskItems.length : "?"}
+              {currentStage !== Stage.UNKNOWN ? mediumRiskItems.length : "?"}
             </span>
           </OutlinedBox>
           <OutlinedBox
             variant="success"
-            disabled={currentStage === Stage.NONE}
+            disabled={currentStage === Stage.UNKNOWN}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
             <span className="font-mono">
-              {currentStage !== Stage.NONE ? lowRiskItems.length : "?"}
+              {currentStage !== Stage.UNKNOWN ? lowRiskItems.length : "?"}
             </span>
           </OutlinedBox>
         </div>
       </div>
-      {showTooltip && currentStage !== Stage.NONE && (
+      {showTooltip && currentStage !== Stage.UNKNOWN && (
         <StageRequirementsTooltip
           currentStage={currentStage}
           nextStage={Number(currentStage) + 1}

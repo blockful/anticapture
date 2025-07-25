@@ -144,7 +144,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <h3 className="text-primary text-[24px] leading-8 font-medium">
+                <h3 className="text-primary text-[24px] font-medium leading-8">
                   {daoConfig.name}
                 </h3>
               </div>
@@ -180,9 +180,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
-              currentStage={getDaoStageFromFields(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-              )}
+              currentStage={getDaoStageFromFields({
+                fields: fieldsToArray(
+                  daoConfig.governanceImplementation?.fields,
+                ),
+              })}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.HIGH,
@@ -218,7 +220,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
           <DaoAvatarIcon daoId={daoId} className="size-icon-md" isRounded />
-          <h2 className="text-primary text-[24px] leading-8 font-semibold">
+          <h2 className="text-primary text-[24px] font-semibold leading-8">
             {daoConfig.name}
           </h2>
         </div>
@@ -242,16 +244,18 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
           <div className="flex w-full flex-col">
-            <div className="mt-3 mb-3 flex h-full items-center gap-2">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
               <p className="text-primary font-mono text-xs font-medium tracking-wider">
                 RESILIENCE STAGE
               </p>
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
-              currentStage={getDaoStageFromFields(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-              )}
+              currentStage={getDaoStageFromFields({
+                fields: fieldsToArray(
+                  daoConfig.governanceImplementation?.fields,
+                ),
+              })}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.HIGH,
@@ -267,7 +271,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
           <div className="flex w-full flex-col">
-            <div className="mt-3 mb-3 flex h-full items-center gap-2">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
               <h3 className="text-primary font-mono text-xs font-medium tracking-wider">
                 RISK AREAS
               </h3>

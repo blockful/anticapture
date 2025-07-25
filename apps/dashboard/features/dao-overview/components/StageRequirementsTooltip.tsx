@@ -28,6 +28,7 @@ export const StageRequirementsTooltip = ({
     [Stage.ZERO]: <AlertTriangleIcon className="text-error size-4" />,
     [Stage.ONE]: <AlertCircleIcon className="text-warning size-4" />,
     [Stage.TWO]: <CheckCircleIcon className="text-success size-4" />,
+    [Stage.UNKNOWN]: <></>,
     [Stage.NONE]: <></>,
   };
   const nextStageTextColor = Array.from([
@@ -37,7 +38,7 @@ export const StageRequirementsTooltip = ({
   ])[Number(nextStage) % 3] as "text-error" | "text-warning" | "text-success";
   return (
     <div
-      className="sm:translate-x absolute top-[calc(100%-8px)] left-0 z-50 mt-2"
+      className="sm:translate-x absolute left-0 top-[calc(100%-8px)] z-50 mt-2"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
@@ -59,7 +60,7 @@ export const StageRequirementsTooltip = ({
           </div>
 
           {/* Title */}
-          <h3 className="text-primary text-start font-mono text-base leading-5 font-normal tracking-wider uppercase">
+          <h3 className="text-primary text-start font-mono text-base font-normal uppercase leading-5 tracking-wider">
             HAS VECTORS THAT CAN MAKE IT VULNERABLE
           </h3>
         </div>

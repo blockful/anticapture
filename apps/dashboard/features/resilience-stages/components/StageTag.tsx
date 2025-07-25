@@ -7,6 +7,7 @@ const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ONE]: "border-warning text-warning bg-surface-opacity-warning",
   [Stage.TWO]: "border-success text-success bg-surface-opacity-success",
   [Stage.NONE]: "border-middle-dark bg-surface-contrast text-secondary",
+  [Stage.UNKNOWN]: "border-middle-dark bg-surface-contrast text-secondary",
 };
 
 interface StageTagProps {
@@ -36,7 +37,7 @@ export const StageTag = ({
         <span className="hidden sm:inline">STAGE </span>
 
         {showStageText && <span className="inline sm:hidden">STAGE </span>}
-        {tagStage === Stage.NONE ? "?" : tagStage}
+        {tagStage === Stage.UNKNOWN ? "?" : tagStage}
       </span>
     </div>
   );
