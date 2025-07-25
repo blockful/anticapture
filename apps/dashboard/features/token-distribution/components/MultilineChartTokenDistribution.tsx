@@ -53,14 +53,17 @@ export const MultilineChartTokenDistribution = ({
       });
 
       return dataPoint;
-    });
+    })
+    .filter(
+      (dataPoint) => !Object.values(dataPoint).some((value) => value == null),
+    );
 
   const visibleDataSets = Object.keys(datasets).filter(
     (item) => item !== filterData,
   );
 
   return (
-    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg border-lightDark bg-dark text-white">
+    <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>

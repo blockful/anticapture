@@ -11,7 +11,11 @@ const daoItemQueries = [
   'compareTreasury',
   'compareVotes',
   'getTotalAssets',
-  'getVotingPower'
+  'getVotingPower',
+  'historicalTokenData',
+  'proposalsActivity',
+  'historicalBalances',
+  'historicalVotingPower',
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
@@ -22,19 +26,19 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
       }
     `,
     resolve: async (root: any, args: any, context: any, info) => {
-      const { daoId } = args;
+      const daoId = args.daoId || context.headers["anticapture-dao-id"];
 
       if (!daoId) {
         throw new Error(`Missing where.daoId in query for ${fieldName}`);
       }
 
       const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
-
       if (!targetClient || typeof targetClient[fieldName] !== 'function') {
         return {}
       }
 
       try {
+        
         return targetClient[fieldName]({
           root,
           args,

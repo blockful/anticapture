@@ -39,10 +39,11 @@ export const ButtonHeaderSidebar = ({
   return (
     <button
       className={cn(
-        `group flex w-full items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium`,
+        `group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium`,
         {
           "cursor-default bg-white": isActive(anchorId),
-          "hover:border-lightDark hover:bg-lightDark": !isActive(anchorId),
+          "hover:border-light-dark hover:bg-surface-contrast":
+            !isActive(anchorId),
         },
         className,
       )}
@@ -51,14 +52,14 @@ export const ButtonHeaderSidebar = ({
     >
       <Icon
         className={cn("size-4", {
-          "text-darkest": isActive(anchorId),
-          "text-foreground group-hover:text-white": !isActive(anchorId),
+          "text-inverted": isActive(anchorId),
+          "text-secondary group-hover:text-primary": !isActive(anchorId),
         })}
       />
       <p
         className={cn("", {
-          "text-darkest": isActive(anchorId),
-          "text-foreground group-hover:text-white": !isActive(anchorId),
+          "text-inverted": isActive(anchorId),
+          "text-secondary group-hover:text-primary": !isActive(anchorId),
         })}
       >
         {label}

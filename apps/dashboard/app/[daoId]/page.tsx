@@ -33,13 +33,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>
     ] || `${baseUrl}/opengraph-images/default.png`;
 
-  // Generate title and description based on support stage
-  let title = `Anticapture - ${daoId} DAO`;
-  let description = `Explore and mitigate governance risks in ${daoId} DAO.`;
-
   return {
-    title,
-    description,
+    title: `Anticapture - ${daoId} DAO`,
+    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
     openGraph: {
       title: `Anticapture - ${daoId} DAO`,
       description: `Explore and mitigate governance risks in ${daoId} DAO.`,
@@ -63,7 +59,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default function DaoPage() {
   return (
-    <div className="flex h-screen overflow-hidden bg-darkest">
+    <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
         <HeaderDAOSidebar />
@@ -73,8 +69,8 @@ export default function DaoPage() {
           <StickyPageHeader />
           <HeaderMobile />
         </div>
-        <div className="flex w-full flex-col items-center xl4k:min-h-screen">
-          <div className="w-full xl4k:max-w-7xl">
+        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full">
             <DaoTemplate />
           </div>
         </div>

@@ -43,14 +43,14 @@ export const RiskTooltipCard = ({
   const content = (
     <div onClick={(e) => e.stopPropagation()} className="flex flex-col">
       <div className="mb-2 flex items-center gap-2">
-        <h4 className="font-mono text-[13px] font-medium uppercase tracking-wider text-white">
+        <h4 className="text-alternative-sm text-primary font-mono font-medium tracking-wider uppercase">
           {title}
         </h4>
         {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
       </div>
       {/* Divider */}
-      <div className="mb-3 h-px bg-lightDark" />
-      <div className="text-sm font-normal leading-tight text-foreground">
+      <div className="bg-surface-contrast mb-3 h-px" />
+      <div className="text-secondary text-sm leading-tight font-normal">
         {descriptionArray.map((paragraph, index) => (
           <p
             key={index}
@@ -68,7 +68,7 @@ export const RiskTooltipCard = ({
       <Popover>
         <PopoverTrigger asChild>
           <div
-            className="focus:outline-none focus:ring-0 data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:outline-none data-[state=open]:ring-0"
+            className="focus:ring-0 focus:outline-hidden data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:ring-0 data-[state=open]:outline-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {children}
@@ -79,9 +79,9 @@ export const RiskTooltipCard = ({
           align="center"
           sideOffset={10}
           className={cn(
-            "z-50 rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg",
+            "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
             "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-            "whitespace-normal break-words",
+            "break-words whitespace-normal",
           )}
         >
           {content}
@@ -99,9 +99,9 @@ export const RiskTooltipCard = ({
         sideOffset={10}
         avoidCollisions={true}
         className={cn(
-          "z-50 rounded-md border border-lightDark bg-darkest p-3 text-left shadow-lg",
+          "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "whitespace-normal break-words",
+          "break-words whitespace-normal",
         )}
       >
         {content}

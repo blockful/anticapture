@@ -91,16 +91,16 @@ export const TokenDistributionTable = () => {
         const currentValue = row.getValue("currentValue");
         const details = metric ? metricDetails[metric] : null;
         return (
-          <p
+          <div
             className={cn(
-              "scrollbar-none flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3 text-white",
-              { "blur-[4px]": currentValue === null },
+              "scrollbar-none text-primary flex w-full max-w-48 items-center gap-2 space-x-1 overflow-auto px-4 py-3",
+              { "blur-xs": currentValue === null },
             )}
           >
             {details && details.icon}
             {metric}
             {details && <TooltipInfo text={details.tooltip} />}
-          </p>
+          </div>
         );
       },
       header: () => (
@@ -125,7 +125,7 @@ export const TokenDistributionTable = () => {
           const randomNumber = Math.floor(Math.random() * 999);
           const randomValues = ["K", "M"];
           return (
-            <div className="flex items-center justify-end px-4 py-3 text-end blur-[4px]">
+            <div className="flex items-center justify-end px-4 py-3 text-end blur-xs">
               {randomNumber}
               {randomValues[randomNumber % 2]}
             </div>
@@ -140,7 +140,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           {String(daoId)?.toUpperCase()} Amount
@@ -177,7 +177,7 @@ export const TokenDistributionTable = () => {
         }
         if (variation === null) {
           return (
-            <div className="flex items-center justify-end text-green-400 blur-[4px]">
+            <div className="text-success flex items-center justify-end blur-xs">
               {(Math.random() * 100).toFixed(2)}%
             </div>
           );
@@ -186,16 +186,16 @@ export const TokenDistributionTable = () => {
           <p
             className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
-                ? "text-green-400"
+                ? "text-success"
                 : Number(variation) < 0
-                  ? "text-red-400"
+                  ? "text-error"
                   : ""
             }`}
           >
             {Number(variation) > 0 ? (
-              <ChevronUp className="size-4 text-green-400" />
+              <ChevronUp className="text-success size-4" />
             ) : Number(variation) < 0 ? (
-              <ChevronDown className="size-4 text-red-400" />
+              <ChevronDown className="text-error size-4" />
             ) : null}
             {variation}%
           </p>
@@ -204,7 +204,7 @@ export const TokenDistributionTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-end px-4 text-end"
           onClick={() => column.toggleSorting()}
         >
           Variation
@@ -238,7 +238,7 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="flex w-full justify-center py-2.5 blur-[4px]">
+            <div className="flex w-full justify-center py-2.5 blur-xs">
               <Sparkline
                 data={mockedTableChartMetrics.map((item) => Number(item.high))}
                 strokeColor={"#4ADE80"}

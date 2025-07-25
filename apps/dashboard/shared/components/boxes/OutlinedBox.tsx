@@ -7,6 +7,7 @@ type OutlinedBoxProps = ComponentProps<"div"> & {
   customIcon?: ReactNode;
   hideIcon?: boolean;
   iconPosition?: "left" | "right";
+  disabled?: boolean;
 };
 
 export const OutlinedBox = ({
@@ -15,18 +16,21 @@ export const OutlinedBox = ({
   hideIcon = false,
   customIcon,
   children,
+  disabled = false,
   ...props
 }: OutlinedBoxProps) => {
   const variantClasses = {
     success:
-      "border-success bg-success bg-opacity-[12%] text-success font-mono text-sm font-medium",
+      "border-success bg-success/12 text-success font-mono text-sm font-medium",
     warning:
-      "border-warning bg-warning bg-opacity-[12%] text-warning font-mono text-sm font-medium",
-    error:
-      "border-error bg-error bg-opacity-[12%] text-error font-mono text-sm font-medium",
+      "border-warning bg-warning/12 text-warning font-mono text-sm font-medium",
+    error: "border-error bg-error/12 text-error font-mono text-sm font-medium",
     lightDark:
-      "border-foreground bg-lightDark text-foreground font-mono text-sm font-medium",
+      "border-foreground bg-surface-contrast text-secondary font-mono text-sm font-medium",
   };
+
+  const disabledVariantClasses =
+    "bg-surface-contrast text-secondary font-mono text-sm font-medium border-[#3F3F46]";
 
   const variantIcons = {
     success: <CheckCircle2 className="size-4" />,
@@ -42,6 +46,7 @@ export const OutlinedBox = ({
         "flex items-center gap-2 rounded-md border",
         props.className,
         variantClasses[variant],
+        disabled && disabledVariantClasses,
         {
           "flex-row-reverse": iconPosition === "right",
         },

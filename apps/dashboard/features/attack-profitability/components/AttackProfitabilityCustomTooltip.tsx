@@ -17,7 +17,7 @@ export const AttackProfitabilityCustomTooltip: React.FC<
 
   return (
     <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
-      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
+      <p className="flex pb-2 text-xs leading-[14px] font-medium text-neutral-50">
         {date}
       </p>
       {payload.map((entry, index) => {
@@ -34,7 +34,7 @@ export const AttackProfitabilityCustomTooltip: React.FC<
           >
             {formattedName}:{" "}
             <strong>
-              {value !== 0 ? formatNumberUserReadable(value) : "No Data"}
+              {value !== 0 ? `$${formatNumberUserReadable(value)}` : "No Data"}
             </strong>
           </p>
         );

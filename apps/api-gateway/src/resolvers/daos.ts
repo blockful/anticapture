@@ -1,8 +1,9 @@
 export const daosResolver = {
   resolve: async (root: any, args: any, context: any, info) => {
+    const daoId = args?.where?.id || context.headers["anticapture-dao-id"];
 
-    if (args.where.id) {
-      const graphqlClient = context[`graphql_${args.where.id.toUpperCase()}`]?.Query;
+    if (daoId) {
+      const graphqlClient = context[`graphql_${daoId.toUpperCase()}`]?.Query;
       return graphqlClient.daos({
         root,
         args,

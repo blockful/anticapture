@@ -1,14 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["euc.li"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+    domains: ["euc.li", "ensdata.net", "static.ricmoo.com", "www.ricmoo.com"],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   webpack: (config: { externals: string[] }) => {
     config.externals.push("pino-pretty");
     return config;
-  },
-  turbopack: {
-    resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
   },
   async headers() {
     return [

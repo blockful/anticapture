@@ -9,6 +9,7 @@ export const UNI: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
+    chainId: 1,
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -17,11 +18,13 @@ export const UNI: DaoConfiguration = {
     cancelFunction:
       "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC#writeContract%23F2",
     snapshot: "https://snapshot.box/#/s:uniswapgovernance.eth",
+    tally: "https://tally.xyz/gov/uniswap",
     rules: {
       delay: true,
       changeVote: true,
       timelock: true,
       cancelFunction: true,
+      logic: "For",
     },
   },
   governanceImplementation: {
@@ -35,12 +38,12 @@ export const UNI: DaoConfiguration = {
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
       },
-      [GovernanceImplementationEnum.DNS_PROTECTION]: {
+      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.DNS_PROTECTION
+            GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
@@ -48,12 +51,12 @@ export const UNI: DaoConfiguration = {
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
       },
-      [GovernanceImplementationEnum.EXTRACTABLE_VALUE]: {
+      [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "<10k USD",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.EXTRACTABLE_VALUE
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
@@ -180,5 +183,5 @@ export const UNI: DaoConfiguration = {
   riskAnalysis: true,
   tokenDistribution: true,
   resilienceStages: true,
-  governanceActivity: true,
+  dataTables: false,
 };

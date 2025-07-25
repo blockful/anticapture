@@ -4,9 +4,27 @@ import { getDateRange } from "@/shared/utils";
 import { useScreenSize } from "@/shared/hooks";
 import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { CardTitle } from "@/shared/components/ui/card";
+import { CardDescription, CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
-import InlineAlert from "../design-system/alerts/inline-alert/InlineAlert";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { Info } from "lucide-react";
+
+interface TheSectionLayoutProps {
+  icon?: ReactNode;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  infoText?: string;
+  days?: string;
+  switchDate?: ReactNode;
+  isSwitchDateLinear?: boolean;
+  riskLevel?: ReactNode;
+  children: ReactNode;
+  anchorId: string;
+  className?: string;
+  subHeader?: ReactNode;
+  leftContent?: ReactNode;
+}
 
 export const TheSectionLayout = ({
   icon,
@@ -22,21 +40,8 @@ export const TheSectionLayout = ({
   anchorId,
   className,
   subHeader,
-}: {
-  icon?: ReactNode;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  infoText?: string;
-  days?: string;
-  switchDate?: ReactNode;
-  isSwitchDateLinear?: boolean;
-  riskLevel?: ReactNode;
-  children: ReactNode;
-  anchorId: string;
-  className?: string;
-  subHeader?: ReactNode;
-}) => {
+  leftContent,
+}: TheSectionLayoutProps) => {
   const { isMobile, isDesktop } = useScreenSize();
   const { ref, inView } = useInView({
     threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
@@ -53,7 +58,7 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:bg-dark sm:px-5 sm:py-7",
+        "sm:bg-surface-default flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:px-5 sm:py-7",
         isSwitchDateLinear && "mt-4 gap-4",
         className,
       )}
@@ -71,9 +76,9 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
+                  <h3 className="text-primary text-xl font-medium leading-7 tracking-[-0.5%] sm:text-left">
                     {title}
-                  </h1>
+                  </h3>
                 </div>
                 <div className="flex items-center">{switchDate}</div>
               </div>
@@ -83,9 +88,9 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h1 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
+                    <h4 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
                       {title}
-                    </h1>
+                    </h4>
                   </div>
                   {subHeader && (
                     <div className="flex items-center gap-2">{subHeader}</div>
@@ -98,7 +103,7 @@ export const TheSectionLayout = ({
             )}
           </div>
           <div className="flex w-full">
-            <p className="flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] text-foreground sm:text-sm">
+            <p className="text-secondary flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] sm:text-sm">
               {description}
             </p>
           </div>
@@ -115,20 +120,35 @@ export const TheSectionLayout = ({
             isSwitchDateLinear ? "hidden" : "flex",
           )}
         >
-          <div className="flex flex-col">
-            <CardTitle className="flex items-center font-mono text-[13px] font-medium uppercase leading-[18px] tracking-wide text-white sm:gap-2.5">
-              {subtitle}
-            </CardTitle>
-            <p
-              className={`font-normal text-foreground ${subtitle ? "text-sm" : "text-base"}`}
-            >
-              {getDateRange(days ?? "")}
-            </p>
-          </div>
+          {leftContent ? (
+            <div className="flex h-full w-full items-center justify-between">
+              {leftContent}
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                {subtitle}
+              </CardTitle>
+              <p
+                className={`text-secondary font-normal ${subtitle ? "text-sm" : "text-base"}`}
+              >
+                {getDateRange(days ?? "")}
+              </p>
+            </div>
+          )}
           <div className="flex items-center">{switchDate}</div>
         </div>
       )}
       {infoText && <InlineAlert text={infoText} variant="info" />}
+
+      {infoText && (
+        <CardDescription className="bg-surface-contrast flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
+          <div className="mt-0.5 sm:mt-0">
+            <Info className="text-primary size-4 w-fit" />
+          </div>
+          <p className="text-secondary text-sm font-normal">{infoText}</p>
+        </CardDescription>
+      )}
       {children}
     </div>
   );

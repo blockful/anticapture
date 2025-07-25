@@ -7,36 +7,59 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "petition api",
+      "name": "api gateway",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/apps/petition/src/index.ts",
+      "program": "${workspaceFolder}/apps/api-gateway/src/index.ts",
       "runtimeExecutable": "tsx",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "env": {
-        "NODE_ENV": "production",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
-        "ENV_FILE": "${workspaceFolder}/apps/petition/.env"
+        "ENV_FILE": "${workspaceFolder}/apps/api-gateway/.env"
       },
       "outFiles": [
         "${workspaceFolder}/**/*.js",
         "!**/node_modules/**"
       ],
-      "cwd": "${workspaceFolder}/apps/petition",
+      "cwd": "${workspaceFolder}/apps/api-gateway",
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "ponder api",
+      "name": "api",
       "skipFiles": [
         "<node_internals>/**"
       ],
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "run",
-        "serve",
+        "dev",
+        "--config",
+        "config/ens.local.config.ts"
+      ],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "ENV_FILE": "${workspaceFolder}/apps/indexer/.env"
+      },
+      "outFiles": [
+        "${workspaceFolder}/**/*.js",
+        "!**/node_modules/**"
+      ],
+      "cwd": "${workspaceFolder}/apps/indexer",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "indexer",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "run",
+        "dev",
         "--config",
         "config/ens.config.ts"
       ],

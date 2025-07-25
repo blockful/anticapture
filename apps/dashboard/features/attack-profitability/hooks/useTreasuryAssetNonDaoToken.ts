@@ -2,7 +2,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
-
+import axios from "axios";
 export interface TreasuryAssetNonDaoToken {
   date: string;
   totalAssets: string;
@@ -15,17 +15,28 @@ export const fetchTreasuryAssetNonDaoToken = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<TreasuryAssetNonDaoToken[]> => {
-  const response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/total-assets?days=${days}`,
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch Treasury Non Dao Token data: ${response.statusText}`,
-    );
+  const query = `
+  query getTotalAssets {
+  totalAssets(days:_${days}){
+    totalAssets
+    date
   }
-
-  return response.json();
+}`;
+  const response = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    {
+      query,
+    },
+    {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+  );
+  const { totalAssets } = response.data.data as {
+    totalAssets: TreasuryAssetNonDaoToken[];
+  };
+  return totalAssets;
 };
 
 export const useTreasuryAssetNonDaoToken = (

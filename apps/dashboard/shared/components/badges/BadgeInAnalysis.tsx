@@ -15,12 +15,12 @@ export const BadgeInAnalysis = ({
   return (
     <div
       className={cn(
-        "flex w-fit items-center gap-2 rounded-full bg-white/10 px-1.5 py-0.5 text-foreground",
+        "text-secondary flex w-fit items-center gap-2 rounded-full bg-white/10 px-1.5 py-0.5",
         className,
       )}
     >
-      {hasIcon && <Clock2 className={cn("size-4", iconClassName)} />}
-      <p className="whitespace-nowrap">In analysis</p>
+      {hasIcon && <Clock2 className={cn("size-3", iconClassName)} />}
+      <p className="text-xs font-medium whitespace-nowrap">In analysis</p>
     </div>
   );
 };

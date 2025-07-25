@@ -6,7 +6,14 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, HeartIcon, Lightbulb, Activity } from "lucide-react";
+import {
+  BarChart,
+  Gauge,
+  HeartIcon,
+  Lightbulb,
+  Activity,
+  UserCheck,
+} from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
@@ -24,23 +31,23 @@ export const HeaderDAOSidebar = () => {
 
   return (
     <aside
-      className={`fixed left-[68px] top-0 z-50 hidden h-screen w-[258px] border-r border-lightDark bg-darkest sm:block`}
+      className={`border-light-dark bg-surface-background fixed top-0 left-[68px] z-50 hidden h-screen w-[258px] border-r sm:block`}
     >
       <div className="flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex h-full flex-col gap-3 p-4">
-          {daoConfig.showSupport && (
-            <ButtonHeaderSidebar
-              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
-              icon={HeartIcon}
-              label={SECTIONS_CONSTANTS.showSupport.title}
-            />
-          )}
           {daoConfig.daoOverview && (
             <ButtonHeaderSidebar
               anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
               icon={PieChart}
               label={SECTIONS_CONSTANTS.daoOverview.title}
+            />
+          )}
+          {daoConfig.showSupport && (
+            <ButtonHeaderSidebar
+              anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
+              icon={HeartIcon}
+              label={SECTIONS_CONSTANTS.showSupport.title}
             />
           )}
           {daoConfig.attackProfitability && (
@@ -80,11 +87,11 @@ export const HeaderDAOSidebar = () => {
               label={SECTIONS_CONSTANTS.tokenDistribution.title}
             />
           )}
-          {daoConfig.governanceActivity && (
+          {daoConfig.dataTables && (
             <ButtonHeaderSidebar
-              anchorId={SECTIONS_CONSTANTS.governanceActivity.anchorId}
-              icon={Activity}
-              label={SECTIONS_CONSTANTS.governanceActivity.title}
+              anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+              icon={UserCheck}
+              label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
             />
           )}
         </div>

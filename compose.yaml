@@ -1,22 +1,19 @@
-version: "3.8"
-
 services:
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    restart: always
-    networks:
-      - backend
 
   contracts:
     build:
-      context: apps/indexer/contracts
+      context: packages/local-node
       dockerfile: Dockerfile
     ports:
       - "8545:8545"
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/anvil-ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   indexer-db:
     image: postgres:16.2
@@ -32,46 +29,25 @@ services:
 
   indexer:
     build:
-      context: apps/indexer
+      context: .
+      dockerfile: infra/indexer/Dockerfile.indexer
+    command: ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
       - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
-      - NETWORK=ethereum
+      - NETWORK=anvil
       - RPC_URL=http://contracts:8545
+      - CHAIN_ID=31337
+      - PORT=42069
     depends_on:
-      - indexer-db
-      - contracts
+      indexer-db:
+        condition: service_started
+      contracts:
+        condition: service_healthy
     ports:
       - "42069:42069"
     networks:
       - backend
 
-  petition-db:
-    image: postgres:16.2
-    ports:
-      - "5433:5432"
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    networks:
-      - backend
-
-  petition:
-    build:
-      context: .
-      dockerfile: apps/petition/Dockerfile
-    ports:
-      - "3100:3100"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@petition-db:5432/postgres
-      - PORT=3100
-    depends_on:
-      - petition-db
-    networks:
-      - backend
-
 networks:
   backend:
-    driver: bridge

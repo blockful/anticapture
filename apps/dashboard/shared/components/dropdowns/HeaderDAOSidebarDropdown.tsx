@@ -112,38 +112,38 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="relative z-50 inline-block h-[57px] w-full border-b border-lightDark sm:h-[65px]"
+      className="border-light-dark relative z-50 inline-block h-[57px] w-full border-b sm:h-[65px]"
       ref={dropdownRef}
     >
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
         <button
-          className="flex w-full items-center justify-between gap-2 rounded-md p-1 hover:bg-[#333] sm:rounded-md sm:p-1"
+          className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md p-1 hover:bg-[#333] sm:rounded-md sm:p-1"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
           <div className="flex w-full items-center gap-2">
             <div>{currentItem?.icon}</div>
-            <h1 className="text-[18px] font-medium leading-6 text-white">
+            <p className="text-primary text-[18px] leading-6 font-medium">
               {currentItem?.label}
-            </h1>
+            </p>
           </div>
           <div>
-            <ChevronsUpDown className="size-5 text-foreground" />
+            <ChevronsUpDown className="text-secondary size-5" />
           </div>
         </button>
       </div>
 
       {isOpen && (
         <div
-          className="absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border border-lightDark bg-dark shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
+          className="border-light-dark bg-surface-default absolute right-0 left-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (
             <button
               key={item.id}
               className={cn(
-                "flex w-full items-center justify-between gap-2 px-3 py-2",
+                "flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2",
                 !item.isDisabled && "hover:bg-[#333]",
               )}
               onClick={() => handleSelectItem(item.id, item.href || "")}
@@ -162,8 +162,8 @@ export const HeaderDAOSidebarDropdown = () => {
                 />
                 <h1
                   className={cn(
-                    "text-sm font-normal text-white",
-                    item.isDisabled && "text-foreground opacity-75",
+                    "text-primary text-sm font-normal",
+                    item.isDisabled && "text-secondary opacity-75",
                   )}
                 >
                   {item.label}

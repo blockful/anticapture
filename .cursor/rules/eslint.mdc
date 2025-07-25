@@ -3,10 +3,9 @@ description:
 globs: 
 alwaysApply: true
 ---
-
 # Your rule content
 - Follow the style rules pointed by the .eslintrc files
-- Always check if the tailwind.config.ts has the colors you're using
+- We're using "tailwindcss": "^4.1.7", so always check if the globals.css has the colors you're using
     - If they are, use the variable of the tailwind;
     - If not, create a variable and use it, do not use Hex colors
 - If you are dealing with complex problems and making mistakes frequently, use sequential thinking mcp;
@@ -62,3 +61,17 @@ src/
       ├── layout/
       └── routing/
 ```
+
+# ESLint and Prettier Configuration
+
+## VSCode Integration
+Always use Prettier as the default formatter, not the built-in TypeScript formatter. The VSCode settings are configured to:
+- Use Prettier for all formatting
+- Disable built-in TypeScript/JavaScript formatters to avoid conflicts
+- Run ESLint fixes on save
+- Format on save with Prettier
+
+## Common Issues to Avoid
+- Never use VSCode's built-in TypeScript formatter when Prettier is configured
+- Always run both ESLint fix and Prettier format on save
+- Ensure consistent formatting across the entire monorepo

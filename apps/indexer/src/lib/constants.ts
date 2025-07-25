@@ -1,66 +1,64 @@
-import { Abi, Address, zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 
-import { DaoIdEnum, NetworkEnum } from "./enums";
-import { UNITokenAbi } from "@/indexer/uni";
-import { ENSTokenAbi } from "@/indexer/ens";
-import { ARBTokenAbi } from "@/indexer/arb";
+import { DaoIdEnum } from "./enums";
 
-export const SECONDS_IN_DAY = 24 * 60 * 60;
-export const MILISECONDS_IN_DAY = SECONDS_IN_DAY * 1000;
 export const DAYS_IN_YEAR = 365;
 
-export const CONTRACT_ADDRESSES: Record<
-  NetworkEnum,
-  Partial<
-    Record<
-      DaoIdEnum,
-      {
-        token: { address: Address; decimals: number; abi: Abi };
-        governor?: Address;
-      }
-    >
-  >
-> = {
-  [NetworkEnum.ETHEREUM]: {
-    [DaoIdEnum.UNI]: {
-      token: {
-        address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-        decimals: 18,
-        abi: UNITokenAbi,
-      },
-      governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+export const CONTRACT_ADDRESSES = {
+  [DaoIdEnum.UNI]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
+    token: {
+      address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      decimals: 18,
+      startBlock: 10861674,
     },
-    [DaoIdEnum.ENS]: {
-      token: {
-        address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-        decimals: 18,
-        abi: ENSTokenAbi,
-      },
-      governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+    // https://etherscan.io/address/0x408ED6354d4973f66138C91495F2f2FCbd8724C3
+    governor: {
+      address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+      startBlock: 13059157,
     },
   },
-  [NetworkEnum.ARBITRUM]: {
-    [DaoIdEnum.ARB]: {
-      token: {
-        address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
-        decimals: 18,
-        abi: ARBTokenAbi,
-      },
+  [DaoIdEnum.ENS]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72
+    token: {
+      address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+      decimals: 18,
+      startBlock: 9380410,
+    },
+    // https://etherscan.io/address/0x323a76393544d5ecca80cd6ef2a560c6a395b7e3
+    governor: {
+      address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      startBlock: 13533772,
     },
   },
-  [NetworkEnum.ANVIL]: {
-    [DaoIdEnum.ENS]: {
-      token: {
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-        decimals: 18,
-        abi: ENSTokenAbi,
-      },
-      governor: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+  [DaoIdEnum.ARB]: {
+    blockTime: 0.25,
+    // https://arbiscan.io/address/0x912CE59144191C1204E64559FE8253a0e49E6548
+    token: {
+      address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+      decimals: 18,
+      startBlock: 70398200,
+    },
+  },
+  [DaoIdEnum.OP]: {
+    blockTime: 2,
+    // https://optimistic.etherscan.io/token/0x4200000000000000000000000000000000000042
+    token: {
+      address: "0x4200000000000000000000000000000000000042",
+      decimals: 18,
+      startBlock: 6490467,
+    },
+    // https://optimistic.etherscan.io/address/0xcDF27F107725988f2261Ce2256bDfCdE8B382B10
+    governor: {
+      address: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
+      startBlock: 71801427,
     },
   },
 } as const;
 
-export const TREASURY_ADDRESSES = {
+export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.UNI]: {
     timelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
     treasuryVester1: "0x4750c43867EF5F89869132ecCF19B9b6C4286E1a",
@@ -75,9 +73,10 @@ export const TREASURY_ADDRESSES = {
     ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.OP]: {},
 };
 
-export const CEXAddresses = {
+export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.UNI]: {
     BinanceHotWallet: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
     BinanceHotWallet2: "0x28C6c06298d514Db089934071355E5743bf21d60",
@@ -136,9 +135,57 @@ export const CEXAddresses = {
     UpbitColdWallet: "0x245445940B317E509002eb682E03f4429184059d",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.OP]: {
+    "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    "Binance 2": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    OKX: "0x611f7bF868a6212f871e89F7e44684045DdFB09d",
+    Bybit: "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    "Bybit 2": "0x88a1493366D48225fc3cEFbdae9eBb23E323Ade3",
+    Bithumb: "0xB18fe4B95b7d633c83689B5Ed3ac4ad0a857A2a7",
+    MEXC: "0xDF90C9B995a3b10A5b8570a47101e6c6a29eb945",
+    Gate: "0xC882b111A75C0c657fC507C04FbFcD2cC984F071",
+    "Kraken 1": "0x2a62C4aCcA1A166Ee582877112682cAe8Cc0ffe7",
+    "Kraken 2": "0xC06f25517E906b7F9B4deC3C7889503Bb00b3370",
+    "Bitkub 1": "0xda4231EF1768176536EEE3ec187315E60572BBD4",
+    "Bitkub 2": "0x7A1CF8CE543F4838c964FB14D403Cc6ED0bDbaCC",
+    Bitget: "0x5bdf85216ec1e38D6458C870992A69e38e03F7Ef",
+    "Kucoin 1": "0x2933782B5A8d72f2754103D1489614F29bfA4625",
+    "Kucoin 2": "0xC1274c580C5653cDF8246695c2E0112492a99D6F",
+    "Kucoin 3": "0xa3f45e619cE3AAe2Fa5f8244439a66B203b78bCc",
+    "Coinbase 1": "0xC8373EDFaD6d5C5f600b6b2507F78431C5271fF5",
+    "Coinbase 2": "0xD839C179a4606F46abD7A757f7Bb77D7593aE249",
+    "Crypto.com 1": "0x8a161a996617f130d0F37478483AfC8c1914DB6d",
+    "Crypto.com 2": "0x92BD687953Da50855AeE2Df0Cff282cC2d5F226b",
+    "Btcturk 1": "0xdE2fACa4BBC0aca08fF04D387c39B6f6325bf82A",
+    "Btcturk 2": "0xB5A46bC8b76FD2825AEB43db9C9e89e89158ECdE",
+    "Bitpanda 1": "0xb1A63489469868dD1d0004922C36D5079d6331c6",
+    "Bitpanda 2": "0x5E8c4499fDD78A5EFe998b3ABF78658E02BB7702",
+    "Bitpanda 3": "0x0529ea5885702715e83923c59746ae8734c553B7",
+    "BingX 1": "0xC3dcd744db3f114f0edF03682b807b78A227Bf74",
+    "Bingx 2": "0x0b07f64ABc342B68AEc57c0936E4B6fD4452967E",
+    "HTX 1": "0xe0B7A39Fef902c21bAd124b144c62E7F85f5f5fA",
+    "HTX 2": "0xd3Cc0C7d40366A061397274Eae7C387D840e6ff8",
+    Bitbank: "0x3727cfCBD85390Bb11B3fF421878123AdB866be8",
+    Revolut: "0x9b0c45d46D386cEdD98873168C36efd0DcBa8d46",
+    "Paribu 1": "0xc80Afd311c9626528De66D86814770361Fe92416",
+    Coinspot: "0xf35A6bD6E0459A4B53A27862c51A2A7292b383d1",
+    "Bitvavo 1": "0x48EcA43dB3a3Ca192a5fB9b20F4fc4d96017AF0F",
+    SwissBorg: "0x28cC933fecf280E720299b1258e8680355D8841F",
+    "Coinbase Prime": "0xDfD76BbFEB9Eb8322F3696d3567e03f894C40d6c",
+    "Binance US": "0x43c5b1C2bE8EF194a509cF93Eb1Ab3Dbd07B97eD",
+    "Bitstamp 1": "0x7C43E0270c868D0341c636a38C07e5Ae93908a04",
+    "Bitstamp 2": "0x4c2eEb203DDC70291e33796527dE4272Ac9fafc1",
+    "Coinhako 1": "0xE66BAa0B612003AF308D78f066Bbdb9a5e00fF6c",
+    "Coinhako 2": "0xE66BAa0B612003AF308D78f066Bbdb9a5e00fF6c",
+    Bitfinex: "0x77134cbC06cB00b66F4c7e623D5fdBF6777635EC",
+    "Woo Network": "0x63DFE4e34A3bFC00eB0220786238a7C6cEF8Ffc4",
+    Koribit: "0xf0bc8FdDB1F358cEf470D63F96aE65B1D7914953",
+    "Indodax 1": "0x3C02290922a3618A4646E3BbCa65853eA45FE7C6",
+    "Indodax 2": "0x91Dca37856240E5e1906222ec79278b16420Dc92",
+  },
 };
 
-export const DEXAddresses = {
+export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.UNI]: {
     // ArbitrumL1ERC20Gateway: "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
     Uniswap_UNI_ETH_V3_03: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
@@ -159,9 +206,19 @@ export const DEXAddresses = {
     SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.OP]: {
+    "Velodrome Finance": "0x47029bc8f5CBe3b464004E87eF9c9419a48018cd",
+    "Uniswap 1": "0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3",
+    "Uniswap 2": "0xFC1f3296458F9b2a27a0B91dd7681C4020E09D05",
+    "Uniswap 3": "0xA39fe8F7A00CE28B572617d3a0bC1c2B44110e79",
+    "WooFi 1": "0x5520385bFcf07Ec87C4c53A7d8d65595Dff69FA4",
+    Curve: "0xd8dD9a8b2AcA88E68c46aF9008259d0EC04b7751",
+    Balancer: "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+    Mux: "0xc6BD76FA1E9e789345e003B361e4A0037DFb7260",
+  },
 };
 
-export const LendingAddresses = {
+export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.UNI]: {
     AaveEthUni: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
     MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
@@ -172,9 +229,28 @@ export const LendingAddresses = {
     AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.OP]: {
+    Aave: "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf",
+    Superfluid: "0x1828Bff08BD244F7990edDCd9B19cc654b33cDB4",
+    Moonwell: "0x9fc345a20541Bf8773988515c5950eD69aF01847",
+    "Silo Finance": "0x8ED1609D796345661d36291B411992e85DE7B224",
+    "Compound 1": "0x2e44e174f7D53F0212823acC11C01A11d58c5bCB",
+    "Compound 2": "0x995E394b8B2437aC8Ce61Ee0bC610D617962B214",
+    "Exactly Protocol": "0xa430A427bd00210506589906a71B54d6C256CEdb",
+    Morpho: "0xF057afeEc22E220f47AD4220871364e9E828b2e9",
+    dForce: "0x7702dC73e8f8D9aE95CF50933aDbEE68e9F1D725",
+  },
 };
 
-export const BurningAddresses = {
+export const BurningAddresses: Record<
+  DaoIdEnum,
+  {
+    ZeroAddress: Address;
+    Dead: Address;
+    TokenContract: Address;
+    Airdrop?: Address;
+  }
+> = {
   [DaoIdEnum.UNI]: {
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
@@ -190,6 +266,11 @@ export const BurningAddresses = {
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1",
+  },
+  [DaoIdEnum.OP]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x4200000000000000000000000000000000000042",
   },
 };
 

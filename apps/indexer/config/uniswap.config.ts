@@ -1,38 +1,37 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { UNIGovernorAbi, UNITokenAbi } from "@/indexer/uni/abi";
+import { GovernorAbi, TokenAbi } from "@/indexer/uni/abi";
+
+const UNI_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.UNI];
 
 export default createConfig({
   database: {
     kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     ethereum_mainnet: {
-      chainId: 1,
-      transport: http(env.RPC_URL),
+      id: 1,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
   },
   contracts: {
     UNIToken: {
-      abi: UNITokenAbi,
-      network: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!.token.address,
-      startBlock: 10861674,
+      abi: TokenAbi,
+      chain: "ethereum_mainnet",
+      address: UNI_CONTRACTS.token.address,
+      startBlock: UNI_CONTRACTS.token.startBlock,
     },
     UNIGovernor: {
-      abi: UNIGovernorAbi,
-      network: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.UNI]!.governor,
-      startBlock: 13059157,
+      abi: GovernorAbi,
+      chain: "ethereum_mainnet",
+      address: UNI_CONTRACTS.governor.address,
+      startBlock: UNI_CONTRACTS.governor.startBlock,
     },
   },
 });

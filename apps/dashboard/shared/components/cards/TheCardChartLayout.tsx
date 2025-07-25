@@ -17,14 +17,14 @@ export const TheCardChartLayout = ({
   headerComponent,
 }: TheCardChartLayoutProps) => {
   return (
-    <Card className="flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border sm:border-lightDark sm:bg-dark sm:shadow xl4k:max-w-full">
+    <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border sm:shadow-sm">
       <CardContent className="flex h-full w-full flex-col gap-6 p-0">
         {title && (
           <div className="flex h-full w-full flex-col">
-            <CardTitle className="flex items-center font-mono text-[13px] font-medium uppercase leading-[18px] text-white sm:gap-2.5">
+            <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
               {title}
             </CardTitle>
-            <p className="text-sm font-normal text-foreground">{subtitle}</p>
+            <p className="text-secondary text-sm font-normal">{subtitle}</p>
           </div>
         )}
         {children}

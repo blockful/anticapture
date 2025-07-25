@@ -74,5 +74,13 @@ export const getDaoStageFromFields = (
     return Stage.ONE;
   }
 
-  return Stage.TWO;
+  const hasLowRisk = fieldsArray.some(
+    (field) => field.riskLevel === RiskLevel.LOW,
+  );
+
+  if (hasLowRisk) {
+    return Stage.TWO;
+  }
+
+  return Stage.NONE;
 };

@@ -4,12 +4,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { ReactNode } from "react";
 
 const defaultLinkVariants = cva(
-  "flex h-full items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
+  "flex items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
   {
     variants: {
       variant: {
-        default: "text-foreground hover:text-white",
-        highlight: "text-tangerine hover:text-tangerine/80",
+        default: "text-secondary hover:text-primary",
+        highlight: "text-link hover:text-link/80",
       },
     },
     defaultVariants: {

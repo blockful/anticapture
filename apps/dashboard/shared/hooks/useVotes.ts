@@ -1,6 +1,7 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
+import axios from "axios";
 
 interface VotesResponse {
   currentVotes: string;
@@ -16,11 +17,29 @@ export const fetchVotes = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<VotesResponse> => {
-  const response: Response = await fetch(
-    `${BACKEND_ENDPOINT}/dao/${daoId}/votes/compare?days=${days}`,
-    { next: { revalidate: 3600 } },
-  );
-  return response.json();
+  const query = `query Votes {
+    compareVotes(days: _${days}) {
+      currentVotes
+      oldVotes
+      changeRate
+    }
+  }`;
+  const response: { data: { data: { compareVotes: VotesResponse } } } =
+    await axios.post(
+      `${BACKEND_ENDPOINT}`,
+      {
+        query,
+      },
+      {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
+    );
+  const { compareVotes } = response.data.data as {
+    compareVotes: VotesResponse;
+  };
+  return compareVotes as VotesResponse;
 };
 
 /**

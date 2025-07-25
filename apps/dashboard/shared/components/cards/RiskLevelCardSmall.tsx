@@ -16,22 +16,22 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   [RiskLevel.HIGH]: {
     color: "error",
     pattern: ["bg-error", "bg-error", "bg-error"],
-    icon: <AlertTriangle className="size-3.5 text-error" />,
+    icon: <AlertTriangle className="text-error size-3.5" />,
   },
   [RiskLevel.MEDIUM]: {
     color: "warning",
-    pattern: ["bg-warning", "bg-warning", "bg-lightDark"],
-    icon: <AlertCircle className="size-3.5 text-warning" />,
+    pattern: ["bg-warning", "bg-warning", "bg-surface-contrast"],
+    icon: <AlertCircle className="text-warning size-3.5" />,
   },
   [RiskLevel.LOW]: {
     color: "success",
-    pattern: ["bg-success", "bg-middleDark", "bg-middleDark"],
-    icon: <CheckCircle2 className="size-3.5 text-success" />,
+    pattern: ["bg-success", "bg-middle-dark", "bg-middle-dark"],
+    icon: <CheckCircle2 className="text-success size-3.5" />,
   },
   [RiskLevel.NONE]: {
-    color: "foreground",
-    pattern: ["bg-middleDark", "bg-middleDark", "bg-middleDark"],
-    icon: <CounterClockwiseClockIcon className="size-3.5 text-foreground" />,
+    color: "secondary",
+    pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
+    icon: <CounterClockwiseClockIcon className="text-secondary size-3.5" />,
   },
 };
 
@@ -81,7 +81,7 @@ export const RiskLevelCardSmall = ({
   return (
     <div
       className={cn(
-        "flex h-full w-fit gap-1 rounded-full bg-lightDark px-2 py-0.5",
+        "bg-surface-contrast flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
         className,
       )}
     >

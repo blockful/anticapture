@@ -8,18 +8,18 @@ import { useScreenSize } from "@/shared/hooks";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { RiskLevel } from "@/shared/types/enums";
 
-const riskBorderColors: Record<RiskLevel, string> = {
-  [RiskLevel.HIGH]: "border-error",
-  [RiskLevel.MEDIUM]: "border-warning",
-  [RiskLevel.LOW]: "border-success",
-  [RiskLevel.NONE]: "border-foreground",
-};
+// const riskBorderColors: Record<RiskLevel, string> = {
+//   [RiskLevel.HIGH]: "border-error",
+//   [RiskLevel.MEDIUM]: "border-warning",
+//   [RiskLevel.LOW]: "border-success",
+//   [RiskLevel.NONE]: "border-foreground",
+// };
 
 const riskBoxStyles: Record<RiskLevel, string> = {
-  [RiskLevel.HIGH]: "bg-error bg-opacity-[12%]",
-  [RiskLevel.MEDIUM]: "bg-warning bg-opacity-[12%]",
-  [RiskLevel.LOW]: "bg-success bg-opacity-[12%]",
-  [RiskLevel.NONE]: "bg-foreground bg-opacity-[12%]",
+  [RiskLevel.HIGH]: "bg-error/12",
+  [RiskLevel.MEDIUM]: "bg-warning/12",
+  [RiskLevel.LOW]: "bg-success/12",
+  [RiskLevel.NONE]: "bg-foreground/10",
 };
 
 const riskTextColors: Record<RiskLevel, string> = {
@@ -43,30 +43,20 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "relative flex w-full flex-col flex-wrap gap-3.5 rounded-none !border-b border-x-transparent !border-b-lightDark border-t-transparent p-3 shadow transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border sm:border-lightDark sm:bg-dark md:w-[calc(50%-10px)] xl4k:max-w-full",
+        "!border-b-light-dark sm:border-light-dark sm:bg-surface-default xl4k:max-w-full border-b! flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
         isOpen
-          ? "-none z-20 sm:border-middleDark sm:bg-lightDark"
-          : "sm:hover:bg-middleDark",
+          ? "sm:border-middle-dark sm:bg-surface-contrast z-20 rounded-b-none"
+          : "sm:hover:bg-middle-dark sm:rounded-b-lg",
       )}
       onClick={onToggle}
     >
       {/* corner border */}
       {isOpen && (
-        <div
-          className={cn(
-            "absolute left-0 top-0 size-3 -translate-x-[1px] -translate-y-[1px] border-l-2 border-t-2",
-            riskBorderColors[field.riskLevel],
-          )}
-        />
+        <div className="border-primary border-l-1 border-t-1 absolute left-0 top-0 size-3" />
       )}
       {/* corner border */}
       {isOpen && (
-        <div
-          className={cn(
-            "absolute right-0 top-0 size-3 -translate-y-[1px] translate-x-[1px] border-r-2 border-t-2",
-            riskBorderColors[field.riskLevel],
-          )}
-        />
+        <div className="border-primary border-r-1 border-t-1 absolute right-0 top-0 size-3" />
       )}
 
       <div className="relative flex w-full items-center justify-between">
@@ -74,7 +64,7 @@ export const GovernanceImplementationCard = ({
           <div className="relative flex size-4 shrink-0 items-center justify-center sm:size-6">
             <span
               className={cn(
-                "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
+                "text-secondary absolute mb-1 text-3xl font-thin transition-all duration-300",
                 isOpen ? "rotate-90 opacity-0" : "opacity-100",
               )}
             >
@@ -82,7 +72,7 @@ export const GovernanceImplementationCard = ({
             </span>
             <span
               className={cn(
-                "absolute mb-1 text-3xl font-thin text-foreground transition-all duration-300",
+                "text-secondary absolute mb-1 text-3xl font-thin transition-all duration-300",
                 isOpen ? "opacity-100" : "rotate-90 opacity-0",
               )}
             >
@@ -91,11 +81,11 @@ export const GovernanceImplementationCard = ({
           </div>
           <div className="flex items-center gap-2 sm:flex-col md:flex-row md:text-center">
             {" "}
-            <h3 className="truncate text-sm font-medium leading-tight text-white">
+            <h3 className="text-primary truncate text-sm font-medium leading-tight">
               {field.name}
             </h3>
-            <div className="size-1 rounded-full bg-white bg-opacity-30" />
-            <span className="text-iconSecondary shrink-0 truncate text-sm font-medium leading-tight">
+            <div className="size-1 rounded-full bg-white/30" />
+            <span className="text-secondary shrink-0 truncate text-sm font-medium leading-tight">
               {field.value || ""}
             </span>
           </div>
@@ -107,7 +97,7 @@ export const GovernanceImplementationCard = ({
 
       <div
         className={cn(
-          "relative z-20 border-transparent sm:absolute sm:border sm:border-t-0 sm:border-middleDark sm:bg-lightDark sm:px-4",
+          "sm:border-middle-dark sm:bg-surface-contrast z-20 rounded-b-lg border-transparent sm:absolute sm:border sm:border-t-0 sm:px-4",
           "-left-px top-full w-[calc(100%+2px)]",
           isOpen
             ? "visible h-auto transition-all duration-500 ease-in-out sm:pb-5"
@@ -120,26 +110,16 @@ export const GovernanceImplementationCard = ({
         }}
       >
         {/* corner border */}
-        <div
-          className={cn(
-            "absolute bottom-0 left-0 size-3 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2",
-            riskBorderColors[field.riskLevel],
-          )}
-        />
+        <div className="border-primary border-b-1 border-l-1 absolute bottom-0 left-0 size-3" />
         {/* corner border */}
-        <div
-          className={cn(
-            "absolute bottom-0 right-0 size-3 translate-x-[1px] translate-y-[1px] border-b-2 border-r-2",
-            riskBorderColors[field.riskLevel],
-          )}
-        />
+        <div className="border-primary border-b-1 border-r-1 absolute bottom-0 right-0 size-3" />
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1 pt-1">
-            <p className="font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px] text-[#A1A1AA]">
+            <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-[0.72px]">
               Definition
             </p>
-            <p className="text-sm text-white">{field.description}</p>
+            <p className="text-secondary text-sm">{field.description}</p>
           </div>
 
           <div
@@ -156,7 +136,7 @@ export const GovernanceImplementationCard = ({
             >
               Risk explained
             </p>
-            <p className="text-sm text-white">
+            <p className="text-secondary text-sm">
               Uniswap has no vote mutability, configuring high risk for the DAO.
             </p>
           </div>

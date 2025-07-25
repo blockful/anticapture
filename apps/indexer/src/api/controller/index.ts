@@ -1,5 +1,6 @@
-export { default as governanceActivity } from "./governance-activity/controller";
-export { default as tokenDistribution } from "./token-distribution/controller";
-export { default as assets } from "./assets.controller";
-export { default as tokenHistoricalData } from "./token-historical-data.controller";
-export { default as votingPower } from "./votingPower";
+export { governanceActivity } from "./governance-activity/controller";
+export { tokenDistribution } from "./token-distribution/controller";
+export { tokenHistoricalData } from "./token-historical-data.controller";
+export { proposalsActivity } from "./proposals-activity.controller";
+export { assets } from "./assets.controller";
+export { historicalOnchain } from "./historical-onchain.controller";

@@ -1,20 +1,21 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
 import { ARBTokenAbi } from "@/indexer/arb";
+
+const ARB_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.ARB];
 
 export default createConfig({
   database: {
     kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     arbitrum_mainnet: {
-      chainId: 42161,
-      transport: http(env.RPC_URL),
+      id: 42161,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
@@ -22,10 +23,9 @@ export default createConfig({
   contracts: {
     ARBToken: {
       abi: ARBTokenAbi,
-      network: "arbitrum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ARBITRUM][DaoIdEnum.ARB]!.token.address,
-      startBlock: 70398200,
+      chain: "arbitrum_mainnet",
+      address: ARB_CONTRACTS.token.address,
+      startBlock: ARB_CONTRACTS.token.startBlock,
     },
   },
 });

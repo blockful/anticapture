@@ -64,18 +64,21 @@ interface BaseInfo {
 
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  contracts?: {
-    governor: Address;
+  chainId: number;
+  contracts: {
     token: Address;
-    timelock: Address;
+    governor?: Address;
+    timelock?: Address;
   };
   cancelFunction?: string;
   snapshot?: string;
+  tally?: string;
   rules?: {
     delay?: boolean;
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
+    logic: "For" | "For + Abstain";
   };
   securityCouncil?: {
     isActive: boolean;
@@ -102,12 +105,15 @@ export interface GovernanceImplementationConfig
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
-  daoOverview?: DaoOverviewConfig;
+  daoOverview: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
-  governanceActivity?: boolean;
-  showSupport?: boolean;
+  dataTables?: boolean;
+  showSupport?: {
+    snapshotProposal: string;
+    snapshotSpace: string;
+  };
   riskAnalysis?: boolean;
 }

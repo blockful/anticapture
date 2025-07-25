@@ -1,206 +1,233 @@
-import { DaysEnum } from "@/lib/daysEnum";
-import { sql } from "ponder";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+
+import { DaysEnum, DaysOpts } from "@/lib/enums";
 import {
   ActiveSupplyQueryResult,
-  AverageTurnoutCompareQueryResult,
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
+  AverageTurnoutCompareQueryResult,
 } from "./types";
-import { convertTimestampMilissecondsToSeconds } from "@/lib/utils";
-import { db } from "ponder:api";
-import { Hono } from "hono";
 
-const app = new Hono();
+interface GovernanceActivityRepository {
+  getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
+  getProposalsCompare(
+    days: DaysEnum,
+  ): Promise<ProposalsCompareQueryResult | undefined>;
+  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
+  getAverageTurnoutCompare(
+    days: DaysEnum,
+  ): Promise<AverageTurnoutCompareQueryResult | undefined>;
+}
 
-app.get("/dao/:daoId/active-supply", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-  //Creating Timestamp
-  const oldTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
+export function governanceActivity(
+  app: Hono,
+  repository: GovernanceActivityRepository,
+) {
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "compareActiveSupply",
+      path: "/active-supply/compare",
+      summary: "Get active token supply for DAO",
+      tags: ["governance"],
+      request: {
+        query: z.object({
+          days: z
+            .enum(DaysOpts)
+            .default("90d")
+            .openapi({
+              example: "90d",
+            })
+            .transform((val) => DaysEnum[val]),
+        }),
+      },
+      responses: {
+        200: {
+          description: "Active supply value",
+          content: {
+            "application/json": {
+              schema: z
+                .object({
+                  activeSupply: z.string(),
+                })
+                .openapi({
+                  example: {
+                    activeSupply: "1000000000000000000000000",
+                  },
+                }),
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { days } = context.req.valid("query");
+      const data = await repository.getActiveSupply(days);
+      return context.json({ activeSupply: data?.activeSupply || "0" });
+    },
+  );
 
-  //Running Query
-  const queryResult = await db.execute(sql`
-    SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply" FROM "account_power" ap
-    WHERE ap."last_vote_timestamp">CAST(${oldTimestamp.toString().slice(0, 10)} as bigint)
-    AND ap."dao_id"=${daoId}
-  `);
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "compareProposals",
+      path: "/proposals/compare",
+      summary: "Compare number of proposals between time periods",
+      tags: ["governance"],
+      request: {
+        query: z.object({
+          days: z
+            .enum(DaysOpts)
+            .default("90d")
+            .transform((val) => DaysEnum[val]),
+        }),
+      },
+      responses: {
+        200: {
+          description: "Proposal comparison",
+          content: {
+            "application/json": {
+              schema: z.object({
+                currentProposalsLaunched: z.number(),
+                oldProposalsLaunched: z.number(),
+                changeRate: z.number(),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { days } = context.req.valid("query");
 
-  //Calculating Change Rate
-  const activeSupply: ActiveSupplyQueryResult = queryResult
-    .rows[0] as ActiveSupplyQueryResult;
+      const data = await repository.getProposalsCompare(days);
+      if (!data) {
+        return context.json({
+          currentProposalsLaunched: 0,
+          oldProposalsLaunched: 0,
+          changeRate: 0,
+        });
+      }
+      const changeRate =
+        data.oldProposalsLaunched &&
+        data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
 
-  // Returning response
-  return context.json(activeSupply);
-});
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
+    },
+  );
 
-app.get("/dao/:daoId/proposals/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "compareVotes",
+      path: "/votes/compare",
+      summary: "Compare number of votes between time periods",
+      tags: ["governance"],
+      request: {
+        query: z.object({
+          days: z
+            .enum(DaysOpts)
+            .default("90d")
+            .transform((val) => DaysEnum[val]),
+        }),
+      },
+      responses: {
+        200: {
+          description: "Vote comparison",
+          content: {
+            "application/json": {
+              schema: z.object({
+                currentVotes: z.number(),
+                oldVotes: z.number(),
+                changeRate: z.number(),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { days } = context.req.valid("query");
 
-  //Creating Timestamp
-  const oldBeginTimestamp =
-    BigInt(Date.now()) -
-    BigInt(DaysEnum[days as unknown as DaysEnum]) -
-    BigInt(DaysEnum["180d"]);
-  const oldEndTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
-  const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+      const data = await repository.getVotesCompare(days);
+      if (!data) {
+        return context.json({
+          currentVotes: 0,
+          oldVotes: 0,
+          changeRate: 0,
+        });
+      }
 
-  //Running Query
-  const queryResult = await db.execute(sql`
-        WITH "old_proposals" AS (
-          SELECT COUNT(*) AS "old_proposals_launched" FROM "proposals_onchain" p 
-          WHERE p.dao_id=${daoId}
-          AND p.timestamp BETWEEN CAST(${oldBeginTimestamp.toString().slice(0, 10)} as bigint) AND CAST(${oldEndTimestamp.toString().slice(0, 10)} as bigint)
-        ),
-        "current_proposals" AS (
-          SELECT COUNT(*) AS "current_proposals_launched" FROM "proposals_onchain" p
-          WHERE p.dao_id=${daoId}
-          AND p.timestamp > CAST(${currentBeginTimestamp.toString().slice(0, 10)} as bigint)
-        )
-        SELECT "current_proposals"."current_proposals_launched" as "currentProposalsLaunched",
-        "old_proposals"."old_proposals_launched" as "oldProposalsLaunched" 
-        FROM "current_proposals"
-        JOIN "old_proposals" ON 1=1;
-  `);
+      const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
 
-  //Calculating Change Rate
-  const proposalsCompare: ProposalsCompareQueryResult = queryResult
-    .rows[0] as ProposalsCompareQueryResult;
-  let changeRate;
-  if (proposalsCompare.oldProposalsLaunched === "0") {
-    changeRate = "0";
-  } else {
-    changeRate =
-      parseFloat(proposalsCompare.currentProposalsLaunched) /
-        parseFloat(proposalsCompare.oldProposalsLaunched) -
-      1;
-  }
-  // Returning response
-  return context.json({ ...proposalsCompare, changeRate });
-});
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
+    },
+  );
 
-app.get("/dao/:daoId/votes/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "compareAverageTurnout",
+      path: "/average-turnout/compare",
+      summary: "Compare average turnout between time periods",
+      tags: ["governance"],
+      request: {
+        query: z.object({
+          days: z
+            .enum(DaysOpts)
+            .default("90d")
+            .transform((val) => DaysEnum[val]),
+        }),
+      },
+      responses: {
+        200: {
+          description: "Average turnout comparison",
+          content: {
+            "application/json": {
+              schema: z.object({
+                currentAverageTurnout: z.number(),
+                oldAverageTurnout: z.number(),
+                changeRate: z.number(),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { days } = context.req.valid("query");
 
-  //Creating Timestamps
-  const oldBeginTimestamp =
-    BigInt(Date.now()) -
-    BigInt(DaysEnum[days as unknown as DaysEnum]) -
-    BigInt(DaysEnum["180d"]);
-  const oldEndTimestamp =
-    BigInt(Date.now()) - BigInt(DaysEnum[days as unknown as DaysEnum]);
-  const currentBeginTimestamp = BigInt(Date.now()) - BigInt(DaysEnum["180d"]);
+      const data = await repository.getAverageTurnoutCompare(days);
+      if (!data) {
+        return context.json({
+          currentAverageTurnout: 0,
+          oldAverageTurnout: 0,
+          changeRate: 0,
+        });
+      }
+      const changeRate =
+        data.oldAverageTurnout &&
+        data.currentAverageTurnout / data.oldAverageTurnout - 1;
 
-  //Running Query
-  const queryResult = await db.execute(sql`
-        WITH "old_votes" AS (
-          SELECT COUNT(*) AS "old_votes" FROM "votes_onchain" v 
-          WHERE v.dao_id=${daoId}
-          AND v.timestamp 
-          BETWEEN CAST(${convertTimestampMilissecondsToSeconds(oldBeginTimestamp)} as bigint) 
-          AND CAST(${convertTimestampMilissecondsToSeconds(oldEndTimestamp)} as bigint)
-        ),
-        "current_votes" AS (
-          SELECT COUNT(*) AS "current_votes" FROM "votes_onchain" v
-          WHERE v.dao_id=${daoId}
-          AND v.timestamp > CAST(${convertTimestampMilissecondsToSeconds(currentBeginTimestamp)} as bigint)
-        )
-        SELECT "current_votes"."current_votes" as "currentVotes",
-        "old_votes"."old_votes" as "oldVotes" 
-        FROM "current_votes"
-        JOIN "old_votes" ON 1=1;
-  `);
-
-  //Calculating Change Rate
-  const votesCompare: VotesCompareQueryResult = queryResult
-    .rows[0] as VotesCompareQueryResult;
-  let changeRate;
-  if (votesCompare.oldVotes === "0") {
-    changeRate = "0";
-  } else {
-    changeRate =
-      parseFloat(votesCompare.currentVotes) /
-        parseFloat(votesCompare.oldVotes) -
-      1;
-  }
-  // Returning response
-  return context.json({ ...votesCompare, changeRate });
-});
-
-app.get("/dao/:daoId/average-turnout/compare", async (context) => {
-  //Handling req query and params
-  const daoId = context.req.param("daoId");
-  const days: string | undefined = context.req.query("days");
-  if (!days) {
-    throw new Error('Query param "days" is mandatory');
-  }
-
-  //Creating Timestamps and Intervals
-  const fixedInterval = BigInt(DaysEnum["180d"]);
-  const proposalVotingPeriod = BigInt(DaysEnum["7d"]);
-  const oldBeginTimestamp =
-    BigInt(Date.now()) -
-    BigInt(DaysEnum[days as unknown as DaysEnum]) -
-    fixedInterval;
-  const oldEndTimestamp =
-    BigInt(Date.now()) -
-    BigInt(DaysEnum[days as unknown as DaysEnum]) -
-    proposalVotingPeriod;
-  const currentBeginTimestamp = BigInt(Date.now()) - fixedInterval;
-  const currentEndTimestamp = BigInt(Date.now()) - proposalVotingPeriod;
-
-  //Running Query
-  const queryResult = await db.execute(sql`
-  with "old_average_turnout" as (
-        select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
-        from "proposals_onchain" po where po.timestamp 
-        BETWEEN CAST(${convertTimestampMilissecondsToSeconds(oldBeginTimestamp)} as bigint)
-        and CAST(${convertTimestampMilissecondsToSeconds(oldEndTimestamp)} as bigint)
-        AND po.status!='CANCELED' AND po."dao_id"=${daoId}
-  ),
-  "current_average_turnout" as (
-        select AVG(po."for_votes" + po."against_votes" + po."abstain_votes") as "average_turnout"
-        from "proposals_onchain" po WHERE po.timestamp
-        BETWEEN CAST(${convertTimestampMilissecondsToSeconds(currentBeginTimestamp)} as bigint)
-        and CAST(${convertTimestampMilissecondsToSeconds(currentEndTimestamp)} as bigint)
-        AND po.status!='CANCELED' AND po."dao_id"=${daoId}
-  )
-  SELECT "old_average_turnout"."average_turnout" as "oldAverageTurnout",
-  "current_average_turnout"."average_turnout" as "currentAverageTurnout" 
-  FROM "current_average_turnout" 
-  JOIN "old_average_turnout" 
-  ON 1=1;
-  `);
-
-  //Calculating Change Rate
-  const averageTurnoutCompare: AverageTurnoutCompareQueryResult = queryResult
-    .rows[0] as AverageTurnoutCompareQueryResult;
-  let changeRate;
-  if (averageTurnoutCompare.oldAverageTurnout === "0") {
-    changeRate = "0";
-  } else {
-    changeRate =
-      parseFloat(averageTurnoutCompare.currentAverageTurnout) /
-        parseFloat(averageTurnoutCompare.oldAverageTurnout) -
-      1;
-  }
-  // Returning response
-  return context.json({ ...averageTurnoutCompare, changeRate });
-});
-
-export default app;
+      return context.json(
+        {
+          ...data,
+          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+        },
+        200,
+      );
+    },
+  );
+}

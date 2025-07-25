@@ -33,16 +33,16 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "How Governance Risk is Calculated",
     icon: (
-      <Calculator className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <Calculator className="text-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRight className="inline-flex size-4 items-center justify-center text-brand" />
+            <ChevronRight className="text-link inline-flex size-4 items-center justify-center" />
           </div>
           <div className="flex flex-col">
-            <p className="flex text-xs font-semibold uppercase text-foreground">
+            <p className="text-secondary flex text-xs font-semibold uppercase">
               Ideal Scenario (Full Delegation Considered)
             </p>
             <p className="card-text-accordion">
@@ -53,10 +53,10 @@ const AccordionData: AccordionDataProps[] = [
         </div>
         <div className="flex gap-2">
           <div className="flex">
-            <ChevronRight className="inline-flex size-4 items-center justify-center text-brand" />
+            <ChevronRight className="text-link inline-flex size-4 items-center justify-center" />
           </div>
           <div className="flex flex-col">
-            <p className="flex text-xs font-semibold uppercase text-foreground">
+            <p className="text-secondary flex text-xs font-semibold uppercase">
               Realistic Scenario (Average Participation)
             </p>
             <p className="card-text-accordion">
@@ -71,7 +71,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Delegated Cap",
     icon: (
-      <PieChart className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <PieChart className="text-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -87,14 +87,14 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <Badge className="group-hover:bg-dark">
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+          <Badge className="group-hover:bg-surface-default">
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Voting power in a proposal
             </p>
           </Badge>
-          <Equal className="size-4 text-white" />
-          <Badge className="group-hover:bg-dark">
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+          <Equal className="text-primary size-4" />
+          <Badge className="group-hover:bg-surface-default">
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Delegated cap at snapshot
             </p>
           </Badge>
@@ -105,7 +105,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Average Turnout and Active Supply",
     icon: (
-      <Users className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <Users className="text-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -123,16 +123,16 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <Badge className="group-hover:bg-dark">
-            <ArrowDown className="size-4 text-foreground" />
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+          <Badge className="group-hover:bg-surface-default">
+            <ArrowDown className="text-secondary size-4" />
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Lower Participation
             </p>
           </Badge>
-          <Equal className="size-4 text-white" />
-          <Badge className="group-hover:bg-dark">
-            <ArrowUp className="size-4 text-foreground" />
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+          <Equal className="text-primary size-4" />
+          <Badge className="group-hover:bg-surface-default">
+            <ArrowUp className="text-secondary size-4" />
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Easier to attack
             </p>
           </Badge>
@@ -143,7 +143,7 @@ const AccordionData: AccordionDataProps[] = [
   {
     title: "Comparison to Treasury Funds",
     icon: (
-      <DollarSign className="size-4 text-iconSecondary group-data-[state=open]/trigger:text-tangerine" />
+      <DollarSign className="text-secondary group-data-[state=open]/trigger:text-link size-4" />
     ),
     content: (
       <div className="flex flex-col gap-3">
@@ -156,19 +156,19 @@ const AccordionData: AccordionDataProps[] = [
           capture.
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row">
-          <Badge className="group-hover:bg-dark">
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+          <Badge className="group-hover:bg-surface-default">
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               Cost to attack
             </p>
-            <ChevronLeft className="size-4 text-foreground" />
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+            <ChevronLeft className="text-secondary size-4" />
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               treasury funds
             </p>
           </Badge>
-          <Equal className="size-4 text-white" />
-          <Badge className="group-hover:bg-dark">
-            <AlertTriangle className="size-4 text-foreground" />
-            <p className="text-xs font-semibold uppercase leading-none text-foreground">
+          <Equal className="text-primary size-4" />
+          <Badge className="group-hover:bg-surface-default">
+            <AlertTriangle className="text-secondary size-4" />
+            <p className="text-secondary text-xs leading-none font-semibold uppercase">
               DAO AT RISK
             </p>
           </Badge>
@@ -183,20 +183,20 @@ export const AttackProfitabilityAccordion = () => {
     <Accordion
       type="single"
       defaultValue="item-0"
-      className="flex h-full w-full flex-col gap-2 text-white sm:gap-3"
+      className="text-primary flex h-full w-full flex-col gap-2 sm:gap-3"
     >
       {AccordionData.map((item, index) => (
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="group flex w-full flex-col rounded-lg border border-lightDark bg-dark transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
+          className="group border-light-dark bg-surface-default flex w-full flex-col rounded-lg border transition-all duration-300 hover:bg-[#26262A] data-[state=open]:flex-1 data-[state=open]:gap-4 data-[state=open]:border-white/10"
         >
-          <AccordionTrigger className="group/trigger flex w-full items-center justify-between px-3 pt-3 data-[state=closed]:pb-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-white group-data-[state=open]/trigger:text-white">
+          <AccordionTrigger className="group/trigger flex w-full cursor-pointer items-center justify-between px-3 pt-3 data-[state=closed]:pb-3">
+            <div className="text-secondary group-hover:text-primary group-data-[state=open]/trigger:text-primary flex items-center gap-2 text-sm font-medium">
               {item.icon}
               {item.title}
             </div>
-            <Plus className="size-4 text-foreground transition-all duration-300 group-data-[state=open]/trigger:hidden" />
+            <Plus className="text-secondary size-4 transition-all duration-300 group-data-[state=open]/trigger:hidden" />
           </AccordionTrigger>
           <AccordionContent className="overflow-hidden px-3 pb-3 transition-all">
             <div className="flex flex-1 flex-col gap-2">{item.content}</div>

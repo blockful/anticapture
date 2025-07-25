@@ -25,11 +25,11 @@ export const SECTIONS_CONSTANTS = {
       "Takes into account the maximum cost and the minimum profit possible. If it looks bad, it’s bad. If it looks good, it’s better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets.",
     anchorId: "attackProfitabilitySection",
   },
-  governanceActivity: {
-    title: "Governance Activity",
+  holdersAndDelegates: {
+    title: "Holders & Delegates",
     description:
-      "Governance activity metrics are based on a 30 days average. Choosing the time frame buttons below will give you the variation based on the 30 days average prior to that date compared to the current",
-    anchorId: "governanceActivitySection",
+      "Explore top token holders and high-power delegates. Click on any row to view more details.",
+    anchorId: "holdersAndDelegatesSection",
   },
   tokenDistribution: {
     title: "Token Distribution",
@@ -51,13 +51,13 @@ export const SECTIONS_CONSTANTS = {
   riskAnalysis: {
     title: "Risk Analysis",
     description:
-      "Assess critical vulnerabilities in your DAO’s governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
+      "Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
     anchorId: "riskAnalysisSection",
   },
   resilienceStages: {
     title: "Resilience Stages",
     description:
-      "Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression. ",
+      "Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression.",
     anchorId: "resilienceStagesSection",
   },
 };

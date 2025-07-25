@@ -5,7 +5,7 @@ import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import {
-  DAYS_IN_MILLISECONDS,
+  DAYS_IN_SECONDS,
   TIME_INTERVAL_TO_DAYS,
 } from "@/shared/constants/time-related";
 
@@ -14,13 +14,15 @@ const fetchTimeSeriesDataFromGraphQL = async (
   metricTypes: MetricTypesEnum[],
 ): Promise<Record<MetricTypesEnum, DaoMetricsDayBucket[]>> => {
   const oneYearAgo = String(
-    BigInt(Date.now() - DAYS_IN_MILLISECONDS[TimeInterval.ONE_YEAR]),
+    BigInt(
+      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.ONE_YEAR],
+    ),
   ).slice(0, 10);
 
   const whereConditions = metricTypes
     .map(
       (metricType) => `
-      ${metricType}: daoMetricsDayBucketss(
+      ${metricType}: daoMetricsDayBuckets(
         where: {
           metricType: ${metricType},
           date_gte: "${oneYearAgo}",
@@ -84,7 +86,7 @@ const filterMetricsByPeriod = (
   > = {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
   const now = Date.now();
-  const cutoffTimestamp = now - DAYS_IN_MILLISECONDS[days];
+  const cutoffTimestamp = now - DAYS_IN_SECONDS[days];
   const cutoffDate = Math.floor(cutoffTimestamp / 1000).toString();
 
   for (const metricType of metricTypes) {

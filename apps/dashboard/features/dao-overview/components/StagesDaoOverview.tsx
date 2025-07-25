@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
+import { cn, formatPlural } from "@/shared/utils/";
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
@@ -20,7 +20,7 @@ interface StagesDaoOverviewProps {
 }
 
 export const StagesDaoOverview = ({
-  currentStage = Stage.ONE,
+  currentStage = Stage.NONE,
   itemsToNextStage = 3,
   highRiskItems = [],
   mediumRiskItems = [],
@@ -62,10 +62,17 @@ export const StagesDaoOverview = ({
     }
   };
 
+  const stageToText = (stage: Stage) => {
+    if (stage === Stage.NONE) {
+      return "?";
+    }
+    return stage;
+  };
+
   return (
     <div className="relative w-full py-0 sm:w-full">
       <div
-        className="flex items-center justify-between gap-1 rounded-lg border-b border-lightDark bg-lightDark p-2 sm:border-none sm:py-0.5"
+        className="border-light-dark bg-surface-contrast flex items-center justify-between gap-1 rounded-lg border-b p-2 sm:border-none sm:py-0.5"
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
       >
         <div className="flex flex-col justify-start gap-1 px-1 sm:flex-row sm:items-center">
@@ -73,66 +80,87 @@ export const StagesDaoOverview = ({
           <div className="flex gap-2">
             <span
               className={cn(
-                "font-mono text-sm font-medium uppercase tracking-wider",
+                "!text-alternative-sm font-mono font-medium uppercase",
                 {
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
                   "text-success": currentStage === Stage.TWO,
+                  "text-secondary": currentStage === Stage.NONE,
                 },
               )}
             >
-              Stage {currentStage}
+              Stage {stageToText(currentStage)}
             </span>
           </div>
-          <BulletPoint className="mb-1 hidden text-sm text-middleDark sm:block" />
+          <BulletPoint className="text-middle-dark mb-1 hidden text-sm sm:block" />
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="group border-b border-dashed border-foreground font-mono text-sm font-medium text-white duration-300 hover:border-white"
+              className="border-foreground group text-primary border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
-              <span className="tracking-wider text-white duration-300">
-                {highRiskItems.length ||
-                  mediumRiskItems.length ||
-                  lowRiskItems.length}{" "}
-                ITEMS
+              <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
+                {currentStage !== Stage.NONE
+                  ? formatPlural(
+                      highRiskItems.length ||
+                        mediumRiskItems.length ||
+                        lowRiskItems.length,
+                      "ITEM",
+                    )
+                  : "? ITEMS"}
               </span>
-              <span className="tracking-wider text-foreground duration-300 group-hover:text-white">
+              <span
+                className={cn([
+                  "text-alternative-sm text-secondary duration-300",
+                  { "group-hover:text-primary": currentStage !== Stage.NONE },
+                ])}
+              >
                 {" "}
-                TO STAGE {Number(currentStage) + 1}
+                {currentStage !== Stage.NONE
+                  ? `TO STAGE ${Number(currentStage) + 1}`
+                  : "TO NEXT"}
               </span>
             </button>
           </div>
         </div>
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">
           <OutlinedBox
-            variant="error"
+            variant={"error"}
+            disabled={currentStage === Stage.NONE}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">{highRiskItems.length}</span>
+            <span className="font-mono">
+              {currentStage !== Stage.NONE ? highRiskItems.length : "?"}
+            </span>
           </OutlinedBox>
           <OutlinedBox
             variant="warning"
+            disabled={currentStage === Stage.NONE}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">{mediumRiskItems.length}</span>
+            <span className="font-mono">
+              {currentStage !== Stage.NONE ? mediumRiskItems.length : "?"}
+            </span>
           </OutlinedBox>
           <OutlinedBox
             variant="success"
+            disabled={currentStage === Stage.NONE}
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
-            <span className="font-mono">{lowRiskItems.length}</span>
+            <span className="font-mono">
+              {currentStage !== Stage.NONE ? lowRiskItems.length : "?"}
+            </span>
           </OutlinedBox>
         </div>
       </div>
-      {showTooltip && (
+      {showTooltip && currentStage !== Stage.NONE && (
         <StageRequirementsTooltip
           currentStage={currentStage}
           nextStage={Number(currentStage) + 1}

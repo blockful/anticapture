@@ -1,20 +1,21 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, NetworkEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
+
+const ENS_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.ENS];
 
 export default createConfig({
   database: {
     kind: "postgres",
     connectionString: env.DATABASE_URL,
   },
-  networks: {
+  chains: {
     ethereum_mainnet: {
-      chainId: 1,
-      transport: http(env.RPC_URL),
+      id: 1,
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
@@ -22,17 +23,15 @@ export default createConfig({
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,
-      network: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.token.address,
-      startBlock: 9380410,
+      chain: "ethereum_mainnet",
+      address: ENS_CONTRACTS.token.address,
+      startBlock: ENS_CONTRACTS.token.startBlock,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
-      network: "ethereum_mainnet",
-      address:
-        CONTRACT_ADDRESSES[NetworkEnum.ETHEREUM][DaoIdEnum.ENS]!.governor,
-      startBlock: 13533772,
+      chain: "ethereum_mainnet",
+      address: ENS_CONTRACTS.governor.address,
+      startBlock: ENS_CONTRACTS.governor.startBlock,
     },
   },
 });

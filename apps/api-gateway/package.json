@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/src/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@graphql-mesh/cli": "^0.100.4",
-    "tsx": "^4.19.4"
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@graphql-mesh/config": "^0.108.4",
@@ -22,6 +24,7 @@
     "@graphql-mesh/openapi": "^0.109.8",
     "@graphql-mesh/runtime": "^0.106.3",
     "@graphql-mesh/types": "^0.104.3",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "graphql": "^16.11.0"
   }
 }

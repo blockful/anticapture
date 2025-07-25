@@ -15,8 +15,7 @@ import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
-import { useDaoDataContext } from "@/shared/contexts";
-import { useTimeSeriesData } from "@/shared/hooks";
+import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -44,13 +43,13 @@ export const MultilineChartAttackProfitability = ({
   filterData,
   days,
 }: MultilineChartAttackProfitabilityProps) => {
-  const { daoData } = useDaoDataContext();
   const { daoId }: { daoId: string } = useParams();
+  const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
   const [mocked, setMocked] = useState<boolean>(false);
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
-    days,
+    TimeInterval.ONE_YEAR,
   );
 
   const { data: daoTokenPriceHistoricalData = { prices: [] } } =
@@ -66,14 +65,10 @@ export const MultilineChartAttackProfitability = ({
     },
   );
   useEffect(() => {
-    if (
+    setMocked(
       timeSeriesData !== undefined &&
-      Object.values(timeSeriesData).every((data) => data.length === 0)
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        Object.values(timeSeriesData).every((data) => data.length === 0),
+    );
   }, [timeSeriesData]);
 
   let delegatedSupplyChart;
@@ -111,15 +106,19 @@ export const MultilineChartAttackProfitability = ({
       treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
         treasuryAssetNonDAOToken,
         "treasuryNonDAO",
-      ),
+      )
+        .reverse()
+        .slice(365 - Number(days.split("d")[0])),
       all: normalizeDatasetAllTreasury(
         selectedPriceHistory,
         "all",
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
-      ),
+      ).slice(365 - Number(days.split("d")[0])),
       quorum: quorumValue
-        ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue)
+        ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue).slice(
+            365 - Number(days.split("d")[0]),
+          )
         : [],
       delegated: delegatedSupplyChart
         ? normalizeDataset(
@@ -127,7 +126,7 @@ export const MultilineChartAttackProfitability = ({
             "delegated",
             null,
             delegatedSupplyChart,
-          )
+          ).slice(365 - Number(days.split("d")[0]))
         : [],
     };
   } else {
@@ -141,7 +140,6 @@ export const MultilineChartAttackProfitability = ({
   );
 
   let lastKnownValues: Record<string, number | null> = {};
-
   const chartData = Array.from(allDates)
     .sort((a, b) => a - b)
     .map((date) => {
@@ -161,9 +159,8 @@ export const MultilineChartAttackProfitability = ({
 
       return dataPoint;
     });
-
   return (
-    <div className="relative flex h-[300px] w-full items-center justify-center rounded-lg text-white sm:border-lightDark sm:bg-dark">
+    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <LineChart data={chartData}>

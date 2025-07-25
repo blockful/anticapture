@@ -35,9 +35,9 @@ export const SupportDaosSection = () => {
       icon={<HeartIcon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.supportDaos.description}
       anchorId={SECTIONS_CONSTANTS.supportDaos.anchorId}
-      className="!gap-4 !border-b-0 !bg-darkest"
+      className="bg-surface-background! gap-4! border-b-0!"
     >
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {Object.entries(daoConfigElectionDaos).map(([daoId, dao]) => (
           <SupportDaoCard
             key={dao.name}
