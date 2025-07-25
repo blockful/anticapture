@@ -92,7 +92,7 @@ export function GlossaryMobileKeyboard({
   return (
     <div
       className={cn(
-        "bg-surface-background border-border-default sticky top-[57px] z-10 flex w-full gap-2 overflow-x-scroll border-b px-4 py-3 md:hidden",
+        "bg-surface-background border-border-default sticky top-[57px] z-10 flex w-full gap-2 overflow-x-scroll border-b px-4 py-3 sm:top-0 md:hidden",
         className,
       )}
     >

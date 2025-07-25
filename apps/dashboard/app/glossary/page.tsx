@@ -70,6 +70,7 @@ export default function GlossaryPage() {
                     )}
                   </div>
                 </div>
+
                 {/* Mobile Keyboard - Fixed positioning */}
                 {!isSearching && (
                   <GlossaryMobileKeyboard
