@@ -32,8 +32,8 @@ export const AccordionContentArea = ({
   return (
     <Card
       className={cn(
-        "!border-b-light-dark border-light-dark bg-surface-default xl4k:max-w-full border! relative flex w-full flex-col flex-wrap gap-3.5 rounded-none p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border",
-        isOpen ? "sm:border-middle-dark z-20" : "sm:hover:bg-middle-dark",
+        "!border-b-light-dark border-light-dark bg-surface-default xl4k:max-w-full relative flex w-full flex-col flex-wrap gap-3.5 rounded-none border p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:gap-0",
+        isOpen ? "border-middle-dark z-20" : "hover:bg-middle-dark",
         className,
       )}
       onClick={onToggle}
@@ -84,11 +84,11 @@ export const AccordionContentArea = ({
       </div>
       <div
         className={cn(
-          "sm:border-middle-dark sm:bg-surface-default z-20 border-transparent p-3 sm:absolute sm:border",
+          "border-middle-dark bg-surface-default absolute z-20 border p-3",
           "-left-px top-full w-[calc(100%+2px)]",
           isOpen
             ? "visible h-auto transition-all duration-500 ease-in-out"
-            : "hidden transition-all duration-300 ease-in-out sm:invisible sm:h-0",
+            : "invisible hidden h-0 transition-all duration-300 ease-in-out",
         )}
         onClick={(e) => {
           if (isDesktop || isTablet) {
