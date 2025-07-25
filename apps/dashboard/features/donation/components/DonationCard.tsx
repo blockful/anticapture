@@ -20,7 +20,7 @@ export const DonationCard = ({
   return (
     <Card className="bg-surface-background md:bg-surface-default w-full rounded-none border-0 shadow-sm">
       <CardContent className="px-0 py-5 md:p-5">
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-4 lg:flex-row">
           <div className="flex-1 space-y-6">
             {/* Title and Description */}
             <div className="mb-4 flex flex-col gap-3">
