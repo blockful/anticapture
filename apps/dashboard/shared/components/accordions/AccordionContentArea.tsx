@@ -38,10 +38,10 @@ export const AccordionContentArea = ({
     >
       <div className="flex w-full items-center justify-between">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="relative mb-1 flex w-4 shrink-0 items-center justify-center">
+          <div className="relative flex w-4 shrink-0 items-center justify-center">
             <span
               className={cn(
-                "text-primary absolute text-xl font-thin transition-all duration-300",
+                "text-primary absolute mb-0.5 text-xl font-thin transition-all duration-300",
                 isOpen ? "rotate-90 opacity-0" : "opacity-100",
               )}
             >
@@ -49,7 +49,7 @@ export const AccordionContentArea = ({
             </span>
             <span
               className={cn(
-                "text-primary absolute mb-1 text-xl font-thin transition-all duration-300",
+                "text-primary absolute text-xl font-thin transition-all duration-300",
                 isOpen ? "opacity-100" : "rotate-90 opacity-0",
               )}
             >
