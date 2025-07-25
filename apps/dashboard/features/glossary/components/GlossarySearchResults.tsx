@@ -19,7 +19,7 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
               key={index}
               className="bg-surface-secondary grid grid-cols-1 p-4 md:grid-cols-5"
             >
-              <h5 className="text-primary font-roboto-mono text-alternative-sm font-medium uppercase leading-[20px] tracking-[0.78px]">
+              <h5 className="text-primary font-roboto-mono text-alternative-sm pr-4 font-medium uppercase leading-[20px] tracking-[0.78px]">
                 {result.term.title}
               </h5>
               <p
