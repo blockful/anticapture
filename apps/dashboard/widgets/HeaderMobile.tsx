@@ -9,7 +9,11 @@ import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter, usePathname } from "next/navigation";
 import { AnticaptureIcon } from "@/shared/components/icons";
 
-export const HeaderMobile = () => {
+export const HeaderMobile = ({
+  overlayClassName,
+}: {
+  overlayClassName?: string;
+}) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
@@ -70,6 +74,7 @@ export const HeaderMobile = () => {
 
   return (
     <>
+      {/* Header */}
       <div className="border-light-dark bg-surface-background absolute left-0 right-0 top-0 z-50 border-b px-4 py-1.5">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex cursor-pointer">
@@ -90,6 +95,7 @@ export const HeaderMobile = () => {
         </div>
       </div>
 
+      {/* Mobile Menu - Overlay */}
       <div
         className={cn(
           "bg-surface-background sticky top-0 z-30 w-full transition-all duration-300",
@@ -102,6 +108,7 @@ export const HeaderMobile = () => {
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
+            overlayClassName,
           )}
           onClick={onToggleMenu}
         >

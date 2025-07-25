@@ -41,7 +41,7 @@ export default function GlossaryPage() {
       <main className="flex-1 overflow-auto sm:ml-[72px]">
         <div className="sm:hidden">
           <div className="h-[57px] w-full sm:hidden">banana</div>
-          <HeaderMobile />
+          <HeaderMobile overlayClassName="top-[57px]" />
         </div>
 
         <div className="xl4k:min-h-screen flex w-full flex-col items-center">
