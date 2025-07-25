@@ -1,77 +1,57 @@
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import useSWR from "swr";
-import { DAO_ADDRESSES } from "@/shared/dao-config/dao-addresses";
-import daoConfigByDaoId from "@/shared/dao-config";
-interface AccountBalance {
-  accountId: string;
-  balance: string;
+import {
+  GetDaoAddressesAccountBalancesQuery,
+  useGetDaoAddressesAccountBalancesQuery,
+} from "@anticapture/graphql-client/hooks";
+import { ApolloError, ApolloQueryResult } from "@apollo/client";
+import { Address } from "viem";
+
+interface TopTokenHolderNonDaoResponse {
+  data:
+    | GetDaoAddressesAccountBalancesQuery["accountBalances"]["items"][0]
+    | undefined;
+  loading: boolean;
+  error: ApolloError | undefined;
+  refetch: () => Promise<
+    ApolloQueryResult<GetDaoAddressesAccountBalancesQuery>
+  >;
 }
-
-interface TopHolderResponse {
-  data: {
-    accountBalances: {
-      items: AccountBalance[];
-    };
-  };
-}
-
-const fetchTopTokenHolder = async (
-  daoId: DaoIdEnum,
-): Promise<AccountBalance | null> => {
-  const daoAddresses = Object.values(DAO_ADDRESSES[daoId]);
-  const tokenAddress = daoConfigByDaoId[daoId].daoOverview.contracts.token;
-  const response = await fetch(`${BACKEND_ENDPOINT}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "anticapture-dao-id": daoId,
-    },
-    body: JSON.stringify({
-      query: `
-        query GetAccountBalances {
-          accountBalances(
-            where: {
-              tokenId: "${tokenAddress}",
-              accountId_not_in: ${JSON.stringify(daoAddresses)}
-            }
-            orderBy: "balance",
-            orderDirection: "DESC",
-            limit: 1
-          ) {
-            items {
-              accountId
-              balance
-            }
-          }
-        }
-      `,
-    }),
-  });
-
-  const data = (await response.json()) as TopHolderResponse;
-  return data.data.accountBalances.items[0] || null;
-};
-
 /**
- * Hook to fetch the top token holder excluding DAO addresses
+ * Hook to fetch the top token holder excluding DAO addresses this is used to calculate the attack profitability
  * @param daoId The DAO ID to fetch data for
- * @param options Additional SWR options
+ * @param options Additional options
  */
 export const useTopTokenHolderNonDao = (
   daoId: DaoIdEnum,
+  tokenAddress: Address,
+  daoAddresses: string[],
   options?: {
     refreshInterval?: number;
     revalidateOnFocus?: boolean;
     revalidateOnReconnect?: boolean;
   },
-) => {
-  const fetcher = () => fetchTopTokenHolder(daoId);
+): TopTokenHolderNonDaoResponse => {
+  const { data, loading, error, refetch } =
+    useGetDaoAddressesAccountBalancesQuery({
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
+      variables: {
+        tokenAddresses: tokenAddress,
+        daoAddresses: daoAddresses as string[],
+      },
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "cache-and-network",
+      pollInterval: options?.refreshInterval || 0,
+      errorPolicy: "all",
+    });
 
-  return useSWR(daoId ? [`topTokenHolder`, daoId] : null, fetcher, {
-    refreshInterval: options?.refreshInterval || 0,
-    revalidateOnFocus: options?.revalidateOnFocus ?? false,
-    revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
-    dedupingInterval: 10000,
-  });
+  return {
+    data: data?.accountBalances.items[0] || undefined,
+    loading,
+    error: error || undefined,
+    refetch,
+  };
 };
