@@ -14,6 +14,7 @@ interface AccordionContentAreaProps {
   isOpen: boolean;
   onToggle: (e: MouseEvent<HTMLDivElement>) => void;
   className?: string;
+  showCorners?: boolean;
 }
 
 export const AccordionContentArea = ({
@@ -24,18 +25,27 @@ export const AccordionContentArea = ({
   isOpen,
   onToggle,
   className,
+  showCorners = false,
 }: AccordionContentAreaProps) => {
   const { isDesktop, isTablet } = useScreenSize();
 
   return (
     <Card
       className={cn(
-        "!border-b-light-dark border-light-dark bg-surface-default xl4k:max-w-full border-b! flex w-full flex-col flex-wrap gap-3.5 rounded-none border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border",
+        "!border-b-light-dark border-light-dark bg-surface-default xl4k:max-w-full border-b! relative flex w-full flex-col flex-wrap gap-3.5 rounded-none border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border",
         isOpen ? "sm:border-middle-dark z-20" : "sm:hover:bg-middle-dark",
         className,
       )}
       onClick={onToggle}
     >
+      {/* Top left and right corners */}
+      {isOpen && showCorners && (
+        <>
+          <div className="border-primary absolute left-0 top-0 size-3 border-l-2 border-t-2" />
+          <div className="border-primary absolute right-0 top-0 size-3 border-r-2 border-t-2" />
+        </>
+      )}
+
       <div className="flex w-full items-center justify-between">
         <div className="flex min-w-0 items-center gap-2">
           <div className="relative flex w-4 shrink-0 items-center justify-center">
@@ -87,6 +97,14 @@ export const AccordionContentArea = ({
         }}
       >
         <div>{children}</div>
+
+        {/* Bottom left and right corners */}
+        {showCorners && (
+          <>
+            <div className="border-primary absolute bottom-0 left-0 size-3 border-b-2 border-l-2" />
+            <div className="border-primary absolute bottom-0 right-0 size-3 border-b-2 border-r-2" />
+          </>
+        )}
       </div>
     </Card>
   );

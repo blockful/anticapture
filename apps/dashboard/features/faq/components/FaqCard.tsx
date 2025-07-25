@@ -20,6 +20,7 @@ export const FaqCard = ({
       isOpen={isOpen}
       onToggle={onToggle}
       className="hover:bg-surface-contrast"
+      showCorners={true}
     >
       <div className="text-secondary prose prose-sm max-w-none text-sm">
         {faqItem.answer}
