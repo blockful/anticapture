@@ -12,13 +12,12 @@ Anticapture is a data-driven platform that helps DAO communities identify, asses
 ## Key Features
 
 - **🛡️ Governance Security Analysis** - Multi-dimensional risk assessment and vulnerability monitoring
-- **📊 Attack Profitability Assessment** - Economic feasibility analysis of potential governance attacks  
+- **📊 Attack Profitability Assessment** - Economic feasibility analysis of potential governance attacks
 - **🗳️ Governance Activity Tracking** - Proposal lifecycle and voting participation monitoring
 - **🪙 Token Distribution Analysis** - Voting power concentration and decentralization metrics
 - **📈 Resilience Assessment** - DAO maturity and security milestone tracking
 - **✍️ Community Petition System** - Governance improvement proposal collection
-implement using Snapshot
-
+  implement using Snapshot
 
 ## Applications
 
