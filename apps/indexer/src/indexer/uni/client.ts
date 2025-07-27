@@ -12,7 +12,7 @@ import { readContract } from "viem/actions";
 import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi";
 
-export class UNIGovernor<
+export class UNIClient<
   TTransport extends Transport = Transport,
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
