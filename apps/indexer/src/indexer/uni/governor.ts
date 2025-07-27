@@ -1,4 +1,5 @@
 import { ponder } from "ponder:registry";
+import { dao } from "ponder:schema";
 
 import {
   proposalCanceled,
@@ -7,10 +8,9 @@ import {
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { Governor } from "@/interfaces/governor";
-import { dao } from "ponder:schema";
+import { DAOClient } from "@/interfaces/client";
 
-export function GovernorIndexer(governor: Governor) {
+export function GovernorIndexer(governor: DAOClient) {
   const daoId = DaoIdEnum.UNI;
 
   ponder.on("UNIGovernor:setup", async ({ context }) => {

@@ -1,14 +1,22 @@
-import { Account, Address, Chain, Client, Transport } from "viem";
+import {
+  Account,
+  Address,
+  Chain,
+  Client,
+  fromHex,
+  toHex,
+  Transport,
+} from "viem";
 import { getBlockNumber, readContract } from "viem/actions";
 
-import { Governor } from "@/interfaces/governor";
+import { DAOClient } from "@/interfaces/client";
 import { ENSGovernorAbi } from "./abi";
 
 export class ENSGovernor<
   TTransport extends Transport = Transport,
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
-> implements Governor
+> implements DAOClient
 {
   private client: Client<TTransport, TChain, TAccount>;
   private abi: typeof ENSGovernorAbi;
@@ -76,5 +84,23 @@ export class ENSGovernor<
       address: timelockAddress,
       functionName: "getMinDelay",
     });
+  }
+
+  async getBlockTime(blockNumber: number): Promise<number | null> {
+    // const z = toHex(blockNumber); // TODO: test this function
+
+    const block = await this.client.request({
+      method: "eth_getBlockByNumber",
+      params: [toHex(blockNumber), false],
+    });
+    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
+  }
+
+  calculateQuorum(votes: {
+    forVotes: bigint;
+    againstVotes: bigint;
+    abstainVotes: bigint;
+  }): bigint {
+    return votes.forVotes + votes.abstainVotes;
   }
 }
