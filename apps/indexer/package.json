@@ -17,7 +17,7 @@
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.3",
     "hono": "^4.7.10",
-    "ponder": "^0.11.35",
+    "ponder": "^0.11.38",
     "viem": "^2.29.4",
     "zod": "^3.25.3",
     "zod-validation-error": "^3.4.1"
