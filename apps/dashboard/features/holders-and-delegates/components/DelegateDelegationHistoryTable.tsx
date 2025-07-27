@@ -247,8 +247,8 @@ export const DelegateDelegationHistoryTable = ({
           // For transfers: if delta is negative, fromAccountId is delegator
           // If delta is positive, toAccountId is delegator
           delegatorAddress = item.isGain
-            ? item.transfer.fromAccountId
-            : item.transfer.toAccountId;
+            ? item.transfer.toAccountId
+            : item.transfer.fromAccountId;
         }
 
         return (
