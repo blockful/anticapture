@@ -1,5 +1,6 @@
-import { sql } from "ponder";
+import { asc, desc, sql } from "ponder";
 import { db } from "ponder:api";
+import { proposalsOnchain } from "ponder:schema";
 
 import {
   ActiveSupplyQueryResult,
@@ -8,6 +9,7 @@ import {
   VotesCompareQueryResult,
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
+import { DBProposal } from "../mappers";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -101,6 +103,23 @@ export class DrizzleRepository {
     `;
     const result = await db.execute<AverageTurnoutCompareQueryResult>(query);
     return result.rows[0];
+  }
+
+  async getProposals(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBProposal[]> {
+    return await db
+      .select()
+      .from(proposalsOnchain)
+      .orderBy(
+        orderDirection === "asc"
+          ? asc(proposalsOnchain.timestamp)
+          : desc(proposalsOnchain.timestamp),
+      )
+      .limit(limit)
+      .offset(skip);
   }
 
   now() {
