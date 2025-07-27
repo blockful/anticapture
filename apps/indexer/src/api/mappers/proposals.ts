@@ -44,7 +44,7 @@ export const ProposalsResponseSchema = z.object({
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
 export const ProposalMapper = {
-  toApi: (proposal: DBProposal[], blockTime: number): ProposalsResponse => {
+  toApi: (proposal: DBProposal[]): ProposalsResponse => {
     return {
       proposals: proposal.map((p) => ({
         id: p.id,
@@ -58,7 +58,7 @@ export const ProposalMapper = {
         forVotes: p.forVotes.toString(),
         againstVotes: p.againstVotes.toString(),
         abstainVotes: p.abstainVotes.toString(),
-        endTimestamp: (p.endBlock * blockTime).toString(),
+        endTimestamp: p.endTimestamp.toString(),
       })),
     };
   },
