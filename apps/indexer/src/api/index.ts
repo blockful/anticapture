@@ -23,7 +23,6 @@ import { DrizzleRepository } from "./repositories";
 import { errorHandler } from "./middlewares";
 import { proposals } from "./controller/proposals.controller";
 import { ProposalsService } from "./services/proposals";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getGovernor } from "@/lib/governor";
 import { getChain } from "@/lib/utils";
 
@@ -70,8 +69,6 @@ if (env.COINGECKO_API_KEY) {
   tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
 }
 
-const blockTime = CONTRACT_ADDRESSES[env.DAO_ID].blockTime;
-
 const governorClient = getGovernor(env.DAO_ID, client);
 
 if (!governorClient) {
@@ -84,7 +81,7 @@ const proposalsRepo = new DrizzleProposalsActivityRepository();
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
-proposals(app, new ProposalsService(repo, governorClient, blockTime));
+proposals(app, new ProposalsService(repo, governorClient));
 historicalOnchain(app, env.DAO_ID);
 docs(app);
 

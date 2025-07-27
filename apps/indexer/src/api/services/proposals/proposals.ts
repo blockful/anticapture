@@ -19,7 +19,6 @@ export class ProposalsService {
   constructor(
     private readonly proposalsRepo: ProposalsRepository,
     private readonly daoClient: DAOClient,
-    private readonly blockTime: number,
   ) {}
 
   async getProposals({
@@ -33,41 +32,53 @@ export class ProposalsService {
       orderDirection,
     );
 
-    const votingDelay = await this.daoClient.getVotingDelay();
-    const quorum = await this.daoClient.getQuorum();
-
-    const now = Math.floor(Date.now() / 1000);
+    const currentBlock = await this.daoClient.getCurrentBlockNumber();
 
     for (const proposal of proposals) {
-      if (proposal.status !== ProposalStatus.PENDING) {
+      // Skip proposals already finalized via event
+      if (
+        [
+          ProposalStatus.CANCELED,
+          ProposalStatus.QUEUED,
+          ProposalStatus.EXECUTED,
+        ].includes(proposal.status)
+      ) {
         continue;
       }
 
-      const endTimestamp = await this.daoClient.getBlockTime(proposal.endBlock);
-
-      if (!endTimestamp) {
+      if (currentBlock < proposal.startBlock) {
+        proposal.status = ProposalStatus.PENDING;
         continue;
       }
 
-      if (now > proposal.timestamp + votingDelay && now < endTimestamp) {
+      if (
+        currentBlock >= proposal.startBlock &&
+        currentBlock < proposal.endBlock
+      ) {
         proposal.status = ProposalStatus.ACTIVE;
+        continue;
       }
 
-      const proposalQuorum = await this.daoClient.calculateQuorum({
-        forVotes: proposal.forVotes,
-        againstVotes: proposal.againstVotes,
-        abstainVotes: proposal.abstainVotes,
-      });
+      // After voting period ends
+      if (currentBlock >= proposal.endBlock) {
+        const proposalQuorum = await this.daoClient.calculateQuorum({
+          forVotes: proposal.forVotes,
+          againstVotes: proposal.againstVotes,
+          abstainVotes: proposal.abstainVotes,
+        });
 
-      if (endTimestamp && endTimestamp > now) {
-        if (proposalQuorum <= quorum) {
+        const quorum = await this.daoClient.getQuorum(proposal.id);
+        const hasQuorum = proposalQuorum >= quorum;
+        const hasMajority = proposal.forVotes > proposal.againstVotes;
+
+        if (!hasQuorum || !hasMajority) {
           proposal.status = ProposalStatus.DEFEATED;
         } else {
-          proposal.status = ProposalStatus.EXPIRED;
+          proposal.status = ProposalStatus.SUCCEEDED;
         }
       }
     }
 
-    return ProposalMapper.toApi(proposals, this.blockTime);
+    return ProposalMapper.toApi(proposals);
   }
 }
