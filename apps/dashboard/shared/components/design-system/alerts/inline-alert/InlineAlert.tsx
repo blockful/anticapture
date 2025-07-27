@@ -11,7 +11,7 @@ const mapVariantToIcon = {
   info: {
     icon: <Info className="size-4 text-white" />,
     color: "text-info",
-    bgColor: "bg-[#27272A]",
+    bgColor: "bg-lightDark",
   },
   warning: {
     icon: <AlertTriangle className="text-warning size-4" />,
