@@ -1,4 +1,4 @@
-import { metricTypeArray } from "@/lib/constants";
+import { metricTypeArray, ProposalStatus } from "@/lib/constants";
 import {
   onchainTable,
   index,
@@ -153,16 +153,16 @@ export const proposalsOnchain = onchainTable(
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     daoId: drizzle.text("dao_id").notNull(),
-    proposerAccountId: drizzle.text("proposer_account_id"),
-    targets: drizzle.json(),
-    values: drizzle.json(),
-    signatures: drizzle.json(),
-    calldatas: drizzle.json(),
-    startBlock: drizzle.text("start_block"),
-    endBlock: drizzle.text("end_block"),
-    description: drizzle.text(),
-    timestamp: drizzle.bigint(),
-    status: drizzle.text(),
+    proposerAccountId: drizzle.text("proposer_account_id").notNull(),
+    targets: drizzle.json().$type<string[]>().notNull(),
+    values: drizzle.json().$type<bigint[]>().notNull(),
+    signatures: drizzle.json().$type<string[]>().notNull(),
+    calldatas: drizzle.json().$type<string[]>().notNull(),
+    startBlock: drizzle.integer("start_block").notNull(),
+    endBlock: drizzle.integer("end_block").notNull(),
+    description: drizzle.text().notNull(),
+    timestamp: drizzle.bigint().notNull(),
+    status: drizzle.text().$type<ProposalStatus>().notNull(),
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
     abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
