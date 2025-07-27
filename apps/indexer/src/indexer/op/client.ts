@@ -1,14 +1,22 @@
-import { Account, Address, Chain, Client, Transport } from "viem";
+import {
+  Account,
+  Address,
+  Chain,
+  Client,
+  fromHex,
+  toHex,
+  Transport,
+} from "viem";
 import { readContract } from "viem/actions";
 
-import { Governor } from "@/interfaces/governor";
+import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi";
 
 export class OPGovernor<
   TTransport extends Transport = Transport,
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
-> implements Governor
+> implements DAOClient
 {
   private client: Client<TTransport, TChain, TAccount>;
   private abi: typeof GovernorAbi;
@@ -50,5 +58,21 @@ export class OPGovernor<
 
   async getTimelockDelay(): Promise<bigint> {
     return 0n;
+  }
+
+  async getBlockTime(blockNumber: number): Promise<number | null> {
+    const block = await this.client.request({
+      method: "eth_getBlockByNumber",
+      params: [toHex(blockNumber), false],
+    });
+    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
+  }
+
+  calculateQuorum(votes: {
+    forVotes: bigint;
+    againstVotes: bigint;
+    abstainVotes: bigint;
+  }): bigint {
+    return votes.forVotes + votes.againstVotes + votes.abstainVotes;
   }
 }
