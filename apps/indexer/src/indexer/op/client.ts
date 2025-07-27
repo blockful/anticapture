@@ -28,8 +28,14 @@ export class OPClient<
     this.abi = GovernorAbi;
   }
 
-  async getQuorum(): Promise<bigint> {
-    return 0n; // TODO: fetch quorum from oracle
+  async getQuorum(proposalId: string | null): Promise<bigint> {
+    if (!proposalId) return 0n;
+    return readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "quorum",
+      args: [BigInt(proposalId)],
+    });
   }
 
   async getProposalThreshold(): Promise<bigint> {
@@ -58,6 +64,13 @@ export class OPClient<
 
   async getTimelockDelay(): Promise<bigint> {
     return 0n;
+  }
+
+  async getCurrentBlockNumber(): Promise<number> {
+    const result = await this.client.request({
+      method: "eth_blockNumber",
+    });
+    return fromHex(result, "number");
   }
 
   async getBlockTime(blockNumber: number): Promise<number | null> {
