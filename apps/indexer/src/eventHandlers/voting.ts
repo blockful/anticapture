@@ -1,8 +1,9 @@
 import { Context } from "ponder:registry";
 import { accountPower, proposalsOnchain, votesOnchain } from "ponder:schema";
+import { Address, Hex } from "viem";
 
 import { ensureAccountExists } from "./shared";
-import { Address, Hex } from "viem";
+import { ProposalStatus } from "@/lib/constants";
 
 export const voteCast = async (
   context: Context,
@@ -96,15 +97,15 @@ export const proposalCreated = async (
     id: proposalId,
     daoId,
     proposerAccountId: proposer,
-    targets: JSON.stringify(targets),
-    values: JSON.stringify(values),
-    signatures: JSON.stringify(signatures),
-    calldatas: JSON.stringify(calldatas),
-    startBlock,
-    endBlock,
+    targets,
+    values,
+    signatures,
+    calldatas,
+    startBlock: parseInt(startBlock),
+    endBlock: parseInt(endBlock),
     description,
     timestamp,
-    status: "Pending",
+    status: ProposalStatus.PENDING,
   });
 
   // Update proposer's proposal count
@@ -125,7 +126,7 @@ export const proposalCanceled = async (
   proposalId: string,
 ) => {
   await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "CANCELED",
+    status: ProposalStatus.CANCELED,
   });
 };
 
@@ -134,6 +135,6 @@ export const proposalExecuted = async (
   proposalId: string,
 ) => {
   await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "EXECUTED",
+    status: ProposalStatus.EXECUTED,
   });
 };
