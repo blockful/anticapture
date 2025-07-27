@@ -86,9 +86,14 @@ export class ENSClient<
     });
   }
 
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    // const z = toHex(blockNumber); // TODO: test this function
+  async getCurrentBlockNumber(): Promise<number> {
+    const result = await this.client.request({
+      method: "eth_blockNumber",
+    });
+    return fromHex(result, "number");
+  }
 
+  async getBlockTime(blockNumber: number): Promise<number | null> {
     const block = await this.client.request({
       method: "eth_getBlockByNumber",
       params: [toHex(blockNumber), false],

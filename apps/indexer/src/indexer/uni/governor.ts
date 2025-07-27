@@ -10,7 +10,7 @@ import {
 import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
 
-export function GovernorIndexer(client: DAOClient) {
+export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.UNI;
 
   ponder.on("UNIGovernor:setup", async ({ context }) => {
@@ -22,7 +22,7 @@ export function GovernorIndexer(client: DAOClient) {
       proposalThreshold,
     ] = await Promise.all([
       client.getVotingPeriod(),
-      client.getQuorum(),
+      client.getQuorum(null),
       client.getVotingDelay(),
       client.getTimelockDelay(),
       client.getProposalThreshold(),
@@ -51,7 +51,7 @@ export function GovernorIndexer(client: DAOClient) {
   });
 
   ponder.on("UNIGovernor:ProposalCreated", async ({ event, context }) => {
-    await proposalCreated(context, daoId, {
+    await proposalCreated(context, daoId, blockTime, {
       proposalId: event.args.id.toString(),
       proposer: event.args.proposer,
       targets: [...event.args.targets],
