@@ -22,44 +22,50 @@ export const ProposalsRequestSchema = z.object({
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
 
+export const ProposalResponseSchema = z.object({
+  id: z.string(),
+  daoId: z.string(),
+  proposerAccountId: z.string(),
+  description: z.string(),
+  startBlock: z.number(),
+  endBlock: z.number(),
+  timestamp: z.string(),
+  status: z.string(),
+  forVotes: z.string(),
+  againstVotes: z.string(),
+  abstainVotes: z.string(),
+  endTimestamp: z.string(),
+});
+
 export const ProposalsResponseSchema = z.object({
-  proposals: z.array(
-    z.object({
-      id: z.string(),
-      daoId: z.string(),
-      proposerAccountId: z.string(),
-      description: z.string(),
-      startBlock: z.number(),
-      endBlock: z.number(),
-      timestamp: z.string(),
-      status: z.string(),
-      forVotes: z.string(),
-      againstVotes: z.string(),
-      abstainVotes: z.string(),
-      endTimestamp: z.string(),
-    }),
-  ),
+  proposals: z.array(ProposalResponseSchema),
 });
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
+export const ProposalRequestSchema = z.object({
+  id: z.string().describe("The proposal ID"),
+});
+
+export type ProposalParams = z.infer<typeof ProposalRequestSchema>;
+
+export type ProposalResponse = z.infer<typeof ProposalResponseSchema>;
+
 export const ProposalMapper = {
-  toApi: (proposal: DBProposal[]): ProposalsResponse => {
+  toApi: (p: DBProposal): ProposalResponse => {
     return {
-      proposals: proposal.map((p) => ({
-        id: p.id,
-        daoId: p.daoId,
-        proposerAccountId: p.proposerAccountId,
-        description: p.description,
-        startBlock: p.startBlock,
-        endBlock: p.endBlock,
-        timestamp: p.timestamp.toString(),
-        status: p.status,
-        forVotes: p.forVotes.toString(),
-        againstVotes: p.againstVotes.toString(),
-        abstainVotes: p.abstainVotes.toString(),
-        endTimestamp: p.endTimestamp.toString(),
-      })),
+      id: p.id,
+      daoId: p.daoId,
+      proposerAccountId: p.proposerAccountId,
+      description: p.description,
+      startBlock: p.startBlock,
+      endBlock: p.endBlock,
+      timestamp: p.timestamp.toString(),
+      status: p.status,
+      forVotes: p.forVotes.toString(),
+      againstVotes: p.againstVotes.toString(),
+      abstainVotes: p.abstainVotes.toString(),
+      endTimestamp: p.endTimestamp.toString(),
     };
   },
 };
