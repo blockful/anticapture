@@ -13,39 +13,10 @@ import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useTimeSeriesData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-
-const initialMetrics = [
-  MetricTypesEnum.DELEGATED_SUPPLY,
-  MetricTypesEnum.CEX_SUPPLY,
-  MetricTypesEnum.DEX_SUPPLY,
-  MetricTypesEnum.LENDING_SUPPLY,
-];
-
-const metricsSchema: Record<
-  string,
-  { label: string; color: string; category: string }
-> = {
-  DELEGATED_SUPPLY: {
-    label: "Delegated Supply",
-    color: "#3B82F6",
-    category: "SUPPLY",
-  },
-  CEX_SUPPLY: {
-    label: "CEX Supply",
-    color: "#FB923C",
-    category: "SUPPLY",
-  },
-  DEX_SUPPLY: {
-    label: "DEX Supply",
-    color: "#22C55E",
-    category: "SUPPLY",
-  },
-  LENDING_SUPPLY: {
-    label: "Lending Supply",
-    color: "#A855F7",
-    category: "SUPPLY",
-  },
-};
+import {
+  initialMetrics,
+  metricsSchema,
+} from "@/features/token-distribution/utils";
 
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] =
