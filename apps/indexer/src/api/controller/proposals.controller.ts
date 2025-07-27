@@ -1,7 +1,13 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { ProposalsService } from "@/api/services/proposals/proposals";
-import { ProposalsResponseSchema, ProposalsRequestSchema } from "../mappers";
+import {
+  ProposalsResponseSchema,
+  ProposalsRequestSchema,
+  ProposalRequestSchema,
+  ProposalResponseSchema,
+  ProposalMapper,
+} from "../mappers";
 
 export function proposals(app: Hono, service: ProposalsService) {
   app.openapi(
@@ -35,7 +41,45 @@ export function proposals(app: Hono, service: ProposalsService) {
         orderDirection,
       });
 
-      return context.json(result, 200);
+      return context.json({ proposals: result.map(ProposalMapper.toApi) });
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getProposalById",
+      path: "/proposals/:id",
+      summary: "Get a proposal by ID",
+      description: "Returns a single proposal by its ID",
+      tags: ["proposals"],
+      request: {
+        params: ProposalRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved proposal",
+          content: {
+            "application/json": {
+              schema: ProposalResponseSchema,
+            },
+          },
+        },
+        404: {
+          description: "Proposal not found",
+        },
+      },
+    }),
+    async (context) => {
+      const { id } = context.req.valid("param");
+
+      const proposal = await service.getProposalById(id);
+
+      if (!proposal) {
+        return context.json({ error: "Proposal not found" }, 404);
+      }
+
+      return context.json(ProposalMapper.toApi(proposal), 200);
     },
   );
 }

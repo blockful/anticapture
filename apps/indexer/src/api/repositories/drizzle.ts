@@ -1,4 +1,4 @@
-import { asc, desc, sql } from "ponder";
+import { asc, desc, eq, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain } from "ponder:schema";
 
@@ -120,6 +120,12 @@ export class DrizzleRepository {
       )
       .limit(limit)
       .offset(skip);
+  }
+
+  async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
+    return await db.query.proposalsOnchain.findFirst({
+      where: eq(proposalsOnchain.id, proposalId),
+    });
   }
 
   now() {
