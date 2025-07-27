@@ -65,6 +65,7 @@ export const voteCast = async (
 export const proposalCreated = async (
   context: Context,
   daoId: string,
+  blockTime: number,
   args: {
     proposalId: string;
     proposer: Address;
@@ -93,6 +94,7 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
+  const blockDelta = parseInt(endBlock) - parseInt(startBlock);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
     daoId,
@@ -106,6 +108,7 @@ export const proposalCreated = async (
     description,
     timestamp,
     status: ProposalStatus.PENDING,
+    endTimestamp: timestamp + BigInt(blockDelta * blockTime),
   });
 
   // Update proposer's proposal count

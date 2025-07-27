@@ -162,6 +162,7 @@ export const proposalsOnchain = onchainTable(
     endBlock: drizzle.integer("end_block").notNull(),
     description: drizzle.text().notNull(),
     timestamp: drizzle.bigint().notNull(),
+    endTimestamp: drizzle.bigint("end_timestamp").notNull(),
     status: drizzle.text().$type<ProposalStatus>().notNull(),
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
