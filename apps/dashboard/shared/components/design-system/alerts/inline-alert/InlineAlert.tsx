@@ -10,8 +10,8 @@ interface InlineAlertProps {
 const mapVariantToIcon = {
   info: {
     icon: <Info className="size-4 text-white" />,
-    color: "text-info",
-    bgColor: "bg-lightDark",
+    color: "text-secondary",
+    bgColor: "bg-surface-contrast",
   },
   warning: {
     icon: <AlertTriangle className="text-warning size-4" />,
@@ -27,7 +27,7 @@ const mapVariantToIcon = {
 
 export const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
   return (
-    <div className="w-full overflow-hidden rounded-md bg-[#18181B]">
+    <div className="bg-surface-contrast w-full overflow-hidden rounded-md">
       <CardDescription
         className={cn(
           "flex w-full items-center gap-2 rounded-lg p-2 sm:items-center",
@@ -35,7 +35,7 @@ export const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
         )}
       >
         <div className="mt-0.5 sm:mt-0">{mapVariantToIcon[variant].icon}</div>
-        <p className="text-foreground text-sm font-normal">{text}</p>
+        <p className="text-secondary text-sm font-normal">{text}</p>
       </CardDescription>
     </div>
   );
