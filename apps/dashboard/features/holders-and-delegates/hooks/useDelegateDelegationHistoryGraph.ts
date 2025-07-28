@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPowerTimePeriod } from "../components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
+import { VotingPowerTimePeriod } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
 
@@ -21,7 +21,7 @@ export interface DelegationHistoryGraphItem {
 export interface UseDelegateDelegationHistoryGraphResult {
   delegationHistory: DelegationHistoryGraphItem[];
   loading: boolean;
-  error: any;
+  error: unknown;
 }
 
 export function useDelegateDelegationHistoryGraph(
