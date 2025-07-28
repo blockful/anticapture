@@ -100,6 +100,7 @@ export const delegatedVotesChanged = async (
 
   await ensureAccountExists(context, delegate);
 
+  const delta = newBalance - oldBalance;
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -107,8 +108,9 @@ export const delegatedVotesChanged = async (
       transactionHash: txHash,
       accountId: delegate,
       votingPower: newBalance,
-      delta: newBalance - oldBalance,
+      delta,
       timestamp,
+      deltaMod: delta < 0n ? -delta : delta, // non-negative value
     })
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
