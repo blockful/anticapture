@@ -90,41 +90,50 @@ export const StagesDaoOverview = ({
                 },
               )}
             >
-              Stage {stageToText(currentStage)}
+              {currentStage === Stage.NONE
+                ? "NO STAGE"
+                : `Stage ${stageToText(currentStage)}`}
             </span>
           </div>
           <BulletPoint className="text-middle-dark mb-1 hidden text-sm sm:block" />
           {/* Items to next stage */}
           <div className="flex justify-start">
-            <button
-              className="border-foreground text-primary group border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
-              onClick={handleButtonClick}
-              onMouseEnter={() => !isMobile && setShowTooltip(true)}
-            >
-              <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
-                {currentStage !== Stage.UNKNOWN
-                  ? formatPlural(
-                      highRiskItems.length ||
-                        mediumRiskItems.length ||
-                        lowRiskItems.length,
-                      "ITEM",
-                    )
-                  : "? ITEMS"}
+            {currentStage === Stage.NONE ? (
+              <span className="text-secondary text-alternative-sm font-medium duration-300">
+                Does not qualify
               </span>
-              <span
-                className={cn([
-                  "text-alternative-sm text-secondary duration-300",
-                  {
-                    "group-hover:text-primary": currentStage !== Stage.UNKNOWN,
-                  },
-                ])}
+            ) : (
+              <button
+                className="border-foreground text-primary group border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
+                onClick={handleButtonClick}
+                onMouseEnter={() => !isMobile && setShowTooltip(true)}
               >
-                {" "}
-                {currentStage !== Stage.UNKNOWN
-                  ? `TO STAGE ${Number(currentStage) + 1}`
-                  : "TO NEXT"}
-              </span>
-            </button>
+                <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
+                  {currentStage !== Stage.UNKNOWN
+                    ? formatPlural(
+                        highRiskItems.length ||
+                          mediumRiskItems.length ||
+                          lowRiskItems.length,
+                        "ITEM",
+                      )
+                    : "? ITEMS"}
+                </span>
+                <span
+                  className={cn([
+                    "text-alternative-sm text-secondary duration-300",
+                    {
+                      "group-hover:text-primary":
+                        currentStage !== Stage.UNKNOWN,
+                    },
+                  ])}
+                >
+                  {" "}
+                  {currentStage !== Stage.UNKNOWN
+                    ? `TO STAGE ${Number(currentStage) + 1}`
+                    : "TO NEXT"}
+                </span>
+              </button>
+            )}
           </div>
         </div>
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">
@@ -163,15 +172,17 @@ export const StagesDaoOverview = ({
           </OutlinedBox>
         </div>
       </div>
-      {showTooltip && currentStage !== Stage.UNKNOWN && (
-        <StageRequirementsTooltip
-          currentStage={currentStage}
-          nextStage={Number(currentStage) + 1}
-          requirements={requirements}
-          onMouseEnter={() => !isMobile && setShowTooltip(true)}
-          onMouseLeave={() => !isMobile && setShowTooltip(false)}
-        />
-      )}
+      {showTooltip &&
+        currentStage !== Stage.UNKNOWN &&
+        currentStage !== Stage.NONE && (
+          <StageRequirementsTooltip
+            currentStage={currentStage}
+            nextStage={Number(currentStage) + 1}
+            requirements={requirements}
+            onMouseEnter={() => !isMobile && setShowTooltip(true)}
+            onMouseLeave={() => !isMobile && setShowTooltip(false)}
+          />
+        )}
     </div>
   );
 };
