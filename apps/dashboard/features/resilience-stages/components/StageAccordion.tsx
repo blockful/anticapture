@@ -47,7 +47,7 @@ export const StageAccordion = ({
               <>
                 <span className="block">
                   All DAOs that have an autonomous operation on-chain based on a
-                  governor and timelock are considered at least
+                  governor and timelock are considered at least{" "}
                   <span className="text-primary whitespace-nowrap">
                     Stage 0
                   </span>
