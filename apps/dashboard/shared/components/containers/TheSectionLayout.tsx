@@ -6,7 +6,6 @@ import { ReactNode, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { CardDescription, CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
-import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Info } from "lucide-react";
 
 interface TheSectionLayoutProps {
