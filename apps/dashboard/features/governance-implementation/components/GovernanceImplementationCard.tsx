@@ -118,7 +118,7 @@ export const GovernanceImplementationCard = ({
           {field.riskExplanation && (
             <div
               className={cn(
-                "flex w-full flex-col gap-1 rounded-lg p-2",
+                "flex w-full flex-col gap-1 p-2",
                 riskBoxStyles[field.riskLevel],
               )}
             >
