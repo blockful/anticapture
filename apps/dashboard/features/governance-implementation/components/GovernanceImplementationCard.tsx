@@ -36,7 +36,7 @@ export const GovernanceImplementationCard = ({
   return (
     <Card
       className={cn(
-        "!border-b-light-dark sm:border-light-dark sm:bg-surface-default xl4k:max-w-full border-b! flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
+        "!border-b-light-dark sm:border-light-dark sm:bg-surface-default xl4k:max-w-full border-b! relative flex w-full flex-col flex-wrap gap-3.5 rounded-b-none rounded-t-lg border-x-transparent border-t-transparent p-3 shadow-sm transition-all duration-200 hover:cursor-pointer sm:relative sm:gap-0 sm:border md:w-[calc(50%-10px)]",
         isOpen
           ? "sm:border-middle-dark sm:bg-surface-contrast z-20 rounded-b-none"
           : "sm:hover:bg-middle-dark sm:rounded-b-lg",
@@ -87,6 +87,13 @@ export const GovernanceImplementationCard = ({
           <RiskLevelCardSmall status={field.riskLevel} />
         </div>
       </div>
+
+      {isOpen && (
+        <>
+          <div className="border-primary border-b-1 border-l-1 absolute bottom-0 left-0 size-3" />
+          <div className="border-primary border-b-1 border-r-1 absolute bottom-0 right-0 size-3" />
+        </>
+      )}
 
       <div
         className={cn(
