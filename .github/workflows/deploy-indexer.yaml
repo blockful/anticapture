@@ -12,7 +12,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      triggers: ${{ steps.filter.outputs.triggers }}
+      api: ${{ steps.filter.outputs.api }}
+      indexer: ${{ steps.filter.outputs.indexer }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
@@ -97,6 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Deploy api-gateway
+        if: ${{ needs.changes.outputs.api == 'true' }}
         run: |
           echo "Deploying api-gateway to ${{ needs.environment.outputs.environment }}"
           railway up -s api-gateway -e ${{ needs.environment.outputs.environment }} --ci
