@@ -13,7 +13,7 @@ export function proposals(app: Hono, service: ProposalsService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "proposalsActivity",
+      operationId: "proposals",
       path: "/proposals",
       summary: "Get proposals for delegate",
       description: "Returns a list of proposal",
@@ -48,7 +48,7 @@ export function proposals(app: Hono, service: ProposalsService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "getProposalById",
+      operationId: "proposal",
       path: "/proposals/:id",
       summary: "Get a proposal by ID",
       description: "Returns a single proposal by its ID",
