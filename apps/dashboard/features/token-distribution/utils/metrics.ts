@@ -12,32 +12,32 @@ export const metricsSchema: Record<
   { label: string; color: string; category: string }
 > = {
   DELEGATED_SUPPLY: {
-    label: "Delegated Supply",
+    label: "Delegated",
     color: "#3B82F6",
     category: "SUPPLY",
   },
   CEX_SUPPLY: {
-    label: "CEX Supply",
+    label: "CEX",
     color: "#FB923C",
     category: "SUPPLY",
   },
   DEX_SUPPLY: {
-    label: "DEX Supply",
+    label: "DEX",
     color: "#22C55E",
     category: "SUPPLY",
   },
   LENDING_SUPPLY: {
-    label: "Lending Supply",
+    label: "Lending",
     color: "#A855F7",
     category: "SUPPLY",
   },
   TOTAL_SUPPLY: {
-    label: "Total Supply",
+    label: "Total",
     color: "#2DD4BF",
     category: "SUPPLY",
   },
   CIRCULATING_SUPPLY: {
-    label: "Circulating Supply",
+    label: "Circulating",
     color: "#A78BFA",
     category: "SUPPLY",
   },

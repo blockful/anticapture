@@ -13,17 +13,7 @@ import React, { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-
-// TODO: move to shared when types is known
-interface Metric {
-  label: string;
-  color: string;
-  category: string;
-}
-
-interface MetricWithKey extends Metric {
-  key: MetricTypesEnum;
-}
+import { MetricWithKey } from "@/shared/dao-config/types";
 
 export const TokenDistributionDialog = ({
   appliedMetrics,
@@ -51,7 +41,7 @@ export const TokenDistributionDialog = ({
 
   const isAllMetricsApplied =
     appliedMetrics &&
-    Object.entries(metricsSchema).some(
+    Object.entries(metricsSchema).every(
       ([category, metrics]) =>
         appliedMetrics[category]?.length === metrics.length,
     );
@@ -61,14 +51,27 @@ export const TokenDistributionDialog = ({
       <Trigger asChild>
         <Button
           variant={isAllMetricsApplied ? "disabled" : "ghost"}
-          className={cn(
-            "border-light-dark mt-4 flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-          )}
+          className={
+            "border-light-dark mt-4 flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+          }
           disabled={isAllMetricsApplied}
         >
-          <PlusIcon className="text-primary" />
-          <span className="text-primary text-sm font-medium">Add metrics</span>
+          {isAllMetricsApplied ? (
+            <>
+              <Check className="text-primary" />
+              <span className="text-primary text-sm font-medium">
+                All metrics added
+              </span>
+            </>
+          ) : (
+            <>
+              {" "}
+              <PlusIcon className="text-primary" />
+              <span className="text-primary text-sm font-medium">
+                Add metrics
+              </span>
+            </>
+          )}
         </Button>
       </Trigger>
       <Portal>

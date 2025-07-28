@@ -73,6 +73,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             setAppliedMetrics={setAppliedMetrics}
             metricsSchema={metricsSchema}
             setHoveredMetricKey={setHoveredMetricKey}
+            timeSeriesData={timeSeriesData}
           />
         </div>
       </Card>

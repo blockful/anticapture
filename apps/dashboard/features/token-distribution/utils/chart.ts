@@ -4,99 +4,46 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { formatUnits } from "viem";
 
 interface TokenDistributionChartData {
-  totalSupply: MetricData;
-  totalSupplyChart: DaoMetricsDayBucket[];
-  circulatingSupply: MetricData;
-  circulatingSupplyChart: DaoMetricsDayBucket[];
-  delegatedSupply: MetricData;
-  delegatedSupplyChart: DaoMetricsDayBucket[];
-  cexSupply: MetricData;
-  cexSupplyChart: DaoMetricsDayBucket[];
-  dexSupply: MetricData;
-  dexSupplyChart: DaoMetricsDayBucket[];
-  lendingSupply: MetricData;
-  lendingSupplyChart: DaoMetricsDayBucket[];
+  TOTAL_SUPPLY: MetricData;
+  CIRCULATING_SUPPLY: MetricData;
+  DELEGATED_SUPPLY: MetricData;
+  CEX_SUPPLY: MetricData;
+  DEX_SUPPLY: MetricData;
+  LENDING_SUPPLY: MetricData;
+  TREASURY: MetricData;
+  PROPOSALS: MetricData;
+  ACTIVE_SUPPLY: MetricData;
+  VOTES: MetricData;
+  AVERAGE_TURNOUT: MetricData;
 }
 
 export const calculateChangeRate = (
   data: DaoMetricsDayBucket[] = [],
 ): string | null => {
-  if (!data || data.length < 2) return null;
+  if (data.length < 2) return null;
 
-  try {
-    if (data.length > 0) {
-      const oldHigh = data[0].high ?? "0";
-      const currentHigh = data[data.length - 1]?.high ?? "0";
-      if (currentHigh === "0") {
-        return "0";
-      } else {
-        return formatUnits(
-          (BigInt(currentHigh) * BigInt(1e18)) / BigInt(oldHigh) - BigInt(1e18),
-          18,
-        );
-      }
-    }
-  } catch (e) {
-    return null;
-  }
-  return null;
+  const first = data[0].high;
+  const last = data.at(-1)?.high;
+
+  if (!first || !last || BigInt(first) === BigInt(0)) return "0";
+
+  const change = (BigInt(last) * BigInt(1e18)) / BigInt(first) - BigInt(1e18);
+  return formatUnits(change, 18);
 };
 
-export const formatChartData = (
+export const formatChartVariation = (
   timeSeriesData: Record<MetricTypesEnum, DaoMetricsDayBucket[]>,
-) => {
-  const chartData: TokenDistributionChartData = {
-    totalSupply: {
-      value:
-        timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
-      changeRate: calculateChangeRate(
-        timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY],
-      ),
-    },
-    totalSupplyChart: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY] || [],
-    circulatingSupply: {
-      value:
-        timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY]?.at(-1)?.high ??
-        null,
-      changeRate: calculateChangeRate(
-        timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY],
-      ),
-    },
-    circulatingSupplyChart:
-      timeSeriesData?.[MetricTypesEnum.CIRCULATING_SUPPLY] || [],
-    delegatedSupply: {
-      value:
-        timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high ??
-        null,
-      changeRate: calculateChangeRate(
-        timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
-      ),
-    },
-    delegatedSupplyChart:
-      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY] || [],
-    cexSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY]?.at(-1)?.high ?? null,
-      changeRate: calculateChangeRate(
-        timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY],
-      ),
-    },
-    cexSupplyChart: timeSeriesData?.[MetricTypesEnum.CEX_SUPPLY] || [],
-    dexSupply: {
-      value: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY]?.at(-1)?.high ?? null,
-      changeRate: calculateChangeRate(
-        timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY],
-      ),
-    },
-    dexSupplyChart: timeSeriesData?.[MetricTypesEnum.DEX_SUPPLY] || [],
-    lendingSupply: {
-      value:
-        timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY]?.at(-1)?.high ?? null,
-      changeRate: calculateChangeRate(
-        timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY],
-      ),
-    },
-    lendingSupplyChart: timeSeriesData?.[MetricTypesEnum.LENDING_SUPPLY] || [],
-  };
+): TokenDistributionChartData => {
+  const metrics = Object.values(MetricTypesEnum);
+
+  const chartData = {} as TokenDistributionChartData;
+
+  metrics.forEach((metric) => {
+    chartData[metric] = {
+      value: timeSeriesData?.[metric]?.at(-1)?.high ?? null,
+      changeRate: calculateChangeRate(timeSeriesData?.[metric]),
+    };
+  });
 
   return chartData;
 };

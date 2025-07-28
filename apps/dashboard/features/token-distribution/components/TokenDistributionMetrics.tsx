@@ -4,17 +4,13 @@ import { X } from "lucide-react";
 import { TokenDistributionDialog } from "@/features/token-distribution/components";
 import { Button } from "@/shared/components/ui/button";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-
-// TODO: move to shared when types is known
-interface Metric {
-  label: string;
-  color: string;
-  category: string;
-}
-
-interface MetricWithKey extends Metric {
-  key: MetricTypesEnum;
-}
+import {
+  DaoMetricsDayBucket,
+  Metric,
+  MetricWithKey,
+} from "@/shared/dao-config/types";
+import { formatChartVariation } from "@/features/token-distribution/utils";
+import { formatNumberUserReadable, formatVariation } from "@/shared/utils";
 
 interface TokenDistributionMetricsProps {
   appliedMetrics: MetricTypesEnum[];
@@ -22,6 +18,7 @@ interface TokenDistributionMetricsProps {
   setHoveredMetricKey: React.Dispatch<
     React.SetStateAction<MetricTypesEnum | null>
   >;
+  timeSeriesData?: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | null;
   metricsSchema: Record<MetricTypesEnum, Metric>;
 }
 
@@ -50,7 +47,10 @@ export const TokenDistributionMetrics = ({
   setAppliedMetrics,
   metricsSchema,
   setHoveredMetricKey,
+  timeSeriesData,
 }: TokenDistributionMetricsProps) => {
+  const metricsData = formatChartVariation(timeSeriesData!);
+
   const handleApplyMetric = (newMetrics: MetricTypesEnum[]) => {
     setAppliedMetrics((prev) => {
       return [...prev, ...newMetrics];
@@ -83,39 +83,81 @@ export const TokenDistributionMetrics = ({
                 <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
                   {category}
                 </CardTitle>
-                {metrics.map((metric) => (
-                  <Button
-                    key={metric.key}
-                    variant={"ghost"}
-                    onClick={() => {
-                      const metricKey = appliedMetrics.find(
-                        (key) => key === metric.key,
-                      );
-                      if (metricKey) handleRemoveMetric(metricKey);
-                    }}
-                    className="border-light-dark flex h-7 w-full items-center justify-between gap-2 rounded-sm border px-2 hover:opacity-80"
-                    onMouseEnter={() => {
-                      const hoveredKey = appliedMetrics.find(
-                        (key) => key === metric.key,
-                      );
-                      setHoveredMetricKey(hoveredKey ?? null);
-                    }}
-                    onMouseLeave={() => setHoveredMetricKey(null)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="rounded-xs size-2"
-                        style={{ backgroundColor: metric.color }}
-                      />
-                      <span className="text-primary text-sm font-medium">
-                        {metric.label}
-                      </span>
-                    </div>
-                    <div className="h3 w-3">
-                      <X className="text-secondary" />
-                    </div>
-                  </Button>
-                ))}
+                {metrics.map((metric) => {
+                  const metricsValue = metricsData[metric.key].value;
+                  const variation = metricsData[metric.key].changeRate;
+
+                  const formattedMetricsValue = metricsValue
+                    ? String(BigInt(metricsValue) / BigInt(10 ** 18))
+                    : metricsValue;
+
+                  const formattedVariation = variation
+                    ? formatVariation(variation)
+                    : variation;
+
+                  const handleClick = () => {
+                    const metricKey = appliedMetrics.find(
+                      (key) => key === metric.key,
+                    );
+                    if (metricKey) handleRemoveMetric(metricKey);
+                  };
+
+                  const handleMouseEnter = () => {
+                    const hoveredKey = appliedMetrics.find(
+                      (key) => key === metric.key,
+                    );
+                    setHoveredMetricKey(hoveredKey ?? null);
+                  };
+
+                  const handleMouseLeave = () => {
+                    setHoveredMetricKey(null);
+                  };
+
+                  return (
+                    <Button
+                      key={metric.key}
+                      variant={"ghost"}
+                      onClick={handleClick}
+                      className="border-light-dark hover:bg-surface-contrast flex h-7 w-full items-center justify-between gap-2 rounded-sm border px-2"
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="rounded-xs size-2"
+                          style={{ backgroundColor: metric.color }}
+                        />
+                        <span className="text-primary text-sm font-medium">
+                          {metric.label}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 text-end">
+                        {formattedMetricsValue && (
+                          <div className="text-secondary">
+                            {formatNumberUserReadable(
+                              Number(formattedMetricsValue),
+                            )}
+                          </div>
+                        )}
+                        {formattedVariation && (
+                          <p
+                            className={`flex items-center justify-end text-end ${
+                              Number(formattedVariation) > 0
+                                ? "text-success"
+                                : Number(formattedVariation) < 0
+                                  ? "text-error"
+                                  : ""
+                            }`}
+                          >
+                            {formattedVariation}%
+                          </p>
+                        )}
+                        <X className="text-secondary h3 w-3" />
+                      </div>
+                    </Button>
+                  );
+                })}
               </div>
             ),
           )}

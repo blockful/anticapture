@@ -3,13 +3,13 @@
 import {
   CartesianGrid,
   Line,
-  LineChart,
   AreaChart,
   XAxis,
   YAxis,
   Tooltip,
   Area,
   Brush,
+  ComposedChart,
 } from "recharts";
 import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
@@ -85,7 +85,7 @@ export const TokenDistributionChart = ({
         className="h-full w-full justify-start"
         config={chartConfig}
       >
-        <LineChart data={chartData}>
+        <ComposedChart data={chartData}>
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
             dataKey="date"
@@ -138,7 +138,7 @@ export const TokenDistributionChart = ({
               />
             </AreaChart>
           </Brush>
-        </LineChart>
+        </ComposedChart>
       </ChartContainer>
     </div>
   );
