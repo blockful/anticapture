@@ -141,7 +141,9 @@ export const StagesDaoOverview = ({
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">
           <OutlinedBox
             variant={"error"}
-            disabled={currentStage === Stage.UNKNOWN}
+            disabled={
+              currentStage === Stage.UNKNOWN || currentStage === Stage.NONE
+            }
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
@@ -152,7 +154,9 @@ export const StagesDaoOverview = ({
           </OutlinedBox>
           <OutlinedBox
             variant="warning"
-            disabled={currentStage === Stage.UNKNOWN}
+            disabled={
+              currentStage === Stage.UNKNOWN || currentStage === Stage.NONE
+            }
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
@@ -163,7 +167,9 @@ export const StagesDaoOverview = ({
           </OutlinedBox>
           <OutlinedBox
             variant="success"
-            disabled={currentStage === Stage.UNKNOWN}
+            disabled={
+              currentStage === Stage.UNKNOWN || currentStage === Stage.NONE
+            }
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
