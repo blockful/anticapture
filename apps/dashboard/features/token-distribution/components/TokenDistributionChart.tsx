@@ -104,6 +104,8 @@ export const TokenDistributionChart = ({
               <TokenDistributionCustomTooltip chartConfig={chartConfig} />
             }
           />
+          {/* <Line dataKey="VERTICAL_LINE_EXAMPLE" stroke="#8884d8" /> */}
+          {/* <Bar dataKey="BAR_EXAMPLE" stroke="#8884d8" /> */}
           {Object.keys(chartConfig).map((key) => {
             const isOpaque = hoveredMetricKey && !(key === hoveredMetricKey);
             return (
