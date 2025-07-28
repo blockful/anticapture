@@ -25,6 +25,7 @@ import { proposals } from "./controller/proposals.controller";
 import { ProposalsService } from "./services/proposals";
 import { getGovernor } from "@/lib/governor";
 import { getChain } from "@/lib/utils";
+import { dao } from "./controller/dao";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -83,6 +84,8 @@ governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 proposals(app, new ProposalsService(repo, governorClient));
 historicalOnchain(app, env.DAO_ID);
+dao(app, env.DAO_ID, governorClient);
+
 docs(app);
 
 export default app;
