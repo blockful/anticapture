@@ -41,7 +41,7 @@ export function proposals(app: Hono, service: ProposalsService) {
         orderDirection,
       });
 
-      return context.json({ proposals: result.map(ProposalMapper.toApi) });
+      return context.json(result.map(ProposalMapper.toApi));
     },
   );
 

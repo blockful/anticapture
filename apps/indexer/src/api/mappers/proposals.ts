@@ -26,6 +26,7 @@ export const ProposalResponseSchema = z.object({
   id: z.string(),
   daoId: z.string(),
   proposerAccountId: z.string(),
+  title: z.string().optional(),
   description: z.string(),
   startBlock: z.number(),
   endBlock: z.number(),
@@ -37,9 +38,7 @@ export const ProposalResponseSchema = z.object({
   endTimestamp: z.string(),
 });
 
-export const ProposalsResponseSchema = z.object({
-  proposals: z.array(ProposalResponseSchema),
-});
+export const ProposalsResponseSchema = z.array(ProposalResponseSchema);
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
@@ -57,6 +56,7 @@ export const ProposalMapper = {
       id: p.id,
       daoId: p.daoId,
       proposerAccountId: p.proposerAccountId,
+      title: p.description.split("\n")[0]?.replace(/^#+\s*/, ""),
       description: p.description,
       startBlock: p.startBlock,
       endBlock: p.endBlock,
