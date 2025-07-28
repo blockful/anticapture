@@ -72,10 +72,8 @@ export const StageRequirementsTooltip = ({
             </h3>
           ) : (
             <span className="text-secondary text-sm">
-              All DAOs that have an autonomous operation on-chain based on a
-              governor and timelock are considered at least Stage 0. At this
-              stage, critical risks might still be present and require
-              attention.
+              To be considered at least Stage 0, a DAO must operate autonomously
+              on-chain based on a governor and a timelock.
             </span>
           )}
         </div>
