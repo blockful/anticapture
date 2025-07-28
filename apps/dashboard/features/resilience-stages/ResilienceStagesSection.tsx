@@ -33,6 +33,7 @@ export const ResilienceStagesSection = ({
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
+    noStage: daoConfig.noStage,
   });
 
   const stageToRiskMapping: Record<Stage, RiskLevel> = {

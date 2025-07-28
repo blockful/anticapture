@@ -184,6 +184,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 fields: fieldsToArray(
                   daoConfig.governanceImplementation?.fields,
                 ),
+                noStage: daoConfig.noStage,
               })}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -255,6 +256,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 fields: fieldsToArray(
                   daoConfig.governanceImplementation?.fields,
                 ),
+                noStage: daoConfig.noStage,
               })}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),

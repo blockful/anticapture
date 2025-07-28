@@ -200,6 +200,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         }
         const stage = getDaoStageFromFields({
           fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
+          noStage: daoConfig.noStage,
         });
 
         return (
