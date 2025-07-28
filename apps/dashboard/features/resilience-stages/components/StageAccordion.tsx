@@ -46,16 +46,16 @@ export const StageAccordion = ({
             requirementText={
               <>
                 <span className="block">
-                  All DAOs that have governor and timelock are considered at
-                  least{" "}
+                  All DAOs that have an autonomous operation on-chain based on a
+                  governor and timelock are considered at least
                   <span className="text-primary whitespace-nowrap">
                     Stage 0
                   </span>
                   .
                 </span>
                 <span className="block pl-1">
-                  At this stage, critical risks still be present and require
-                  attention.
+                  At this stage, critical risks might still be present and
+                  require attention.
                 </span>
               </>
             }
