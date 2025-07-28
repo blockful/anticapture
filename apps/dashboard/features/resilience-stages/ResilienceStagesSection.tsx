@@ -46,7 +46,7 @@ export const ResilienceStagesSection = ({
 
   const highRiskItems = filterFieldsByRiskLevel(
     fieldsToArray(daoConfig.governanceImplementation?.fields),
-    stageToRiskMapping[currentDaoStage],
+    RiskLevel.HIGH,
   );
 
   const mediumRiskItems = filterFieldsByRiskLevel(
@@ -102,7 +102,7 @@ export const ResilienceStagesSection = ({
               "absolute left-0 h-0.5",
               StagesToLineStyle[currentDaoStage],
             )}
-          ></div>
+          />
 
           {/* Stage 0 */}
           <div className="bg-surface-default absolute left-0 top-1/2 -translate-y-1/2">
@@ -115,22 +115,23 @@ export const ResilienceStagesSection = ({
           </div>
 
           {/* Current Position Indicator */}
-          <div
-            className={cn(
-              "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
-              StagesToDaoAvatarPosition[currentDaoStage],
-            )}
-          >
+          {currentDaoStage !== Stage.NONE && (
             <div
               className={cn(
-                "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
-                StagesToBorderColor[currentDaoStage],
+                "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
+                StagesToDaoAvatarPosition[currentDaoStage],
               )}
             >
-              <DaoAvatarIcon isRounded daoId={daoId} />
+              <div
+                className={cn(
+                  "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
+                  StagesToBorderColor[currentDaoStage],
+                )}
+              >
+                <DaoAvatarIcon isRounded daoId={daoId} />
+              </div>
             </div>
-          </div>
-
+          )}
           {/* Stage 2 */}
           <div className="bg-surface-default absolute right-0 top-1/2 -translate-y-1/2">
             <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />

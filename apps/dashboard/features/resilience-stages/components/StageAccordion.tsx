@@ -24,6 +24,7 @@ interface StageAccordionProps {
 }
 
 export const StageAccordion = ({
+  daoStage,
   highRiskFields,
   mediumRiskFields,
 }: StageAccordionProps) => {
@@ -31,7 +32,7 @@ export const StageAccordion = ({
     <Accordion type="multiple" className="flex h-full flex-col gap-3">
       <CustomAccordionItem
         riskFields={[]}
-        isCompleted={true}
+        isCompleted={daoStage !== Stage.NONE}
         stage={Stage.ZERO}
         title="Partial Risk Reduction"
         description="No High Risk issues, at least one Medium Risk issue remains"
@@ -63,7 +64,7 @@ export const StageAccordion = ({
       />
       <CustomAccordionItem
         riskFields={highRiskFields}
-        isCompleted={false}
+        isCompleted={daoStage === Stage.ONE || daoStage === Stage.TWO}
         stage={Stage.ONE}
         title="Partial Risk Reduction"
         description="No High Risk issues, at least one Medium Risk issue remains"
@@ -71,7 +72,7 @@ export const StageAccordion = ({
       />
       <CustomAccordionItem
         riskFields={mediumRiskFields}
-        isCompleted={false}
+        isCompleted={daoStage === Stage.TWO}
         stage={Stage.TWO}
         title="Partial Risk Reduction"
         description="No High or Medium Risk issues, only Low Risk items"

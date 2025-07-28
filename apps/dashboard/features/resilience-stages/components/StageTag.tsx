@@ -29,15 +29,18 @@ export const StageTag = ({
       ? "border-middle-dark text-secondary"
       : STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
 
+  const showNoTag = daoStage === Stage.NONE && daoStage === tagStage;
+
   return (
     <div
       className={`bg-surface-contrast inline-flex rounded-lg border p-2 py-1 ${stageStyles} ${className}`}
     >
       <span className="text-alternative-sm whitespace-nowrap font-mono font-medium leading-[18px]">
+        {showNoTag && "NO "}
         <span className="hidden sm:inline">STAGE </span>
 
         {showStageText && <span className="inline sm:hidden">STAGE </span>}
-        {tagStage === Stage.UNKNOWN ? "?" : tagStage}
+        {tagStage === Stage.UNKNOWN ? "?" : !showNoTag && tagStage}
       </span>
     </div>
   );

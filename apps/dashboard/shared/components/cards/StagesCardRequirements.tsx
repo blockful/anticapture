@@ -5,6 +5,7 @@ import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
 import { ReactNode } from "react";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
@@ -57,34 +58,43 @@ export const StagesCardRequirements = ({
 
   return (
     <div>
-      <div className="relative w-full">
-        <PointerIcon
-          className={cn(
-            "absolute bottom-0 -translate-x-1/2 translate-y-px",
-            STAGE_POINTER_POSITIONS[daoStage],
-          )}
+      {daoStage !== Stage.NONE && (
+        <div className="relative w-full">
+          <PointerIcon
+            className={cn(
+              "absolute bottom-0 -translate-x-1/2 translate-y-px",
+              STAGE_POINTER_POSITIONS[daoStage],
+            )}
+          />
+        </div>
+      )}
+
+      {daoStage === Stage.NONE ? (
+        <InlineAlert
+          text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
+          variant="info"
         />
-      </div>
+      ) : (
+        <div
+          className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
+        >
+          <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
+          <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
 
-      <div
-        className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
-      >
-        <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
-        <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
-
-        {issues.length > 0 && (
-          <>
-            <Title daoStage={daoStage}>Issues that need to be fixed</Title>
-            <div className="flex flex-wrap gap-4">
-              {issues.map((issue, index) => (
-                <Issue key={index} daoStage={daoStage}>
-                  {issue}
-                </Issue>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+          {issues.length > 0 && (
+            <>
+              <Title daoStage={daoStage}>Issues that need to be fixed</Title>
+              <div className="flex flex-wrap gap-4">
+                {issues.map((issue, index) => (
+                  <Issue key={index} daoStage={daoStage}>
+                    {issue}
+                  </Issue>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
