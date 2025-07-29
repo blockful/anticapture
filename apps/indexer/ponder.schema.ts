@@ -209,6 +209,7 @@ export const transaction = onchainTable(
     transactionHash: drizzle.text("transaction_hash").primaryKey(),
     fromAddress: drizzle.text("from_address"),
     toAddress: drizzle.text("to_address"),
+    value: drizzle.bigint().notNull().default(0n),
     isCex: drizzle.boolean().notNull().default(false),
     isDex: drizzle.boolean().notNull().default(false),
     isLending: drizzle.boolean().notNull().default(false),

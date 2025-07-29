@@ -145,9 +145,10 @@ export const tokenTransfer = async (
     timestamp: bigint;
     transactionFrom: Address | null;
     transactionTo: Address | null;
+    transactionValue?: bigint;
   },
 ) => {
-  const { from, to, tokenAddress, transactionHash, value, timestamp, transactionFrom, transactionTo } = args;
+  const { from, to, tokenAddress, transactionHash, value, timestamp, transactionFrom, transactionTo, transactionValue = 0n } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
@@ -161,6 +162,7 @@ export const tokenTransfer = async (
     transactionFrom || from,
     transactionTo || to,
     timestamp,
+    transactionValue,
   );
 
   await context.db
