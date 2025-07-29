@@ -4,39 +4,60 @@ import { cn } from "@/shared/utils/";
 import { Badge } from "@/shared/components";
 import { ReactNode } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
+import Link from "next/link";
 
 interface SwitchItemProps {
   switched?: boolean;
   icon?: ReactNode;
-  onClick?: () => void;
+  href?: string;
 }
 
-export const SwitchCardDaoInfoItem = (item: SwitchItemProps) => {
+export const SwitchCardDaoInfoItem = ({
+  switched,
+  icon,
+  href,
+}: SwitchItemProps) => {
+  if (href) {
+    return (
+      <Link href={href} target="_blank" rel="noopener noreferrer">
+        <CustomBadge switched={switched} icon={icon} href={href} />
+      </Link>
+    );
+  }
+  return <CustomBadge switched={switched} icon={icon} href={href} />;
+};
+
+interface CustomBadgeProps {
+  switched?: boolean;
+  icon?: ReactNode;
+  href?: string;
+}
+
+const CustomBadge = ({ switched, icon, href }: CustomBadgeProps) => {
   return (
     <Badge
       className={cn(
-        "!bg-surface-contrast/20 sm:bg-surface-contrast! flex h-full w-full gap-1.5! px-2.5! py-1! lg:w-fit",
+        "!bg-surface-contrast/20 sm:bg-surface-contrast! gap-1.5! px-2.5! py-1! flex h-full w-full lg:w-fit",
         {
           "hover:bg-middle-dark! cursor-pointer! transition-all duration-300":
-            item.onClick,
+            href,
         },
       )}
-      onClick={item.onClick}
     >
-      {item.switched ? (
+      {switched ? (
         <CheckCircle2 className="text-success size-3.5" />
       ) : (
         <XCircle className="text-error size-3.5" />
       )}
       <p
         className={cn([
-          "text-sm leading-tight font-medium",
-          item.switched ? "text-success" : "text-error",
+          "text-sm font-medium leading-tight",
+          switched ? "text-success" : "text-error",
         ])}
       >
-        {item.switched ? "Yes" : "No"}
+        {switched ? "Yes" : "No"}
       </p>
-      <span> {item.icon}</span>
+      <span> {icon}</span>
     </Badge>
   );
 };

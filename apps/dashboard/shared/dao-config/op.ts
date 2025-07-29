@@ -21,7 +21,8 @@ export const OP: DaoConfiguration = {
       token: "0x4200000000000000000000000000000000000042",
       timelock: "0x0eDd4B2cCCf41453D8B5443FBB96cc577d1d06bF",
     },
-    cancelFunction: undefined,
+    cancelFunction:
+      "https://optimistic.etherscan.io/address/0xcDF27F107725988f2261Ce2256bDfCdE8B382B10#writeProxyContract#F1",
     rules: {
       delay: false,
       changeVote: false,

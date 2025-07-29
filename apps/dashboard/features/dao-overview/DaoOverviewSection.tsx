@@ -7,7 +7,6 @@ import {
 } from "@/shared/components";
 import { FilePenLine, LinkIcon, Shield } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useInView } from "react-intersection-observer";
@@ -32,7 +31,6 @@ import {
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
-import { Address } from "viem";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -63,8 +61,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Governor",
             icon: <Shield className="text-link size-4" />,
-            onClick: () =>
-              openEtherscanAddress(daoOverview.contracts?.governor as Address),
+            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.governor}`,
           },
         ]
       : []),
@@ -73,8 +70,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Token",
             icon: <TokensIcon className="text-link size-4" />,
-            onClick: () =>
-              openEtherscanAddress(daoOverview.contracts?.token as Address),
+            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.token}`,
           },
         ]
       : []),
@@ -86,12 +82,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Snapshot",
             icon: <LightningBoltIcon className="text-link size-4" />,
-            onClick: () =>
-              window.open(
-                daoOverview.snapshot as string,
-                "_blank",
-                "noopener,noreferrer",
-              ),
+            href: daoOverview.snapshot,
           },
         ]
       : []),
@@ -100,8 +91,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Token",
             icon: <TokensIcon className="text-link size-4" />,
-            onClick: () =>
-              openEtherscanAddress(daoOverview.contracts?.token as Address),
+            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.token}`,
           },
         ]
       : []),
@@ -154,7 +144,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                     defaultValue={{
                       value: "OnChain Gov",
                       icon: <LinkIcon className="text-primary size-3.5" />,
-                      onClick: () => {},
+                      href: "",
                     }}
                     options={onChainOptions}
                   />
@@ -164,7 +154,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                     defaultValue={{
                       value: "OffChain Gov",
                       icon: <FilePenLine className="text-primary size-3.5" />,
-                      onClick: () => {},
+                      href: "",
                     }}
                     options={offChainOptions}
                   />
@@ -231,7 +221,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               defaultValue={{
                 value: "OnChain Gov",
                 icon: <LinkIcon className="text-primary size-3.5" />,
-                onClick: () => {},
+                href: "",
               }}
               options={onChainOptions}
             />
@@ -239,7 +229,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               defaultValue={{
                 value: "OffChain Gov",
                 icon: <FilePenLine className="text-primary size-3.5" />,
-                onClick: () => {},
+                href: "",
               }}
               options={offChainOptions}
             />
