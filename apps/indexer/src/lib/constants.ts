@@ -41,6 +41,16 @@ export const CONTRACT_ADDRESSES = {
       decimals: 18,
       startBlock: 70398200,
     },
+    // https://arbiscan.io/address/0x789fC99093B09aD01C34DC7251D0C89ce743e5a4
+    governorTreasury: {
+      address: "0x789fC99093B09aD01C34DC7251D0C89ce743e5a4",
+      startBlock: 70398215,
+    },
+    // https://arbiscan.io/address/0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9
+    governor: {
+      address: "0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9",
+      startBlock: 70398215,
+    },
   },
   [DaoIdEnum.OP]: {
     blockTime: 2,
@@ -72,7 +82,9 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
     oldEthRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
     ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
-  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.ARB]: {
+    timelock: "0xbFc1FECa8B09A5c5D3EFfE7429eBE24b9c09EF58",
+  },
   [DaoIdEnum.OP]: {},
 };
 

@@ -14,7 +14,10 @@ import {
   GovernorIndexer as OPGovernorIndexer,
   OPTokenIndexer,
 } from "@/indexer/op";
-import { ARBTokenIndexer } from "@/indexer/arb";
+import {
+  ARBTokenIndexer,
+  GovernorIndexer as ARBGovernorIndexer,
+} from "./indexer/arb";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId } = env;
 
@@ -24,8 +27,7 @@ if (!chain) {
 }
 console.log("Connected to chain", chain.name);
 
-const { token, blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
-
+const { token, blockTime } = CONTRACT_ADDRESSES[daoId];
 switch (daoId) {
   case DaoIdEnum.ENS: {
     ENSTokenIndexer(token.address, token.decimals);
@@ -39,6 +41,7 @@ switch (daoId) {
   }
   case DaoIdEnum.ARB: {
     ARBTokenIndexer(token.address, token.decimals);
+    ARBGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.OP: {
