@@ -41,6 +41,9 @@ export const OP: DaoConfiguration = {
       OptimismTokenDistributor: "",
       OptimismUniv3Uni: "",
     },
+    dynamicQuorum: {
+      percentage: 0.3,
+    },
   },
   riskAnalysis: true,
   governanceImplementation: {

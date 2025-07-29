@@ -130,6 +130,9 @@ export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
   supportsLiquidTreasuryCall?: boolean;
   attackCostBarChart: DaoAddresses[DaoIdEnum];
+  dynamicQuorum?: {
+    percentage: number;
+  };
 }
 export interface GovernanceImplementationConfig
   extends GovernanceImplementation {}
