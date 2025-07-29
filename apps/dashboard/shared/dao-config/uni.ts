@@ -3,13 +3,14 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
+import { mainnet } from "viem/chains";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
   supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
-    chainId: 1,
+    chain: mainnet,
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",

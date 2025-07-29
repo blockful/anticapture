@@ -1,11 +1,12 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import { ArbitrumIcon } from "@/shared/components/icons";
+import { arbitrum } from "viem/chains";
 
 export const ARB: DaoConfiguration = {
   name: "Arbitrum",
   daoOverview: {
-    chainId: 42161,
+    chain: arbitrum,
     contracts: {
       token: "0x912CE59144191C1204E64559FE8253a0e49E6548",
     },

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Address } from "viem";
+import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import {
@@ -65,7 +65,7 @@ interface BaseInfo {
 
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  chainId: number;
+  chain: Chain;
   contracts: {
     token: Address;
     governor?: Address;

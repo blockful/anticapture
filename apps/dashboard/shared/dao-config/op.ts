@@ -6,6 +6,7 @@ import {
 } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { OptimismIcon } from "@/shared/components/icons";
+import { optimism } from "viem/chains";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
@@ -13,7 +14,7 @@ export const OP: DaoConfiguration = {
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {
-    chainId: 10,
+    chain: optimism,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
