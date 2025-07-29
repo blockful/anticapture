@@ -151,26 +151,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       {
         id: "delegatedSupply",
         name: "Delegated Supply",
-        type: BarChartEnum.STACKED,
-        stackedValues: [
-          {
-            value:
-              Number(
-                formatEther(
-                  BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
-                ),
-              ) * lastPrice,
-            label: "Other Delegations",
-            color: "#EC762ECC",
-          },
-          {
-            value: vetoCouncilVotingPower
-              ? Number(formatEther(BigInt(vetoCouncilVotingPower))) * lastPrice
-              : 0,
-            label: "Veto Council",
-            color: "#EC762E9F",
-          },
-        ],
+        value:
+          Number(
+            formatEther(
+              BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+            ),
+          ) * lastPrice,
+        type: BarChartEnum.REGULAR,
+        customColor: "#EC762ECC",
       },
       {
         id: "activeSupply",

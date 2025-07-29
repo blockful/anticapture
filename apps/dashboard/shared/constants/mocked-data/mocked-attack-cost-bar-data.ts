@@ -10,18 +10,8 @@ export const mockedAttackCostBarData = [
     id: "delegatedSupply",
     name: "Delegated Supply",
     type: "Stacked",
-    stackedValues: [
-      {
-        value: 123400367.2564219,
-        label: "Other Delegations",
-        color: "#EC762ECC",
-      },
-      {
-        value: 63293421.91106828,
-        label: "Veto Council",
-        color: "#EC762E9F",
-      },
-    ],
+    value: 123400367.2564219,
+    customColor: "#EC762ECC",
   },
   {
     id: "activeSupply",
