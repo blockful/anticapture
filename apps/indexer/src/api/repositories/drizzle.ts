@@ -1,6 +1,7 @@
-import { asc, desc, eq, sql } from "ponder";
+import { and, asc, desc, eq, gte, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain } from "ponder:schema";
+import { SQL } from "drizzle-orm";
 
 import {
   ActiveSupplyQueryResult,
@@ -109,10 +110,31 @@ export class DrizzleRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    status: string | undefined,
+    fromDate: number | undefined,
   ): Promise<DBProposal[]> {
+    const whereClauses: SQL<unknown>[] = [];
+    if (status) {
+      // the following statuses are not handled by the indexing process
+      // being stored as "PENDING" in the database to be further processed
+      if (
+        status === "ACTIVE" ||
+        status === "DEFEATED" ||
+        status === "SUCCEEDED"
+      ) {
+        whereClauses.push(eq(proposalsOnchain.status, "PENDING"));
+      } else {
+        whereClauses.push(eq(proposalsOnchain.status, status));
+      }
+    }
+    if (fromDate) {
+      whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
+    }
+
     return await db
       .select()
       .from(proposalsOnchain)
+      .where(and(...whereClauses))
       .orderBy(
         orderDirection === "asc"
           ? asc(proposalsOnchain.timestamp)

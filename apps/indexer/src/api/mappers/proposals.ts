@@ -18,6 +18,11 @@ export const ProposalsRequestSchema = z.object({
     .default(10)
     .optional(),
   orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
+  status: z
+    .string()
+    .optional()
+    .transform((val) => val?.toUpperCase()),
+  fromDate: z.number().optional(),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
@@ -25,6 +30,7 @@ export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
 export const ProposalResponseSchema = z.object({
   id: z.string(),
   daoId: z.string(),
+  txHash: z.string(),
   proposerAccountId: z.string(),
   title: z.string().optional(),
   description: z.string(),
@@ -43,7 +49,7 @@ export const ProposalsResponseSchema = z.array(ProposalResponseSchema);
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
 export const ProposalRequestSchema = z.object({
-  id: z.string().describe("The proposal ID"),
+  id: z.string(),
 });
 
 export type ProposalParams = z.infer<typeof ProposalRequestSchema>;
@@ -55,6 +61,7 @@ export const ProposalMapper = {
     return {
       id: p.id,
       daoId: p.daoId,
+      txHash: p.txHash,
       proposerAccountId: p.proposerAccountId,
       title: p.description.split("\n")[0]?.replace(/^#+\s*/, ""),
       description: p.description,
