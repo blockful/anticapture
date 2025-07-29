@@ -1,4 +1,4 @@
-import { metricTypeArray, ProposalStatus } from "@/lib/constants";
+import { metricTypeArray } from "@/lib/constants";
 import {
   onchainTable,
   index,
@@ -156,6 +156,7 @@ export const proposalsOnchain = onchainTable(
   "proposals_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
+    txHash: drizzle.text("tx_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     proposerAccountId: drizzle.text("proposer_account_id").notNull(),
     targets: drizzle.json().$type<string[]>().notNull(),
@@ -167,7 +168,7 @@ export const proposalsOnchain = onchainTable(
     description: drizzle.text().notNull(),
     timestamp: drizzle.bigint().notNull(),
     endTimestamp: drizzle.bigint("end_timestamp").notNull(),
-    status: drizzle.text().$type<ProposalStatus>().notNull(),
+    status: drizzle.text().notNull(),
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
     abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
