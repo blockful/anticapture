@@ -10,17 +10,17 @@ export class TransactionsRepository {
       offset = 0,
       sortBy = "timestamp",
       sortOrder = "desc",
-      fromAddress,
-      toAddress,
+      from,
+      to,
     } = params;
 
     // Build where conditions
     const whereConditions = [];
-    if (fromAddress) {
-      whereConditions.push(eq(transaction.fromAddress, fromAddress));
+    if (from) {
+      whereConditions.push(eq(transaction.fromAddress, from));
     }
-    if (toAddress) {
-      whereConditions.push(eq(transaction.toAddress, toAddress));
+    if (to) {
+      whereConditions.push(eq(transaction.toAddress, to));
     }
 
     // Get transactions
@@ -80,21 +80,19 @@ export class TransactionsRepository {
     return {
       transactions: mappedTransactions,
       total: 0, // Will be set by service
-      limit,
-      offset,
     };
   }
 
-  async getTransactionCount(params: { fromAddress?: string; toAddress?: string } = {}): Promise<number> {
-    const { fromAddress, toAddress } = params;
+  async getTransactionCount(params: { from?: string; to?: string } = {}): Promise<number> {
+    const { from, to } = params;
 
     // Build where conditions
     const whereConditions = [];
-    if (fromAddress) {
-      whereConditions.push(eq(transaction.fromAddress, fromAddress));
+    if (from) {
+      whereConditions.push(eq(transaction.fromAddress, from));
     }
-    if (toAddress) {
-      whereConditions.push(eq(transaction.toAddress, toAddress));
+    if (to) {
+      whereConditions.push(eq(transaction.toAddress, to));
     }
 
     const result = await db

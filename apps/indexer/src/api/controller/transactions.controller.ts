@@ -30,15 +30,15 @@ export function transactions(app: Hono, service: TransactionsService) {
       },
     }),
     async (context) => {
-      const { limit, offset, sortBy, sortOrder, fromAddress, toAddress } = context.req.valid("query");
+      const { limit, offset, sortBy, sortOrder, from, to } = context.req.valid("query");
 
       const result = await service.getTransactionsWithChildren({
         limit,
         offset,
         sortBy,
         sortOrder,
-        fromAddress,
-        toAddress,
+        from,
+        to,
       });
 
       return context.json(result);

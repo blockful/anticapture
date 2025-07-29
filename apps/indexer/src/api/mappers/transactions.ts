@@ -21,8 +21,8 @@ export const TransactionsRequestSchema = z.object({
     .optional(),
   sortBy: z.enum(["timestamp"]).default("timestamp").optional(),
   sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
-  fromAddress: z.string().optional(),
-  toAddress: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
@@ -49,8 +49,8 @@ export const DelegationResponseSchema = z.object({
 
 export const TransactionResponseSchema = z.object({
   transactionHash: z.string(),
-  fromAddress: z.string().nullable(),
-  toAddress: z.string().nullable(),
+  from: z.string().nullable(),
+  to: z.string().nullable(),
   isCex: z.boolean(),
   isDex: z.boolean(),
   isLending: z.boolean(),
@@ -66,8 +66,6 @@ export const TransactionResponseSchema = z.object({
 export const TransactionsResponseSchema = z.object({
   transactions: z.array(TransactionResponseSchema),
   total: z.number(),
-  limit: z.number(),
-  offset: z.number(),
 });
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
@@ -103,8 +101,8 @@ export const TransactionMapper = {
   toApi: (t: DBTransaction, transfers: DBTransfer[], delegations: DBDelegation[]): TransactionResponse => {
     return {
       transactionHash: t.transactionHash,
-      fromAddress: t.fromAddress,
-      toAddress: t.toAddress,
+      from: t.fromAddress,
+      to: t.toAddress,
       isCex: t.isCex,
       isDex: t.isDex,
       isLending: t.isLending,
