@@ -13,6 +13,7 @@ import {
   assets,
   proposalsActivity,
   historicalOnchain,
+  proposals,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
@@ -21,7 +22,6 @@ import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import { DrizzleRepository } from "./repositories";
 import { errorHandler } from "./middlewares";
-import { proposals } from "./controller/proposals.controller";
 import { ProposalsService } from "./services/proposals";
 import { getGovernor } from "@/lib/governor";
 import { getChain } from "@/lib/utils";

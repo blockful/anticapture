@@ -15,7 +15,7 @@ export function proposals(app: Hono, service: ProposalsService) {
       method: "get",
       operationId: "proposals",
       path: "/proposals",
-      summary: "Get proposals for delegate",
+      summary: "Get proposals",
       description: "Returns a list of proposal",
       tags: ["proposals"],
       request: {
@@ -49,7 +49,7 @@ export function proposals(app: Hono, service: ProposalsService) {
     createRoute({
       method: "get",
       operationId: "proposal",
-      path: "/proposals/:id",
+      path: "/proposals/{id}",
       summary: "Get a proposal by ID",
       description: "Returns a single proposal by its ID",
       tags: ["proposals"],
