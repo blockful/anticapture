@@ -13,7 +13,9 @@ import {
   ensureAccountExists,
   ensureAccountsExist,
   storeDailyBucket,
+  createOrUpdateTransaction,
 } from "./shared";
+import { DaoIdEnum } from "@/lib/enums";
 
 export const delegateChanged = async (
   context: Context,
@@ -25,13 +27,26 @@ export const delegateChanged = async (
     fromDelegate: Address;
     txHash: Hex;
     timestamp: bigint;
+    transactionFrom: Address | null;
+    transactionTo: Address | null;
   },
 ) => {
-  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp } =
+  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp, transactionFrom, transactionTo } =
     args;
 
   // Ensure all required accounts exist in parallel
   await ensureAccountsExist(context, [delegator, toDelegate]);
+
+  // Create or update transaction record with flags
+  // Use transaction sender/recipient if provided, otherwise use delegator/delegate
+  await createOrUpdateTransaction(
+    context,
+    daoId as DaoIdEnum,
+    txHash,
+    transactionFrom || delegator,
+    transactionTo || toDelegate,
+    timestamp,
+  );
 
   // Get the delegator's current balance
   const delegatorBalance = await context.db.find(accountBalance, {
@@ -94,11 +109,24 @@ export const delegatedVotesChanged = async (
     newBalance: bigint;
     oldBalance: bigint;
     timestamp: bigint;
+    transactionFrom: Address | null;
+    transactionTo: Address | null;
   },
 ) => {
-  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId } = args;
+  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId, transactionFrom, transactionTo } = args;
 
   await ensureAccountExists(context, delegate);
+
+  // Create or update transaction record with flags
+  // Use transaction sender/recipient if provided, otherwise use delegate for both
+  await createOrUpdateTransaction(
+    context,
+    daoId as DaoIdEnum,
+    txHash,
+    transactionFrom,
+    transactionTo,
+    timestamp,
+  );
 
   const delta = newBalance - oldBalance;
   await context.db

@@ -12,13 +12,15 @@ import {
   assets,
   proposalsActivity,
   historicalOnchain,
+  transactions,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
-import { DrizzleRepository } from "./repositories";
+import { DrizzleRepository, TransactionsRepository } from "./repositories";
+import { TransactionsService } from "./services/transactions";
 import { errorHandler } from "./middlewares";
 
 const app = new Hono({
@@ -55,11 +57,14 @@ if (env.COINGECKO_API_KEY) {
 
 const repo = new DrizzleRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
+const transactionsRepo = new TransactionsRepository();
+const transactionsService = new TransactionsService(transactionsRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 historicalOnchain(app, env.DAO_ID);
+transactions(app, transactionsService);
 docs(app);
 
 export default app;

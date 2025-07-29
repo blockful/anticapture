@@ -1,9 +1,17 @@
 import { Address } from "viem";
 import { Context } from "ponder:registry";
-import { account, daoMetricsDayBucket } from "ponder:schema";
+import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
+import { 
+  BurningAddresses, 
+  CEXAddresses, 
+  DEXAddresses, 
+  LendingAddresses, 
+  TREASURY_ADDRESSES 
+} from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
 
 export const ensureAccountExists = async (
   context: Context,
@@ -62,5 +70,66 @@ export const storeDailyBucket = async (
       close: newValue,
       volume: row.volume + volume,
       count: row.count + 1,
+    }));
+};
+
+export const createOrUpdateTransaction = async (
+  context: Context,
+  daoId: DaoIdEnum,
+  transactionHash: string,
+  from: Address | null,
+  to: Address | null,
+  timestamp: bigint,
+) => {
+  if (!from || !to) {
+    return;
+  }
+
+  // Get address lists for the specific DAO
+  const cexAddresses = Object.values(CEXAddresses[daoId] || {});
+  const dexAddresses = Object.values(DEXAddresses[daoId] || {});
+  const lendingAddresses = Object.values(LendingAddresses[daoId] || {});
+  const treasuryAddresses = Object.values(TREASURY_ADDRESSES[daoId] || {});
+  const burningAddresses = Object.values(BurningAddresses[daoId] || {});
+
+  // Determine flags
+  const isCex = cexAddresses.includes(from) || cexAddresses.includes(to);
+  const isDex = dexAddresses.includes(from) || dexAddresses.includes(to);
+  const isLending = lendingAddresses.includes(from) || lendingAddresses.includes(to);
+  const isTreasury = treasuryAddresses.includes(from) || treasuryAddresses.includes(to);
+  const isBurning = burningAddresses.includes(from) || burningAddresses.includes(to);
+  
+  // Determine isTotal flag - true if it's a burning transaction (affects total supply)
+  const isTotal = isBurning;
+  
+  // Determine isCirculating flag - true if it affects circulating supply
+  // Circulating supply is affected by treasury and burning transactions
+  const isCirculating = isTreasury || isBurning;
+
+  await context.db
+    .insert(transaction)
+    .values({
+      transactionHash,
+      fromAddress: from,
+      toAddress: to,
+      isCex,
+      isDex,
+      isLending,
+      isTreasury,
+      isBurning,
+      isTotal,
+      isCirculating,
+      timestamp,
+    })
+    .onConflictDoUpdate((existing) => ({
+      // Use OR logic to preserve existing true flags
+      isCex: existing.isCex || isCex,
+      isDex: existing.isDex || isDex,
+      isLending: existing.isLending || isLending,
+      isTreasury: existing.isTreasury || isTreasury,
+      isBurning: existing.isBurning || isBurning,
+      isTotal: existing.isTotal || isTotal,
+      isCirculating: existing.isCirculating || isCirculating,
+      timestamp: timestamp,
     }));
 };

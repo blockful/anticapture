@@ -11,7 +11,7 @@ import {
   TREASURY_ADDRESSES,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { ensureAccountExists, storeDailyBucket } from "./shared";
+import { ensureAccountExists, storeDailyBucket, createOrUpdateTransaction } from "./shared";
 
 const updateSupplyMetric = async (
   context: Context,
@@ -143,12 +143,25 @@ export const tokenTransfer = async (
     transactionHash: Hex;
     value: bigint;
     timestamp: bigint;
+    transactionFrom: Address | null;
+    transactionTo: Address | null;
   },
 ) => {
-  const { from, to, tokenAddress, transactionHash, value, timestamp } = args;
+  const { from, to, tokenAddress, transactionHash, value, timestamp, transactionFrom, transactionTo } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
+
+  // Create or update transaction record with flags
+  // Use transaction sender/recipient if provided, otherwise fall back to transfer addresses
+  await createOrUpdateTransaction(
+    context,
+    daoId,
+    transactionHash,
+    transactionFrom || from,
+    transactionTo || to,
+    timestamp,
+  );
 
   await context.db
     .insert(transfer)

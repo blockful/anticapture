@@ -28,9 +28,11 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       transactionHash: event.transaction.hash,
       value: event.args.amount,
       timestamp: event.block.timestamp,
+      transactionFrom: event.transaction.from,
+      transactionTo: event.transaction.to,
     });
   });
-  ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
+  ponder.on(`UNIToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -38,10 +40,12 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       fromDelegate: event.args.fromDelegate,
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
+      transactionFrom: event.transaction.from,
+      transactionTo: event.transaction.to,
     });
   });
 
-  ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
+  ponder.on(`UNIToken:DelegateVotesChanged`, async ({ event, context }) => {
     await delegatedVotesChanged(context, daoId, {
       tokenId: event.log.address,
       delegate: event.args.delegate,
@@ -49,6 +53,8 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       newBalance: event.args.newBalance,
       oldBalance: event.args.previousBalance,
       timestamp: event.block.timestamp,
+      transactionFrom: event.transaction.from,
+      transactionTo: event.transaction.to,
     });
   });
 }
