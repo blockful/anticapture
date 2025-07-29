@@ -68,6 +68,7 @@ export const proposalCreated = async (
   blockTime: number,
   args: {
     proposalId: string;
+    txHash: Hex;
     proposer: Address;
     targets: Address[];
     values: bigint[];
@@ -82,6 +83,7 @@ export const proposalCreated = async (
   const {
     proposer,
     proposalId,
+    txHash,
     targets,
     values,
     signatures,
@@ -97,6 +99,7 @@ export const proposalCreated = async (
   const blockDelta = parseInt(endBlock) - parseInt(startBlock);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
+    txHash,
     daoId,
     proposerAccountId: proposer,
     targets,
@@ -124,20 +127,12 @@ export const proposalCreated = async (
     }));
 };
 
-export const proposalCanceled = async (
+export const updateProposalStatus = async (
   context: Context,
   proposalId: string,
+  status: string,
 ) => {
   await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: ProposalStatus.CANCELED,
-  });
-};
-
-export const proposalExecuted = async (
-  context: Context,
-  proposalId: string,
-) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: ProposalStatus.EXECUTED,
+    status,
   });
 };

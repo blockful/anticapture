@@ -2,13 +2,13 @@ import { ponder } from "ponder:registry";
 import { dao } from "ponder:schema";
 
 import {
-  proposalCanceled,
   proposalCreated,
-  proposalExecuted,
+  updateProposalStatus,
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
+import { ProposalStatus } from "@/lib/constants";
 
 export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.UNI;
@@ -54,6 +54,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
     await proposalCreated(context, daoId, blockTime, {
       proposalId: event.args.id.toString(),
       proposer: event.args.proposer,
+      txHash: event.transaction.hash,
       targets: [...event.args.targets],
       values: [...event.args.values],
       signatures: [...event.args.signatures],
@@ -66,10 +67,26 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on("UNIGovernor:ProposalCanceled", async ({ event, context }) => {
-    await proposalCanceled(context, event.args.id.toString());
+    await updateProposalStatus(
+      context,
+      event.args.id.toString(),
+      ProposalStatus.CANCELED,
+    );
   });
 
   ponder.on("UNIGovernor:ProposalExecuted", async ({ event, context }) => {
-    await proposalExecuted(context, event.args.id.toString());
+    await updateProposalStatus(
+      context,
+      event.args.id.toString(),
+      ProposalStatus.EXECUTED,
+    );
+  });
+
+  ponder.on("UNIGovernor:ProposalQueued", async ({ event, context }) => {
+    await updateProposalStatus(
+      context,
+      event.args.id.toString(),
+      ProposalStatus.QUEUED,
+    );
   });
 }

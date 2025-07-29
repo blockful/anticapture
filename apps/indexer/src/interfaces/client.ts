@@ -1,3 +1,5 @@
+import { DBProposal } from "@/api/mappers";
+
 export interface DAOClient {
   getVotingDelay: () => Promise<bigint>;
   getVotingPeriod: () => Promise<bigint>;
@@ -11,4 +13,16 @@ export interface DAOClient {
     againstVotes: bigint;
     abstainVotes: bigint;
   }) => bigint;
+  getProposalStatus: (
+    proposal: Pick<
+      DBProposal,
+      | "id"
+      | "status"
+      | "startBlock"
+      | "endBlock"
+      | "forVotes"
+      | "againstVotes"
+      | "abstainVotes"
+    >,
+  ) => Promise<string>;
 }

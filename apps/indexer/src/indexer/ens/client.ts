@@ -11,19 +11,21 @@ import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/interfaces/client";
 import { ENSGovernorAbi } from "./abi";
+import { GovernorBase } from "../governor.base";
 
 export class ENSClient<
-  TTransport extends Transport = Transport,
-  TChain extends Chain = Chain,
-  TAccount extends Account | undefined = Account | undefined,
-> implements DAOClient
+    TTransport extends Transport = Transport,
+    TChain extends Chain = Chain,
+    TAccount extends Account | undefined = Account | undefined,
+  >
+  extends GovernorBase
+  implements DAOClient
 {
-  private client: Client<TTransport, TChain, TAccount>;
   private abi: typeof ENSGovernorAbi;
   private address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
-    this.client = client;
+    super(client);
     this.address = address;
     this.abi = ENSGovernorAbi;
   }
