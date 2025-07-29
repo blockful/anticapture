@@ -1,7 +1,7 @@
 import { Account, Chain, Client, Transport } from "viem";
 
-import { DBProposal } from "@/api/mappers";
-import { ProposalStatus } from "@/lib/constants";
+import { DBProposal } from "../api/mappers";
+import { ProposalStatus } from "../lib/constants";
 
 /**
  * Base implementation for EVM Compound-based governance contracts.
