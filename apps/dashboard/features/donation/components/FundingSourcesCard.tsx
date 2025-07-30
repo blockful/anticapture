@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { FundingSourcesCardProps } from "@/features/donation/types";
 import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
-import { ExternalLink } from "lucide-react";
 
 export const FundingSourcesCard = ({
   title,
@@ -34,7 +33,7 @@ export const FundingSourcesCard = ({
                 rel="noopener noreferrer"
                 className="block h-full cursor-pointer"
               >
-                <div className="bg-surface-default text-primary border-light-dark hover:bg-middle-dark flex h-full items-center gap-3 border p-3 transition-colors sm:bg-transparent">
+                <div className="bg-surface-default text-primary border-light-dark flex h-full items-center gap-3 border p-3 transition-colors hover:bg-[#27272A] sm:bg-transparent">
                   <DaoAvatarIcon
                     daoId={source.daoId}
                     className="size-9"
@@ -42,11 +41,11 @@ export const FundingSourcesCard = ({
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm flex items-center gap-1 truncate font-medium">
+                      <h4 className="flex items-center gap-1 truncate text-sm font-medium">
                         {source.name}
                       </h4>
                       <div className="bg-success/12 text-success flex items-center gap-1 rounded-full px-1.5 py-0.5">
-                        <span className="text-accent text-xs font-medium whitespace-nowrap">
+                        <span className="text-accent whitespace-nowrap text-xs font-medium">
                           {source.amount}
                         </span>
                       </div>
