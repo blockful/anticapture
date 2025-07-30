@@ -56,9 +56,29 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 71801427,
     },
   },
+  [DaoIdEnum.SHU]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xe485E2f1bab389C08721B291f6b59780feC83Fd7
+    token: {
+      address: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+      decimals: 18,
+      startBlock: 19021394,
+    },
+    // https://etherscan.io/address/0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e
+    azorius: {
+      address: "0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e",
+      startBlock: 19021698,
+    },
+    // https://etherscan.io/address/0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F
+    linearVotingStrategy: {
+      address: "0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F",
+      startBlock: 19021698,
+    },
+  },
 } as const;
 
 export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.SHU]: {},
   [DaoIdEnum.UNI]: {
     timelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
     treasuryVester1: "0x4750c43867EF5F89869132ecCF19B9b6C4286E1a",
@@ -77,6 +97,7 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.SHU]: {},
   [DaoIdEnum.UNI]: {
     BinanceHotWallet: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
     BinanceHotWallet2: "0x28C6c06298d514Db089934071355E5743bf21d60",
@@ -186,6 +207,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.SHU]: {},
   [DaoIdEnum.UNI]: {
     // ArbitrumL1ERC20Gateway: "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
     Uniswap_UNI_ETH_V3_03: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
@@ -219,6 +241,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.SHU]: {},
   [DaoIdEnum.UNI]: {
     AaveEthUni: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
     MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
@@ -251,6 +274,11 @@ export const BurningAddresses: Record<
     Airdrop?: Address;
   }
 > = {
+  [DaoIdEnum.SHU]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+  },
   [DaoIdEnum.UNI]: {
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",

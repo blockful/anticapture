@@ -20,6 +20,9 @@ import {
   OPTokenIndexer,
 } from "@/indexer/op";
 import { ARBTokenIndexer } from "./indexer/arb";
+import { SHUTokenIndexer } from "./indexer/shutter/erc20";
+import { SHUGovernanceIndexer } from "./indexer/shutter/governor";
+import { SHUGovernor } from "./indexer/shutter/client";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -56,6 +59,14 @@ switch (daoId) {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     OPTokenIndexer(token.address, token.decimals);
     OPGovernorIndexer(new OPGovernor(client, governor.address));
+    break;
+  }
+  case DaoIdEnum.SHU: {
+    const { token, azorius, linearVotingStrategy } = CONTRACT_ADDRESSES[daoId];
+    SHUTokenIndexer(token.address, token.decimals);
+    SHUGovernanceIndexer(
+      new SHUGovernor(client, azorius.address, linearVotingStrategy.address),
+    );
     break;
   }
   default:

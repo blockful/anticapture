@@ -120,20 +120,62 @@ export const proposalCreated = async (
     }));
 };
 
+// TODO: apply to other DAOs
+export const upsertProposal = async (
+  context: Context,
+  daoId: string,
+  args: { proposalId: string } & Partial<{
+    proposerAccountId: Address;
+    targets: Address[];
+    values: bigint[];
+    signatures: string[];
+    calldatas: Hex[];
+    startBlock: string;
+    endBlock: string;
+    description: string;
+    timestamp: bigint;
+    status: string;
+  }>,
+) => {
+  await context.db
+    .insert(proposalsOnchain)
+    .values({
+      id: args.proposalId,
+      daoId,
+      ...args,
+    })
+    .onConflictDoUpdate(args);
+
+  if (args.proposerAccountId) {
+    await ensureAccountExists(context, args.proposerAccountId);
+
+    await context.db
+      .insert(accountPower)
+      .values({
+        accountId: args.proposerAccountId,
+        daoId,
+        proposalsCount: 1,
+      })
+      .onConflictDoUpdate((current) => ({
+        proposalsCount: current.proposalsCount + 1,
+      }));
+  }
+};
+
 export const proposalCanceled = async (
   context: Context,
   proposalId: string,
 ) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "CANCELED",
-  });
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set({ status: "CANCELED" });
 };
 
 export const proposalExecuted = async (
   context: Context,
   proposalId: string,
 ) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "EXECUTED",
-  });
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set({ status: "EXECUTED" });
 };
