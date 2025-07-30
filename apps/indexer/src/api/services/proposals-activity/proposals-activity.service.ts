@@ -4,19 +4,12 @@ import {
   ProposalsActivityRepository,
   DbProposal,
   DbVote,
+  OrderByField,
+  OrderDirection,
+  VoteFilter,
 } from "@/api/repositories/proposals-activity.repository";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
-
-export enum VoteFilter {
-  YES = "yes",
-  NO = "no",
-  ABSTAIN = "abstain",
-  NO_VOTE = "no_vote",
-}
-
-export type OrderByField = "votingPower" | "voteTiming";
-export type OrderDirection = "asc" | "desc";
 
 export interface ProposalActivityRequest {
   address: Address;
@@ -77,15 +70,13 @@ export class ProposalsActivityService {
     skip = 0,
     limit = 10,
     blockTime,
-    orderBy = "voteTiming",
+    orderBy = "timestamp",
     orderDirection = "desc",
     userVoteFilter,
   }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
     // Check if user has ever voted
-    const firstVoteTimestamp = await this.repository.getFirstVoteTimestamp(
-      address,
-      daoId,
-    );
+    const firstVoteTimestamp =
+      await this.repository.getFirstVoteTimestamp(address);
 
     if (!firstVoteTimestamp) {
       return this.createEmptyActivity(address, true);
@@ -93,6 +84,10 @@ export class ProposalsActivityService {
 
     // Get voting period for the DAO
     const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
+    if (!votingPeriodBlocks) {
+      throw new Error(`DAO ${daoId} not found or missing voting period`);
+    }
+
     const votingPeriodSeconds = votingPeriodBlocks * blockTime;
 
     // Calculate activity start time

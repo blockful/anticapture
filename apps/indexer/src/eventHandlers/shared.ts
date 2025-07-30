@@ -42,14 +42,14 @@ export const storeDailyBucket = async (
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
-      date,
+      date: truncateTimestampTime(date),
       tokenId: tokenAddress,
       metricType,
       daoId,
       average: newValue,
-      open: currentValue,
-      high: max(newValue, currentValue),
-      low: min(newValue, currentValue),
+      open: newValue,
+      high: newValue,
+      low: newValue,
       close: newValue,
       volume,
       count: 1,
@@ -63,4 +63,9 @@ export const storeDailyBucket = async (
       volume: row.volume + volume,
       count: row.count + 1,
     }));
+};
+
+const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
+  const SECONDS_IN_DAY = BigInt(86400); // 24 * 60 * 60
+  return (timestampSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;
 };
