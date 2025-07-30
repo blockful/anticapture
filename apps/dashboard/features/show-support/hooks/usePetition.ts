@@ -75,7 +75,7 @@ export const usePetitionSignatures = (
       };
 
     const { data } = await response.json();
-    const signers = data.votes.map(({ voter }: any) => voter);
+    const signers = data.votes.map(({ voter }: { voter: Address }) => voter);
     const tokenAddress = config.daoOverview.contracts.token;
 
     const votePowers = (await multicall(client, {

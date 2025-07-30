@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BarChart4 } from "lucide-react";
-import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
+import {
+  ButtonHeaderSidebar,
+  ConnectWallet,
+  BottomNavigationButtons,
+} from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
 export const HeaderSidebar = () => {
   const router = useRouter();
@@ -35,7 +39,7 @@ export const HeaderSidebar = () => {
 
   return (
     <header
-      className={`border-light-dark bg-surface-background fixed top-0 left-0 z-50 hidden h-screen w-[68px] border-r sm:block`}
+      className={`border-light-dark bg-surface-background fixed left-0 top-0 z-50 hidden h-screen w-[68px] border-r sm:block`}
     >
       <div className="flex h-full w-full flex-col items-start">
         <Link
@@ -52,15 +56,21 @@ export const HeaderSidebar = () => {
                 anchorId={item.anchorId || ""}
                 icon={item.icon}
                 label={item.label}
-                className="flex-col gap-1 text-xs! font-medium!"
+                className="text-xs! font-medium! flex-col gap-1"
                 onClick={() => {
                   router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
                 }}
               />
             ))}
           </div>
-          <div className="flex px-3 py-4">
-            <ConnectWallet label="" />
+
+          <div className="flex w-full flex-col">
+            <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-t border-b py-2">
+              <BottomNavigationButtons isCompact />
+            </div>
+            <div className="mx-1.5 flex flex-col px-2 py-4">
+              <ConnectWallet label="" />
+            </div>
           </div>
         </div>
       </div>
