@@ -51,12 +51,12 @@ export default function GlossaryPage() {
               icon={<BookOpen className="section-layout-icon" />}
               description={SECTIONS_CONSTANTS.glossary.description}
               anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
-              className="bg-surface-background! sm:mt-0! gap-4! md:gap-6!"
+              className="bg-surface-background! sm:mt-0! gap-4! lg:gap-6!"
             >
-              <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 md:flex-row md:gap-10 md:border-none">
+              <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 lg:flex-row lg:gap-10 lg:border-none">
                 {/* Sticky Sidebar - Left Side */}
                 <div className="flex-shrink-0">
-                  <div className="sticky top-4 md:space-y-6">
+                  <div className="sticky top-4 lg:space-y-6">
                     {/* Search Input */}
                     <GlossarySearch
                       glossaryData={SAMPLE_GLOSSARY_DATA}

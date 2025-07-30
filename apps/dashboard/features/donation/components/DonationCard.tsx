@@ -5,7 +5,6 @@ import { ExternalLink, Eye, BookOpen, Shield } from "lucide-react";
 import Link from "next/link";
 
 import Image from "next/image";
-import { formatAddress } from "@/shared/utils/formatAddress";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 export const DonationCard = ({
@@ -99,7 +98,7 @@ export const DonationCard = ({
           </div>
           {/* Right side - QR Code with Orange Corner Brackets and Gradient */}
           {qrCodeUrl && (
-            <div className="mt-6 w-[350px] flex-shrink-0 lg:mt-0">
+            <div className="mt-6 w-full flex-shrink-0 lg:mt-0 lg:w-[405px]">
               <div className="relative">
                 {/* Orange corner brackets */}
                 <div className="border-tangerine absolute size-4 border-l-2 border-t-2" />
@@ -139,12 +138,20 @@ export const DonationCard = ({
                       </p>
                       <div className="border-light-dark flex-1 border-t"></div>
                     </div>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center">
+                    <div className="flex w-full flex-col items-start justify-start gap-3">
+                      <div>
                         <p className="text-secondary !text-alternative-xs font-regular font-mono uppercase tracking-wide">
                           ENS Domain
                         </p>
-                        <CopyAndPasteButton textToCopy={ensAddress} />
+                        <div className="flex items-center gap-1">
+                          <code className="text-primary max-w-[300px] truncate font-sans text-sm font-normal">
+                            donate.blockful.eth
+                          </code>
+                          <CopyAndPasteButton
+                            className="size-6"
+                            textToCopy={ensAddress}
+                          />
+                        </div>
                       </div>
 
                       {/* Address - moved inside QR box */}
@@ -154,9 +161,12 @@ export const DonationCard = ({
                         </p>
                         <div className="flex items-center gap-1">
                           <code className="text-primary max-w-[calc(100vw-100px)] truncate font-sans text-sm font-normal">
-                            {formatAddress(address)}
+                            {address}
                           </code>
-                          <CopyAndPasteButton textToCopy={address} />
+                          <CopyAndPasteButton
+                            className="size-6"
+                            textToCopy={address}
+                          />
                         </div>
                       </div>
                     </div>

@@ -34,7 +34,7 @@ export function GlossarySearch({
   };
 
   return (
-    <div className="mx-auto w-full md:w-[274px]">
+    <div className="mx-auto w-full lg:w-[274px]">
       <SearchField
         placeholder="Search the word..."
         value={searchQuery}

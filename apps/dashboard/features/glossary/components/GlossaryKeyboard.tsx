@@ -43,7 +43,7 @@ export function GlossaryKeyboard({
   return (
     <>
       {/* Desktop keyboard */}
-      <div className="mx-auto hidden w-full max-w-lg md:block">
+      <div className="mx-auto hidden w-full max-w-lg lg:block">
         <div className="grid grid-cols-7 justify-items-center gap-2">
           {ALL_LETTERS.map((letter) => {
             const isAvailable = availableLetters.includes(letter);
@@ -92,7 +92,7 @@ export function GlossaryMobileKeyboard({
   return (
     <div
       className={cn(
-        "bg-surface-background border-border-default sticky top-[57px] z-10 flex w-full gap-2 overflow-x-scroll border-b px-4 py-3 sm:top-0 md:hidden",
+        "bg-surface-background border-border-default sticky top-[57px] z-10 flex w-full gap-2 overflow-x-scroll border-b px-4 py-3 sm:top-0 lg:hidden",
         className,
       )}
     >
