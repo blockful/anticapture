@@ -3,11 +3,12 @@
 import { ReactNode, useState } from "react";
 import { cn } from "@/shared/utils/";
 import { ChevronDown } from "lucide-react";
+import Link from "next/link";
 
 interface Option {
   value: string;
   icon: ReactNode;
-  onClick: () => void;
+  href: string;
 }
 
 interface DaoInfoDropdownProps {
@@ -44,7 +45,7 @@ export const DaoInfoDropdown = ({
         )}
       >
         {defaultValue.icon}
-        <span className="text-sm font-medium whitespace-nowrap">
+        <span className="whitespace-nowrap text-sm font-medium">
           {defaultValue.value}
         </span>
         <ChevronDown
@@ -58,23 +59,22 @@ export const DaoInfoDropdown = ({
       </button>
 
       {isOpen && (
-        <div className="text-primary absolute top-full right-0 z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
+        <div className="text-primary absolute right-0 top-full z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
           {options.map((option) => (
-            <button
+            <Link
               key={option.value}
-              onClick={() => {
-                option.onClick();
-                setIsOpen(false);
-              }}
+              href={option.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className={cn(
-                "hover:bg-middle-dark text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal whitespace-nowrap",
+                "hover:bg-middle-dark text-primary flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal",
               )}
             >
               <div className="flex items-center gap-1.5">
                 <span>{option.icon}</span>
                 <span>{option.value}</span>
               </div>
-            </button>
+            </Link>
           ))}
         </div>
       )}

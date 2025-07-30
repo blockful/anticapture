@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     <div
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground rounded-lg border shadow-xs",
+        "bg-card text-card-foreground shadow-xs rounded-lg border",
         className,
       )}
       {...props}
@@ -36,7 +36,7 @@ function CardTitle({
     <div
       data-slot="card-title"
       className={cn(
-        "text-2xl leading-none font-semibold tracking-tight",
+        "text-2xl font-semibold leading-none tracking-tight",
         className,
       )}
       {...props}

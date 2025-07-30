@@ -3,13 +3,14 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
+import { mainnet } from "viem/chains";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
   supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
-    chainId: 1,
+    chain: mainnet,
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -25,6 +26,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
+      quorumCalculation: "Total Supply",
     },
   },
   governanceImplementation: {
@@ -179,6 +181,11 @@ export const UNI: DaoConfiguration = {
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: false,
+    attackCostBarChart: {
+      UniTimelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+      UniTokenDistributor: "0x090D4613473dEE047c3f2706764f49E0821D256e",
+      Univ3Uni: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
+    },
   },
   riskAnalysis: true,
   tokenDistribution: true,

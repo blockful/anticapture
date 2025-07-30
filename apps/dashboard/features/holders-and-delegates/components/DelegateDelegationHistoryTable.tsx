@@ -15,6 +15,7 @@ import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -247,8 +248,8 @@ export const DelegateDelegationHistoryTable = ({
           // For transfers: if delta is negative, fromAccountId is delegator
           // If delta is positive, toAccountId is delegator
           delegatorAddress = item.isGain
-            ? item.transfer.fromAccountId
-            : item.transfer.toAccountId;
+            ? item.transfer.toAccountId
+            : item.transfer.fromAccountId;
         }
 
         return (
@@ -342,7 +343,7 @@ export const DelegateDelegationHistoryTable = ({
               />
             </div>
             <Link
-              href={`https://etherscan.io/tx/${item.transactionHash}`}
+              href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${item.transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="cursor-pointer"
