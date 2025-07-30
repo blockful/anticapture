@@ -7,7 +7,7 @@ import { Stage } from "@/shared/types/enums/Stage";
  * @param fields Partial record of the fields
  * @returns Array<AnyField & { name: string }>
  */
-export const fieldsToArray = <T extends Record<string, any>>(
+export const fieldsToArray = <T extends Record<string, unknown>>(
   fields?: Partial<Record<GovernanceImplementationEnum, T>>,
 ): Array<T & { name: string }> => {
   if (!fields) return [];
@@ -42,13 +42,23 @@ export const filterFieldsByRiskLevel = (
  * Stage 2 (LOW RISK): No High or Medium Risk details
  * Stage NONE: No governance implementation fields
  */
-export const getDaoStageFromFields = (
+interface GetDaoStageFromFieldsProps {
   fields:
     | Partial<
         Record<GovernanceImplementationEnum, GovernanceImplementationField>
       >
-    | GovernanceImplementationField[],
-): Stage => {
+    | GovernanceImplementationField[];
+  noStage?: boolean;
+}
+
+export const getDaoStageFromFields = ({
+  fields,
+  noStage = false,
+}: GetDaoStageFromFieldsProps): Stage => {
+  if (noStage) {
+    return Stage.NONE;
+  }
+
   let fieldsArray: GovernanceImplementationField[];
 
   // Convert to array if it's a record
@@ -82,5 +92,5 @@ export const getDaoStageFromFields = (
     return Stage.TWO;
   }
 
-  return Stage.NONE;
+  return Stage.UNKNOWN;
 };

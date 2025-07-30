@@ -7,7 +7,6 @@ import {
 } from "@/shared/components";
 import { FilePenLine, LinkIcon, Shield } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useInView } from "react-intersection-observer";
@@ -32,7 +31,6 @@ import {
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
-import { Address } from "viem";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -63,8 +61,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Governor",
             icon: <Shield className="text-link size-4" />,
-            onClick: () =>
-              openEtherscanAddress(daoOverview.contracts?.governor as Address),
+            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.governor}`,
           },
         ]
       : []),
@@ -73,8 +70,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Token",
             icon: <TokensIcon className="text-link size-4" />,
-            onClick: () =>
-              openEtherscanAddress(daoOverview.contracts?.token as Address),
+            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.token}`,
           },
         ]
       : []),
@@ -86,12 +82,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Snapshot",
             icon: <LightningBoltIcon className="text-link size-4" />,
-            onClick: () =>
-              window.open(
-                daoOverview.snapshot as string,
-                "_blank",
-                "noopener,noreferrer",
-              ),
+            href: daoOverview.snapshot,
           },
         ]
       : []),
@@ -100,8 +91,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           {
             value: "Token",
             icon: <TokensIcon className="text-link size-4" />,
-            onClick: () =>
-              openEtherscanAddress(daoOverview.contracts?.token as Address),
+            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.token}`,
           },
         ]
       : []),
@@ -144,7 +134,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <h3 className="text-primary text-[24px] leading-8 font-medium">
+                <h3 className="text-primary text-[24px] font-medium leading-8">
                   {daoConfig.name}
                 </h3>
               </div>
@@ -154,7 +144,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                     defaultValue={{
                       value: "OnChain Gov",
                       icon: <LinkIcon className="text-primary size-3.5" />,
-                      onClick: () => {},
+                      href: "",
                     }}
                     options={onChainOptions}
                   />
@@ -164,7 +154,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                     defaultValue={{
                       value: "OffChain Gov",
                       icon: <FilePenLine className="text-primary size-3.5" />,
-                      onClick: () => {},
+                      href: "",
                     }}
                     options={offChainOptions}
                   />
@@ -180,9 +170,12 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
-              currentStage={getDaoStageFromFields(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-              )}
+              currentStage={getDaoStageFromFields({
+                fields: fieldsToArray(
+                  daoConfig.governanceImplementation?.fields,
+                ),
+                noStage: daoConfig.noStage,
+              })}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.HIGH,
@@ -218,7 +211,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
         <div className="flex items-center gap-3">
           <DaoAvatarIcon daoId={daoId} className="size-icon-md" isRounded />
-          <h2 className="text-primary text-[24px] leading-8 font-semibold">
+          <h2 className="text-primary text-[24px] font-semibold leading-8">
             {daoConfig.name}
           </h2>
         </div>
@@ -228,7 +221,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               defaultValue={{
                 value: "OnChain Gov",
                 icon: <LinkIcon className="text-primary size-3.5" />,
-                onClick: () => {},
+                href: "",
               }}
               options={onChainOptions}
             />
@@ -236,22 +229,25 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               defaultValue={{
                 value: "OffChain Gov",
                 icon: <FilePenLine className="text-primary size-3.5" />,
-                onClick: () => {},
+                href: "",
               }}
               options={offChainOptions}
             />
           </div>
           <div className="flex w-full flex-col">
-            <div className="mt-3 mb-3 flex h-full items-center gap-2">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
               <p className="text-primary font-mono text-xs font-medium tracking-wider">
                 RESILIENCE STAGE
               </p>
               <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
             </div>
             <StagesDaoOverview
-              currentStage={getDaoStageFromFields(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-              )}
+              currentStage={getDaoStageFromFields({
+                fields: fieldsToArray(
+                  daoConfig.governanceImplementation?.fields,
+                ),
+                noStage: daoConfig.noStage,
+              })}
               highRiskItems={filterFieldsByRiskLevel(
                 fieldsToArray(daoConfig.governanceImplementation?.fields),
                 RiskLevel.HIGH,
@@ -267,7 +263,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             />
           </div>
           <div className="flex w-full flex-col">
-            <div className="mt-3 mb-3 flex h-full items-center gap-2">
+            <div className="mb-3 mt-3 flex h-full items-center gap-2">
               <h3 className="text-primary font-mono text-xs font-medium tracking-wider">
                 RISK AREAS
               </h3>

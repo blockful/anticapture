@@ -7,9 +7,7 @@ import {
   SwitchCardDaoInfoItem,
 } from "@/shared/components";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
-import { openEtherscanAddress } from "@/shared/utils/openEtherscanAddress";
 import { Clock, Clock4, ExternalLink } from "lucide-react";
-import { Address } from "viem";
 
 // timelock card section
 export const TimelockCard = ({
@@ -30,11 +28,7 @@ export const TimelockCard = ({
               <SwitchCardDaoInfoItem
                 switched={daoOverview.rules?.timelock}
                 icon={<ExternalLink className="text-secondary size-3.5" />}
-                onClick={() =>
-                  openEtherscanAddress(
-                    daoOverview.contracts?.timelock as Address,
-                  )
-                }
+                href={`${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.timelock}`}
                 key={"switch"}
               />,
             ]
@@ -54,14 +48,12 @@ export const TimelockCard = ({
             ? [
                 <SwitchCardDaoInfoItem
                   switched={daoOverview.rules?.cancelFunction}
-                  icon={<ExternalLink className="text-secondary size-3.5" />}
-                  onClick={() =>
-                    window.open(
-                      `${daoOverview.cancelFunction}`,
-                      "_blank",
-                      "noopener,noreferrer",
-                    )
+                  icon={
+                    daoOverview.cancelFunction ? (
+                      <ExternalLink className="text-secondary size-3.5" />
+                    ) : undefined
                   }
+                  href={daoOverview.cancelFunction}
                   key={"switch"}
                 />,
               ]

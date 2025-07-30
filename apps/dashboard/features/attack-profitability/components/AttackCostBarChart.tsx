@@ -31,6 +31,7 @@ import {
   useTreasuryAssetNonDaoToken,
   useVetoCouncilVotingPower,
 } from "@/features/attack-profitability/hooks";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 interface StackedValue {
   value: number;
@@ -75,10 +76,16 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData(selectedDaoId);
 
+  const daoConfig = daoConfigByDaoId[selectedDaoId];
+  const attackCostBarChart =
+    daoConfig?.attackProfitability?.attackCostBarChart || {};
+  const daoAddresses: string[] = Object.values(attackCostBarChart);
+  const tokenAddress = daoConfig?.daoOverview.contracts.token;
+
   const {
     data: daoTopTokenHolderExcludingTheDao,
-    isLoading: daoTopTokenHolderExcludingTheDaoLoading,
-  } = useTopTokenHolderNonDao(selectedDaoId);
+    loading: daoTopTokenHolderExcludingTheDaoLoading,
+  } = useTopTokenHolderNonDao(selectedDaoId, tokenAddress, daoAddresses);
 
   const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);
@@ -144,26 +151,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
       {
         id: "delegatedSupply",
         name: "Delegated Supply",
-        type: BarChartEnum.STACKED,
-        stackedValues: [
-          {
-            value:
-              Number(
-                formatEther(
-                  BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
-                ),
-              ) * lastPrice,
-            label: "Other Delegations",
-            color: "#EC762ECC",
-          },
-          {
-            value: vetoCouncilVotingPower
-              ? Number(formatEther(BigInt(vetoCouncilVotingPower))) * lastPrice
-              : 0,
-            label: "Veto Council",
-            color: "#EC762E9F",
-          },
-        ],
+        value:
+          Number(
+            formatEther(
+              BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+            ),
+          ) * lastPrice,
+        type: BarChartEnum.REGULAR,
+        customColor: "#EC762ECC",
       },
       {
         id: "activeSupply",
