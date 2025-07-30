@@ -56,7 +56,7 @@ export const HeaderDAOSidebarDropdown = () => {
         href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
         name: DaoIdEnum.UNISWAP,
         isDisabled:
-          daoConfigByDaoId[DaoIdEnum.UNISWAP].supportStage ===
+          daoConfigByDaoId[daoId].supportStage ===
           SupportStageEnum.ANALYSIS,
       },
       {
