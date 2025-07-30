@@ -42,7 +42,6 @@ export const TheButton = ({
   className,
   children,
   onClick,
-  hasText,
   hasIcon = true,
   icon: Icon,
   disabled = false,

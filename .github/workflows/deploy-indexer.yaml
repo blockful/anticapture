@@ -12,8 +12,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      api: ${{ steps.filter.outputs.api }}
-      indexer: ${{ steps.filter.outputs.indexer }}
+      api: ${{ steps.changes.outputs.api }}
+      indexer: ${{ steps.changes.outputs.indexer }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2

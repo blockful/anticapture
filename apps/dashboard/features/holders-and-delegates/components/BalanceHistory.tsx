@@ -14,6 +14,8 @@ import {
   FilterDropdown,
   FilterOption,
 } from "@/shared/components/dropdowns/FilterDropdown";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface BalanceHistoryData {
   id: string;
@@ -28,7 +30,7 @@ interface BalanceHistoryData {
 
 interface BalanceHistoryProps {
   accountId: string;
-  daoId: string;
+  daoId: DaoIdEnum;
 }
 
 export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
@@ -347,7 +349,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
               />
             </div>
             <a
-              href={`https://etherscan.io/tx/${row.original.id}`}
+              href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${row.original.id}`}
               target="_blank"
               rel="noopener noreferrer"
             >

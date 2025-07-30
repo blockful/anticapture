@@ -5,12 +5,14 @@ import { AlertCircle, AlertTriangle } from "lucide-react";
 import { PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
 import { ReactNode } from "react";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
   [Stage.ONE]: "text-warning",
   [Stage.TWO]: "text-success",
   [Stage.NONE]: "text-middle-dark",
+  [Stage.UNKNOWN]: "text-middle-dark",
 };
 
 const STAGE_TITLES: Record<Stage, string> = {
@@ -18,6 +20,7 @@ const STAGE_TITLES: Record<Stage, string> = {
   [Stage.ONE]: "STAGE 1: MEDIUM RISK",
   [Stage.TWO]: "STAGE 2: LOW RISK",
   [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
 };
 
 const STAGE_DESCRIPTIONS: Record<Stage, string> = {
@@ -28,6 +31,7 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
   [Stage.TWO]:
     "A Stage 2 DAO has no implementation details identified as Medium or High Risk.",
   [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
@@ -35,6 +39,7 @@ const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
   [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-px",
   [Stage.TWO]: "hidden",
   [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
 };
 
 interface StagesCardRequirementsProps {
@@ -53,34 +58,43 @@ export const StagesCardRequirements = ({
 
   return (
     <div>
-      <div className="relative w-full">
-        <PointerIcon
-          className={cn(
-            "absolute bottom-0 -translate-x-1/2 translate-y-px",
-            STAGE_POINTER_POSITIONS[daoStage],
-          )}
+      {daoStage !== Stage.NONE && (
+        <div className="relative w-full">
+          <PointerIcon
+            className={cn(
+              "absolute bottom-0 -translate-x-1/2 translate-y-px",
+              STAGE_POINTER_POSITIONS[daoStage],
+            )}
+          />
+        </div>
+      )}
+
+      {daoStage === Stage.NONE ? (
+        <InlineAlert
+          text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
+          variant="info"
         />
-      </div>
+      ) : (
+        <div
+          className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
+        >
+          <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
+          <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
 
-      <div
-        className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
-      >
-        <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
-        <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
-
-        {issues.length > 0 && (
-          <>
-            <Title daoStage={daoStage}>Issues that need to be fixed</Title>
-            <div className="flex flex-wrap gap-4">
-              {issues.map((issue, index) => (
-                <Issue key={index} daoStage={daoStage}>
-                  {issue}
-                </Issue>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+          {issues.length > 0 && (
+            <>
+              <Title daoStage={daoStage}>Issues that need to be fixed</Title>
+              <div className="flex flex-wrap gap-4">
+                {issues.map((issue, index) => (
+                  <Issue key={index} daoStage={daoStage}>
+                    {issue}
+                  </Issue>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -95,7 +109,7 @@ const Title = ({
   return (
     <h3
       className={cn([
-        "mb-2 font-mono text-xs leading-4 font-medium tracking-wider uppercase",
+        "mb-2 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
         STAGE_STYLES[daoStage],
       ])}
     >
@@ -106,7 +120,7 @@ const Title = ({
 
 const Description = ({ children }: { children: ReactNode }) => {
   return (
-    <p className="font-inter text-primary mb-4 text-sm leading-5 font-normal">
+    <p className="font-inter text-primary mb-4 text-sm font-normal leading-5">
       {children}
     </p>
   );
@@ -127,7 +141,7 @@ const Issue = ({
       {daoStage === Stage.ONE && (
         <AlertCircle className="text-warning size-4" />
       )}
-      <span className="font-inter text-primary text-sm leading-5 font-normal">
+      <span className="font-inter text-primary text-sm font-normal leading-5">
         {children}
       </span>
     </div>

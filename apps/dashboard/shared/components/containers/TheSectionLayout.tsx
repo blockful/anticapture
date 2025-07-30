@@ -75,7 +75,7 @@ export const TheSectionLayout = ({
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   {icon}
-                  <h3 className="text-primary text-xl leading-7 font-medium tracking-[-0.5%] sm:text-left">
+                  <h3 className="text-primary text-xl font-medium leading-7 tracking-[-0.5%] sm:text-left">
                     {title}
                   </h3>
                 </div>
@@ -87,7 +87,7 @@ export const TheSectionLayout = ({
                 <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                   <div className="flex items-center gap-2">
                     <div>{icon}</div>
-                    <h4 className="text-xl leading-7 font-medium tracking-[-0.5%] text-white sm:text-left">
+                    <h4 className="text-xl font-medium leading-7 tracking-[-0.5%] text-white sm:text-left">
                       {title}
                     </h4>
                   </div>
@@ -102,7 +102,7 @@ export const TheSectionLayout = ({
             )}
           </div>
           <div className="flex w-full">
-            <p className="text-secondary flex w-full flex-col text-justify text-[12px] leading-[18px] font-normal sm:text-sm">
+            <p className="text-secondary flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] sm:text-sm">
               {description}
             </p>
           </div>
@@ -125,7 +125,7 @@ export const TheSectionLayout = ({
             </div>
           ) : (
             <div className="flex flex-col">
-              <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium tracking-wide uppercase sm:gap-2.5">
+              <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
                 {subtitle}
               </CardTitle>
               <p

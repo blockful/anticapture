@@ -7,13 +7,14 @@ import {
 import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { EnsIcon } from "@/shared/components/icons";
+import { mainnet } from "viem/chains";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
-    chainId: 1,
+    chain: mainnet,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -27,6 +28,7 @@ export const ENS: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain",
+      quorumCalculation: "Total Supply",
     },
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {
@@ -51,6 +53,11 @@ export const ENS: DaoConfiguration = {
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
     supportsLiquidTreasuryCall: true,
+    attackCostBarChart: {
+      ENSTokenTimelock: "0xd7A029Db2585553978190dB5E85eC724Aa4dF23f",
+      ENSDaoWallet: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
+      ENSColdWallet: "0x690F0581eCecCf8389c223170778cD9D029606F2",
+    },
   },
   riskAnalysis: true,
   governanceImplementation: {

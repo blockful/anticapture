@@ -15,6 +15,7 @@ import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -342,7 +343,7 @@ export const DelegateDelegationHistoryTable = ({
               />
             </div>
             <Link
-              href={`https://etherscan.io/tx/${item.transactionHash}`}
+              href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${item.transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="cursor-pointer"
