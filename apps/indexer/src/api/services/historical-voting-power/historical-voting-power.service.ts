@@ -5,12 +5,12 @@ import {
   DBVotingPowerHistoryWithRelations,
   VotingPowerHistoriesResponse,
 } from "@/api/mappers";
-import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
+import { calculateTimeDifference } from "@/lib/blockTime";
 import { VotingPowerHistoryMapper } from "@/api/mappers/historical-voting-power";
 
 interface Repository {
   getVotingPowers(args: {
-    blockNumber: number;
+    fromDate: number;
     limit: number;
     skip: number;
     orderBy: "timestamp" | "delta";
@@ -23,7 +23,6 @@ export class HistoricalVotingPowerService {
   constructor(
     private readonly repo: Repository,
     private readonly client: PublicClient,
-    private readonly blockTime: number,
   ) {}
 
   async getHistoricalVotingPower({
@@ -34,14 +33,9 @@ export class HistoricalVotingPowerService {
     orderBy,
     orderDirection,
   }: VotingPowerHistoriesRequest): Promise<VotingPowerHistoriesResponse> {
-    const currentBlockNumber = await this.getCurrentBlockNumber();
-    const blockNumber = calculateHistoricalBlockNumber(
-      days,
-      currentBlockNumber,
-      this.blockTime,
-    );
+    const timestamp = calculateTimeDifference(days);
     const votingPowers = await this.repo.getVotingPowers({
-      blockNumber,
+      fromDate: timestamp,
       limit,
       skip,
       orderBy,

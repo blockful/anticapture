@@ -106,14 +106,14 @@ export class DrizzleRepository {
   }
 
   async getVotingPowers({
-    blockNumber,
+    fromDate,
     limit,
     skip,
     orderBy = "timestamp",
     orderDirection = "asc",
     addresses,
   }: {
-    blockNumber: number;
+    fromDate: number;
     limit: number;
     skip: number;
     orderBy: "timestamp" | "delta";
@@ -123,14 +123,14 @@ export class DrizzleRepository {
     const orderDirectionFn = orderDirection === "asc" ? asc : desc;
 
     const whereConditions = [
-      gte(votingPowerHistory.timestamp, BigInt(blockNumber)),
+      gte(votingPowerHistory.timestamp, BigInt(fromDate)),
     ];
 
     if (addresses) {
       whereConditions.push(inArray(votingPowerHistory.accountId, addresses));
     }
 
-    const result = await db
+    const result = db
       .select()
       .from(votingPowerHistory)
       .leftJoin(
@@ -152,7 +152,11 @@ export class DrizzleRepository {
       .limit(limit)
       .offset(skip);
 
-    return result.map((row) => ({
+    console.log({ a: result.toSQL() });
+
+    const x = await result;
+
+    return x.map((row) => ({
       ...row.voting_power_history,
       transfers: row.transfers ? [row.transfers] : [],
       delegations: row.delegations ? [row.delegations] : [],

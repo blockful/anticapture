@@ -4,6 +4,7 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
+import { createPublicClient, http } from "viem";
 
 import {
   governanceActivity,
@@ -21,9 +22,7 @@ import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import { DrizzleRepository } from "./repositories";
 import { errorHandler } from "./middlewares";
 import { HistoricalVotingPowerService } from "./services/historical-voting-power";
-import { createPublicClient, http } from "viem";
 import { getChain } from "@/lib/utils";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -75,11 +74,7 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 
-const votingPowerService = new HistoricalVotingPowerService(
-  repo,
-  client,
-  CONTRACT_ADDRESSES[env.DAO_ID].blockTime,
-);
+const votingPowerService = new HistoricalVotingPowerService(repo, client);
 historicalOnchain(app, votingPowerService, env.DAO_ID);
 
 docs(app);
