@@ -1,2 +1,3 @@
-export * from "./drizzle";
-export * from "./proposals-activity.repository";
+export { DrizzleRepository } from "./drizzle";
+export { DrizzleProposalsActivityRepository } from "./proposals-activity.repository";
+export { TransactionsRepository } from "./transactions.repository";

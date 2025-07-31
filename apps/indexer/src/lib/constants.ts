@@ -56,6 +56,18 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 71801427,
     },
   },
+  [DaoIdEnum.TEST]: {
+    blockTime: 12,
+    token: {
+      address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+      decimals: 18,
+      startBlock: 22635098,
+    },
+    governor: {
+      address: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+      startBlock: 22635098,
+    },
+  },
 } as const;
 
 export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
@@ -74,6 +86,7 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
+  [DaoIdEnum.TEST]: {},
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -183,6 +196,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Indodax 1": "0x3C02290922a3618A4646E3BbCa65853eA45FE7C6",
     "Indodax 2": "0x91Dca37856240E5e1906222ec79278b16420Dc92",
   },
+  [DaoIdEnum.TEST]: {},
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -216,6 +230,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Balancer: "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
     Mux: "0xc6BD76FA1E9e789345e003B361e4A0037DFb7260",
   },
+  [DaoIdEnum.TEST]: {},
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -240,6 +255,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Morpho: "0xF057afeEc22E220f47AD4220871364e9E828b2e9",
     dForce: "0x7702dC73e8f8D9aE95CF50933aDbEE68e9F1D725",
   },
+  [DaoIdEnum.TEST]: {},
 };
 
 export const BurningAddresses: Record<
@@ -271,6 +287,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x4200000000000000000000000000000000000042",
+  },
+  [DaoIdEnum.TEST]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
   },
 };
 

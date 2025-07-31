@@ -58,6 +58,12 @@ switch (daoId) {
     OPGovernorIndexer(new OPGovernor(client, governor.address));
     break;
   }
+  case DaoIdEnum.TEST: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    ENSTokenIndexer(token.address, token.decimals);
+    ENSGovernorIndexer(new ENSGovernor(client, governor.address));
+    break;
+  }
   default:
     throw new Error(`DAO ${daoId} not supported`);
 }

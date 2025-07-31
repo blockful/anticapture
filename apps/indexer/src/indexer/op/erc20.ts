@@ -20,7 +20,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
     });
   });
 
-  ponder.on("OPToken:Transfer", async ({ event, context }) => {
+  ponder.on(`OPToken:Transfer`, async ({ event, context }) => {
     await tokenTransfer(context, daoId, {
       from: event.args.from,
       to: event.args.to,
@@ -28,6 +28,9 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       transactionHash: event.transaction.hash,
       value: event.args.value,
       timestamp: event.block.timestamp,
+      transactionFrom: event.transaction.from,
+      transactionTo: event.transaction.to,
+      logIndex: BigInt(event.log.logIndex),
     });
   });
   ponder.on(`OPToken:DelegateChanged`, async ({ event, context }) => {
@@ -38,6 +41,9 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       fromDelegate: event.args.fromDelegate,
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
+      transactionFrom: event.transaction.from,
+      transactionTo: event.transaction.to,
+      logIndex: BigInt(event.log.logIndex),
     });
   });
 
@@ -49,6 +55,9 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       newBalance: event.args.newBalance,
       oldBalance: event.args.previousBalance,
       timestamp: event.block.timestamp,
+      transactionFrom: event.transaction.from,
+      transactionTo: event.transaction.to,
+      logIndex: BigInt(event.log.logIndex),
     });
   });
 }

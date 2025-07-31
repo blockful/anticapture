@@ -1,12 +1,13 @@
 import { createConfig } from "ponder";
 
 import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
+import { env } from "@/env";
 
 export default createConfig({
   chains: {
     anvil: {
       id: 31337,
-      rpc: "http://localhost:8545",
+      rpc: env.RPC_URL,
       maxRequestsPerSecond: 10,
       pollingInterval: 1000,
       disableCache: true,
