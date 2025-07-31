@@ -23,6 +23,8 @@ export const TransactionsRequestSchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
   from: z.string().optional(),
   to: z.string().optional(),
+  minVolume: z.coerce.number().optional(),
+  maxVolume: z.coerce.number().optional(),
 });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
@@ -35,6 +37,7 @@ export const TransferResponseSchema = z.object({
   fromAccountId: z.string(),
   toAccountId: z.string(),
   timestamp: z.string(),
+  logIndex: z.string().nullable(),
 });
 
 export const DelegationResponseSchema = z.object({
@@ -45,13 +48,14 @@ export const DelegationResponseSchema = z.object({
   delegatedValue: z.string(),
   previousDelegate: z.string().nullable(),
   timestamp: z.string(),
+  logIndex: z.string().nullable(),
 });
 
 export const TransactionResponseSchema = z.object({
   transactionHash: z.string(),
   from: z.string().nullable(),
   to: z.string().nullable(),
-  value: z.string(),
+  volume: z.string(),
   isCex: z.boolean(),
   isDex: z.boolean(),
   isLending: z.boolean(),
@@ -84,6 +88,7 @@ export const TransactionMapper = {
       fromAccountId: t.fromAccountId || "",
       toAccountId: t.toAccountId || "",
       timestamp: (t.timestamp || 0n).toString(),
+      logIndex: t.logIndex !== null && t.logIndex !== undefined ? t.logIndex.toString() : null,
     };
   },
 
@@ -96,15 +101,31 @@ export const TransactionMapper = {
       delegatedValue: (d.delegatedValue || 0n).toString(),
       previousDelegate: d.previousDelegate,
       timestamp: (d.timestamp || 0n).toString(),
+      logIndex: d.logIndex !== null && d.logIndex !== undefined ? d.logIndex.toString() : null,
     };
   },
 
   toApi: (t: DBTransaction, transfers: DBTransfer[], delegations: DBDelegation[]): TransactionResponse => {
+    // Calculate volume based on transfers and delegations
+    let volume = 0n;
+    
+    // If there are transfers, sum their amounts
+    if (transfers.length > 0) {
+      volume = transfers.reduce((sum, transfer) => sum + (transfer.amount || 0n), 0n);
+    } else if (delegations.length > 0) {
+      // If only delegations, sum positive delegation amounts
+      volume = delegations.reduce((sum, delegation) => {
+        const delegatedValue = delegation.delegatedValue || 0n;
+        // Only add positive values (ignore negative or zero)
+        return delegatedValue > 0n ? sum + delegatedValue : sum;
+      }, 0n);
+    }
+
     return {
       transactionHash: t.transactionHash,
       from: t.fromAddress,
       to: t.toAddress,
-      value: (t.value || 0n).toString(),
+      volume: volume.toString(),
       isCex: t.isCex,
       isDex: t.isDex,
       isLending: t.isLending,

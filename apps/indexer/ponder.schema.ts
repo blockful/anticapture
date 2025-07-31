@@ -103,6 +103,7 @@ export const delegation = onchainTable(
     delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
     previousDelegate: drizzle.text("previous_delegate"),
     timestamp: drizzle.bigint(),
+    logIndex: drizzle.bigint("log_index"),
   }),
   (table) => ({
     pk: primaryKey({
@@ -125,6 +126,7 @@ export const transfer = onchainTable(
     fromAccountId: drizzle.text("from_account_id"),
     toAccountId: drizzle.text("to_account_id"),
     timestamp: drizzle.bigint(),
+    logIndex: drizzle.bigint("log_index"),
   }),
   (table) => ({
     pk: primaryKey({
@@ -209,7 +211,6 @@ export const transaction = onchainTable(
     transactionHash: drizzle.text("transaction_hash").primaryKey(),
     fromAddress: drizzle.text("from_address"),
     toAddress: drizzle.text("to_address"),
-    value: drizzle.bigint().notNull().default(0n),
     isCex: drizzle.boolean().notNull().default(false),
     isDex: drizzle.boolean().notNull().default(false),
     isLending: drizzle.boolean().notNull().default(false),

@@ -29,17 +29,19 @@ export function transactions(app: Hono, service: TransactionsService) {
         },
       },
     }),
-    async (context) => {
-      const { limit, offset, sortBy, sortOrder, from, to } = context.req.valid("query");
+          async (context) => {
+        const { limit, offset, sortBy, sortOrder, from, to, minVolume, maxVolume } = context.req.valid("query");
 
-      const result = await service.getTransactionsWithChildren({
-        limit,
-        offset,
-        sortBy,
-        sortOrder,
-        from,
-        to,
-      });
+        const result = await service.getTransactionsWithChildren({
+          limit,
+          offset,
+          sortBy,
+          sortOrder,
+          from,
+          to,
+          minVolume,
+          maxVolume,
+        });
 
       return context.json(result);
     },

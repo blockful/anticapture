@@ -80,7 +80,6 @@ export const createOrUpdateTransaction = async (
   from: Address | null,
   to: Address | null,
   timestamp: bigint,
-  value: bigint = 0n,
 ) => {
   if (!from || !to) {
     return;
@@ -113,7 +112,6 @@ export const createOrUpdateTransaction = async (
       transactionHash,
       fromAddress: from,
       toAddress: to,
-      value,
       isCex,
       isDex,
       isLending,
@@ -132,7 +130,6 @@ export const createOrUpdateTransaction = async (
       isBurning: existing.isBurning || isBurning,
       isTotal: existing.isTotal || isTotal,
       isCirculating: existing.isCirculating || isCirculating,
-      value: value,
       timestamp: timestamp,
     }));
 };

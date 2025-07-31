@@ -29,10 +29,10 @@ export const delegateChanged = async (
     timestamp: bigint;
     transactionFrom: Address | null;
     transactionTo: Address | null;
-    transactionValue?: bigint;
+    logIndex: bigint;
   },
 ) => {
-  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp, transactionFrom, transactionTo, transactionValue = 0n } =
+  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp, transactionFrom, transactionTo, logIndex } =
     args;
 
   // Ensure all required accounts exist in parallel
@@ -47,7 +47,6 @@ export const delegateChanged = async (
     transactionFrom || delegator,
     transactionTo || toDelegate,
     timestamp,
-    transactionValue,
   );
 
   // Get the delegator's current balance
@@ -64,6 +63,7 @@ export const delegateChanged = async (
     delegatedValue: delegatorBalance?.balance ?? BigInt(0),
     previousDelegate: fromDelegate,
     timestamp,
+    logIndex,
   });
 
   // Update the delegator's delegate
@@ -113,10 +113,10 @@ export const delegatedVotesChanged = async (
     timestamp: bigint;
     transactionFrom: Address | null;
     transactionTo: Address | null;
-    transactionValue?: bigint;
+    logIndex: bigint;
   },
 ) => {
-  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId, transactionFrom, transactionTo, transactionValue = 0n } = args;
+  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId, transactionFrom, transactionTo, logIndex } = args;
 
   await ensureAccountExists(context, delegate);
 
@@ -129,7 +129,6 @@ export const delegatedVotesChanged = async (
     transactionFrom,
     transactionTo,
     timestamp,
-    transactionValue,
   );
 
   const delta = newBalance - oldBalance;
