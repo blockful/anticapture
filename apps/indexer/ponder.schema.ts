@@ -79,7 +79,7 @@ export const votingPowerHistory = onchainTable(
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
-    accountId: drizzle.text("account_id"),
+    accountId: drizzle.text("account_id").notNull(),
     votingPower: drizzle.bigint("voting_power").notNull(),
     delta: drizzle.bigint("delta").notNull(),
     timestamp: drizzle.bigint().notNull(),
@@ -96,13 +96,13 @@ export const votingPowerHistory = onchainTable(
 export const delegation = onchainTable(
   "delegations",
   (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash"),
-    daoId: drizzle.text("dao_id").notNull(),
-    delegateAccountId: drizzle.text("delegate_account_id"),
-    delegatorAccountId: drizzle.text("delegator_account_id"),
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    daoId: drizzle.text("dao_id"),
+    delegateAccountId: drizzle.text("delegate_account_id").notNull(),
+    delegatorAccountId: drizzle.text("delegator_account_id").notNull(),
     delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
-    previousDelegate: drizzle.text("previous_delegate"),
-    timestamp: drizzle.bigint(),
+    previousDelegate: drizzle.text("previous_delegate").notNull(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -118,13 +118,13 @@ export const delegation = onchainTable(
 export const transfer = onchainTable(
   "transfers",
   (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash"),
-    daoId: drizzle.text("dao_id").notNull(),
-    tokenId: drizzle.text("token_id"),
-    amount: drizzle.bigint(),
-    fromAccountId: drizzle.text("from_account_id"),
-    toAccountId: drizzle.text("to_account_id"),
-    timestamp: drizzle.bigint(),
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    daoId: drizzle.text("dao_id"),
+    tokenId: drizzle.text("token_id").notNull(),
+    amount: drizzle.bigint().notNull(),
+    fromAccountId: drizzle.text("from_account_id").notNull(),
+    toAccountId: drizzle.text("to_account_id").notNull(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({

@@ -4,6 +4,7 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
+import { createPublicClient, http } from "viem";
 
 import {
   governanceActivity,
@@ -20,6 +21,8 @@ import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import { DrizzleRepository } from "./repositories";
 import { errorHandler } from "./middlewares";
+import { HistoricalVotingPowerService } from "./services/historical-voting-power";
+import { getChain } from "@/lib/utils";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -43,6 +46,17 @@ app.onError(errorHandler);
 app.use("/", graphql({ db, schema }));
 app.use("/graphql", graphql({ db, schema }));
 
+const chain = getChain(env.CHAIN_ID);
+if (!chain) {
+  throw new Error(`Chain not found for chainId ${env.CHAIN_ID}`);
+}
+console.log("Connected to chain", chain.name);
+
+const client = createPublicClient({
+  chain,
+  transport: http(env.RPC_URL),
+});
+
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
   assets(app, duneClient);
@@ -59,7 +73,10 @@ const proposalsRepo = new DrizzleProposalsActivityRepository();
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
-historicalOnchain(app, env.DAO_ID);
+
+const votingPowerService = new HistoricalVotingPowerService(repo, client);
+historicalOnchain(app, votingPowerService, env.DAO_ID);
+
 docs(app);
 
 export default app;

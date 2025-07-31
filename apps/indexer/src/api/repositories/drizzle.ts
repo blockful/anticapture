@@ -1,5 +1,6 @@
-import { sql } from "ponder";
+import { and, asc, desc, eq, gte, inArray, sql } from "ponder";
 import { db } from "ponder:api";
+import { delegation, transfer, votingPowerHistory } from "ponder:schema";
 
 import {
   ActiveSupplyQueryResult,
@@ -8,6 +9,7 @@ import {
   VotesCompareQueryResult,
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
+import { DBVotingPowerHistoryWithRelations } from "../mappers";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -101,6 +103,64 @@ export class DrizzleRepository {
     `;
     const result = await db.execute<AverageTurnoutCompareQueryResult>(query);
     return result.rows[0];
+  }
+
+  async getVotingPowers({
+    fromDate,
+    limit,
+    skip,
+    orderBy = "timestamp",
+    orderDirection = "asc",
+    addresses,
+  }: {
+    fromDate: number;
+    limit: number;
+    skip: number;
+    orderBy: "timestamp" | "delta";
+    orderDirection: "asc" | "desc";
+    addresses?: string[];
+  }): Promise<DBVotingPowerHistoryWithRelations[]> {
+    const orderDirectionFn = orderDirection === "asc" ? asc : desc;
+
+    const whereConditions = [
+      gte(votingPowerHistory.timestamp, BigInt(fromDate)),
+    ];
+
+    if (addresses) {
+      whereConditions.push(inArray(votingPowerHistory.accountId, addresses));
+    }
+
+    const result = db
+      .select()
+      .from(votingPowerHistory)
+      .leftJoin(
+        transfer,
+        and(
+          eq(votingPowerHistory.transactionHash, transfer.transactionHash),
+          eq(votingPowerHistory.deltaMod, transfer.amount),
+        ),
+      )
+      .leftJoin(
+        delegation,
+        and(
+          eq(votingPowerHistory.transactionHash, delegation.transactionHash),
+          eq(votingPowerHistory.deltaMod, delegation.delegatedValue),
+        ),
+      )
+      .where(and(...whereConditions))
+      .orderBy(orderDirectionFn(votingPowerHistory[orderBy]))
+      .limit(limit)
+      .offset(skip);
+
+    console.log({ a: result.toSQL() });
+
+    const x = await result;
+
+    return x.map((row) => ({
+      ...row.voting_power_history,
+      transfers: row.transfers ? [row.transfers] : [],
+      delegations: row.delegations ? [row.delegations] : [],
+    }));
   }
 
   now() {
