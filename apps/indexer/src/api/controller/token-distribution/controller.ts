@@ -15,6 +15,10 @@ export function tokenDistribution(
   app: Hono,
   repository: TokenDistributionRepository,
 ) {
+  for (let i = 0; i < 10; i++) {
+    console.log(i);
+  }
+
   const routes = [
     {
       path: "total-supply",
