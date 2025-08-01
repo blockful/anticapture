@@ -18,7 +18,7 @@ export const TextCardDaoInfoItem = ({
 }) => {
   return (
     <div
-      className={`bg-surface-default sm:bg-surface-contrast text-primary flex h-full w-full gap-1.5 rounded-lg px-2 py-1 text-sm leading-tight font-medium ${className}`}
+      className={`bg-surface-default sm:bg-surface-contrast text-primary flex h-full w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium leading-tight ${className}`}
     >
       {item.daoId && (
         <p className="flex items-center">
@@ -29,7 +29,7 @@ export const TextCardDaoInfoItem = ({
           />
         </p>
       )}
-      <p>
+      <p className="whitespace-nowrap">
         {item.label} {item.value}
       </p>
     </div>

@@ -1,0 +1,1 @@
+export { AccordionContentArea } from "./AccordionContentArea";
