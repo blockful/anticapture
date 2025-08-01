@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/src/index.js",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo"
   },
   "keywords": [],
