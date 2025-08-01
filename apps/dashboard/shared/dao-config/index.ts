@@ -4,12 +4,13 @@ import { ENS } from "@/shared/dao-config/ens";
 import { OP } from "@/shared/dao-config/op";
 import { UNI } from "@/shared/dao-config/uni";
 import { ARB } from "@/shared/dao-config/arb";
+import { SHU } from "@/shared/dao-config/shu";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 
 export type DaoConfigByDaoId = {
   [key in DaoIdEnum]: DaoConfiguration;
 };
 
-const daoConfigByDaoId: DaoConfigByDaoId = { ARB, UNI, ENS, OP };
+const daoConfigByDaoId: DaoConfigByDaoId = { ARB, UNI, ENS, OP, SHU };
 
 export default daoConfigByDaoId;

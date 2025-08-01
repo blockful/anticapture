@@ -3,6 +3,7 @@ export enum DaoIdEnum {
   ENS = "ENS",
   OPTIMISM = "OP",
   ARBITRUM = "ARB",
+  SHUTTER = "SHU",
 }
 
 export interface DAO {
