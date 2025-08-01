@@ -77,6 +77,8 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
+      - name: Run typecheck
+        run: pnpm typecheck
       - name: Deploy ${{ matrix.dao }}-indexer
         if: ${{ needs.changes.outputs.indexer == 'true' }}
         run: |

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
