@@ -86,8 +86,6 @@ export type Query = {
   delegations: DelegationPage;
   /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
-  /** Get historical market data for a specific token */
-  historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
@@ -96,8 +94,6 @@ export type Query = {
   proposalsOnchains: ProposalsOnchainPage;
   token?: Maybe<Token>;
   tokens: TokenPage;
-  /** Get total assets */
-  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transfer?: Maybe<Transfer>;
   transfers: TransferPage;
   votesOnchain?: Maybe<VotesOnchain>;
@@ -241,6 +237,8 @@ export type QueryDaosArgs = {
 
 
 export type QueryDelegationArgs = {
+  delegateAccountId: Scalars['String']['input'];
+  delegatorAccountId: Scalars['String']['input'];
   transactionHash: Scalars['String']['input'];
 };
 
@@ -308,12 +306,9 @@ export type QueryTokensArgs = {
 };
 
 
-export type QueryTotalAssetsArgs = {
-  days?: InputMaybe<QueryInput_TotalAssets_Days>;
-};
-
-
 export type QueryTransferArgs = {
+  fromAccountId: Scalars['String']['input'];
+  toAccountId: Scalars['String']['input'];
   transactionHash: Scalars['String']['input'];
 };
 
@@ -913,7 +908,7 @@ export type Delegation = {
   delegatorAccountId?: Maybe<Scalars['String']['output']>;
   previousDelegate?: Maybe<Scalars['String']['output']>;
   timestamp?: Maybe<Scalars['BigInt']['output']>;
-  transactionHash: Scalars['String']['output'];
+  transactionHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type DelegationFilter = {
@@ -992,13 +987,6 @@ export type DelegationPage = {
   items: Array<Delegation>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
-};
-
-export type HistoricalTokenData_200_Response = {
-  __typename?: 'historicalTokenData_200_response';
-  market_caps: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  prices: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  total_volumes: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
 };
 
 export enum MetricType {
@@ -1291,14 +1279,6 @@ export enum QueryInput_ProposalsActivity_UserVoteFilter {
   Yes = 'yes'
 }
 
-export enum QueryInput_TotalAssets_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
 export type Query_HistoricalBalances_Items = {
   __typename?: 'query_historicalBalances_items';
   address: Scalars['String']['output'];
@@ -1345,12 +1325,6 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   timestamp: Scalars['String']['output'];
   voterAccountId: Scalars['String']['output'];
   votingPower?: Maybe<Scalars['String']['output']>;
-};
-
-export type Query_TotalAssets_Items = {
-  __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
 };
 
 export type Token = {
@@ -1474,7 +1448,7 @@ export type Transfer = {
   toAccountId?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Token>;
   tokenId?: Maybe<Scalars['String']['output']>;
-  transactionHash: Scalars['String']['output'];
+  transactionHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type TransferFilter = {
@@ -1666,6 +1640,7 @@ export type VotingPowerHistory = {
   daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
   delta: Scalars['BigInt']['output'];
+  deltaMod: Scalars['BigInt']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
   transfer?: Maybe<Transfer>;
@@ -1696,6 +1671,14 @@ export type VotingPowerHistoryFilter = {
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
   delta?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  deltaMod_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
   delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
   delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
@@ -1748,7 +1731,7 @@ export type BalanceHistoryQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistoryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type BalanceHistoryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash?: string | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type BalanceHistoryTotalCountQueryVariables = Exact<{
   account: Scalars['String']['input'];
@@ -1767,7 +1750,7 @@ export type BalanceHistoryBuyQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistoryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type BalanceHistoryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash?: string | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type BalanceHistoryBuyTotalCountQueryVariables = Exact<{
   account: Scalars['String']['input'];
@@ -1786,7 +1769,7 @@ export type BalanceHistorySellQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistorySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type BalanceHistorySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash?: string | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type BalanceHistorySellTotalCountQueryVariables = Exact<{
   account: Scalars['String']['input'];
