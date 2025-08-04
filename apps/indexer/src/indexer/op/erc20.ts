@@ -8,6 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
+import { insertEvent } from "@/eventHandlers/shared";
 
 export function OPTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.OP;
@@ -21,6 +22,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on("OPToken:Transfer", async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await tokenTransfer(context, daoId, {
       from: event.args.from,
       to: event.args.to,
@@ -33,6 +35,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`OPToken:DelegateChanged`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -45,6 +48,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`OPToken:DelegateVotesChanged`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await delegatedVotesChanged(context, daoId, {
       tokenId: event.log.address,
       delegate: event.args.delegate,

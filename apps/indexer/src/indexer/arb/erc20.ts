@@ -4,6 +4,7 @@ import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { tokenTransfer } from "@/eventHandlers";
+import { insertEvent } from "@/eventHandlers/shared";
 
 export function ARBTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.ARB;
@@ -17,6 +18,7 @@ export function ARBTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`ARBToken:Transfer`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await tokenTransfer(context, daoId, {
       from: event.args.from,
       to: event.args.to,

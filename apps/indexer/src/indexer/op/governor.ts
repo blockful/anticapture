@@ -9,6 +9,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
 import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
+import { insertEvent } from "@/eventHandlers/shared";
 
 export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.OP;
@@ -39,6 +40,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on("OPGovernor:VoteCast", async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await voteCast(context, daoId, {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
@@ -53,6 +55,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(
     `OPGovernor:ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)`,
     async ({ event, context }) => {
+      await insertEvent(context, event.log.logIndex, event.transaction.hash);
       await proposalCreated(context, daoId, blockTime, {
         proposalId: event.args.proposalId.toString(),
         proposer: event.args.proposer,
@@ -72,6 +75,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(
     `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
     async ({ event, context }) => {
+      await insertEvent(context, event.log.logIndex, event.transaction.hash);
       await proposalCreated(context, daoId, blockTime, {
         proposalId: event.args.proposalId.toString(),
         proposer: event.args.proposer,
@@ -91,6 +95,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(
     `OPGovernor:ProposalCreated(uint256 indexed proposalId, address indexed proposer, address indexed votingModule, bytes proposalData, uint256 startBlock, uint256 endBlock, string description, uint8 proposalType)`,
     async ({ event, context }) => {
+      await insertEvent(context, event.log.logIndex, event.transaction.hash);
       await proposalCreated(context, daoId, blockTime, {
         proposalId: event.args.proposalId.toString(),
         proposer: event.args.proposer,
@@ -110,6 +115,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(
     `OPGovernor:ProposalCreated(uint256 proposalId, address proposer, address votingModule, bytes proposalData, uint256 startBlock, uint256 endBlock, string description)`,
     async ({ event, context }) => {
+      await insertEvent(context, event.log.logIndex, event.transaction.hash);
       await proposalCreated(context, daoId, blockTime, {
         proposalId: event.args.proposalId.toString(),
         proposer: event.args.proposer,
@@ -127,6 +133,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   );
 
   ponder.on(`OPGovernor:ProposalCanceled`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await updateProposalStatus(
       context,
       event.args.proposalId.toString(),
@@ -135,6 +142,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`OPGovernor:ProposalExecuted`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await updateProposalStatus(
       context,
       event.args.proposalId.toString(),
@@ -143,6 +151,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`OPGovernor:ProposalQueued`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await updateProposalStatus(
       context,
       event.args.proposalId.toString(),

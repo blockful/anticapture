@@ -9,6 +9,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
 import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
+import { insertEvent } from "@/eventHandlers/shared";
 
 export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.ENS;
@@ -39,6 +40,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`ENSGovernor:VoteCast`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await voteCast(context, daoId, {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
@@ -51,6 +53,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`ENSGovernor:ProposalCreated`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await proposalCreated(context, daoId, blockTime, {
       proposalId: event.args.proposalId.toString(),
       txHash: event.transaction.hash,
@@ -67,6 +70,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`ENSGovernor:ProposalCanceled`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await updateProposalStatus(
       context,
       event.args.proposalId.toString(),
@@ -75,6 +79,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`ENSGovernor:ProposalExecuted`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await updateProposalStatus(
       context,
       event.args.proposalId.toString(),
@@ -83,6 +88,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   });
 
   ponder.on(`ENSGovernor:ProposalQueued`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await updateProposalStatus(
       context,
       event.args.proposalId.toString(),

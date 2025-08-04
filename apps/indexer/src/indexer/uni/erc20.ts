@@ -8,6 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
+import { insertEvent } from "@/eventHandlers/shared";
 
 export function UNITokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.UNI;
@@ -21,6 +22,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`UNIToken:Transfer`, async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await tokenTransfer(context, daoId, {
       from: event.args.from,
       to: event.args.to,
@@ -32,6 +34,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
     });
   });
   ponder.on("UNIToken:DelegateChanged", async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -44,6 +47,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on("UNIToken:DelegateVotesChanged", async ({ event, context }) => {
+    await insertEvent(context, event.log.logIndex, event.transaction.hash);
     await delegatedVotesChanged(context, daoId, {
       tokenId: event.log.address,
       delegate: event.args.delegate,
