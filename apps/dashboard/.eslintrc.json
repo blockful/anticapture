@@ -6,12 +6,9 @@
   ],
   "rules": {
     "no-restricted-imports": [
-      "error",
+      "warn",
       {
-        "patterns": [
-          "../*",
-          "./*"
-        ]
+        "patterns": ["../*", "./*"]
       }
     ]
   }

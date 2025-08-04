@@ -65,7 +65,7 @@ export const HeaderSidebar = () => {
           </div>
 
           <div className="flex w-full flex-col">
-            <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-t border-b py-2">
+            <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-b border-t py-2">
               <BottomNavigationButtons isCompact />
             </div>
             <div className="mx-1.5 flex flex-col px-2 py-4">

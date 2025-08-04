@@ -283,14 +283,14 @@ importers:
         specifier: ^0.31.4
         version: 0.31.4
       drizzle-orm:
-        specifier: ^0.44.3
-        version: 0.44.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.4)(kysely@0.26.3)(pg@8.16.3)
+        specifier: ^0.41.0
+        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.4)(kysely@0.26.3)(pg@8.16.3)
       hono:
         specifier: ^4.7.10
         version: 4.8.5
       ponder:
-        specifier: ^0.11.38
-        version: 0.11.38(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        specifier: ^0.11.40
+        version: 0.11.40(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       viem:
         specifier: ^2.29.4
         version: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -13386,10 +13386,10 @@ packages:
       }
     engines: { node: ">=10" }
 
-  ponder@0.11.38:
+  ponder@0.11.40:
     resolution:
       {
-        integrity: sha512-cfyEOAr8EwDEBeNADY8wkGptTZf46Rs9MAoFVJ0GW667KCeHVvlGGJNikJGvvJgRd2ybMEe3hXyHcsgVufZBIw==,
+        integrity: sha512-E00KQmcu37UrGleg8CFDDY9/eRkDqt0jH0ZBKesPjxcp5lDAf5PO38G6lMwkbqi7pW4i3KC6qJpMaZVt2daONQ==,
       }
     engines: { node: ">=18.14" }
     hasBin: true
@@ -24016,14 +24016,6 @@ snapshots:
       kysely: 0.26.3
       pg: 8.16.3
 
-  drizzle-orm@0.44.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.4)(kysely@0.26.3)(pg@8.16.3):
-    optionalDependencies:
-      "@electric-sql/pglite": 0.2.13
-      "@opentelemetry/api": 1.9.0
-      "@types/pg": 8.15.4
-      kysely: 0.26.3
-      pg: 8.16.3
-
   dset@3.1.4: {}
 
   dunder-proto@1.0.1:
@@ -26946,7 +26938,7 @@ snapshots:
     dependencies:
       "@babel/runtime": 7.27.6
 
-  ponder@0.11.38(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  ponder@0.11.40(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
     dependencies:
       "@babel/code-frame": 7.27.1
       "@commander-js/extra-typings": 12.1.0(commander@12.1.0)

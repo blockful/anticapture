@@ -1,1 +1,1 @@
-export * from "./governor";
+export * from "./client";

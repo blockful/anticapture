@@ -1,5 +1,7 @@
-import { sql } from "ponder";
+import { and, asc, desc, eq, gte, sql } from "ponder";
 import { db } from "ponder:api";
+import { proposalsOnchain } from "ponder:schema";
+import { SQL } from "drizzle-orm";
 
 import {
   ActiveSupplyQueryResult,
@@ -8,6 +10,7 @@ import {
   VotesCompareQueryResult,
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
+import { DBProposal } from "../mappers";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -101,6 +104,50 @@ export class DrizzleRepository {
     `;
     const result = await db.execute<AverageTurnoutCompareQueryResult>(query);
     return result.rows[0];
+  }
+
+  async getProposals(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    status: string | undefined,
+    fromDate: number | undefined,
+  ): Promise<DBProposal[]> {
+    const whereClauses: SQL<unknown>[] = [];
+    if (status) {
+      // the following statuses are not handled by the indexing process
+      // being stored as "PENDING" in the database to be further processed
+      if (
+        status === "ACTIVE" ||
+        status === "DEFEATED" ||
+        status === "SUCCEEDED"
+      ) {
+        whereClauses.push(eq(proposalsOnchain.status, "PENDING"));
+      } else {
+        whereClauses.push(eq(proposalsOnchain.status, status));
+      }
+    }
+    if (fromDate) {
+      whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
+    }
+
+    return await db
+      .select()
+      .from(proposalsOnchain)
+      .where(and(...whereClauses))
+      .orderBy(
+        orderDirection === "asc"
+          ? asc(proposalsOnchain.timestamp)
+          : desc(proposalsOnchain.timestamp),
+      )
+      .limit(limit)
+      .offset(skip);
+  }
+
+  async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
+    return await db.query.proposalsOnchain.findFirst({
+      where: eq(proposalsOnchain.id, proposalId),
+    });
   }
 
   now() {

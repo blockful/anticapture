@@ -4,6 +4,7 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
+import { createPublicClient, http } from "viem";
 
 import {
   governanceActivity,
@@ -12,6 +13,7 @@ import {
   assets,
   proposalsActivity,
   historicalOnchain,
+  proposals,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
@@ -20,6 +22,9 @@ import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import { DrizzleRepository } from "./repositories";
 import { errorHandler } from "./middlewares";
+import { ProposalsService } from "./services/proposals";
+import { getGovernor } from "@/lib/governor";
+import { getChain } from "@/lib/utils";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -43,6 +48,17 @@ app.onError(errorHandler);
 app.use("/", graphql({ db, schema }));
 app.use("/graphql", graphql({ db, schema }));
 
+const chain = getChain(env.CHAIN_ID);
+if (!chain) {
+  throw new Error(`Chain not found for chainId ${env.CHAIN_ID}`);
+}
+console.log("Connected to chain", chain.name);
+
+const client = createPublicClient({
+  chain,
+  transport: http(env.RPC_URL),
+});
+
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
   assets(app, duneClient);
@@ -53,12 +69,19 @@ if (env.COINGECKO_API_KEY) {
   tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
 }
 
+const governorClient = getGovernor(env.DAO_ID, client);
+
+if (!governorClient) {
+  throw new Error(`Governor client not found for DAO ${env.DAO_ID}`);
+}
+
 const repo = new DrizzleRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
+proposals(app, new ProposalsService(repo, governorClient));
 historicalOnchain(app, env.DAO_ID);
 docs(app);
 
