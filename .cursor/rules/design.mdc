@@ -1,0 +1,204 @@
+---
+description: >
+  USE WHEN: creating or modifying UI in React/TSX. Follow our design system strictly.
+  Goal: generate components that import DS primitives, use tokens, and meet a11y/testing standards.
+globs:
+  - "apps/dashboard/**/*.{ts,tsx,mdx}"
+  - "shared/**/*.{ts,tsx,mdx}"
+  - "features/**/*.{ts,tsx,mdx}"
+alwaysApply: false
+---
+
+# Design System Overview
+
+- Framework: React + TypeScript, styling with Tailwind CSS v4
+- All configuration is in `apps/dashboard/app/globals.css` (Tailwind 4 approach)
+- Do **not** invent styles. Use DS tokens/utilities only.
+- **Always prefer design-system components over UI primitives.**
+- Prefer composition over re-implementation; import existing design-system components.
+
+## Component Architecture
+
+Follow the established folder structure:
+
+```
+shared/
+├── components/
+│   ├── design-system/         # Primary design system components (preferred)
+│   ├── [category]/            # Specific component categories (badges, charts, etc.)
+│   └── index.ts              # Barrel exports
+```
+
+## Authoritative Component Imports
+
+**Design System Components (always prefer these):**
+
+- TheButton → `import { TheButton } from "@/shared/components/design-system/buttons/TheButton"`
+- BlankState → `import { BlankState } from "@/shared/components/design-system/blank-state/BlankState"`
+- TextIconLeft → `import { TextIconLeft } from "@/shared/components/design-system/TextIconLeft"`
+- SearchField → `import { SearchField } from "@/shared/components/design-system/SearchField"`
+- ActivityIndicator → `import { ActivityIndicator } from "@/shared/components/design-system/ActivityIndicator"`
+- SimpleProgressBar → `import { SimpleProgressBar } from "@/shared/components/design-system/SimpleProgressBar"`
+
+**Shared Components (for specific use cases):**
+
+- Badge → `import { Badge } from "@/shared/components"`
+- Icon components → `import { [IconName] } from "@/shared/components/icons"`
+
+**UI Primitives (only for internal composition):**
+
+- Button → `import { Button } from "@/shared/components/ui/button"`
+- Card → `import { Card } from "@/shared/components/ui/card"`
+- Table → `import { Table } from "@/shared/components/ui/table"`
+- Other UI primitives should only be used when building new design-system components
+
+## Design Tokens & Colors
+
+All colors are defined in `globals.css` using CSS custom properties. **Never use hex colors**.
+
+**Important:** Use Tailwind utility classes in your JSX (e.g., `text-primary`, `bg-surface-default`). Only use `var()` syntax when writing custom CSS, never in className attributes.
+
+### Color Categories:
+
+**Text Colors:**
+
+- Primary text: `text-primary`
+- Secondary text: `text-secondary`
+- Dimmed text: `text-dimmed`
+- Inverted text: `text-inverted`
+- Success text: `text-success`
+- Warning text: `text-warning`
+- Error text: `text-error`
+- Link text: `text-link`
+
+**Surface Colors:**
+
+- Background: `bg-surface-background`
+- Default surface: `bg-surface-default`
+- Contrast surface: `bg-surface-contrast`
+- Hover surface: `bg-surface-hover`
+- Action surface: `bg-surface-action`
+- Success surface: `bg-surface-solid-success`
+- Warning surface: `bg-surface-solid-warning`
+- Error surface: `bg-surface-solid-error`
+- Brand surface: `bg-surface-solid-brand`
+
+**Border Colors:**
+
+- Default border: `border-border-default`
+- Contrast border: `border-border-contrast`
+- Primary border: `border-border-primary`
+
+### Icon Sizes:
+
+Use predefined icon size tokens:
+
+- `size-icon-xxs` (16px), `size-icon-xs` (20px), `size-icon-sm` (24px)
+- `size-icon-md` (36px), `size-icon-lg` (48px), `size-icon-xl` (76px)
+
+### Typography:
+
+- Use standard Tailwind text sizes: `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`
+- Font weights: `font-medium`, `font-semibold` only
+- Alternative sizes available: `text-alternative-sm` (13px), `text-alternative-xs` (12px)
+
+## Component Conventions
+
+### File Structure:
+
+- Design system components: `apps/dashboard/shared/components/design-system/[ComponentName].tsx` or `apps/dashboard/shared/components/design-system/[category]/[ComponentName].tsx`
+- Feature-specific: `apps/dashboard/shared/components/[category]/[ComponentName].tsx`
+- UI primitives: `apps/dashboard/shared/components/ui/[component-name].tsx` (for internal use only)
+
+### Component Pattern:
+
+```typescript
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/shared/utils/";
+
+export const componentVariants = cva(
+  "base-classes-here",
+  {
+    variants: {
+      variant: {
+        default: "default-styles",
+        secondary: "secondary-styles",
+      },
+      size: {
+        sm: "small-styles",
+        md: "medium-styles",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md",
+    },
+  },
+);
+
+export interface ComponentProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof componentVariants> {
+  asChild?: boolean; // When polymorphism is needed
+}
+
+export const Component: React.FC<ComponentProps> = ({
+  className,
+  variant,
+  size,
+  ...props
+}) => {
+  return (
+    <div
+      className={cn(componentVariants({ variant, size }), className)}
+      {...props}
+    />
+  );
+};
+
+// Export both component and variants for flexibility
+export { Component, componentVariants };
+```
+
+### Required Practices:
+
+- Use `class-variance-authority` for variant management
+- Use `cn()` utility for class merging (from `@/shared/utils/`)
+- Support `className` prop override
+- Export both component and variants
+- Use semantic HTML elements with proper ARIA attributes
+- Add focus-visible styles, never remove focus outlines
+
+### Accessibility Requirements:
+
+- Buttons must have proper roles and keyboard support
+- Inputs must be labeled via `aria-label` or associated `<label>`
+- Interactive elements must have focus-visible styles
+- Use semantic HTML elements when possible
+
+## Testing & Documentation:
+
+- Consider adding Storybook stories for complex components
+- Test with screen readers and keyboard navigation
+- Ensure color contrast meets WCAG standards
+
+## Do / Don't
+
+✅ **Do:**
+
+- **Always prefer design-system components first**
+- Use design tokens from globals.css
+- Follow the established folder structure
+- Export components from appropriate index.ts files
+- Use class-variance-authority for variants
+- Compose from existing design-system components
+
+❌ **Don't:**
+
+- Use hex colors (`#RRGGBB`) - always use design tokens
+- Create inline styles (except rare documented cases)
+- Use UI primitives directly in features (use design-system components instead)
+- Duplicate components that already exist in `design-system/` folder
+- Skip accessibility considerations
+- Ignore the established import patterns
