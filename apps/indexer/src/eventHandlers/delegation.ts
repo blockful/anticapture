@@ -127,7 +127,7 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
       delta: newBalance - oldBalance,
       timestamp,
-      logIndex,
+      logIndex: logIndex - 1,
     })
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
