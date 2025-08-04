@@ -206,6 +206,20 @@ export const daoMetricsDayBucket = onchainTable(
   }),
 );
 
+export const events = onchainTable(
+  "events",
+  (drizzle) => ({
+    logIndex: drizzle.integer("log_index").notNull(),
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    name: drizzle.text().notNull(),
+  }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.transactionHash, table.logIndex],
+    }),
+  }),
+);
+
 // Account Power and Balance relations
 export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
   // Relation to the delegate's power
