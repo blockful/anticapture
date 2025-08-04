@@ -143,9 +143,18 @@ export const tokenTransfer = async (
     transactionHash: Hex;
     value: bigint;
     timestamp: bigint;
+    logIndex: number;
   },
 ) => {
-  const { from, to, tokenAddress, transactionHash, value, timestamp } = args;
+  const {
+    from,
+    to,
+    tokenAddress,
+    transactionHash,
+    value,
+    timestamp,
+    logIndex,
+  } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
@@ -160,6 +169,7 @@ export const tokenTransfer = async (
       fromAccountId: from,
       toAccountId: to,
       timestamp,
+      logIndex,
     })
     .onConflictDoNothing();
 
