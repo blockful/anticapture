@@ -1,6 +1,6 @@
 import { Address } from "viem";
 import { Context } from "ponder:registry";
-import { account, daoMetricsDayBucket } from "ponder:schema";
+import { account, daoMetricsDayBucket, events } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
@@ -15,6 +15,17 @@ export const ensureAccountExists = async (
       id: address,
     })
     .onConflictDoNothing();
+};
+
+export const insertEvent = async (
+  context: Context,
+  logIndex: number,
+  transactionHash: string,
+): Promise<void> => {
+  await context.db.insert(events).values({
+    logIndex,
+    transactionHash,
+  });
 };
 
 /**

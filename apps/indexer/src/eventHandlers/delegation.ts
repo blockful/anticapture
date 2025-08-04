@@ -5,6 +5,7 @@ import {
   delegation,
   votingPowerHistory,
   token,
+  events,
 } from "ponder:schema";
 import { Address, Hex, zeroAddress } from "viem";
 
@@ -117,6 +118,15 @@ export const delegatedVotesChanged = async (
   } = args;
 
   await ensureAccountExists(context, delegate);
+
+  let index = logIndex - 1;
+  const previousEvent = await context.db.find(events, {
+    transactionHash: txHash,
+    logIndex: index,
+  });
+
+  // handling multiple DelegateVotesChanged events caused by the same transfer/delegation
+  if (previousEvent?.name === "DelegateVotesChanged") index -= 1;
 
   await context.db
     .insert(votingPowerHistory)
