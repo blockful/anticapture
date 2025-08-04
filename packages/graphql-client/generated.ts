@@ -1937,6 +1937,14 @@ export type GetProposalsActivityQueryVariables = Exact<{
 
 export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: string, endBlock: string, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
+export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
+  tokenAddresses: Scalars['String']['input'];
+  daoAddresses: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
+
 export type GetTopTokenHoldersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3079,6 +3087,55 @@ export type GetProposalsActivityQueryHookResult = ReturnType<typeof useGetPropos
 export type GetProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetProposalsActivityLazyQuery>;
 export type GetProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetProposalsActivitySuspenseQuery>;
 export type GetProposalsActivityQueryResult = Apollo.QueryResult<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>;
+export const GetDaoAddressesAccountBalancesDocument = gql`
+    query GetDaoAddressesAccountBalances($tokenAddresses: String!, $daoAddresses: [String]!) {
+  accountBalances(
+    where: {tokenId: $tokenAddresses, accountId_not_in: $daoAddresses}
+    orderBy: "balance"
+    orderDirection: "DESC"
+    limit: 1
+  ) {
+    items {
+      accountId
+      balance
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDaoAddressesAccountBalancesQuery__
+ *
+ * To run a query within a React component, call `useGetDaoAddressesAccountBalancesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDaoAddressesAccountBalancesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDaoAddressesAccountBalancesQuery({
+ *   variables: {
+ *      tokenAddresses: // value for 'tokenAddresses'
+ *      daoAddresses: // value for 'daoAddresses'
+ *   },
+ * });
+ */
+export function useGetDaoAddressesAccountBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables> & ({ variables: GetDaoAddressesAccountBalancesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
+      }
+export function useGetDaoAddressesAccountBalancesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
+        }
+export function useGetDaoAddressesAccountBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
+        }
+export type GetDaoAddressesAccountBalancesQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesQuery>;
+export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesLazyQuery>;
+export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
+export type GetDaoAddressesAccountBalancesQueryResult = Apollo.QueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
 export const GetTopTokenHoldersDocument = gql`
     query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String) {
   accountBalances(

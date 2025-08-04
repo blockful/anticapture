@@ -20,8 +20,7 @@ interface StagesDaoOverviewProps {
 }
 
 export const StagesDaoOverview = ({
-  currentStage = Stage.NONE,
-  itemsToNextStage = 3,
+  currentStage = Stage.UNKNOWN,
   highRiskItems = [],
   mediumRiskItems = [],
   lowRiskItems = [],
@@ -63,7 +62,7 @@ export const StagesDaoOverview = ({
   };
 
   const stageToText = (stage: Stage) => {
-    if (stage === Stage.NONE) {
+    if (stage === Stage.UNKNOWN) {
       return "?";
     }
     return stage;
@@ -85,82 +84,103 @@ export const StagesDaoOverview = ({
                   "text-error": currentStage === Stage.ZERO,
                   "text-warning": currentStage === Stage.ONE,
                   "text-success": currentStage === Stage.TWO,
-                  "text-secondary": currentStage === Stage.NONE,
+                  "text-secondary":
+                    currentStage === Stage.NONE ||
+                    currentStage === Stage.UNKNOWN,
                 },
               )}
             >
-              Stage {stageToText(currentStage)}
+              {currentStage === Stage.NONE
+                ? "NO STAGE"
+                : `Stage ${stageToText(currentStage)}`}
             </span>
           </div>
           <BulletPoint className="text-middle-dark mb-1 hidden text-sm sm:block" />
           {/* Items to next stage */}
           <div className="flex justify-start">
             <button
-              className="border-foreground group text-primary border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
+              className="border-foreground text-primary group border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
-              <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
-                {currentStage !== Stage.NONE
-                  ? formatPlural(
-                      highRiskItems.length ||
-                        mediumRiskItems.length ||
-                        lowRiskItems.length,
-                      "ITEM",
-                    )
-                  : "? ITEMS"}
-              </span>
-              <span
-                className={cn([
-                  "text-alternative-sm text-secondary duration-300",
-                  { "group-hover:text-primary": currentStage !== Stage.NONE },
-                ])}
-              >
-                {" "}
-                {currentStage !== Stage.NONE
-                  ? `TO STAGE ${Number(currentStage) + 1}`
-                  : "TO NEXT"}
-              </span>
+              {currentStage === Stage.NONE ? (
+                <span className="text-secondary group-hover:text-primary text-alternative-sm font-medium uppercase duration-300">
+                  Does not qualify
+                </span>
+              ) : (
+                <>
+                  <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
+                    {currentStage !== Stage.UNKNOWN
+                      ? formatPlural(
+                          highRiskItems.length ||
+                            mediumRiskItems.length ||
+                            lowRiskItems.length,
+                          "ITEM",
+                        )
+                      : "? ITEMS"}
+                  </span>
+                  <span
+                    className={cn([
+                      "text-alternative-sm text-secondary duration-300",
+                      {
+                        "group-hover:text-primary":
+                          currentStage !== Stage.UNKNOWN,
+                      },
+                    ])}
+                  >
+                    {" "}
+                    {currentStage !== Stage.UNKNOWN
+                      ? `TO STAGE ${Number(currentStage) + 1}`
+                      : "TO NEXT"}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </div>
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">
           <OutlinedBox
             variant={"error"}
-            disabled={currentStage === Stage.NONE}
+            disabled={
+              currentStage === Stage.UNKNOWN || currentStage === Stage.NONE
+            }
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
             <span className="font-mono">
-              {currentStage !== Stage.NONE ? highRiskItems.length : "?"}
+              {currentStage !== Stage.UNKNOWN ? highRiskItems.length : "?"}
             </span>
           </OutlinedBox>
           <OutlinedBox
             variant="warning"
-            disabled={currentStage === Stage.NONE}
+            disabled={
+              currentStage === Stage.UNKNOWN || currentStage === Stage.NONE
+            }
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
             <span className="font-mono">
-              {currentStage !== Stage.NONE ? mediumRiskItems.length : "?"}
+              {currentStage !== Stage.UNKNOWN ? mediumRiskItems.length : "?"}
             </span>
           </OutlinedBox>
           <OutlinedBox
             variant="success"
-            disabled={currentStage === Stage.NONE}
+            disabled={
+              currentStage === Stage.UNKNOWN || currentStage === Stage.NONE
+            }
             className="p-1 py-0.5"
             onClick={() => setShowTooltip(!showTooltip)}
             onMouseEnter={() => !isMobile && setShowTooltip(true)}
           >
             <span className="font-mono">
-              {currentStage !== Stage.NONE ? lowRiskItems.length : "?"}
+              {currentStage !== Stage.UNKNOWN ? lowRiskItems.length : "?"}
             </span>
           </OutlinedBox>
         </div>
       </div>
-      {showTooltip && currentStage !== Stage.NONE && (
+      {showTooltip && currentStage !== Stage.UNKNOWN && (
         <StageRequirementsTooltip
           currentStage={currentStage}
           nextStage={Number(currentStage) + 1}
