@@ -83,8 +83,6 @@ export const votingPowerHistory = onchainTable(
     votingPower: drizzle.bigint("voting_power").notNull(),
     delta: drizzle.bigint("delta").notNull(),
     timestamp: drizzle.bigint().notNull(),
-    // the voting power change non-negative to correlate with the transfer and delegation
-    deltaMod: drizzle.bigint("delta_mod").notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -306,13 +304,13 @@ export const votingPowerHistoryRelations = relations(
   votingPowerHistory,
   ({ one }) => ({
     transfer: one(transfer, {
-      fields: [votingPowerHistory.transactionHash, votingPowerHistory.deltaMod],
-      references: [transfer.transactionHash, transfer.amount],
+      fields: [votingPowerHistory.transactionHash],
+      references: [transfer.transactionHash],
       relationName: "votingPowerTransfer",
     }),
     delegation: one(delegation, {
-      fields: [votingPowerHistory.transactionHash, votingPowerHistory.deltaMod],
-      references: [delegation.transactionHash, delegation.delegatedValue],
+      fields: [votingPowerHistory.transactionHash],
+      references: [delegation.transactionHash],
       relationName: "votingPowerDelegation",
     }),
     account: one(account, {
