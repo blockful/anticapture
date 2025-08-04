@@ -118,15 +118,6 @@ export const delegatedVotesChanged = async (
 
   await ensureAccountExists(context, delegate);
 
-  const _logIndex = logIndex - 1;
-  const votingPower = await context.db.sql.query.votingPowerHistory.findFirst({
-    where: (table, { and, eq }) =>
-      and(eq(table.transactionHash, txHash), eq(table.logIndex, _logIndex)),
-  });
-
-  // Handling transfers/delegations that emit multiple DelegateVoteChanged events
-  if (votingPower) _logIndex - 2;
-
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -136,7 +127,7 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
       delta: newBalance - oldBalance,
       timestamp,
-      logIndex: _logIndex,
+      logIndex: logIndex - 1,
     })
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
