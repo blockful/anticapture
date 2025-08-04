@@ -79,7 +79,7 @@ export const votingPowerHistory = onchainTable(
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
-    accountId: drizzle.text("account_id"),
+    accountId: drizzle.text("account_id").notNull(),
     votingPower: drizzle.bigint("voting_power").notNull(),
     delta: drizzle.bigint("delta").notNull(),
     timestamp: drizzle.bigint().notNull(),
