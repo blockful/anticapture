@@ -32,8 +32,17 @@ export const delegateChanged = async (
     logIndex: bigint;
   },
 ) => {
-  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp, transactionFrom, transactionTo, logIndex } =
-    args;
+  const {
+    delegator,
+    toDelegate,
+    tokenId,
+    txHash,
+    fromDelegate,
+    timestamp,
+    transactionFrom,
+    transactionTo,
+    logIndex,
+  } = args;
 
   // Ensure all required accounts exist in parallel
   await ensureAccountsExist(context, [delegator, toDelegate]);
@@ -116,7 +125,16 @@ export const delegatedVotesChanged = async (
     logIndex: bigint;
   },
 ) => {
-  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId, transactionFrom, transactionTo, logIndex } = args;
+  const {
+    delegate,
+    txHash,
+    newBalance,
+    oldBalance,
+    timestamp,
+    tokenId,
+    transactionFrom,
+    transactionTo,
+  } = args;
 
   await ensureAccountExists(context, delegate);
 

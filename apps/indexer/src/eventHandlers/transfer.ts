@@ -11,7 +11,11 @@ import {
   TREASURY_ADDRESSES,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { ensureAccountExists, storeDailyBucket, createOrUpdateTransaction } from "./shared";
+import {
+  ensureAccountExists,
+  storeDailyBucket,
+  createOrUpdateTransaction,
+} from "./shared";
 
 const updateSupplyMetric = async (
   context: Context,
@@ -148,7 +152,17 @@ export const tokenTransfer = async (
     logIndex: bigint;
   },
 ) => {
-  const { from, to, tokenAddress, transactionHash, value, timestamp, transactionFrom, transactionTo, logIndex } = args;
+  const {
+    from,
+    to,
+    tokenAddress,
+    transactionHash,
+    value,
+    timestamp,
+    transactionFrom,
+    transactionTo,
+    logIndex,
+  } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);

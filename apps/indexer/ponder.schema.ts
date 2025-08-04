@@ -205,22 +205,19 @@ export const daoMetricsDayBucket = onchainTable(
   }),
 );
 
-export const transaction = onchainTable(
-  "transaction",
-  (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash").primaryKey(),
-    fromAddress: drizzle.text("from_address"),
-    toAddress: drizzle.text("to_address"),
-    isCex: drizzle.boolean().notNull().default(false),
-    isDex: drizzle.boolean().notNull().default(false),
-    isLending: drizzle.boolean().notNull().default(false),
-    isTreasury: drizzle.boolean().notNull().default(false),
-    isBurning: drizzle.boolean().notNull().default(false),
-    isTotal: drizzle.boolean().notNull().default(false),
-    isCirculating: drizzle.boolean().notNull().default(false),
-    timestamp: drizzle.bigint().notNull(),
-  }),
-);
+export const transaction = onchainTable("transaction", (drizzle) => ({
+  transactionHash: drizzle.text("transaction_hash").primaryKey(),
+  fromAddress: drizzle.text("from_address"),
+  toAddress: drizzle.text("to_address"),
+  isCex: drizzle.boolean().notNull().default(false),
+  isDex: drizzle.boolean().notNull().default(false),
+  isLending: drizzle.boolean().notNull().default(false),
+  isTreasury: drizzle.boolean().notNull().default(false),
+  isBurning: drizzle.boolean().notNull().default(false),
+  isTotal: drizzle.boolean().notNull().default(false),
+  isCirculating: drizzle.boolean().notNull().default(false),
+  timestamp: drizzle.bigint().notNull(),
+}));
 
 // Account Power and Balance relations
 export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
@@ -354,7 +351,7 @@ export const votingPowerHistoryRelations = relations(
   }),
 );
 
-export const transactionRelations = relations(transaction, ({ one, many }) => ({
+export const transactionRelations = relations(transaction, ({ many }) => ({
   transfers: many(transfer, {
     relationName: "transactionTransfers",
   }),

@@ -5,6 +5,18 @@ export type DBTransaction = typeof transaction.$inferSelect;
 export type DBTransfer = typeof transfer.$inferSelect;
 export type DBDelegation = typeof delegation.$inferSelect;
 
+export const AffectedSupplyEnum = z.enum([
+  "CEX",
+  "DEX",
+  "LENDING",
+  "TREASURY",
+  "BURNING",
+  "TOTAL",
+  "CIRCULATING",
+]);
+
+export type AffectedSupply = z.infer<typeof AffectedSupplyEnum>;
+
 export const TransactionsRequestSchema = z.object({
   limit: z.coerce
     .number()
@@ -25,6 +37,7 @@ export const TransactionsRequestSchema = z.object({
   to: z.string().optional(),
   minVolume: z.coerce.number().optional(),
   maxVolume: z.coerce.number().optional(),
+  affectedSupply: z.array(AffectedSupplyEnum).optional(),
 });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
@@ -88,7 +101,10 @@ export const TransactionMapper = {
       fromAccountId: t.fromAccountId || "",
       toAccountId: t.toAccountId || "",
       timestamp: (t.timestamp || 0n).toString(),
-      logIndex: t.logIndex !== null && t.logIndex !== undefined ? t.logIndex.toString() : null,
+      logIndex:
+        t.logIndex !== null && t.logIndex !== undefined
+          ? t.logIndex.toString()
+          : null,
     };
   },
 
@@ -101,17 +117,27 @@ export const TransactionMapper = {
       delegatedValue: (d.delegatedValue || 0n).toString(),
       previousDelegate: d.previousDelegate,
       timestamp: (d.timestamp || 0n).toString(),
-      logIndex: d.logIndex !== null && d.logIndex !== undefined ? d.logIndex.toString() : null,
+      logIndex:
+        d.logIndex !== null && d.logIndex !== undefined
+          ? d.logIndex.toString()
+          : null,
     };
   },
 
-  toApi: (t: DBTransaction, transfers: DBTransfer[], delegations: DBDelegation[]): TransactionResponse => {
+  toApi: (
+    t: DBTransaction,
+    transfers: DBTransfer[],
+    delegations: DBDelegation[],
+  ): TransactionResponse => {
     // Calculate volume based on transfers and delegations
     let volume = 0n;
-    
+
     // If there are transfers, sum their amounts
     if (transfers.length > 0) {
-      volume = transfers.reduce((sum, transfer) => sum + (transfer.amount || 0n), 0n);
+      volume = transfers.reduce(
+        (sum, transfer) => sum + (transfer.amount || 0n),
+        0n,
+      );
     } else if (delegations.length > 0) {
       // If only delegations, sum positive delegation amounts
       volume = delegations.reduce((sum, delegation) => {

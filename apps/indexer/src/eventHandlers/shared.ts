@@ -4,12 +4,12 @@ import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
-import { 
-  BurningAddresses, 
-  CEXAddresses, 
-  DEXAddresses, 
-  LendingAddresses, 
-  TREASURY_ADDRESSES 
+import {
+  BurningAddresses,
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+  TREASURY_ADDRESSES,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
@@ -95,13 +95,16 @@ export const createOrUpdateTransaction = async (
   // Determine flags
   const isCex = cexAddresses.includes(from) || cexAddresses.includes(to);
   const isDex = dexAddresses.includes(from) || dexAddresses.includes(to);
-  const isLending = lendingAddresses.includes(from) || lendingAddresses.includes(to);
-  const isTreasury = treasuryAddresses.includes(from) || treasuryAddresses.includes(to);
-  const isBurning = burningAddresses.includes(from) || burningAddresses.includes(to);
-  
+  const isLending =
+    lendingAddresses.includes(from) || lendingAddresses.includes(to);
+  const isTreasury =
+    treasuryAddresses.includes(from) || treasuryAddresses.includes(to);
+  const isBurning =
+    burningAddresses.includes(from) || burningAddresses.includes(to);
+
   // Determine isTotal flag - true if it's a burning transaction (affects total supply)
   const isTotal = isBurning;
-  
+
   // Determine isCirculating flag - true if it affects circulating supply
   // Circulating supply is affected by treasury and burning transactions
   const isCirculating = isTreasury || isBurning;
