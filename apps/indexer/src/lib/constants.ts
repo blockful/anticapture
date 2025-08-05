@@ -295,6 +295,17 @@ export const BurningAddresses: Record<
   },
 };
 
+export enum ProposalStatus {
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  CANCELED = "CANCELED",
+  DEFEATED = "DEFEATED",
+  SUCCEEDED = "SUCCEEDED",
+  QUEUED = "QUEUED",
+  EXPIRED = "EXPIRED",
+  EXECUTED = "EXECUTED",
+}
+
 export enum MetricTypesEnum {
   TOTAL_SUPPLY = "TOTAL_SUPPLY",
   DELEGATED_SUPPLY = "DELEGATED_SUPPLY",

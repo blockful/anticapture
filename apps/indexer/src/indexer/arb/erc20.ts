@@ -26,7 +26,7 @@ export function ARBTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
 }

@@ -29,7 +29,7 @@ export const delegateChanged = async (
     timestamp: bigint;
     transactionFrom: Address | null;
     transactionTo: Address | null;
-    logIndex: bigint;
+    logIndex: number;
   },
 ) => {
   const {
@@ -122,7 +122,7 @@ export const delegatedVotesChanged = async (
     timestamp: bigint;
     transactionFrom: Address | null;
     transactionTo: Address | null;
-    logIndex: bigint;
+    logIndex: number;
   },
 ) => {
   const {
@@ -134,6 +134,7 @@ export const delegatedVotesChanged = async (
     tokenId,
     transactionFrom,
     transactionTo,
+    logIndex,
   } = args;
 
   await ensureAccountExists(context, delegate);
@@ -149,7 +150,6 @@ export const delegatedVotesChanged = async (
     timestamp,
   );
 
-  const delta = newBalance - oldBalance;
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -157,9 +157,9 @@ export const delegatedVotesChanged = async (
       transactionHash: txHash,
       accountId: delegate,
       votingPower: newBalance,
-      delta,
+      delta: newBalance - oldBalance,
       timestamp,
-      deltaMod: delta < 0n ? -delta : delta, // non-negative value
+      logIndex: logIndex - 1,
     })
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,

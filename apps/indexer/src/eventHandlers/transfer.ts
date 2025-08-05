@@ -149,7 +149,7 @@ export const tokenTransfer = async (
     timestamp: bigint;
     transactionFrom: Address | null;
     transactionTo: Address | null;
-    logIndex: bigint;
+    logIndex: number;
   },
 ) => {
   const {

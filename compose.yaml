@@ -21,7 +21,6 @@ services:
     command:
       ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
-      - DATABASE_URL=postgres://postgres:admin@indexer-db:5432/postgres
       - DAO_ID=ENS
       - NETWORK=anvil
       - RPC_URL=http://contracts:8545

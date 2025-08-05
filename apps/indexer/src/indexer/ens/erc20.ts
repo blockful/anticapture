@@ -30,9 +30,10 @@ export function ENSTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
+
   ponder.on(`ENSToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
@@ -43,7 +44,7 @@ export function ENSTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
 
@@ -57,7 +58,7 @@ export function ENSTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
 }

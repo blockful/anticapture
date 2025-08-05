@@ -283,14 +283,14 @@ importers:
         specifier: ^0.31.4
         version: 0.31.4
       drizzle-orm:
-        specifier: ^0.44.3
-        version: 0.44.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.4)(kysely@0.26.3)(pg@8.16.3)
+        specifier: ~0.41.0
+        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.4)(kysely@0.26.3)(pg@8.16.3)
       hono:
         specifier: ^4.7.10
         version: 4.8.5
       ponder:
-        specifier: ^0.11.38
-        version: 0.11.38(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        specifier: ^0.11.40
+        version: 0.11.40(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       viem:
         specifier: ^2.29.4
         version: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -9128,101 +9128,6 @@ packages:
       sqlite3:
         optional: true
 
-  drizzle-orm@0.44.3:
-    resolution:
-      {
-        integrity: sha512-8nIiYQxOpgUicEL04YFojJmvC4DNO4KoyXsEIqN44+g6gNBr6hmVpWk3uyAt4CaTiRGDwoU+alfqNNeonLAFOQ==,
-      }
-    peerDependencies:
-      "@aws-sdk/client-rds-data": ">=3"
-      "@cloudflare/workers-types": ">=4"
-      "@electric-sql/pglite": ">=0.2.0"
-      "@libsql/client": ">=0.10.0"
-      "@libsql/client-wasm": ">=0.10.0"
-      "@neondatabase/serverless": ">=0.10.0"
-      "@op-engineering/op-sqlite": ">=2"
-      "@opentelemetry/api": ^1.4.1
-      "@planetscale/database": ">=1.13"
-      "@prisma/client": "*"
-      "@tidbcloud/serverless": "*"
-      "@types/better-sqlite3": "*"
-      "@types/pg": "*"
-      "@types/sql.js": "*"
-      "@upstash/redis": ">=1.34.7"
-      "@vercel/postgres": ">=0.8.0"
-      "@xata.io/client": "*"
-      better-sqlite3: ">=7"
-      bun-types: "*"
-      expo-sqlite: ">=14.0.0"
-      gel: ">=2"
-      knex: "*"
-      kysely: "*"
-      mysql2: ">=2"
-      pg: ">=8"
-      postgres: ">=3"
-      prisma: "*"
-      sql.js: ">=1"
-      sqlite3: ">=5"
-    peerDependenciesMeta:
-      "@aws-sdk/client-rds-data":
-        optional: true
-      "@cloudflare/workers-types":
-        optional: true
-      "@electric-sql/pglite":
-        optional: true
-      "@libsql/client":
-        optional: true
-      "@libsql/client-wasm":
-        optional: true
-      "@neondatabase/serverless":
-        optional: true
-      "@op-engineering/op-sqlite":
-        optional: true
-      "@opentelemetry/api":
-        optional: true
-      "@planetscale/database":
-        optional: true
-      "@prisma/client":
-        optional: true
-      "@tidbcloud/serverless":
-        optional: true
-      "@types/better-sqlite3":
-        optional: true
-      "@types/pg":
-        optional: true
-      "@types/sql.js":
-        optional: true
-      "@upstash/redis":
-        optional: true
-      "@vercel/postgres":
-        optional: true
-      "@xata.io/client":
-        optional: true
-      better-sqlite3:
-        optional: true
-      bun-types:
-        optional: true
-      expo-sqlite:
-        optional: true
-      gel:
-        optional: true
-      knex:
-        optional: true
-      kysely:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      postgres:
-        optional: true
-      prisma:
-        optional: true
-      sql.js:
-        optional: true
-      sqlite3:
-        optional: true
-
   dset@3.1.4:
     resolution:
       {
@@ -13386,10 +13291,10 @@ packages:
       }
     engines: { node: ">=10" }
 
-  ponder@0.11.38:
+  ponder@0.11.40:
     resolution:
       {
-        integrity: sha512-cfyEOAr8EwDEBeNADY8wkGptTZf46Rs9MAoFVJ0GW667KCeHVvlGGJNikJGvvJgRd2ybMEe3hXyHcsgVufZBIw==,
+        integrity: sha512-E00KQmcu37UrGleg8CFDDY9/eRkDqt0jH0ZBKesPjxcp5lDAf5PO38G6lMwkbqi7pW4i3KC6qJpMaZVt2daONQ==,
       }
     engines: { node: ">=18.14" }
     hasBin: true
@@ -24016,14 +23921,6 @@ snapshots:
       kysely: 0.26.3
       pg: 8.16.3
 
-  drizzle-orm@0.44.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.4)(kysely@0.26.3)(pg@8.16.3):
-    optionalDependencies:
-      "@electric-sql/pglite": 0.2.13
-      "@opentelemetry/api": 1.9.0
-      "@types/pg": 8.15.4
-      kysely: 0.26.3
-      pg: 8.16.3
-
   dset@3.1.4: {}
 
   dunder-proto@1.0.1:
@@ -26946,7 +26843,7 @@ snapshots:
     dependencies:
       "@babel/runtime": 7.27.6
 
-  ponder@0.11.38(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  ponder@0.11.40(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
     dependencies:
       "@babel/code-frame": 7.27.1
       "@commander-js/extra-typings": 12.1.0(commander@12.1.0)

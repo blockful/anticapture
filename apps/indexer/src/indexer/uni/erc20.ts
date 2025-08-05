@@ -30,7 +30,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
   ponder.on(`UNIToken:DelegateChanged`, async ({ event, context }) => {
@@ -43,7 +43,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
 
@@ -57,7 +57,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
       transactionTo: event.transaction.to,
-      logIndex: BigInt(event.log.logIndex),
+      logIndex: event.log.logIndex,
     });
   });
 }

@@ -1,22 +1,23 @@
 const daoItemQueries = [
-  'compareActiveSupply',
-  'compareAverageTurnout',
-  'compareCexSupply',
-  'compareCirculatingSupply',
-  'compareDelegatedSupply',
-  'compareDexSupply',
-  'compareLendingSupply',
-  'compareProposals',
-  'compareTotalSupply',
-  'compareTreasury',
-  'compareVotes',
-  'getTotalAssets',
-  'getVotingPower',
-  'historicalTokenData',
-  'proposalsActivity',
-  'historicalBalances',
-  'historicalVotingPower',
-  'getTransactions',
+  "compareActiveSupply",
+  "compareAverageTurnout",
+  "compareCexSupply",
+  "compareCirculatingSupply",
+  "compareDelegatedSupply",
+  "compareDexSupply",
+  "compareLendingSupply",
+  "compareProposals",
+  "compareTotalSupply",
+  "compareTreasury",
+  "compareVotes",
+  "getTotalAssets",
+  "getVotingPower",
+  "historicalTokenData",
+  "proposalsActivity",
+  "historicalBalances",
+  "historicalVotingPower",
+  "proposals",
+  "getTransactions",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
@@ -26,7 +27,12 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
         daoId
       }
     `,
-    resolve: async (root: any, args: any, context: any, info) => {
+    resolve: async (
+      root: unknown,
+      args: { daoId?: string },
+      context: { headers: { "anticapture-dao-id"?: string } },
+      info: unknown,
+    ) => {
       const daoId = args.daoId || context.headers["anticapture-dao-id"];
 
       if (!daoId) {
@@ -34,12 +40,11 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
       }
 
       const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
-      if (!targetClient || typeof targetClient[fieldName] !== 'function') {
-        return {}
+      if (!targetClient || typeof targetClient[fieldName] !== "function") {
+        return {};
       }
 
       try {
-        
         return targetClient[fieldName]({
           root,
           args,

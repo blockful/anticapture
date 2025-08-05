@@ -5,3 +5,4 @@ export { proposalsActivity } from "./proposals-activity.controller";
 export { assets } from "./assets.controller";
 export { historicalOnchain } from "./historical-onchain.controller";
 export { transactions } from "./transactions.controller";
+export { proposals } from "./proposals";
