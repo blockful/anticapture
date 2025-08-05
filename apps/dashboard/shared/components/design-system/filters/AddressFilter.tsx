@@ -57,7 +57,7 @@ export function AddressFilter({
             className,
           )}
         >
-          <Filter className="h-3.5 w-3.5 text-gray-400" />
+          <Filter className="size-3.5 text-gray-400" />
         </button>
       </PopoverTrigger>
       <PopoverContent
