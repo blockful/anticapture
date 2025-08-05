@@ -25,10 +25,18 @@ export const delegateChanged = async (
     fromDelegate: Address;
     txHash: Hex;
     timestamp: bigint;
+    logIndex: number;
   },
 ) => {
-  const { delegator, toDelegate, tokenId, txHash, fromDelegate, timestamp } =
-    args;
+  const {
+    delegator,
+    toDelegate,
+    tokenId,
+    txHash,
+    fromDelegate,
+    timestamp,
+    logIndex,
+  } = args;
 
   // Ensure all required accounts exist in parallel
   await ensureAccountsExist(context, [delegator, toDelegate]);
@@ -47,6 +55,7 @@ export const delegateChanged = async (
     delegatedValue: delegatorBalance?.balance ?? BigInt(0),
     previousDelegate: fromDelegate,
     timestamp,
+    logIndex,
   });
 
   // Update the delegator's delegate
@@ -94,13 +103,21 @@ export const delegatedVotesChanged = async (
     newBalance: bigint;
     oldBalance: bigint;
     timestamp: bigint;
+    logIndex: number;
   },
 ) => {
-  const { delegate, txHash, newBalance, oldBalance, timestamp, tokenId } = args;
+  const {
+    delegate,
+    txHash,
+    newBalance,
+    oldBalance,
+    timestamp,
+    tokenId,
+    logIndex,
+  } = args;
 
   await ensureAccountExists(context, delegate);
 
-  const delta = newBalance - oldBalance;
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -108,9 +125,9 @@ export const delegatedVotesChanged = async (
       transactionHash: txHash,
       accountId: delegate,
       votingPower: newBalance,
-      delta,
+      delta: newBalance - oldBalance,
       timestamp,
-      deltaMod: delta < 0n ? -delta : delta, // non-negative value
+      logIndex: logIndex - 1,
     })
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,

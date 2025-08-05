@@ -1,16 +1,16 @@
 import { ponder } from "ponder:registry";
 
 import {
-  proposalCanceled,
+  updateProposalStatus,
   proposalCreated,
-  proposalExecuted,
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { Governor } from "@/interfaces/governor";
+import { DAOClient } from "@/interfaces/client";
 import { dao } from "ponder:schema";
+import { ProposalStatus } from "@/lib/constants";
 
-export function GovernorIndexer(governor: Governor) {
+export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.ENS;
 
   ponder.on(`ENSGovernor:setup`, async ({ context }) => {
@@ -21,11 +21,11 @@ export function GovernorIndexer(governor: Governor) {
       timelockDelay,
       proposalThreshold,
     ] = await Promise.all([
-      governor.getVotingPeriod(),
-      governor.getQuorum(),
-      governor.getVotingDelay(),
-      governor.getTimelockDelay(),
-      governor.getProposalThreshold(),
+      client.getVotingPeriod(),
+      client.getQuorum(null),
+      client.getVotingDelay(),
+      client.getTimelockDelay(),
+      client.getProposalThreshold(),
     ]);
 
     await context.db.insert(dao).values({
@@ -51,8 +51,9 @@ export function GovernorIndexer(governor: Governor) {
   });
 
   ponder.on(`ENSGovernor:ProposalCreated`, async ({ event, context }) => {
-    await proposalCreated(context, daoId, {
+    await proposalCreated(context, daoId, blockTime, {
       proposalId: event.args.proposalId.toString(),
+      txHash: event.transaction.hash,
       proposer: event.args.proposer,
       targets: [...event.args.targets],
       values: [...event.args.values],
@@ -66,10 +67,26 @@ export function GovernorIndexer(governor: Governor) {
   });
 
   ponder.on(`ENSGovernor:ProposalCanceled`, async ({ event, context }) => {
-    await proposalCanceled(context, event.args.proposalId.toString());
+    await updateProposalStatus(
+      context,
+      event.args.proposalId.toString(),
+      ProposalStatus.CANCELED,
+    );
   });
 
   ponder.on(`ENSGovernor:ProposalExecuted`, async ({ event, context }) => {
-    await proposalExecuted(context, event.args.proposalId.toString());
+    await updateProposalStatus(
+      context,
+      event.args.proposalId.toString(),
+      ProposalStatus.EXECUTED,
+    );
+  });
+
+  ponder.on(`ENSGovernor:ProposalQueued`, async ({ event, context }) => {
+    await updateProposalStatus(
+      context,
+      event.args.proposalId.toString(),
+      ProposalStatus.QUEUED,
+    );
   });
 }
