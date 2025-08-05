@@ -305,7 +305,7 @@ export const TokenHolders = ({
         <TheTable
           columns={tokenHoldersColumns}
           data={
-            Array.from({ length: 10 }, (_, i) => ({
+            Array.from({ length: 10 }, () => ({
               address: `0x${"0".repeat(40)}` as Address,
               type: "EOA" as string | undefined,
               balance: 0,
@@ -353,7 +353,7 @@ export const TokenHolders = ({
                             getIsSorted: () => false,
                             toggleSorting: () => {},
                           },
-                        } as any)
+                        } as Parameters<typeof column.header>[0])
                       : column.header}
                   </th>
                 ))}
