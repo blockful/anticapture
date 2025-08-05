@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, RotateCcw } from "lucide-react";
+import { Filter } from "lucide-react";
 import { isAddress } from "viem";
 import {
   Popover,
@@ -10,7 +10,8 @@ import {
 } from "@/shared/components/ui/popover";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
-import SearchField from "../SearchField";
+import SearchField from "@/shared/components/design-system/SearchField";
+import { ResetIcon } from "@radix-ui/react-icons";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
@@ -51,7 +52,7 @@ export function AddressFilter({
         <button
           aria-label="Filter by address"
           className={cn(
-            "hover:bg-surface-contrast flex items-center justify-center rounded border border-gray-600 p-1 transition-colors",
+            "hover:bg-surface-contrast flex items-center justify-center rounded border border-gray-600 p-1 transition-colors hover:cursor-pointer",
             currentFilter && "border-blue-500 bg-blue-500/10",
             className,
           )}
@@ -71,17 +72,17 @@ export function AddressFilter({
         <div className="flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-600 px-4 py-3">
-            <span className="text-sm font-medium text-gray-300">
+            <span className="font-mono text-sm font-medium text-gray-300">
               SEARCH ADDRESS
             </span>
             <Button
               onClick={handleReset}
               variant="ghost"
               size="sm"
-              className="h-auto p-1 text-gray-400 hover:text-white"
+              className="flex h-auto items-center justify-center p-1 text-gray-400 hover:text-white"
             >
-              <RotateCcw className="h-4 w-4" />
-              <span className="ml-1 text-xs">RESET</span>
+              <ResetIcon className="h-4 w-4" />
+              <span className="ml-1 font-mono text-xs">RESET</span>
             </Button>
           </div>
 
