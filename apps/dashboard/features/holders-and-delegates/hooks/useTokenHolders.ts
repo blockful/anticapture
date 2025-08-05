@@ -80,7 +80,7 @@ export const useTokenHolders = ({
       before: undefined,
       limit,
       orderDirection,
-      addresses,
+      ...(addresses && addresses.length > 0 && { addresses }),
     },
     context: {
       headers: {
@@ -106,7 +106,7 @@ export const useTokenHolders = ({
       before: undefined,
       limit,
       orderDirection,
-      addresses,
+      ...(addresses && addresses.length > 0 && { addresses }),
     });
   }, [orderBy, orderDirection, limit, refetch, addresses]);
 
@@ -168,7 +168,7 @@ export const useTokenHolders = ({
           before: undefined,
           limit,
           orderDirection,
-          addresses,
+          ...(addresses && addresses.length > 0 && { addresses }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -221,7 +221,7 @@ export const useTokenHolders = ({
           before: pagination.startCursor,
           limit,
           orderDirection,
-          addresses,
+          ...(addresses && addresses.length > 0 && { addresses }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;

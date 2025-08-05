@@ -97,7 +97,7 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
-      addresses,
+      ...(addresses && addresses.length > 0 && { addresses }),
     },
     context: {
       headers: {
@@ -123,7 +123,7 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
-      addresses,
+      ...(addresses && addresses.length > 0 && { addresses }),
     });
   }, [orderBy, orderDirection, addresses, refetch]);
 
@@ -298,7 +298,7 @@ export const useDelegates = ({
           before: undefined,
           orderBy,
           orderDirection,
-          addresses,
+          ...(addresses && addresses.length > 0 && { addresses }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -351,7 +351,7 @@ export const useDelegates = ({
           before: pagination.startCursor,
           orderBy,
           orderDirection,
-          addresses,
+          ...(addresses && addresses.length > 0 && { addresses }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -392,7 +392,7 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
-      addresses,
+      ...(addresses && addresses.length > 0 && { addresses }),
     });
   }, [refetch, orderBy, orderDirection, addresses]);
 
