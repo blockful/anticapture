@@ -81,7 +81,7 @@ export function AddressFilter({
               size="sm"
               className="flex h-auto items-center justify-center p-1 text-gray-400 hover:text-white"
             >
-              <ResetIcon className="h-4 w-4" />
+              <ResetIcon className="size-4" />
               <span className="ml-1 font-mono text-xs">RESET</span>
             </Button>
           </div>
