@@ -1,7 +1,6 @@
 import { and, asc, desc, eq, gte, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain } from "ponder:schema";
-import { SQL } from "drizzle-orm";
 
 import {
   ActiveSupplyQueryResult,
@@ -12,6 +11,7 @@ import {
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
 import { ProposalStatus } from "@/lib/constants";
+import { SQLWrapper } from "drizzle-orm";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -114,7 +114,7 @@ export class DrizzleRepository {
     status: string | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]> {
-    const whereClauses: SQL<unknown>[] = [];
+    const whereClauses: ReturnType<typeof eq>[] = [];
     if (status) {
       // the following statuses are not handled by the indexing process
       // being stored as "PENDING" in the database to be further processed
