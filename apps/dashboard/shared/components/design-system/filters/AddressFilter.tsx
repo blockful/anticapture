@@ -10,6 +10,7 @@ import {
 } from "@/shared/components/ui/popover";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
+import SearchField from "../SearchField";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
@@ -64,7 +65,7 @@ export function AddressFilter({
         sideOffset={8}
         avoidCollisions={true}
         className={cn(
-          "border-light-dark bg-surface-default z-50 w-80 rounded-lg border p-0 shadow-lg",
+          "border-light-dark bg-surface-contrast z-50 w-80 rounded-lg border p-0 shadow-lg",
         )}
       >
         <div className="flex flex-col">
@@ -86,14 +87,12 @@ export function AddressFilter({
 
           {/* Input Section */}
           <div className="p-4">
-            <input
-              type="text"
-              placeholder="Paste the address"
+            <SearchField
+              placeholder="Search by address"
               value={tempAddress}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setTempAddress(e.target.value)
               }
-              className="bg-surface-background w-full rounded-md border border-gray-600 px-3 py-2 text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             {tempAddress.trim() && !isValidAddress && (
               <p className="mt-2 text-xs text-red-400">
