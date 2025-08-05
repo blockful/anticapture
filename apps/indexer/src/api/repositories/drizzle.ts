@@ -11,6 +11,7 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
+import { ProposalStatus } from "@/lib/constants";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -118,11 +119,11 @@ export class DrizzleRepository {
       // the following statuses are not handled by the indexing process
       // being stored as "PENDING" in the database to be further processed
       if (
-        status === "ACTIVE" ||
-        status === "DEFEATED" ||
-        status === "SUCCEEDED"
+        status === ProposalStatus.ACTIVE ||
+        status === ProposalStatus.DEFEATED ||
+        status === ProposalStatus.SUCCEEDED
       ) {
-        whereClauses.push(eq(proposalsOnchain.status, "PENDING"));
+        whereClauses.push(eq(proposalsOnchain.status, ProposalStatus.PENDING));
       } else {
         whereClauses.push(eq(proposalsOnchain.status, status));
       }
