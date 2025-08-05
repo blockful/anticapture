@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { Filter } from "lucide-react";
 import { isAddress } from "viem";
 import {
@@ -91,7 +91,7 @@ export function AddressFilter({
             <SearchField
               placeholder="Search by address"
               value={tempAddress}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setTempAddress(e.target.value)
               }
             />
