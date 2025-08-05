@@ -68,7 +68,6 @@ jobs:
   deploy-indexers:
     needs: [get-daos, changes, environment]
     runs-on: ubuntu-latest
-    if: ${{ needs.changes.outputs.api == 'true' }}
     container: ghcr.io/railwayapp/cli:latest
     environment: ${{ needs.environment.outputs.environment }}
     strategy:
@@ -78,18 +77,21 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
+      - name: Prune DB inactive schemas
+        if: ${{ needs.changes.outputs.indexer == 'true' }}
+        run: |
+          pnpm indexer db:list
+          pnpm indexer db:prune
       - name: Deploy ${{ matrix.dao }}-indexer
+        if: ${{ needs.changes.outputs.indexer == 'true' }}
         run: |
           echo "Deploying ${{ matrix.dao }}-indexer to ${{ needs.environment.outputs.environment }}"
           railway up -s ${{ matrix.dao }}-indexer -e ${{ needs.environment.outputs.environment }} --ci -d
       - name: Deploy ${{ matrix.dao }}-api
+        if: ${{ needs.changes.outputs.api == 'true' }}
         run: |
           echo "Deploying ${{ matrix.dao }}-api to ${{ needs.environment.outputs.environment }}"
           railway up -s ${{ matrix.dao }}-api -e ${{ needs.environment.outputs.environment }} --ci
-      - name: Prune DB inactive schemas
-        run: |
-          pnpm indexer db:list
-          pnpm indexer db:prune
 
   deploy-api-gateway:
     needs: [deploy-indexers, changes, environment]
