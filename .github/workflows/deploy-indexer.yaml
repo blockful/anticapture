@@ -89,7 +89,7 @@ jobs:
           railway up -s ${{ matrix.dao }}-api -e ${{ needs.environment.outputs.environment }} --ci
 
   deploy-api-gateway:
-    needs: [deploy-indexers, environment]
+    needs: [deploy-indexers, changes, environment]
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     environment: ${{ needs.environment.outputs.environment }}
