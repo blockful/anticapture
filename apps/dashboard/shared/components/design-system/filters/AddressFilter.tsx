@@ -60,7 +60,7 @@ export function AddressFilter({
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
-        align="end"
+        align="start"
         sideOffset={8}
         avoidCollisions={true}
         className={cn(

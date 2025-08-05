@@ -145,7 +145,7 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-between px-2">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
