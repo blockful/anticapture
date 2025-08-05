@@ -43,6 +43,7 @@ interface UseTokenHoldersParams {
   orderBy?: string;
   orderDirection?: string;
   limit?: number;
+  addresses?: string[];
 }
 
 export const useTokenHolders = ({
@@ -50,6 +51,7 @@ export const useTokenHolders = ({
   orderBy = "balance",
   orderDirection = "desc",
   limit = 10,
+  addresses,
 }: UseTokenHoldersParams): UseTokenHoldersResult => {
   const itemsPerPage = limit;
 
@@ -63,7 +65,7 @@ export const useTokenHolders = ({
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection]);
+  }, [orderBy, orderDirection, addresses]);
 
   const {
     data: tokenHoldersData,
@@ -78,6 +80,7 @@ export const useTokenHolders = ({
       before: undefined,
       limit,
       orderDirection,
+      addresses,
     },
     context: {
       headers: {
@@ -103,8 +106,9 @@ export const useTokenHolders = ({
       before: undefined,
       limit,
       orderDirection,
+      addresses,
     });
-  }, [orderBy, orderDirection, limit, refetch]);
+  }, [orderBy, orderDirection, limit, refetch, addresses]);
 
   const processedData = useMemo(() => {
     if (!tokenHoldersData?.accountBalances?.items) return null;
@@ -164,6 +168,7 @@ export const useTokenHolders = ({
           before: undefined,
           limit,
           orderDirection,
+          addresses,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -192,6 +197,7 @@ export const useTokenHolders = ({
     pagination.endCursor,
     limit,
     orderDirection,
+    addresses,
     isPaginationLoading,
   ]);
 
@@ -215,6 +221,7 @@ export const useTokenHolders = ({
           before: pagination.startCursor,
           limit,
           orderDirection,
+          addresses,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -243,6 +250,7 @@ export const useTokenHolders = ({
     pagination.startCursor,
     limit,
     orderDirection,
+    addresses,
     isPaginationLoading,
   ]);
 
