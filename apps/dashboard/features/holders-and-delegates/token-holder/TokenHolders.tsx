@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address, formatUnits } from "viem";
+import { Address, formatUnits, zeroAddress } from "viem";
 import { Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -40,12 +40,6 @@ export const TokenHolders = ({
   const pageLimit: number = 10;
   const { isMobile } = useScreenSize();
 
-  // Parse and validate single address from the filter
-  const filteredAddresses = useMemo(() => {
-    if (!currentAddressFilter.trim()) return undefined;
-    return [currentAddressFilter];
-  }, [currentAddressFilter]);
-
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
   };
@@ -62,7 +56,7 @@ export const TokenHolders = ({
     daoId: daoId,
     limit: pageLimit,
     orderDirection: sortOrder,
-    addresses: filteredAddresses,
+    address: currentAddressFilter,
   });
 
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
@@ -326,11 +320,11 @@ export const TokenHolders = ({
               columns={tokenHoldersColumns}
               data={
                 Array.from({ length: 10 }, () => ({
-                  address: `0x${"0".repeat(40)}` as Address,
+                  address: zeroAddress,
                   type: "EOA" as string | undefined,
                   balance: 0,
                   variation: { percentageChange: 0, absoluteChange: 0 },
-                  delegate: `0x${"0".repeat(40)}` as Address,
+                  delegate: zeroAddress,
                 })) as TokenHolderTableData[]
               }
               withSorting={true}

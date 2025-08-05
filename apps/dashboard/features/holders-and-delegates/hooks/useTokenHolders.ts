@@ -43,7 +43,7 @@ interface UseTokenHoldersParams {
   orderBy?: string;
   orderDirection?: string;
   limit?: number;
-  addresses?: string[];
+  address?: string;
 }
 
 export const useTokenHolders = ({
@@ -51,7 +51,7 @@ export const useTokenHolders = ({
   orderBy = "balance",
   orderDirection = "desc",
   limit = 10,
-  addresses,
+  address,
 }: UseTokenHoldersParams): UseTokenHoldersResult => {
   const itemsPerPage = limit;
 
@@ -65,7 +65,7 @@ export const useTokenHolders = ({
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection, addresses]);
+  }, [orderBy, orderDirection, address]);
 
   const {
     data: tokenHoldersData,
@@ -80,7 +80,7 @@ export const useTokenHolders = ({
       before: undefined,
       limit,
       orderDirection,
-      ...(addresses && addresses.length > 0 && { addresses }),
+      ...(address && { addresses: [address] }),
     },
     context: {
       headers: {
@@ -106,9 +106,9 @@ export const useTokenHolders = ({
       before: undefined,
       limit,
       orderDirection,
-      ...(addresses && addresses.length > 0 && { addresses }),
+      ...(address && { addresses: [address] }),
     });
-  }, [orderBy, orderDirection, limit, refetch, addresses]);
+  }, [orderBy, orderDirection, limit, refetch, address]);
 
   const processedData = useMemo(() => {
     if (!tokenHoldersData?.accountBalances?.items) return null;
@@ -168,7 +168,7 @@ export const useTokenHolders = ({
           before: undefined,
           limit,
           orderDirection,
-          ...(addresses && addresses.length > 0 && { addresses }),
+          ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -197,7 +197,7 @@ export const useTokenHolders = ({
     pagination.endCursor,
     limit,
     orderDirection,
-    addresses,
+    address,
     isPaginationLoading,
   ]);
 
@@ -221,7 +221,7 @@ export const useTokenHolders = ({
           before: pagination.startCursor,
           limit,
           orderDirection,
-          ...(addresses && addresses.length > 0 && { addresses }),
+          ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -250,7 +250,7 @@ export const useTokenHolders = ({
     pagination.startCursor,
     limit,
     orderDirection,
-    addresses,
+    address,
     isPaginationLoading,
   ]);
 
