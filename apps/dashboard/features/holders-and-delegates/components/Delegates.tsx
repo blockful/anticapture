@@ -70,12 +70,6 @@ export const Delegates = ({
   // State for address filtering
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
 
-  // Parse and validate single address from the filter
-  const filteredAddresses = useMemo(() => {
-    if (!currentAddressFilter.trim()) return undefined;
-    return [currentAddressFilter];
-  }, [currentAddressFilter]);
-
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
   };
@@ -101,7 +95,7 @@ export const Delegates = ({
     orderDirection: sortDirection,
     daoId,
     days: timePeriod,
-    addresses: filteredAddresses,
+    address: currentAddressFilter,
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);

@@ -17,7 +17,7 @@ interface ProposalsActivity {
 }
 
 interface Delegate {
-  votingPower: any;
+  votingPower: bigint;
   delegationsCount: number;
   accountId: string;
   proposalsActivity?: ProposalsActivity;
@@ -54,7 +54,7 @@ interface UseDelegatesParams {
   orderBy?: string;
   orderDirection?: string;
   days: TimeInterval;
-  addresses?: string[];
+  address?: string;
 }
 
 export const useDelegates = ({
@@ -63,7 +63,7 @@ export const useDelegates = ({
   orderBy = "votingPower",
   orderDirection = "desc",
   days,
-  addresses,
+  address,
 }: UseDelegatesParams): UseDelegatesResult => {
   const itemsPerPage = 10; // This should match the limit in the GraphQL query
 
@@ -82,7 +82,7 @@ export const useDelegates = ({
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection, addresses]);
+  }, [orderBy, orderDirection, address]);
 
   const {
     data: delegatesData,
@@ -97,7 +97,7 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
-      ...(addresses && addresses.length > 0 && { addresses }),
+      ...(address && { addresses: [address] }),
     },
     context: {
       headers: {
@@ -123,9 +123,9 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
-      ...(addresses && addresses.length > 0 && { addresses }),
+      ...(address && { addresses: [address] }),
     });
-  }, [orderBy, orderDirection, addresses, refetch]);
+  }, [orderBy, orderDirection, address, refetch]);
 
   const delegateAddresses = useMemo(() => {
     return (
@@ -298,7 +298,7 @@ export const useDelegates = ({
           before: undefined,
           orderBy,
           orderDirection,
-          ...(addresses && addresses.length > 0 && { addresses }),
+          ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -327,7 +327,7 @@ export const useDelegates = ({
     pagination.endCursor,
     orderBy,
     orderDirection,
-    addresses,
+    address,
     isPaginationLoading,
   ]);
 
@@ -351,7 +351,7 @@ export const useDelegates = ({
           before: pagination.startCursor,
           orderBy,
           orderDirection,
-          ...(addresses && addresses.length > 0 && { addresses }),
+          ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -380,7 +380,7 @@ export const useDelegates = ({
     pagination.startCursor,
     orderBy,
     orderDirection,
-    addresses,
+    address,
     isPaginationLoading,
   ]);
 
@@ -392,9 +392,9 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
-      ...(addresses && addresses.length > 0 && { addresses }),
+      ...(address && { addresses: [address] }),
     });
-  }, [refetch, orderBy, orderDirection, addresses]);
+  }, [refetch, orderBy, orderDirection, address]);
 
   return {
     data: finalData,
