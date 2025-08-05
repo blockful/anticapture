@@ -11,7 +11,6 @@ import {
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
 import { ProposalStatus } from "@/lib/constants";
-import { SQLWrapper } from "drizzle-orm";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
