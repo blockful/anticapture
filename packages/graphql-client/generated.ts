@@ -1975,6 +1975,7 @@ export type GetDelegatesQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
+  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
 
@@ -2768,14 +2769,14 @@ export type GetDelegateDelegationHistoryGraphLazyQueryHookResult = ReturnType<ty
 export type GetDelegateDelegationHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphSuspenseQuery>;
 export type GetDelegateDelegationHistoryGraphQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>;
 export const GetDelegatesDocument = gql`
-    query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
+    query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc", $addresses: [String]) {
   accountPowers(
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: 10
     after: $after
     before: $before
-    where: {votingPower_gt: 0}
+    where: {votingPower_gt: 0, accountId_in: $addresses}
   ) {
     items {
       votingPower
@@ -2808,6 +2809,7 @@ export const GetDelegatesDocument = gql`
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
+ *      addresses: // value for 'addresses'
  *   },
  * });
  */

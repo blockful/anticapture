@@ -17,6 +17,7 @@ import { ProgressCircle } from "@/features/holders-and-delegates/components/Prog
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
+import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 
 interface DelegateTableData {
   address: string;
@@ -66,6 +67,19 @@ export const Delegates = ({
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
+  // State for address filtering
+  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+
+  // Parse and validate single address from the filter
+  const filteredAddresses = useMemo(() => {
+    if (!currentAddressFilter.trim()) return undefined;
+    return [currentAddressFilter];
+  }, [currentAddressFilter]);
+
+  const handleAddressFilterApply = (address: string | undefined) => {
+    setCurrentAddressFilter(address || "");
+  };
+
   // Calculate time-based parameters
   const fromDate = useMemo(
     () => getTimeDataFromPeriod(timePeriod),
@@ -87,6 +101,7 @@ export const Delegates = ({
     orderDirection: sortDirection,
     daoId,
     days: timePeriod,
+    addresses: filteredAddresses,
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
@@ -210,9 +225,14 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-2">
-          Address
-        </h4>
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <span>Address</span>
+          <AddressFilter
+            onApply={handleAddressFilterApply}
+            currentFilter={currentAddressFilter}
+            className="ml-2"
+          />
+        </div>
       ),
     },
     {
