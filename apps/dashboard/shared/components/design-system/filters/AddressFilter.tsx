@@ -103,7 +103,7 @@ export function AddressFilter({
           aria-label="Filter by address"
           className={cn(
             "hover:bg-surface-contrast flex items-center justify-center rounded border border-gray-600 p-1 transition-colors hover:cursor-pointer",
-            currentFilter && "border-tangerine bg-blue-500/10",
+            currentFilter && "border-tangerine",
             className,
           )}
         >
