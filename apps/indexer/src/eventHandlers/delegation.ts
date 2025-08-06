@@ -47,16 +47,25 @@ export const delegateChanged = async (
     tokenId,
   });
 
-  await context.db.insert(delegation).values({
-    transactionHash: txHash,
-    daoId,
-    delegateAccountId: toDelegate,
-    delegatorAccountId: delegator,
-    delegatedValue: delegatorBalance?.balance ?? BigInt(0),
-    previousDelegate: fromDelegate,
-    timestamp,
-    logIndex,
-  });
+  if (!delegatorBalance) {
+    throw new Error(`Delegator ${delegator} not found`);
+  }
+
+  await context.db
+    .insert(delegation)
+    .values({
+      transactionHash: txHash,
+      daoId,
+      delegateAccountId: toDelegate,
+      delegatorAccountId: delegator,
+      delegatedValue: delegatorBalance.balance,
+      previousDelegate: fromDelegate,
+      timestamp,
+      logIndex,
+    })
+    .onConflictDoUpdate({
+      delegatedValue: delegatorBalance.balance,
+    });
 
   // Update the delegator's delegate
   await context.db
