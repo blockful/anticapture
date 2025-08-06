@@ -6,13 +6,13 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { TheTable, SkeletonRow, BlankState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { Plus } from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
@@ -485,6 +485,15 @@ export const Delegates = ({
           withSorting={true}
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
           isTableSmall={true}
+          showWhenEmpty={
+            <BlankState
+              variant="default"
+              icon={Inbox}
+              title=""
+              className="h-full rounded-none"
+              description="No addresses found"
+            />
+          }
         />
 
         <Pagination

@@ -5,7 +5,7 @@ import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
-import { Plus } from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -18,6 +18,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
+import { BlankState } from "@/shared/components";
 
 interface TokenHolderTableData {
   address: Address;
@@ -419,6 +420,15 @@ export const TokenHolders = ({
             withSorting={true}
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
+            showWhenEmpty={
+              <BlankState
+                variant="default"
+                icon={Inbox}
+                title=""
+                className="h-full rounded-none"
+                description="No addresses found"
+              />
+            }
           />
           <Pagination
             currentPage={pagination.currentPage}
