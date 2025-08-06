@@ -123,7 +123,7 @@ export function AddressFilter({
         <div className="flex flex-col gap-1 py-1">
           {/* Header */}
           <div className="flex items-center justify-between px-3 py-2">
-            <span className="text-secondary font-mono text-xs font-medium">
+            <span className="text-secondary font-mono text-xs font-medium uppercase">
               SEARCH ADDRESS
             </span>
             <Button
@@ -133,7 +133,7 @@ export function AddressFilter({
               className="text-secondary flex h-auto items-center justify-center p-1 hover:text-white"
             >
               <ResetIcon className="size-4" />
-              <span className="ml-1 font-mono text-xs">RESET</span>
+              <span className="ml-1 font-mono text-xs uppercase">RESET</span>
             </Button>
           </div>
 
