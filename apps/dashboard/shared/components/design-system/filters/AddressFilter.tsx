@@ -116,20 +116,20 @@ export function AddressFilter({
         sideOffset={8}
         avoidCollisions={true}
         className={cn(
-          "border-light-dark bg-surface-contrast z-50 w-80 rounded-lg border p-0 shadow-lg",
+          "border-border-contrast bg-surface-contrast z-50 w-[260px] rounded-lg border p-0 shadow-lg",
         )}
       >
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1 py-1">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-600 px-4 py-3">
-            <span className="font-mono text-sm font-medium text-gray-300">
+          <div className="flex items-center justify-between px-3 py-2">
+            <span className="text-secondary font-mono text-xs font-medium">
               SEARCH ADDRESS
             </span>
             <Button
               onClick={handleReset}
               variant="ghost"
               size="sm"
-              className="flex h-auto items-center justify-center p-1 text-gray-400 hover:text-white"
+              className="text-secondary flex h-auto items-center justify-center p-1 hover:text-white"
             >
               <ResetIcon className="size-4" />
               <span className="ml-1 font-mono text-xs">RESET</span>
@@ -137,7 +137,7 @@ export function AddressFilter({
           </div>
 
           {/* Input Section */}
-          <div className="p-4">
+          <div className="px-3">
             <SearchField
               placeholder="Search by address"
               value={tempAddress}
@@ -157,13 +157,13 @@ export function AddressFilter({
           </div>
 
           {/* Apply Button */}
-          <div className="border-t border-gray-600 p-4">
+          <div className="px-3 py-2">
             <Button
               onClick={handleApply}
               disabled={
                 (tempAddress.trim() !== "" && !isValidAddress) || isResolving
               }
-              className="w-full bg-white text-black hover:bg-gray-200 disabled:bg-gray-600 disabled:text-gray-400"
+              className="h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black hover:bg-gray-200 disabled:bg-gray-600 disabled:text-gray-400"
             >
               {isResolving ? (
                 <>
