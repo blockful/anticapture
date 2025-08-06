@@ -102,12 +102,13 @@ export function AddressFilter({
         <button
           aria-label="Filter by address"
           className={cn(
-            "hover:bg-surface-contrast flex items-center justify-center rounded border border-gray-600 p-1 transition-colors hover:cursor-pointer",
-            currentFilter && "border-tangerine",
+            "group flex cursor-pointer items-center rounded-sm border p-1 transition-colors",
+            "hover:border-highlight bg-surface-hover border-transparent",
+            currentFilter && "border-highlight bg-surface-hover",
             className,
           )}
         >
-          <Filter className="size-3.5 text-gray-400" />
+          <Filter className="text-primary size-3" />
         </button>
       </PopoverTrigger>
       <PopoverContent
