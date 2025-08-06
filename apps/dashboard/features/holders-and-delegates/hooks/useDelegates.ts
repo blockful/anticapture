@@ -17,7 +17,7 @@ interface ProposalsActivity {
 }
 
 interface Delegate {
-  votingPower: bigint;
+  votingPower: string;
   delegationsCount: number;
   accountId: string;
   proposalsActivity?: ProposalsActivity;
