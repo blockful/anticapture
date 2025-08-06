@@ -314,99 +314,95 @@ export const TokenHolders = ({
 
   if (loading) {
     return (
-      <>
-        <div className="w-full text-white">
-          <div className="flex flex-col gap-2">
-            <TheTable
-              columns={tokenHoldersColumns}
-              data={
-                Array.from({ length: 10 }, () => ({
-                  address: zeroAddress,
-                  type: "EOA" as string | undefined,
-                  balance: 0,
-                  variation: { percentageChange: 0, absoluteChange: 0 },
-                  delegate: zeroAddress,
-                })) as TokenHolderTableData[]
-              }
-              withSorting={true}
-              onRowClick={() => {}}
-              isTableSmall={true}
-            />
+      <div className="w-full text-white">
+        <div className="flex flex-col gap-2">
+          <TheTable
+            columns={tokenHoldersColumns}
+            data={
+              Array.from({ length: 10 }, () => ({
+                address: zeroAddress,
+                type: "EOA" as string | undefined,
+                balance: 0,
+                variation: { percentageChange: 0, absoluteChange: 0 },
+                delegate: zeroAddress,
+              })) as TokenHolderTableData[]
+            }
+            withSorting={true}
+            onRowClick={() => {}}
+            isTableSmall={true}
+          />
 
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPrevious={fetchPreviousPage}
-              onNext={fetchNextPage}
-              className="text-white"
-              hasNextPage={pagination.hasNextPage}
-              hasPreviousPage={pagination.hasPreviousPage}
-              isLoading={fetchingMore}
-            />
-          </div>
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            className="text-white"
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isLoading={fetchingMore}
+          />
         </div>
-      </>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
-        <div className="w-full text-white">
-          <div className="flex flex-col gap-2">
-            <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-              <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
-                <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
-                  <tr className="border-light-dark">
-                    {tokenHoldersColumns.map((column, index) => (
-                      <th
-                        key={index}
-                        className="h-8 text-left [&:has([role=checkbox])]:pr-0"
-                        style={{
-                          width: column.size !== 150 ? column.size : "auto",
-                        }}
-                      >
-                        {typeof column.header === "function"
-                          ? column.header({
-                              column: {
-                                getIsSorted: () => false,
-                                toggleSorting: () => {},
-                              },
-                            } as Parameters<typeof column.header>[0])
-                          : column.header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-                  <tr className="hover:bg-surface-contrast transition-colors duration-300">
-                    <td
-                      colSpan={tokenHoldersColumns.length}
-                      className="bg-light h-[410px] p-0 text-center"
+      <div className="w-full text-white">
+        <div className="flex flex-col gap-2">
+          <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+              <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
+                <tr className="border-light-dark">
+                  {tokenHoldersColumns.map((column, index) => (
+                    <th
+                      key={index}
+                      className="h-8 text-left [&:has([role=checkbox])]:pr-0"
+                      style={{
+                        width: column.size !== 150 ? column.size : "auto",
+                      }}
                     >
-                      <div className="flex h-full items-center justify-center">
-                        <div className="text-error">
-                          {/* Error loading token holders: {error.message} */}
-                        </div>
+                      {typeof column.header === "function"
+                        ? column.header({
+                            column: {
+                              getIsSorted: () => false,
+                              toggleSorting: () => {},
+                            },
+                          } as Parameters<typeof column.header>[0])
+                        : column.header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="scrollbar-none [&_tr:last-child]:border-0">
+                <tr className="hover:bg-surface-contrast transition-colors duration-300">
+                  <td
+                    colSpan={tokenHoldersColumns.length}
+                    className="bg-light h-[410px] p-0 text-center"
+                  >
+                    <div className="flex h-full items-center justify-center">
+                      <div className="text-error">
+                        {/* Error loading token holders: {error.message} */}
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPrevious={fetchPreviousPage}
-              onNext={fetchNextPage}
-              className="text-white"
-              hasNextPage={pagination.hasNextPage}
-              hasPreviousPage={pagination.hasPreviousPage}
-            />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            className="text-white"
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+          />
         </div>
-      </>
+      </div>
     );
   }
 
