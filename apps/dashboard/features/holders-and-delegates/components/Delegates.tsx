@@ -6,7 +6,7 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { TheTable, SkeletonRow, BlankState } from "@/shared/components";
+import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
@@ -486,7 +486,7 @@ export const Delegates = ({
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
           isTableSmall={true}
           showWhenEmpty={
-            <BlankState
+            <BlankSlate
               variant="default"
               icon={Inbox}
               title=""

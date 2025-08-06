@@ -18,7 +18,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
-import { BlankState } from "@/shared/components";
+import { BlankSlate } from "@/shared/components";
 
 interface TokenHolderTableData {
   address: Address;
@@ -417,7 +417,7 @@ export const TokenHolders = ({
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
             showWhenEmpty={
-              <BlankState
+              <BlankSlate
                 variant="default"
                 icon={Inbox}
                 title=""
