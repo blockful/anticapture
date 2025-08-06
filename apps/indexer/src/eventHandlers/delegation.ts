@@ -47,16 +47,21 @@ export const delegateChanged = async (
     tokenId,
   });
 
-  await context.db.insert(delegation).values({
-    transactionHash: txHash,
-    daoId,
-    delegateAccountId: toDelegate,
-    delegatorAccountId: delegator,
-    delegatedValue: delegatorBalance?.balance ?? BigInt(0),
-    previousDelegate: fromDelegate,
-    timestamp,
-    logIndex,
-  });
+  await context.db
+    .insert(delegation)
+    .values({
+      transactionHash: txHash,
+      daoId,
+      delegateAccountId: toDelegate,
+      delegatorAccountId: delegator,
+      delegatedValue: delegatorBalance?.balance ?? 0n,
+      previousDelegate: fromDelegate,
+      timestamp,
+      logIndex,
+    })
+    .onConflictDoUpdate({
+      delegatedValue: delegatorBalance?.balance ?? 0n,
+    });
 
   // Update the delegator's delegate
   await context.db
