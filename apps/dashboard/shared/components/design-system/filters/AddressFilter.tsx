@@ -103,7 +103,7 @@ export function AddressFilter({
           aria-label="Filter by address"
           className={cn(
             "hover:bg-surface-contrast flex items-center justify-center rounded border border-gray-600 p-1 transition-colors hover:cursor-pointer",
-            currentFilter && "border-blue-500 bg-blue-500/10",
+            currentFilter && "border-tangerine bg-blue-500/10",
             className,
           )}
         >
@@ -147,12 +147,12 @@ export function AddressFilter({
               }}
             />
             {tempAddress.trim() && !isValidAddress && (
-              <p className="mt-2 text-xs text-red-400">
+              <p className="text-error mt-2 text-xs">
                 Please enter a valid Ethereum address or ENS name
               </p>
             )}
             {ensAddressError && (
-              <p className="mt-2 text-xs text-red-400">{ensAddressError}</p>
+              <p className="text-error mt-2 text-xs">{ensAddressError}</p>
             )}
           </div>
 
