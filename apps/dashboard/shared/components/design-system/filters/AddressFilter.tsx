@@ -1,8 +1,10 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { Filter } from "lucide-react";
+import { Filter, Loader2 } from "lucide-react";
 import { isAddress } from "viem";
+import { getEnsAddress } from "viem/actions";
+import { normalize } from "viem/ens";
 import {
   Popover,
   PopoverTrigger,
@@ -12,6 +14,7 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ResetIcon } from "@radix-ui/react-icons";
+import { publicClient } from "@/shared/services/wallet/wallet";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
@@ -19,20 +22,67 @@ interface AddressFilterProps {
   className?: string;
 }
 
+const isEnsAddress = (address: string) => {
+  try {
+    normalize(address);
+  } catch {
+    return false;
+  }
+
+  return address.endsWith(".eth") && address.slice(0, -4).length >= 3;
+};
+
 export function AddressFilter({
   onApply,
   currentFilter = "",
   className,
 }: AddressFilterProps) {
   const [tempAddress, setTempAddress] = useState<string>(currentFilter);
+  const [isResolving, setIsResolving] = useState<boolean>(false);
+  const [ensAddressError, setEnsAddressError] = useState<string | null>(null);
 
-  const isValidAddress = tempAddress.trim() && isAddress(tempAddress.trim());
+  const isValidAddress =
+    tempAddress.trim() &&
+    (isAddress(tempAddress.trim()) || isEnsAddress(tempAddress.trim()));
 
-  const handleApply = () => {
+  const handleApply = async () => {
     const trimmedAddress = tempAddress.trim();
-    onApply(
-      trimmedAddress && isAddress(trimmedAddress) ? trimmedAddress : undefined,
-    );
+
+    if (!trimmedAddress) {
+      onApply(undefined);
+      return;
+    }
+
+    // If it's already a valid Ethereum address, use it directly
+    if (isAddress(trimmedAddress)) {
+      onApply(trimmedAddress);
+      return;
+    }
+
+    // If it's an ENS name, resolve it
+    if (isEnsAddress(trimmedAddress)) {
+      setIsResolving(true);
+      try {
+        const resolvedAddress = await getEnsAddress(publicClient, {
+          name: normalize(trimmedAddress),
+        });
+
+        if (resolvedAddress) {
+          onApply(resolvedAddress);
+        } else {
+          // ENS name doesn't resolve to an address
+          onApply(undefined);
+          setEnsAddressError("ENS name could not be resolved");
+        }
+      } catch (error) {
+        console.error("Error resolving ENS address:", error);
+        onApply(undefined);
+      } finally {
+        setIsResolving(false);
+      }
+    } else {
+      onApply(undefined);
+    }
   };
 
   const handleReset = () => {
@@ -91,14 +141,18 @@ export function AddressFilter({
             <SearchField
               placeholder="Search by address"
               value={tempAddress}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setTempAddress(e.target.value)
-              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setTempAddress(e.target.value);
+                setEnsAddressError(null);
+              }}
             />
             {tempAddress.trim() && !isValidAddress && (
               <p className="mt-2 text-xs text-red-400">
-                Please enter a valid Ethereum address
+                Please enter a valid Ethereum address or ENS name
               </p>
+            )}
+            {ensAddressError && (
+              <p className="mt-2 text-xs text-red-400">{ensAddressError}</p>
             )}
           </div>
 
@@ -106,10 +160,19 @@ export function AddressFilter({
           <div className="border-t border-gray-600 p-4">
             <Button
               onClick={handleApply}
-              disabled={tempAddress.trim() !== "" && !isValidAddress}
+              disabled={
+                (tempAddress.trim() !== "" && !isValidAddress) || isResolving
+              }
               className="w-full bg-white text-black hover:bg-gray-200 disabled:bg-gray-600 disabled:text-gray-400"
             >
-              Apply
+              {isResolving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Resolving ENS...
+                </>
+              ) : (
+                "Apply"
+              )}
             </Button>
           </div>
         </div>
