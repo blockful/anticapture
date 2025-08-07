@@ -10,432 +10,190 @@ import {
 
 type TransactionsResponseWithoutTotal = Omit<TransactionsResponse, "total">;
 
+type AffectedSupplyFilters = {
+  isCex?: boolean;
+  isDex?: boolean;
+  isLending?: boolean;
+  isTotal?: boolean;
+};
+
+type QueryParams = {
+  limit: number;
+  offset: number;
+  sortBy: string;
+  sortOrder: string;
+  from?: string;
+  to?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  affectedSupplyFilters: AffectedSupplyFilters;
+};
+
+type TransactionWithChildren = {
+  transaction: typeof transaction.$inferSelect;
+  transfers: (typeof transfer.$inferSelect)[];
+  delegations: (typeof delegation.$inferSelect)[];
+};
+
 export class TransactionsRepository {
-  async getTransactionsWithChildren(
-    params: TransactionsRequest = {},
-  ): Promise<TransactionsResponseWithoutTotal> {
-    const {
-      limit = 50,
-      offset = 0,
-      sortBy = "timestamp",
-      sortOrder = "desc",
-      from,
-      to,
-      minAmount,
-      maxAmount,
-      affectedSupply,
-    } = params;
+  // Simple data access methods - no business logic
 
-    // Parse affectedSupply array into individual filters
-    const affectedSupplyFilters = this.parseAffectedSupply(affectedSupply);
-
-    // Build where conditions
-    const whereConditions = this.buildWhereConditions(
-      from,
-      to,
-      affectedSupplyFilters,
-    );
-
-    // If amount filtering is needed, we need to use a more complex query
-    if (minAmount !== undefined || maxAmount !== undefined) {
-      // Build amount filtering conditions
-      const amountConditions = [];
-
-      // Handle transfers
-      if (minAmount !== undefined && maxAmount !== undefined) {
-        // Both min and max amount specified
-        amountConditions.push(
-          and(
-            gte(transfer.amount, BigInt(minAmount)),
-            lte(transfer.amount, BigInt(maxAmount)),
-          ),
-        );
-        amountConditions.push(
-          and(
-            gte(delegation.delegatedValue, BigInt(minAmount)),
-            lte(delegation.delegatedValue, BigInt(maxAmount)),
-          ),
-        );
-      } else if (minAmount !== undefined) {
-        // Only min amount specified
-        amountConditions.push(and(gte(transfer.amount, BigInt(minAmount))));
-        amountConditions.push(
-          and(gte(delegation.delegatedValue, BigInt(minAmount))),
-        );
-      } else if (maxAmount !== undefined) {
-        // Only max amount specified
-        amountConditions.push(and(lte(transfer.amount, BigInt(maxAmount))));
-        amountConditions.push(
-          and(lte(delegation.delegatedValue, BigInt(maxAmount))),
-        );
-      }
-
-      // Combine amount conditions with OR logic
-      const amountFilterCondition =
-        amountConditions.length > 0 ? or(...amountConditions) : undefined;
-
-      // Combine all conditions
-      const allConditions = [...whereConditions, amountFilterCondition].filter(
-        Boolean,
-      );
-
-      // Get transactions with their transfers and delegations
-      const transactionsWithData = await db
-        .select({
-          transaction: transaction,
-          transfer: transfer,
-          delegation: delegation,
-        })
-        .from(transaction)
-        .leftJoin(
-          transfer,
-          eq(transaction.transactionHash, transfer.transactionHash),
-        )
-        .leftJoin(
-          delegation,
-          eq(transaction.transactionHash, delegation.transactionHash),
-        )
-        .where(allConditions.length > 0 ? and(...allConditions) : undefined)
-        .orderBy(
-          sortBy === "timestamp"
-            ? sortOrder === "desc"
-              ? desc(transaction.timestamp)
-              : asc(transaction.timestamp)
-            : desc(transaction.timestamp),
-        )
-        .limit(limit)
-        .offset(offset);
-
-      // Group the results by transaction
-      const transactionMap = new Map<
-        string,
-        {
-          transaction: typeof transaction.$inferSelect;
-          transfers: (typeof transfer.$inferSelect)[];
-          delegations: (typeof delegation.$inferSelect)[];
-        }
-      >();
-
-      for (const row of transactionsWithData) {
-        const hash = row.transaction.transactionHash;
-
-        if (!transactionMap.has(hash)) {
-          transactionMap.set(hash, {
-            transaction: row.transaction,
-            transfers: [],
-            delegations: [],
-          });
-        }
-
-        const entry = transactionMap.get(hash)!;
-
-        if (row.transfer) {
-          // Check for duplicates to handle Cartesian product from LEFT JOINs
-          const transferExists = entry.transfers.some(
-            (t) =>
-              t.transactionHash === row.transfer!.transactionHash &&
-              t.logIndex === row.transfer!.logIndex,
-          );
-          if (!transferExists) {
-            entry.transfers.push(row.transfer);
-          }
-        }
-        if (row.delegation) {
-          // Check for duplicates to handle Cartesian product from LEFT JOINs
-          const delegationExists = entry.delegations.some(
-            (d) =>
-              d.transactionHash === row.delegation!.transactionHash &&
-              d.logIndex === row.delegation!.logIndex,
-          );
-          if (!delegationExists) {
-            entry.delegations.push(row.delegation);
-          }
-        }
-      }
-
-      // Map to API response using the mapper
-      const mappedTransactions = Array.from(transactionMap.values()).map(
-        (entry) =>
-          TransactionMapper.toApi(
-            entry.transaction,
-            entry.transfers,
-            entry.delegations,
-          ),
-      );
-
-      return {
-        transactions: mappedTransactions,
-      };
-    }
-
-    // If no amount filtering, use simple query with joins
-    const transactionsWithData = await db
-      .select({
-        transaction: transaction,
-        transfer: transfer,
-        delegation: delegation,
-      })
-      .from(transaction)
-      .leftJoin(
-        transfer,
-        eq(transaction.transactionHash, transfer.transactionHash),
-      )
-      .leftJoin(
-        delegation,
-        eq(transaction.transactionHash, delegation.transactionHash),
-      )
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-      .orderBy(
-        sortBy === "timestamp"
-          ? sortOrder === "desc"
-            ? desc(transaction.timestamp)
-            : asc(transaction.timestamp)
-          : desc(transaction.timestamp),
-      )
-      .limit(limit)
-      .offset(offset);
-
-    // Group the results by transaction
-    const transactionMap = new Map<
-      string,
-      {
-        transaction: typeof transaction.$inferSelect;
-        transfers: (typeof transfer.$inferSelect)[];
-        delegations: (typeof delegation.$inferSelect)[];
-      }
-    >();
-
-    for (const row of transactionsWithData) {
-      const hash = row.transaction.transactionHash;
-
-      if (!transactionMap.has(hash)) {
-        transactionMap.set(hash, {
-          transaction: row.transaction,
-          transfers: [],
-          delegations: [],
-        });
-      }
-
-      const entry = transactionMap.get(hash)!;
-
-      if (row.transfer) {
-        // Check for duplicates to handle Cartesian product from LEFT JOINs
-        const transferExists = entry.transfers.some(
-          (t) =>
-            t.transactionHash === row.transfer!.transactionHash &&
-            t.logIndex === row.transfer!.logIndex,
-        );
-        if (!transferExists) {
-          entry.transfers.push(row.transfer);
-        }
-      }
-      if (row.delegation) {
-        // Check for duplicates to handle Cartesian product from LEFT JOINs
-        const delegationExists = entry.delegations.some(
-          (d) =>
-            d.transactionHash === row.delegation!.transactionHash &&
-            d.logIndex === row.delegation!.logIndex,
-        );
-        if (!delegationExists) {
-          entry.delegations.push(row.delegation);
-        }
-      }
-    }
-
-    // Map to API response using the mapper
-    const mappedTransactions = Array.from(transactionMap.values()).map(
-      (entry) =>
-        TransactionMapper.toApi(
-          entry.transaction,
-          entry.transfers,
-          entry.delegations,
-        ),
-    );
-
-    return {
-      transactions: mappedTransactions,
-    };
-  }
-
-  async getTransactionCount(
-    params: {
-      from?: string;
-      to?: string;
-      minAmount?: number;
-      maxAmount?: number;
-      affectedSupply?: AffectedSupply[];
-    } = {},
-  ): Promise<number> {
-    const { from, to, minAmount, maxAmount, affectedSupply } = params;
-
-    // Parse affectedSupply array into individual filters
-    const affectedSupplyFilters = this.parseAffectedSupply(affectedSupply);
-
-    // Build where conditions using the shared method
-    const whereConditions = this.buildWhereConditions(
-      from,
-      to,
-      affectedSupplyFilters,
-    );
-
-    // If amount filtering is needed, we need to use a more complex query
-    if (minAmount !== undefined || maxAmount !== undefined) {
-      // Build amount filtering conditions
-      const amountConditions = [];
-
-      // Handle transfers
-      if (minAmount !== undefined && maxAmount !== undefined) {
-        amountConditions.push(
-          and(
-            gte(transfer.amount, BigInt(minAmount)),
-            lte(transfer.amount, BigInt(maxAmount)),
-          ),
-        );
-        amountConditions.push(
-          and(
-            gte(delegation.delegatedValue, BigInt(minAmount)),
-            lte(delegation.delegatedValue, BigInt(maxAmount)),
-          ),
-        );
-      } else if (minAmount !== undefined) {
-        amountConditions.push(and(gte(transfer.amount, BigInt(minAmount))));
-        amountConditions.push(
-          and(gte(delegation.delegatedValue, BigInt(minAmount))),
-        );
-      } else if (maxAmount !== undefined) {
-        amountConditions.push(and(lte(transfer.amount, BigInt(maxAmount))));
-        amountConditions.push(
-          and(lte(delegation.delegatedValue, BigInt(maxAmount))),
-        );
-      }
-
-      // Combine amount conditions with OR logic
-      const amountFilterCondition =
-        amountConditions.length > 0 ? or(...amountConditions) : undefined;
-
-      // Combine all conditions
-      const allConditions = [...whereConditions, amountFilterCondition].filter(
-        Boolean,
-      );
-
-      // Get distinct transaction hashes that match the criteria
-      const result = await db
-        .select({
-          transactionHash: transaction.transactionHash,
-        })
-        .from(transaction)
-        .leftJoin(
-          transfer,
-          eq(transaction.transactionHash, transfer.transactionHash),
-        )
-        .leftJoin(
-          delegation,
-          eq(transaction.transactionHash, delegation.transactionHash),
-        )
-        .where(allConditions.length > 0 ? and(...allConditions) : undefined);
-
-      // Count distinct transaction hashes
-      const distinctTransactionHashes = new Set(
-        result.map((row) => row.transactionHash).filter(Boolean),
-      );
-
-      return distinctTransactionHashes.size;
-    }
-
-    // If no amount filtering, use efficient COUNT query
+  async getAllTransactionHashes(): Promise<string[]> {
     const result = await db
-      .select({
-        count: count(),
-      })
-      .from(transaction)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+      .select({ transactionHash: transaction.transactionHash })
+      .from(transaction);
 
-    return result[0]?.count || 0;
+    return result.map((t) => t.transactionHash);
   }
 
-  private parseAffectedSupply(affectedSupply: AffectedSupply[] | undefined): {
-    isCex?: boolean;
-    isDex?: boolean;
-    isLending?: boolean;
-    isTotal?: boolean;
-  } {
-    if (!affectedSupply || affectedSupply.length === 0) {
-      return {};
-    }
-
-    const filters: {
-      isCex?: boolean;
-      isDex?: boolean;
-      isLending?: boolean;
-      isTotal?: boolean;
-    } = {};
-
-    if (affectedSupply.includes("CEX")) {
-      filters.isCex = true;
-    }
-    if (affectedSupply.includes("DEX")) {
-      filters.isDex = true;
-    }
-    if (affectedSupply.includes("LENDING")) {
-      filters.isLending = true;
-    }
-    if (affectedSupply.includes("TOTAL")) {
-      filters.isTotal = true;
-    }
-
-    return filters;
-  }
-
-  private buildWhereConditions(
-    from: string | undefined,
-    to: string | undefined,
-    affectedSupplyFilters: {
-      isCex?: boolean;
-      isDex?: boolean;
-      isLending?: boolean;
-      isTotal?: boolean;
-    },
+  async getTransactionsByHashes(
+    hashes: string[],
+    pagination: { limit: number; offset: number },
+    sorting: { sortBy: string; sortOrder: string },
   ) {
-    const whereConditions = [];
+    if (hashes.length === 0) return [];
 
-    // Handle nested from filtering
-    if (from) {
-      const fromConditions = [
-        eq(transaction.fromAddress, from),
-        eq(transfer.fromAccountId, from),
-        eq(delegation.delegatorAccountId, from),
-      ];
-      whereConditions.push(or(...fromConditions));
-    }
+    const orderBy = this.buildOrderBy(sorting.sortBy, sorting.sortOrder);
+    const hashConditions = hashes.map((hash) =>
+      eq(transaction.transactionHash, hash),
+    );
 
-    // Handle nested to filtering
-    if (to) {
-      const toConditions = [
-        eq(transaction.toAddress, to),
-        eq(transfer.toAccountId, to),
-        eq(delegation.delegateAccountId, to),
-      ];
-      whereConditions.push(or(...toConditions));
-    }
+    return db
+      .select()
+      .from(transaction)
+      .where(or(...hashConditions))
+      .orderBy(orderBy)
+      .limit(pagination.limit)
+      .offset(pagination.offset);
+  }
 
-    // Apply affectedSupply filters - only check transaction table
+  async getTransfersForTransactions(hashes: string[]) {
+    if (hashes.length === 0) return [];
+
+    return db
+      .select()
+      .from(transfer)
+      .where(or(...hashes.map((hash) => eq(transfer.transactionHash, hash))));
+  }
+
+  async getDelegationsForTransactions(hashes: string[]) {
+    if (hashes.length === 0) return [];
+
+    return db
+      .select()
+      .from(delegation)
+      .where(or(...hashes.map((hash) => eq(delegation.transactionHash, hash))));
+  }
+
+  async findTransactionsByFilters(filters: any): Promise<string[]> {
+    const conditions = [];
+
+    if (filters.from)
+      conditions.push(eq(transaction.fromAddress, filters.from));
+    if (filters.to) conditions.push(eq(transaction.toAddress, filters.to));
+
+    const { affectedSupplyFilters } = filters;
     if (affectedSupplyFilters.isCex !== undefined) {
-      whereConditions.push(eq(transaction.isCex, affectedSupplyFilters.isCex));
+      conditions.push(eq(transaction.isCex, affectedSupplyFilters.isCex));
     }
     if (affectedSupplyFilters.isDex !== undefined) {
-      whereConditions.push(eq(transaction.isDex, affectedSupplyFilters.isDex));
+      conditions.push(eq(transaction.isDex, affectedSupplyFilters.isDex));
     }
     if (affectedSupplyFilters.isLending !== undefined) {
-      whereConditions.push(
+      conditions.push(
         eq(transaction.isLending, affectedSupplyFilters.isLending),
       );
     }
     if (affectedSupplyFilters.isTotal !== undefined) {
-      whereConditions.push(
-        eq(transaction.isTotal, affectedSupplyFilters.isTotal),
-      );
+      conditions.push(eq(transaction.isTotal, affectedSupplyFilters.isTotal));
     }
 
-    return whereConditions;
+    if (conditions.length === 0) return [];
+
+    const result = await db
+      .select({ transactionHash: transaction.transactionHash })
+      .from(transaction)
+      .where(and(...conditions));
+
+    return result.map((t) => t.transactionHash);
+  }
+
+  async findTransactionsByTransferFilters(filters: any): Promise<string[]> {
+    const conditions = [];
+
+    if (filters.from) conditions.push(eq(transfer.fromAccountId, filters.from));
+    if (filters.to) conditions.push(eq(transfer.toAccountId, filters.to));
+
+    const amountCondition = this.buildAmountCondition(
+      transfer.amount,
+      filters.minAmount,
+      filters.maxAmount,
+    );
+    if (amountCondition) conditions.push(amountCondition);
+
+    if (conditions.length === 0) return [];
+
+    const result = await db
+      .select({ transactionHash: transfer.transactionHash })
+      .from(transfer)
+      .where(and(...conditions));
+
+    return result
+      .map((t) => t.transactionHash)
+      .filter((hash): hash is string => Boolean(hash));
+  }
+
+  async findTransactionsByDelegationFilters(filters: any): Promise<string[]> {
+    const conditions = [];
+
+    if (filters.from)
+      conditions.push(eq(delegation.delegatorAccountId, filters.from));
+    if (filters.to)
+      conditions.push(eq(delegation.delegateAccountId, filters.to));
+
+    const amountCondition = this.buildAmountCondition(
+      delegation.delegatedValue,
+      filters.minAmount,
+      filters.maxAmount,
+    );
+    if (amountCondition) conditions.push(amountCondition);
+
+    if (conditions.length === 0) return [];
+
+    const result = await db
+      .select({ transactionHash: delegation.transactionHash })
+      .from(delegation)
+      .where(and(...conditions));
+
+    return result
+      .map((d) => d.transactionHash)
+      .filter((hash): hash is string => Boolean(hash));
+  }
+
+  // Helper methods for data access only
+  private buildAmountCondition(
+    field: any, // Drizzle column type
+    minAmount?: number,
+    maxAmount?: number,
+  ) {
+    if (minAmount !== undefined && maxAmount !== undefined) {
+      return and(gte(field, BigInt(minAmount)), lte(field, BigInt(maxAmount)));
+    }
+    if (minAmount !== undefined) {
+      return gte(field, BigInt(minAmount));
+    }
+    if (maxAmount !== undefined) {
+      return lte(field, BigInt(maxAmount));
+    }
+    return null;
+  }
+
+  private buildOrderBy(sortBy: string, sortOrder: string) {
+    if (sortBy === "timestamp") {
+      return sortOrder === "desc"
+        ? desc(transaction.timestamp)
+        : asc(transaction.timestamp);
+    }
+    return desc(transaction.timestamp);
   }
 }
