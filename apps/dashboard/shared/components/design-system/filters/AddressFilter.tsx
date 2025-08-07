@@ -164,7 +164,7 @@ export function AddressFilter({
               disabled={
                 (tempAddress.trim() !== "" && !isValidAddress) || isResolving
               }
-              className="hover:bg-surface-hover h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black disabled:bg-gray-600 disabled:text-gray-400"
+              className="disabled:text-opacity- disabled:bg-opacity-6070 h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black hover:bg-opacity-90"
             >
               {isResolving ? (
                 <>
