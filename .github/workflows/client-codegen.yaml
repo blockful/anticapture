@@ -5,8 +5,28 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.determine.outputs.environment }}
+      railway_token: ${{ steps.determine.outputs.railway_token }}
+    steps:
+      - name: Determine environment and token
+        id: determine
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+          echo "Deploying to: $([ '${{ github.ref }}' == 'refs/heads/main' ] && echo 'production' || echo 'dev')"
+
   codegen:
     runs-on: ubuntu-latest
+    needs: [environment]
+    environment: ${{ needs.environment.outputs.environment }}
+    env:
+      ANTICAPTURE_GRAPHQL_ENDPOINT: ${{ secrets.GATEWAY_URL }}
 
     steps:
       - name: Checkout repository
