@@ -17,7 +17,7 @@ interface ProposalsActivity {
 }
 
 interface Delegate {
-  votingPower: any;
+  votingPower: string;
   delegationsCount: number;
   accountId: string;
   proposalsActivity?: ProposalsActivity;
@@ -54,6 +54,7 @@ interface UseDelegatesParams {
   orderBy?: string;
   orderDirection?: string;
   days: TimeInterval;
+  address?: string;
 }
 
 export const useDelegates = ({
@@ -62,6 +63,7 @@ export const useDelegates = ({
   orderBy = "votingPower",
   orderDirection = "desc",
   days,
+  address,
 }: UseDelegatesParams): UseDelegatesResult => {
   const itemsPerPage = 10; // This should match the limit in the GraphQL query
 
@@ -80,7 +82,7 @@ export const useDelegates = ({
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection]);
+  }, [orderBy, orderDirection, address]);
 
   const {
     data: delegatesData,
@@ -95,6 +97,7 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
+      ...(address && { addresses: [address] }),
     },
     context: {
       headers: {
@@ -120,8 +123,9 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
+      ...(address && { addresses: [address] }),
     });
-  }, [orderBy, orderDirection, refetch]);
+  }, [orderBy, orderDirection, address, refetch]);
 
   const delegateAddresses = useMemo(() => {
     return (
@@ -294,6 +298,7 @@ export const useDelegates = ({
           before: undefined,
           orderBy,
           orderDirection,
+          ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -322,6 +327,7 @@ export const useDelegates = ({
     pagination.endCursor,
     orderBy,
     orderDirection,
+    address,
     isPaginationLoading,
   ]);
 
@@ -345,6 +351,7 @@ export const useDelegates = ({
           before: pagination.startCursor,
           orderBy,
           orderDirection,
+          ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
@@ -373,14 +380,21 @@ export const useDelegates = ({
     pagination.startCursor,
     orderBy,
     orderDirection,
+    address,
     isPaginationLoading,
   ]);
 
   // Enhanced refetch that resets pagination
   const handleRefetch = useCallback(() => {
     setCurrentPage(1);
-    refetch();
-  }, [refetch]);
+    refetch({
+      after: undefined,
+      before: undefined,
+      orderBy,
+      orderDirection,
+      ...(address && { addresses: [address] }),
+    });
+  }, [refetch, orderBy, orderDirection, address]);
 
   return {
     data: finalData,
