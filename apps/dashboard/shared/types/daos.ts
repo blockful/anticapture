@@ -2,7 +2,8 @@ export enum DaoIdEnum {
   UNISWAP = "UNI",
   ENS = "ENS",
   OPTIMISM = "OP",
-  ARBITRUM = "ARB",
+  ARBITRUM = "ARB", 
+  GTC = "GTC",
 }
 
 export interface DAO {
