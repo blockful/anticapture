@@ -293,7 +293,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
               ))}
         </BarChart>
       </ResponsiveContainer>
-      <AnticaptureWatermark />
+      <AnticaptureWatermark svgClassName="pb-10" />
     </div>
   );
 };
