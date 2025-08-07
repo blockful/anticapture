@@ -130,10 +130,26 @@ export class TransactionsRepository {
         const entry = transactionMap.get(hash)!;
 
         if (row.transfer) {
-          entry.transfers.push(row.transfer);
+          // Check for duplicates to handle Cartesian product from LEFT JOINs
+          const transferExists = entry.transfers.some(
+            (t) =>
+              t.transactionHash === row.transfer!.transactionHash &&
+              t.logIndex === row.transfer!.logIndex,
+          );
+          if (!transferExists) {
+            entry.transfers.push(row.transfer);
+          }
         }
         if (row.delegation) {
-          entry.delegations.push(row.delegation);
+          // Check for duplicates to handle Cartesian product from LEFT JOINs
+          const delegationExists = entry.delegations.some(
+            (d) =>
+              d.transactionHash === row.delegation!.transactionHash &&
+              d.logIndex === row.delegation!.logIndex,
+          );
+          if (!delegationExists) {
+            entry.delegations.push(row.delegation);
+          }
         }
       }
 
@@ -203,10 +219,26 @@ export class TransactionsRepository {
       const entry = transactionMap.get(hash)!;
 
       if (row.transfer) {
-        entry.transfers.push(row.transfer);
+        // Check for duplicates to handle Cartesian product from LEFT JOINs
+        const transferExists = entry.transfers.some(
+          (t) =>
+            t.transactionHash === row.transfer!.transactionHash &&
+            t.logIndex === row.transfer!.logIndex,
+        );
+        if (!transferExists) {
+          entry.transfers.push(row.transfer);
+        }
       }
       if (row.delegation) {
-        entry.delegations.push(row.delegation);
+        // Check for duplicates to handle Cartesian product from LEFT JOINs
+        const delegationExists = entry.delegations.some(
+          (d) =>
+            d.transactionHash === row.delegation!.transactionHash &&
+            d.logIndex === row.delegation!.logIndex,
+        );
+        if (!delegationExists) {
+          entry.delegations.push(row.delegation);
+        }
       }
     }
 

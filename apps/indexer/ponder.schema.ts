@@ -87,7 +87,7 @@ export const votingPowerHistory = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.accountId],
+      columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
   }),
 );
@@ -114,6 +114,7 @@ export const delegation = onchainTable(
         table.transactionHash,
         table.delegatorAccountId,
         table.delegateAccountId,
+        table.logIndex,
       ],
     }),
   }),
@@ -137,7 +138,12 @@ export const transfer = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.fromAccountId, table.toAccountId],
+      columns: [
+        table.transactionHash,
+        table.fromAccountId,
+        table.toAccountId,
+        table.logIndex,
+      ],
     }),
   }),
 );
@@ -349,11 +355,6 @@ export const votingPowerHistoryRelations = relations(
       fields: [votingPowerHistory.accountId],
       references: [account.id],
     }),
-    transaction: one(transaction, {
-      fields: [votingPowerHistory.transactionHash],
-      references: [transaction.transactionHash],
-      relationName: "transactionVotingPowerHistory",
-    }),
   }),
 );
 
@@ -363,9 +364,6 @@ export const transactionRelations = relations(transaction, ({ many }) => ({
   }),
   delegations: many(delegation, {
     relationName: "transactionDelegations",
-  }),
-  votingPowerHistory: many(votingPowerHistory, {
-    relationName: "transactionVotingPowerHistory",
   }),
 }));
 

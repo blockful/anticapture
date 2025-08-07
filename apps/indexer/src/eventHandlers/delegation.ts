@@ -34,8 +34,8 @@ export const delegateChanged = async (
     fromDelegate: Address;
     txHash: Hex;
     timestamp: bigint;
-    transactionFrom: Address | null;
-    transactionTo: Address | null;
+    transactionFrom: Address;
+    transactionTo: Address;
     logIndex: number;
   },
 ) => {
@@ -60,8 +60,8 @@ export const delegateChanged = async (
     context,
     daoId as DaoIdEnum,
     txHash,
-    transactionFrom || delegator,
-    transactionTo || toDelegate,
+    transactionFrom,
+    transactionTo,
     timestamp,
   );
 
@@ -110,9 +110,7 @@ export const delegateChanged = async (
       isLending,
       isTotal,
     })
-    .onConflictDoUpdate({
-      delegatedValue: delegatorBalance?.balance ?? 0n,
-    });
+    .onConflictDoNothing();
 
   // Update transaction-level flags based on this delegation
   await updateTransactionFlags(
@@ -170,8 +168,8 @@ export const delegatedVotesChanged = async (
     newBalance: bigint;
     oldBalance: bigint;
     timestamp: bigint;
-    transactionFrom: Address | null;
-    transactionTo: Address | null;
+    transactionFrom: Address;
+    transactionTo: Address;
     logIndex: number;
   },
 ) => {
@@ -189,8 +187,12 @@ export const delegatedVotesChanged = async (
 
   await ensureAccountExists(context, delegate);
 
+  // Validate daoId is a valid DaoIdEnum value
+  if (!Object.values(DaoIdEnum).includes(daoId as DaoIdEnum)) {
+    throw new Error(`Invalid daoId: ${daoId}`);
+  }
+
   // Create or update transaction record with flags
-  // Use transaction sender/recipient if provided, otherwise use delegate for both
   await createOrUpdateTransaction(
     context,
     daoId as DaoIdEnum,
@@ -211,9 +213,7 @@ export const delegatedVotesChanged = async (
       timestamp,
       logIndex: logIndex - 1,
     })
-    .onConflictDoUpdate(() => ({
-      votingPower: newBalance,
-    }));
+    .onConflictDoNothing();
 
   // Update the delegate's voting power
   await context.db
