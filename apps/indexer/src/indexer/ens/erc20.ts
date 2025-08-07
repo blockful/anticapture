@@ -9,9 +9,11 @@ import {
   tokenTransfer,
 } from "@/eventHandlers";
 
-export function ENSTokenIndexer(address: Address, decimals: number) {
-  const daoId = DaoIdEnum.ENS;
-
+export function ENSTokenIndexer(
+  address: Address,
+  decimals: number,
+  daoId: DaoIdEnum = DaoIdEnum.ENS,
+) {
   ponder.on("ENSToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
       id: address,

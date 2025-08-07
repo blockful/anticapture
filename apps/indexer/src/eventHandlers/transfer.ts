@@ -15,6 +15,7 @@ import {
   ensureAccountExists,
   storeDailyBucket,
   createOrUpdateTransaction,
+  updateTransactionFlags,
 } from "./shared";
 
 const updateSupplyMetric = async (
@@ -106,24 +107,25 @@ const updateTotalSupplyMetric = async (
 
 const updateCirculatingSupplyMetric = async (
   context: Context,
-  tokenData: { circulatingSupply: bigint },
-  isTotalSupplyTransaction: boolean,
-  isTreasuryTransaction: boolean,
+  tokenData: {
+    circulatingSupply: bigint;
+    totalSupply: bigint;
+    treasury: bigint;
+  },
   metricType: MetricTypesEnum,
   daoId: string,
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
   const currentCirculatingSupply = tokenData.circulatingSupply ?? BigInt(0);
-  const isCirculatingSupplyTransaction =
-    isTotalSupplyTransaction || isTreasuryTransaction;
 
-  if (isCirculatingSupplyTransaction) {
-    const newCirculatingSupply = (
-      await context.db.update(token, { id: tokenAddress }).set((row) => ({
-        circulatingSupply: row.totalSupply - row.treasury,
-      }))
-    ).circulatingSupply;
+  // Calculate circulating supply as total supply minus treasury
+  const newCirculatingSupply = tokenData.totalSupply - tokenData.treasury;
+
+  if (newCirculatingSupply !== currentCirculatingSupply) {
+    await context.db.update(token, { id: tokenAddress }).set({
+      circulatingSupply: newCirculatingSupply,
+    });
 
     await storeDailyBucket(
       context,
@@ -178,19 +180,7 @@ export const tokenTransfer = async (
     timestamp,
   );
 
-  await context.db
-    .insert(transfer)
-    .values({
-      transactionHash,
-      daoId,
-      tokenId: tokenAddress,
-      amount: value,
-      fromAccountId: from,
-      toAccountId: to,
-      timestamp,
-      logIndex,
-    })
-    .onConflictDoNothing();
+  // Transfer record will be created later with proper flags after address list calculations
 
   await context.db
     .insert(accountBalance)
@@ -234,6 +224,44 @@ export const tokenTransfer = async (
   const dexAddressList = Object.values(DEXAddresses[daoId]);
   const treasuryAddressList = Object.values(TREASURY_ADDRESSES[daoId]);
   const burningAddressList = Object.values(BurningAddresses[daoId]);
+
+  // Determine flags for the transfer
+  const isCex = cexAddressList.includes(from) || cexAddressList.includes(to);
+  const isDex = dexAddressList.includes(from) || dexAddressList.includes(to);
+  const isLending =
+    lendingAddressList.includes(from) || lendingAddressList.includes(to);
+  const isBurning =
+    burningAddressList.includes(from) || burningAddressList.includes(to);
+  const isTotal = isBurning;
+
+  await context.db
+    .insert(transfer)
+    .values({
+      transactionHash,
+      daoId,
+      tokenId: tokenAddress,
+      amount: value,
+      fromAccountId: from,
+      toAccountId: to,
+      timestamp,
+      logIndex,
+      isCex,
+      isDex,
+      isLending,
+      isTotal,
+    })
+    .onConflictDoNothing();
+
+  // Update transaction-level flags based on this transfer
+  await updateTransactionFlags(
+    context,
+    daoId,
+    transactionHash,
+    isCex,
+    isDex,
+    isLending,
+    isTotal,
+  );
 
   // Update lending supply
   await updateSupplyMetric(
@@ -324,8 +352,6 @@ export const tokenTransfer = async (
   await updateCirculatingSupplyMetric(
     context,
     tokenData,
-    isTotalSupplyTransaction,
-    isTreasuryTransaction,
     MetricTypesEnum.CIRCULATING_SUPPLY,
     daoId,
     tokenAddress,

@@ -196,6 +196,34 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
         
         echo "✅ Post-voting delegation events completed!"
         
+        echo "🔄 Creating Multicall3 operations for complex scenarios..."
+        
+        # Multicall3 Operation 1: Multiple transfers in one transaction
+        echo "📊 Multicall3 Operation 1: Multiple transfers in one transaction..."
+        forge script script/Multicall3Operations.s.sol:Multicall3Operations --sig "runOperation1()" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
+        sleep 2
+        
+        # Multicall3 Operation 2: Multiple delegations from different accounts
+        echo "📊 Multicall3 Operation 2: Multiple delegations from different accounts..."
+        forge script script/Multicall3Operations.s.sol:Multicall3Operations --sig "runOperation2()" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
+        sleep 2
+        
+        # Multicall3 Operation 3: Mixed transfers and delegation in one transaction
+        echo "📊 Multicall3 Operation 3: Mixed transfers and delegation in one transaction..."
+        forge script script/Multicall3Operations.s.sol:Multicall3Operations --sig "runOperation3()" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
+        sleep 2
+        
+        # Multicall3 Operation 4: Complex scenario with many operations
+        echo "📊 Multicall3 Operation 4: Complex scenario with many operations..."
+        forge script script/Multicall3Operations.s.sol:Multicall3Operations --sig "runOperation4()" --rpc-url http://localhost:8545 --broadcast --private-key $ALICE_KEY
+        
+        sleep 2
+        
+        echo "✅ Multicall3 operations completed!"
+        
         echo "✅ Parameterized governance flow completed successfully!"
         echo "🎉 Development environment ready with:"
         echo "   - Forked mainnet state with all existing contracts"
@@ -207,6 +235,12 @@ forge script script/DeployENS.sol:DeployENS --rpc-url http://localhost:8545 --br
         echo "     * Proposal 2: Transfer 5 ENS to Charlie (Alice=FOR, Bob=AGAINST, Charlie=ABSTAIN - EXECUTED)"
         echo "     * Proposal 3: Transfer 5 ENS to David (Alice=AGAINST, Bob=FOR, Charlie=FOR - LEFT AS VOTED)"
         echo "     * Proposal 4: Transfer 3 ENS to Alice (Alice=AGAINST, Bob=AGAINST, Charlie=AGAINST - LEFT AS DEFEATED)"
+        echo "   - Multicall3 operations creating complex transaction scenarios:"
+        echo "     * Operation 1: 4 transfers in one transaction (Alice to Bob, Charlie, David, Alice)"
+        echo "     * Operation 2: Multiple delegations from different accounts"
+        echo "     * Operation 3: 3 transfers + 1 delegation in one transaction"
+        echo "     * Operation 4: 5 transfers + 1 delegation in one transaction"
+        echo "   - Address classification for CEX/DEX/Lending flag testing"
         echo "   - Clean parameterized script architecture for easy testing"
         echo ""
         echo "🔧 Access to all mainnet contracts including:"

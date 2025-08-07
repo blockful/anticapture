@@ -10,7 +10,7 @@ export class TransactionsService {
   async getTransactionsWithChildren(
     params: TransactionsRequest = {},
   ): Promise<TransactionsResponse> {
-    const { from, to, minVolume, maxVolume, affectedSupply } = params;
+    const { from, to, minAmount, maxAmount, affectedSupply } = params;
 
     // Get transactions with their children
     const result = await this.repository.getTransactionsWithChildren(params);
@@ -19,8 +19,8 @@ export class TransactionsService {
     const total = await this.repository.getTransactionCount({
       from,
       to,
-      minVolume,
-      maxVolume,
+      minAmount,
+      maxAmount,
       affectedSupply,
     });
 

@@ -62,8 +62,12 @@ switch (daoId) {
   }
   case DaoIdEnum.TEST: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
-    ENSTokenIndexer(token.address, token.decimals);
-    ENSGovernorIndexer(new ENSGovernor(client, governor.address));
+    ENSTokenIndexer(token.address, token.decimals, daoId);
+    ENSGovernorIndexer(
+      new ENSClient(client, governor.address),
+      blockTime,
+      daoId,
+    );
     break;
   }
   default:

@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { transaction, transfer, delegation } from "ponder:schema";
-import { eq, desc, asc, and, or, isNotNull, count } from "ponder";
+import { eq, desc, asc, and, or, count, gte, lte } from "ponder";
 import {
   TransactionMapper,
   TransactionsRequest,
@@ -21,8 +21,8 @@ export class TransactionsRepository {
       sortOrder = "desc",
       from,
       to,
-      minVolume,
-      maxVolume,
+      minAmount,
+      maxAmount,
       affectedSupply,
     } = params;
 
@@ -36,10 +36,51 @@ export class TransactionsRepository {
       affectedSupplyFilters,
     );
 
-    // If volume filtering is needed, we need to calculate total volume per transaction
-    if (minVolume !== undefined || maxVolume !== undefined) {
-      // Get all transactions with their transfers and delegations first
-      const allTransactionsWithData = await db
+    // If amount filtering is needed, we need to use a more complex query
+    if (minAmount !== undefined || maxAmount !== undefined) {
+      // Build amount filtering conditions
+      const amountConditions = [];
+
+      // Handle transfers
+      if (minAmount !== undefined && maxAmount !== undefined) {
+        // Both min and max amount specified
+        amountConditions.push(
+          and(
+            gte(transfer.amount, BigInt(minAmount)),
+            lte(transfer.amount, BigInt(maxAmount)),
+          ),
+        );
+        amountConditions.push(
+          and(
+            gte(delegation.delegatedValue, BigInt(minAmount)),
+            lte(delegation.delegatedValue, BigInt(maxAmount)),
+          ),
+        );
+      } else if (minAmount !== undefined) {
+        // Only min amount specified
+        amountConditions.push(and(gte(transfer.amount, BigInt(minAmount))));
+        amountConditions.push(
+          and(gte(delegation.delegatedValue, BigInt(minAmount))),
+        );
+      } else if (maxAmount !== undefined) {
+        // Only max amount specified
+        amountConditions.push(and(lte(transfer.amount, BigInt(maxAmount))));
+        amountConditions.push(
+          and(lte(delegation.delegatedValue, BigInt(maxAmount))),
+        );
+      }
+
+      // Combine amount conditions with OR logic
+      const amountFilterCondition =
+        amountConditions.length > 0 ? or(...amountConditions) : undefined;
+
+      // Combine all conditions
+      const allConditions = [...whereConditions, amountFilterCondition].filter(
+        Boolean,
+      );
+
+      // Get transactions with their transfers and delegations
+      const transactionsWithData = await db
         .select({
           transaction: transaction,
           transfer: transfer,
@@ -54,14 +95,16 @@ export class TransactionsRepository {
           delegation,
           eq(transaction.transactionHash, delegation.transactionHash),
         )
-        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+        .where(allConditions.length > 0 ? and(...allConditions) : undefined)
         .orderBy(
           sortBy === "timestamp"
             ? sortOrder === "desc"
               ? desc(transaction.timestamp)
               : asc(transaction.timestamp)
             : desc(transaction.timestamp),
-        );
+        )
+        .limit(limit)
+        .offset(offset);
 
       // Group the results by transaction
       const transactionMap = new Map<
@@ -73,7 +116,7 @@ export class TransactionsRepository {
         }
       >();
 
-      for (const row of allTransactionsWithData) {
+      for (const row of transactionsWithData) {
         const hash = row.transaction.transactionHash;
 
         if (!transactionMap.has(hash)) {
@@ -94,48 +137,14 @@ export class TransactionsRepository {
         }
       }
 
-      // Filter transactions by their total volume
-      const filteredTransactions = Array.from(transactionMap.values()).filter(
-        (entry) => {
-          // Calculate volume (same logic as in mapper)
-          let volume = 0n;
-          if (entry.transfers.length > 0) {
-            volume = entry.transfers.reduce(
-              (sum, transfer) => sum + (transfer.amount || 0n),
-              0n,
-            );
-          } else if (entry.delegations.length > 0) {
-            volume = entry.delegations.reduce((sum, delegation) => {
-              const delegatedValue = delegation.delegatedValue || 0n;
-              // Only add positive values (ignore negative or zero)
-              return delegatedValue > 0n ? sum + delegatedValue : sum;
-            }, 0n);
-          }
-
-          // Apply volume filters
-          if (minVolume !== undefined && volume <= BigInt(minVolume)) {
-            return false;
-          }
-          if (maxVolume !== undefined && volume >= BigInt(maxVolume)) {
-            return false;
-          }
-          return true;
-        },
-      );
-
-      // Apply pagination to filtered results
-      const paginatedTransactions = filteredTransactions.slice(
-        offset,
-        offset + limit,
-      );
-
       // Map to API response using the mapper
-      const mappedTransactions = paginatedTransactions.map((entry) =>
-        TransactionMapper.toApi(
-          entry.transaction,
-          entry.transfers,
-          entry.delegations,
-        ),
+      const mappedTransactions = Array.from(transactionMap.values()).map(
+        (entry) =>
+          TransactionMapper.toApi(
+            entry.transaction,
+            entry.transfers,
+            entry.delegations,
+          ),
       );
 
       return {
@@ -143,7 +152,7 @@ export class TransactionsRepository {
       };
     }
 
-    // If no volume filtering, use simple query with joins
+    // If no amount filtering, use simple query with joins
     const transactionsWithData = await db
       .select({
         transaction: transaction,
@@ -220,12 +229,12 @@ export class TransactionsRepository {
     params: {
       from?: string;
       to?: string;
-      minVolume?: number;
-      maxVolume?: number;
+      minAmount?: number;
+      maxAmount?: number;
       affectedSupply?: AffectedSupply[];
     } = {},
   ): Promise<number> {
-    const { from, to, minVolume, maxVolume, affectedSupply } = params;
+    const { from, to, minAmount, maxAmount, affectedSupply } = params;
 
     // Parse affectedSupply array into individual filters
     const affectedSupplyFilters = this.parseAffectedSupply(affectedSupply);
@@ -237,15 +246,50 @@ export class TransactionsRepository {
       affectedSupplyFilters,
     );
 
-    // If volume filtering is needed, we need to calculate total volume per transaction
-    if (minVolume !== undefined || maxVolume !== undefined) {
-      // For volume filtering, we still need to get all transactions to calculate volume
-      // This is because volume is calculated from transfers/delegations, not stored directly
-      const allTransactionsWithData = await db
+    // If amount filtering is needed, we need to use a more complex query
+    if (minAmount !== undefined || maxAmount !== undefined) {
+      // Build amount filtering conditions
+      const amountConditions = [];
+
+      // Handle transfers
+      if (minAmount !== undefined && maxAmount !== undefined) {
+        amountConditions.push(
+          and(
+            gte(transfer.amount, BigInt(minAmount)),
+            lte(transfer.amount, BigInt(maxAmount)),
+          ),
+        );
+        amountConditions.push(
+          and(
+            gte(delegation.delegatedValue, BigInt(minAmount)),
+            lte(delegation.delegatedValue, BigInt(maxAmount)),
+          ),
+        );
+      } else if (minAmount !== undefined) {
+        amountConditions.push(and(gte(transfer.amount, BigInt(minAmount))));
+        amountConditions.push(
+          and(gte(delegation.delegatedValue, BigInt(minAmount))),
+        );
+      } else if (maxAmount !== undefined) {
+        amountConditions.push(and(lte(transfer.amount, BigInt(maxAmount))));
+        amountConditions.push(
+          and(lte(delegation.delegatedValue, BigInt(maxAmount))),
+        );
+      }
+
+      // Combine amount conditions with OR logic
+      const amountFilterCondition =
+        amountConditions.length > 0 ? or(...amountConditions) : undefined;
+
+      // Combine all conditions
+      const allConditions = [...whereConditions, amountFilterCondition].filter(
+        Boolean,
+      );
+
+      // Get distinct transaction hashes that match the criteria
+      const result = await db
         .select({
-          transaction: transaction,
-          transfer: transfer,
-          delegation: delegation,
+          transactionHash: transaction.transactionHash,
         })
         .from(transaction)
         .leftJoin(
@@ -256,76 +300,17 @@ export class TransactionsRepository {
           delegation,
           eq(transaction.transactionHash, delegation.transactionHash),
         )
-        .where(
-          whereConditions.length > 0 ? and(...whereConditions) : undefined,
-        );
+        .where(allConditions.length > 0 ? and(...allConditions) : undefined);
 
-      // Group the results by transaction
-      const transactionMap = new Map<
-        string,
-        {
-          transaction: typeof transaction.$inferSelect;
-          transfers: (typeof transfer.$inferSelect)[];
-          delegations: (typeof delegation.$inferSelect)[];
-        }
-      >();
+      // Count distinct transaction hashes
+      const distinctTransactionHashes = new Set(
+        result.map((row) => row.transactionHash).filter(Boolean),
+      );
 
-      for (const row of allTransactionsWithData) {
-        const hash = row.transaction.transactionHash;
-        if (!hash) continue;
-
-        if (!transactionMap.has(hash)) {
-          transactionMap.set(hash, {
-            transaction: row.transaction,
-            transfers: [],
-            delegations: [],
-          });
-        }
-
-        const entry = transactionMap.get(hash)!;
-
-        if (row.transfer) {
-          entry.transfers.push(row.transfer);
-        }
-        if (row.delegation) {
-          entry.delegations.push(row.delegation);
-        }
-      }
-
-      // Filter by volume if needed
-      let filteredTransactions = Array.from(transactionMap.values());
-      if (minVolume !== undefined || maxVolume !== undefined) {
-        filteredTransactions = filteredTransactions.filter((entry) => {
-          // Calculate volume (same logic as in mapper)
-          let volume = 0n;
-          if (entry.transfers.length > 0) {
-            volume = entry.transfers.reduce(
-              (sum, transfer) => sum + (transfer.amount || 0n),
-              0n,
-            );
-          } else if (entry.delegations.length > 0) {
-            volume = entry.delegations.reduce((sum, delegation) => {
-              const delegatedValue = delegation.delegatedValue || 0n;
-              // Only add positive values (ignore negative or zero)
-              return delegatedValue > 0n ? sum + delegatedValue : sum;
-            }, 0n);
-          }
-
-          // Apply volume filters
-          if (minVolume !== undefined && volume <= BigInt(minVolume)) {
-            return false;
-          }
-          if (maxVolume !== undefined && volume >= BigInt(maxVolume)) {
-            return false;
-          }
-          return true;
-        });
-      }
-
-      return filteredTransactions.length;
+      return distinctTransactionHashes.size;
     }
 
-    // If no volume filtering, use efficient COUNT query
+    // If no amount filtering, use efficient COUNT query
     const result = await db
       .select({
         count: count(),
@@ -340,10 +325,7 @@ export class TransactionsRepository {
     isCex?: boolean;
     isDex?: boolean;
     isLending?: boolean;
-    isTreasury?: boolean;
-    isBurning?: boolean;
     isTotal?: boolean;
-    isCirculating?: boolean;
   } {
     if (!affectedSupply || affectedSupply.length === 0) {
       return {};
@@ -353,10 +335,7 @@ export class TransactionsRepository {
       isCex?: boolean;
       isDex?: boolean;
       isLending?: boolean;
-      isTreasury?: boolean;
-      isBurning?: boolean;
       isTotal?: boolean;
-      isCirculating?: boolean;
     } = {};
 
     if (affectedSupply.includes("CEX")) {
@@ -368,17 +347,8 @@ export class TransactionsRepository {
     if (affectedSupply.includes("LENDING")) {
       filters.isLending = true;
     }
-    if (affectedSupply.includes("TREASURY")) {
-      filters.isTreasury = true;
-    }
-    if (affectedSupply.includes("BURNING")) {
-      filters.isBurning = true;
-    }
     if (affectedSupply.includes("TOTAL")) {
       filters.isTotal = true;
-    }
-    if (affectedSupply.includes("CIRCULATING")) {
-      filters.isCirculating = true;
     }
 
     return filters;
@@ -391,10 +361,7 @@ export class TransactionsRepository {
       isCex?: boolean;
       isDex?: boolean;
       isLending?: boolean;
-      isTreasury?: boolean;
-      isBurning?: boolean;
       isTotal?: boolean;
-      isCirculating?: boolean;
     },
   ) {
     const whereConditions = [];
@@ -403,14 +370,8 @@ export class TransactionsRepository {
     if (from) {
       const fromConditions = [
         eq(transaction.fromAddress, from),
-        and(
-          isNotNull(transfer.transactionHash),
-          eq(transfer.fromAccountId, from),
-        ),
-        and(
-          isNotNull(delegation.transactionHash),
-          eq(delegation.delegatorAccountId, from),
-        ),
+        eq(transfer.fromAccountId, from),
+        eq(delegation.delegatorAccountId, from),
       ];
       whereConditions.push(or(...fromConditions));
     }
@@ -419,16 +380,13 @@ export class TransactionsRepository {
     if (to) {
       const toConditions = [
         eq(transaction.toAddress, to),
-        and(isNotNull(transfer.transactionHash), eq(transfer.toAccountId, to)),
-        and(
-          isNotNull(delegation.transactionHash),
-          eq(delegation.delegateAccountId, to),
-        ),
+        eq(transfer.toAccountId, to),
+        eq(delegation.delegateAccountId, to),
       ];
       whereConditions.push(or(...toConditions));
     }
 
-    // Apply affectedSupply filters
+    // Apply affectedSupply filters - only check transaction table
     if (affectedSupplyFilters.isCex !== undefined) {
       whereConditions.push(eq(transaction.isCex, affectedSupplyFilters.isCex));
     }
@@ -440,24 +398,9 @@ export class TransactionsRepository {
         eq(transaction.isLending, affectedSupplyFilters.isLending),
       );
     }
-    if (affectedSupplyFilters.isTreasury !== undefined) {
-      whereConditions.push(
-        eq(transaction.isTreasury, affectedSupplyFilters.isTreasury),
-      );
-    }
-    if (affectedSupplyFilters.isBurning !== undefined) {
-      whereConditions.push(
-        eq(transaction.isBurning, affectedSupplyFilters.isBurning),
-      );
-    }
     if (affectedSupplyFilters.isTotal !== undefined) {
       whereConditions.push(
         eq(transaction.isTotal, affectedSupplyFilters.isTotal),
-      );
-    }
-    if (affectedSupplyFilters.isCirculating !== undefined) {
-      whereConditions.push(
-        eq(transaction.isCirculating, affectedSupplyFilters.isCirculating),
       );
     }
 

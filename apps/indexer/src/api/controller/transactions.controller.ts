@@ -39,8 +39,8 @@ export function transactions(app: Hono, service: TransactionsService) {
         sortOrder,
         from,
         to,
-        minVolume,
-        maxVolume,
+        minAmount,
+        maxAmount,
         affectedSupply,
       } = context.req.valid("query");
 
@@ -51,8 +51,8 @@ export function transactions(app: Hono, service: TransactionsService) {
         sortOrder,
         from,
         to,
-        minVolume,
-        maxVolume,
+        minAmount,
+        maxAmount,
         affectedSupply,
       });
 

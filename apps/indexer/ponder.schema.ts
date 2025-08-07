@@ -103,6 +103,10 @@ export const delegation = onchainTable(
     previousDelegate: drizzle.text("previous_delegate"),
     timestamp: drizzle.bigint(),
     logIndex: drizzle.integer("log_index").notNull(),
+    isCex: drizzle.boolean().notNull().default(false),
+    isDex: drizzle.boolean().notNull().default(false),
+    isLending: drizzle.boolean().notNull().default(false),
+    isTotal: drizzle.boolean().notNull().default(false),
   }),
   (table) => ({
     pk: primaryKey({
@@ -126,6 +130,10 @@ export const transfer = onchainTable(
     toAccountId: drizzle.text("to_account_id"),
     timestamp: drizzle.bigint(),
     logIndex: drizzle.integer("log_index").notNull(),
+    isCex: drizzle.boolean().notNull().default(false),
+    isDex: drizzle.boolean().notNull().default(false),
+    isLending: drizzle.boolean().notNull().default(false),
+    isTotal: drizzle.boolean().notNull().default(false),
   }),
   (table) => ({
     pk: primaryKey({
@@ -213,10 +221,7 @@ export const transaction = onchainTable("transaction", (drizzle) => ({
   isCex: drizzle.boolean().notNull().default(false),
   isDex: drizzle.boolean().notNull().default(false),
   isLending: drizzle.boolean().notNull().default(false),
-  isTreasury: drizzle.boolean().notNull().default(false),
-  isBurning: drizzle.boolean().notNull().default(false),
   isTotal: drizzle.boolean().notNull().default(false),
-  isCirculating: drizzle.boolean().notNull().default(false),
   timestamp: drizzle.bigint().notNull(),
 }));
 

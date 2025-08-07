@@ -28,6 +28,10 @@ export function getGovernor<
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new OPClient(client, governor.address);
     }
+    case DaoIdEnum.TEST: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new ENSClient(client, governor.address);
+    }
     default:
       return null;
   }

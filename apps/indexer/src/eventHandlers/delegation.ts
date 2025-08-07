@@ -14,8 +14,15 @@ import {
   ensureAccountsExist,
   storeDailyBucket,
   createOrUpdateTransaction,
+  updateTransactionFlags,
 } from "./shared";
 import { DaoIdEnum } from "@/lib/enums";
+import {
+  BurningAddresses,
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+} from "@/lib/constants";
 
 export const delegateChanged = async (
   context: Context,
@@ -64,6 +71,29 @@ export const delegateChanged = async (
     tokenId,
   });
 
+  // Pre-compute address lists for flag determination
+  const lendingAddressList = Object.values(
+    LendingAddresses[daoId as DaoIdEnum] || {},
+  );
+  const cexAddressList = Object.values(CEXAddresses[daoId as DaoIdEnum] || {});
+  const dexAddressList = Object.values(DEXAddresses[daoId as DaoIdEnum] || {});
+  const burningAddressList = Object.values(
+    BurningAddresses[daoId as DaoIdEnum] || {},
+  );
+
+  // Determine flags for the delegation
+  const isCex =
+    cexAddressList.includes(delegator) || cexAddressList.includes(toDelegate);
+  const isDex =
+    dexAddressList.includes(delegator) || dexAddressList.includes(toDelegate);
+  const isLending =
+    lendingAddressList.includes(delegator) ||
+    lendingAddressList.includes(toDelegate);
+  const isBurning =
+    burningAddressList.includes(delegator) ||
+    burningAddressList.includes(toDelegate);
+  const isTotal = isBurning;
+
   await context.db
     .insert(delegation)
     .values({
@@ -75,10 +105,25 @@ export const delegateChanged = async (
       previousDelegate: fromDelegate,
       timestamp,
       logIndex,
+      isCex,
+      isDex,
+      isLending,
+      isTotal,
     })
     .onConflictDoUpdate({
       delegatedValue: delegatorBalance?.balance ?? 0n,
     });
+
+  // Update transaction-level flags based on this delegation
+  await updateTransactionFlags(
+    context,
+    daoId as DaoIdEnum,
+    txHash,
+    isCex,
+    isDex,
+    isLending,
+    isTotal,
+  );
 
   // Update the delegator's delegate
   await context.db
