@@ -212,7 +212,7 @@ export const Delegates = ({
             {!isMobile && (
               <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
                 <Plus className="size-3.5" />
-                <span className="text-sm font-medium">Details</span>
+                <p className="text-sm font-medium">Details</p>
               </div>
             )}
           </div>
@@ -220,7 +220,7 @@ export const Delegates = ({
       },
       header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-          <span>Address</span>
+          <p>Address</p>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter}
@@ -292,8 +292,8 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center justify-start gap-1 whitespace-nowrap px-4 py-2 text-end text-sm">
-            <span className="text-secondary">{variation.split(" ")[0]}</span>
-            <span
+            <p className="text-secondary">{variation.split(" ")[0]}</p>
+            <p
               className={cn(
                 variation.includes("↑")
                   ? "text-success"
@@ -303,7 +303,7 @@ export const Delegates = ({
               )}
             >
               {variation.split(" ").slice(2).join(" ")}
-            </span>
+            </p>
           </div>
         );
       },
