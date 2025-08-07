@@ -6,7 +6,7 @@ import { SkeletonRow, TheTable } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address } from "viem";
-import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
@@ -181,7 +181,7 @@ export const VotingPowerTable = ({
   if (error) {
     return (
       <div className="flex items-center justify-center p-4">
-        <BlankState
+        <BlankSlate
           variant="title"
           icon={AlertOctagon}
           title="Failed to load the API definition"
@@ -194,7 +194,7 @@ export const VotingPowerTable = ({
   if (!loading && tableData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-4">
-        <BlankState
+        <BlankSlate
           variant="default"
           icon={Inbox}
           description="No voting power data found for this address"

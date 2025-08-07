@@ -6,7 +6,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useVotingPowerData } from "@/features/holders-and-delegates/delegate/drawer/voting-power/hooks/useVotingPowerData";
-import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Inbox } from "lucide-react";
 
 const ChartLegend = ({
@@ -84,7 +84,7 @@ export const VotingPower = ({
     (topFiveDelegators.length === 0 && !loadingVotingPowerData)
   ) {
     return (
-      <BlankState
+      <BlankSlate
         variant="default"
         icon={Inbox}
         description="No delegators found"

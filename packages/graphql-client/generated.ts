@@ -93,6 +93,10 @@ export type Query = {
   historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
+  /** Returns a single proposal by its ID */
+  proposal?: Maybe<Proposal_200_Response>;
+  /** Returns a list of proposal */
+  proposals?: Maybe<Array<Maybe<Query_Proposals_Items>>>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
@@ -244,6 +248,8 @@ export type QueryDaosArgs = {
 
 
 export type QueryDelegationArgs = {
+  delegateAccountId: Scalars['String']['input'];
+  delegatorAccountId: Scalars['String']['input'];
   transactionHash: Scalars['String']['input'];
 };
 
@@ -267,6 +273,20 @@ export type QueryHistoricalBalancesArgs = {
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
+};
+
+
+export type QueryProposalArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryProposalsArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -317,6 +337,8 @@ export type QueryTotalAssetsArgs = {
 
 
 export type QueryTransferArgs = {
+  fromAccountId: Scalars['String']['input'];
+  toAccountId: Scalars['String']['input'];
   transactionHash: Scalars['String']['input'];
 };
 
@@ -914,9 +936,10 @@ export type Delegation = {
   delegatedValue: Scalars['BigInt']['output'];
   delegator?: Maybe<Account>;
   delegatorAccountId?: Maybe<Scalars['String']['output']>;
+  logIndex: Scalars['Int']['output'];
   previousDelegate?: Maybe<Scalars['String']['output']>;
   timestamp?: Maybe<Scalars['BigInt']['output']>;
-  transactionHash: Scalars['String']['output'];
+  transactionHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type DelegationFilter = {
@@ -960,6 +983,14 @@ export type DelegationFilter = {
   delegatorAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   delegatorAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   delegatorAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
+  logIndex?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   previousDelegate?: InputMaybe<Scalars['String']['input']>;
   previousDelegate_contains?: InputMaybe<Scalars['String']['input']>;
   previousDelegate_ends_with?: InputMaybe<Scalars['String']['input']>;
@@ -1014,6 +1045,24 @@ export enum MetricType {
   Treasury = 'TREASURY'
 }
 
+export type Proposal_200_Response = {
+  __typename?: 'proposal_200_response';
+  abstainVotes: Scalars['String']['output'];
+  againstVotes: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  endBlock: Scalars['Float']['output'];
+  endTimestamp: Scalars['String']['output'];
+  forVotes: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  proposerAccountId: Scalars['String']['output'];
+  startBlock: Scalars['Float']['output'];
+  status: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  txHash: Scalars['String']['output'];
+};
+
 export type ProposalsActivity_200_Response = {
   __typename?: 'proposalsActivity_200_response';
   address: Scalars['String']['output'];
@@ -1030,20 +1079,22 @@ export type ProposalsOnchain = {
   __typename?: 'proposalsOnchain';
   abstainVotes: Scalars['BigInt']['output'];
   againstVotes: Scalars['BigInt']['output'];
-  calldatas?: Maybe<Scalars['JSON']['output']>;
+  calldatas: Scalars['JSON']['output'];
   daoId: Scalars['String']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  endBlock?: Maybe<Scalars['String']['output']>;
+  description: Scalars['String']['output'];
+  endBlock: Scalars['Int']['output'];
+  endTimestamp: Scalars['BigInt']['output'];
   forVotes: Scalars['BigInt']['output'];
   id: Scalars['String']['output'];
   proposer?: Maybe<Account>;
-  proposerAccountId?: Maybe<Scalars['String']['output']>;
-  signatures?: Maybe<Scalars['JSON']['output']>;
-  startBlock?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<Scalars['String']['output']>;
-  targets?: Maybe<Scalars['JSON']['output']>;
-  timestamp?: Maybe<Scalars['BigInt']['output']>;
-  values?: Maybe<Scalars['JSON']['output']>;
+  proposerAccountId: Scalars['String']['output'];
+  signatures: Scalars['JSON']['output'];
+  startBlock: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  targets: Scalars['JSON']['output'];
+  timestamp: Scalars['BigInt']['output'];
+  txHash: Scalars['String']['output'];
+  values: Scalars['JSON']['output'];
   votes?: Maybe<VotesOnchainPage>;
 };
 
@@ -1096,16 +1147,22 @@ export type ProposalsOnchainFilter = {
   description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   description_starts_with?: InputMaybe<Scalars['String']['input']>;
-  endBlock?: InputMaybe<Scalars['String']['input']>;
-  endBlock_contains?: InputMaybe<Scalars['String']['input']>;
-  endBlock_ends_with?: InputMaybe<Scalars['String']['input']>;
-  endBlock_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  endBlock_not?: InputMaybe<Scalars['String']['input']>;
-  endBlock_not_contains?: InputMaybe<Scalars['String']['input']>;
-  endBlock_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  endBlock_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  endBlock_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  endBlock_starts_with?: InputMaybe<Scalars['String']['input']>;
+  endBlock?: InputMaybe<Scalars['Int']['input']>;
+  endBlock_gt?: InputMaybe<Scalars['Int']['input']>;
+  endBlock_gte?: InputMaybe<Scalars['Int']['input']>;
+  endBlock_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  endBlock_lt?: InputMaybe<Scalars['Int']['input']>;
+  endBlock_lte?: InputMaybe<Scalars['Int']['input']>;
+  endBlock_not?: InputMaybe<Scalars['Int']['input']>;
+  endBlock_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  endTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  endTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   forVotes?: InputMaybe<Scalars['BigInt']['input']>;
   forVotes_gt?: InputMaybe<Scalars['BigInt']['input']>;
   forVotes_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1134,16 +1191,14 @@ export type ProposalsOnchainFilter = {
   proposerAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   proposerAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   proposerAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  startBlock?: InputMaybe<Scalars['String']['input']>;
-  startBlock_contains?: InputMaybe<Scalars['String']['input']>;
-  startBlock_ends_with?: InputMaybe<Scalars['String']['input']>;
-  startBlock_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startBlock_not?: InputMaybe<Scalars['String']['input']>;
-  startBlock_not_contains?: InputMaybe<Scalars['String']['input']>;
-  startBlock_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  startBlock_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startBlock_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  startBlock_starts_with?: InputMaybe<Scalars['String']['input']>;
+  startBlock?: InputMaybe<Scalars['Int']['input']>;
+  startBlock_gt?: InputMaybe<Scalars['Int']['input']>;
+  startBlock_gte?: InputMaybe<Scalars['Int']['input']>;
+  startBlock_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  startBlock_lt?: InputMaybe<Scalars['Int']['input']>;
+  startBlock_lte?: InputMaybe<Scalars['Int']['input']>;
+  startBlock_not?: InputMaybe<Scalars['Int']['input']>;
+  startBlock_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   status?: InputMaybe<Scalars['String']['input']>;
   status_contains?: InputMaybe<Scalars['String']['input']>;
   status_ends_with?: InputMaybe<Scalars['String']['input']>;
@@ -1162,6 +1217,16 @@ export type ProposalsOnchainFilter = {
   timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  txHash?: InputMaybe<Scalars['String']['input']>;
+  txHash_contains?: InputMaybe<Scalars['String']['input']>;
+  txHash_ends_with?: InputMaybe<Scalars['String']['input']>;
+  txHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  txHash_not?: InputMaybe<Scalars['String']['input']>;
+  txHash_not_contains?: InputMaybe<Scalars['String']['input']>;
+  txHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  txHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  txHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  txHash_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ProposalsOnchainPage = {
@@ -1294,6 +1359,11 @@ export enum QueryInput_ProposalsActivity_UserVoteFilter {
   Yes = 'yes'
 }
 
+export enum QueryInput_Proposals_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_TotalAssets_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1348,6 +1418,24 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   timestamp: Scalars['String']['output'];
   voterAccountId: Scalars['String']['output'];
   votingPower?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_Proposals_Items = {
+  __typename?: 'query_proposals_items';
+  abstainVotes: Scalars['String']['output'];
+  againstVotes: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  endBlock: Scalars['Float']['output'];
+  endTimestamp: Scalars['String']['output'];
+  forVotes: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  proposerAccountId: Scalars['String']['output'];
+  startBlock: Scalars['Float']['output'];
+  status: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  txHash: Scalars['String']['output'];
 };
 
 export type Query_TotalAssets_Items = {
@@ -1472,12 +1560,13 @@ export type Transfer = {
   daoId: Scalars['String']['output'];
   from?: Maybe<Account>;
   fromAccountId?: Maybe<Scalars['String']['output']>;
+  logIndex: Scalars['Int']['output'];
   timestamp?: Maybe<Scalars['BigInt']['output']>;
   to?: Maybe<Account>;
   toAccountId?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Token>;
   tokenId?: Maybe<Scalars['String']['output']>;
-  transactionHash: Scalars['String']['output'];
+  transactionHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type TransferFilter = {
@@ -1511,6 +1600,14 @@ export type TransferFilter = {
   fromAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   fromAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   fromAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
+  logIndex?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   timestamp?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1665,10 +1762,11 @@ export type VotesOnchainPage = {
 export type VotingPowerHistory = {
   __typename?: 'votingPowerHistory';
   account?: Maybe<Account>;
-  accountId?: Maybe<Scalars['String']['output']>;
+  accountId: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
   delta: Scalars['BigInt']['output'];
+  logIndex: Scalars['Int']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
   transfer?: Maybe<Transfer>;
@@ -1706,6 +1804,14 @@ export type VotingPowerHistoryFilter = {
   delta_lte?: InputMaybe<Scalars['BigInt']['input']>;
   delta_not?: InputMaybe<Scalars['BigInt']['input']>;
   delta_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  logIndex?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
+  logIndex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   timestamp?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
   timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1751,7 +1857,7 @@ export type BalanceHistoryQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistoryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type BalanceHistoryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash?: string | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type BalanceHistoryTotalCountQueryVariables = Exact<{
   account: Scalars['String']['input'];
@@ -1770,7 +1876,7 @@ export type BalanceHistoryBuyQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistoryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type BalanceHistoryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash?: string | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type BalanceHistoryBuyTotalCountQueryVariables = Exact<{
   account: Scalars['String']['input'];
@@ -1789,7 +1895,7 @@ export type BalanceHistorySellQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistorySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type BalanceHistorySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp?: any | null, amount?: any | null, fromAccountId?: string | null, toAccountId?: string | null, transactionHash?: string | null }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type BalanceHistorySellTotalCountQueryVariables = Exact<{
   account: Scalars['String']['input'];
@@ -1869,6 +1975,7 @@ export type GetDelegatesQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
+  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
 
@@ -1950,6 +2057,7 @@ export type GetTopTokenHoldersQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
+  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
 
@@ -2661,14 +2769,14 @@ export type GetDelegateDelegationHistoryGraphLazyQueryHookResult = ReturnType<ty
 export type GetDelegateDelegationHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphSuspenseQuery>;
 export type GetDelegateDelegationHistoryGraphQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>;
 export const GetDelegatesDocument = gql`
-    query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc") {
+    query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc", $addresses: [String]) {
   accountPowers(
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: 10
     after: $after
     before: $before
-    where: {votingPower_gt: 0}
+    where: {votingPower_gt: 0, accountId_in: $addresses}
   ) {
     items {
       votingPower
@@ -2701,6 +2809,7 @@ export const GetDelegatesDocument = gql`
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
+ *      addresses: // value for 'addresses'
  *   },
  * });
  */
@@ -3137,14 +3246,14 @@ export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeo
 export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
 export type GetDaoAddressesAccountBalancesQueryResult = Apollo.QueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
 export const GetTopTokenHoldersDocument = gql`
-    query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String) {
+    query GetTopTokenHolders($after: String, $before: String, $limit: Int, $orderDirection: String, $addresses: [String]) {
   accountBalances(
     orderBy: "balance"
     orderDirection: $orderDirection
     limit: $limit
     after: $after
     before: $before
-    where: {balance_gt: 0}
+    where: {balance_gt: 0, accountId_in: $addresses}
   ) {
     items {
       accountId
@@ -3178,6 +3287,7 @@ export const GetTopTokenHoldersDocument = gql`
  *      before: // value for 'before'
  *      limit: // value for 'limit'
  *      orderDirection: // value for 'orderDirection'
+ *      addresses: // value for 'addresses'
  *   },
  * });
  */

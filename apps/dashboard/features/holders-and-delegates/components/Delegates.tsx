@@ -6,17 +6,18 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { Plus } from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
+import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 
 interface DelegateTableData {
   address: string;
@@ -66,6 +67,13 @@ export const Delegates = ({
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
+  // State for address filtering
+  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+
+  const handleAddressFilterApply = (address: string | undefined) => {
+    setCurrentAddressFilter(address || "");
+  };
+
   // Calculate time-based parameters
   const fromDate = useMemo(
     () => getTimeDataFromPeriod(timePeriod),
@@ -87,6 +95,7 @@ export const Delegates = ({
     orderDirection: sortDirection,
     daoId,
     days: timePeriod,
+    address: currentAddressFilter,
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
@@ -203,16 +212,21 @@ export const Delegates = ({
             {!isMobile && (
               <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
                 <Plus className="size-3.5" />
-                <span className="text-sm font-medium">Details</span>
+                <p className="text-sm font-medium">Details</p>
               </div>
             )}
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-2">
-          Address
-        </h4>
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <p>Address</p>
+          <AddressFilter
+            onApply={handleAddressFilterApply}
+            currentFilter={currentAddressFilter}
+            className="ml-2"
+          />
+        </div>
       ),
     },
     {
@@ -278,8 +292,8 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center justify-start gap-1 whitespace-nowrap px-4 py-2 text-end text-sm">
-            <span className="text-secondary">{variation.split(" ")[0]}</span>
-            <span
+            <p className="text-secondary">{variation.split(" ")[0]}</p>
+            <p
               className={cn(
                 variation.includes("↑")
                   ? "text-success"
@@ -289,7 +303,7 @@ export const Delegates = ({
               )}
             >
               {variation.split(" ").slice(2).join(" ")}
-            </span>
+            </p>
           </div>
         );
       },
@@ -471,6 +485,15 @@ export const Delegates = ({
           withSorting={true}
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
           isTableSmall={true}
+          showWhenEmpty={
+            <BlankSlate
+              variant="default"
+              icon={Inbox}
+              title=""
+              className="h-full rounded-none"
+              description="No addresses found"
+            />
+          }
         />
 
         <Pagination
