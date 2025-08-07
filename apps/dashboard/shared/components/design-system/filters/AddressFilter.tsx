@@ -133,7 +133,7 @@ export function AddressFilter({
               className="text-secondary flex h-auto items-center justify-center p-1 hover:text-white"
             >
               <ResetIcon className="size-4" />
-              <span className="ml-1 font-mono text-xs uppercase">RESET</span>
+              <span className="ml-1 font-mono text-xs uppercase">Reset</span>
             </Button>
           </div>
 
