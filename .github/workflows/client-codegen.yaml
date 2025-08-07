@@ -1,8 +1,8 @@
 name: GraphQL Client Codegen
 
 on:
-  push:
-    branches: ["**"]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   codegen:
