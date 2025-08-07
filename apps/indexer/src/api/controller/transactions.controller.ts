@@ -10,7 +10,7 @@ export function transactions(app: Hono, service: TransactionsService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "getTransactions",
+      operationId: "transactions",
       path: "/transactions",
       summary: "Get transactions with transfers and delegations",
       description:

@@ -17,7 +17,7 @@ const daoItemQueries = [
   "historicalBalances",
   "historicalVotingPower",
   "proposals",
-  "getTransactions",
+  "transactions",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
