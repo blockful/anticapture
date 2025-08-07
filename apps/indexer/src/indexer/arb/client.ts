@@ -1,25 +1,27 @@
 import { Account, Address, Chain, Client, Transport } from "viem";
 import { getBlockNumber, readContract } from "viem/actions";
 
-import { Governor } from "@/interfaces/governor";
+import { GovernorBase } from "@/indexer/governor.base";
+import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi";
 
 export class ARBClient<
-  TTransport extends Transport = Transport,
-  TChain extends Chain = Chain,
-  TAccount extends Account | undefined = Account | undefined,
-> implements Governor
+    TTransport extends Transport = Transport,
+    TChain extends Chain = Chain,
+    TAccount extends Account | undefined = Account | undefined,
+  >
+  extends GovernorBase
+  implements DAOClient
 {
-  private client: Client<TTransport, TChain, TAccount>;
   private readonly abi = GovernorAbi;
   private address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
-    this.client = client;
+    super(client);
     this.address = address;
   }
 
-  async getQuorum(): Promise<bigint> {
+  async getQuorum(_: string | null): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
     const targetBlock = blockNumber - 10n;
     return readContract(this.client, {
@@ -75,5 +77,13 @@ export class ARBClient<
       address: timelockAddress,
       functionName: "getMinDelay",
     });
+  }
+
+  calculateQuorum(votes: {
+    forVotes: bigint;
+    againstVotes: bigint;
+    abstainVotes: bigint;
+  }): bigint {
+    return votes.forVotes + votes.againstVotes;
   }
 }

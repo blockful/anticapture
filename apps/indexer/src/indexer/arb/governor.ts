@@ -1,42 +1,15 @@
 import { ponder } from "ponder:registry";
 
 import {
-  proposalCanceled,
   proposalCreated,
-  proposalExecuted,
+  updateProposalStatus,
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { Governor } from "@/interfaces/governor";
-import { dao } from "ponder:schema";
+import { ProposalStatus } from "@/lib/constants";
 
-export function GovernorIndexer(governor: Governor) {
+export function GovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.ARB;
-
-  ponder.on(`ARBGovernor:setup`, async ({ context }) => {
-    const [
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    ] = await Promise.all([
-      governor.getVotingPeriod(),
-      governor.getQuorum(),
-      governor.getVotingDelay(),
-      governor.getTimelockDelay(),
-      governor.getProposalThreshold(),
-    ]);
-
-    await context.db.insert(dao).values({
-      id: daoId,
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    });
-  });
 
   ponder.on(`ARBGovernor:VoteCast`, async ({ event, context }) => {
     await voteCast(context, daoId, {
@@ -51,8 +24,9 @@ export function GovernorIndexer(governor: Governor) {
   });
 
   ponder.on(`ARBGovernor:ProposalCreated`, async ({ event, context }) => {
-    await proposalCreated(context, daoId, {
+    await proposalCreated(context, daoId, blockTime, {
       proposalId: event.args.proposalId.toString(),
+      txHash: event.transaction.hash,
       proposer: event.args.proposer,
       targets: [...event.args.targets],
       values: [...event.args.values],
@@ -66,11 +40,19 @@ export function GovernorIndexer(governor: Governor) {
   });
 
   ponder.on(`ARBGovernor:ProposalCanceled`, async ({ event, context }) => {
-    await proposalCanceled(context, event.args.proposalId.toString());
+    await updateProposalStatus(
+      context,
+      event.args.proposalId.toString(),
+      ProposalStatus.CANCELED,
+    );
   });
 
   ponder.on(`ARBGovernor:ProposalExecuted`, async ({ event, context }) => {
-    await proposalExecuted(context, event.args.proposalId.toString());
+    await updateProposalStatus(
+      context,
+      event.args.proposalId.toString(),
+      ProposalStatus.EXECUTED,
+    );
   });
 
   ///////////////////////
@@ -92,7 +74,8 @@ export function GovernorIndexer(governor: Governor) {
   ponder.on(
     `ARBGovernorTreasury:ProposalCreated`,
     async ({ event, context }) => {
-      await proposalCreated(context, daoId, {
+      await proposalCreated(context, daoId, blockTime, {
+        txHash: event.transaction.hash,
         proposalId: event.args.proposalId.toString(),
         proposer: event.args.proposer,
         targets: [...event.args.targets],
@@ -110,14 +93,22 @@ export function GovernorIndexer(governor: Governor) {
   ponder.on(
     `ARBGovernorTreasury:ProposalCanceled`,
     async ({ event, context }) => {
-      await proposalCanceled(context, event.args.proposalId.toString());
+      await updateProposalStatus(
+        context,
+        event.args.proposalId.toString(),
+        ProposalStatus.CANCELED,
+      );
     },
   );
 
   ponder.on(
     `ARBGovernorTreasury:ProposalExecuted`,
     async ({ event, context }) => {
-      await proposalExecuted(context, event.args.proposalId.toString());
+      await updateProposalStatus(
+        context,
+        event.args.proposalId.toString(),
+        ProposalStatus.EXECUTED,
+      );
     },
   );
 }

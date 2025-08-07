@@ -1,4 +1,4 @@
-import { Account, Chain, Client, Transport } from "viem";
+import { Account, Chain, Client, fromHex, toHex, Transport } from "viem";
 
 import { DBProposal } from "../api/mappers";
 import { ProposalStatus } from "../lib/constants";
@@ -22,11 +22,27 @@ export abstract class GovernorBase<
     abstainVotes: bigint;
   }): bigint;
 
-  abstract getCurrentBlockNumber(): Promise<number>;
-
   abstract getQuorum(proposalId: string | null): Promise<bigint>;
 
-  async getProposalStatus(proposal: DBProposal): Promise<string> {
+  async getCurrentBlockNumber(): Promise<number> {
+    const result = await this.client.request({
+      method: "eth_blockNumber",
+    });
+    return fromHex(result, "number");
+  }
+
+  async getProposalStatus(
+    proposal: Pick<
+      DBProposal,
+      | "id"
+      | "status"
+      | "startBlock"
+      | "endBlock"
+      | "forVotes"
+      | "againstVotes"
+      | "abstainVotes"
+    >,
+  ): Promise<string> {
     const currentBlock = await this.getCurrentBlockNumber();
 
     // Skip proposals already finalized via event
@@ -70,5 +86,13 @@ export abstract class GovernorBase<
     }
 
     return proposal.status;
+  }
+
+  async getBlockTime(blockNumber: number): Promise<number | null> {
+    const block = await this.client.request({
+      method: "eth_getBlockByNumber",
+      params: [toHex(blockNumber), false],
+    });
+    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 }

@@ -1,12 +1,4 @@
-import {
-  Account,
-  Address,
-  Chain,
-  Client,
-  fromHex,
-  toHex,
-  Transport,
-} from "viem";
+import { Account, Address, Chain, Client, fromHex, Transport } from "viem";
 import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/interfaces/client";
@@ -91,14 +83,6 @@ export class UNIClient<
       method: "eth_blockNumber",
     });
     return fromHex(result, "number");
-  }
-
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    const block = await this.client.request({
-      method: "eth_getBlockByNumber",
-      params: [toHex(blockNumber), false],
-    });
-    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 
   calculateQuorum(votes: {
