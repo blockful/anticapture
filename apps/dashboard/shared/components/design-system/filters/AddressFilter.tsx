@@ -124,7 +124,7 @@ export function AddressFilter({
           {/* Header */}
           <div className="flex items-center justify-between px-3 py-2">
             <span className="text-secondary font-mono text-xs font-medium uppercase">
-              SEARCH ADDRESS
+              Search Address
             </span>
             <Button
               onClick={handleReset}
