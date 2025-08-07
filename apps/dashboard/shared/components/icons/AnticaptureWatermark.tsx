@@ -1,3 +1,4 @@
+import { cn } from "@/shared/utils";
 import { SVGProps } from "react";
 
 export const AnticaptureLogo = (props: SVGProps<SVGSVGElement>) => {
@@ -61,5 +62,25 @@ export const AnticaptureLogo = (props: SVGProps<SVGSVGElement>) => {
         />
       </g>
     </svg>
+  );
+};
+
+interface AnticaptureWatermarkProps extends SVGProps<HTMLDivElement> {
+  svgClassName?: string;
+}
+
+export const AnticaptureWatermark = (props: AnticaptureWatermarkProps) => {
+  return (
+    <div
+      {...props}
+      className={cn([
+        "pointer-events-none absolute inset-0 flex items-center justify-center",
+        props.className,
+      ])}
+    >
+      <AnticaptureLogo
+        className={cn(["h-16 w-48 opacity-40", props.svgClassName])}
+      />
+    </div>
   );
 };

@@ -11,7 +11,7 @@ import {
 import { formatNumberUserReadable } from "@/shared/utils";
 import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/voting-power/utils/renderCustomizedLabel";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureLogo";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 const PieChartCustomTooltip: React.FC<
   TooltipProps<number, string> & {
@@ -106,9 +106,7 @@ export const ThePieChart = ({
           />
         </PieChart>
       </ResponsiveContainer>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <AnticaptureLogo className="h-8 w-24 opacity-60" />
-      </div>
+      <AnticaptureWatermark />
     </div>
   );
 };

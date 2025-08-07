@@ -14,7 +14,7 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureLogo";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface MultilineChartTokenDistributionProps {
   datasets: Record<string, DaoMetricsDayBucket[] | undefined>;
@@ -105,9 +105,7 @@ export const MultilineChartTokenDistribution = ({
             ))}
         </LineChart>
       </ChartContainer>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <AnticaptureLogo className="h-16 w-48 opacity-60" />
-      </div>
+      <AnticaptureWatermark />
     </div>
   );
 };

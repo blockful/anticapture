@@ -22,7 +22,7 @@ import {
 } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureLogo";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -279,9 +279,7 @@ export const VotingPowerVariationGraph = ({
             />
           </LineChart>
         </ChartContainer>
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <AnticaptureLogo className="h-16 w-48 opacity-60" />
-        </div>
+        <AnticaptureWatermark />
       </div>
     </div>
   );
