@@ -1,38 +1,32 @@
 import { db } from "ponder:api";
 import { transaction, transfer, delegation } from "ponder:schema";
-import { eq, desc, asc, and, or, count, gte, lte } from "ponder";
-import {
-  TransactionMapper,
-  TransactionsRequest,
-  TransactionsResponse,
-  AffectedSupply,
-} from "../mappers/transactions";
+import { eq, desc, asc, and, or, gte, lte } from "ponder";
 
-type TransactionsResponseWithoutTotal = Omit<TransactionsResponse, "total">;
-
-type AffectedSupplyFilters = {
+export type AffectedSupplyFilters = {
   isCex?: boolean;
   isDex?: boolean;
   isLending?: boolean;
   isTotal?: boolean;
 };
 
-type QueryParams = {
-  limit: number;
-  offset: number;
-  sortBy: string;
-  sortOrder: string;
+export type TransactionFilters = {
+  from?: string;
+  to?: string;
+  affectedSupplyFilters: AffectedSupplyFilters;
+};
+
+export type TransferFilters = {
   from?: string;
   to?: string;
   minAmount?: number;
   maxAmount?: number;
-  affectedSupplyFilters: AffectedSupplyFilters;
 };
 
-type TransactionWithChildren = {
-  transaction: typeof transaction.$inferSelect;
-  transfers: (typeof transfer.$inferSelect)[];
-  delegations: (typeof delegation.$inferSelect)[];
+export type DelegationFilters = {
+  from?: string;
+  to?: string;
+  minAmount?: number;
+  maxAmount?: number;
 };
 
 export class TransactionsRepository {
@@ -85,7 +79,9 @@ export class TransactionsRepository {
       .where(or(...hashes.map((hash) => eq(delegation.transactionHash, hash))));
   }
 
-  async findTransactionsByFilters(filters: any): Promise<string[]> {
+  async findTransactionsByFilters(
+    filters: TransactionFilters,
+  ): Promise<string[]> {
     const conditions = [];
 
     if (filters.from)
@@ -118,7 +114,9 @@ export class TransactionsRepository {
     return result.map((t) => t.transactionHash);
   }
 
-  async findTransactionsByTransferFilters(filters: any): Promise<string[]> {
+  async findTransactionsByTransferFilters(
+    filters: TransferFilters,
+  ): Promise<string[]> {
     const conditions = [];
 
     if (filters.from) conditions.push(eq(transfer.fromAccountId, filters.from));
@@ -143,7 +141,9 @@ export class TransactionsRepository {
       .filter((hash): hash is string => Boolean(hash));
   }
 
-  async findTransactionsByDelegationFilters(filters: any): Promise<string[]> {
+  async findTransactionsByDelegationFilters(
+    filters: DelegationFilters,
+  ): Promise<string[]> {
     const conditions = [];
 
     if (filters.from)
@@ -172,7 +172,7 @@ export class TransactionsRepository {
 
   // Helper methods for data access only
   private buildAmountCondition(
-    field: any, // Drizzle column type
+    field: typeof transfer.amount | typeof delegation.delegatedValue,
     minAmount?: number,
     maxAmount?: number,
   ) {

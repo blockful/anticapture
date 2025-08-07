@@ -11,12 +11,7 @@ import {
   TREASURY_ADDRESSES,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import {
-  ensureAccountExists,
-  storeDailyBucket,
-  createOrUpdateTransaction,
-  updateTransactionFlags,
-} from "./shared";
+import { ensureAccountExists, storeDailyBucket } from "./shared";
 
 const updateSupplyMetric = async (
   context: Context,
@@ -149,8 +144,6 @@ export const tokenTransfer = async (
     transactionHash: Hex;
     value: bigint;
     timestamp: bigint;
-    transactionFrom: Address | null;
-    transactionTo: Address | null;
     logIndex: number;
   },
 ) => {
@@ -161,24 +154,13 @@ export const tokenTransfer = async (
     transactionHash,
     value,
     timestamp,
-    transactionFrom,
-    transactionTo,
     logIndex,
   } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
 
-  // Create or update transaction record with flags
-  // Use transaction sender/recipient if provided, otherwise fall back to transfer addresses
-  await createOrUpdateTransaction(
-    context,
-    daoId,
-    transactionHash,
-    transactionFrom || from,
-    transactionTo || to,
-    timestamp,
-  );
+  // Transaction handling moved to DAO-specific indexer
 
   // Transfer record will be created later with proper flags after address list calculations
 
@@ -252,16 +234,7 @@ export const tokenTransfer = async (
     })
     .onConflictDoNothing();
 
-  // Update transaction-level flags based on this transfer
-  await updateTransactionFlags(
-    context,
-    daoId,
-    transactionHash,
-    isCex,
-    isDex,
-    isLending,
-    isTotal,
-  );
+  // Transaction flag updates moved to DAO-specific indexer
 
   // Update lending supply
   await updateSupplyMetric(
@@ -308,12 +281,6 @@ export const tokenTransfer = async (
     timestamp,
   );
 
-  // Update treasury supply
-  const isToTreasury = treasuryAddressList.includes(to);
-  const isFromTreasury = treasuryAddressList.includes(from);
-  const isTreasuryTransaction =
-    (isToTreasury || isFromTreasury) && !(isToTreasury && isFromTreasury);
-
   await updateSupplyMetric(
     context,
     tokenData,
@@ -327,13 +294,6 @@ export const tokenTransfer = async (
     tokenAddress,
     timestamp,
   );
-
-  // Update total supply
-  const isToBurningAddress = burningAddressList.includes(to);
-  const isFromBurningAddress = burningAddressList.includes(from);
-  const isTotalSupplyTransaction =
-    (isToBurningAddress || isFromBurningAddress) &&
-    !(isToBurningAddress && isFromBurningAddress);
 
   await updateTotalSupplyMetric(
     context,

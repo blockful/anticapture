@@ -1,16 +1,16 @@
-import { TransactionsRepository } from "../../repositories/transactions.repository";
+import {
+  TransactionsRepository,
+  AffectedSupplyFilters,
+  TransactionWithChildren,
+} from "../../repositories/transactions.repository";
 import {
   TransactionsRequest,
   TransactionsResponse,
   TransactionMapper,
+  DBTransaction,
+  DBTransfer,
+  DBDelegation,
 } from "../../mappers/transactions";
-
-type AffectedSupplyFilters = {
-  isCex?: boolean;
-  isDex?: boolean;
-  isLending?: boolean;
-  isTotal?: boolean;
-};
 
 type TransactionFilters = {
   from?: string;
@@ -149,10 +149,10 @@ export class TransactionsService {
   }
 
   private groupTransactionsWithChildren(
-    transactions: any[],
-    transfers: any[],
-    delegations: any[],
-  ) {
+    transactions: DBTransaction[],
+    transfers: DBTransfer[],
+    delegations: DBDelegation[],
+  ): TransactionWithChildren[] {
     const transactionMap = new Map();
 
     // Initialize with transactions

@@ -111,6 +111,57 @@ export const updateTransactionFlags = async (
   }));
 };
 
+export const handleTransaction = async (
+  context: Context,
+  daoId: DaoIdEnum,
+  transactionHash: string,
+  from: Address | null,
+  to: Address | null,
+  timestamp: bigint,
+  addresses: Address[], // The addresses involved in this event
+) => {
+  // Early return if we can't create a transaction record
+  if (!from || !to) {
+    return;
+  }
+
+  // Import address constants
+  const { CEXAddresses, DEXAddresses, LendingAddresses, BurningAddresses } =
+    await import("@/lib/constants");
+
+  // First, create or update the transaction record
+  await createOrUpdateTransaction(
+    context,
+    daoId,
+    transactionHash,
+    from,
+    to,
+    timestamp,
+  );
+
+  // Calculate transaction flags based on addresses
+  const cexAddresses = Object.values(CEXAddresses[daoId] || {});
+  const dexAddresses = Object.values(DEXAddresses[daoId] || {});
+  const lendingAddresses = Object.values(LendingAddresses[daoId] || {});
+  const burningAddresses = Object.values(BurningAddresses[daoId] || {});
+
+  const isCex = addresses.some((addr) => cexAddresses.includes(addr));
+  const isDex = addresses.some((addr) => dexAddresses.includes(addr));
+  const isLending = addresses.some((addr) => lendingAddresses.includes(addr));
+  const isTotal = addresses.some((addr) => burningAddresses.includes(addr));
+
+  // Then, update the transaction flags
+  await updateTransactionFlags(
+    context,
+    daoId,
+    transactionHash,
+    isCex,
+    isDex,
+    isLending,
+    isTotal,
+  );
+};
+
 const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
   const SECONDS_IN_DAY = BigInt(86400); // 24 * 60 * 60
   return (timestampSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;

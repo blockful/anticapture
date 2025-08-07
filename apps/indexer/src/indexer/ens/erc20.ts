@@ -8,6 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
+import { handleTransaction } from "@/eventHandlers/shared";
 
 export function ENSTokenIndexer(
   address: Address,
@@ -23,6 +24,7 @@ export function ENSTokenIndexer(
   });
 
   ponder.on("ENSToken:Transfer", async ({ event, context }) => {
+    // Process the transfer
     await tokenTransfer(context, daoId, {
       from: event.args.from,
       to: event.args.to,
@@ -34,9 +36,21 @@ export function ENSTokenIndexer(
       transactionTo: event.transaction.to,
       logIndex: event.log.logIndex,
     });
+
+    // Handle transaction creation/update with flag calculation
+    await handleTransaction(
+      context,
+      daoId,
+      event.transaction.hash,
+      event.transaction.from,
+      event.transaction.to,
+      event.block.timestamp,
+      [event.args.from, event.args.to], // Addresses to check
+    );
   });
 
   ponder.on(`ENSToken:DelegateChanged`, async ({ event, context }) => {
+    // Process the delegation change
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -45,12 +59,24 @@ export function ENSTokenIndexer(
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
-      transactionTo: event.transaction.to,
+      transactionTo: event.transaction.to ?? event.args.delegator,
       logIndex: event.log.logIndex,
     });
+
+    // Handle transaction creation/update with flag calculation
+    await handleTransaction(
+      context,
+      daoId,
+      event.transaction.hash,
+      event.transaction.from,
+      event.transaction.to,
+      event.block.timestamp,
+      [event.args.delegator, event.args.toDelegate], // Addresses to check
+    );
   });
 
   ponder.on(`ENSToken:DelegateVotesChanged`, async ({ event, context }) => {
+    // Process the delegate votes change
     await delegatedVotesChanged(context, daoId, {
       tokenId: event.log.address,
       delegate: event.args.delegate,
@@ -59,8 +85,19 @@ export function ENSTokenIndexer(
       oldBalance: event.args.previousBalance,
       timestamp: event.block.timestamp,
       transactionFrom: event.transaction.from,
-      transactionTo: event.transaction.to,
+      transactionTo: event.transaction.to ?? event.args.delegate,
       logIndex: event.log.logIndex,
     });
+
+    // Handle transaction creation/update with flag calculation
+    await handleTransaction(
+      context,
+      daoId,
+      event.transaction.hash,
+      event.transaction.from,
+      event.transaction.to,
+      event.block.timestamp,
+      [event.args.delegate], // Address to check
+    );
   });
 }

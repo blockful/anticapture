@@ -13,8 +13,6 @@ import {
   ensureAccountExists,
   ensureAccountsExist,
   storeDailyBucket,
-  createOrUpdateTransaction,
-  updateTransactionFlags,
 } from "./shared";
 import { DaoIdEnum } from "@/lib/enums";
 import {
@@ -34,8 +32,6 @@ export const delegateChanged = async (
     fromDelegate: Address;
     txHash: Hex;
     timestamp: bigint;
-    transactionFrom: Address;
-    transactionTo: Address;
     logIndex: number;
   },
 ) => {
@@ -46,24 +42,11 @@ export const delegateChanged = async (
     txHash,
     fromDelegate,
     timestamp,
-    transactionFrom,
-    transactionTo,
     logIndex,
   } = args;
 
   // Ensure all required accounts exist in parallel
   await ensureAccountsExist(context, [delegator, toDelegate]);
-
-  // Create or update transaction record with flags
-  // Use transaction sender/recipient if provided, otherwise use delegator/delegate
-  await createOrUpdateTransaction(
-    context,
-    daoId as DaoIdEnum,
-    txHash,
-    transactionFrom,
-    transactionTo,
-    timestamp,
-  );
 
   // Get the delegator's current balance
   const delegatorBalance = await context.db.find(accountBalance, {
@@ -112,16 +95,7 @@ export const delegateChanged = async (
     })
     .onConflictDoNothing();
 
-  // Update transaction-level flags based on this delegation
-  await updateTransactionFlags(
-    context,
-    daoId as DaoIdEnum,
-    txHash,
-    isCex,
-    isDex,
-    isLending,
-    isTotal,
-  );
+  // Transaction flag updates moved to DAO-specific indexer
 
   // Update the delegator's delegate
   await context.db
@@ -168,8 +142,6 @@ export const delegatedVotesChanged = async (
     newBalance: bigint;
     oldBalance: bigint;
     timestamp: bigint;
-    transactionFrom: Address;
-    transactionTo: Address;
     logIndex: number;
   },
 ) => {
@@ -180,8 +152,6 @@ export const delegatedVotesChanged = async (
     oldBalance,
     timestamp,
     tokenId,
-    transactionFrom,
-    transactionTo,
     logIndex,
   } = args;
 
@@ -192,15 +162,7 @@ export const delegatedVotesChanged = async (
     throw new Error(`Invalid daoId: ${daoId}`);
   }
 
-  // Create or update transaction record with flags
-  await createOrUpdateTransaction(
-    context,
-    daoId as DaoIdEnum,
-    txHash,
-    transactionFrom,
-    transactionTo,
-    timestamp,
-  );
+  // Transaction handling moved to DAO-specific indexer
 
   await context.db
     .insert(votingPowerHistory)
