@@ -6,13 +6,14 @@ import {
 } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { GitcoinIcon } from "@/shared/components/icons";
+import { mainnet } from "viem/chains";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
   supportStage: SupportStageEnum.FULL,
   icon: GitcoinIcon,
   daoOverview: {
-    chainId: 1,
+    chain: mainnet,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
       governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
@@ -238,4 +239,5 @@ export const GTC: DaoConfiguration = {
   },
   resilienceStages: true,
   tokenDistribution: true,
+  dataTables: true,
 };
