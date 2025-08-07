@@ -3,6 +3,10 @@ name: GraphQL Client Codegen
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "apps/indexer/**/*.ts"
+      - "apps/api-gateway/**/*.ts"
+      - "packages/graphql-client/**"
 
 jobs:
   codegen:
