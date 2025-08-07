@@ -164,11 +164,11 @@ export function AddressFilter({
               disabled={
                 (tempAddress.trim() !== "" && !isValidAddress) || isResolving
               }
-              className="h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black hover:bg-gray-200 disabled:bg-gray-600 disabled:text-gray-400"
+              className="hover:bg-surface-hover h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black disabled:bg-gray-600 disabled:text-gray-400"
             >
               {isResolving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   Resolving ENS...
                 </>
               ) : (
