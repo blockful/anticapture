@@ -34,7 +34,7 @@ shared/
 **Design System Components (always prefer these):**
 
 - TheButton → `import { TheButton } from "@/shared/components/design-system/buttons/TheButton"`
-- BlankState → `import { BlankState } from "@/shared/components/design-system/blank-state/BlankState"`
+- BlankSlate → `import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate"`
 - TextIconLeft → `import { TextIconLeft } from "@/shared/components/design-system/TextIconLeft"`
 - SearchField → `import { SearchField } from "@/shared/components/design-system/SearchField"`
 - ActivityIndicator → `import { ActivityIndicator } from "@/shared/components/design-system/ActivityIndicator"`

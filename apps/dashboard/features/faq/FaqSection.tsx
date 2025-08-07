@@ -1,6 +1,6 @@
 "use client";
 
-import { BlankState, TheSectionLayout } from "@/shared/components";
+import { BlankSlate, TheSectionLayout } from "@/shared/components";
 import { useState } from "react";
 import { cn } from "@/shared/utils/";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
@@ -81,7 +81,7 @@ export const FaqSection = () => {
         </div>
 
         {/* Talk to our team section */}
-        <BlankState
+        <BlankSlate
           variant="title"
           className="bg-surface-default"
           icon={SearchXIcon}
@@ -98,7 +98,7 @@ export const FaqSection = () => {
               Send Message
             </button>
           </Link>
-        </BlankState>
+        </BlankSlate>
       </div>
     </TheSectionLayout>
   );
