@@ -8,7 +8,7 @@ import Link from "next/link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
 
 const footerVariant = cva(
-  "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100",
+  "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300",
   {
     variants: {
       variant: {
