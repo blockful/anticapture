@@ -106,7 +106,7 @@ export const ThePieChart = ({
           />
         </PieChart>
       </ResponsiveContainer>
-      <AnticaptureWatermark />
+      <AnticaptureWatermark svgClassName="w-32" />
     </div>
   );
 };
