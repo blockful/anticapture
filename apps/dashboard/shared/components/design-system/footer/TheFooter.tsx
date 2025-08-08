@@ -33,14 +33,14 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
           <p className="text-alternative-xs text-secondary flex uppercase">
             &gt;v1.1_
           </p>
-          <p className="text-alternative-xs text-secondary flex uppercase">
+          <p className="text-alternative-xs text-secondary flex font-mono uppercase">
             powered by
           </p>
           <DefaultLink
-            href="https://blockful.com"
+            href="https://blockful.io/"
             openInNewTab
             variant="default"
-            className="text-alternative-xs text-secondary flex uppercase"
+            className="text-alternative-xs text-secondary flex font-mono uppercase"
           >
             Blockful
           </DefaultLink>
