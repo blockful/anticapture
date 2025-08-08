@@ -85,9 +85,11 @@ const filterMetricsByPeriod = (
     DaoMetricsDayBucket[]
   > = {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
-  const now = Date.now();
-  const cutoffTimestamp = now - DAYS_IN_SECONDS[days];
-  const cutoffDate = Math.floor(cutoffTimestamp / 1000).toString();
+  // Use seconds consistently to avoid ms/s mismatches that can
+  // collapse the chart around midnight in certain timezones
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  const cutoffTimestampSeconds = nowInSeconds - DAYS_IN_SECONDS[days];
+  const cutoffDate = cutoffTimestampSeconds.toString();
 
   for (const metricType of metricTypes) {
     if (
