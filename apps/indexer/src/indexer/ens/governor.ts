@@ -10,9 +10,11 @@ import { DAOClient } from "@/interfaces/client";
 import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
 
-export function GovernorIndexer(client: DAOClient, blockTime: number) {
-  const daoId = DaoIdEnum.ENS;
-
+export function GovernorIndexer(
+  client: DAOClient,
+  blockTime: number,
+  daoId: DaoIdEnum = DaoIdEnum.ENS,
+) {
   ponder.on(`ENSGovernor:setup`, async ({ context }) => {
     const [
       votingPeriod,
