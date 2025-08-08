@@ -2,6 +2,7 @@ import { db } from "ponder:api";
 import { delegation } from "ponder:schema";
 import { asc, count, desc, gte, lte, sql, or, eq } from "ponder";
 import { SQL } from "drizzle-orm";
+import { TransactionsRequest } from "../mappers/transactions";
 
 export type AffectedSupplyFilters = {
   isCex?: boolean;
@@ -30,13 +31,10 @@ export class DelegationsRepository {
     return Math.min(limit, max);
   }
 
-  async getDelegations(
-    sortBy: DelegationsSortBy,
-    sortOrder: SortOrder,
-    filterBy: DelegationsFilterBy,
-  ): Promise<(typeof delegation.$inferSelect)[]> {
-    const limit = this.clampLimit(filterBy.limit);
-    const offset = Math.max(0, filterBy.offset ?? 0);
+  async getDelegationsTransactionHashesWithTimestamp(
+    filterBy: TransactionsRequest,
+  ): Promise<{ timestamp: bigint; transactionHash: string }[]> {
+    const { limit, offset, sortBy, sortOrder } = filterBy;
 
     const where = this.buildWhere(filterBy);
 
@@ -48,7 +46,10 @@ export class DelegationsRepository {
         : desc(delegation.timestamp);
 
     return db
-      .selectDistinctOn([delegation.timestamp, delegation.transactionHash])
+      .selectDistinctOn([delegation.timestamp, delegation.transactionHash], {
+        transactionHash: delegation.transactionHash,
+        timestamp: delegation.timestamp,
+      })
       .from(delegation)
       .where(where)
       .orderBy(order, desc(delegation.transactionHash))

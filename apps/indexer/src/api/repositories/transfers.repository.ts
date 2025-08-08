@@ -2,41 +2,13 @@ import { db } from "ponder:api";
 import { transfer } from "ponder:schema";
 import { asc, count, desc, gte, lte, sql, or, eq } from "ponder";
 import { SQL } from "drizzle-orm";
-
-export type AffectedSupplyFilters = {
-  isCex?: boolean;
-  isDex?: boolean;
-  isLending?: boolean;
-  isTotal?: boolean;
-};
-
-export type TransfersSortBy = "timestamp";
-export type SortOrder = "asc" | "desc";
-
-export type TransfersFilterBy = {
-  affectedSupply?: AffectedSupplyFilters;
-  minAmount?: bigint;
-  maxAmount?: bigint;
-  from?: string;
-  to?: string;
-  limit: number;
-  offset: number;
-};
+import { TransactionsRequest } from "../mappers/transactions";
 
 export class TransfersRepository {
-  private clampLimit(limit: number): number {
-    const max = 100;
-    if (!Number.isFinite(limit) || limit <= 0) return 10;
-    return Math.min(limit, max);
-  }
-
-  async getTransfers(
-    sortBy: TransfersSortBy,
-    sortOrder: SortOrder,
-    filterBy: TransfersFilterBy,
-  ): Promise<(typeof transfer.$inferSelect)[]> {
-    const limit = this.clampLimit(filterBy.limit);
-    const offset = Math.max(0, filterBy.offset ?? 0);
+  async getTransfersTransactionHashesWithTimestamp(
+    filterBy: TransactionsRequest,
+  ): Promise<{ timestamp: bigint; transactionHash: string }[]> {
+    const { limit, offset, sortBy, sortOrder } = filterBy;
 
     const where = this.buildWhere(filterBy);
 
@@ -48,7 +20,10 @@ export class TransfersRepository {
         : desc(transfer.timestamp);
 
     return db
-      .selectDistinctOn([transfer.timestamp, transfer.transactionHash])
+      .selectDistinctOn([transfer.timestamp, transfer.transactionHash], {
+        timestamp: transfer.timestamp,
+        transactionHash: transfer.transactionHash,
+      })
       .from(transfer)
       .where(where)
       .orderBy(order, desc(transfer.transactionHash))
@@ -64,8 +39,9 @@ export class TransfersRepository {
       .where(or(...hashes.map((h) => eq(transfer.transactionHash, h))));
   }
 
+  //Change to ORM native methods
   async getTransfersCount(
-    filterBy: Omit<TransfersFilterBy, "limit" | "offset">,
+    filterBy: Omit<TransactionsRequest, "sortBy" | "sortOrder">,
   ): Promise<number> {
     const where = this.buildWhere(filterBy);
     const result = await db.select({ c: count() }).from(transfer).where(where);
@@ -76,7 +52,7 @@ export class TransfersRepository {
   }
 
   private buildWhere(
-    filterBy: Omit<TransfersFilterBy, "limit" | "offset"> | TransfersFilterBy,
+    filterBy: Omit<TransactionsRequest, "sortBy" | "sortOrder">,
   ): SQL<unknown> {
     const parts: SQL<unknown>[] = [];
 
@@ -86,7 +62,6 @@ export class TransfersRepository {
     if (filterBy.to) {
       parts.push(eq(transfer.toAccountId, filterBy.to));
     }
-    console.log("affectedSupply", filterBy.affectedSupply);
     // affected supply flags live on transfer rows - OR semantics across selected flags
     const supplyConds: SQL<unknown>[] = [];
     if (filterBy.affectedSupply?.isCex === true) {

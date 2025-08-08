@@ -2,7 +2,11 @@ import { z } from "@hono/zod-openapi";
 import { transaction, transfer, delegation } from "ponder:schema";
 import { isAddress } from "viem";
 
-export type DBTransaction = typeof transaction.$inferSelect;
+export type DBTransaction = typeof transaction.$inferSelect & {
+  transfers: DBTransfer[];
+  delegations: DBDelegation[];
+};
+
 export type DBTransfer = typeof transfer.$inferSelect;
 export type DBDelegation = typeof delegation.$inferSelect;
 
@@ -19,16 +23,16 @@ export const TransactionsRequestSchema = z.object({
     .int()
     .min(1, "Limit must be a positive integer")
     .max(100, "Limit cannot exceed 100")
-    .default(50)
-    .optional(),
+    .optional()
+    .default(50),
   offset: z.coerce
     .number()
     .int()
     .min(0, "Offset must be a non-negative integer")
-    .default(0)
-    .optional(),
-  sortBy: z.enum(["timestamp"]).default("timestamp").optional(),
-  sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
+    .optional()
+    .default(0),
+  sortBy: z.enum(["timestamp"]).optional().default("timestamp"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
   from: z
     .string()
     .refine((addr) => addr && isAddress(addr))
@@ -37,8 +41,8 @@ export const TransactionsRequestSchema = z.object({
     .string()
     .refine((addr) => addr && isAddress(addr))
     .optional(),
-  minAmount: z.coerce.number().optional(),
-  maxAmount: z.coerce.number().optional(),
+  minAmount: z.coerce.bigint().optional(),
+  maxAmount: z.coerce.bigint().optional(),
   affectedSupply: z
     .union([
       z.nativeEnum(AffectedSupply),
@@ -47,7 +51,17 @@ export const TransactionsRequestSchema = z.object({
     .optional()
     .describe(
       "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-    ),
+    )
+    .transform((affectedSupply) => {
+      if (!affectedSupply?.length) return {};
+
+      return {
+        isCex: affectedSupply.includes(AffectedSupply.CEX),
+        isDex: affectedSupply.includes(AffectedSupply.DEX),
+        isLending: affectedSupply.includes(AffectedSupply.LENDING),
+        isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
+      };
+    }),
 });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
@@ -75,7 +89,7 @@ export const DelegationResponseSchema = z.object({
   delegatedValue: z.string(),
   previousDelegate: z.string().nullable(),
   timestamp: z.string(),
-  logIndex: z.string().nullable(),
+  logIndex: z.number(),
   isCex: z.boolean(),
   isDex: z.boolean(),
   isLending: z.boolean(),
@@ -132,7 +146,7 @@ export const TransactionMapper = {
       delegatedValue: d.delegatedValue.toString(),
       previousDelegate: d.previousDelegate,
       timestamp: d.timestamp.toString(),
-      logIndex: d.logIndex.toString(),
+      logIndex: d.logIndex,
       isCex: d.isCex,
       isDex: d.isDex,
       isLending: d.isLending,
@@ -140,11 +154,7 @@ export const TransactionMapper = {
     };
   },
 
-  toApi: (
-    t: DBTransaction,
-    transfers: DBTransfer[],
-    delegations: DBDelegation[],
-  ): TransactionResponse => {
+  toApi: (t: DBTransaction): TransactionResponse => {
     return {
       transactionHash: t.transactionHash,
       from: t.fromAddress,
@@ -154,8 +164,8 @@ export const TransactionMapper = {
       isLending: t.isLending,
       isTotal: t.isTotal,
       timestamp: t.timestamp.toString(),
-      transfers: transfers.map(TransactionMapper.transferToApi),
-      delegations: delegations.map(TransactionMapper.delegationToApi),
+      transfers: t.transfers.map(TransactionMapper.transferToApi),
+      delegations: t.delegations.map(TransactionMapper.delegationToApi),
     };
   },
 };
