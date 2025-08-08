@@ -20,13 +20,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const ogImage: Record<
-    Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM | DaoIdEnum.GITCOIN>,
-    string
-  > = {
+  const ogImage: Record<Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>, string> = {
     [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
     [DaoIdEnum.OPTIMISM]: `${baseUrl}/opengraph-images/op.png`,
+    [DaoIdEnum.GITCOIN]: `${baseUrl}/opengraph-images/gitcoin.png`,
   };
 
   const imageUrl =
