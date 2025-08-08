@@ -84,7 +84,11 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
           >
             <Twitter className="text-secondary size-4" />
           </Link>
-          <Link href="" target="_blank" rel="noopener noreferrer">
+          <Link
+            href="https://t.me/+uZlI0EZS2WM5YzMx"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <TelegramIcon className="text-secondary size-4" />
           </Link>
         </div>
