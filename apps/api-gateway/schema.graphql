@@ -75,6 +75,12 @@ type Query {
   """
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
+  """Returns a list of proposal"""
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: String, fromDate: Float): [query_proposals_items]
+
+  """Returns a single proposal by its ID"""
+  proposal(id: String!): proposal_200_response
+
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
   """
@@ -84,6 +90,9 @@ type Query {
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+
+  """Get the last update time"""
+  lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 }
 
 """
@@ -461,6 +470,7 @@ type delegation {
   delegatedValue: BigInt!
   previousDelegate: String
   timestamp: BigInt
+  logIndex: Int!
   delegate: account
   delegator: account
 }
@@ -534,6 +544,14 @@ input delegationFilter {
   timestamp_lt: BigInt
   timestamp_gte: BigInt
   timestamp_lte: BigInt
+  logIndex: Int
+  logIndex_not: Int
+  logIndex_in: [Int]
+  logIndex_not_in: [Int]
+  logIndex_gt: Int
+  logIndex_lt: Int
+  logIndex_gte: Int
+  logIndex_lte: Int
 }
 
 type transferPage {
@@ -550,6 +568,7 @@ type transfer {
   fromAccountId: String
   toAccountId: String
   timestamp: BigInt
+  logIndex: Int!
   from: account
   to: account
   token: token
@@ -624,6 +643,14 @@ input transferFilter {
   timestamp_lt: BigInt
   timestamp_gte: BigInt
   timestamp_lte: BigInt
+  logIndex: Int
+  logIndex_not: Int
+  logIndex_in: [Int]
+  logIndex_not_in: [Int]
+  logIndex_gt: Int
+  logIndex_lt: Int
+  logIndex_gte: Int
+  logIndex_lte: Int
 }
 
 type proposalsOnchainPage {
@@ -634,17 +661,19 @@ type proposalsOnchainPage {
 
 type proposalsOnchain {
   id: String!
+  txHash: String!
   daoId: String!
-  proposerAccountId: String
-  targets: JSON
-  values: JSON
-  signatures: JSON
-  calldatas: JSON
-  startBlock: String
-  endBlock: String
-  description: String
-  timestamp: BigInt
-  status: String
+  proposerAccountId: String!
+  targets: JSON!
+  values: JSON!
+  signatures: JSON!
+  calldatas: JSON!
+  startBlock: Int!
+  endBlock: Int!
+  description: String!
+  timestamp: BigInt!
+  endTimestamp: BigInt!
+  status: String!
   forVotes: BigInt!
   againstVotes: BigInt!
   abstainVotes: BigInt!
@@ -767,6 +796,16 @@ input proposalsOnchainFilter {
   id_ends_with: String
   id_not_starts_with: String
   id_not_ends_with: String
+  txHash: String
+  txHash_not: String
+  txHash_in: [String]
+  txHash_not_in: [String]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_starts_with: String
+  txHash_ends_with: String
+  txHash_not_starts_with: String
+  txHash_not_ends_with: String
   daoId: String
   daoId_not: String
   daoId_in: [String]
@@ -787,26 +826,22 @@ input proposalsOnchainFilter {
   proposerAccountId_ends_with: String
   proposerAccountId_not_starts_with: String
   proposerAccountId_not_ends_with: String
-  startBlock: String
-  startBlock_not: String
-  startBlock_in: [String]
-  startBlock_not_in: [String]
-  startBlock_contains: String
-  startBlock_not_contains: String
-  startBlock_starts_with: String
-  startBlock_ends_with: String
-  startBlock_not_starts_with: String
-  startBlock_not_ends_with: String
-  endBlock: String
-  endBlock_not: String
-  endBlock_in: [String]
-  endBlock_not_in: [String]
-  endBlock_contains: String
-  endBlock_not_contains: String
-  endBlock_starts_with: String
-  endBlock_ends_with: String
-  endBlock_not_starts_with: String
-  endBlock_not_ends_with: String
+  startBlock: Int
+  startBlock_not: Int
+  startBlock_in: [Int]
+  startBlock_not_in: [Int]
+  startBlock_gt: Int
+  startBlock_lt: Int
+  startBlock_gte: Int
+  startBlock_lte: Int
+  endBlock: Int
+  endBlock_not: Int
+  endBlock_in: [Int]
+  endBlock_not_in: [Int]
+  endBlock_gt: Int
+  endBlock_lt: Int
+  endBlock_gte: Int
+  endBlock_lte: Int
   description: String
   description_not: String
   description_in: [String]
@@ -825,6 +860,14 @@ input proposalsOnchainFilter {
   timestamp_lt: BigInt
   timestamp_gte: BigInt
   timestamp_lte: BigInt
+  endTimestamp: BigInt
+  endTimestamp_not: BigInt
+  endTimestamp_in: [BigInt]
+  endTimestamp_not_in: [BigInt]
+  endTimestamp_gt: BigInt
+  endTimestamp_lt: BigInt
+  endTimestamp_gte: BigInt
+  endTimestamp_lte: BigInt
   status: String
   status_not: String
   status_in: [String]
@@ -885,11 +928,11 @@ input accountFilter {
 type votingPowerHistory {
   transactionHash: String!
   daoId: String!
-  accountId: String
+  accountId: String!
   votingPower: BigInt!
   delta: BigInt!
   timestamp: BigInt!
-  deltaMod: BigInt!
+  logIndex: Int!
   transfer: transfer
   delegation: delegation
   account: account
@@ -958,14 +1001,14 @@ input votingPowerHistoryFilter {
   timestamp_lt: BigInt
   timestamp_gte: BigInt
   timestamp_lte: BigInt
-  deltaMod: BigInt
-  deltaMod_not: BigInt
-  deltaMod_in: [BigInt]
-  deltaMod_not_in: [BigInt]
-  deltaMod_gt: BigInt
-  deltaMod_lt: BigInt
-  deltaMod_gte: BigInt
-  deltaMod_lte: BigInt
+  logIndex: Int
+  logIndex_not: Int
+  logIndex_in: [Int]
+  logIndex_not_in: [Int]
+  logIndex_gt: Int
+  logIndex_lt: Int
+  logIndex_gte: Int
+  logIndex_lte: Int
 }
 
 type daoMetricsDayBucket {
@@ -1329,6 +1372,45 @@ enum queryInput_proposalsActivity_userVoteFilter {
   no_vote
 }
 
+type query_proposals_items {
+  id: String!
+  daoId: String!
+  txHash: String!
+  proposerAccountId: String!
+  title: String
+  description: String!
+  startBlock: Float!
+  endBlock: Float!
+  timestamp: String!
+  status: String!
+  forVotes: String!
+  againstVotes: String!
+  abstainVotes: String!
+  endTimestamp: String!
+}
+
+enum queryInput_proposals_orderDirection {
+  asc
+  desc
+}
+
+type proposal_200_response {
+  id: String!
+  daoId: String!
+  txHash: String!
+  proposerAccountId: String!
+  title: String
+  description: String!
+  startBlock: Float!
+  endBlock: Float!
+  timestamp: String!
+  status: String!
+  forVotes: String!
+  againstVotes: String!
+  abstainVotes: String!
+  endTimestamp: String!
+}
+
 type query_historicalBalances_items {
   address: String!
   balance: String!
@@ -1357,6 +1439,16 @@ enum queryInput_historicalVotingPower_days {
   _90d
   _180d
   _365d
+}
+
+type lastUpdate_200_response {
+  lastUpdate: String
+}
+
+enum queryInput_lastUpdate_chart {
+  cost_comparison
+  attack_profitability
+  token_distribution
 }
 
 enum HTTPMethod {
