@@ -1,6 +1,7 @@
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HomeTemplate } from "@/templates";
 import { HeaderSidebar } from "@/widgets";
+import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
 
 export default function Home() {
   return (
@@ -10,10 +11,11 @@ export default function Home() {
         <div className="sm:hidden">
           <HeaderMobile />
         </div>
-        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full">
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full flex-1">
             <HomeTemplate />
           </div>
+          <TheFooter />
         </div>
       </main>
     </div>
