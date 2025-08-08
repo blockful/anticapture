@@ -30,7 +30,7 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
     <footer className={cn(footerVariant({ variant }), className)}>
       <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-alternative-xs text-secondary flex uppercase">
+          <p className="text-alternative-xs text-secondary flex font-mono uppercase">
             &gt;v1.1_
           </p>
           <p className="text-alternative-xs text-secondary flex font-mono uppercase">
@@ -75,9 +75,7 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
               Give Feedback
             </DefaultLink>
           </div>
-          <p className="text-secondary hidden items-center uppercase sm:flex">
-            /
-          </p>
+          <p className="text-dimmed hidden items-center uppercase sm:flex">/</p>
           <Link
             href="https://github.com/blockful/anticapture"
             target="_blank"
