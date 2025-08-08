@@ -29,16 +29,21 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
   return (
     <footer className={cn(footerVariant({ variant }), className)}>
       <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <p className="text-alternative-xs text-secondary flex uppercase">
             &gt;v1.1_
           </p>
           <p className="text-alternative-xs text-secondary flex uppercase">
             powered by
           </p>
-          <p className="text-alternative-xs text-secondary flex uppercase">
+          <DefaultLink
+            href="https://blockful.com"
+            openInNewTab
+            variant="default"
+            className="text-alternative-xs text-secondary flex uppercase"
+          >
             Blockful
-          </p>
+          </DefaultLink>
         </div>
         <div className="flex gap-2 sm:hidden">
           {/* TODO: Commented for now, will be added back later */}
@@ -59,7 +64,7 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
             Give Feedback
           </DefaultLink>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <div className="hidden sm:flex">
             <DefaultLink
               href="https://surveys.hotjar.com/346670a7-5423-4d65-8e93-30d0191a926a"
@@ -70,26 +75,29 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
               Give Feedback
             </DefaultLink>
           </div>
+          <p className="text-secondary hidden items-center uppercase sm:flex">
+            /
+          </p>
           <Link
             href="https://github.com/blockful/anticapture"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Github className="text-secondary size-4" />
+            <Github className="text-secondary hover:text-primary size-4 transition-colors duration-300" />
           </Link>
           <Link
             href="https://x.com/anticapture"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Twitter className="text-secondary size-4" />
+            <Twitter className="text-secondary hover:text-primary size-4 transition-colors duration-300" />
           </Link>
           <Link
             href="https://t.me/+uZlI0EZS2WM5YzMx"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <TelegramIcon className="text-secondary size-4" />
+            <TelegramIcon className="text-secondary hover:text-primary size-4 transition-colors duration-300" />
           </Link>
         </div>
       </div>
