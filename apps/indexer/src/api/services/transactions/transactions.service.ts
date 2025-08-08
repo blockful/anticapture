@@ -1,8 +1,9 @@
 import {
   TransactionsRepository,
   AffectedSupplyFilters,
-  TransactionWithChildren,
 } from "../../repositories/transactions.repository";
+import { TransfersRepository } from "../../repositories/transfers.repository";
+import { DelegationsRepository } from "../../repositories/delegations.repository";
 import {
   TransactionsRequest,
   TransactionsResponse,
@@ -10,84 +11,103 @@ import {
   DBTransaction,
   DBTransfer,
   DBDelegation,
+  AffectedSupply,
 } from "../../mappers/transactions";
 
-type TransactionFilters = {
-  from?: string;
-  to?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  affectedSupplyFilters: AffectedSupplyFilters;
-};
-
 export class TransactionsService {
-  constructor(private repository: TransactionsRepository) {}
+  constructor(
+    private transactionsRepository: TransactionsRepository,
+    private transfersRepository = new TransfersRepository(),
+    private delegationsRepository = new DelegationsRepository(),
+  ) {}
 
-  async getTransactionsWithChildren(
+  async getTransactions(
     params: TransactionsRequest = {},
   ): Promise<TransactionsResponse> {
-    const filters = this.buildFilters(params);
-    const pagination = this.buildPagination(params);
+    const { limit, offset } = this.buildPagination(params);
     const sorting = this.buildSorting(params);
+    const affectedSupplyFilters = this.parseAffectedSupply(
+      params.affectedSupply,
+    );
 
-    // Business rule: Get transactions that match ANY of the criteria
-    const qualifyingTransactionHashes =
-      await this.findQualifyingTransactions(filters);
+    // 1) Page transfers and delegations independently with the same limit/offset
+    const pagedTransfers = await this.transfersRepository.getTransfers(
+      "timestamp",
+      sorting.sortOrder as "asc" | "desc",
+      {
+        from: params.from,
+        to: params.to,
+        affectedSupply: affectedSupplyFilters,
+        minAmount: params.minAmount ? BigInt(params.minAmount) : undefined,
+        maxAmount: params.maxAmount ? BigInt(params.maxAmount) : undefined,
+        limit,
+        offset,
+      },
+    );
 
-    if (qualifyingTransactionHashes.length === 0) {
-      return { transactions: [], total: 0 };
-    }
+    const pagedDelegations = await this.delegationsRepository.getDelegations(
+      "timestamp",
+      sorting.sortOrder as "asc" | "desc",
+      {
+        from: params.from,
+        to: params.to,
+        affectedSupply: affectedSupplyFilters,
+        minAmount: params.minAmount ? BigInt(params.minAmount) : undefined,
+        maxAmount: params.maxAmount ? BigInt(params.maxAmount) : undefined,
+        limit,
+        offset,
+      },
+    );
 
-    // Get paginated transactions and their related data
-    const [transactions, transfers, delegations] = await Promise.all([
-      this.repository.getTransactionsByHashes(
-        qualifyingTransactionHashes,
-        pagination,
-        sorting,
-      ),
-      this.repository.getTransfersForTransactions(qualifyingTransactionHashes),
-      this.repository.getDelegationsForTransactions(
-        qualifyingTransactionHashes,
-      ),
+    // 2) Collect transaction hashes from the page results
+    const pageHashes = new Set<string>();
+    for (const t of pagedTransfers)
+      if (t.transactionHash) pageHashes.add(t.transactionHash);
+    for (const d of pagedDelegations)
+      if (d.transactionHash) pageHashes.add(d.transactionHash);
+
+    const hashArray = Array.from(pageHashes);
+
+    // 3) Fetch ALL transfers/delegations for those hashes
+    const [allTransfers, allDelegations] = await Promise.all([
+      this.transfersRepository.getTransfersByHash(hashArray),
+      this.delegationsRepository.getDelegationsByHash(hashArray),
     ]);
 
-    // Business logic: Group transactions with their children
-    const groupedTransactions = this.groupTransactionsWithChildren(
-      transactions,
-      transfers,
-      delegations,
+    // 4) Fetch transactions for those hashes
+    const transactions =
+      await this.transactionsRepository.getTransactionsByHashesOnly(hashArray);
+
+    // 4) Map grouped response
+    const grouped = this.groupTransactionsWithChildren(
+      transactions as unknown as DBTransaction[],
+      allTransfers as unknown as DBTransfer[],
+      allDelegations as unknown as DBDelegation[],
     );
 
-    // Business logic: Map to API response format
-    const mappedTransactions = groupedTransactions.map((group) =>
-      TransactionMapper.toApi(
-        group.transaction,
-        group.transfers,
-        group.delegations,
-      ),
+    const mapped = grouped.map((g) =>
+      TransactionMapper.toApi(g.transaction, g.transfers, g.delegations),
     );
 
-    const total = qualifyingTransactionHashes.length;
+    // 5) Counts using count() for each type
+    const transactionsCount =
+      await this.transactionsRepository.getTransactionsCount({
+        from: params.from,
+        to: params.to,
+        affectedSupplyFilters,
+        minAmount: params.minAmount,
+        maxAmount: params.maxAmount,
+      });
 
     return {
-      transactions: mappedTransactions,
-      total,
-    };
-  }
-
-  private buildFilters(params: TransactionsRequest): TransactionFilters {
-    return {
-      from: params.from,
-      to: params.to,
-      minAmount: params.minAmount,
-      maxAmount: params.maxAmount,
-      affectedSupplyFilters: this.parseAffectedSupply(params.affectedSupply),
+      transactions: mapped,
+      total: transactionsCount,
     };
   }
 
   private buildPagination(params: TransactionsRequest) {
     return {
-      limit: params.limit || 50,
+      limit: Math.min(Math.max(params.limit ?? 10, 1), 100),
       offset: params.offset || 0,
     };
   }
@@ -100,59 +120,23 @@ export class TransactionsService {
   }
 
   private parseAffectedSupply(
-    affectedSupply?: string[],
+    affectedSupply?: AffectedSupply[],
   ): AffectedSupplyFilters {
     if (!affectedSupply?.length) return {};
 
     return {
-      isCex: affectedSupply.includes("CEX"),
-      isDex: affectedSupply.includes("DEX"),
-      isLending: affectedSupply.includes("LENDING"),
-      isTotal: affectedSupply.includes("TOTAL"),
+      isCex: affectedSupply.includes(AffectedSupply.CEX),
+      isDex: affectedSupply.includes(AffectedSupply.DEX),
+      isLending: affectedSupply.includes(AffectedSupply.LENDING),
+      isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
     };
-  }
-
-  private async findQualifyingTransactions(
-    filters: TransactionFilters,
-  ): Promise<string[]> {
-    // Business rule: If no filters, return all transactions
-    if (this.hasNoFilters(filters)) {
-      return this.repository.getAllTransactionHashes();
-    }
-
-    // Business rule: Transaction qualifies if ANY transfer, delegation, or transaction matches
-    const [transactionMatches, transferMatches, delegationMatches] =
-      await Promise.all([
-        this.repository.findTransactionsByFilters(filters),
-        this.repository.findTransactionsByTransferFilters(filters),
-        this.repository.findTransactionsByDelegationFilters(filters),
-      ]);
-
-    // Business rule: Combine all matches (union)
-    const allMatches = new Set([
-      ...transactionMatches,
-      ...transferMatches,
-      ...delegationMatches,
-    ]);
-
-    return Array.from(allMatches);
-  }
-
-  private hasNoFilters(filters: TransactionFilters): boolean {
-    return (
-      !filters.from &&
-      !filters.to &&
-      filters.minAmount === undefined &&
-      filters.maxAmount === undefined &&
-      Object.keys(filters.affectedSupplyFilters).length === 0
-    );
   }
 
   private groupTransactionsWithChildren(
     transactions: DBTransaction[],
     transfers: DBTransfer[],
     delegations: DBDelegation[],
-  ): TransactionWithChildren[] {
+  ) {
     const transactionMap = new Map();
 
     // Initialize with transactions

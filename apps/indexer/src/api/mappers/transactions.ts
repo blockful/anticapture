@@ -6,9 +6,12 @@ export type DBTransaction = typeof transaction.$inferSelect;
 export type DBTransfer = typeof transfer.$inferSelect;
 export type DBDelegation = typeof delegation.$inferSelect;
 
-export const AffectedSupplyEnum = z.enum(["CEX", "DEX", "LENDING", "TOTAL"]);
-
-export type AffectedSupply = z.infer<typeof AffectedSupplyEnum>;
+export enum AffectedSupply {
+  CEX = "CEX",
+  DEX = "DEX",
+  LENDING = "LENDING",
+  TOTAL = "TOTAL",
+}
 
 export const TransactionsRequestSchema = z.object({
   limit: z.coerce
@@ -36,7 +39,12 @@ export const TransactionsRequestSchema = z.object({
     .optional(),
   minAmount: z.coerce.number().optional(),
   maxAmount: z.coerce.number().optional(),
-  affectedSupply: z.array(AffectedSupplyEnum).optional(),
+  affectedSupply: z
+    .array(z.nativeEnum(AffectedSupply))
+    .optional()
+    .describe(
+      "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
+    ),
 });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
@@ -49,7 +57,7 @@ export const TransferResponseSchema = z.object({
   fromAccountId: z.string(),
   toAccountId: z.string(),
   timestamp: z.string(),
-  logIndex: z.string().nullable(),
+  logIndex: z.number(),
   isCex: z.boolean(),
   isDex: z.boolean(),
   isLending: z.boolean(),
@@ -100,10 +108,10 @@ export const TransactionMapper = {
       transactionHash: t.transactionHash,
       daoId: t.daoId,
       tokenId: t.tokenId,
-      amount: t.amount,
+      amount: t.amount.toString(),
       fromAccountId: t.fromAccountId,
       toAccountId: t.toAccountId,
-      timestamp: t.timestamp,
+      timestamp: t.timestamp.toString(),
       logIndex: t.logIndex,
       isCex: t.isCex,
       isDex: t.isDex,
@@ -118,7 +126,7 @@ export const TransactionMapper = {
       daoId: d.daoId,
       delegateAccountId: d.delegateAccountId,
       delegatorAccountId: d.delegatorAccountId,
-      delegatedValue: d.delegatedValue,
+      delegatedValue: d.delegatedValue.toString(),
       previousDelegate: d.previousDelegate,
       timestamp: d.timestamp.toString(),
       logIndex: d.logIndex.toString(),

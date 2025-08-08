@@ -44,7 +44,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         affectedSupply,
       } = context.req.valid("query");
 
-      const result = await service.getTransactionsWithChildren({
+      const result = await service.getTransactions({
         limit,
         offset,
         sortBy,

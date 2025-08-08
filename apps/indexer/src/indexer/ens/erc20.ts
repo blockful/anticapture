@@ -32,8 +32,6 @@ export function ENSTokenIndexer(
       transactionHash: event.transaction.hash,
       value: event.args.value,
       timestamp: event.block.timestamp,
-      transactionFrom: event.transaction.from,
-      transactionTo: event.transaction.to,
       logIndex: event.log.logIndex,
     });
 
@@ -58,8 +56,6 @@ export function ENSTokenIndexer(
       fromDelegate: event.args.fromDelegate,
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
-      transactionFrom: event.transaction.from,
-      transactionTo: event.transaction.to ?? event.args.delegator,
       logIndex: event.log.logIndex,
     });
 
@@ -84,8 +80,6 @@ export function ENSTokenIndexer(
       newBalance: event.args.newBalance,
       oldBalance: event.args.previousBalance,
       timestamp: event.block.timestamp,
-      transactionFrom: event.transaction.from,
-      transactionTo: event.transaction.to ?? event.args.delegate,
       logIndex: event.log.logIndex,
     });
 
