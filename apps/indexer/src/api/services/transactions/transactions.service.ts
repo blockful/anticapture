@@ -27,7 +27,11 @@ export class TransactionsService {
     const { limit, offset } = this.buildPagination(params);
     const sorting = this.buildSorting(params);
     const affectedSupplyFilters = this.parseAffectedSupply(
-      params.affectedSupply,
+      Array.isArray(params.affectedSupply)
+        ? params.affectedSupply
+        : params.affectedSupply
+          ? [params.affectedSupply]
+          : undefined,
     );
 
     // 1) Page transfers and delegations independently with the same limit/offset

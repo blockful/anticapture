@@ -40,7 +40,10 @@ export const TransactionsRequestSchema = z.object({
   minAmount: z.coerce.number().optional(),
   maxAmount: z.coerce.number().optional(),
   affectedSupply: z
-    .array(z.nativeEnum(AffectedSupply))
+    .union([
+      z.nativeEnum(AffectedSupply),
+      z.array(z.nativeEnum(AffectedSupply)),
+    ])
     .optional()
     .describe(
       "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
