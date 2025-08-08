@@ -1,6 +1,7 @@
 import { HeaderSidebar } from "@/widgets";
 import { DonationSection } from "@/features/donation";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
 
 export default function DonatePage() {
   return (
@@ -10,10 +11,11 @@ export default function DonatePage() {
         <div className="sm:hidden">
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
-        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full">
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full flex-1">
             <DonationSection />
           </div>
+          <TheFooter />
         </div>
       </main>
     </div>
