@@ -46,13 +46,13 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
       support: event.args.support ? 1 : 0,
       timestamp: event.block.timestamp,
       txHash: event.transaction.hash,
-      votingPower: event.args.votes,
+      votingPower: event.args.weight,
     });
   });
 
   ponder.on(`GTCGovernor:ProposalCreated`, async ({ event, context }) => {
     await proposalCreated(context, daoId, blockTime, {
-      proposalId: event.args.id.toString(),
+      proposalId: event.args.proposalId.toString(),
       txHash: event.transaction.hash,
       proposer: event.args.proposer,
       targets: [...event.args.targets],
@@ -69,7 +69,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(`GTCGovernor:ProposalCanceled`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
-      event.args.id.toString(),
+      event.args.proposalId.toString(),
       ProposalStatus.CANCELED,
     );
   });
@@ -77,7 +77,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(`GTCGovernor:ProposalExecuted`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
-      event.args.id.toString(),
+      event.args.proposalId.toString(),
       ProposalStatus.EXECUTED,
     );
   });
@@ -85,7 +85,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
   ponder.on(`GTCGovernor:ProposalQueued`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
-      event.args.id.toString(),
+      event.args.proposalId.toString(),
       ProposalStatus.QUEUED,
     );
   });
