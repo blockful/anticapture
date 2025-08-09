@@ -7,7 +7,7 @@ import {
   toHex,
   Transport,
 } from "viem";
-import { readContract } from "viem/actions";
+import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi/governor";
@@ -31,10 +31,13 @@ export class GTCClient<
   }
 
   async getQuorum(): Promise<bigint> {
+    const blockNumber = await getBlockNumber(this.client);
+    const targetBlock = blockNumber - 10n;
     return readContract(this.client, {
       abi: this.abi,
       address: this.address,
-      functionName: "quorumVotes",
+      functionName: "quorum",
+      args: [targetBlock < 0n ? 0n : targetBlock],
     });
   }
 
