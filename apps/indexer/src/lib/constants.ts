@@ -58,15 +58,16 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.GTC]: {
     blockTime: 12,
-    // https://arbiscan.io/address/0x912CE59144191C1204E64559FE8253a0e49E6548
+    // https://etherscan.io/address/0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F
     token: {
       address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
       decimals: 18,
       startBlock: 12422079,
     },
+    // https://etherscan.io/address/0x9D4C63565D5618310271bF3F3c01b2954C1D1639
     governor: {
-      address: "0xDbD27635A534A3d3169Ef0498beB56Fb9c937489",
-      startBlock: 12497481,
+      address: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
+      startBlock: 17813942,
     },
   },
 } as const;
