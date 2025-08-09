@@ -6,6 +6,7 @@ import { UNIClient } from "@/indexer/uni/client";
 import { ENSClient } from "@/indexer/ens/client";
 import { OPClient } from "@/indexer/op";
 import { DAOClient } from "@/interfaces/client";
+import { ARBClient } from "@/indexer/arb";
 
 export function getGovernor<
   TTransport extends Transport = Transport,
@@ -15,18 +16,19 @@ export function getGovernor<
   daoId: DaoIdEnum,
   client: Client<TTransport, TChain, TAccount>,
 ): DAOClient | null {
+  const { governor } = CONTRACT_ADDRESSES[daoId];
   switch (daoId) {
     case DaoIdEnum.ENS: {
-      const { governor } = CONTRACT_ADDRESSES[daoId];
       return new ENSClient(client, governor.address);
     }
     case DaoIdEnum.UNI: {
-      const { governor } = CONTRACT_ADDRESSES[daoId];
       return new UNIClient(client, governor.address);
     }
     case DaoIdEnum.OP: {
-      const { governor } = CONTRACT_ADDRESSES[daoId];
       return new OPClient(client, governor.address);
+    }
+    case DaoIdEnum.ARB: {
+      return new ARBClient(client, governor.address);
     }
     default:
       return null;

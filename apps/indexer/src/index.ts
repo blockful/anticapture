@@ -17,7 +17,7 @@ import {
 import {
   ARBTokenIndexer,
   GovernorIndexer as ARBGovernorIndexer,
-} from "./indexer/arb";
+} from "@/indexer/arb";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId } = env;
 
