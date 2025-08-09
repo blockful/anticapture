@@ -1,27 +1,22 @@
-import { createPublicClient, http } from "viem";
-
 import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import {
-  ENSClient,
   GovernorIndexer as ENSGovernorIndexer,
   ENSTokenIndexer,
 } from "@/indexer/ens";
 import {
-  UNIClient,
   GovernorIndexer as UNIGovernorIndexer,
   UNITokenIndexer,
 } from "@/indexer/uni";
 import {
-  OPClient,
   GovernorIndexer as OPGovernorIndexer,
   OPTokenIndexer,
 } from "@/indexer/op";
 import { ARBTokenIndexer } from "@/indexer/arb";
 
-const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
+const { DAO_ID: daoId, CHAIN_ID: chainId } = env;
 
 const chain = getChain(chainId);
 if (!chain) {
@@ -29,35 +24,26 @@ if (!chain) {
 }
 console.log("Connected to chain", chain.name);
 
-const client = createPublicClient({
-  chain,
-  transport: http(rpcUrl),
-});
-
-const blockTime = CONTRACT_ADDRESSES[env.DAO_ID].blockTime;
+const { token, blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 switch (daoId) {
   case DaoIdEnum.ENS: {
-    const { token, governor } = CONTRACT_ADDRESSES[daoId];
     ENSTokenIndexer(token.address, token.decimals);
-    ENSGovernorIndexer(new ENSClient(client, governor.address), blockTime);
+    ENSGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.UNI: {
-    const { token, governor } = CONTRACT_ADDRESSES[daoId];
     UNITokenIndexer(token.address, token.decimals);
-    UNIGovernorIndexer(new UNIClient(client, governor.address), blockTime);
+    UNIGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.ARB: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     ARBTokenIndexer(token.address, token.decimals);
     break;
   }
   case DaoIdEnum.OP: {
-    const { token, governor } = CONTRACT_ADDRESSES[daoId];
     OPTokenIndexer(token.address, token.decimals);
-    OPGovernorIndexer(new OPClient(client, governor.address), blockTime);
+    OPGovernorIndexer(blockTime);
     break;
   }
   default:
