@@ -32,6 +32,7 @@ import {
   useVetoCouncilVotingPower,
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface StackedValue {
   value: number;
@@ -292,6 +293,7 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
               ))}
         </BarChart>
       </ResponsiveContainer>
+      <AnticaptureWatermark svgClassName="mb-15" />
     </div>
   );
 };
