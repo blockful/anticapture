@@ -42,7 +42,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
     await voteCast(context, daoId, {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
-      reason: "",
+      reason: event.reason,
       support: event.args.support ? 1 : 0,
       timestamp: event.block.timestamp,
       txHash: event.transaction.hash,
