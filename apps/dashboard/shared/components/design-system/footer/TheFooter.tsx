@@ -1,14 +1,12 @@
 "use client";
-
 import { cn } from "@/shared/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { Github, Twitter } from "lucide-react";
 import Link from "next/link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
-
 const footerVariant = cva(
-  "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300",
+  "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300 xl4k:max-w-7xl",
   {
     variants: {
       variant: {
@@ -20,27 +18,25 @@ const footerVariant = cva(
     },
   },
 );
-
 type TheFooterProps = VariantProps<typeof footerVariant> & {
   className?: string;
 };
-
 export const TheFooter = ({ variant, className }: TheFooterProps) => {
   return (
     <footer className={cn(footerVariant({ variant }), className)}>
-      <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-alternative-xs text-secondary flex font-mono uppercase">
+          <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
             &gt;v1.1_
           </p>
-          <p className="text-alternative-xs text-secondary flex font-mono uppercase">
+          <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
             powered by
           </p>
           <DefaultLink
             href="https://blockful.io/"
             openInNewTab
             variant="default"
-            className="text-alternative-xs text-secondary flex font-mono uppercase"
+            className="text-alternative-xs text-secondary flex font-mono uppercase leading-none"
           >
             Blockful
           </DefaultLink>
@@ -59,7 +55,7 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
             href="https://surveys.hotjar.com/346670a7-5423-4d65-8e93-30d0191a926a"
             openInNewTab
             variant="default"
-            className="uppercase"
+            className="uppercase leading-none"
           >
             Give Feedback
           </DefaultLink>
@@ -70,7 +66,7 @@ export const TheFooter = ({ variant, className }: TheFooterProps) => {
               href="https://surveys.hotjar.com/346670a7-5423-4d65-8e93-30d0191a926a"
               openInNewTab
               variant="default"
-              className="uppercase"
+              className="uppercase leading-none"
             >
               Give Feedback
             </DefaultLink>
