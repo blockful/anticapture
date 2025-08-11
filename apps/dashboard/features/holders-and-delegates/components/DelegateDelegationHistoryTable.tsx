@@ -161,7 +161,7 @@ export const DelegateDelegationHistoryTable = ({
           className="flex h-8 w-full justify-start rounded-b-none px-4"
           onClick={() => handleSort("delta")}
         >
-          <h4 className="text-table-header">Amount (ENS)</h4>
+          <h4 className="text-table-header">Amount ({daoId.toUpperCase()})</h4>
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
