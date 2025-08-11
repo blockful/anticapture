@@ -4,6 +4,7 @@ import { ENS } from "@/shared/dao-config/ens";
 import { OP } from "@/shared/dao-config/op";
 import { UNI } from "@/shared/dao-config/uni";
 import { ARB } from "@/shared/dao-config/arb";
+import { GTC } from "@/shared/dao-config/gtc";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 
 export type DaoConfigByDaoId = {
