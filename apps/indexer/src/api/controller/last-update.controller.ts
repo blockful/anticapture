@@ -28,6 +28,16 @@ export function lastUpdate(app: Hono) {
             },
           },
         },
+        404: {
+          description: "No last update time found",
+          content: {
+            "application/json": {
+              schema: z.object({
+                lastUpdate: z.null(),
+              }),
+            },
+          },
+        },
       },
     }),
     async (context) => {
@@ -38,7 +48,7 @@ export function lastUpdate(app: Hono) {
         return context.json({ lastUpdate }, 200);
       } catch (error) {
         console.error("Error getting last update:", error);
-        return context.json({ lastUpdate: null }, 200);
+        return context.json({ lastUpdate: null }, 404);
       }
     },
   );

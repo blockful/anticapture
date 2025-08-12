@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { eq, or } from "ponder";
+import { inArray } from "ponder";
 import { daoMetricsDayBucket } from "ponder:schema";
 
 import { ChartType } from "../mappers/last-update";
@@ -7,7 +7,7 @@ import { MetricTypesEnum } from "@/lib/constants";
 
 export class LastUpdateRepository {
   async getLastUpdate(chart: ChartType) {
-    let metricsToCheck: MetricTypesEnum[];
+    let metricsToCheck: MetricTypesEnum[] = [];
 
     // Determine which metrics to check based on chart type
     switch (chart) {
@@ -29,22 +29,11 @@ export class LastUpdateRepository {
         ];
         break;
       default:
-        throw new Error(`Unsupported chart type: ${chart}`);
+        break;
     }
-
-    // Create where condition for the metrics
-    const metricConditions = metricsToCheck.map((metric) =>
-      eq(daoMetricsDayBucket.metricType, metric),
-    );
-
-    const whereCondition =
-      metricConditions.length === 1
-        ? metricConditions[0]
-        : or(...metricConditions);
-
     // Find the record with the greatest timestamp for the specified metrics
     const lastUpdate = await db.query.daoMetricsDayBucket.findFirst({
-      where: whereCondition,
+      where: inArray(daoMetricsDayBucket.metricType, metricsToCheck),
       orderBy: (fields, { desc }) => [desc(fields.date)],
     });
 
