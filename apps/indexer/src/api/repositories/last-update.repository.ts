@@ -33,6 +33,9 @@ export class LastUpdateRepository {
     }
     // Find the record with the greatest timestamp for the specified metrics
     const lastUpdate = await db.query.daoMetricsDayBucket.findFirst({
+      columns: {
+        date: true,
+      },
       where: inArray(daoMetricsDayBucket.metricType, metricsToCheck),
       orderBy: (fields, { desc }) => [desc(fields.date)],
     });
