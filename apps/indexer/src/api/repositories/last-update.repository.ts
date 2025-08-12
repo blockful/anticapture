@@ -40,6 +40,6 @@ export class LastUpdateRepository {
       orderBy: (fields, { desc }) => [desc(fields.date)],
     });
 
-    return lastUpdate?.date ?? null;
+    return lastUpdate?.date;
   }
 }
