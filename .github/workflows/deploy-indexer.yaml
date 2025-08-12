@@ -77,6 +77,11 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
+      - name: Prune DB inactive schemas
+        if: ${{ needs.changes.outputs.indexer == 'true' }}
+        run: |
+          pnpm indexer db:list
+          pnpm indexer db:prune
       - name: Deploy ${{ matrix.dao }}-indexer
         if: ${{ needs.changes.outputs.indexer == 'true' }}
         run: |

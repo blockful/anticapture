@@ -1,7 +1,8 @@
-import { and, asc, desc, eq, gte, sql } from "ponder";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "ponder";
 import { db } from "ponder:api";
-import { proposalsOnchain } from "ponder:schema";
+import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
 import { SQL } from "drizzle-orm";
+import { Address } from "viem";
 
 import {
   ActiveSupplyQueryResult,
@@ -149,6 +150,28 @@ export class DrizzleRepository {
     return await db.query.proposalsOnchain.findFirst({
       where: eq(proposalsOnchain.id, proposalId),
     });
+  }
+
+  async getVotingPower(
+    addresses: Address[],
+    timestamp: bigint,
+  ): Promise<{ address: Address; votingPower: bigint }[]> {
+    return await db
+      .selectDistinctOn([votingPowerHistory.accountId], {
+        address: votingPowerHistory.accountId,
+        votingPower: votingPowerHistory.votingPower,
+      })
+      .from(votingPowerHistory)
+      .where(
+        and(
+          inArray(votingPowerHistory.accountId, addresses),
+          lte(votingPowerHistory.timestamp, timestamp),
+        ),
+      )
+      .orderBy(
+        votingPowerHistory.accountId,
+        desc(votingPowerHistory.timestamp),
+      );
   }
 
   now() {

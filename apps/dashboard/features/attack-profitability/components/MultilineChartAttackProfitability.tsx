@@ -34,6 +34,7 @@ import {
   normalizeDatasetAllTreasury,
 } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -214,6 +215,8 @@ export const MultilineChartAttackProfitability = ({
             ))}
         </LineChart>
       </ChartContainer>
+      {/* Watermark */}
+      <AnticaptureWatermark />
     </div>
   );
 };

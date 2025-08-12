@@ -26,7 +26,7 @@
       "name": "indexer",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "dev", "--config", "config/ens.local.config.ts"],
+      "runtimeArgs": ["run", "serve", "--config", "config/uniswap.config.ts"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
         "ENV_FILE": "${workspaceFolder}/apps/indexer/.env"
