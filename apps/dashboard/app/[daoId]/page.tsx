@@ -5,7 +5,7 @@ import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 import { DaoTemplate } from "@/templates";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -71,7 +71,7 @@ export default function DaoPage() {
           <div className="xl4k:max-w-7xl w-full flex-1">
             <DaoTemplate />
           </div>
-          <TheFooter />
+          <Footer />
         </div>
       </main>
     </div>

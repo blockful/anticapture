@@ -16,7 +16,7 @@ import {
   GlossaryContent,
 } from "@/features/glossary";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 export default function GlossaryPage() {
   const availableLetters = getAvailableLetters(SAMPLE_GLOSSARY_DATA);
@@ -93,7 +93,7 @@ export default function GlossaryPage() {
               </div>
             </TheSectionLayout>
           </div>
-          <TheFooter />
+          <Footer />
         </div>
       </main>
     </div>

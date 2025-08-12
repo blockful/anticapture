@@ -1,7 +1,7 @@
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HomeTemplate } from "@/templates";
 import { HeaderSidebar } from "@/widgets";
-import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
           <div className="xl4k:max-w-7xl w-full flex-1">
             <HomeTemplate />
           </div>
-          <TheFooter />
+          <Footer />
         </div>
       </main>
     </div>

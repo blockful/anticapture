@@ -1,7 +1,7 @@
 import { HeaderSidebar } from "@/widgets";
 import { FaqSection } from "@/features/faq";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 export default function FAQPage() {
   return (
@@ -16,7 +16,7 @@ export default function FAQPage() {
           <div className="xl4k:max-w-7xl w-full flex-1">
             <FaqSection />
           </div>
-          <TheFooter />
+          <Footer />
         </div>
       </main>
     </div>

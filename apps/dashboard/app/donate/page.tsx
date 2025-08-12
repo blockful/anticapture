@@ -1,7 +1,7 @@
 import { HeaderSidebar } from "@/widgets";
 import { DonationSection } from "@/features/donation";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { TheFooter } from "@/shared/components/design-system/footer/TheFooter";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 export default function DonatePage() {
   return (
@@ -15,7 +15,7 @@ export default function DonatePage() {
           <div className="xl4k:max-w-7xl w-full flex-1">
             <DonationSection />
           </div>
-          <TheFooter />
+          <Footer />
         </div>
       </main>
     </div>

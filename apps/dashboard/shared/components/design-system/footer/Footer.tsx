@@ -1,10 +1,12 @@
 "use client";
+
 import { cn } from "@/shared/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { Github, Twitter } from "lucide-react";
 import Link from "next/link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
+
 const footerVariant = cva(
   "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300 xl4k:max-w-7xl",
   {
@@ -18,10 +20,12 @@ const footerVariant = cva(
     },
   },
 );
-type TheFooterProps = VariantProps<typeof footerVariant> & {
+
+type FooterProps = VariantProps<typeof footerVariant> & {
   className?: string;
 };
-export const TheFooter = ({ variant, className }: TheFooterProps) => {
+
+export const Footer = ({ variant, className }: FooterProps) => {
   return (
     <footer className={cn(footerVariant({ variant }), className)}>
       <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:items-center sm:justify-between">
