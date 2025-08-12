@@ -25,6 +25,7 @@ import { errorHandler } from "./middlewares";
 import { ProposalsService } from "./services/proposals";
 import { getGovernor } from "@/lib/governor";
 import { getChain } from "@/lib/utils";
+import { HistoricalVotingPowerService } from "./services";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -82,7 +83,7 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 proposals(app, new ProposalsService(repo, governorClient));
-historicalOnchain(app, env.DAO_ID);
+historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
 docs(app);
 
 export default app;
