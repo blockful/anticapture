@@ -42,13 +42,30 @@ export function tokenHistoricalData(
             },
           },
         },
+        400: {
+          description: "Bad request - DAO not supported for historical data",
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+        },
       },
     }),
     async (context) => {
-      const data = await client.getHistoricalTokenData(
-        CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum],
-        DAYS_IN_YEAR,
-      );
+      // Validate that daoId is supported by Coingecko
+      if (!(daoId in CoingeckoTokenIdEnum)) {
+        return context.json(
+          { error: `Token historical data not supported for DAO: ${daoId}` },
+          400,
+        );
+      }
+
+      const tokenId =
+        CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
+      const data = await client.getHistoricalTokenData(tokenId, DAYS_IN_YEAR);
 
       return context.json(data, 200);
     },
