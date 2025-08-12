@@ -1,6 +1,7 @@
 import { HeaderSidebar } from "@/widgets";
 import { FaqSection } from "@/features/faq";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 export default function FAQPage() {
   return (
@@ -11,10 +12,11 @@ export default function FAQPage() {
           <div className="h-[57px] w-full sm:hidden" />
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
-        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full">
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full flex-1">
             <FaqSection />
           </div>
+          <Footer />
         </div>
       </main>
     </div>

@@ -1429,8 +1429,6 @@ enum queryInput_historicalBalances_days {
 type query_historicalVotingPower_items {
   address: String!
   votingPower: String!
-  blockNumber: Float!
-  tokenAddress: String!
 }
 
 enum queryInput_historicalVotingPower_days {
