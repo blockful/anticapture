@@ -5,7 +5,11 @@ import { daoMetricsDayBucket } from "ponder:schema";
 import { ChartType } from "../mappers/last-update";
 import { MetricTypesEnum } from "@/lib/constants";
 
-export class LastUpdateRepository {
+export interface LastUpdateRepository {
+  getLastUpdate(chart: ChartType): Promise<bigint | undefined>;
+}
+
+export class LastUpdateRepositoryImpl implements LastUpdateRepository {
   async getLastUpdate(chart: ChartType) {
     let metricsToCheck: MetricTypesEnum[] = [];
 

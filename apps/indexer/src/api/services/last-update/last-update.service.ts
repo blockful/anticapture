@@ -1,7 +1,5 @@
 import { ChartType } from "@/api/mappers/last-update";
-interface LastUpdateRepository {
-  getLastUpdate(chart: ChartType): Promise<number | undefined>
-}
+import { LastUpdateRepository } from "@/api/repositories/last-update.repository";
 
 export class LastUpdateService {
   constructor(private readonly repository: LastUpdateRepository) {}
