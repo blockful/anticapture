@@ -20,6 +20,7 @@ export const GTC: DaoConfiguration = {
       token: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
       timelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     },
+    tally: "https://tally.xyz/gov/gitcoin",
     cancelFunction:
       "https://etherscan.io/address/0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518#writeContract#F2",
     rules: {
