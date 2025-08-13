@@ -76,7 +76,7 @@ const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
     current.setMonth(current.getMonth() + 1);
   }
 
-  return ticks;
+  return Array.from(new Set(ticks));
 };
 
 export const VotingPowerVariationGraph = ({
