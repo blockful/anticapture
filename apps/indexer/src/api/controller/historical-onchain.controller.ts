@@ -1,19 +1,19 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaoIdEnum, DaysOpts, DaysEnum } from "@/lib/enums";
 import {
   HistoricalBalancesService,
   HistoricalBalancesRequest,
 } from "../services/historical-balances";
-import {
-  HistoricalVotingPowerService,
-  HistoricalVotingPowerRequest,
-} from "../services/historical-voting-power";
+import { HistoricalVotingPowerService } from "../services/historical-voting-power";
 
-export function historicalOnchain(app: Hono, daoId: DaoIdEnum) {
+export function historicalOnchain(
+  app: Hono,
+  daoId: DaoIdEnum,
+  votingPowerService: HistoricalVotingPowerService,
+) {
   const balancesService = new HistoricalBalancesService();
-  const votingPowerService = new HistoricalVotingPowerService();
 
   // Historical Balances endpoint
   app.openapi(
@@ -116,9 +116,7 @@ export function historicalOnchain(app: Hono, daoId: DaoIdEnum) {
               schema: z.array(
                 z.object({
                   address: z.string(),
-                  votingPower: z.string(), // BigInt serialized as string
-                  blockNumber: z.number(),
-                  tokenAddress: z.string(),
+                  votingPower: z.string(),
                 }),
               ),
             },
@@ -129,16 +127,12 @@ export function historicalOnchain(app: Hono, daoId: DaoIdEnum) {
     async (context) => {
       const { addresses, days } = context.req.valid("query");
 
-      const request: HistoricalVotingPowerRequest = {
+      const votingPowers = await votingPowerService.getHistoricalVotingPower(
         addresses,
-        daysInSeconds: days,
-        daoId,
-      };
+        days,
+      );
 
-      const votingPowers =
-        await votingPowerService.getHistoricalVotingPower(request);
-
-      return context.json(votingPowers, 200);
+      return context.json(votingPowers);
     },
   );
 }
