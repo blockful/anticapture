@@ -77,17 +77,6 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install Node.js and pnpm
-        run: |
-          apk add --no-cache nodejs npm
-          npm install -g pnpm@10.10.0
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Prune DB inactive schemas
-        if: ${{ needs.changes.outputs.indexer == 'true' }}
-        run: |
-          pnpm indexer db:list
-          pnpm indexer db:prune
       - name: Deploy ${{ matrix.dao }}-indexer
         if: ${{ needs.changes.outputs.indexer == 'true' }}
         run: |
