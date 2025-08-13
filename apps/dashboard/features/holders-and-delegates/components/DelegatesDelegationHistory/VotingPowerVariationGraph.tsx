@@ -57,12 +57,19 @@ const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
   const firstTimestamp = Math.min(...chartData.map((d) => d.timestamp));
   const lastTimestamp = Math.max(...chartData.map((d) => d.timestamp));
 
-  const ticks = [];
+  const ticks: number[] = [];
   const startDate = new Date(firstTimestamp);
   const endDate = new Date(lastTimestamp);
 
-  // Start from the first day of the month containing the first data point
-  const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  // Ensure the first tick aligns with the first data point to avoid leading blank space
+  ticks.push(firstTimestamp);
+
+  // Then add monthly ticks starting from the first day of the next month
+  const current = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth() + 1,
+    1,
+  );
 
   while (current <= endDate) {
     ticks.push(current.getTime());
