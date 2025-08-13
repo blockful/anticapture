@@ -35,6 +35,7 @@ export const StageContent = ({
 }: StageContentProps) => {
   const { daoId } = useParams<{ daoId: string }>();
   const selectedDaoId = (daoId || "").toUpperCase() as DaoIdEnum;
+  const daoName = daoConfigByDaoId[selectedDaoId].name;
 
   return (
     <div className="flex w-full flex-col gap-2">
@@ -53,13 +54,15 @@ export const StageContent = ({
           )}
           {type === "issues" &&
             (isCompleted ? (
-              <h4
-                className={cn(
-                  "text-primary font-mono text-xs font-medium uppercase tracking-wide",
-                )}
-              >
-                {daoConfigByDaoId[selectedDaoId].name} is currently in here!
-              </h4>
+              daoName && (
+                <h4
+                  className={cn(
+                    "text-primary font-mono text-xs font-medium uppercase tracking-wide",
+                  )}
+                >
+                  {daoName} is currently in here!
+                </h4>
+              )
             ) : (
               <h4
                 className={cn(
