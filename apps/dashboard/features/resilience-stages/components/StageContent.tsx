@@ -1,10 +1,13 @@
 "use client";
 
 import { ReactNode } from "react";
-import { AlertCircle, AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { cn } from "@/shared/utils/";
 import { Stage } from "@/shared/types/enums/Stage";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 interface Issue {
   title: string;
@@ -18,6 +21,7 @@ interface StageContentProps {
   type: "requirements" | "issues";
   issues?: Issue[];
   requirementText?: ReactNode;
+  isCompleted?: boolean;
 }
 
 export const StageContent = ({
@@ -27,7 +31,11 @@ export const StageContent = ({
   type,
   issues,
   requirementText,
+  isCompleted,
 }: StageContentProps) => {
+  const { daoId } = useParams<{ daoId: string }>();
+  const selectedDaoId = (daoId || "").toUpperCase() as DaoIdEnum;
+
   return (
     <div className="flex w-full flex-col gap-2">
       <div className="bg-surface-contrast flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
@@ -43,17 +51,26 @@ export const StageContent = ({
               Requirements
             </h4>
           )}
-          {type === "issues" && (
-            <h4
-              className={cn(
-                "text-primary font-mono text-xs font-medium uppercase tracking-wide",
-                stage === Stage.ONE && "text-error",
-                stage === Stage.TWO && "text-warning",
-              )}
-            >
-              Issues that need to be fixed
-            </h4>
-          )}
+          {type === "issues" &&
+            (isCompleted ? (
+              <h4
+                className={cn(
+                  "text-primary font-mono text-xs font-medium uppercase tracking-wide",
+                )}
+              >
+                {daoConfigByDaoId[selectedDaoId].name} is currently in here!
+              </h4>
+            ) : (
+              <h4
+                className={cn(
+                  "text-primary font-mono text-xs font-medium uppercase tracking-wide",
+                  stage === Stage.ONE && "text-error",
+                  stage === Stage.TWO && "text-warning",
+                )}
+              >
+                Issues that need to be fixed
+              </h4>
+            ))}
 
           {type === "requirements" ? (
             <div className="flex flex-row gap-2">
@@ -66,7 +83,7 @@ export const StageContent = ({
               <div key={index}>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-start gap-2">
-                    {stage === Stage.ONE && (
+                    {stage === Stage.ONE && !isCompleted && (
                       <div>
                         <AlertTriangle
                           className={cn(
@@ -76,7 +93,7 @@ export const StageContent = ({
                         />
                       </div>
                     )}
-                    {stage === Stage.TWO && (
+                    {stage === Stage.TWO && !isCompleted && (
                       <div>
                         <AlertCircle
                           className={cn(
@@ -84,6 +101,11 @@ export const StageContent = ({
                             stage === Stage.TWO && "text-warning",
                           )}
                         />
+                      </div>
+                    )}
+                    {isCompleted && (
+                      <div>
+                        <CheckCircle className="text-success" size={14} />
                       </div>
                     )}
                     <p className="text-primary text-sm font-normal">
