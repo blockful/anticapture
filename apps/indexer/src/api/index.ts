@@ -10,14 +10,12 @@ import {
   governanceActivity,
   tokenHistoricalData,
   tokenDistribution,
-  assets,
   proposalsActivity,
   historicalOnchain,
   proposals,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
-import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import { DrizzleRepository } from "./repositories";
@@ -60,10 +58,10 @@ const client = createPublicClient({
   transport: http(env.RPC_URL),
 });
 
-if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  assets(app, duneClient);
-}
+// if (env.DUNE_API_URL && env.DUNE_API_KEY) {
+//   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
+//   assets(app, duneClient);
+// }
 
 if (env.COINGECKO_API_KEY) {
   const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
