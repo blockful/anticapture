@@ -26,7 +26,18 @@ export abstract class GovernorBase<
 
   abstract getQuorum(proposalId: string | null): Promise<bigint>;
 
-  async getProposalStatus(proposal: DBProposal): Promise<string> {
+  async getProposalStatus(
+    proposal: Pick<
+      DBProposal,
+      | "id"
+      | "status"
+      | "startBlock"
+      | "endBlock"
+      | "forVotes"
+      | "againstVotes"
+      | "abstainVotes"
+    >,
+  ): Promise<string> {
     const currentBlock = await this.getCurrentBlockNumber();
 
     // Skip proposals already finalized via event

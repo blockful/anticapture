@@ -1,5 +1,5 @@
 import { GlossarySearchResult } from "@/features/glossary/glossary";
-import { BlankState } from "@/shared/components/design-system/blank-state/BlankState";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { SearchIcon } from "lucide-react";
 
 interface GlossarySearchResultsProps {
@@ -33,7 +33,7 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
             </div>
           ))
         ) : (
-          <BlankState
+          <BlankSlate
             variant="default"
             icon={SearchIcon}
             description="No terms found matching your search."

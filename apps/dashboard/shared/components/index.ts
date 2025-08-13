@@ -25,7 +25,7 @@ export * from "@/shared/components/tables/TheTable";
 export * from "@/shared/components/tooltips/TooltipInfo";
 export * from "@/shared/components/cards/RiskAreaCard";
 export * from "@/shared/components/buttons/BottomNavigationButtons";
-export * from "@/shared/components/design-system/blank-state/BlankState";
+export * from "@/shared/components/design-system/blank-slate/BlankSlate";
 export * from "@/shared/components/accordions";
 export * from "@/shared/components/cards/MetricCard";
 export * from "@/shared/components/design-system/TextIconLeft";

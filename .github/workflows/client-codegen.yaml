@@ -1,0 +1,34 @@
+name: GraphQL Client Codegen
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "apps/indexer/**/*.ts"
+      - "apps/api-gateway/**/*.ts"
+      - "packages/graphql-client/**"
+
+jobs:
+  codegen:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run GraphQL codegen
+        run: pnpm client codegen
