@@ -84,7 +84,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       riskArea === RiskAreaEnum.SPAM_VULNERABLE
         ? [
             "Means the system can be overwhelmed by malicious or low-quality proposals. This wastes resources, discourages real participation and exposes the DAO to a war of attrition.",
-            "It usually happens when there's no checks to submit proposals, or the implementation allows it to be ignored.",
+            "It usually happens when there are no checks to submit proposals, or the implementation allows it to be ignored.",
           ]
         : riskAreaInfo.description;
 
