@@ -48,7 +48,7 @@ export const StageAccordion = ({
               <div className="flex flex-col gap-2">
                 <p className="text-primary flex items-start gap-2 text-sm font-normal">
                   {daoStage !== Stage.NONE && (
-                    <CheckCircle className="text-success" size={14} />
+                    <CheckCircle className="text-success size-[14px] shrink-0" />
                   )}
                   All DAOs that have an autonomous operation on-chain based on a
                   governor and timelock are considered at least Stage 0.
