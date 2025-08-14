@@ -27,7 +27,6 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
       client.getTimelockDelay(),
       client.getProposalThreshold(),
     ]);
-
     await context.db.insert(dao).values({
       id: daoId,
       votingPeriod,

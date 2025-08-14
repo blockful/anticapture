@@ -1,0 +1,23 @@
+{
+  "name": "indexer-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "node": "hardhat node --network hardhat",
+    "test": "start-server-and-test \"node\" :8545 \"(cd ../.. && pnpm indexer dev --config config/ens.config.ts)\" :42069 \"hardhat --network localhost test nodejs\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "devDependencies": {
+    "@anticapture/indexer": "workspace:*",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.0",
+    "hardhat": "^3.0.0",
+    "start-server-and-test": "^2.0.13",
+    "viem": "^2.33.3",
+    "vitest": "^3.2.4"
+  },
+  "type": "module"
+}

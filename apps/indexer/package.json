@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": true,
   "scripts": {
-    "dev": "ponder dev --schema public",
+    "dev": "ponder dev --disable-ui",
     "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
     "serve": "ponder serve --schema=anticapture",
     "db:list": "ponder db list",
