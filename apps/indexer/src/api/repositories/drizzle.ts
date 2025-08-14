@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, lte, sql } from "ponder";
+import { and, asc, desc, eq, gte, inArray, lte, or, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
 import { SQL } from "drizzle-orm";
@@ -113,9 +113,11 @@ export class DrizzleRepository {
     limit: number,
     orderDirection: "asc" | "desc",
     status: string | undefined,
+    status_in: string[] | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
+
     if (status) {
       // the following statuses are not handled by the indexing process
       // being stored as "PENDING" in the database to be further processed
@@ -128,7 +130,24 @@ export class DrizzleRepository {
       } else {
         whereClauses.push(eq(proposalsOnchain.status, status));
       }
+    } else if (status_in && status_in.length > 0) {
+      // Handle multiple statuses
+      const statusConditions = status_in.map((s) => {
+        if (
+          s === ProposalStatus.ACTIVE ||
+          s === ProposalStatus.DEFEATED ||
+          s === ProposalStatus.SUCCEEDED
+        ) {
+          return eq(proposalsOnchain.status, ProposalStatus.PENDING);
+        }
+        return eq(proposalsOnchain.status, s);
+      });
+      // Use or() to combine multiple status conditions
+      if (statusConditions.length > 0) {
+        whereClauses.push(or(...statusConditions));
+      }
     }
+
     if (fromDate) {
       whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
     }
