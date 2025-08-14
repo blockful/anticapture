@@ -22,6 +22,10 @@ export const ProposalsRequestSchema = z.object({
     .string()
     .optional()
     .transform((val) => val?.toUpperCase()),
+  status_in: z
+    .array(z.string())
+    .optional()
+    .transform((arr) => arr?.map((val) => val.toUpperCase())),
   fromDate: z.number().optional(),
 });
 
