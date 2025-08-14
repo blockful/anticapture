@@ -38,12 +38,12 @@ export class LastUpdateRepositoryImpl implements LastUpdateRepository {
     // Find the record with the greatest timestamp for the specified metrics
     const lastUpdate = await db.query.daoMetricsDayBucket.findFirst({
       columns: {
-        date: true,
+        lastUpdate: true,
       },
       where: inArray(daoMetricsDayBucket.metricType, metricsToCheck),
       orderBy: (fields, { desc }) => [desc(fields.date)],
     });
 
-    return lastUpdate?.date;
+    return lastUpdate?.lastUpdate;
   }
 }
