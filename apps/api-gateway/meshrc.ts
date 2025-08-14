@@ -6,6 +6,11 @@ dotenv.config();
 
 export default processConfig(
   {
+    serve: {
+      cors: {
+        origin: "*",
+      },
+    },
     sources: [
       ...Object.entries(process.env)
         .filter(([key]) => key.startsWith("DAO_API_"))
