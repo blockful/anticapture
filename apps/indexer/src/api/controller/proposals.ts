@@ -33,12 +33,16 @@ export function proposals(app: Hono, service: ProposalsService) {
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection } = context.req.valid("query");
+      const { skip, limit, orderDirection, status, status_in, fromDate } =
+        context.req.valid("query");
 
       const result = await service.getProposals({
         skip,
         limit,
         orderDirection,
+        status,
+        status_in,
+        fromDate,
       });
 
       return context.json(result.map(ProposalMapper.toApi));
