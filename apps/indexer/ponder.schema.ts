@@ -201,6 +201,7 @@ export const daoMetricsDayBucket = onchainTable(
     average: drizzle.bigint().notNull(),
     volume: drizzle.bigint().notNull(),
     count: drizzle.integer().notNull(),
+    lastUpdate: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({

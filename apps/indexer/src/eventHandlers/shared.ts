@@ -53,6 +53,7 @@ export const storeDailyBucket = async (
       close: newValue,
       volume,
       count: 1,
+      lastUpdate: date,
     })
     .onConflictDoUpdate((row) => ({
       average:
