@@ -7,8 +7,6 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  dao(id: String!): dao
-  daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
   token(id: String!): token
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
@@ -30,9 +28,6 @@ type Query {
   daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
-
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
   historicalTokenData: historicalTokenData_200_response
@@ -81,6 +76,9 @@ type Query {
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
 
+  """Returns dao data"""
+  dao: dao_200_response
+
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
   """
@@ -108,76 +106,6 @@ type PageInfo {
 
 type Meta {
   status: JSON
-}
-
-type dao {
-  id: String!
-  quorum: BigInt!
-  proposalThreshold: BigInt!
-  votingDelay: BigInt!
-  votingPeriod: BigInt!
-  timelockDelay: BigInt!
-}
-
-type daoPage {
-  items: [dao!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input daoFilter {
-  AND: [daoFilter]
-  OR: [daoFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  quorum: BigInt
-  quorum_not: BigInt
-  quorum_in: [BigInt]
-  quorum_not_in: [BigInt]
-  quorum_gt: BigInt
-  quorum_lt: BigInt
-  quorum_gte: BigInt
-  quorum_lte: BigInt
-  proposalThreshold: BigInt
-  proposalThreshold_not: BigInt
-  proposalThreshold_in: [BigInt]
-  proposalThreshold_not_in: [BigInt]
-  proposalThreshold_gt: BigInt
-  proposalThreshold_lt: BigInt
-  proposalThreshold_gte: BigInt
-  proposalThreshold_lte: BigInt
-  votingDelay: BigInt
-  votingDelay_not: BigInt
-  votingDelay_in: [BigInt]
-  votingDelay_not_in: [BigInt]
-  votingDelay_gt: BigInt
-  votingDelay_lt: BigInt
-  votingDelay_gte: BigInt
-  votingDelay_lte: BigInt
-  votingPeriod: BigInt
-  votingPeriod_not: BigInt
-  votingPeriod_in: [BigInt]
-  votingPeriod_not_in: [BigInt]
-  votingPeriod_gt: BigInt
-  votingPeriod_lt: BigInt
-  votingPeriod_gte: BigInt
-  votingPeriod_lte: BigInt
-  timelockDelay: BigInt
-  timelockDelay_not: BigInt
-  timelockDelay_in: [BigInt]
-  timelockDelay_not_in: [BigInt]
-  timelockDelay_gt: BigInt
-  timelockDelay_lt: BigInt
-  timelockDelay_gte: BigInt
-  timelockDelay_lte: BigInt
 }
 
 type token {
@@ -562,8 +490,8 @@ type transfer {
   daoId: String!
   tokenId: String
   amount: BigInt
-  fromAccountId: String
-  toAccountId: String
+  fromAccountId: String!
+  toAccountId: String!
   timestamp: BigInt
   logIndex: Int!
   from: account
@@ -687,7 +615,7 @@ type votesOnchainPage {
 type votesOnchain {
   txHash: String
   daoId: String!
-  voterAccountId: String
+  voterAccountId: String!
   proposalId: String
   support: String
   votingPower: String
@@ -1131,19 +1059,6 @@ input daoMetricsDayBucketFilter {
   count_lte: Int
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type historicalTokenData_200_response {
   prices: [[Float]]!
   market_caps: [[Float]]!
@@ -1406,6 +1321,15 @@ type proposal_200_response {
   againstVotes: String!
   abstainVotes: String!
   endTimestamp: String!
+}
+
+type dao_200_response {
+  id: String!
+  votingDelay: String!
+  votingPeriod: String!
+  timelockDelay: String!
+  quorum: String!
+  proposalThreshold: String!
 }
 
 type query_historicalBalances_items {
