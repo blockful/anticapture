@@ -3,31 +3,39 @@ import { proposalsOnchain } from "ponder:schema";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 
-export const ProposalsRequestSchema = z.object({
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .default(0)
-    .optional(),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .default(10)
-    .optional(),
-  orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
-  status: z
-    .string()
-    .optional()
-    .transform((val) => val?.toUpperCase()),
-  status_in: z
-    .array(z.string())
-    .optional()
-    .transform((arr) => arr?.map((val) => val.toUpperCase())),
-  fromDate: z.number().optional(),
-});
+export const ProposalsRequestSchema = z
+  .object({
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .default(0)
+      .optional(),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .default(10)
+      .optional(),
+    orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
+    status: z
+      .string()
+      .optional()
+      .transform((val) => val?.toUpperCase()),
+    status_in: z
+      .array(z.string())
+      .optional()
+      .transform((arr) => arr?.map((val) => val.toUpperCase())),
+    fromDate: z.number().optional(),
+  })
+  .refine(
+    (data) => !(data.status && data.status_in && data.status_in.length > 0),
+    {
+      message:
+        "Parameters 'status' and 'status_in' are mutually exclusive. Please use only one.",
+    },
+  );
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
 
