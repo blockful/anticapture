@@ -1,8 +1,8 @@
-import { DAO_VETO_COUNCIL_ADDRESSES } from "@/shared/dao-config/dao-addresses";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
 import axios from "axios";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 const api = axios.create({
   baseURL: BACKEND_ENDPOINT,
@@ -25,7 +25,8 @@ interface VotingPowerResponse {
 const fetchVetoCouncilVotingPower = async (
   daoId: DaoIdEnum,
 ): Promise<string | null> => {
-  const accountId = DAO_VETO_COUNCIL_ADDRESSES[daoId];
+  const accountId =
+    daoConfigByDaoId[daoId].daoOverview.securityCouncil?.vetoCouncilAddress;
 
   const response = await api.post<VotingPowerResponse>("", {
     query: `

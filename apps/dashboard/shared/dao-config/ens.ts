@@ -33,6 +33,7 @@ export const ENS: DaoConfiguration = {
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {
       isActive: true,
+      vetoCouncilAddress: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
       multisig: {
         threshold: 4,
         signers: 8,

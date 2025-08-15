@@ -38,7 +38,6 @@ export const MultilineChartTokenDistribution = ({
       dataset?.map((item) => item.date),
     ),
   );
-
   const chartData = Array.from(allDates)
     .sort((a, b) => Number(a) - Number(b))
     .map((date) => {
@@ -50,7 +49,7 @@ export const MultilineChartTokenDistribution = ({
         const entry = datasets[key as keyof typeof datasets]?.find(
           (item) => item.date === date,
         );
-        dataPoint[key] = entry ? Number(entry.high) : null;
+        dataPoint[key] = entry ? Number(entry.high) : 0;
       });
 
       return dataPoint;
@@ -62,7 +61,6 @@ export const MultilineChartTokenDistribution = ({
   const visibleDataSets = Object.keys(datasets).filter(
     (item) => item !== filterData,
   );
-
   return (
     <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}
