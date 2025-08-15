@@ -5,6 +5,7 @@ export const CoingeckoTokenIdEnum = {
   UNI: "uniswap",
   ARB: "arbitrum",
   OP: "optimism",
+  GTC: "gitcoin",
 } as const;
 
 export type CoingeckoTokenId =

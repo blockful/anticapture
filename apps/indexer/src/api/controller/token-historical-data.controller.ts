@@ -45,10 +45,9 @@ export function tokenHistoricalData(
       },
     }),
     async (context) => {
-      const data = await client.getHistoricalTokenData(
-        CoingeckoTokenIdEnum[daoId],
-        DAYS_IN_YEAR,
-      );
+      const tokenId =
+        CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
+      const data = await client.getHistoricalTokenData(tokenId, DAYS_IN_YEAR);
 
       return context.json(data, 200);
     },

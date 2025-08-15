@@ -56,6 +56,25 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 71801427,
     },
   },
+  [DaoIdEnum.GTC]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F
+    token: {
+      address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
+      decimals: 18,
+      startBlock: 12422079,
+    },
+    // https://etherscan.io/address/0x9D4C63565D5618310271bF3F3c01b2954C1D1639
+    governor: {
+      address: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
+      startBlock: 17813942,
+    },
+    // https://etherscan.io/address/0xDbD27635A534A3d3169Ef0498beB56Fb9c937489
+    governorAlpha: {
+      address: "0xDbD27635A534A3d3169Ef0498beB56Fb9c937489",
+      startBlock: 12497481,
+    },
+  },
 } as const;
 
 export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
@@ -74,6 +93,53 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
+  [DaoIdEnum.GTC]: {
+    "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
+    "Gitcoin CSDO": "0x931896A8A9313F622a2AFCA76d1471B97955e551",
+    "Gitcoin Fraud Detection & Defense":
+      "0xD4567069C5a1c1fc8261d8Ff5C0B1d98f069Cf47",
+    "Gitcoin Grants Matching Pool":
+      "0xde21F729137C5Af1b01d73aF1dC21eFfa2B8a0d6",
+    "Gitcoin Merch, Memes and Marketing":
+      "0xC23DA3Ca9300571B9CF43298228353cbb3E1b4c0",
+    "Gitcoin Timelock Transfer 1": "0x6EEdE31a2A15340342B4BCb3039447d457aC7C4b",
+    "Gitcoin Timelock Transfer 2": "0xeD95D629c4Db80060C59432e81254D256AEc97E2",
+    "Vesting Address GTC 1": "0x2AA5d15Eb36E5960d056e8FeA6E7BB3e2a06A351",
+    "Staking contract GTC": "0x0E3efD5BE54CC0f4C64e0D186b0af4b7F2A0e95F",
+    "OKX Ventures": "0xe527BbDE3654E9ba824f9B72DFF495eEe60fD366",
+    "Protocol Labs 1": "0x154855f5522f6B04ce654175368F428852DCd55D",
+    "Matt Solomon": "0x7aD3d9819B06E800F8A65f3440D599A23D6A0BDf",
+    "Arbitrum Bridge": "0xa3A7B6F88361F48403514059F1F16C8E78d60EeC",
+    "Optimism Bridge": "0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1",
+    "Radicle Timelock": "0x8dA8f82d2BbDd896822de723F55D6EdF416130ba",
+    "Vesting Address GTC 3": "0x2CDE9919e81b20B4B33DD562a48a84b54C48F00C",
+    "deltajuliet.eth 1": "0x5b1ddBEC956Ed39e1aC92AE3c3D99295ddD59865",
+    "deltajuliet.eth 2": "0x407466C56B8488c4d99558633Ff1AC5D84400B46",
+    "deltajuliet.eth 3": "0x14b9F70C3d4B367D496F3771EdA7EFA65282e55D",
+    "deltajuliet.eth 4": "0x0dcFc9323539A6eC47f9BC0A96882070540bf950",
+    "deltajuliet.eth 5": "0x08f3FB287AEc4E06EFF8de37410eaF52B05c7f56",
+    "Gitcoin Timelock Transfer 5": "0x9E75c3BFb82cf701AC0A74d6C1607461Ec65EfF9",
+    "Old Address, Large GTC Transfers 1":
+      "0xF5A7bA226CB94D87C29aDD2b59aC960904a163F3",
+    "Old Address, Large GTC Transfers 2":
+      "0xeD865C87c3509e3A908655777B13f7313b2fc196",
+    "Old Address, Large GTC Transfers 3":
+      "0xDD6a165B9e05549640149dF108AC0aF8579B7005",
+    "Old Address, Large GTC Transfers 4":
+      "0xaD467E6039F0Ca383b5FFd60F1C7a890acaB4bE3",
+    "Old Address, Large GTC Transfers 5":
+      "0x44d4d830788cc6D4d72C78203F5918a3E2761691",
+    "Old Address, Large GTC Transfers 6":
+      "0x38661187CfD779bEa00e14Bc5b986CF0C717A39B",
+    "Old Address, Large GTC Transfers 7":
+      "0x34237F91D2Ce322f3572376b82472C7FA56D7595",
+    "Old Address, Large GTC Transfers 8":
+      "0x2083e7B107347AE4F5Cb6Ff35EC5DAcf03391c57",
+    "Old Address, Large GTC Transfers 9":
+      "0x183a1CaF6750CF88E45812FCE0110D59d71833e4",
+    "Old Address, Large GTC Transfers 10":
+      "0x11e06eF6e42306dc40D2754Ef2629fB011d80aE9",
+  },
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -183,6 +249,38 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Indodax 1": "0x3C02290922a3618A4646E3BbCa65853eA45FE7C6",
     "Indodax 2": "0x91Dca37856240E5e1906222ec79278b16420Dc92",
   },
+  [DaoIdEnum.GTC]: {
+    "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    "Binance 2": "0x28C6c06298d514Db089934071355E5743bf21d60",
+    "Binance 3": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    "Binance 4": "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d",
+    "Binance 5": "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
+    Bithumb: "0x74be0CF1c9972C00ed4EF290e0E5BCFd18873f13",
+    Upbit: "0x74be0CF1c9972C00ed4EF290e0E5BCFd18873f13",
+    "Upbit 2": "0xeDAe8A6cBA6867a0B7e565C21eaBAEe3D550fd9d",
+    "Coinbase 1": "0x237eF9564D74A1056c1A276B03C66055Fa61A700",
+    "Coinbase 2": "0x31Bc777E72A0A7F90cC7b1ec52eACeC806B27563",
+    "Coinbase 3": "0x11aC4fE470Cf8B5b3de59B31261030BD8514892d",
+    "Coinbase 4": "0x271Ac4A385F689f00D01716877e827702231447e",
+    "Coinbase 5": "0x4a630c042B2b07a0641d487b0Ccf5af36800415e",
+    "Coinbase 6": "0xA9D1e08C7793af67e9d92fe308d5697FB81d3E43",
+    Kraken: "0x310E035d176ccB589511eD16af7aE7BAc4fc7f83",
+    "Kraken 2": "0xC06f25517E906b7F9B4deC3C7889503Bb00b3370",
+    "Kraken 3": "0x22af984f13DFB5C80145E3F9eE1050Ae5a5FB651",
+    "Crypto.com": "0xCFFAd3200574698b78f32232aa9D63eABD290703",
+    "Crypto.com 2": "0xA023f08c70A23aBc7EdFc5B6b5E171d78dFc947e",
+    "Crypto.com 3": "0x46340b20830761efd32832A74d7169B29FEB9758",
+    Kucoin: "0x58edF78281334335EfFa23101bBe3371b6a36A51",
+    "Kucoin 2": "0xD6216fC19DB775Df9774a6E33526131dA7D19a2c",
+    Bittavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
+    MEXC: "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    "MEXC 2": "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
+    Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    BingX: "0xC3dcd744db3f114f0edF03682b807b78A227Bf74",
+    Bitget: "0x5bdf85216ec1e38D6458C870992A69e38e03F7Ef",
+    CoinEx: "0x38f6d5fb32f970Fe60924B282704899411126336",
+    Bitpanda: "0x0529ea5885702715e83923c59746ae8734c553B7",
+  },
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -216,6 +314,9 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Balancer: "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
     Mux: "0xc6BD76FA1E9e789345e003B361e4A0037DFb7260",
   },
+  [DaoIdEnum.GTC]: {
+    Uniswap: "0xD017617f6F0fD22796E137a8240cc38F52a147B2",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -240,6 +341,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Morpho: "0xF057afeEc22E220f47AD4220871364e9E828b2e9",
     dForce: "0x7702dC73e8f8D9aE95CF50933aDbEE68e9F1D725",
   },
+  [DaoIdEnum.GTC]: {},
 };
 
 export const BurningAddresses: Record<
@@ -271,6 +373,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x4200000000000000000000000000000000000042",
+  },
+  [DaoIdEnum.GTC]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
   },
 };
 

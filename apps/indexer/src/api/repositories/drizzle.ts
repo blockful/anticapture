@@ -1,7 +1,6 @@
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
-import { SQL } from "drizzle-orm";
 import { Address } from "viem";
 
 import {
@@ -115,7 +114,7 @@ export class DrizzleRepository {
     status: string | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]> {
-    const whereClauses: SQL<unknown>[] = [];
+    const whereClauses: ReturnType<typeof eq>[] = [];
     if (status) {
       // the following statuses are not handled by the indexing process
       // being stored as "PENDING" in the database to be further processed
