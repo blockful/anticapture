@@ -19,9 +19,14 @@ export const ProposalsRequestSchema = z.object({
     .optional(),
   orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
   status: z
-    .string()
+    .union([z.string(), z.array(z.string())])
     .optional()
-    .transform((val) => val?.toUpperCase()),
+    .transform((val) => {
+      if (!val) return undefined;
+      // Always normalize to array and uppercase
+      const normalized = typeof val === "string" ? [val] : val;
+      return normalized.map((v) => v.toUpperCase());
+    }),
   fromDate: z.number().optional(),
 });
 
