@@ -22,12 +22,10 @@ export const ProposalsRequestSchema = z.object({
     .union([z.string(), z.array(z.string())])
     .optional()
     .transform((val) => {
-      if (typeof val === "string") {
-        return val.toUpperCase();
-      } else if (Array.isArray(val)) {
-        return val.map((v) => v.toUpperCase());
-      }
-      return val;
+      if (!val) return undefined;
+      // Always normalize to array and uppercase
+      const normalized = typeof val === "string" ? [val] : val;
+      return normalized.map((v) => v.toUpperCase());
     }),
   fromDate: z.number().optional(),
 });

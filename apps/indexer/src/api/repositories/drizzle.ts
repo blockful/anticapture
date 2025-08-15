@@ -12,7 +12,6 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
-import { ProposalStatus } from "@/lib/constants";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -112,40 +111,14 @@ export class DrizzleRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    status: string | string[] | undefined,
+    status: string[] | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
-    if (status) {
-      if (typeof status === "string") {
-        // Single status handling
-        if (
-          status === ProposalStatus.ACTIVE ||
-          status === ProposalStatus.DEFEATED ||
-          status === ProposalStatus.SUCCEEDED
-        ) {
-          whereClauses.push(eq(proposalsOnchain.status, ProposalStatus.PENDING));
-        } else {
-          whereClauses.push(eq(proposalsOnchain.status, status));
-        }
-      } else if (Array.isArray(status) && status.length > 0) {
-        // Multiple statuses handling
-        const statusConditions = status.map((s) => {
-          if (
-            s === ProposalStatus.ACTIVE ||
-            s === ProposalStatus.DEFEATED ||
-            s === ProposalStatus.SUCCEEDED
-          ) {
-            return eq(proposalsOnchain.status, ProposalStatus.PENDING);
-          }
-          return eq(proposalsOnchain.status, s);
-        });
-        // Use or() to combine multiple status conditions
-        if (statusConditions.length > 0) {
-          whereClauses.push(or(...statusConditions));
-        }
-      }
+    // Simply use the status array as provided by the service
+    if (status && status.length > 0) {
+      whereClauses.push(inArray(proposalsOnchain.status, status));
     }
 
     if (fromDate) {
