@@ -1383,8 +1383,6 @@ export type Query_HistoricalBalances_Items = {
 export type Query_HistoricalVotingPower_Items = {
   __typename?: 'query_historicalVotingPower_items';
   address: Scalars['String']['output'];
-  blockNumber: Scalars['Float']['output'];
-  tokenAddress: Scalars['String']['output'];
   votingPower: Scalars['String']['output'];
 };
 

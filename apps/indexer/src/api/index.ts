@@ -10,14 +10,13 @@ import {
   governanceActivity,
   tokenHistoricalData,
   tokenDistribution,
-  assets,
   proposalsActivity,
   historicalOnchain,
   proposals,
+  assets,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
-import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import { DrizzleRepository } from "./repositories";
@@ -25,6 +24,8 @@ import { errorHandler } from "./middlewares";
 import { ProposalsService } from "./services/proposals";
 import { getGovernor } from "@/lib/governor";
 import { getChain } from "@/lib/utils";
+import { HistoricalVotingPowerService } from "./services";
+import { DuneService } from "./services/dune/dune.service";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -82,7 +83,7 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 proposals(app, new ProposalsService(repo, governorClient));
-historicalOnchain(app, env.DAO_ID);
+historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
 docs(app);
 
 export default app;

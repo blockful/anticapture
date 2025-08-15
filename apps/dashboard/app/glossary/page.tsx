@@ -16,6 +16,7 @@ import {
   GlossaryContent,
 } from "@/features/glossary";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 export default function GlossaryPage() {
   const availableLetters = getAvailableLetters(SAMPLE_GLOSSARY_DATA);
@@ -44,8 +45,8 @@ export default function GlossaryPage() {
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
 
-        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full">
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full flex-1">
             <TheSectionLayout
               title={SECTIONS_CONSTANTS.glossary.title}
               icon={<BookOpen className="section-layout-icon" />}
@@ -92,6 +93,7 @@ export default function GlossaryPage() {
               </div>
             </TheSectionLayout>
           </div>
+          <Footer />
         </div>
       </main>
     </div>
