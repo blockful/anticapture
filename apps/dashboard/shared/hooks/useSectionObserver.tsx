@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 
 interface UseSectionObserverProps {
   initialSection?: string;
@@ -9,28 +10,23 @@ interface UseSectionObserverProps {
 }
 
 export const useSectionObserver = ({
-  initialSection,
   headerOffset = 0,
   useWindowScrollTo = false,
 }: UseSectionObserverProps) => {
-  const [activeSection, setActiveSection] = useState<string | null>(
-    initialSection ?? null,
-  );
-  const isScrollingRef = useRef<boolean>(false);
+  const { activeSection, updateActiveSection } = useDaoPageInteraction();
   const hasScrolledRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleSectionChange = (event: Event) => {
-      if (isScrollingRef.current) return;
       const customEvent = event as CustomEvent<string>;
-      setActiveSection(customEvent.detail);
+      updateActiveSection(customEvent.detail, { source: "event" });
     };
 
     window.addEventListener("sectionInView", handleSectionChange);
     return () => {
       window.removeEventListener("sectionInView", handleSectionChange);
     };
-  }, []);
+  }, [updateActiveSection]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,8 +41,7 @@ export const useSectionObserver = ({
   }, []);
 
   const handleSectionClick = (sectionId: string) => {
-    isScrollingRef.current = true;
-    setActiveSection(sectionId);
+    updateActiveSection(sectionId, { source: "programmatic" });
 
     const section = document.getElementById(sectionId);
     if (section) {
@@ -67,9 +62,9 @@ export const useSectionObserver = ({
     }
 
     setTimeout(() => {
-      isScrollingRef.current = false;
+      updateActiveSection(activeSection, { source: "programmatic", end: true });
       hasScrolledRef.current = true;
-    }, 500);
+    }, 1000);
   };
 
   return { activeSection, handleSectionClick };
