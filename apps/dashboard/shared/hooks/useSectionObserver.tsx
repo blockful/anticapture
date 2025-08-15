@@ -62,7 +62,7 @@ export const useSectionObserver = ({
     }
 
     setTimeout(() => {
-      updateActiveSection(activeSection, { source: "programmatic", end: true });
+      updateActiveSection(sectionId, { source: "programmatic", end: true });
       hasScrolledRef.current = true;
     }, 1000);
   };
