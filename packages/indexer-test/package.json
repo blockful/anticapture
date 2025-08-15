@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "node": "hardhat node --network hardhat",
-    "test": "start-server-and-test \"node\" :8545 \"(cd ../.. && pnpm indexer dev --config config/ens.config.ts)\" :42069 \"hardhat --network localhost test nodejs\""
+    "indexer": "cd ../.. && pnpm indexer dev --config config/ens.config.ts",
+    "test": "hardhat --network localhost test nodejs",
+    "test:ens": "start-server-and-test \"node\" :8545 \"indexer\" :42069 \"test\""
   },
   "keywords": [],
   "author": "",

@@ -1,23 +1,57 @@
 // import { describe, expect, it } from "vitest";
 import { test } from "node:test";
-import assert from "node:assert";
+// import assert from "node:assert";
 
-import { anvil } from "viem/chains";
-import { createPublicClient, http } from "viem";
+import { hardhat } from "viem/chains";
+import {
+  createTestClient,
+  encodeFunctionData,
+  http,
+  parseEther,
+  publicActions,
+  walletActions,
+  zeroAddress,
+} from "viem";
+
+import { ENSGovernorAbi, ENSTokenAbi } from "@anticapture/indexer/ens";
+import { CONTRACT_ADDRESSES } from "@anticapture/indexer/contracts";
 
 test("test", async () => {
-  const publicClient = createPublicClient({
-    chain: anvil,
+  const client = createTestClient({
+    chain: hardhat,
+    mode: "hardhat",
     transport: http("http://localhost:8545"),
+    account: "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
+  })
+    .extend(publicActions)
+    .extend(walletActions);
+
+  const {
+    governor: { address: GOVERNOR },
+    token: { address: TOKEN },
+  } = CONTRACT_ADDRESSES["ENS"];
+
+  await client.impersonateAccount({
+    address: "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
   });
 
-  assert.strictEqual(1 + 1, 2);
-
-  assert.strictEqual(await publicClient.getChainId(), 31337);
-
-  const balance = await publicClient.getBalance({
-    address: "0x76A6D08b82034b397E7e09dAe4377C18F132BbB8",
+  const proposalId = await client.writeContract({
+    address: GOVERNOR,
+    abi: ENSGovernorAbi,
+    functionName: "propose",
+    args: [
+      [TOKEN],
+      [0n],
+      [
+        encodeFunctionData({
+          abi: ENSTokenAbi,
+          functionName: "transfer",
+          args: [zeroAddress, parseEther("0.1")],
+        }),
+      ],
+      "aeuhgeauhuae",
+    ],
   });
 
-  console.log({ balance });
+  console.log({ proposalId });
 });
