@@ -263,9 +263,9 @@ export const TokenHolders = ({
         return (
           <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
             <p>
-              {formatNumberUserReadable(
+              {`${variation.percentageChange < 0 ? "-" : ""}${formatNumberUserReadable(
                 Math.abs(variation.absoluteChange),
-              )}{" "}
+              )}`}
             </p>
             <div>
               <Percentage value={variation.percentageChange} />
