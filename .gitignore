@@ -145,3 +145,6 @@ dist
 **/storybook-static/*
 
 .sst/
+
+
+*.db

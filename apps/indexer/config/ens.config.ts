@@ -7,33 +7,31 @@ import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 
 const ENS_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.ENS];
 
-export const config = {
-  // database: {
-  //   kind: "postgres",
-  //   connectionString: env.DATABASE_URL,
-  // },
+export default createConfig({
   chains: {
     ethereum_mainnet: {
-      id: 31337,
+      id: 1,
       rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
+  },
+  database: {
+    kind: "postgres",
+    connectionString: env.DATABASE_URL,
   },
   contracts: {
     ENSToken: {
       abi: ENSTokenAbi,
       chain: "ethereum_mainnet",
       address: ENS_CONTRACTS.token.address,
-      // startBlock: ENS_CONTRACTS.token.startBlock,
+      startBlock: ENS_CONTRACTS.token.startBlock,
     },
     ENSGovernor: {
       abi: ENSGovernorAbi,
       chain: "ethereum_mainnet",
       address: ENS_CONTRACTS.governor.address,
-      // startBlock: ENS_CONTRACTS.governor.startBlock,
+      startBlock: ENS_CONTRACTS.governor.startBlock,
     },
   },
-} as const;
-
-export default createConfig(config);
+});
