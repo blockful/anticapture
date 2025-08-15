@@ -41,7 +41,7 @@ export class LastUpdateRepositoryImpl implements LastUpdateRepository {
         lastUpdate: true,
       },
       where: inArray(daoMetricsDayBucket.metricType, metricsToCheck),
-      orderBy: (fields, { desc }) => [desc(fields.date)],
+      orderBy: (fields, { desc }) => [desc(fields.lastUpdate)],
     });
 
     return lastUpdate?.lastUpdate;
