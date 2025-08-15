@@ -33,7 +33,7 @@ export function proposals(app: Hono, service: ProposalsService) {
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection, status, status_in, fromDate } =
+      const { skip, limit, orderDirection, status, fromDate } =
         context.req.valid("query");
 
       const result = await service.getProposals({
@@ -41,7 +41,6 @@ export function proposals(app: Hono, service: ProposalsService) {
         limit,
         orderDirection,
         status,
-        status_in,
         fromDate,
       });
 

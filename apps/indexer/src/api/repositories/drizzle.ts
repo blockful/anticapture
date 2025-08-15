@@ -112,39 +112,39 @@ export class DrizzleRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    status: string | undefined,
-    status_in: string[] | undefined,
+    status: string | string[] | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
     if (status) {
-      // the following statuses are not handled by the indexing process
-      // being stored as "PENDING" in the database to be further processed
-      if (
-        status === ProposalStatus.ACTIVE ||
-        status === ProposalStatus.DEFEATED ||
-        status === ProposalStatus.SUCCEEDED
-      ) {
-        whereClauses.push(eq(proposalsOnchain.status, ProposalStatus.PENDING));
-      } else {
-        whereClauses.push(eq(proposalsOnchain.status, status));
-      }
-    } else if (status_in && status_in.length > 0) {
-      // Handle multiple statuses
-      const statusConditions = status_in.map((s) => {
+      if (typeof status === "string") {
+        // Single status handling
         if (
-          s === ProposalStatus.ACTIVE ||
-          s === ProposalStatus.DEFEATED ||
-          s === ProposalStatus.SUCCEEDED
+          status === ProposalStatus.ACTIVE ||
+          status === ProposalStatus.DEFEATED ||
+          status === ProposalStatus.SUCCEEDED
         ) {
-          return eq(proposalsOnchain.status, ProposalStatus.PENDING);
+          whereClauses.push(eq(proposalsOnchain.status, ProposalStatus.PENDING));
+        } else {
+          whereClauses.push(eq(proposalsOnchain.status, status));
         }
-        return eq(proposalsOnchain.status, s);
-      });
-      // Use or() to combine multiple status conditions
-      if (statusConditions.length > 0) {
-        whereClauses.push(or(...statusConditions));
+      } else if (Array.isArray(status) && status.length > 0) {
+        // Multiple statuses handling
+        const statusConditions = status.map((s) => {
+          if (
+            s === ProposalStatus.ACTIVE ||
+            s === ProposalStatus.DEFEATED ||
+            s === ProposalStatus.SUCCEEDED
+          ) {
+            return eq(proposalsOnchain.status, ProposalStatus.PENDING);
+          }
+          return eq(proposalsOnchain.status, s);
+        });
+        // Use or() to combine multiple status conditions
+        if (statusConditions.length > 0) {
+          whereClauses.push(or(...statusConditions));
+        }
       }
     }
 

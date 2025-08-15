@@ -31,9 +31,6 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
   """Get historical market data for a specific token"""
   historicalTokenData: historicalTokenData_200_response
 
@@ -76,7 +73,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: String, status_in: [String], fromDate: Float): [query_proposals_items]
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): [query_proposals_items]
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -562,8 +559,8 @@ type transfer {
   daoId: String!
   tokenId: String
   amount: BigInt
-  fromAccountId: String
-  toAccountId: String
+  fromAccountId: String!
+  toAccountId: String!
   timestamp: BigInt
   logIndex: Int!
   from: account
@@ -687,7 +684,7 @@ type votesOnchainPage {
 type votesOnchain {
   txHash: String
   daoId: String!
-  voterAccountId: String
+  voterAccountId: String!
   proposalId: String
   support: String
   votingPower: String
@@ -1129,19 +1126,6 @@ input daoMetricsDayBucketFilter {
   count_lt: Int
   count_gte: Int
   count_lte: Int
-}
-
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
 }
 
 type historicalTokenData_200_response {
