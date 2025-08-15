@@ -116,7 +116,6 @@ export class DrizzleRepository {
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
-    // Simply use the status array as provided by the service
     if (status && status.length > 0) {
       whereClauses.push(inArray(proposalsOnchain.status, status));
     }
