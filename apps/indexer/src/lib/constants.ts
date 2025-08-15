@@ -69,6 +69,11 @@ export const CONTRACT_ADDRESSES = {
       address: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
       startBlock: 17813942,
     },
+    // https://etherscan.io/address/0xDbD27635A534A3d3169Ef0498beB56Fb9c937489
+    governorAlpha: {
+      address: "0xDbD27635A534A3d3169Ef0498beB56Fb9c937489",
+      startBlock: 12497481,
+    },
   },
 } as const;
 
@@ -88,7 +93,53 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
-  [DaoIdEnum.GTC]: {},
+  [DaoIdEnum.GTC]: {
+    "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
+    "Gitcoin CSDO": "0x931896A8A9313F622a2AFCA76d1471B97955e551",
+    "Gitcoin Fraud Detection & Defense":
+      "0xD4567069C5a1c1fc8261d8Ff5C0B1d98f069Cf47",
+    "Gitcoin Grants Matching Pool":
+      "0xde21F729137C5Af1b01d73aF1dC21eFfa2B8a0d6",
+    "Gitcoin Merch, Memes and Marketing":
+      "0xC23DA3Ca9300571B9CF43298228353cbb3E1b4c0",
+    "Gitcoin Timelock Transfer 1": "0x6EEdE31a2A15340342B4BCb3039447d457aC7C4b",
+    "Gitcoin Timelock Transfer 2": "0xeD95D629c4Db80060C59432e81254D256AEc97E2",
+    "Vesting Address GTC 1": "0x2AA5d15Eb36E5960d056e8FeA6E7BB3e2a06A351",
+    "Staking contract GTC": "0x0E3efD5BE54CC0f4C64e0D186b0af4b7F2A0e95F",
+    "OKX Ventures": "0xe527BbDE3654E9ba824f9B72DFF495eEe60fD366",
+    "Protocol Labs 1": "0x154855f5522f6B04ce654175368F428852DCd55D",
+    "Matt Solomon": "0x7aD3d9819B06E800F8A65f3440D599A23D6A0BDf",
+    "Arbitrum Bridge": "0xa3A7B6F88361F48403514059F1F16C8E78d60EeC",
+    "Optimism Bridge": "0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1",
+    "Radicle Timelock": "0x8dA8f82d2BbDd896822de723F55D6EdF416130ba",
+    "Vesting Address GTC 3": "0x2CDE9919e81b20B4B33DD562a48a84b54C48F00C",
+    "deltajuliet.eth 1": "0x5b1ddBEC956Ed39e1aC92AE3c3D99295ddD59865",
+    "deltajuliet.eth 2": "0x407466C56B8488c4d99558633Ff1AC5D84400B46",
+    "deltajuliet.eth 3": "0x14b9F70C3d4B367D496F3771EdA7EFA65282e55D",
+    "deltajuliet.eth 4": "0x0dcFc9323539A6eC47f9BC0A96882070540bf950",
+    "deltajuliet.eth 5": "0x08f3FB287AEc4E06EFF8de37410eaF52B05c7f56",
+    "Gitcoin Timelock Transfer 5": "0x9E75c3BFb82cf701AC0A74d6C1607461Ec65EfF9",
+    "Old Address, Large GTC Transfers 1":
+      "0xF5A7bA226CB94D87C29aDD2b59aC960904a163F3",
+    "Old Address, Large GTC Transfers 2":
+      "0xeD865C87c3509e3A908655777B13f7313b2fc196",
+    "Old Address, Large GTC Transfers 3":
+      "0xDD6a165B9e05549640149dF108AC0aF8579B7005",
+    "Old Address, Large GTC Transfers 4":
+      "0xaD467E6039F0Ca383b5FFd60F1C7a890acaB4bE3",
+    "Old Address, Large GTC Transfers 5":
+      "0x44d4d830788cc6D4d72C78203F5918a3E2761691",
+    "Old Address, Large GTC Transfers 6":
+      "0x38661187CfD779bEa00e14Bc5b986CF0C717A39B",
+    "Old Address, Large GTC Transfers 7":
+      "0x34237F91D2Ce322f3572376b82472C7FA56D7595",
+    "Old Address, Large GTC Transfers 8":
+      "0x2083e7B107347AE4F5Cb6Ff35EC5DAcf03391c57",
+    "Old Address, Large GTC Transfers 9":
+      "0x183a1CaF6750CF88E45812FCE0110D59d71833e4",
+    "Old Address, Large GTC Transfers 10":
+      "0x11e06eF6e42306dc40D2754Ef2629fB011d80aE9",
+  },
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
