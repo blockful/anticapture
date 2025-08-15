@@ -97,7 +97,17 @@ export const EnsAvatar = ({
     return "Unknown";
   };
 
-  const displayName = getDisplayName();
+  const displayNameRaw = getDisplayName();
+  const truncateMiddle = (value: string, max: number) => {
+    if (value.length <= max) return value;
+    const keep = max - 3;
+    const start = Math.ceil(keep / 2);
+    const end = Math.floor(keep / 2);
+    return value.slice(0, start) + "..." + value.slice(value.length - end);
+  };
+  const displayName = ensData?.ens
+    ? truncateMiddle(displayNameRaw, 20)
+    : displayNameRaw;
   const isLoadingName = loading || ensLoading;
 
   const baseClasses = cn(
@@ -159,10 +169,10 @@ export const EnsAvatar = ({
 
   // Return avatar with name
   return (
-    <div className={cn("flex items-center gap-3", containerClassName)}>
+    <div className={cn("flex min-w-0 items-center gap-3", containerClassName)}>
       {avatarElement()}
 
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col">
         <div className="flex items-center gap-2">
           {isLoadingName ? (
             <SkeletonRow
@@ -172,7 +182,7 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary text-sm",
+                "text-primary block max-w-full overflow-hidden truncate text-ellipsis whitespace-nowrap text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 nameClassName,
               )}
