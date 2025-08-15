@@ -292,17 +292,17 @@ export const Delegates = ({
 
         return (
           <div className="flex h-10 items-center justify-start gap-1 whitespace-nowrap px-4 py-2 text-end text-sm">
-            <p className="text-secondary">{`${variation.includes("↓") ? "-" : ""}${variation.split(" ")[0]}`}</p>
+            <p className="text-secondary">{`${variation?.includes("↓") ? "-" : ""}${variation?.split(" ")?.[0] || variation}`}</p>
             <p
               className={cn(
-                variation.includes("↑")
+                variation?.includes("↑")
                   ? "text-success"
-                  : variation.includes("↓")
+                  : variation?.includes("↓")
                     ? "text-error"
                     : "text-secondary",
               )}
             >
-              {variation.split(" ").slice(2).join(" ")}
+              {variation?.split(" ")?.slice(2).join(" ") || ""}
             </p>
           </div>
         );
