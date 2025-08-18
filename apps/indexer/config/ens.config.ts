@@ -8,6 +8,10 @@ import { ENSGovernorAbi, ENSTokenAbi } from "@/indexer/ens/abi";
 const ENS_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.ENS];
 
 export default createConfig({
+  database: {
+    kind: "postgres",
+    connectionString: env.DATABASE_URL,
+  },
   chains: {
     ethereum_mainnet: {
       id: 1,
@@ -15,10 +19,6 @@ export default createConfig({
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },
-  },
-  database: {
-    kind: "postgres",
-    connectionString: env.DATABASE_URL,
   },
   contracts: {
     ENSToken: {
