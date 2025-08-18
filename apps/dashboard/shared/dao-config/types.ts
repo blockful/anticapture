@@ -14,6 +14,16 @@ export enum ChainNameEnum {
   Ethereum = "ethereum",
 }
 
+export type Metric = {
+  label: string;
+  color: string;
+  category: string;
+};
+
+export type MetricWithKey = Metric & {
+  key: MetricTypesEnum;
+};
+
 export type DaoMetricsDayBucket = {
   date: string;
   daoId: DaoIdEnum;
