@@ -1,4 +1,4 @@
-"use client" 
+"use client";
 
 import {
   Close,
@@ -95,13 +95,13 @@ export const TokenDistributionDialog = ({
                   </CardTitle>
                   <div className="flex w-full flex-wrap gap-2 sm:gap-3">
                     {metrics.map((metric) => {
-                      const isAlreadyApplied = appliedMetrics[category]?.some(
-                        (i) => i.key === metric.key,
-                      );
+                      const isMetricAlreadyApplied = appliedMetrics[
+                        category
+                      ]?.some((i) => i.key === metric.key);
 
                       const isSelected = selectedMetrics.includes(metric.key);
 
-                      if (isAlreadyApplied) return null;
+                      if (isMetricAlreadyApplied) return null;
 
                       return (
                         <div
