@@ -15,6 +15,9 @@ import {
   OPTokenIndexer,
 } from "@/indexer/op";
 import { ARBTokenIndexer } from "@/indexer/arb";
+import { GTCClient } from "@/indexer/gtc/client";
+import { GTCTokenIndexer } from "@/indexer/gtc/erc20";
+import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId } = env;
 
@@ -44,6 +47,12 @@ switch (daoId) {
   case DaoIdEnum.OP: {
     OPTokenIndexer(token.address, token.decimals);
     OPGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.GTC: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    GTCTokenIndexer(token.address, token.decimals);
+    GTCGovernorIndexer(new GTCClient(client, governor.address), blockTime);
     break;
   }
   default:
