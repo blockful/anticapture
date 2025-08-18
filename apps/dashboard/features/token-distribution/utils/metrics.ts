@@ -5,12 +5,17 @@ export const initialMetrics = [
   MetricTypesEnum.CEX_SUPPLY,
   MetricTypesEnum.DEX_SUPPLY,
   MetricTypesEnum.LENDING_SUPPLY,
+  MetricTypesEnum.PROPOSALS,
+  MetricTypesEnum.VOTES,
 ];
 
-export const metricsSchema: Record<
-  string,
-  { label: string; color: string; category: string }
-> = {
+interface MetricSchema {
+  label: string;
+  color: string;
+  category: string;
+}
+
+export const metricsSchema: Record<string, MetricSchema> = {
   DELEGATED_SUPPLY: {
     label: "Delegated",
     color: "#3B82F6",
@@ -44,6 +49,16 @@ export const metricsSchema: Record<
   TREASURY: {
     label: "Treasury",
     color: "#FAFAFA",
+    category: "GOVERNANCE",
+  },
+  PROPOSALS: {
+    label: "Proposals",
+    color: "#8884d8",
+    category: "GOVERNANCE",
+  },
+  VOTES: {
+    label: "Votes",
+    color: "#8884d8",
     category: "GOVERNANCE",
   },
 };

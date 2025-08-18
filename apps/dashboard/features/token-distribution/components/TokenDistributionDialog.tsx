@@ -67,9 +67,8 @@ export const TokenDistributionDialog = ({
             </>
           ) : (
             <>
-              {" "}
               <PlusIcon className="text-primary" />
-              <p className="text-primary text-sm font-medium">Add metrics</p>
+              <p className="text-primary text-sm font-medium">Add metric</p>
             </>
           )}
         </Button>
@@ -77,17 +76,17 @@ export const TokenDistributionDialog = ({
       <Portal>
         <Overlay className="fixed inset-0 z-50 bg-black/80" />
         <Content className="z-60 fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-[#18181b] shadow-lg">
-          <Title className="text-primary m-0 px-4 py-3.5 text-[17px] font-medium">
+          <Title className="text-primary px-4 py-3.5 text-[16px] font-medium leading-6">
             Add metrics to chart
           </Title>
           <div className="border-light-dark h-px w-full border-t" />
-          <div className="flex flex-col px-4 pt-4">
+          <div className="flex flex-col p-4">
             {Object.entries(metricsSchema).map(([category, metrics], index) => {
               if (appliedMetrics[category]?.length === metrics.length)
                 return null;
 
               return (
-                <div key={category} className="mb-4">
+                <div key={category}>
                   <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
                     {category}
                   </CardTitle>
@@ -155,7 +154,7 @@ export const TokenDistributionDialog = ({
               className="text-primary focus:ring-primary absolute right-4 top-3.5 inline-flex size-[25px] cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-1"
               aria-label="Close"
             >
-              <X />
+              <X className="size-4" />
             </button>
           </Close>
         </Content>

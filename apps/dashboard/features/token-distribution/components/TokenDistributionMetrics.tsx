@@ -78,7 +78,7 @@ export const TokenDistributionMetrics = ({
 
   return (
     <div className="flex h-full w-full flex-col justify-between">
-      <div className="relative flex h-full w-full flex-col gap-4 sm:gap-6">
+      <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
         <div className="scrollbar-none flex max-h-96 flex-col gap-2 overflow-y-auto">
           {Object.entries(appliedMetricsFormatted).map(
             ([category, metrics]) => (
@@ -165,7 +165,6 @@ export const TokenDistributionMetrics = ({
             ),
           )}
         </div>
-        <div className="from-surface-default pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent" />
       </div>
       <TokenDistributionDialog
         appliedMetrics={appliedMetricsFormatted}
