@@ -17,6 +17,7 @@ const daoItemQueries = [
   "historicalBalances",
   "historicalVotingPower",
   "proposals",
+  "lastUpdate",
   "proposal",
 ];
 

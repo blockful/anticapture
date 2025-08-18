@@ -265,10 +265,10 @@ type Query {
   """
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
-  historicalVotingPower(
-    addresses: JSON!
-    days: queryInput_historicalVotingPower_days = _7d
-  ): [query_historicalVotingPower_items]
+  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+
+  """Get the last update time"""
+  lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 }
 
 """
@@ -1620,6 +1620,16 @@ enum queryInput_historicalVotingPower_days {
   _90d
   _180d
   _365d
+}
+
+type lastUpdate_200_response {
+  lastUpdate: String
+}
+
+enum queryInput_lastUpdate_chart {
+  cost_comparison
+  attack_profitability
+  token_distribution
 }
 
 enum HTTPMethod {

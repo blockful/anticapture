@@ -6,3 +6,4 @@ export { assets } from "./assets.controller";
 export { historicalOnchain } from "./historical-onchain.controller";
 export { proposals } from "./proposals";
 export { daoController } from "./dao";
+export { lastUpdate } from "./last-update.controller";
