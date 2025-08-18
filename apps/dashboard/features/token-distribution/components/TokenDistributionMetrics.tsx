@@ -14,9 +14,9 @@ import { formatNumberUserReadable, formatVariation } from "@/shared/utils";
 
 interface TokenDistributionMetricsProps {
   appliedMetrics: MetricTypesEnum[];
-  setAppliedMetrics: React.Dispatch<React.SetStateAction<MetricTypesEnum[]>>;
-  setHoveredMetricKey: React.Dispatch<
-    React.SetStateAction<MetricTypesEnum | null>
+  setAppliedMetrics: Dispatch<SetStateAction<MetricTypesEnum[]>>;
+  setHoveredMetricKey: Dispatch<
+    SetStateAction<MetricTypesEnum | null>
   >;
   timeSeriesData?: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | null;
   metricsSchema: Record<MetricTypesEnum, Metric>;
