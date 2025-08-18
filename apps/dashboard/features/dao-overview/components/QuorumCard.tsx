@@ -40,6 +40,18 @@ export const QuorumCard = () => {
     ),
   };
 
+  const delSupply = {
+    value:
+      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high ?? null,
+    changeRate: calculateChangeRate(
+      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
+    ),
+  };
+
+  const delegatedSupplyValueOp = delSupply.value
+    ? String(BigInt(delSupply.value) / BigInt(10 ** 18))
+    : delSupply.value;
+
   if (loading) {
     return <SkeletonDaoInfoCards />;
   }
@@ -52,6 +64,14 @@ export const QuorumCard = () => {
         BigInt(totalSupply.value ?? ("1" as string)),
     );
 
+  const quorumMinPercentageDelSupply =
+    delegatedSupplyValueOp &&
+    delSupply.value !== undefined &&
+    formatEther(
+      (BigInt(delegatedSupplyValueOp) * BigInt(30) * BigInt(1e18)) /
+        BigInt(100),
+    );
+
   const proposalThresholdPercentage =
     daoData?.proposalThreshold &&
     totalSupply.value !== undefined &&
@@ -60,13 +80,31 @@ export const QuorumCard = () => {
         BigInt(totalSupply.value ?? ("1" as string)),
     );
 
-  const quorumValue = daoData?.quorum
+  const quorumValueTotalSupply = daoData?.quorum
     ? `${formatNumberUserReadable(Number(daoData.quorum) / 10 ** 18)} `
     : "No Quorum";
 
-  const quorumPercentage = quorumMinPercentage
-    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}%)`
+  const quorumValueDelSupply = quorumMinPercentageDelSupply
+    ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
+    : "No Quorum";
+
+  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
+    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
     : "(N/A)";
+
+  const quorumPercentageTotalSupply = quorumMinPercentage
+    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
+    : "(N/A)";
+
+  const quorumPercentage =
+    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+      ? quorumPercentageDelSupply
+      : quorumPercentageTotalSupply;
+
+  const quorumValue =
+    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+      ? quorumValueDelSupply
+      : quorumValueTotalSupply;
 
   const proposalThresholdValue = daoData?.proposalThreshold
     ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
@@ -78,11 +116,14 @@ export const QuorumCard = () => {
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
 
+  const textCardDaoInfo =
+    daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
+
   const quorumData: CardData = {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,
     optionalHeaderValue: daoData && (
-      <p className="text-link flex text-sm">
+      <p className="text-link flex text-xs font-medium">
         {quorumValue} {daoData?.id || "Unknown ID"} {quorumPercentage}
       </p>
     ),
@@ -95,6 +136,7 @@ export const QuorumCard = () => {
           daoData && daoConfig.daoOverview.rules?.logic
             ? [
                 <TextCardDaoInfoItem
+                  className="items-center"
                   key="text-logic"
                   item={{
                     label: daoConfig.daoOverview.rules.logic,
@@ -108,7 +150,6 @@ export const QuorumCard = () => {
                 </Badge>,
               ],
       },
-
       {
         title: "Proposal Threshold",
         tooltip:
@@ -117,7 +158,10 @@ export const QuorumCard = () => {
           ? [
               <TextCardDaoInfoItem
                 key="text-proposal-threshold"
-                item={{ value: proposalThresholdText, daoId: daoData.id }}
+                item={{
+                  value: textCardDaoInfo,
+                  daoId: daoData.id as DaoIdEnum,
+                }}
               />,
             ]
           : [

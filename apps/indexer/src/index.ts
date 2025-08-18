@@ -5,21 +5,24 @@ import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import {
-  ENSGovernor,
+  ENSClient,
   GovernorIndexer as ENSGovernorIndexer,
   ENSTokenIndexer,
 } from "@/indexer/ens";
 import {
-  UNIGovernor,
+  UNIClient,
   GovernorIndexer as UNIGovernorIndexer,
   UNITokenIndexer,
 } from "@/indexer/uni";
 import {
-  OPGovernor,
+  OPClient,
   GovernorIndexer as OPGovernorIndexer,
   OPTokenIndexer,
 } from "@/indexer/op";
-import { ARBTokenIndexer } from "./indexer/arb";
+import { ARBTokenIndexer } from "@/indexer/arb";
+import { GTCClient } from "@/indexer/gtc/client";
+import { GTCTokenIndexer } from "@/indexer/gtc/erc20";
+import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -34,17 +37,19 @@ const client = createPublicClient({
   transport: http(rpcUrl),
 });
 
+const blockTime = CONTRACT_ADDRESSES[env.DAO_ID].blockTime;
+
 switch (daoId) {
   case DaoIdEnum.ENS: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     ENSTokenIndexer(token.address, token.decimals);
-    ENSGovernorIndexer(new ENSGovernor(client, governor.address));
+    ENSGovernorIndexer(new ENSClient(client, governor.address), blockTime);
     break;
   }
   case DaoIdEnum.UNI: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     UNITokenIndexer(token.address, token.decimals);
-    UNIGovernorIndexer(new UNIGovernor(client, governor.address));
+    UNIGovernorIndexer(new UNIClient(client, governor.address), blockTime);
     break;
   }
   case DaoIdEnum.ARB: {
@@ -55,7 +60,13 @@ switch (daoId) {
   case DaoIdEnum.OP: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     OPTokenIndexer(token.address, token.decimals);
-    OPGovernorIndexer(new OPGovernor(client, governor.address));
+    OPGovernorIndexer(new OPClient(client, governor.address), blockTime);
+    break;
+  }
+  case DaoIdEnum.GTC: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    GTCTokenIndexer(token.address, token.decimals);
+    GTCGovernorIndexer(new GTCClient(client, governor.address), blockTime);
     break;
   }
   default:

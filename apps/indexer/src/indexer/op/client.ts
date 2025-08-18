@@ -1,27 +1,43 @@
-import { Account, Address, Chain, Client, Transport } from "viem";
+import {
+  Account,
+  Address,
+  Chain,
+  Client,
+  fromHex,
+  toHex,
+  Transport,
+} from "viem";
 import { readContract } from "viem/actions";
 
-import { Governor } from "@/interfaces/governor";
+import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi";
+import { GovernorBase } from "../governor.base";
 
-export class OPGovernor<
-  TTransport extends Transport = Transport,
-  TChain extends Chain = Chain,
-  TAccount extends Account | undefined = Account | undefined,
-> implements Governor
+export class OPClient<
+    TTransport extends Transport = Transport,
+    TChain extends Chain = Chain,
+    TAccount extends Account | undefined = Account | undefined,
+  >
+  extends GovernorBase
+  implements DAOClient
 {
-  private client: Client<TTransport, TChain, TAccount>;
   private abi: typeof GovernorAbi;
   private address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
-    this.client = client;
+    super(client);
     this.address = address;
     this.abi = GovernorAbi;
   }
 
-  async getQuorum(): Promise<bigint> {
-    return 0n; // TODO: fetch quorum from oracle
+  async getQuorum(proposalId: string | null): Promise<bigint> {
+    if (!proposalId) return 0n;
+    return readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "quorum",
+      args: [BigInt(proposalId)],
+    });
   }
 
   async getProposalThreshold(): Promise<bigint> {
@@ -50,5 +66,28 @@ export class OPGovernor<
 
   async getTimelockDelay(): Promise<bigint> {
     return 0n;
+  }
+
+  async getCurrentBlockNumber(): Promise<number> {
+    const result = await this.client.request({
+      method: "eth_blockNumber",
+    });
+    return fromHex(result, "number");
+  }
+
+  async getBlockTime(blockNumber: number): Promise<number | null> {
+    const block = await this.client.request({
+      method: "eth_getBlockByNumber",
+      params: [toHex(blockNumber), false],
+    });
+    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
+  }
+
+  calculateQuorum(votes: {
+    forVotes: bigint;
+    againstVotes: bigint;
+    abstainVotes: bigint;
+  }): bigint {
+    return votes.forVotes + votes.againstVotes + votes.abstainVotes;
   }
 }

@@ -5,6 +5,7 @@ import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 import { DaoTemplate } from "@/templates";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -20,18 +21,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const ogImage: Record<
-    Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>,
-    string
-  > = {
+  const ogImage: Record<Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>, string> = {
     [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
+    [DaoIdEnum.OPTIMISM]: `${baseUrl}/opengraph-images/op.png`,
   };
 
   const imageUrl =
-    ogImage[
-      daoId as Exclude<DaoIdEnum, DaoIdEnum.OPTIMISM | DaoIdEnum.ARBITRUM>
-    ] || `${baseUrl}/opengraph-images/default.png`;
+    ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>] ||
+    `${baseUrl}/opengraph-images/default.png`;
 
   return {
     title: `Anticapture - ${daoId} DAO`,
@@ -69,10 +67,11 @@ export default function DaoPage() {
           <StickyPageHeader />
           <HeaderMobile />
         </div>
-        <div className="xl4k:min-h-screen flex w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full">
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="xl4k:max-w-7xl w-full flex-1">
             <DaoTemplate />
           </div>
+          <Footer />
         </div>
       </main>
     </div>

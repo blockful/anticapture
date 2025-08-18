@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Address } from "viem";
+import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import {
@@ -62,6 +62,7 @@ export type GovernanceImplementationField = {
   description: string;
   riskLevel: RiskLevel;
   requirements?: string[];
+  riskExplanation?: string;
 };
 
 // Base DAO information
@@ -74,7 +75,7 @@ interface BaseInfo {
 
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  chainId: number;
+  chain: Chain;
   contracts: {
     token: Address;
     governor?: Address;
@@ -88,7 +89,13 @@ export interface DaoOverviewConfig {
     changeVote?: boolean;
     timelock?: boolean;
     cancelFunction?: boolean;
-    logic: "For" | "For + Abstain";
+    logic:
+      | "For"
+      | "For + Abstain"
+      | "For + Abstain + Against"
+      | "All Votes Cast";
+    quorumCalculation: "Total Supply" | "Del. Supply";
+    proposalThreshold?: string;
   };
   securityCouncil?: {
     isActive: boolean;
@@ -106,9 +113,36 @@ export interface DaoOverviewConfig {
   };
 }
 
+export interface DaoAddresses {
+  [DaoIdEnum.UNISWAP]: {
+    UniTimelock: string;
+    UniTokenDistributor: string;
+    Univ3Uni: string;
+  };
+  [DaoIdEnum.ENS]: {
+    ENSTokenTimelock: string;
+    ENSDaoWallet: string;
+    ENSColdWallet: string;
+  };
+  [DaoIdEnum.OPTIMISM]: {
+    OptimismTimelock: string;
+    OptimismTokenDistributor: string;
+    OptimismUniv3Uni: string;
+  };
+  [DaoIdEnum.ARBITRUM]: {
+    ArbitrumTimelock: string;
+    ArbitrumTokenDistributor: string;
+    ArbitrumDaoWallet: string;
+  };
+}
+
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
   supportsLiquidTreasuryCall?: boolean;
+  attackCostBarChart: DaoAddresses[DaoIdEnum];
+  dynamicQuorum?: {
+    percentage: number;
+  };
 }
 export interface GovernanceImplementationConfig
   extends GovernanceImplementation {}
@@ -126,4 +160,5 @@ export interface DaoConfiguration extends BaseInfo {
     snapshotSpace: string;
   };
   riskAnalysis?: boolean;
+  noStage?: boolean;
 }

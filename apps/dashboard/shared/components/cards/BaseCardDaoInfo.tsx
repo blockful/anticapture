@@ -29,19 +29,24 @@ interface BaseCardDaoInfoProps {
 
 export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
   return (
-    <Card className="sm:bg-surface-default xl4k:max-w-full flex w-full! flex-col border-none sm:max-w-full">
-      <CardHeader id="daoinfo-basecard-header" className="px-0 py-2! sm:p-2">
+    <Card className="sm:bg-surface-default xl4k:max-w-full w-full! flex flex-col border-none sm:max-w-full">
+      <CardHeader id="daoinfo-basecard-header" className="py-2! px-0 sm:p-2">
         <div
           className={cn(
             "flex w-full items-center",
             data.optionalHeaderValue ? "justify-between" : "justify-start",
           )}
         >
-          <CardTitle className="!text-alternative-sm text-primary flex items-center gap-2 font-mono !font-medium !tracking-wide uppercase">
-            {data.icon}
+          <CardTitle className="!text-alternative-sm text-primary flex items-center gap-2 font-mono !font-medium uppercase !tracking-wide">
+            <div>{data.icon}</div>
             {data.title}
+            {data.optionalHeaderValue && (
+              <>
+                <div className="hidden size-1 rounded-full bg-gray-600 sm:flex" />
+                {data.optionalHeaderValue}
+              </>
+            )}
           </CardTitle>
-          {data.optionalHeaderValue}
         </div>
       </CardHeader>
 

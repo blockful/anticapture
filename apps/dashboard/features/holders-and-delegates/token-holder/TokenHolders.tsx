@@ -4,8 +4,8 @@ import { useState } from "react";
 import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address, formatUnits } from "viem";
-import { Plus } from "lucide-react";
+import { Address, formatUnits, zeroAddress } from "viem";
+import { Inbox, Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -17,6 +17,8 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
+import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
+import { BlankSlate } from "@/shared/components";
 
 interface TokenHolderTableData {
   address: Address;
@@ -35,8 +37,13 @@ export const TokenHolders = ({
 }) => {
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 10;
   const { isMobile } = useScreenSize();
+
+  const handleAddressFilterApply = (address: string | undefined) => {
+    setCurrentAddressFilter(address || "");
+  };
 
   const {
     data: tokenHoldersData,
@@ -50,6 +57,7 @@ export const TokenHolders = ({
     daoId: daoId,
     limit: pageLimit,
     orderDirection: sortOrder,
+    address: currentAddressFilter,
   });
 
   const addresses = tokenHoldersData?.map((holder) => holder.accountId);
@@ -133,7 +141,12 @@ export const TokenHolders = ({
       accessorKey: "address",
       header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-          Address
+          <span>Address</span>
+          <AddressFilter
+            onApply={handleAddressFilterApply}
+            currentFilter={currentAddressFilter}
+            className="ml-2"
+          />
         </div>
       ),
       size: 280,
@@ -301,90 +314,94 @@ export const TokenHolders = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-2">
-        <TheTable
-          columns={tokenHoldersColumns}
-          data={
-            Array.from({ length: 10 }, (_, i) => ({
-              address: `0x${"0".repeat(40)}` as Address,
-              type: "EOA" as string | undefined,
-              balance: 0,
-              variation: { percentageChange: 0, absoluteChange: 0 },
-              delegate: `0x${"0".repeat(40)}` as Address,
-            })) as TokenHolderTableData[]
-          }
-          withSorting={true}
-          onRowClick={() => {}}
-          isTableSmall={true}
-        />
+      <div className="w-full text-white">
+        <div className="flex flex-col gap-2">
+          <TheTable
+            columns={tokenHoldersColumns}
+            data={
+              Array.from({ length: 10 }, () => ({
+                address: zeroAddress,
+                type: "EOA" as string | undefined,
+                balance: 0,
+                variation: { percentageChange: 0, absoluteChange: 0 },
+                delegate: zeroAddress,
+              })) as TokenHolderTableData[]
+            }
+            withSorting={true}
+            onRowClick={() => {}}
+            isTableSmall={true}
+          />
 
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          className="text-white"
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
-        />
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            className="text-white"
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isLoading={fetchingMore}
+          />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col gap-2">
-        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
-            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
-              <tr className="border-light-dark">
-                {tokenHoldersColumns.map((column, index) => (
-                  <th
-                    key={index}
-                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
-                    style={{
-                      width: column.size !== 150 ? column.size : "auto",
-                    }}
+      <div className="w-full text-white">
+        <div className="flex flex-col gap-2">
+          <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+              <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
+                <tr className="border-light-dark">
+                  {tokenHoldersColumns.map((column, index) => (
+                    <th
+                      key={index}
+                      className="h-8 text-left [&:has([role=checkbox])]:pr-0"
+                      style={{
+                        width: column.size !== 150 ? column.size : "auto",
+                      }}
+                    >
+                      {typeof column.header === "function"
+                        ? column.header({
+                            column: {
+                              getIsSorted: () => false,
+                              toggleSorting: () => {},
+                            },
+                          } as Parameters<typeof column.header>[0])
+                        : column.header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="scrollbar-none [&_tr:last-child]:border-0">
+                <tr className="hover:bg-surface-contrast transition-colors duration-300">
+                  <td
+                    colSpan={tokenHoldersColumns.length}
+                    className="bg-light h-[410px] p-0 text-center"
                   >
-                    {typeof column.header === "function"
-                      ? column.header({
-                          column: {
-                            getIsSorted: () => false,
-                            toggleSorting: () => {},
-                          },
-                        } as any)
-                      : column.header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-              <tr className="hover:bg-surface-contrast transition-colors duration-300">
-                <td
-                  colSpan={tokenHoldersColumns.length}
-                  className="bg-light h-[410px] p-0 text-center"
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <div className="text-error">
-                      {/* Error loading token holders: {error.message} */}
+                    <div className="flex h-full items-center justify-center">
+                      <div className="text-error">
+                        {/* Error loading token holders: {error.message} */}
+                      </div>
                     </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          className="text-white"
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-        />
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPrevious={fetchPreviousPage}
+            onNext={fetchNextPage}
+            className="text-white"
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+          />
+        </div>
       </div>
     );
   }
@@ -399,6 +416,15 @@ export const TokenHolders = ({
             withSorting={true}
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
+            showWhenEmpty={
+              <BlankSlate
+                variant="default"
+                icon={Inbox}
+                title=""
+                className="h-full rounded-none"
+                description="No addresses found"
+              />
+            }
           />
           <Pagination
             currentPage={pagination.currentPage}

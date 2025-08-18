@@ -22,7 +22,7 @@ export const SECTIONS_CONSTANTS = {
   attackProfitability: {
     title: "Attack Profitability",
     description:
-      "Takes into account the maximum cost and the minimum profit possible. If it looks bad, it’s bad. If it looks good, it’s better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets.",
+      "Takes into account the maximum cost and the minimum profit possible. If it looks bad, it’s bad. If it looks good, it’s better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other forms beyond direct buying and selling assets.",
     anchorId: "attackProfitabilitySection",
   },
   holdersAndDelegates: {
@@ -34,7 +34,7 @@ export const SECTIONS_CONSTANTS = {
   tokenDistribution: {
     title: "Token Distribution",
     description:
-      "Token distribution metrics are based on Blockful's Governance Indexer and are updated daily based on the events and interaction with relevant contracts.",
+      "Token distribution metrics are based on Blockful's Governance Indexer and are updated daily based on the events and interactions with relevant contracts.",
     anchorId: "tokenDistributionSection",
   },
   governanceImplementation: {
@@ -59,5 +59,23 @@ export const SECTIONS_CONSTANTS = {
     description:
       "Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression.",
     anchorId: "resilienceStagesSection",
+  },
+  donate: {
+    title: "Donate",
+    description:
+      "Support Anticapture's mission to protect DAOs and prevent governance attacks.",
+    anchorId: "donateSection",
+  },
+  glossary: {
+    title: "Glossary",
+    description:
+      "Explore the glossary of key terms and concepts in DAO security.",
+    anchorId: "glossarySection",
+  },
+  faq: {
+    title: "FAQ",
+    description:
+      "Find answers to common questions about DAO security and how Anticapture works.",
+    anchorId: "faqSection",
   },
 };

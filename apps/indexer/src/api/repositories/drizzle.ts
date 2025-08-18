@@ -1,5 +1,7 @@
-import { sql } from "ponder";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "ponder";
 import { db } from "ponder:api";
+import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
+import { Address } from "viem";
 
 import {
   ActiveSupplyQueryResult,
@@ -8,6 +10,8 @@ import {
   VotesCompareQueryResult,
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
+import { DBProposal } from "../mappers";
+import { ProposalStatus } from "@/lib/constants";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -101,6 +105,72 @@ export class DrizzleRepository {
     `;
     const result = await db.execute<AverageTurnoutCompareQueryResult>(query);
     return result.rows[0];
+  }
+
+  async getProposals(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    status: string | undefined,
+    fromDate: number | undefined,
+  ): Promise<DBProposal[]> {
+    const whereClauses: ReturnType<typeof eq>[] = [];
+    if (status) {
+      // the following statuses are not handled by the indexing process
+      // being stored as "PENDING" in the database to be further processed
+      if (
+        status === ProposalStatus.ACTIVE ||
+        status === ProposalStatus.DEFEATED ||
+        status === ProposalStatus.SUCCEEDED
+      ) {
+        whereClauses.push(eq(proposalsOnchain.status, ProposalStatus.PENDING));
+      } else {
+        whereClauses.push(eq(proposalsOnchain.status, status));
+      }
+    }
+    if (fromDate) {
+      whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
+    }
+
+    return await db
+      .select()
+      .from(proposalsOnchain)
+      .where(and(...whereClauses))
+      .orderBy(
+        orderDirection === "asc"
+          ? asc(proposalsOnchain.timestamp)
+          : desc(proposalsOnchain.timestamp),
+      )
+      .limit(limit)
+      .offset(skip);
+  }
+
+  async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
+    return await db.query.proposalsOnchain.findFirst({
+      where: eq(proposalsOnchain.id, proposalId),
+    });
+  }
+
+  async getVotingPower(
+    addresses: Address[],
+    timestamp: bigint,
+  ): Promise<{ address: Address; votingPower: bigint }[]> {
+    return await db
+      .selectDistinctOn([votingPowerHistory.accountId], {
+        address: votingPowerHistory.accountId,
+        votingPower: votingPowerHistory.votingPower,
+      })
+      .from(votingPowerHistory)
+      .where(
+        and(
+          inArray(votingPowerHistory.accountId, addresses),
+          lte(votingPowerHistory.timestamp, timestamp),
+        ),
+      )
+      .orderBy(
+        votingPowerHistory.accountId,
+        desc(votingPowerHistory.timestamp),
+      );
   }
 
   now() {

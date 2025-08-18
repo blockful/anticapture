@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@radix-ui/react-accordion";
-import { MinusIcon } from "lucide-react";
+import { CheckCircle, MinusIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { Stage } from "@/shared/types/enums/Stage";
 import { StageTagSimplified } from "@/shared/components/tags/StageTagSimplified";
@@ -16,6 +16,7 @@ import { StageContent } from "@/features/resilience-stages/components/StageConte
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";
 import { Plus } from "lucide-react";
+import { DotFilledIcon } from "@radix-ui/react-icons";
 
 interface StageAccordionProps {
   daoStage: Stage;
@@ -24,6 +25,7 @@ interface StageAccordionProps {
 }
 
 export const StageAccordion = ({
+  daoStage,
   highRiskFields,
   mediumRiskFields,
 }: StageAccordionProps) => {
@@ -31,7 +33,7 @@ export const StageAccordion = ({
     <Accordion type="multiple" className="flex h-full flex-col gap-3">
       <CustomAccordionItem
         riskFields={[]}
-        isCompleted={true}
+        isCompleted={daoStage !== Stage.NONE}
         stage={Stage.ZERO}
         title="Partial Risk Reduction"
         description="No High Risk issues, at least one Medium Risk issue remains"
@@ -43,27 +45,33 @@ export const StageAccordion = ({
             description="At least one High Risk issue identified"
             type="requirements"
             requirementText={
-              <>
-                <span className="block">
-                  All DAOs that have governor and timelock are considered at
-                  least{" "}
-                  <span className="text-primary whitespace-nowrap">
-                    Stage 0
-                  </span>
-                  .
-                </span>
-                <span className="block pl-1">
-                  At this stage, critical risks still be present and require
-                  attention.
-                </span>
-              </>
+              <div className="flex flex-col gap-2">
+                <p className="text-primary flex items-start gap-2 text-sm font-normal">
+                  {daoStage !== Stage.NONE && (
+                    <CheckCircle className="text-success size-[14px] shrink-0" />
+                  )}
+                  All DAOs that have an autonomous operation on-chain based on a
+                  governor and timelock are considered at least Stage 0.
+                </p>
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-row gap-2">
+                    <div>
+                      <DotFilledIcon className="size-4 text-zinc-600" />
+                    </div>
+                    <p className="text-secondary text-sm font-normal">
+                      At this stage, critical risks might still be present and
+                      require attention.
+                    </p>
+                  </div>
+                </div>
+              </div>
             }
           />
         }
       />
       <CustomAccordionItem
         riskFields={highRiskFields}
-        isCompleted={false}
+        isCompleted={daoStage === Stage.ONE || daoStage === Stage.TWO}
         stage={Stage.ONE}
         title="Partial Risk Reduction"
         description="No High Risk issues, at least one Medium Risk issue remains"
@@ -71,7 +79,7 @@ export const StageAccordion = ({
       />
       <CustomAccordionItem
         riskFields={mediumRiskFields}
-        isCompleted={false}
+        isCompleted={daoStage === Stage.TWO}
         stage={Stage.TWO}
         title="Partial Risk Reduction"
         description="No High or Medium Risk issues, only Low Risk items"
@@ -97,10 +105,10 @@ const stageTwoEmptyContent: (GovernanceImplementationField & {
   name: string;
 })[] = [
   {
-    name: "Fix all Stage 1 parameters and reduce their risk level to low",
+    name: "This Governance has solved all issues identified as High Risk and met the requirements for Stage 1 qualification.",
     value: "no",
     description:
-      "To complete this stage, you need to resolve all previous parameters and bring them down to low risk. High Risk issues partially solved will qualify as Medium Risk and stays as blockers for Stage 2 progression.",
+      "This does not guarantee safety, but it shows the DAO has its security basics in place. Check the dependencies left for Stage 2 to keep advancing towards resilient governance!",
     riskLevel: RiskLevel.LOW,
   },
 ];
@@ -157,6 +165,7 @@ const CustomAccordionItem = ({
             )}
           >
             <StageContent
+              isCompleted={isCompleted}
               stage={stage}
               title={
                 stage === Stage.ONE ? "Partial Risk Reduction" : "Minimal Risks"

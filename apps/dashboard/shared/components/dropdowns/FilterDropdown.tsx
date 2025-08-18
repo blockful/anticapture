@@ -20,7 +20,6 @@ export const FilterDropdown = ({
   options,
   selectedValue,
   onValueChange,
-  placeholder = "Filter",
   className,
 }: FilterDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,7 +75,7 @@ export const FilterDropdown = ({
                   index === 0 && "border-border-contrast border-b",
                 )}
               >
-                <span className="text-primary text-sm font-normal whitespace-nowrap">
+                <span className="text-primary whitespace-nowrap text-sm font-normal">
                   {option.label}
                 </span>
                 {selectedValue === option.value && (

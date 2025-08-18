@@ -1,8 +1,9 @@
 import { Context } from "ponder:registry";
 import { accountPower, proposalsOnchain, votesOnchain } from "ponder:schema";
+import { Address, Hex } from "viem";
 
 import { ensureAccountExists } from "./shared";
-import { Address, Hex } from "viem";
+import { ProposalStatus } from "@/lib/constants";
 
 export const voteCast = async (
   context: Context,
@@ -64,8 +65,10 @@ export const voteCast = async (
 export const proposalCreated = async (
   context: Context,
   daoId: string,
+  blockTime: number,
   args: {
     proposalId: string;
+    txHash: Hex;
     proposer: Address;
     targets: Address[];
     values: bigint[];
@@ -80,6 +83,7 @@ export const proposalCreated = async (
   const {
     proposer,
     proposalId,
+    txHash,
     targets,
     values,
     signatures,
@@ -92,19 +96,22 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
+  const blockDelta = parseInt(endBlock) - parseInt(startBlock);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
+    txHash,
     daoId,
     proposerAccountId: proposer,
-    targets: JSON.stringify(targets),
-    values: JSON.stringify(values),
-    signatures: JSON.stringify(signatures),
-    calldatas: JSON.stringify(calldatas),
-    startBlock,
-    endBlock,
+    targets,
+    values,
+    signatures,
+    calldatas,
+    startBlock: parseInt(startBlock),
+    endBlock: parseInt(endBlock),
     description,
     timestamp,
-    status: "Pending",
+    status: ProposalStatus.PENDING,
+    endTimestamp: timestamp + BigInt(blockDelta * blockTime),
   });
 
   // Update proposer's proposal count
@@ -120,20 +127,12 @@ export const proposalCreated = async (
     }));
 };
 
-export const proposalCanceled = async (
+export const updateProposalStatus = async (
   context: Context,
   proposalId: string,
+  status: string,
 ) => {
   await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "CANCELED",
-  });
-};
-
-export const proposalExecuted = async (
-  context: Context,
-  proposalId: string,
-) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status: "EXECUTED",
+    status,
   });
 };

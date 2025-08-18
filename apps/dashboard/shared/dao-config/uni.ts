@@ -3,13 +3,14 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
+import { mainnet } from "viem/chains";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
   supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
-    chainId: 1,
+    chain: mainnet,
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -25,6 +26,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
+      quorumCalculation: "Total Supply",
     },
   },
   governanceImplementation: {
@@ -40,16 +42,19 @@ export const UNI: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
-          "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
-          "Currently, the DAO’s domains have no DNS-level protections (High Risk).",
-          "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
+          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable",
+          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity",
+          "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
+          "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
         ],
+        riskExplanation: `Although protected from spoofing or hijacking, the service used for voting could still be internally compromised.\n
+          A change in the voting interface could be used to manipulate the results of the vote, hiding malicious txns, or even changing selection of votes.`,
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "<10k USD",
@@ -179,9 +184,14 @@ export const UNI: DaoConfiguration = {
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: false,
+    attackCostBarChart: {
+      UniTimelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+      UniTokenDistributor: "0x090D4613473dEE047c3f2706764f49E0821D256e",
+      Univ3Uni: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
+    },
   },
   riskAnalysis: true,
   tokenDistribution: true,
   resilienceStages: true,
-  dataTables: false,
+  dataTables: true,
 };

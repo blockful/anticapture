@@ -33,6 +33,8 @@ import {
   normalizeDatasetTreasuryNonDaoToken,
   normalizeDatasetAllTreasury,
 } from "@/features/attack-profitability/utils";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -115,11 +117,27 @@ export const MultilineChartAttackProfitability = ({
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
       ).slice(365 - Number(days.split("d")[0])),
-      quorum: quorumValue
-        ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue).slice(
-            365 - Number(days.split("d")[0]),
+      quorum: daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
+        ?.attackProfitability?.dynamicQuorum?.percentage
+        ? normalizeDataset(
+            selectedPriceHistory,
+            "quorum",
+            null,
+            delegatedSupplyChart,
           )
-        : [],
+            .slice(365 - Number(days.split("d")[0]))
+            .map((datasetpoint) => ({
+              ...datasetpoint,
+              quorum:
+                datasetpoint.quorum *
+                (daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
+                  ?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
+            }))
+        : quorumValue
+          ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue).slice(
+              365 - Number(days.split("d")[0]),
+            )
+          : [],
       delegated: delegatedSupplyChart
         ? normalizeDataset(
             selectedPriceHistory,
@@ -139,7 +157,7 @@ export const MultilineChartAttackProfitability = ({
     ),
   );
 
-  let lastKnownValues: Record<string, number | null> = {};
+  const lastKnownValues: Record<string, number | null> = {};
   const chartData = Array.from(allDates)
     .sort((a, b) => a - b)
     .map((date) => {
@@ -197,6 +215,8 @@ export const MultilineChartAttackProfitability = ({
             ))}
         </LineChart>
       </ChartContainer>
+      {/* Watermark */}
+      <AnticaptureWatermark />
     </div>
   );
 };
