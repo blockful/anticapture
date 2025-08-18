@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { CardTitle } from "@/shared/components/ui/card";
 import { X } from "lucide-react";
