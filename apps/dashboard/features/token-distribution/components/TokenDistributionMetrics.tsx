@@ -153,7 +153,7 @@ export const TokenDistributionMetrics = ({
                             {formattedVariation}%
                           </p>
                         )}
-                        <X className="text-secondary h3 w-3" />
+                        <X className="text-secondary size-3" />
                       </div>
                     </Button>
                   );
