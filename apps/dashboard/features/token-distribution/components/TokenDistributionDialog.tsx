@@ -54,24 +54,22 @@ export const TokenDistributionDialog = ({
         <Button
           variant={isAllMetricsApplied ? "disabled" : "ghost"}
           className={
-            "border-light-dark mt-4 flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+            "border-light-dark flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
           }
           disabled={isAllMetricsApplied}
         >
           {isAllMetricsApplied ? (
             <>
               <Check className="text-primary" />
-              <span className="text-primary text-sm font-medium">
+              <p className="text-primary text-sm font-medium">
                 All metrics added
-              </span>
+              </p>
             </>
           ) : (
             <>
               {" "}
               <PlusIcon className="text-primary" />
-              <span className="text-primary text-sm font-medium">
-                Add metrics
-              </span>
+              <p className="text-primary text-sm font-medium">Add metrics</p>
             </>
           )}
         </Button>

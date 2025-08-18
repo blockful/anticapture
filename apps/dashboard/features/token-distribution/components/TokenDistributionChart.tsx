@@ -18,6 +18,7 @@ import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPen
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface TokenDistributionChartProps {
   appliedMetrics: MetricTypesEnum[];
@@ -143,6 +144,7 @@ export const TokenDistributionChart = ({
           </Brush>
         </ComposedChart>
       </ChartContainer>
+      <AnticaptureWatermark />
     </div>
   );
 };
