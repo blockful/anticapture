@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { Dispatch, SetStateAction } from "react";
 import { CardTitle } from "@/shared/components/ui/card";
 import { X } from "lucide-react";
 import { TokenDistributionDialog } from "@/features/token-distribution/components";
@@ -50,7 +50,9 @@ export const TokenDistributionMetrics = ({
   setHoveredMetricKey,
   timeSeriesData,
 }: TokenDistributionMetricsProps) => {
-  const metricsData = formatChartVariation(timeSeriesData!);
+  if (!timeSeriesData) return null;
+
+  const metricsData = formatChartVariation(timeSeriesData);
 
   const handleApplyMetric = (newMetrics: MetricTypesEnum[]) => {
     setAppliedMetrics((prev) => {

@@ -39,6 +39,7 @@ export const TokenDistributionChart = ({
       </div>
     );
   }
+  if (!appliedMetrics.length) return null;
 
   const datasets = appliedMetrics.reduce(
     (acc, key) => {
