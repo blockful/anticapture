@@ -13,13 +13,12 @@ import {
 } from "@/shared/dao-config/types";
 import { formatChartVariation } from "@/features/token-distribution/utils";
 import { formatNumberUserReadable, formatVariation } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 interface TokenDistributionMetricsProps {
   appliedMetrics: MetricTypesEnum[];
   setAppliedMetrics: Dispatch<SetStateAction<MetricTypesEnum[]>>;
-  setHoveredMetricKey: Dispatch<
-    SetStateAction<MetricTypesEnum | null>
-  >;
+  setHoveredMetricKey: Dispatch<SetStateAction<MetricTypesEnum | null>>;
   timeSeriesData?: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | null;
   metricsSchema: Record<MetricTypesEnum, Metric>;
 }
@@ -144,13 +143,13 @@ export const TokenDistributionMetrics = ({
                         )}
                         {formattedVariation && (
                           <p
-                            className={`flex items-center justify-end text-end ${
-                              Number(formattedVariation) > 0
-                                ? "text-success"
-                                : Number(formattedVariation) < 0
-                                  ? "text-error"
-                                  : ""
-                            }`}
+                            className={cn(
+                              "flex items-center justify-end text-end",
+                              {
+                                "text-success": Number(formattedVariation) > 0,
+                                "text-error": Number(formattedVariation) < 0,
+                              },
+                            )}
                           >
                             {formattedVariation}%
                           </p>
@@ -164,7 +163,7 @@ export const TokenDistributionMetrics = ({
             ),
           )}
         </div>
-        <div className="from-surface-default pointer-events-none absolute bottom-0  inset-x-0 h-8 bg-gradient-to-t to-transparent" />
+        <div className="from-surface-default pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent" />
       </div>
       <TokenDistributionDialog
         appliedMetrics={appliedMetricsFormatted}
