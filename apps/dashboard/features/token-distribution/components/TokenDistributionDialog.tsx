@@ -152,7 +152,7 @@ export const TokenDistributionDialog = ({
 
           <Close asChild>
             <button
-              className="text-primary focus:ring-primary absolute right-4 top-3.5 inline-flex h-[25px] w-[25px] cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-1"
+              className="text-primary focus:ring-primary absolute right-4 top-3.5 inline-flex size-[25px] cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-1"
               aria-label="Close"
             >
               <X />
