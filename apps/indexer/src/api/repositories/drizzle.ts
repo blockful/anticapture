@@ -1,7 +1,6 @@
 import { and, asc, desc, eq, gte, inArray, lte, or, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
-import { SQL } from "drizzle-orm";
 import { Address } from "viem";
 
 import {
