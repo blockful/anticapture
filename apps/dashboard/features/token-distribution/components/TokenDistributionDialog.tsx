@@ -133,7 +133,7 @@ export const TokenDistributionDialog = ({
           <div className="flex justify-end gap-2 px-4 py-3">
             <Close asChild>
               <Button
-                variant={"ghost"}
+                variant="ghost"
                 className="text-primary bg-surface-default border-light-dark flex cursor-pointer items-center rounded-md border px-4 py-2 text-sm font-medium"
               >
                 Cancel
