@@ -31,6 +31,9 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
   """Get historical market data for a specific token"""
   historicalTokenData: historicalTokenData_200_response
 
@@ -73,7 +76,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): [query_proposals_items]
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: String, fromDate: Float): [query_proposals_items]
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -87,6 +90,9 @@ type Query {
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+
+  """Get the last update time"""
+  lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 }
 
 """
@@ -1017,6 +1023,7 @@ type daoMetricsDayBucket {
   average: BigInt!
   volume: BigInt!
   count: Int!
+  lastUpdate: BigInt!
 }
 
 enum metricType {
@@ -1126,6 +1133,27 @@ input daoMetricsDayBucketFilter {
   count_lt: Int
   count_gte: Int
   count_lte: Int
+  lastUpdate: BigInt
+  lastUpdate_not: BigInt
+  lastUpdate_in: [BigInt]
+  lastUpdate_not_in: [BigInt]
+  lastUpdate_gt: BigInt
+  lastUpdate_lt: BigInt
+  lastUpdate_gte: BigInt
+  lastUpdate_lte: BigInt
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
 }
 
 type historicalTokenData_200_response {
@@ -1418,6 +1446,16 @@ enum queryInput_historicalVotingPower_days {
   _90d
   _180d
   _365d
+}
+
+type lastUpdate_200_response {
+  lastUpdate: String!
+}
+
+enum queryInput_lastUpdate_chart {
+  cost_comparison
+  attack_profitability
+  token_distribution
 }
 
 enum HTTPMethod {

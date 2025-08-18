@@ -25,10 +25,8 @@ export class ProposalsService {
    * and removes duplicates.
    */
   private prepareStatusForDatabase(
-    statusArray: string[] | undefined,
-  ): string[] | undefined {
-    if (!statusArray) return undefined;
-    
+    statusArray: string[],
+  ): string[] {
     const mappedStatuses = statusArray.map((status) => {
       if (
         status === ProposalStatus.ACTIVE ||
@@ -50,9 +48,8 @@ export class ProposalsService {
    */
   private filterProposalsByStatus(
     proposals: DBProposal[],
-    requestedStatuses: string[] | undefined,
+    requestedStatuses: string[],
   ): DBProposal[] {
-    if (!requestedStatuses) return proposals;
     
     return proposals.filter((proposal) =>
       requestedStatuses.includes(proposal.status),
@@ -67,7 +64,7 @@ export class ProposalsService {
     fromDate,
   }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
-    const dbStatuses = this.prepareStatusForDatabase(status);
+    const dbStatuses = status ? this.prepareStatusForDatabase(status) : undefined;
 
     // 2. Fetch proposals from database
     const proposals = await this.proposalsRepo.getProposals(
@@ -84,7 +81,7 @@ export class ProposalsService {
     }
 
     // 4. Filter by originally requested statuses (handles on-chain determined statuses)
-    return this.filterProposalsByStatus(proposals, status);
+    return status ? this.filterProposalsByStatus(proposals, status) : proposals;
   }
 
   async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
