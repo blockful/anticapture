@@ -162,7 +162,7 @@ export const TokenDistributionMetrics = ({
             ),
           )}
         </div>
-        <div className="from-surface-default pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t to-transparent" />
+        <div className="from-surface-default pointer-events-none absolute bottom-0  inset-x-0 h-8 bg-gradient-to-t to-transparent" />
       </div>
       <TokenDistributionDialog
         appliedMetrics={appliedMetricsFormatted}
