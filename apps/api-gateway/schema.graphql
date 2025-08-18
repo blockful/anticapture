@@ -1,3 +1,5 @@
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
+
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
@@ -35,7 +37,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData: historicalTokenData_200_response
+  historicalTokenData: historicalTokenData_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -90,6 +92,9 @@ type Query {
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+
+  """Get the last update time"""
+  lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 }
 
 """
@@ -562,8 +567,8 @@ type transfer {
   daoId: String!
   tokenId: String
   amount: BigInt
-  fromAccountId: String
-  toAccountId: String
+  fromAccountId: String!
+  toAccountId: String!
   timestamp: BigInt
   logIndex: Int!
   from: account
@@ -687,7 +692,7 @@ type votesOnchainPage {
 type votesOnchain {
   txHash: String
   daoId: String!
-  voterAccountId: String
+  voterAccountId: String!
   proposalId: String
   support: String
   votingPower: String
@@ -1144,10 +1149,16 @@ enum queryInput_totalAssets_days {
   _365d
 }
 
+union historicalTokenData_response = historicalTokenData_200_response | historicalTokenData_400_response
+
 type historicalTokenData_200_response {
   prices: [[Float]]!
   market_caps: [[Float]]!
   total_volumes: [[Float]]!
+}
+
+type historicalTokenData_400_response {
+  error: String!
 }
 
 type compareTotalSupply_200_response {
@@ -1434,6 +1445,16 @@ enum queryInput_historicalVotingPower_days {
   _90d
   _180d
   _365d
+}
+
+type lastUpdate_200_response {
+  lastUpdate: String
+}
+
+enum queryInput_lastUpdate_chart {
+  cost_comparison
+  attack_profitability
+  token_distribution
 }
 
 enum HTTPMethod {

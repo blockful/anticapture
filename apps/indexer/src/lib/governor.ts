@@ -6,6 +6,7 @@ import { UNIClient } from "@/indexer/uni/client";
 import { ENSClient } from "@/indexer/ens/client";
 import { OPClient } from "@/indexer/op";
 import { DAOClient } from "@/interfaces/client";
+import { GTCClient } from "@/indexer/gtc/client";
 
 export function getGovernor<
   TTransport extends Transport = Transport,
@@ -31,6 +32,10 @@ export function getGovernor<
     case DaoIdEnum.TEST: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new ENSClient(client, governor.address);
+    }
+    case DaoIdEnum.GTC: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new GTCClient(client, governor.address);
     }
     default:
       return null;
