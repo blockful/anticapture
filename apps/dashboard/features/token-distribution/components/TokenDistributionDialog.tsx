@@ -113,9 +113,9 @@ export const TokenDistributionDialog = ({
                           )}
                         >
                           {isSelected ? (
-                            <Check className="h-3 w-3" />
+                            <Check className="size-3" />
                           ) : (
-                            <Plus className="h-3 w-3" />
+                            <Plus className="size-3" />
                           )}
                           {metric.label}
                         </div>
