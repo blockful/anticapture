@@ -106,7 +106,7 @@ export const TokenDistributionDialog = ({
                           key={metric.label}
                           onClick={() => handleSelectMetric(metric.key)}
                           className={cn(
-                            `bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm`,
+                            "bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm",
                             isSelected
                               ? "border-tangerine"
                               : "border-transparent",
