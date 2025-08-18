@@ -5,8 +5,6 @@ export const initialMetrics = [
   MetricTypesEnum.CEX_SUPPLY,
   MetricTypesEnum.DEX_SUPPLY,
   MetricTypesEnum.LENDING_SUPPLY,
-  MetricTypesEnum.PROPOSALS,
-  MetricTypesEnum.VOTES,
 ];
 
 interface MetricSchema {
@@ -60,5 +58,10 @@ export const metricsSchema: Record<string, MetricSchema> = {
     label: "Votes",
     color: "#8884d8",
     category: "GOVERNANCE",
+  },
+  TOKEN_PRICE: {
+    label: "Token Price",
+    color: "#8884d8",
+    category: "MARKET",
   },
 };
