@@ -141,7 +141,7 @@ export const TokenDistributionDialog = ({
             </Close>
             <Close asChild>
               <Button
-                variant={"ghost"}
+                variant="ghost"
                 onClick={handleApplyMetric}
                 className="text-inverted flex cursor-pointer items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium"
               >
