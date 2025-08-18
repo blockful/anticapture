@@ -13,6 +13,8 @@ import {
   proposalsActivity,
   historicalOnchain,
   proposals,
+  lastUpdate,
+  assets,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
@@ -24,6 +26,7 @@ import { ProposalsService } from "./services/proposals";
 import { getGovernor } from "@/lib/governor";
 import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService } from "./services";
+import { DuneService } from "./services/dune/dune.service";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -58,10 +61,10 @@ const client = createPublicClient({
   transport: http(env.RPC_URL),
 });
 
-// if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-//   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-//   assets(app, duneClient);
-// }
+if (env.DUNE_API_URL && env.DUNE_API_KEY) {
+  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
+  assets(app, duneClient);
+}
 
 if (env.COINGECKO_API_KEY) {
   const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
@@ -82,6 +85,7 @@ governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 proposals(app, new ProposalsService(repo, governorClient));
 historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
+lastUpdate(app);
 docs(app);
 
 export default app;
