@@ -8,8 +8,14 @@ import {
   ProposalResponseSchema,
   ProposalMapper,
 } from "../mappers";
+import { DAOClient } from "@/interfaces";
 
-export function proposals(app: Hono, service: ProposalsService) {
+export function proposals(
+  app: Hono,
+  service: ProposalsService,
+  client: DAOClient,
+  blockTime: number,
+) {
   app.openapi(
     createRoute({
       method: "get",
@@ -41,7 +47,15 @@ export function proposals(app: Hono, service: ProposalsService) {
         orderDirection,
       });
 
-      return context.json(result.map(ProposalMapper.toApi));
+      const quorums = await Promise.all(
+        result.map((p) => client.getQuorum(p.id)),
+      );
+
+      return context.json(
+        result.map((p, index) =>
+          ProposalMapper.toApi(p, quorums[index]!, blockTime),
+        ),
+      );
     },
   );
 
@@ -79,7 +93,11 @@ export function proposals(app: Hono, service: ProposalsService) {
         return context.json({ error: "Proposal not found" }, 404);
       }
 
-      return context.json(ProposalMapper.toApi(proposal), 200);
+      const quorum = await client.getQuorum(id);
+      return context.json(
+        ProposalMapper.toApi(proposal, quorum, blockTime),
+        200,
+      );
     },
   );
 }
