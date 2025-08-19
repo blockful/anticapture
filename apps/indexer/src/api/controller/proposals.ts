@@ -51,9 +51,11 @@ export function proposals(
         result.map((p) => client.getQuorum(p.id)),
       );
 
+      const votingDelay = await service.getVotingDelay();
+
       return context.json(
         result.map((p, index) =>
-          ProposalMapper.toApi(p, quorums[index]!, blockTime),
+          ProposalMapper.toApi(p, quorums[index]!, blockTime, votingDelay),
         ),
       );
     },
@@ -92,10 +94,11 @@ export function proposals(
       if (!proposal) {
         return context.json({ error: "Proposal not found" }, 404);
       }
+      const votingDelay = await service.getVotingDelay();
 
       const quorum = await client.getQuorum(id);
       return context.json(
-        ProposalMapper.toApi(proposal, quorum, blockTime),
+        ProposalMapper.toApi(proposal, quorum, blockTime, votingDelay),
         200,
       );
     },
