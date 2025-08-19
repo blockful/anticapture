@@ -2,6 +2,7 @@
 
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
+import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
@@ -91,23 +92,13 @@ export const EnsAvatar = ({
       if (showFullAddress) {
         return address;
       }
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+      return formatAddress(address, 12);
     }
 
     return "Unknown";
   };
 
-  const displayNameRaw = getDisplayName();
-  const truncateMiddle = (value: string, max: number) => {
-    if (value.length <= max) return value;
-    const keep = max - 3;
-    const start = Math.ceil(keep / 2);
-    const end = Math.floor(keep / 2);
-    return value.slice(0, start) + "..." + value.slice(value.length - end);
-  };
-  const displayName = ensData?.ens
-    ? truncateMiddle(displayNameRaw, 20)
-    : displayNameRaw;
+  const displayName = getDisplayName();
   const isLoadingName = loading || ensLoading;
 
   const baseClasses = cn(
@@ -182,7 +173,7 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary block max-w-full overflow-hidden truncate text-ellipsis whitespace-nowrap text-sm",
+                "text-primary block truncate text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 nameClassName,
               )}
