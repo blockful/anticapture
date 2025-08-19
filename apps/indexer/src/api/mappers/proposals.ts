@@ -27,7 +27,7 @@ export const ProposalsRequestSchema = z.object({
       const normalized = typeof val === "string" ? [val] : val;
       return normalized.map((v) => v.toUpperCase());
     }),
-  fromDate: z.number().optional(),
+  fromDate: z.coerce.number().optional(),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
