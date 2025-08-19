@@ -161,11 +161,6 @@ export const delegatedVotesChanged = async (
     }))
   ).delegatedSupply;
 
-  const date = BigInt(
-    new Date(parseInt(timestamp.toString() + "000")).setHours(0, 0, 0, 0) /
-      1000,
-  );
-
   // Store delegated supply on daily bucket
   await storeDailyBucket(
     context,
@@ -173,7 +168,7 @@ export const delegatedVotesChanged = async (
     currentDelegatedSupply,
     newDelegatedSupply,
     daoId,
-    date,
+    timestamp,
     tokenId,
   );
 };
