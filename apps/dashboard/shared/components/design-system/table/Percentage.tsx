@@ -46,6 +46,7 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
           className={cn("size-4", variant === "negative" && "text-error")}
         />
       )}
+      {value < 0 ? "-" : ""}
       {Math.abs(value)}%
     </span>
   );
