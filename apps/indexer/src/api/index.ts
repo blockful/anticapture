@@ -13,6 +13,7 @@ import {
   proposalsActivity,
   historicalOnchain,
   proposals,
+  lastUpdate,
   assets,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
@@ -84,6 +85,7 @@ governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
 proposals(app, new ProposalsService(repo, governorClient));
 historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
+lastUpdate(app);
 docs(app);
 
 export default app;
