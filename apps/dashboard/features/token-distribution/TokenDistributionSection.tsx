@@ -17,6 +17,13 @@ import {
   initialMetrics,
   metricsSchema,
 } from "@/features/token-distribution/utils";
+import { useDaoTokenHistoricalData } from "../attack-profitability/hooks/useDaoTokenHistoricalData";
+import { useProposals } from "./hooks/useProposals";
+
+// 1. The metrics should be applied in the url
+// 2. The metrics needs to be applied in the chart with multiple data-source differents
+// 3. I can storage the metrics in the local-storage to remember the user-preferences
+// 4. I need to transform the data to be used in one unique dataset.
 
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] =
@@ -34,6 +41,10 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
   );
 
+  const { data: historicalTokenData } = useDaoTokenHistoricalData(daoId);
+  console.log("historicalTokenData", historicalTokenData);
+  const { data: proposalsOnChain } = useProposals(daoId);
+  console.log("proposalsOnChain", proposalsOnChain);
   const chartData = appliedMetrics.reduce(
     (acc, metricKey) => {
       const metric = metricsSchema[metricKey];
@@ -46,6 +57,13 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     },
     {} as typeof metricsSchema,
   );
+
+  console.log("TokenDistributionSection", {
+    appliedMetrics,
+    timeSeriesData,
+    chartData,
+    hoveredMetricKey,
+  });
 
   return (
     <TheSectionLayout

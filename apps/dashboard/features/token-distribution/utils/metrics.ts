@@ -44,10 +44,30 @@ export const metricsSchema: Record<string, MetricSchema> = {
     color: "#A78BFA",
     category: "SUPPLY",
   },
-  TREASURY: {
-    label: "Treasury",
-    color: "#FAFAFA",
-    category: "GOVERNANCE",
+  ACTIVE_SUPPLY: {
+    label: "Active",
+    color: "#A78BFA",
+    category: "SUPPLY",
+  },
+  DELEGATIONS: {
+    label: "Delegations",
+    color: "#8884d8",
+    category: "TRANSFER VOLUME",
+  },
+  CEX_TOKENS: {
+    label: "CEX Tokens",
+    color: "#8884d8",
+    category: "TRANSFER VOLUME",
+  },
+  DEX_TOKENS: {
+    label: "DEX Tokens",
+    color: "#8884d8",
+    category: "TRANSFER VOLUME",
+  },
+  LENDING_TOKENS: {
+    label: "Lending Tokens",
+    color: "#8884d8",
+    category: "TRANSFER VOLUME",
   },
   PROPOSALS: {
     label: "Proposals",
@@ -55,8 +75,13 @@ export const metricsSchema: Record<string, MetricSchema> = {
     category: "GOVERNANCE",
   },
   VOTES: {
-    label: "Votes",
+    label: "Voting Volume",
     color: "#8884d8",
+    category: "GOVERNANCE",
+  },
+  TREASURY: {
+    label: "Treasury",
+    color: "#FAFAFA",
     category: "GOVERNANCE",
   },
   TOKEN_PRICE: {
