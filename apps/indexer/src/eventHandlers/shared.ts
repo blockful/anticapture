@@ -35,14 +35,14 @@ export const storeDailyBucket = async (
   currentValue: bigint,
   newValue: bigint,
   daoId: string,
-  date: bigint,
+  timestamp: bigint,
   tokenAddress: Address,
 ) => {
   const volume = delta(newValue, currentValue);
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
-      date: truncateTimestampTime(date),
+      date: truncateTimestampTime(timestamp),
       tokenId: tokenAddress,
       metricType,
       daoId,
@@ -53,6 +53,7 @@ export const storeDailyBucket = async (
       close: newValue,
       volume,
       count: 1,
+      lastUpdate: timestamp,
     })
     .onConflictDoUpdate((row) => ({
       average:
@@ -62,6 +63,7 @@ export const storeDailyBucket = async (
       close: newValue,
       volume: row.volume + volume,
       count: row.count + 1,
+      lastUpdate: timestamp,
     }));
 };
 
