@@ -1025,6 +1025,7 @@ type daoMetricsDayBucket {
   average: BigInt!
   volume: BigInt!
   count: Int!
+  lastUpdate: BigInt!
 }
 
 enum metricType {
@@ -1134,6 +1135,14 @@ input daoMetricsDayBucketFilter {
   count_lt: Int
   count_gte: Int
   count_lte: Int
+  lastUpdate: BigInt
+  lastUpdate_not: BigInt
+  lastUpdate_in: [BigInt]
+  lastUpdate_not_in: [BigInt]
+  lastUpdate_gt: BigInt
+  lastUpdate_lt: BigInt
+  lastUpdate_gte: BigInt
+  lastUpdate_lte: BigInt
 }
 
 type query_totalAssets_items {
@@ -1448,7 +1457,7 @@ enum queryInput_historicalVotingPower_days {
 }
 
 type lastUpdate_200_response {
-  lastUpdate: String
+  lastUpdate: String!
 }
 
 enum queryInput_lastUpdate_chart {
