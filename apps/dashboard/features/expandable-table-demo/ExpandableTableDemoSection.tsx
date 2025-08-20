@@ -90,7 +90,7 @@ export const ExpandableTableDemoSection = () => {
             <span className="text-secondary text-sm">{date}</span>
           ) : null;
         },
-        size: 100,
+        size: 162,
       },
       {
         accessorKey: "from",
@@ -100,11 +100,10 @@ export const ExpandableTableDemoSection = () => {
           return (
             <div className="flex items-center gap-2">
               <span className="text-secondary text-sm">{from}</span>
-              <ExternalLink className="text-secondary h-3 w-3 opacity-50" />
             </div>
           );
         },
-        size: 150,
+        size: 162,
       },
       {
         id: "arrow",
@@ -123,7 +122,7 @@ export const ExpandableTableDemoSection = () => {
             </div>
           );
         },
-        size: 150,
+        size: 162,
       },
       {
         id: "actions",
