@@ -44,6 +44,7 @@ interface DataTableProps<TData, TValue> {
   enableExpanding?: boolean;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
   defaultExpanded?: ExpandedState;
+  showParentDividers?: boolean;
 }
 
 export const TheTable = <TData, TValue>({
@@ -62,6 +63,7 @@ export const TheTable = <TData, TValue>({
   enableExpanding = false,
   getSubRows,
   defaultExpanded = {},
+  showParentDividers = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -155,59 +157,80 @@ export const TheTable = <TData, TValue>({
       </TableHeader>
       <TableBody className="min-h-[400px]">
         {table.getRowModel().rows.length > 0 ? (
-          table.getRowModel().rows.map((row) => {
+          table.getRowModel().rows.map((row, rowIndex) => {
+            // Check if we need a divider before this row
+            const needsDivider =
+              showParentDividers &&
+              row.depth === 0 &&
+              rowIndex > 0 &&
+              table.getRowModel().rows[rowIndex - 1]?.depth === 0;
+
             return (
-              <TableRow
-                key={row.id}
-                className={cn(
-                  "border-transparent transition-colors duration-300",
-                  enableExpanding && row.depth > 0 && "bg-surface-contrast/50", // Highlight sub-rows
-                  onRowClick && !disableRowClick?.(row.original)
-                    ? "hover:bg-surface-contrast cursor-pointer"
-                    : "cursor-default",
-                  isTableSmall ? "h-10" : "h-13",
+              <>
+                {/* Parent row divider */}
+                {needsDivider && (
+                  <tr key={`divider-${row.id}`}>
+                    <td colSpan={columns.length} className="p-0">
+                      <div className="border-border-default border-t" />
+                    </td>
+                  </tr>
                 )}
-                onClick={() =>
-                  !disableRowClick?.(row.original) && onRowClick?.(row.original)
-                }
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(
-                      cell.column.getIndex() === 0 &&
-                        stickyFirstColumn &&
-                        "bg-surface-default sticky left-0 z-50",
-                    )}
-                    style={{
-                      width: cell.column.getSize(),
-                    }}
-                  >
-                    <div className="flex items-center">
-                      {/* Tree lines for hierarchical visualization */}
-                      {index === 0 && enableExpanding && (
-                        <TreeLines row={row} />
-                      )}
 
-                      {/* Expand/Collapse button */}
-                      {index === 0 && (
-                        <div className="flex items-center">
-                          <ExpandButton
-                            row={row}
-                            enableExpanding={enableExpanding}
-                          />
-                        </div>
+                <TableRow
+                  key={row.id}
+                  className={cn(
+                    "border-transparent transition-colors duration-300",
+                    enableExpanding &&
+                      row.depth > 0 &&
+                      "bg-surface-contrast/50", // Highlight sub-rows
+                    onRowClick && !disableRowClick?.(row.original)
+                      ? "hover:bg-surface-contrast cursor-pointer"
+                      : "cursor-default",
+                    isTableSmall ? "h-10" : "h-13",
+                  )}
+                  onClick={() =>
+                    !disableRowClick?.(row.original) &&
+                    onRowClick?.(row.original)
+                  }
+                >
+                  {row.getVisibleCells().map((cell, index) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        cell.column.getIndex() === 0 &&
+                          stickyFirstColumn &&
+                          "bg-surface-default sticky left-0 z-50",
                       )}
+                      style={{
+                        width: cell.column.getSize(),
+                      }}
+                    >
+                      <div className="flex items-center">
+                        {/* Tree lines for hierarchical visualization */}
+                        {index === 0 && enableExpanding && (
+                          <TreeLines row={row} />
+                        )}
 
-                      {/* Cell content */}
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </div>
-                  </TableCell>
-                ))}
-              </TableRow>
+                        {/* Expand/Collapse button */}
+                        {index === 0 && (
+                          <div className="flex items-center px-1">
+                            <ExpandButton
+                              row={row}
+                              enableExpanding={enableExpanding}
+                            />
+                          </div>
+                        )}
+
+                        {/* Cell content */}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </>
             );
           })
         ) : (

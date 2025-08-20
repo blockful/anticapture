@@ -25,9 +25,9 @@ export const ExpandButton = <TData,>({
         className="text-secondary hover:text-primary p-1 transition-colors"
       >
         {isExpanded ? (
-          <Minus className="mt-0.5 size-4" />
+          <Minus className="size-4" />
         ) : (
-          <Plus className="mt-0.5 size-4" />
+          <Plus className="size-4" />
         )}
       </button>
     );

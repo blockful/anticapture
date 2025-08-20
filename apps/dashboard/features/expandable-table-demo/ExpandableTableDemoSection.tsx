@@ -137,19 +137,18 @@ export const ExpandableTableDemoSection = () => {
 
   return (
     <div className="w-full">
-      <div className="bg-surface-default p-6">
-        <div className="border-light-dark overflow-hidden rounded-lg border">
-          <TheTable
-            columns={columns}
-            data={sampleTransactionData}
-            enableExpanding={true}
-            getSubRows={(row) => row.subRows}
-            withSorting={true}
-            withPagination={false}
-            isTableSmall={true}
-            className="border-0"
-          />
-        </div>
+      <div className="bg-surface-default p-4">
+        <TheTable
+          columns={columns}
+          data={sampleTransactionData}
+          enableExpanding={true}
+          getSubRows={(row) => row.subRows}
+          withSorting={true}
+          withPagination={false}
+          isTableSmall={true}
+          className="border-0"
+          showParentDividers={true}
+        />
       </div>
     </div>
   );
