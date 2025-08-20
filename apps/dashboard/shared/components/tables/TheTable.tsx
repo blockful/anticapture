@@ -12,6 +12,8 @@ import {
   getSortedRowModel,
   useReactTable,
   TableOptions,
+  ExpandedState,
+  getExpandedRowModel,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -22,6 +24,8 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { cn } from "@/shared/utils";
+import { TreeLines } from "@/shared/components/tables/TreeLines";
+import { ExpandButton } from "@/shared/components/tables/ExpandButton";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
@@ -35,7 +39,11 @@ interface DataTableProps<TData, TValue> {
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
   mobileTableFixed?: boolean;
-  showWhenEmpty?: ReactNode; // new prop
+  showWhenEmpty?: ReactNode;
+  // Expandable functionality - optional props
+  enableExpanding?: boolean;
+  getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
+  defaultExpanded?: ExpandedState;
 }
 
 export const TheTable = <TData, TValue>({
@@ -51,9 +59,13 @@ export const TheTable = <TData, TValue>({
   stickyFirstColumn = false,
   mobileTableFixed = false,
   showWhenEmpty,
+  enableExpanding = false,
+  getSubRows,
+  defaultExpanded = {},
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [expanded, setExpanded] = useState<ExpandedState>(defaultExpanded);
 
   let tableConfig: TableOptions<TData> = {
     data,
@@ -86,6 +98,16 @@ export const TheTable = <TData, TValue>({
     };
   }
 
+  if (enableExpanding && getSubRows) {
+    tableConfig = {
+      ...tableConfig,
+      state: { ...tableConfig.state, expanded },
+      onExpandedChange: setExpanded,
+      getSubRows,
+      getExpandedRowModel: getExpandedRowModel(),
+    };
+  }
+
   const table = useReactTable(tableConfig);
 
   return (
@@ -96,7 +118,7 @@ export const TheTable = <TData, TValue>({
         className,
       )}
     >
-      <TableHeader className="bg-surface-contrast text-secondary text-xs font-semibold sm:font-medium">
+      <TableHeader className="bg-surface-contrast text-secondary text-xs font-medium font-normal">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
@@ -137,12 +159,19 @@ export const TheTable = <TData, TValue>({
             return (
               <TableRow
                 key={row.id}
-                className={`border-transparent transition-colors duration-300 ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
+                className={cn(
+                  "border-transparent transition-colors duration-300",
+                  enableExpanding && row.depth > 0 && "bg-surface-contrast/50", // Highlight sub-rows
+                  onRowClick && !disableRowClick?.(row.original)
+                    ? "hover:bg-surface-contrast cursor-pointer"
+                    : "cursor-default",
+                  isTableSmall ? "h-10" : "h-13",
+                )}
                 onClick={() =>
                   !disableRowClick?.(row.original) && onRowClick?.(row.original)
                 }
               >
-                {row.getVisibleCells().map((cell) => (
+                {row.getVisibleCells().map((cell, index) => (
                   <TableCell
                     key={cell.id}
                     className={cn(
@@ -154,7 +183,28 @@ export const TheTable = <TData, TValue>({
                       width: cell.column.getSize(),
                     }}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <div className="flex items-center">
+                      {/* Tree lines for hierarchical visualization */}
+                      {index === 0 && enableExpanding && (
+                        <TreeLines row={row} />
+                      )}
+
+                      {/* Expand/Collapse button */}
+                      {index === 0 && (
+                        <div className="flex items-center">
+                          <ExpandButton
+                            row={row}
+                            enableExpanding={enableExpanding}
+                          />
+                        </div>
+                      )}
+
+                      {/* Cell content */}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </div>
                   </TableCell>
                 ))}
               </TableRow>

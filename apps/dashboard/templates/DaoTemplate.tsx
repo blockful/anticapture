@@ -13,6 +13,7 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
+import { ExpandableTableDemoSection } from "@/features/expandable-table-demo";
 
 // import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 // import { Info, Send } from "lucide-react";
@@ -80,6 +81,9 @@ export const DaoTemplate = () => {
         {daoConstants.dataTables && (
           <HoldersAndDelegatesSection daoId={daoIdEnum} />
         )}
+
+        {/* Demo section for expandable table - remove this in production */}
+        <ExpandableTableDemoSection />
       </div>
       <ShowYourSupportStickyBar />
     </DaoPageInteractionProvider>
