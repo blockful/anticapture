@@ -104,7 +104,7 @@ function TableCell({
   return (
     <td
       data-slot="table-cell"
-      className={cn("bg-light p-0", className)}
+      className={cn("bg-surface-default p-0", className)}
       {...props}
     />
   );

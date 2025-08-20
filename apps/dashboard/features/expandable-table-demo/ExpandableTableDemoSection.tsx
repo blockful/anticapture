@@ -136,8 +136,8 @@ export const ExpandableTableDemoSection = () => {
   );
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-6">
-      <div className="bg-surface-default rounded-lg p-6 shadow-sm">
+    <div className="w-full">
+      <div className="bg-surface-default p-6">
         <div className="border-light-dark overflow-hidden rounded-lg border">
           <TheTable
             columns={columns}
@@ -148,10 +148,6 @@ export const ExpandableTableDemoSection = () => {
             withPagination={false}
             isTableSmall={true}
             className="border-0"
-            defaultExpanded={{
-              "1": true, // First transaction expanded by default
-              "4": true, // Fourth transaction expanded by default
-            }}
           />
         </div>
       </div>
