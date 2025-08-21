@@ -122,6 +122,7 @@ type dao {
   votingDelay: BigInt!
   votingPeriod: BigInt!
   timelockDelay: BigInt!
+  chainId: Int!
 }
 
 type daoPage {
