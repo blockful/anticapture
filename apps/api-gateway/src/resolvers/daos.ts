@@ -30,7 +30,7 @@ export const daosResolver = {
       )
     );
 
-    const items = results.map(result => result.status === 'fulfilled' && result.value.items[0]).filter(Boolean);
+    const items = results.map(result => result.status === 'fulfilled' && result.value?.items?.[0]).filter(Boolean);
 
     return {
       items,
