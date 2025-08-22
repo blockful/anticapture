@@ -9,6 +9,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
 import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
+import { env } from "@/env";
 
 export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.GTC;
@@ -35,6 +36,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
       votingDelay,
       timelockDelay,
       proposalThreshold,
+      chainId: env.CHAIN_ID,
     });
   });
 
@@ -42,7 +44,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
     await voteCast(context, daoId, {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
-      reason: event.reason,
+      reason: event.args.reason,
       support: event.args.support ? 1 : 0,
       timestamp: event.block.timestamp,
       txHash: event.transaction.hash,
