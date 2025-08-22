@@ -232,7 +232,9 @@ export const tokenTransfer = async (
       isLending,
       isTotal,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate((current) => ({
+      amount: (current.amount ?? 0n) + value,
+    }));
 
   // Transaction flag updates moved to DAO-specific indexer
 

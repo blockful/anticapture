@@ -93,7 +93,10 @@ export const delegateChanged = async (
       isLending,
       isTotal,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate((current) => ({
+      delegatedValue:
+        current.delegatedValue + (delegatorBalance?.balance ?? 0n),
+    }));
 
   // Transaction flag updates moved to DAO-specific indexer
 

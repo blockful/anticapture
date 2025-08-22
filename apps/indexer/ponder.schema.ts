@@ -87,7 +87,7 @@ export const votingPowerHistory = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.accountId, table.logIndex],
+      columns: [table.transactionHash, table.accountId],
     }),
   }),
 );
@@ -114,7 +114,6 @@ export const delegation = onchainTable(
         table.transactionHash,
         table.delegatorAccountId,
         table.delegateAccountId,
-        table.logIndex,
       ],
     }),
   }),
@@ -138,12 +137,7 @@ export const transfer = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [
-        table.transactionHash,
-        table.fromAccountId,
-        table.toAccountId,
-        table.logIndex,
-      ],
+      columns: [table.transactionHash, table.fromAccountId, table.toAccountId],
     }),
   }),
 );
