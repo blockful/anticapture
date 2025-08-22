@@ -70,6 +70,15 @@ importers:
       "@graphql-mesh/runtime":
         specifier: ^0.106.3
         version: 0.106.6(graphql@16.11.0)
+      "@graphql-mesh/transform-filter-schema":
+        specifier: ^0.104.6
+        version: 0.104.6(graphql@16.11.0)
+      "@graphql-mesh/transform-prefix":
+        specifier: ^0.105.7
+        version: 0.105.7(graphql@16.11.0)
+      "@graphql-mesh/transform-rename":
+        specifier: ^0.105.7
+        version: 0.105.7(graphql@16.11.0)
       "@graphql-mesh/types":
         specifier: ^0.104.3
         version: 0.104.6(graphql@16.11.0)
@@ -378,7 +387,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/c7be2a3481f9e51230880bb0949072c7e3a4da82
 
 packages:
   "@adobe/css-tools@4.4.3":
@@ -3018,6 +3027,33 @@ packages:
     resolution:
       {
         integrity: sha512-6u/62K4phhWQ0qsDldM0XYla0Imqk+3A6Vz2VSvOltn/cGCZv58oNM0M4IaC5+uZn3M+jZPV0uqkiXJ7oafh/Q==,
+      }
+    engines: { node: ">=16.0.0" }
+    peerDependencies:
+      graphql: "*"
+
+  "@graphql-mesh/transform-filter-schema@0.104.6":
+    resolution:
+      {
+        integrity: sha512-cW1pzc7a00ZZln0h+lYGlO16EjhAM4w6ZQU77rM4Da0pvbX+u57eFm/TEpqiVui/ax8cNivGBPntwbBfKtDRWA==,
+      }
+    engines: { node: ">=16.0.0" }
+    peerDependencies:
+      graphql: "*"
+
+  "@graphql-mesh/transform-prefix@0.105.7":
+    resolution:
+      {
+        integrity: sha512-i/63uTW/BrZ8OmLIv8EfrJ2UUkz8MXmjJkTjApae0XBDxQimJRwxOAT1fQdh1h3LNsbE7lvb2TVgYAOmnxfeIA==,
+      }
+    engines: { node: ">=16.0.0" }
+    peerDependencies:
+      graphql: "*"
+
+  "@graphql-mesh/transform-rename@0.105.7":
+    resolution:
+      {
+        integrity: sha512-UN5mks6io/0tcbB/DNDaugIaE9ukLuSHgyT19jSeylscXAuA3FL2INCTlSoXp0KhJ+1/19traXDwSYa2v+g1/Q==,
       }
     engines: { node: ">=16.0.0" }
     peerDependencies:
@@ -10045,12 +10081,12 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/c7be2a3481f9e51230880bb0949072c7e3a4da82:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/c7be2a3481f9e51230880bb0949072c7e3a4da82,
       }
-    version: 1.9.7
+    version: 1.10.0
 
   fork-ts-checker-webpack-plugin@8.0.0:
     resolution:
@@ -18914,6 +18950,39 @@ snapshots:
       lodash.get: 4.4.2
       tslib: 2.8.1
 
+  "@graphql-mesh/transform-filter-schema@0.104.6(graphql@16.11.0)":
+    dependencies:
+      "@graphql-mesh/types": 0.104.6(graphql@16.11.0)
+      "@graphql-mesh/utils": 0.104.6(graphql@16.11.0)
+      "@graphql-tools/delegate": 10.2.21(graphql@16.11.0)
+      "@graphql-tools/utils": 10.9.1(graphql@16.11.0)
+      "@graphql-tools/wrap": 10.1.2(graphql@16.11.0)
+      graphql: 16.11.0
+      minimatch: 10.0.3
+      tslib: 2.8.1
+
+  "@graphql-mesh/transform-prefix@0.105.7(graphql@16.11.0)":
+    dependencies:
+      "@graphql-mesh/types": 0.104.6(graphql@16.11.0)
+      "@graphql-mesh/utils": 0.104.6(graphql@16.11.0)
+      "@graphql-tools/delegate": 10.2.21(graphql@16.11.0)
+      "@graphql-tools/utils": 10.9.1(graphql@16.11.0)
+      "@graphql-tools/wrap": 10.1.2(graphql@16.11.0)
+      graphql: 16.11.0
+      graphql-scalars: 1.24.2(graphql@16.11.0)
+      tslib: 2.8.1
+
+  "@graphql-mesh/transform-rename@0.105.7(graphql@16.11.0)":
+    dependencies:
+      "@graphql-mesh/types": 0.104.6(graphql@16.11.0)
+      "@graphql-mesh/utils": 0.104.6(graphql@16.11.0)
+      "@graphql-tools/delegate": 10.2.21(graphql@16.11.0)
+      "@graphql-tools/utils": 10.9.1(graphql@16.11.0)
+      "@graphql-tools/wrap": 10.1.2(graphql@16.11.0)
+      graphql: 16.11.0
+      graphql-scalars: 1.24.2(graphql@16.11.0)
+      tslib: 2.8.1
+
   "@graphql-mesh/transport-common@0.7.35(graphql@16.11.0)":
     dependencies:
       "@envelop/core": 5.3.0
@@ -19229,7 +19298,7 @@ snapshots:
   "@graphql-tools/optimize@2.0.0(graphql@16.11.0)":
     dependencies:
       graphql: 16.11.0
-      tslib: 2.6.3
+      tslib: 2.8.1
 
   "@graphql-tools/prisma-loader@8.0.17(@types/node@20.19.9)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.11.0)(utf-8-validate@5.0.10)":
     dependencies:
@@ -19275,7 +19344,7 @@ snapshots:
       "@ardatan/relay-compiler": 12.0.3(graphql@16.11.0)
       "@graphql-tools/utils": 10.9.1(graphql@16.11.0)
       graphql: 16.11.0
-      tslib: 2.6.3
+      tslib: 2.8.1
     transitivePeerDependencies:
       - encoding
 
@@ -24227,7 +24296,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.2.0(eslint@8.57.1)
@@ -24267,7 +24336,7 @@ snapshots:
       tinyglobby: 0.2.14
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -24282,7 +24351,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       "@rtsao/scc": 1.1.0
       array-includes: 3.1.9
@@ -24547,7 +24616,7 @@ snapshots:
 
   extension-port-stream@3.0.0:
     dependencies:
-      readable-stream: 3.6.2
+      readable-stream: 4.7.0
       webextension-polyfill: 0.10.0
 
   external-editor@3.1.0:
@@ -24715,7 +24784,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/c7be2a3481f9e51230880bb0949072c7e3a4da82:
     {}
 
   fork-ts-checker-webpack-plugin@8.0.0(typescript@5.8.3)(webpack@5.100.2(esbuild@0.25.8)):

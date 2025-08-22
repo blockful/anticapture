@@ -26,6 +26,13 @@ export default processConfig(
                   endpoint: value,
                 },
               },
+              transforms: [
+                {
+                  filterSchema: {
+                    filters: ["transactions"],
+                  },
+                },
+              ],
             },
             {
               name: `rest_${daoName}`,
