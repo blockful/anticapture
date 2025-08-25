@@ -1,6 +1,27 @@
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { formatUnits } from "viem";
 
+// Timestamp utility functions
+export const normalizeTimestamp = (timestamp: number | string): number => {
+  const ts = Number(timestamp);
+  // Convert milliseconds to seconds if needed
+  return ts > 1000000000000 ? Math.floor(ts / 1000) : ts;
+};
+
+export const validateChartData = <T extends Record<string, unknown>>(
+  data: T[],
+  requiredKeys: string[],
+): boolean => {
+  if (!Array.isArray(data) || data.length === 0) return false;
+
+  return data.every(
+    (item) =>
+      item &&
+      typeof item === "object" &&
+      requiredKeys.every((key) => key in item),
+  );
+};
+
 // interface TokenDistributionChartData {
 //   TOTAL_SUPPLY: MetricData;
 //   CIRCULATING_SUPPLY: MetricData;
