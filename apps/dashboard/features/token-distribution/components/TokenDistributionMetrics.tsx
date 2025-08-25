@@ -1,68 +1,43 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
 import { CardTitle } from "@/shared/components/ui/card";
-import { X } from "lucide-react";
 import { TokenDistributionDialog } from "@/features/token-distribution/components";
-import { Button } from "@/shared/components/ui/button";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import {
-  DaoMetricsDayBucket,
-  Metric,
-  MetricWithKey,
-} from "@/shared/dao-config/types";
-import { formatChartVariation } from "@/features/token-distribution/utils";
-import { formatNumberUserReadable, formatVariation } from "@/shared/utils";
-import { cn } from "@/shared/utils/cn";
+  formatMetricsByCategory,
+  MetricSchema,
+  metricsSchema,
+} from "@/features/token-distribution/utils/metrics";
+import { Metric } from "@/features/token-distribution/components/Metric";
+import { MetricWithKey } from "@/features/token-distribution/types";
 
 interface TokenDistributionMetricsProps {
-  appliedMetrics: MetricTypesEnum[];
-  setAppliedMetrics: Dispatch<SetStateAction<MetricTypesEnum[]>>;
-  setHoveredMetricKey: Dispatch<SetStateAction<MetricTypesEnum | null>>;
-  timeSeriesData?: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | null;
-  metricsSchema: Record<MetricTypesEnum, Metric>;
+  appliedMetrics: (MetricTypesEnum | string)[];
+  setAppliedMetrics: (metrics: string[]) => void;
+  setHoveredMetricKey: (metricKey: string | null) => void;
+  chartData?: ChartDataSetPoint[];
 }
-
-const formatMetricsByCategory = (
-  metrics: Record<MetricTypesEnum, Metric>,
-): Record<string, MetricWithKey[]> => {
-  return Object.entries(metrics).reduce(
-    (grouped, [key, metric]) => {
-      const metricKey = key as MetricTypesEnum;
-      const { category } = metric;
-
-      if (!grouped[category]) {
-        grouped[category] = [];
-      }
-
-      grouped[category].push({ ...metric, key: metricKey });
-
-      return grouped;
-    },
-    {} as Record<string, MetricWithKey[]>,
-  );
-};
 
 export const TokenDistributionMetrics = ({
   appliedMetrics,
   setAppliedMetrics,
-  metricsSchema,
   setHoveredMetricKey,
-  timeSeriesData,
+  chartData,
 }: TokenDistributionMetricsProps) => {
-  if (!timeSeriesData) return null;
+  if (!chartData) return null;
 
-  const metricsData = formatChartVariation(timeSeriesData);
+  // const metricsData = formatChartVariation(chartData);
 
-  const handleApplyMetric = (newMetrics: MetricTypesEnum[]) => {
-    setAppliedMetrics((prev) => {
-      return [...prev, ...newMetrics];
-    });
+  const handleApplyMetric = (newMetrics: (MetricTypesEnum | string)[]) => {
+    // ADICIONAR novas métricas às existentes (não substituir)
+    const updatedMetrics = [...appliedMetrics, ...newMetrics];
+    setAppliedMetrics(updatedMetrics);
   };
 
-  const handleRemoveMetric = (metricToRemove: MetricTypesEnum) => {
-    setAppliedMetrics((prev) =>
-      prev.filter((metric) => metric !== metricToRemove),
+  const handleRemoveMetric = (metricToRemove: MetricTypesEnum | string) => {
+    setAppliedMetrics(
+      appliedMetrics.filter((metric) => metric !== metricToRemove),
     );
     setHoveredMetricKey(null);
   };
@@ -71,7 +46,7 @@ export const TokenDistributionMetrics = ({
     appliedMetrics
       .map((key) => [key, metricsSchema[key]])
       .filter(([, metric]) => !!metric),
-  ) as Record<MetricTypesEnum, Metric>;
+  ) as Record<string, MetricSchema>;
 
   const appliedMetricsFormatted = formatMetricsByCategory(appliedMetricsSchema);
   const metricsSchemaFormatted = formatMetricsByCategory(metricsSchema);
@@ -86,17 +61,51 @@ export const TokenDistributionMetrics = ({
                 <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
                   {category}
                 </CardTitle>
-                {metrics.map((metric) => {
-                  const metricsValue = metricsData[metric.key].value;
-                  const variation = metricsData[metric.key].changeRate;
+                {metrics.map((metric: MetricWithKey) => {
+                  // CORREÇÃO SUPREMA: Calcular valores corretos das métricas
+                  const metricData = chartData
+                    .map((point) => point[metric.key])
+                    .filter((val) => val !== undefined);
 
-                  const formattedMetricsValue = metricsValue
-                    ? String(BigInt(metricsValue) / BigInt(10 ** 18))
-                    : metricsValue;
+                  if (metricData.length === 0) {
+                    console.warn(`No data found for metric: ${metric.key}`);
+                    return null;
+                  }
 
-                  const formattedVariation = variation
-                    ? formatVariation(variation)
-                    : variation;
+                  // Valor atual: último ponto com dados
+                  const currentValue = metricData[metricData.length - 1];
+
+                  // Valor anterior: primeiro ponto com dados
+                  const previousValue = metricData[0];
+
+                  // Calcular variação percentual
+                  const variation =
+                    previousValue && currentValue
+                      ? ((currentValue - previousValue) / previousValue) * 100
+                      : 0;
+
+                  // Formatar valor baseado no tipo de métrica
+                  let formattedMetricsValue: string;
+                  const metricKey = metric.key as string; // Permitir métricas customizadas
+
+                  if (metricKey === "TOKEN_PRICE") {
+                    // Token price já está em formato correto
+                    formattedMetricsValue = currentValue?.toFixed(2) || "0";
+                  } else if (metricKey === "PROPOSALS_GOVERNANCE") {
+                    // Proposals são contagem, não precisam de formatação wei
+                    formattedMetricsValue = currentValue?.toString() || "0";
+                  } else {
+                    // Métricas de supply: converter de wei para token units
+                    formattedMetricsValue = currentValue
+                      ? (Number(currentValue) / 1e18).toFixed(2)
+                      : "0";
+                  }
+
+                  // Formatar variação
+                  const formattedVariation =
+                    variation !== 0
+                      ? `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`
+                      : "0.0";
 
                   const handleClick = () => {
                     const metricKey = appliedMetrics.find(
@@ -117,48 +126,16 @@ export const TokenDistributionMetrics = ({
                   };
 
                   return (
-                    <Button
+                    <Metric
                       key={metric.key}
-                      variant={"ghost"}
-                      onClick={handleClick}
-                      className="border-light-dark hover:bg-surface-contrast flex h-7 w-full items-center justify-between gap-2 rounded-sm border px-2"
+                      label={metric.label}
+                      color={metric.color}
+                      value={formattedMetricsValue}
+                      percentage={formattedVariation}
+                      onRemove={handleClick}
                       onMouseEnter={handleMouseEnter}
                       onMouseLeave={handleMouseLeave}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="rounded-xs size-2"
-                          style={{ backgroundColor: metric.color }}
-                        />
-                        <span className="text-primary text-sm font-medium">
-                          {metric.label}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-end gap-2 text-end">
-                        {formattedMetricsValue && (
-                          <div className="text-secondary">
-                            {formatNumberUserReadable(
-                              Number(formattedMetricsValue),
-                            )}
-                          </div>
-                        )}
-                        {formattedVariation && (
-                          <p
-                            className={cn(
-                              "flex items-center justify-end text-end",
-                              {
-                                "text-success": Number(formattedVariation) > 0,
-                                "text-error": Number(formattedVariation) < 0,
-                              },
-                            )}
-                          >
-                            {formattedVariation}%
-                          </p>
-                        )}
-                        <X className="text-secondary size-3" />
-                      </div>
-                    </Button>
+                    />
                   );
                 })}
               </div>

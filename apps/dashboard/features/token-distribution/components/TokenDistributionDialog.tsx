@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { MetricWithKey } from "@/shared/dao-config/types";
+import { MetricWithKey } from "@/features/token-distribution/types";
 
 export const TokenDistributionDialog = ({
   appliedMetrics,
@@ -24,11 +24,13 @@ export const TokenDistributionDialog = ({
 }: {
   appliedMetrics: Record<string, MetricWithKey[]>;
   metricsSchema: Record<string, MetricWithKey[]>;
-  onApply: (metric: MetricTypesEnum[]) => void;
+  onApply: (metric: (MetricTypesEnum | string)[]) => void;
 }) => {
-  const [selectedMetrics, setSelectedMetrics] = useState<MetricTypesEnum[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<
+    (MetricTypesEnum | string)[]
+  >([]);
 
-  const handleSelectMetric = (metricKey: MetricTypesEnum) => {
+  const handleSelectMetric = (metricKey: MetricTypesEnum | string) => {
     setSelectedMetrics((prev) =>
       prev.includes(metricKey)
         ? prev.filter((m) => m !== metricKey)

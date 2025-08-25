@@ -1,21 +1,20 @@
-import { MetricData } from "@/shared/contexts";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+// import { MetricData } from "@/shared/contexts";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { formatUnits } from "viem";
 
-interface TokenDistributionChartData {
-  TOTAL_SUPPLY: MetricData;
-  CIRCULATING_SUPPLY: MetricData;
-  DELEGATED_SUPPLY: MetricData;
-  CEX_SUPPLY: MetricData;
-  DEX_SUPPLY: MetricData;
-  LENDING_SUPPLY: MetricData;
-  TREASURY: MetricData;
-  PROPOSALS: MetricData;
-  ACTIVE_SUPPLY: MetricData;
-  VOTES: MetricData;
-  AVERAGE_TURNOUT: MetricData;
-}
+// interface TokenDistributionChartData {
+//   TOTAL_SUPPLY: MetricData;
+//   CIRCULATING_SUPPLY: MetricData;
+//   DELEGATED_SUPPLY: MetricData;
+//   CEX_SUPPLY: MetricData;
+//   DEX_SUPPLY: MetricData;
+//   LENDING_SUPPLY: MetricData;
+//   TREASURY: MetricData;
+//   PROPOSALS: MetricData;
+//   ACTIVE_SUPPLY: MetricData;
+//   VOTES: MetricData;
+//   AVERAGE_TURNOUT: MetricData;
+// }
 
 export const calculateChangeRate = (
   data: DaoMetricsDayBucket[] = [],
@@ -31,19 +30,19 @@ export const calculateChangeRate = (
   return formatUnits(change, 18);
 };
 
-export const formatChartVariation = (
-  timeSeriesData: Record<MetricTypesEnum, DaoMetricsDayBucket[]>,
-): TokenDistributionChartData => {
-  const metrics = Object.values(MetricTypesEnum);
+// export const formatChartVariation = (
+//   timeSeriesData: Record<MetricTypesEnum, DaoMetricsDayBucket[]>,
+// ): TokenDistributionChartData => {
+//   const metrics = Object.values(MetricTypesEnum);
 
-  const chartData = {} as TokenDistributionChartData;
+//   const chartData = {} as TokenDistributionChartData;
 
-  metrics.forEach((metric) => {
-    chartData[metric] = {
-      value: timeSeriesData?.[metric]?.at(-1)?.high ?? null,
-      changeRate: calculateChangeRate(timeSeriesData?.[metric]),
-    };
-  });
+//   metrics.forEach((metric) => {
+//     chartData[metric] = {
+//       value: timeSeriesData?.[metric]?.at(-1)?.high ?? null,
+//       changeRate: calculateChangeRate(timeSeriesData?.[metric]),
+//     };
+//   });
 
-  return chartData;
-};
+//   return chartData;
+// };

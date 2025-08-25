@@ -1,4 +1,5 @@
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { MetricWithKey } from "@/features/token-distribution/types";
 
 export const initialMetrics = [
   MetricTypesEnum.DELEGATED_SUPPLY,
@@ -7,10 +8,11 @@ export const initialMetrics = [
   MetricTypesEnum.LENDING_SUPPLY,
 ];
 
-interface MetricSchema {
+export interface MetricSchema {
   label: string;
   color: string;
   category: string;
+  type: "BAR" | "LINE";
 }
 
 export const metricsSchema: Record<string, MetricSchema> = {
@@ -18,75 +20,111 @@ export const metricsSchema: Record<string, MetricSchema> = {
     label: "Delegated",
     color: "#3B82F6",
     category: "SUPPLY",
+    type: "LINE",
   },
   CEX_SUPPLY: {
     label: "CEX",
     color: "#FB923C",
     category: "SUPPLY",
+    type: "LINE",
   },
   DEX_SUPPLY: {
     label: "DEX",
     color: "#22C55E",
     category: "SUPPLY",
+    type: "LINE",
   },
   LENDING_SUPPLY: {
     label: "Lending",
     color: "#A855F7",
     category: "SUPPLY",
+    type: "LINE",
   },
   TOTAL_SUPPLY: {
     label: "Total",
     color: "#2DD4BF",
     category: "SUPPLY",
+    type: "LINE",
   },
   CIRCULATING_SUPPLY: {
     label: "Circulating",
     color: "#A78BFA",
     category: "SUPPLY",
+    type: "LINE",
   },
   ACTIVE_SUPPLY: {
     label: "Active",
     color: "#A78BFA",
     category: "SUPPLY",
+    type: "LINE",
   },
   DELEGATIONS: {
     label: "Delegations",
-    color: "#8884d8",
+    color: "#EC4899",
     category: "TRANSFER VOLUME",
+    type: "LINE",
   },
   CEX_TOKENS: {
     label: "CEX Tokens",
-    color: "#8884d8",
+    color: "#F97316",
     category: "TRANSFER VOLUME",
+    type: "LINE",
   },
   DEX_TOKENS: {
     label: "DEX Tokens",
-    color: "#8884d8",
+    color: "#10B981",
     category: "TRANSFER VOLUME",
+    type: "LINE",
   },
   LENDING_TOKENS: {
     label: "Lending Tokens",
-    color: "#8884d8",
+    color: "#8B5CF6",
     category: "TRANSFER VOLUME",
+    type: "LINE",
   },
-  PROPOSALS: {
+  PROPOSALS_GOVERNANCE: {
     label: "Proposals",
-    color: "#8884d8",
+    color: "#F59E0B",
     category: "GOVERNANCE",
+    type: "BAR",
   },
   VOTES: {
     label: "Voting Volume",
-    color: "#8884d8",
+    color: "#EF4444",
     category: "GOVERNANCE",
+    type: "LINE",
   },
   TREASURY: {
     label: "Treasury",
     color: "#FAFAFA",
     category: "GOVERNANCE",
+    type: "LINE",
   },
   TOKEN_PRICE: {
     label: "Token Price",
     color: "#8884d8",
     category: "MARKET",
+    type: "BAR",
   },
+};
+
+/* This function is used to format the metrics by category */
+export const formatMetricsByCategory = (
+  metrics: Record<string, MetricSchema>,
+): Record<string, MetricWithKey[]> => {
+  return Object.entries(metrics).reduce(
+    (grouped, [key, metric]) => {
+      const metricKey = key;
+      const { category } = metric;
+
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+
+      grouped[category].push({ ...metric, key: metricKey });
+
+      return grouped;
+    },
+    {} as Record<string, MetricWithKey[]>,
+  );
 };

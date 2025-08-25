@@ -10,75 +10,73 @@ import {
   Area,
   Brush,
   ComposedChart,
+  Bar,
 } from "recharts";
 import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
+import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { MetricSchema } from "@/features/token-distribution/utils/metrics";
+import React from "react";
 
 interface TokenDistributionChartProps {
-  appliedMetrics: MetricTypesEnum[];
-  chartConfig: Record<string, { label: string; color: string }>;
-  timeSeriesData?: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | null;
+  appliedMetrics: string[];
+  chartConfig: Record<string, MetricSchema>;
+  chartData?: ChartDataSetPoint[];
   hoveredMetricKey?: string | null;
 }
 
 export const TokenDistributionChart = ({
-  timeSeriesData,
   appliedMetrics,
   chartConfig,
+  chartData,
   hoveredMetricKey,
 }: TokenDistributionChartProps) => {
-  if (!timeSeriesData) {
+  // Show loading state
+  if (!chartData) {
     return (
       <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
-        <ResearchPendingChartBlur />;
+        <div className="text-center">
+          <div className="border-primary mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2"></div>
+          <p className="text-muted-foreground text-sm">Loading chart data...</p>
+        </div>
       </div>
     );
   }
+
+  // Show empty state
+  if (!chartData.length) {
+    return (
+      <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
+        <ResearchPendingChartBlur />
+      </div>
+    );
+  }
+
   if (!appliedMetrics.length) return null;
 
-  const datasets = appliedMetrics.reduce(
-    (acc, key) => {
-      acc[key] = timeSeriesData[key];
-      return acc;
-    },
-    {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>,
-  );
-
-  const allDates = new Set(
-    Object.values(datasets).flatMap((dataset) =>
-      dataset?.map((item) => item.date),
+  // Check if data is mocked (all metrics have 0 values)
+  const isMocked = chartData.every((dataPoint) =>
+    appliedMetrics.every(
+      (metric) => !dataPoint[metric] || dataPoint[metric] === 0,
     ),
   );
 
-  const chartData = Array.from(allDates)
-    .sort((a, b) => Number(a) - Number(b))
-    .map((date) => {
-      const dataPoint: Record<string, number | null> = {
-        date: Number(date),
-      };
+  // appliedMetrics.forEach((metricKey) => {
+  //   const config = chartConfig[metricKey];
+  // });
 
-      Object.keys(datasets).forEach((key) => {
-        const entry = datasets[key as keyof typeof datasets]?.find(
-          (item) => item.date === date,
-        );
-        dataPoint[key] = entry ? Number(entry.high) / 1e18 : null;
-      });
+  // if (chartData.length > 0) {
+  //   const firstDataPoint = chartData[0];
 
-      return dataPoint;
-    })
-    .filter(
-      (dataPoint) => !Object.values(dataPoint).some((value) => value == null),
-    );
-
-  const isMocked = Object.values(datasets).every(
-    (value) => value!.length === 0,
-  );
+  //   // Verificar se as métricas aplicadas existem nos dados
+  //   appliedMetrics.forEach((metricKey) => {
+  //     const value = firstDataPoint[metricKey];
+  //   });
+  // }
 
   return (
     <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
@@ -106,18 +104,43 @@ export const TokenDistributionChart = ({
               <TokenDistributionCustomTooltip chartConfig={chartConfig} />
             }
           />
-          {/* <Line dataKey="VERTICAL_LINE_EXAMPLE" stroke="#8884d8" /> */}
-          {/* <Bar dataKey="BAR_EXAMPLE" stroke="#8884d8" /> */}
-          {Object.keys(chartConfig).map((key) => {
-            const isOpaque = hoveredMetricKey && !(key === hoveredMetricKey);
+
+          {/* Render all metrics as LINES first */}
+          {appliedMetrics.map((metricKey) => {
+            const isOpaque =
+              hoveredMetricKey && !(metricKey === hoveredMetricKey);
+            const config = chartConfig[metricKey];
+
+            if (!config) {
+              return null;
+            }
+
             return (
               <Line
-                key={key}
-                dataKey={key}
-                stroke={chartConfig[key as keyof typeof chartConfig].color}
+                key={`${metricKey}-line`}
+                dataKey={metricKey}
+                stroke={config.color}
                 strokeWidth={2}
                 strokeOpacity={isOpaque ? 0.3 : 1}
                 dot={false}
+              />
+            );
+          })}
+
+          {/* Render BARS for BAR type metrics */}
+          {appliedMetrics.map((metricKey) => {
+            const config = chartConfig[metricKey];
+
+            if (!config || config.type !== "BAR") {
+              return null;
+            }
+
+            return (
+              <Bar
+                key={`${metricKey}-bar`}
+                dataKey={metricKey}
+                fill={config.color}
+                opacity={0.6}
               />
             );
           })}
@@ -131,11 +154,15 @@ export const TokenDistributionChart = ({
             <AreaChart height={32} width={1128} data={chartData}>
               <XAxis dataKey="date" hide />
               <YAxis hide />
+              <Bar
+                dataKey={appliedMetrics[0]}
+                fill={chartConfig[appliedMetrics[0]].color}
+              />
               <Area
                 type="monotone"
                 dataKey={appliedMetrics[0]}
-                stroke="#3F3F46"
-                fill="#1f1f1f"
+                stroke={chartConfig[appliedMetrics[0]].color}
+                fill={chartConfig[appliedMetrics[0]].color}
                 fillOpacity={0.3}
                 strokeWidth={1}
                 dot={false}
