@@ -1,7 +1,8 @@
-import { and, asc, desc, eq, gte, inArray, lte, or, sql } from "ponder";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
 import { Address } from "viem";
+import { SQL } from "drizzle-orm";
 
 import {
   ActiveSupplyQueryResult,
@@ -48,6 +49,16 @@ export class DrizzleRepository {
     `;
     const result = await db.execute<ActiveSupplyQueryResult>(query);
     return result.rows[0];
+  }
+
+  async getVotingDelay(): Promise<bigint> {
+    const result = await db.query.dao.findFirst({
+      columns: {
+        votingDelay: true,
+      },
+    });
+
+    return result!.votingDelay;
   }
 
   async getProposalsCompare(days: DaysEnum) {
