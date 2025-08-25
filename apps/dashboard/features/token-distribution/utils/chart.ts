@@ -1,4 +1,3 @@
-// import { MetricData } from "@/shared/contexts";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { formatUnits } from "viem";
 

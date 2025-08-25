@@ -1,5 +1,3 @@
-// import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-
 export type Metric = {
   label: string;
   color: string;

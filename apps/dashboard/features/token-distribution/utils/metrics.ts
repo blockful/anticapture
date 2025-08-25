@@ -12,7 +12,7 @@ export interface MetricSchema {
   label: string;
   color: string;
   category: string;
-  type: "BAR" | "LINE";
+  type: "BAR" | "LINE" | "SPORADIC_LINE";
 }
 
 export const metricsSchema: Record<string, MetricSchema> = {
@@ -86,7 +86,7 @@ export const metricsSchema: Record<string, MetricSchema> = {
     label: "Proposals",
     color: "#F59E0B",
     category: "GOVERNANCE",
-    type: "BAR",
+    type: "SPORADIC_LINE",
   },
   VOTES: {
     label: "Voting Volume",
