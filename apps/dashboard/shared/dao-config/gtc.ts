@@ -58,7 +58,7 @@ export const GTC: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.INTERFACE_HIJACK
@@ -97,7 +97,7 @@ export const GTC: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
         value: "150k GTC",
-        riskLevel: RiskLevel.NONE,
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD

@@ -88,7 +88,10 @@ function TableHead({
   return (
     <th
       data-slot="table-head"
-      className={cn("h-10 text-left [&:has([role=checkbox])]:pr-0", className)}
+      className={cn(
+        "h-10 text-left font-normal [&:has([role=checkbox])]:pr-0",
+        className,
+      )}
       {...props}
     />
   );
@@ -101,7 +104,7 @@ function TableCell({
   return (
     <td
       data-slot="table-cell"
-      className={cn("bg-light p-0", className)}
+      className={cn("bg-surface-default p-0", className)}
       {...props}
     />
   );

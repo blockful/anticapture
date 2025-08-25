@@ -15,6 +15,7 @@ export const dao = onchainTable("dao", (drizzle) => ({
   votingDelay: drizzle.bigint("voting_delay").notNull().default(0n),
   votingPeriod: drizzle.bigint("voting_period").notNull().default(0n),
   timelockDelay: drizzle.bigint("timelock_delay").notNull().default(0n),
+  chainId: drizzle.integer("chain_id").notNull(),
 }));
 
 export const token = onchainTable("token", (drizzle) => ({

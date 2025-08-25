@@ -11,6 +11,7 @@ interface ProposalsRepository {
     fromDate: number | undefined,
   ): Promise<DBProposal[]>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
+  getVotingDelay(): Promise<bigint>;
 }
 
 export class ProposalsService {
@@ -19,14 +20,16 @@ export class ProposalsService {
     private readonly daoClient: DAOClient,
   ) {}
 
+  async getVotingDelay(): Promise<bigint> {
+    return this.proposalsRepo.getVotingDelay();
+  }
+
   /**
    * Prepares status array for database query.
    * Maps ACTIVE, DEFEATED, and SUCCEEDED to PENDING (as they're determined on-chain)
    * and removes duplicates.
    */
-  private prepareStatusForDatabase(
-    statusArray: string[],
-  ): string[] {
+  private prepareStatusForDatabase(statusArray: string[]): string[] {
     const mappedStatuses = statusArray.map((status) => {
       if (
         status === ProposalStatus.ACTIVE ||
@@ -37,7 +40,7 @@ export class ProposalsService {
       }
       return status;
     });
-    
+
     return [...new Set(mappedStatuses)]; // Remove duplicates
   }
 
@@ -50,7 +53,6 @@ export class ProposalsService {
     proposals: DBProposal[],
     requestedStatuses: string[],
   ): DBProposal[] {
-    
     return proposals.filter((proposal) =>
       requestedStatuses.includes(proposal.status),
     );
@@ -64,7 +66,9 @@ export class ProposalsService {
     fromDate,
   }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
-    const dbStatuses = status ? this.prepareStatusForDatabase(status) : undefined;
+    const dbStatuses = status
+      ? this.prepareStatusForDatabase(status)
+      : undefined;
 
     // 2. Fetch proposals from database
     const proposals = await this.proposalsRepo.getProposals(

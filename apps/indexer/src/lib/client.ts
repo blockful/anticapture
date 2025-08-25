@@ -8,7 +8,7 @@ import { OPClient } from "@/indexer/op";
 import { DAOClient } from "@/interfaces/client";
 import { GTCClient } from "@/indexer/gtc/client";
 
-export function getGovernor<
+export function getClient<
   TTransport extends Transport = Transport,
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
