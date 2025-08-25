@@ -110,5 +110,3 @@ Gov Indexer creates the following tables in the database to store the indexed da
   - `description`: Description of the proposal (string).
   - `timestamp`: Date and time when the proposal was created (bigint).
   - `status`: Current status of the proposal (string).
-
-TestCI/CD
