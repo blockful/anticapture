@@ -1,0 +1,14 @@
+FROM node:20-slim
+
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
+WORKDIR /app
+
+# Copy all files first
+COPY apps/indexer/ .
+
+# Install dependencies with npm for simpler module resolution
+RUN npm install
+
+ENTRYPOINT ["npm", "run", "start"]
