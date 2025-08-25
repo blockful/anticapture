@@ -37,7 +37,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     }
   }, [metrics.length, setMetrics]);
 
-  const { chartData, chartConfig } = useChartMetrics({
+  const { chartData, chartConfig, isLoading } = useChartMetrics({
     appliedMetrics: metrics,
     daoId,
     metricsSchema,
@@ -56,6 +56,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             GOVERNANCE SUPPLY TRENDS (CAT)
           </CardTitle>
           <TokenDistributionChart
+            isLoading={isLoading}
             appliedMetrics={metrics}
             chartConfig={chartConfig}
             chartData={chartData}

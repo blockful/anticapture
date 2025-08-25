@@ -8,6 +8,7 @@ import {
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
+import { metricsSchema } from "@/features/token-distribution/utils";
 
 export type DaoMetricsDayBucket = {
   date: string;
@@ -38,7 +39,7 @@ export interface MultilineChartDataSetPoint {
 
 export interface ChartDataSetPoint {
   date: number;
-  [key: string]: number;
+  [key: keyof typeof metricsSchema]: number | undefined;
 }
 
 export type GovernanceImplementation = {
