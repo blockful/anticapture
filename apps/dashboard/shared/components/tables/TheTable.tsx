@@ -134,7 +134,7 @@ export const TheTable = <TData, TValue>({
                     isTableSmall && "h-8",
                     header.column.getIndex() === 0 &&
                       stickyFirstColumn &&
-                      "bg-surface-contrast sticky left-0 z-50",
+                      "bg-surface-contrast z-1 sticky left-0",
                   )}
                   style={{
                     width:
@@ -199,7 +199,7 @@ export const TheTable = <TData, TValue>({
                       className={cn(
                         cell.column.getIndex() === 0 &&
                           stickyFirstColumn &&
-                          "bg-surface-default sticky left-0 z-50",
+                          "bg-surface-default z-1 sticky left-0",
                       )}
                       style={{
                         width: cell.column.getSize(),

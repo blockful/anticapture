@@ -83,7 +83,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
+      <div className="text-secondary flex w-full items-center justify-end px-4 py-3 text-end text-sm font-normal">
         {formattedSupply}
       </div>
     );

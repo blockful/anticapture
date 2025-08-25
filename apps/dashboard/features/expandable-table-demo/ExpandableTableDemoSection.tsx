@@ -142,6 +142,7 @@ export const ExpandableTableDemoSection = () => {
           data={sampleTransactionData}
           enableExpanding={true}
           getSubRows={(row) => row.subRows}
+          stickyFirstColumn={true}
           withSorting={true}
           withPagination={false}
           isTableSmall={true}
