@@ -25,6 +25,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
     [DaoIdEnum.OPTIMISM]: `${baseUrl}/opengraph-images/op.png`,
+    [DaoIdEnum.GITCOIN]: `${baseUrl}/opengraph-images/gitcoin.png`,
   };
 
   const imageUrl =

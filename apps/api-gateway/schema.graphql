@@ -1,5 +1,3 @@
-directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
-
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
@@ -32,12 +30,6 @@ type Query {
   daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
-
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
-  """Get historical market data for a specific token"""
-  historicalTokenData: historicalTokenData_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -78,7 +70,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: String, fromDate: Float): [query_proposals_items]
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): [query_proposals_items]
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -122,6 +114,7 @@ type dao {
   votingDelay: BigInt!
   votingPeriod: BigInt!
   timelockDelay: BigInt!
+  chainId: Int!
 }
 
 type daoPage {
@@ -183,6 +176,14 @@ input daoFilter {
   timelockDelay_lt: BigInt
   timelockDelay_gte: BigInt
   timelockDelay_lte: BigInt
+  chainId: Int
+  chainId_not: Int
+  chainId_in: [Int]
+  chainId_not_in: [Int]
+  chainId_gt: Int
+  chainId_lt: Int
+  chainId_gte: Int
+  chainId_lte: Int
 }
 
 type token {
@@ -1025,6 +1026,7 @@ type daoMetricsDayBucket {
   average: BigInt!
   volume: BigInt!
   count: Int!
+  lastUpdate: BigInt!
 }
 
 enum metricType {
@@ -1134,31 +1136,14 @@ input daoMetricsDayBucketFilter {
   count_lt: Int
   count_gte: Int
   count_lte: Int
-}
-
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
-union historicalTokenData_response = historicalTokenData_200_response | historicalTokenData_400_response
-
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
-}
-
-type historicalTokenData_400_response {
-  error: String!
+  lastUpdate: BigInt
+  lastUpdate_not: BigInt
+  lastUpdate_in: [BigInt]
+  lastUpdate_not_in: [BigInt]
+  lastUpdate_gt: BigInt
+  lastUpdate_lt: BigInt
+  lastUpdate_gte: BigInt
+  lastUpdate_lte: BigInt
 }
 
 type compareTotalSupply_200_response {
@@ -1448,7 +1433,7 @@ enum queryInput_historicalVotingPower_days {
 }
 
 type lastUpdate_200_response {
-  lastUpdate: String
+  lastUpdate: String!
 }
 
 enum queryInput_lastUpdate_chart {

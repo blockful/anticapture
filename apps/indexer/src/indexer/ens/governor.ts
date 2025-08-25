@@ -9,6 +9,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
 import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
+import { env } from "@/env";
 
 export function GovernorIndexer(
   client: DAOClient,
@@ -37,6 +38,7 @@ export function GovernorIndexer(
       votingDelay,
       timelockDelay,
       proposalThreshold,
+      chainId: env.CHAIN_ID,
     });
   });
 

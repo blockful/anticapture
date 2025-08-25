@@ -3,6 +3,7 @@ export enum DaoIdEnum {
   ENS = "ENS",
   OPTIMISM = "OP",
   ARBITRUM = "ARB",
+  GITCOIN = "GTC",
 }
 
 export interface DAO {
