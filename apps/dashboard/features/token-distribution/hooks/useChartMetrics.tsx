@@ -10,7 +10,6 @@ import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
 
-// Hook result interface
 export interface UseChartMetricsResult {
   chartData: ChartDataSetPoint[];
   chartConfig: Record<string, MetricSchema>;
@@ -105,24 +104,17 @@ export const useChartMetrics = ({
       );
     }
 
-    // Process proposalsOnChain (proposals count) - consolidate by date
     if (
       appliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
       proposalsOnChain?.proposals
     ) {
-      const proposalCounts = new Map<number, number>();
-
       proposalsOnChain.proposals.forEach((proposal) => {
         if (!proposal) return;
         const timestamp = normalizeTimestamp(proposal.timestamp);
-        proposalCounts.set(timestamp, (proposalCounts.get(timestamp) || 0) + 1);
-      });
-
-      Array.from(proposalCounts.entries()).forEach(([timestamp, count]) => {
         result[timestamp] = {
           ...result[timestamp],
           date: timestamp,
-          PROPOSALS_GOVERNANCE: count,
+          PROPOSALS_GOVERNANCE: proposal.id,
         };
       });
     }
@@ -147,10 +139,14 @@ export const useChartMetrics = ({
       ...Object.entries(value).reduce(
         (
           acc,
-          [key, metric]: [keyof typeof metricsSchema, number | undefined],
+          [key, metric]: [
+            keyof typeof metricsSchema,
+            number | undefined | string,
+          ],
         ) => {
           if (metric !== undefined) {
-            lastKnownValues[key as keyof typeof metricsSchema] = metric;
+            lastKnownValues[key as keyof typeof metricsSchema] =
+              metric as number;
           }
           if (key === "PROPOSALS_GOVERNANCE") {
             return {

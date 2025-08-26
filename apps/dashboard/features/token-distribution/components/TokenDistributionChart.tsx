@@ -40,68 +40,6 @@ export const TokenDistributionChart = ({
   isLoading = false,
   error = null,
 }: TokenDistributionChartProps) => {
-  // 🎯 DYNAMIC SCALE DETECTION - Analyze data ranges for each metric
-  const metricRanges = React.useMemo(() => {
-    if (!chartData || !appliedMetrics.length) return {};
-
-    const ranges: Record<string, { min: number; max: number; avg: number }> =
-      {};
-
-    appliedMetrics.forEach((metricKey) => {
-      const values = chartData
-        .map((item) => item[metricKey])
-        .filter((v) => v !== undefined && v !== null && v > 0);
-
-      if (values.length > 0) {
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
-        ranges[metricKey] = { min, max, avg };
-      }
-    });
-
-    return ranges;
-  }, [chartData, appliedMetrics]);
-
-  // Automatic axis assignment - group metrics by scale
-  const axisAssignment = React.useMemo(() => {
-    const ranges = Object.entries(metricRanges);
-
-    if (ranges.length <= 1) {
-      return { primary: appliedMetrics, secondary: [] };
-    }
-
-    const SCALE_THRESHOLD = 100;
-    const maxValues = ranges.map(([key, range]) => ({ key, max: range.max }));
-    const largestScale = Math.max(...maxValues.map((v) => v.max)) || 1;
-
-    const primary: string[] = [];
-    const secondary: string[] = [];
-
-    ranges.forEach(([metricKey, range]) => {
-      const scaleRatio = largestScale / range.max;
-      if (scaleRatio > SCALE_THRESHOLD) {
-        secondary.push(metricKey);
-      } else {
-        primary.push(metricKey);
-      }
-    });
-
-    // Ensure at least one metric in primary
-    if (primary.length === 0 && secondary.length > 0) {
-      primary.push(secondary.pop()!);
-    }
-
-    return { primary, secondary };
-  }, [metricRanges, appliedMetrics]);
-
-  // Get axis ID for any metric
-  const getAxisId = (metricKey: string): "primary" | "secondary" => {
-    return axisAssignment.secondary.includes(metricKey)
-      ? "secondary"
-      : "primary";
-  };
-
   // Show error state
   if (error) {
     return (
@@ -188,19 +126,13 @@ export const TokenDistributionChart = ({
           />
 
           {/* SECONDARY AXIS - For smaller scale metrics (only when needed) */}
-          {axisAssignment.secondary.length > 0 && (
+          {appliedMetrics.length > 0 && (
             <YAxis
               yAxisId="secondary"
               orientation="right"
               domain={[0, "auto"]}
               tickFormatter={(value) => {
-                // Dynamic formatter based on the metrics using this axis
-                const isProposals = axisAssignment.secondary.includes(
-                  "PROPOSALS_GOVERNANCE",
-                );
-                return isProposals
-                  ? `${value}`
-                  : formatNumberUserReadable(Number(value));
+                return formatNumberUserReadable(Number(value));
               }}
             />
           )}
@@ -209,6 +141,35 @@ export const TokenDistributionChart = ({
               <TokenDistributionCustomTooltip chartConfig={chartConfig} />
             }
           />
+
+          {/* Render SPORADIC_LINE metrics as event markers with dashed lines and arrows - BEHIND other elements */}
+          {appliedMetrics
+            .filter(
+              (metricKey) => chartConfig[metricKey]?.type === "SPORADIC_LINE",
+            )
+            .map((metricKey) => {
+              const config = chartConfig[metricKey];
+              const isOpaque =
+                hoveredMetricKey && !(metricKey === hoveredMetricKey);
+
+              // Get all dates where this metric has values > 0
+              const eventDates =
+                chartData?.filter(
+                  (d) => d[metricKey] && Number(d[metricKey]) > 0,
+                ) || [];
+
+              return eventDates.map((eventData, index) => (
+                <ReferenceLine
+                  key={`${metricKey}-event-${index}`}
+                  x={eventData.date}
+                  stroke={config.color}
+                  strokeWidth={2}
+                  strokeDasharray="5,5"
+                  opacity={isOpaque ? 0.3 : 1}
+                />
+              ));
+            })
+            .flat()}
 
           {/* Render LINE metrics - DYNAMIC AXIS ASSIGNMENT */}
           {appliedMetrics.map((metricKey) => {
@@ -225,41 +186,13 @@ export const TokenDistributionChart = ({
                 key={`${metricKey}-line`}
                 dataKey={metricKey}
                 stroke={config.color}
-                strokeWidth={2}
+                strokeWidth={3}
                 strokeOpacity={isOpaque ? 0.3 : 1}
                 dot={false}
-                yAxisId={getAxisId(metricKey)}
+                yAxisId={0}
               />
             );
           })}
-
-          {/* Render SPORADIC_LINE metrics as event markers with dashed lines and arrows */}
-          {appliedMetrics
-            .filter(
-              (metricKey) => chartConfig[metricKey]?.type === "SPORADIC_LINE",
-            )
-            .map((metricKey) => {
-              const config = chartConfig[metricKey];
-              const isOpaque =
-                hoveredMetricKey && !(metricKey === hoveredMetricKey);
-
-              // Get all dates where this metric has values > 0
-              const eventDates =
-                chartData?.filter((d) => d[metricKey] && d[metricKey] > 0) ||
-                [];
-
-              return eventDates.map((eventData, index) => (
-                <ReferenceLine
-                  key={`${metricKey}-event-${index}`}
-                  x={eventData.date}
-                  stroke={config.color}
-                  strokeWidth={2}
-                  strokeDasharray="5,5"
-                  opacity={isOpaque ? 0.3 : 1}
-                />
-              ));
-            })
-            .flat()}
 
           {/* Render BARS for BAR type metrics */}
           {appliedMetrics.map((metricKey) => {
@@ -278,7 +211,7 @@ export const TokenDistributionChart = ({
                 fill={config.color}
                 opacity={isOpaque ? 0.3 : 0.6}
                 barSize={20}
-                yAxisId={getAxisId(metricKey)}
+                yAxisId={0}
               />
             );
           })}

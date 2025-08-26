@@ -39,7 +39,7 @@ export interface MultilineChartDataSetPoint {
 
 export interface ChartDataSetPoint {
   date: number;
-  [key: keyof typeof metricsSchema]: number | undefined;
+  [key: keyof typeof metricsSchema]: number | string | undefined;
 }
 
 export type GovernanceImplementation = {
