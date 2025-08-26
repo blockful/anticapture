@@ -103,7 +103,7 @@ const AncestorLine = <TData,>({
     <div
       className="border-border-contrast absolute left-[80%] border-l"
       style={{
-        top: "-16px",
+        top: "-20px",
         height: "calc(100% + 48px)",
       }}
     />
@@ -125,7 +125,7 @@ export const TreeLines = <TData,>({ row }: TreeLinesProps<TData>) => {
           <div
             key={depthIndex}
             className="relative flex items-center justify-center"
-            style={{ width: "2rem", height: "100%" }}
+            style={{ width: "1rem", height: "100%" }}
           >
             {isCurrentLevel ? (
               <TreeConnector row={row} />

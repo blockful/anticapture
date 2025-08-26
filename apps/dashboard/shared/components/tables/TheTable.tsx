@@ -160,10 +160,7 @@ export const TheTable = <TData, TValue>({
           table.getRowModel().rows.map((row, rowIndex) => {
             // Check if we need a divider before this row
             const needsDivider =
-              showParentDividers &&
-              row.depth === 0 &&
-              rowIndex > 0 &&
-              table.getRowModel().rows[rowIndex - 1]?.depth === 0;
+              showParentDividers && row.depth === 0 && rowIndex > 0;
 
             return (
               <>

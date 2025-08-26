@@ -33,7 +33,7 @@ export const ExpandableTableDemoSection = () => {
             </div>
           );
         },
-        size: 162,
+        size: 180,
       },
       {
         accessorKey: "amount",
@@ -83,11 +83,11 @@ export const ExpandableTableDemoSection = () => {
       },
       {
         accessorKey: "date",
-        header: "Date",
+        header: () => <div className="w-full">Date</div>,
         cell: ({ getValue }) => {
           const date = getValue<string>();
           return date ? (
-            <span className="text-secondary text-sm">{date}</span>
+            <span className="text-secondary w-full text-sm">{date}</span>
           ) : null;
         },
         size: 162,
@@ -136,7 +136,7 @@ export const ExpandableTableDemoSection = () => {
 
   return (
     <div className="w-full">
-      <div className="bg-surface-default p-4">
+      <div className="bg-surface-default flex flex-col p-4">
         <TheTable
           columns={columns}
           data={sampleTransactionData}
@@ -148,6 +148,7 @@ export const ExpandableTableDemoSection = () => {
           isTableSmall={true}
           className="border-0"
           showParentDividers={true}
+          mobileTableFixed={true}
         />
       </div>
     </div>
