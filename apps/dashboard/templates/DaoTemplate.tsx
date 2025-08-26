@@ -14,9 +14,9 @@ import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
 
-// import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
-// import { Info, Send } from "lucide-react";
-// import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { Send } from "lucide-react";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -27,22 +27,22 @@ export const DaoTemplate = () => {
     return null;
   }
 
-  // const bannerAlertMessage =
-  //   "RECEIVE REAL-TIME " +
-  //   daoConstants.name.toUpperCase() +
-  //   " SECURITY UPDATES.";
+  const bannerAlertMessage =
+    "RECEIVE REAL-TIME " +
+    daoConstants.name.toUpperCase() +
+    " SECURITY UPDATES.";
 
   return (
     <DaoPageInteractionProvider>
       {/* <MessageStacker messages={messages} /> */}
       {/* <BannerAlert
-          icon={<Info className="size-4" />}
-          text={"Currently in beta. Some data inconsistencies may occur."}
-          storageKey={`beta-banner-dismissed-${daoIdEnum}`}
-        /> */}
+        icon={<Info className="size-4" />}
+        text={"Currently in beta. Some data inconsistencies may occur."}
+        storageKey={`beta-banner-dismissed-${daoIdEnum}`}
+      /> */}
       <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
         {/* Commented out while TelegramBot is not ready to be added to the DAO */}
-        {/* <BannerAlert
+        <BannerAlert
           icon={<Send className="hidden size-4 text-white sm:block" />}
           text={bannerAlertMessage}
           link={{
@@ -51,7 +51,7 @@ export const DaoTemplate = () => {
           }}
           storageKey={`banner-dismissed-${daoIdEnum}`}
         />
-        <BannerAlert
+        {/* <BannerAlert
           icon={<Info className="hidden size-4 text-white sm:block" />}
           text={bannerAlertMessage}
           storageKey={`banner-dismissed-${daoIdEnum}`}
