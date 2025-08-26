@@ -46,7 +46,9 @@ export const ProposalResponseSchema = z.object({
   forVotes: z.string(),
   againstVotes: z.string(),
   abstainVotes: z.string(),
+  startTimestamp: z.string(),
   endTimestamp: z.string(),
+  quorum: z.string(),
 });
 
 export const ProposalsResponseSchema = z.array(ProposalResponseSchema);
@@ -62,7 +64,12 @@ export type ProposalParams = z.infer<typeof ProposalRequestSchema>;
 export type ProposalResponse = z.infer<typeof ProposalResponseSchema>;
 
 export const ProposalMapper = {
-  toApi: (p: DBProposal): ProposalResponse => {
+  toApi: (
+    p: DBProposal,
+    quorum: bigint,
+    blockTime: number,
+    votingDelay: bigint,
+  ): ProposalResponse => {
     return {
       id: p.id,
       daoId: p.daoId,
@@ -78,6 +85,11 @@ export const ProposalMapper = {
       againstVotes: p.againstVotes.toString(),
       abstainVotes: p.abstainVotes.toString(),
       endTimestamp: p.endTimestamp.toString(),
+      startTimestamp: (
+        p.endTimestamp -
+        (BigInt(p.endBlock - p.startBlock) + votingDelay) * BigInt(blockTime)
+      ).toString(),
+      quorum: quorum.toString(),
     };
   },
 };
