@@ -111,7 +111,7 @@ export const TokenDistributionChart = ({
           <XAxis
             dataKey="date"
             type="number"
-            domain={["auto", "auto"]}
+            domain={["dataMin", "dataMax"]}
             tickMargin={8}
             tickFormatter={(date) => timestampToReadableDate(date)}
           />
