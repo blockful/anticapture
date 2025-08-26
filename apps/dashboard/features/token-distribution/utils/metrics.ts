@@ -89,12 +89,6 @@ export const metricsSchema: Record<string, MetricSchema> = {
     category: "GOVERNANCE",
     type: "SPORADIC_LINE",
   },
-  VOTES: {
-    label: "Voting Volume",
-    color: "#EF4444",
-    category: "GOVERNANCE",
-    type: "LINE",
-  },
   TREASURY: {
     label: "Treasury",
     color: "#FAFAFA",
