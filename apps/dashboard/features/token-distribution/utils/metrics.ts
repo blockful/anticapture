@@ -53,12 +53,6 @@ export const metricsSchema: Record<string, MetricSchema> = {
     category: "SUPPLY",
     type: "LINE",
   },
-  ACTIVE_SUPPLY: {
-    label: "Active",
-    color: "#A78BFA",
-    category: "SUPPLY",
-    type: "LINE",
-  },
   DELEGATIONS: {
     label: "Delegations",
     color: "#EC4899",
