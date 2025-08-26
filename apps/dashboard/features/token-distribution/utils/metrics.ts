@@ -12,7 +12,8 @@ export interface MetricSchema {
   label: string;
   color: string;
   category: string;
-  type: "BAR" | "LINE" | "SPORADIC_LINE";
+  type: "BAR" | "LINE" | "SPORADIC_LINE" | "AREA";
+  axis?: "primary" | "secondary";
 }
 
 export const metricsSchema: Record<string, MetricSchema> = {
@@ -104,7 +105,8 @@ export const metricsSchema: Record<string, MetricSchema> = {
     label: "Token Price",
     color: "#8884d8",
     category: "MARKET",
-    type: "BAR",
+    type: "AREA",
+    axis: "secondary",
   },
 };
 

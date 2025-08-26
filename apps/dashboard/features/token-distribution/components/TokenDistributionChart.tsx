@@ -125,15 +125,17 @@ export const TokenDistributionChart = ({
             tickFormatter={(value) => formatNumberUserReadable(Number(value))}
           />
 
-          {/* SECONDARY AXIS - For smaller scale metrics (only when needed) */}
-          {appliedMetrics.length > 0 && (
+          {/* SECONDARY AXIS - For metrics configured with axis: "secondary" */}
+          {appliedMetrics.some(
+            (key) => chartConfig[key]?.axis === "secondary",
+          ) && (
             <YAxis
               yAxisId="secondary"
               orientation="right"
-              domain={[0, "auto"]}
-              tickFormatter={(value) => {
-                return formatNumberUserReadable(Number(value));
-              }}
+              domain={["auto", "auto"]}
+              tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
+              stroke="#8884d8"
+              tick={{ fill: "#8884d8", fontSize: 12 }}
             />
           )}
           <Tooltip
@@ -186,10 +188,36 @@ export const TokenDistributionChart = ({
                 key={`${metricKey}-line`}
                 dataKey={metricKey}
                 stroke={config.color}
-                strokeWidth={3}
+                strokeWidth={2}
                 strokeOpacity={isOpaque ? 0.3 : 1}
                 dot={false}
-                yAxisId={0}
+                yAxisId={config.axis || "primary"}
+              />
+            );
+          })}
+
+          {/* Render AREA metrics - DYNAMIC AXIS ASSIGNMENT */}
+          {appliedMetrics.map((metricKey) => {
+            const isOpaque =
+              hoveredMetricKey && !(metricKey === hoveredMetricKey);
+            const config = chartConfig[metricKey];
+
+            if (!config || config.type !== "AREA") {
+              return null;
+            }
+
+            return (
+              <Area
+                key={`${metricKey}-area`}
+                dataKey={metricKey}
+                stroke={config.color}
+                fill={config.color}
+                fillOpacity={isOpaque ? 0.02 : 0.08}
+                strokeWidth={2}
+                strokeOpacity={isOpaque ? 0.3 : 0.8}
+                yAxisId={config.axis || "primary"}
+                type="monotone"
+                dot={false}
               />
             );
           })}
@@ -211,7 +239,7 @@ export const TokenDistributionChart = ({
                 fill={config.color}
                 opacity={isOpaque ? 0.3 : 0.6}
                 barSize={20}
-                yAxisId={0}
+                yAxisId={config.axis || "primary"}
               />
             );
           })}

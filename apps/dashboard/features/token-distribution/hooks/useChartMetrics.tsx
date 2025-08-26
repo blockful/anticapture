@@ -63,6 +63,7 @@ export const useChartMetrics = ({
             color: metric.color,
             category: metric.category,
             type: metric.type,
+            axis: metric.axis,
           };
         }
         return acc;
