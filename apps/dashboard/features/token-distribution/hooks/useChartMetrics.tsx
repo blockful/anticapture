@@ -25,18 +25,43 @@ export const useChartMetrics = ({
   daoId: DaoIdEnum;
   metricsSchema: Record<string, MetricSchema>;
 }): UseChartMetricsResult => {
-  // Only fetch timeSeriesData if we have enum metrics
+  // Get direct enum metrics
   const enumMetrics = appliedMetrics.filter((key) =>
     Object.values(MetricTypesEnum).includes(key as MetricTypesEnum),
   );
 
-  const shouldFetchTimeSeries = enumMetrics.length > 0;
+  // Get additional SUPPLY metrics needed for TRANSFER VOLUME metrics
+  const transferVolumeMetrics = appliedMetrics.filter(
+    (key) => metricsSchema[key]?.category === "TRANSFER VOLUME",
+  );
 
-  // Fetch time series data (only if we have enum metrics)
+  const additionalSupplyMetrics: MetricTypesEnum[] = [];
+  transferVolumeMetrics.forEach((metric) => {
+    if (metric === "CEX_TOKENS")
+      additionalSupplyMetrics.push(MetricTypesEnum.CEX_SUPPLY);
+    if (metric === "DEX_TOKENS")
+      additionalSupplyMetrics.push(MetricTypesEnum.DEX_SUPPLY);
+    if (metric === "LENDING_TOKENS")
+      additionalSupplyMetrics.push(MetricTypesEnum.LENDING_SUPPLY);
+    if (metric === "DELEGATIONS")
+      additionalSupplyMetrics.push(MetricTypesEnum.DELEGATED_SUPPLY);
+  });
+
+  // Combine all metrics to fetch, removing duplicates
+  const allMetricsToFetch = [
+    ...new Set([
+      ...(enumMetrics as MetricTypesEnum[]),
+      ...additionalSupplyMetrics,
+    ]),
+  ];
+
+  const shouldFetchTimeSeries = allMetricsToFetch.length > 0;
+
+  // Fetch time series data (for all needed metrics)
   const { data: timeSeriesData, isLoading: timeSeriesLoading } =
     useTimeSeriesData(
       daoId,
-      shouldFetchTimeSeries ? (enumMetrics as MetricTypesEnum[]) : [],
+      shouldFetchTimeSeries ? allMetricsToFetch : [],
       TimeInterval.ONE_YEAR,
       {
         refreshInterval: 300000,
@@ -78,16 +103,53 @@ export const useChartMetrics = ({
 
     // Process timeSeriesData (only for enum metrics)
     if (timeSeriesData) {
-      enumMetrics.forEach((metricKey) => {
-        const enumKey = metricKey as MetricTypesEnum;
-        if (timeSeriesData[enumKey]) {
-          timeSeriesData[enumKey].forEach((item: DaoMetricsDayBucket) => {
+      console.log("timeSeriesData available:", Object.keys(timeSeriesData));
+      console.log("enumMetrics:", enumMetrics);
+
+      appliedMetrics.forEach((metricKey) => {
+        const metricSchema = metricsSchema[metricKey];
+        let dataSourceKey = metricKey as MetricTypesEnum;
+        let valueField = "high";
+
+        // For TRANSFER VOLUME metrics, use corresponding SUPPLY data with volume field
+        if (metricSchema?.category === "TRANSFER VOLUME") {
+          console.log(`Processing TRANSFER VOLUME metric: ${metricKey}`);
+          if (metricKey === "CEX_TOKENS") {
+            dataSourceKey = MetricTypesEnum.CEX_SUPPLY;
+            valueField = "volume";
+          } else if (metricKey === "DEX_TOKENS") {
+            dataSourceKey = MetricTypesEnum.DEX_SUPPLY;
+            valueField = "volume";
+          } else if (metricKey === "LENDING_TOKENS") {
+            dataSourceKey = MetricTypesEnum.LENDING_SUPPLY;
+            valueField = "volume";
+          } else if (metricKey === "DELEGATIONS") {
+            dataSourceKey = MetricTypesEnum.DELEGATED_SUPPLY;
+            valueField = "volume";
+          }
+          console.log(
+            `Using dataSourceKey: ${dataSourceKey}, valueField: ${valueField}`,
+          );
+        }
+
+        if (timeSeriesData[dataSourceKey]) {
+          console.log(
+            `Found data for ${dataSourceKey}, processing ${timeSeriesData[dataSourceKey].length} items`,
+          );
+          timeSeriesData[dataSourceKey].forEach((item: DaoMetricsDayBucket) => {
+            const value = valueField === "volume" ? item.volume : item.high;
+            console.log(`Item for ${metricKey}:`, {
+              date: item.date,
+              [valueField]: value,
+            });
             result[item.date] = {
               ...result[item.date],
               date: Number(item.date),
-              [metricKey]: Number(item.high) / 1e18, // Convert from wei to token units
+              [metricKey]: Number(value) / 1e18, // Convert from wei to token units
             };
           });
+        } else {
+          console.log(`No data found for dataSourceKey: ${dataSourceKey}`);
         }
       });
     }

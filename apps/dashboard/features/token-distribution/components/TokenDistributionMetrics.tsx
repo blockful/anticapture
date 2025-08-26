@@ -26,8 +26,7 @@ export const TokenDistributionMetrics = ({
   chartData,
 }: TokenDistributionMetricsProps) => {
   if (!chartData) return null;
-
-  // const metricsData = formatChartVariation(chartData);
+  console.log({ chartData });
 
   const handleApplyMetric = (newMetrics: (MetricTypesEnum | string)[]) => {
     // ADICIONAR novas métricas às existentes (não substituir)
@@ -50,6 +49,9 @@ export const TokenDistributionMetrics = ({
 
   const appliedMetricsFormatted = formatMetricsByCategory(appliedMetricsSchema);
   const metricsSchemaFormatted = formatMetricsByCategory(metricsSchema);
+
+  console.log("appliedMetricsFormatted", appliedMetricsFormatted);
+  console.log("metricsSchemaFormatted", metricsSchemaFormatted);
 
   return (
     <div className="flex h-full w-full flex-col justify-between">
@@ -81,7 +83,9 @@ export const TokenDistributionMetrics = ({
                   // Calcular variação percentual
                   const variation =
                     previousValue && currentValue
-                      ? ((currentValue - previousValue) / previousValue) * 100
+                      ? ((Number(currentValue) - Number(previousValue)) /
+                          Number(previousValue)) *
+                        100
                       : 0;
 
                   // Formatar valor baseado no tipo de métrica
@@ -90,7 +94,7 @@ export const TokenDistributionMetrics = ({
 
                   if (metricKey === "TOKEN_PRICE") {
                     // Token price já está em formato correto
-                    formattedMetricsValue = currentValue?.toFixed(2) || "0";
+                    formattedMetricsValue = Number(currentValue).toFixed(2);
                   } else if (metricKey === "PROPOSALS_GOVERNANCE") {
                     // Proposals são contagem, não precisam de formatação wei
                     formattedMetricsValue = currentValue?.toString() || "0";
