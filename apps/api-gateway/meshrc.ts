@@ -28,8 +28,19 @@ export default processConfig(
               },
               transforms: [
                 {
-                  filterSchema: {
-                    filters: ["transactions"],
+                  rename: {
+                    renames: [
+                      {
+                        from: {
+                          type: "Query",
+                          field: "transactions",
+                        },
+                        to: {
+                          type: "Query",
+                          field: "_",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
