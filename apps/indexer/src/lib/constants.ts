@@ -56,6 +56,18 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 71801427,
     },
   },
+  [DaoIdEnum.TEST]: {
+    blockTime: 12,
+    token: {
+      address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+      decimals: 18,
+      startBlock: 22635098,
+    },
+    governor: {
+      address: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+      startBlock: 22635098,
+    },
+  },
   [DaoIdEnum.GTC]: {
     blockTime: 12,
     // https://etherscan.io/address/0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F
@@ -93,6 +105,7 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
+  [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {
     "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     "Gitcoin CSDO": "0x931896A8A9313F622a2AFCA76d1471B97955e551",
@@ -249,6 +262,15 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Indodax 1": "0x3C02290922a3618A4646E3BbCa65853eA45FE7C6",
     "Indodax 2": "0x91Dca37856240E5e1906222ec79278b16420Dc92",
   },
+  [DaoIdEnum.TEST]: {
+    // Major centralized exchanges (CEX) - Alice and Bob for comprehensive coverage
+    Alice_CEX: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Alice as CEX
+    Bob_CEX: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", // Bob as CEX
+    // ENS contract addresses for completeness
+    ENSToken: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+    ENSGovernor: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+    ENSTimelock: "0xa7E99C1df635d13d61F7c81eCe571cc952E64526",
+  },
   [DaoIdEnum.GTC]: {
     "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
     "Binance 2": "0x28C6c06298d514Db089934071355E5743bf21d60",
@@ -314,6 +336,14 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Balancer: "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
     Mux: "0xc6BD76FA1E9e789345e003B361e4A0037DFb7260",
   },
+  [DaoIdEnum.TEST]: {
+    // DEX pools - Charlie and David for comprehensive coverage
+    Charlie_DEX_Pool: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", // Charlie as DEX
+    David_DEX_Pool: "0x90F79bf6EB2c4f870365E785982E1f101E93b906", // David as DEX
+    // ENS contract addresses involved in DEX-like operations
+    ENSToken: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+    ENSTimelock: "0xa7E99C1df635d13d61F7c81eCe571cc952E64526",
+  },
   [DaoIdEnum.GTC]: {
     Uniswap: "0xD017617f6F0fD22796E137a8240cc38F52a147B2",
   },
@@ -340,6 +370,14 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Exactly Protocol": "0xa430A427bd00210506589906a71B54d6C256CEdb",
     Morpho: "0xF057afeEc22E220f47AD4220871364e9E828b2e9",
     dForce: "0x7702dC73e8f8D9aE95CF50933aDbEE68e9F1D725",
+  },
+  [DaoIdEnum.TEST]: {
+    // Lending protocols - different addresses for comprehensive flag coverage
+    Alice_Lending_Protocol: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Alice as lending
+    Charlie_Lending_Pool: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", // Charlie as lending
+    // ENS contract addresses involved in lending-like operations
+    ENSGovernor: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+    ENSTimelock: "0xa7E99C1df635d13d61F7c81eCe571cc952E64526",
   },
   [DaoIdEnum.GTC]: {},
 };
@@ -373,6 +411,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x4200000000000000000000000000000000000042",
+  },
+  [DaoIdEnum.TEST]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
   },
   [DaoIdEnum.GTC]: {
     ZeroAddress: zeroAddress,
