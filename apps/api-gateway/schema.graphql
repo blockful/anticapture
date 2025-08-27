@@ -2,6 +2,12 @@ directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+
+directive @regexp(subgraph: String, pattern: String) on SCALAR
+
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
@@ -29,7 +35,15 @@ type Query {
   proposalsOnchains(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage!
   daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
+  transaction(transactionHash: String!): transaction
+  _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
   _meta: Meta
+
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """Get historical market data for a specific token"""
+  historicalTokenData: historicalTokenData_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -84,6 +98,25 @@ type Query {
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+
+  """
+  Get transactions with their associated transfers and delegations, with optional filtering and sorting
+  """
+  transactions(
+    limit: PositiveInt = 50
+    offset: NonNegativeInt
+    sortBy: timestamp_const
+    sortOrder: queryInput_transactions_sortOrder = desc
+    from: String
+    to: String
+    minAmount: queryInput_transactions_minAmount
+    maxAmount: queryInput_transactions_maxAmount
+
+    """
+    Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
+    """
+    affectedSupply: JSON
+  ): transactions_200_response
 
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
@@ -466,95 +499,34 @@ type delegationPage {
 }
 
 type delegation {
-  transactionHash: String
+  transactionHash: String!
   daoId: String!
-  delegateAccountId: String
-  delegatorAccountId: String
+  delegateAccountId: String!
+  delegatorAccountId: String!
   delegatedValue: BigInt!
   previousDelegate: String
-  timestamp: BigInt
+  timestamp: BigInt!
   logIndex: Int!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
   delegate: account
   delegator: account
+  transaction: transaction
 }
 
-input delegationFilter {
-  AND: [delegationFilter]
-  OR: [delegationFilter]
-  transactionHash: String
-  transactionHash_not: String
-  transactionHash_in: [String]
-  transactionHash_not_in: [String]
-  transactionHash_contains: String
-  transactionHash_not_contains: String
-  transactionHash_starts_with: String
-  transactionHash_ends_with: String
-  transactionHash_not_starts_with: String
-  transactionHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  delegateAccountId: String
-  delegateAccountId_not: String
-  delegateAccountId_in: [String]
-  delegateAccountId_not_in: [String]
-  delegateAccountId_contains: String
-  delegateAccountId_not_contains: String
-  delegateAccountId_starts_with: String
-  delegateAccountId_ends_with: String
-  delegateAccountId_not_starts_with: String
-  delegateAccountId_not_ends_with: String
-  delegatorAccountId: String
-  delegatorAccountId_not: String
-  delegatorAccountId_in: [String]
-  delegatorAccountId_not_in: [String]
-  delegatorAccountId_contains: String
-  delegatorAccountId_not_contains: String
-  delegatorAccountId_starts_with: String
-  delegatorAccountId_ends_with: String
-  delegatorAccountId_not_starts_with: String
-  delegatorAccountId_not_ends_with: String
-  delegatedValue: BigInt
-  delegatedValue_not: BigInt
-  delegatedValue_in: [BigInt]
-  delegatedValue_not_in: [BigInt]
-  delegatedValue_gt: BigInt
-  delegatedValue_lt: BigInt
-  delegatedValue_gte: BigInt
-  delegatedValue_lte: BigInt
-  previousDelegate: String
-  previousDelegate_not: String
-  previousDelegate_in: [String]
-  previousDelegate_not_in: [String]
-  previousDelegate_contains: String
-  previousDelegate_not_contains: String
-  previousDelegate_starts_with: String
-  previousDelegate_ends_with: String
-  previousDelegate_not_starts_with: String
-  previousDelegate_not_ends_with: String
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-  logIndex: Int
-  logIndex_not: Int
-  logIndex_in: [Int]
-  logIndex_not_in: [Int]
-  logIndex_gt: Int
-  logIndex_lt: Int
-  logIndex_gte: Int
-  logIndex_lte: Int
+type transaction {
+  transactionHash: String!
+  fromAddress: String
+  toAddress: String
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+  timestamp: BigInt!
+  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
+  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
 }
 
 type transferPage {
@@ -564,7 +536,7 @@ type transferPage {
 }
 
 type transfer {
-  transactionHash: String
+  transactionHash: String!
   daoId: String!
   tokenId: String
   amount: BigInt
@@ -572,9 +544,14 @@ type transfer {
   toAccountId: String!
   timestamp: BigInt
   logIndex: Int!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
   from: account
   to: account
   token: token
+  transaction: transaction
 }
 
 input transferFilter {
@@ -654,6 +631,117 @@ input transferFilter {
   logIndex_lt: Int
   logIndex_gte: Int
   logIndex_lte: Int
+  isCex: Boolean
+  isCex_not: Boolean
+  isCex_in: [Boolean]
+  isCex_not_in: [Boolean]
+  isDex: Boolean
+  isDex_not: Boolean
+  isDex_in: [Boolean]
+  isDex_not_in: [Boolean]
+  isLending: Boolean
+  isLending_not: Boolean
+  isLending_in: [Boolean]
+  isLending_not_in: [Boolean]
+  isTotal: Boolean
+  isTotal_not: Boolean
+  isTotal_in: [Boolean]
+  isTotal_not_in: [Boolean]
+}
+
+input delegationFilter {
+  AND: [delegationFilter]
+  OR: [delegationFilter]
+  transactionHash: String
+  transactionHash_not: String
+  transactionHash_in: [String]
+  transactionHash_not_in: [String]
+  transactionHash_contains: String
+  transactionHash_not_contains: String
+  transactionHash_starts_with: String
+  transactionHash_ends_with: String
+  transactionHash_not_starts_with: String
+  transactionHash_not_ends_with: String
+  daoId: String
+  daoId_not: String
+  daoId_in: [String]
+  daoId_not_in: [String]
+  daoId_contains: String
+  daoId_not_contains: String
+  daoId_starts_with: String
+  daoId_ends_with: String
+  daoId_not_starts_with: String
+  daoId_not_ends_with: String
+  delegateAccountId: String
+  delegateAccountId_not: String
+  delegateAccountId_in: [String]
+  delegateAccountId_not_in: [String]
+  delegateAccountId_contains: String
+  delegateAccountId_not_contains: String
+  delegateAccountId_starts_with: String
+  delegateAccountId_ends_with: String
+  delegateAccountId_not_starts_with: String
+  delegateAccountId_not_ends_with: String
+  delegatorAccountId: String
+  delegatorAccountId_not: String
+  delegatorAccountId_in: [String]
+  delegatorAccountId_not_in: [String]
+  delegatorAccountId_contains: String
+  delegatorAccountId_not_contains: String
+  delegatorAccountId_starts_with: String
+  delegatorAccountId_ends_with: String
+  delegatorAccountId_not_starts_with: String
+  delegatorAccountId_not_ends_with: String
+  delegatedValue: BigInt
+  delegatedValue_not: BigInt
+  delegatedValue_in: [BigInt]
+  delegatedValue_not_in: [BigInt]
+  delegatedValue_gt: BigInt
+  delegatedValue_lt: BigInt
+  delegatedValue_gte: BigInt
+  delegatedValue_lte: BigInt
+  previousDelegate: String
+  previousDelegate_not: String
+  previousDelegate_in: [String]
+  previousDelegate_not_in: [String]
+  previousDelegate_contains: String
+  previousDelegate_not_contains: String
+  previousDelegate_starts_with: String
+  previousDelegate_ends_with: String
+  previousDelegate_not_starts_with: String
+  previousDelegate_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  logIndex: Int
+  logIndex_not: Int
+  logIndex_in: [Int]
+  logIndex_not_in: [Int]
+  logIndex_gt: Int
+  logIndex_lt: Int
+  logIndex_gte: Int
+  logIndex_lte: Int
+  isCex: Boolean
+  isCex_not: Boolean
+  isCex_in: [Boolean]
+  isCex_not_in: [Boolean]
+  isDex: Boolean
+  isDex_not: Boolean
+  isDex_in: [Boolean]
+  isDex_not_in: [Boolean]
+  isLending: Boolean
+  isLending_not: Boolean
+  isLending_in: [Boolean]
+  isLending_not_in: [Boolean]
+  isTotal: Boolean
+  isTotal_not: Boolean
+  isTotal_in: [Boolean]
+  isTotal_not_in: [Boolean]
 }
 
 type proposalsOnchainPage {
@@ -1146,6 +1234,90 @@ input daoMetricsDayBucketFilter {
   lastUpdate_lte: BigInt
 }
 
+type transactionPage {
+  items: [transaction!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input transactionFilter {
+  AND: [transactionFilter]
+  OR: [transactionFilter]
+  transactionHash: String
+  transactionHash_not: String
+  transactionHash_in: [String]
+  transactionHash_not_in: [String]
+  transactionHash_contains: String
+  transactionHash_not_contains: String
+  transactionHash_starts_with: String
+  transactionHash_ends_with: String
+  transactionHash_not_starts_with: String
+  transactionHash_not_ends_with: String
+  fromAddress: String
+  fromAddress_not: String
+  fromAddress_in: [String]
+  fromAddress_not_in: [String]
+  fromAddress_contains: String
+  fromAddress_not_contains: String
+  fromAddress_starts_with: String
+  fromAddress_ends_with: String
+  fromAddress_not_starts_with: String
+  fromAddress_not_ends_with: String
+  toAddress: String
+  toAddress_not: String
+  toAddress_in: [String]
+  toAddress_not_in: [String]
+  toAddress_contains: String
+  toAddress_not_contains: String
+  toAddress_starts_with: String
+  toAddress_ends_with: String
+  toAddress_not_starts_with: String
+  toAddress_not_ends_with: String
+  isCex: Boolean
+  isCex_not: Boolean
+  isCex_in: [Boolean]
+  isCex_not_in: [Boolean]
+  isDex: Boolean
+  isDex_not: Boolean
+  isDex_in: [Boolean]
+  isDex_not_in: [Boolean]
+  isLending: Boolean
+  isLending_not: Boolean
+  isLending_in: [Boolean]
+  isLending_not_in: [Boolean]
+  isTotal: Boolean
+  isTotal_not: Boolean
+  isTotal_in: [Boolean]
+  isTotal_not_in: [Boolean]
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+type historicalTokenData_200_response {
+  prices: [[Float]]!
+  market_caps: [[Float]]!
+  total_volumes: [[Float]]!
+}
+
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
@@ -1379,7 +1551,9 @@ type query_proposals_items {
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
+  startTimestamp: String!
   endTimestamp: String!
+  quorum: String!
 }
 
 enum queryInput_proposals_orderDirection {
@@ -1401,7 +1575,9 @@ type proposal_200_response {
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
+  startTimestamp: String!
   endTimestamp: String!
+  quorum: String!
 }
 
 type query_historicalBalances_items {
@@ -1432,6 +1608,67 @@ enum queryInput_historicalVotingPower_days {
   _365d
 }
 
+type transactions_200_response {
+  transactions: [query_transactions_transactions_items]!
+  total: Float!
+}
+
+type query_transactions_transactions_items {
+  transactionHash: String!
+  from: String
+  to: String
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+  timestamp: String!
+  transfers: [query_transactions_transactions_items_transfers_items]!
+  delegations: [query_transactions_transactions_items_delegations_items]!
+}
+
+type query_transactions_transactions_items_transfers_items {
+  transactionHash: String!
+  daoId: String!
+  tokenId: String!
+  amount: String!
+  fromAccountId: String!
+  toAccountId: String!
+  timestamp: String!
+  logIndex: Float!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+}
+
+type query_transactions_transactions_items_delegations_items {
+  transactionHash: String!
+  daoId: String!
+  delegateAccountId: String!
+  delegatorAccountId: String!
+  delegatedValue: String!
+  previousDelegate: String
+  timestamp: String!
+  logIndex: Float!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+}
+
+enum timestamp_const {
+  timestamp
+}
+
+enum queryInput_transactions_sortOrder {
+  asc
+  desc
+}
+
+scalar queryInput_transactions_minAmount
+
+scalar queryInput_transactions_maxAmount
+
 type lastUpdate_200_response {
   lastUpdate: String!
 }
@@ -1441,6 +1678,8 @@ enum queryInput_lastUpdate_chart {
   attack_profitability
   token_distribution
 }
+
+scalar ObjMap
 
 enum HTTPMethod {
   GET
@@ -1453,5 +1692,3 @@ enum HTTPMethod {
   TRACE
   PATCH
 }
-
-scalar ObjMap
