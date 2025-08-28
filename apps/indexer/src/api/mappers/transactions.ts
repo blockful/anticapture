@@ -111,7 +111,6 @@ export const TransactionResponseSchema = z.object({
 
 export const TransactionsResponseSchema = z.object({
   transactions: z.array(TransactionResponseSchema),
-  total: z.number(),
 });
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
