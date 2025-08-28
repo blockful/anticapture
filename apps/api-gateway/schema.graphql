@@ -1610,7 +1610,6 @@ enum queryInput_historicalVotingPower_days {
 
 type transactions_200_response {
   transactions: [query_transactions_transactions_items]!
-  total: Float!
 }
 
 type query_transactions_transactions_items {
