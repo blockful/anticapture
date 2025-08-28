@@ -7,13 +7,18 @@ import {
   SupplyLabel,
   SupplyType,
 } from "@/shared/components/badges/SupplyLabel";
-import {
-  TransactionData,
-  sampleTransactionData,
-} from "@/shared/constants/mocked-data/sample-expandable-data";
+import { TransactionData } from "@/shared/constants/mocked-data/sample-expandable-data";
 import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
+import { useTransactionsTableData } from "@/features/expandable-table-demo";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const ExpandableTableDemoSection = () => {
+  // Using ENS as default dao for demo, can be parameterized later
+  const { data: tableData } = useTransactionsTableData({
+    daoId: DaoIdEnum.ENS,
+    limit: 10,
+    offset: 0,
+  });
   const columns = useMemo<ColumnDef<TransactionData>[]>(
     () => [
       {
@@ -139,7 +144,7 @@ export const ExpandableTableDemoSection = () => {
       <div className="bg-surface-default flex flex-col p-4">
         <TheTable
           columns={columns}
-          data={sampleTransactionData}
+          data={tableData}
           enableExpanding={true}
           getSubRows={(row) => row.subRows}
           stickyFirstColumn={true}

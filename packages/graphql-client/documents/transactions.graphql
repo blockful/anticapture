@@ -1,0 +1,43 @@
+query Transactions($limit: PositiveInt, $offset: NonNegativeInt) {
+  transactions(limit: $limit, offset: $offset) {
+    total
+    transactions {
+      from
+      isCex
+      isDex
+      isLending
+      isTotal
+      timestamp
+      to
+      transactionHash
+      delegations {
+        daoId
+        delegateAccountId
+        delegatedValue
+        delegatorAccountId
+        isCex
+        isDex
+        isTotal
+        isLending
+        logIndex
+        previousDelegate
+        timestamp
+        transactionHash
+      }
+      transfers {
+        amount
+        daoId
+        fromAccountId
+        isCex
+        isDex
+        isLending
+        isTotal
+        logIndex
+        timestamp
+        toAccountId
+        tokenId
+        transactionHash
+      }
+    }
+  }
+}
