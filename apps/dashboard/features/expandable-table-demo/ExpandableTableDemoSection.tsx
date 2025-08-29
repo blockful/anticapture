@@ -15,6 +15,8 @@ import { AmountFilter } from "@/shared/components/design-system/filters/AmountFi
 import { useParams } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { TransactionData } from "@/shared/constants/mocked-data/sample-expandable-data";
+import { Button } from "@/shared/components/ui/button";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 
 export const ExpandableTableDemoSection = () => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
@@ -24,7 +26,9 @@ export const ExpandableTableDemoSection = () => {
   const [toFilter, setToFilter] = useState<string>("");
   const [minAmount, setMinAmount] = useState<number | undefined>(undefined);
   const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined);
-  const [sortOrder] = useState<"asc" | "desc" | undefined>(undefined);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | undefined>(
+    "desc",
+  );
 
   // Using ENS as default dao for demo, can be parameterized later
   const {
@@ -121,7 +125,27 @@ export const ExpandableTableDemoSection = () => {
     },
     {
       accessorKey: "date",
-      header: () => <div className="w-full">Date</div>,
+      header: () => (
+        <Button
+          variant="ghost"
+          className="!text-table-header w-full justify-end px-4 text-end"
+          onClick={() => {
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+          }}
+        >
+          Date
+          <ArrowUpDown
+            props={{ className: "ml-2 size-4" }}
+            activeState={
+              sortOrder === "asc"
+                ? ArrowState.UP
+                : sortOrder === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
         return date ? (
