@@ -3,7 +3,7 @@ import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 export interface TransactionData {
   id: string;
   affectedSupply: SupplyType[];
-  amount: number;
+  amount: string;
   date: string;
   from: string;
   to: string;

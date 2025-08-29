@@ -2343,6 +2343,11 @@ export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalance
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  from?: InputMaybe<Scalars['String']['input']>;
+  to?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
+  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
+  sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
 }>;
 
 
@@ -3627,8 +3632,16 @@ export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGet
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
 export const TransactionsDocument = gql`
-    query Transactions($limit: PositiveInt, $offset: NonNegativeInt) {
-  transactions(limit: $limit, offset: $offset) {
+    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: queryInput_transactions_minAmount, $maxAmount: queryInput_transactions_maxAmount, $sortOrder: queryInput_transactions_sortOrder) {
+  transactions(
+    limit: $limit
+    offset: $offset
+    from: $from
+    to: $to
+    minAmount: $minAmount
+    maxAmount: $maxAmount
+    sortOrder: $sortOrder
+  ) {
     total
     transactions {
       from
@@ -3686,6 +3699,11 @@ export const TransactionsDocument = gql`
  *   variables: {
  *      limit: // value for 'limit'
  *      offset: // value for 'offset'
+ *      from: // value for 'from'
+ *      to: // value for 'to'
+ *      minAmount: // value for 'minAmount'
+ *      maxAmount: // value for 'maxAmount'
+ *      sortOrder: // value for 'sortOrder'
  *   },
  * });
  */

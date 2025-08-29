@@ -2340,6 +2340,11 @@ export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalance
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  from?: InputMaybe<Scalars['String']['input']>;
+  to?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
+  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
+  sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
 }>;
 
 

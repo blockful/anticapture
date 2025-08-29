@@ -1,5 +1,6 @@
 import { TransactionData } from "@/shared/constants/mocked-data/sample-expandable-data";
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { formatEther } from "viem";
 
 export type GraphTransaction = {
@@ -76,31 +77,48 @@ export const adaptTransactionsToTableData = (
   return transactions.map((tx, idx) => {
     const affectedSupply = deduceSupplyTypes(tx);
 
-    // Amount is not available at the transaction level. If any transfer exists, sum them; else 0.
-    const amountRaw =
-      tx.transfers?.reduce((acc, t) => acc + BigInt(t.amount), 0n) ?? 0n;
-    const amount = Number(formatEther(amountRaw ?? 0n));
+    const transfersAmountRaw =
+      tx.transfers?.reduce((acc, t) => acc + Number(t.amount), 0) ?? 0;
+    const delegationsAmountRaw =
+      tx.delegations?.reduce((acc, d) => acc + Number(d.delegatedValue), 0) ??
+      0;
 
-    // SubRows from delegations: each delegation becomes a nested row with affectedSupply Delegation
-    const subRows: TransactionData[] | undefined = tx.delegations?.length
-      ? tx.delegations.map((d, didx) => ({
-          id: `${idx + 1}.${didx + 1}`,
-          affectedSupply: ["Delegation"],
-          amount: Number(formatEther(BigInt(d.delegatedValue || 0))),
-          date: formatRelativeTime(d.timestamp),
-          from: toShortAddress(d.delegatorAccountId),
-          to: toShortAddress(d.delegateAccountId),
-        }))
-      : undefined;
+    const amount =
+      Number(formatEther(BigInt(transfersAmountRaw))) +
+        Number(formatEther(BigInt(delegationsAmountRaw))) || 0;
+
+    // add transfers to subRows also
+    const transfersSubRows = tx.transfers?.map((t, tidx) => ({
+      id: `${idx + 1}.${tidx + 1}`,
+      affectedSupply: ["Others"] as SupplyType[],
+      amount: formatNumberUserReadable(Number(t.amount), 2),
+      date: formatRelativeTime(t.timestamp),
+      from: toShortAddress(t.fromAccountId),
+      to: toShortAddress(t.toAccountId),
+    }));
+    const delegationsSubRows = tx.delegations?.map((d, didx) => ({
+      id: `${idx + 1}.${didx + 1}`,
+      affectedSupply: ["Delegation"] as SupplyType[],
+      amount: formatNumberUserReadable(
+        Number(formatEther(BigInt(d.delegatedValue))) || 0,
+        2,
+      ),
+      date: formatRelativeTime(d.timestamp),
+      from: toShortAddress(d.delegatorAccountId),
+      to: toShortAddress(d.delegateAccountId),
+    }));
+    const subRows = [...transfersSubRows, ...delegationsSubRows].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
 
     return {
       id: String(idx + 1),
       affectedSupply,
-      amount,
+      amount: formatNumberUserReadable(amount, 2),
       date: formatRelativeTime(tx.timestamp),
       from: toShortAddress(tx.from),
       to: toShortAddress(tx.to),
-      subRows,
+      subRows: subRows.length > 0 ? subRows : undefined,
     } satisfies TransactionData;
   });
 };

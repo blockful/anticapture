@@ -1,5 +1,21 @@
-query Transactions($limit: PositiveInt, $offset: NonNegativeInt) {
-  transactions(limit: $limit, offset: $offset) {
+query Transactions(
+  $limit: PositiveInt
+  $offset: NonNegativeInt
+  $from: String
+  $to: String
+  $minAmount: queryInput_transactions_minAmount
+  $maxAmount: queryInput_transactions_maxAmount
+  $sortOrder: queryInput_transactions_sortOrder
+) {
+  transactions(
+    limit: $limit
+    offset: $offset
+    from: $from
+    to: $to
+    minAmount: $minAmount
+    maxAmount: $maxAmount
+    sortOrder: $sortOrder
+  ) {
     total
     transactions {
       from
