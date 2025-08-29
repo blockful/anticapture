@@ -144,7 +144,7 @@ export const TokenDistributionChart = ({
               yAxisId="secondary"
               orientation="right"
               domain={["auto", "auto"]}
-              tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
+              tickFormatter={(value) => `$${Number(value)}`}
               stroke="#8884d8"
               tick={{ fill: "#8884d8", fontSize: 12 }}
             />
