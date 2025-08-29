@@ -79,7 +79,7 @@ export const metricsSchema: Record<string, MetricSchema> = {
   },
   PROPOSALS_GOVERNANCE: {
     label: "Proposals",
-    color: "#FAFAFA",
+    color: "#FAFAFA66",
     category: "GOVERNANCE",
     type: "SPORADIC_LINE",
   },
