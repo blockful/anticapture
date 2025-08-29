@@ -12,6 +12,7 @@ import {
   tokenDistribution,
   proposalsActivity,
   historicalOnchain,
+  transactions,
   proposals,
   lastUpdate,
   assets,
@@ -20,13 +21,15 @@ import { DrizzleProposalsActivityRepository } from "./repositories/proposals-act
 import { docs } from "./docs";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
-import { DrizzleRepository } from "./repositories";
+import { DrizzleRepository, TransactionsRepository } from "./repositories";
+import { TransactionsService } from "./services/transactions";
 import { errorHandler } from "./middlewares";
 import { ProposalsService } from "./services/proposals";
-import { getGovernor } from "@/lib/governor";
+import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -71,20 +74,25 @@ if (env.COINGECKO_API_KEY) {
   tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
 }
 
-const governorClient = getGovernor(env.DAO_ID, client);
+const daoClient = getClient(env.DAO_ID, client);
 
-if (!governorClient) {
-  throw new Error(`Governor client not found for DAO ${env.DAO_ID}`);
+if (!daoClient) {
+  throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
+
+const { blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 const repo = new DrizzleRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
+const transactionsRepo = new TransactionsRepository();
+const transactionsService = new TransactionsService(transactionsRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID);
-proposals(app, new ProposalsService(repo, governorClient));
+proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
 historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
+transactions(app, transactionsService);
 lastUpdate(app);
 docs(app);
 

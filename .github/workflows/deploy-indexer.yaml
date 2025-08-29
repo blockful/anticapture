@@ -37,7 +37,7 @@ jobs:
         id: get-daos
         run: |
           # Extract DAO names from config files (excluding local configs)
-          daos=$(ls apps/indexer/config/*.config.ts | grep -v local | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
+          daos=$(ls apps/indexer/config/*.config.ts | grep -v test | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
 
           # Create DAO array
           dao_array="["

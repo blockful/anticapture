@@ -14,6 +14,13 @@ import {
   ensureAccountsExist,
   storeDailyBucket,
 } from "./shared";
+import { DaoIdEnum } from "@/lib/enums";
+import {
+  BurningAddresses,
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+} from "@/lib/constants";
 
 export const delegateChanged = async (
   context: Context,
@@ -47,6 +54,29 @@ export const delegateChanged = async (
     tokenId,
   });
 
+  // Pre-compute address lists for flag determination
+  const lendingAddressList = Object.values(
+    LendingAddresses[daoId as DaoIdEnum] || {},
+  );
+  const cexAddressList = Object.values(CEXAddresses[daoId as DaoIdEnum] || {});
+  const dexAddressList = Object.values(DEXAddresses[daoId as DaoIdEnum] || {});
+  const burningAddressList = Object.values(
+    BurningAddresses[daoId as DaoIdEnum] || {},
+  );
+
+  // Determine flags for the delegation
+  const isCex =
+    cexAddressList.includes(delegator) || cexAddressList.includes(toDelegate);
+  const isDex =
+    dexAddressList.includes(delegator) || dexAddressList.includes(toDelegate);
+  const isLending =
+    lendingAddressList.includes(delegator) ||
+    lendingAddressList.includes(toDelegate);
+  const isBurning =
+    burningAddressList.includes(delegator) ||
+    burningAddressList.includes(toDelegate);
+  const isTotal = isBurning;
+
   await context.db
     .insert(delegation)
     .values({
@@ -58,10 +88,17 @@ export const delegateChanged = async (
       previousDelegate: fromDelegate,
       timestamp,
       logIndex,
+      isCex,
+      isDex,
+      isLending,
+      isTotal,
     })
-    .onConflictDoUpdate({
-      delegatedValue: delegatorBalance?.balance ?? 0n,
-    });
+    .onConflictDoUpdate((current) => ({
+      delegatedValue:
+        current.delegatedValue + (delegatorBalance?.balance ?? 0n),
+    }));
+
+  // Transaction flag updates moved to DAO-specific indexer
 
   // Update the delegator's delegate
   await context.db
@@ -123,6 +160,13 @@ export const delegatedVotesChanged = async (
 
   await ensureAccountExists(context, delegate);
 
+  // Validate daoId is a valid DaoIdEnum value
+  if (!Object.values(DaoIdEnum).includes(daoId as DaoIdEnum)) {
+    throw new Error(`Invalid daoId: ${daoId}`);
+  }
+
+  // Transaction handling moved to DAO-specific indexer
+
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -134,9 +178,7 @@ export const delegatedVotesChanged = async (
       timestamp,
       logIndex: logIndex - 1,
     })
-    .onConflictDoUpdate(() => ({
-      votingPower: newBalance,
-    }));
+    .onConflictDoNothing();
 
   // Update the delegate's voting power
   await context.db
