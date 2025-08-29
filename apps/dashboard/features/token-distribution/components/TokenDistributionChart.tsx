@@ -21,7 +21,8 @@ import { TokenDistributionCustomTooltip } from "@/features/token-distribution/co
 import { formatNumberUserReadable } from "@/shared/utils";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { timestampToReadableDate } from "@/shared/utils";
-import React from "react";
+import React, { useEffect } from "react";
+import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 
 interface TokenDistributionChartProps {
   appliedMetrics: string[];
@@ -40,6 +41,16 @@ export const TokenDistributionChart = ({
   isLoading = false,
   error = null,
 }: TokenDistributionChartProps) => {
+  // All hooks must be called at the top, before any conditional returns
+  const { initializeData, setVisibleData } = useBrushStore();
+
+  // Initialize store with full chart data when it loads
+  useEffect(() => {
+    if (chartData && chartData.length > 0) {
+      initializeData(chartData);
+    }
+  }, [chartData, initializeData]);
+
   // Show error state
   if (error) {
     return (
@@ -106,7 +117,7 @@ export const TokenDistributionChart = ({
         className="h-full w-full justify-start"
         config={chartConfig}
       >
-        <ComposedChart data={chartData}>
+        <ComposedChart data={chartData} syncId="tokenChart">
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
             dataKey="date"
@@ -250,6 +261,18 @@ export const TokenDistributionChart = ({
             fill="#1f1f1f"
             tickFormatter={(timestamp) => timestampToReadableDate(timestamp)}
             travellerWidth={10}
+            onChange={(brushArea) => {
+              if (brushArea && chartData) {
+                const { startIndex = 0, endIndex = chartData.length - 1 } =
+                  brushArea;
+                const visibleData = chartData.slice(startIndex, endIndex + 1);
+
+                // Use setTimeout to debounce and avoid infinite loops
+                setTimeout(() => {
+                  setVisibleData(visibleData);
+                }, 0);
+              }
+            }}
           >
             <AreaChart height={32} width={1128} data={chartData}>
               <XAxis dataKey="date" hide />

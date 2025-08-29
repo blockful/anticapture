@@ -11,6 +11,8 @@ import {
 } from "@/features/token-distribution/utils/metrics";
 import { Metric } from "@/features/token-distribution/components/Metric";
 import { MetricWithKey } from "@/features/token-distribution/types";
+import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenDistributionMetricsProps {
   appliedMetrics: (MetricTypesEnum | string)[];
@@ -25,8 +27,13 @@ export const TokenDistributionMetrics = ({
   setHoveredMetricKey,
   chartData,
 }: TokenDistributionMetricsProps) => {
+  // Get visible data from Zustand store (filtered by brush)
+  const { visibleData } = useBrushStore();
+
   if (!chartData) return null;
-  console.log({ chartData });
+
+  // Use visible data if available, otherwise fallback to full chart data
+  const dataToUse = visibleData.length > 0 ? visibleData : chartData;
 
   const handleApplyMetric = (newMetrics: (MetricTypesEnum | string)[]) => {
     // ADICIONAR novas métricas às existentes (não substituir)
@@ -64,8 +71,7 @@ export const TokenDistributionMetrics = ({
                   {category}
                 </CardTitle>
                 {metrics.map((metric: MetricWithKey) => {
-                  // CORREÇÃO SUPREMA: Calcular valores corretos das métricas
-                  const metricData = chartData
+                  const metricData = dataToUse
                     .map((point) => point[metric.key])
                     .filter((val) => val !== undefined);
 
@@ -90,19 +96,21 @@ export const TokenDistributionMetrics = ({
 
                   // Formatar valor baseado no tipo de métrica
                   let formattedMetricsValue: string;
-                  const metricKey = metric.key as string; // Permitir métricas customizadas
+                  const metricKey = metric.key as string;
 
                   if (metricKey === "TOKEN_PRICE") {
-                    // Token price já está em formato correto
-                    formattedMetricsValue = Number(currentValue).toFixed(2);
+                    formattedMetricsValue = `$${Number(currentValue).toFixed(2)}`;
                   } else if (metricKey === "PROPOSALS_GOVERNANCE") {
-                    // Proposals são contagem, não precisam de formatação wei
-                    formattedMetricsValue = currentValue?.toString() || "0";
+                    formattedMetricsValue = formatNumberUserReadable(
+                      Number(currentValue) || 0,
+                    );
                   } else {
-                    // Métricas de supply: converter de wei para token units
-                    formattedMetricsValue = currentValue
-                      ? (Number(currentValue) / 1e18).toFixed(2)
-                      : "0";
+                    const numericValue = Number(currentValue);
+                    formattedMetricsValue = formatNumberUserReadable(
+                      Number.isFinite(numericValue)
+                        ? Math.floor(numericValue)
+                        : 0,
+                    );
                   }
 
                   // Formatar variação

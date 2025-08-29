@@ -29,7 +29,6 @@ import { useTokenDistributionStore } from "@/features/token-distribution/store/u
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
   const { metrics, setMetrics } = useTokenDistributionStore();
-
   // Initialize store with initial metrics if empty
   useEffect(() => {
     if (metrics.length === 0) {
