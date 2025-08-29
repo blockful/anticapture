@@ -121,6 +121,7 @@ export const delegation = onchainTable(
     delegationTimestampIdx: index().on(table.timestamp),
     delegationDelegatorAccountIdIdx: index().on(table.delegatorAccountId),
     delegationDelegateAccountIdIdx: index().on(table.delegateAccountId),
+    delegationDelegatedValueIdx: index().on(table.delegatedValue),
   }),
 );
 
@@ -148,6 +149,7 @@ export const transfer = onchainTable(
     transferTimestampIdx: index().on(table.timestamp),
     transferFromAccountIdIdx: index().on(table.fromAccountId),
     transferToAccountIdIdx: index().on(table.toAccountId),
+    transferAmountIdx: index().on(table.amount),
   }),
 );
 
