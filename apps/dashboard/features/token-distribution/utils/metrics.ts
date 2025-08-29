@@ -19,19 +19,19 @@ export interface MetricSchema {
 export const metricsSchema: Record<string, MetricSchema> = {
   DELEGATED_SUPPLY: {
     label: "Delegated",
-    color: "#3B82F6",
+    color: "#93C5FD",
     category: "SUPPLY",
     type: "LINE",
   },
   CEX_SUPPLY: {
     label: "CEX",
-    color: "#FB923C",
+    color: "#FACC15",
     category: "SUPPLY",
     type: "LINE",
   },
   DEX_SUPPLY: {
     label: "DEX",
-    color: "#22C55E",
+    color: "#4ADE80",
     category: "SUPPLY",
     type: "LINE",
   },
@@ -55,13 +55,13 @@ export const metricsSchema: Record<string, MetricSchema> = {
   },
   DELEGATIONS: {
     label: "Delegations",
-    color: "#EC4899",
+    color: "#3B82F6",
     category: "TRANSFER VOLUME",
     type: "BAR",
   },
   CEX_TOKENS: {
     label: "CEX Tokens",
-    color: "#F97316",
+    color: "#FDE047",
     category: "TRANSFER VOLUME",
     type: "BAR",
   },

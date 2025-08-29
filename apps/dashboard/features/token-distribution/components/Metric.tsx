@@ -24,20 +24,31 @@ export const Metric = ({
   return (
     <button
       className={cn(
-        "border-light-dark hover:bg-surface-contrast flex h-7 w-full items-center justify-between gap-2 rounded-sm border px-2",
+        "border-light-dark hover:bg-surface-contrast flex h-full w-full flex-col justify-between gap-2 rounded-sm border px-2 py-1 sm:h-7 sm:flex-row sm:items-center",
         className,
       )}
       {...props}
     >
-      <div className="flex items-center gap-2">
-        <span
-          className="rounded-xs size-2"
-          style={{ backgroundColor: color }}
-        />
-        <p className="text-primary text-sm font-medium">{label}</p>
+      <div className="flex items-center justify-between gap-2 sm:items-start sm:justify-start">
+        <div className="flex items-center gap-2">
+          <span
+            className="rounded-xs size-2"
+            style={{ backgroundColor: color }}
+          />
+          <p className="text-primary text-sm font-medium">{label}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <X
+            className="text-secondary hover:text-primary block size-4 cursor-pointer sm:hidden"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove?.();
+            }}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center justify-end gap-2 text-end">
+      <div className="flex items-center gap-2 text-end sm:justify-end">
         {value && <div className="text-secondary text-sm">{value}</div>}
         {percentage && (
           <p
@@ -50,7 +61,7 @@ export const Metric = ({
           </p>
         )}
         <X
-          className="text-secondary hover:text-primary size-3 cursor-pointer"
+          className="text-secondary hover:text-primary hidden size-3 cursor-pointer sm:block"
           onClick={(e) => {
             e.stopPropagation();
             onRemove?.();

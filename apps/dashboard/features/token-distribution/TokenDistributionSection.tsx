@@ -49,8 +49,8 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
     >
-      <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex gap-4 rounded-lg border-none shadow-none sm:max-w-full sm:gap-0 sm:border">
-        <CardContent className="flex h-full w-full flex-col gap-6 p-0">
+      <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none shadow-none sm:max-w-full sm:gap-0 sm:border md:flex-row">
+        <CardContent className="order-2 flex h-full w-full flex-col gap-6 p-0 sm:order-1">
           <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
             GOVERNANCE SUPPLY TRENDS ({daoId})
           </CardTitle>
@@ -63,7 +63,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           />
         </CardContent>
         <div className="border-light-dark mx-4 w-px border-r border-dashed" />
-        <div className="flex w-full max-w-72 items-start sm:flex-row">
+        <div className="order-1 w-full items-start sm:order-2 sm:w-full">
           <TokenDistributionMetrics
             appliedMetrics={metrics}
             setAppliedMetrics={setMetrics}
