@@ -18,40 +18,40 @@ export interface MetricSchema {
 
 export const metricsSchema: Record<string, MetricSchema> = {
   DELEGATED_SUPPLY: {
-    label: "Delegated",
+    label: "Delegation",
     color: "#93C5FD",
     category: "SUPPLY",
-    type: "LINE",
+    type: "AREA",
   },
   CEX_SUPPLY: {
     label: "CEX",
     color: "#FACC15",
     category: "SUPPLY",
-    type: "LINE",
+    type: "AREA",
   },
   DEX_SUPPLY: {
     label: "DEX",
     color: "#4ADE80",
     category: "SUPPLY",
-    type: "LINE",
+    type: "AREA",
   },
   LENDING_SUPPLY: {
     label: "Lending",
     color: "#A855F7",
     category: "SUPPLY",
-    type: "LINE",
+    type: "AREA",
   },
   TOTAL_SUPPLY: {
     label: "Total",
     color: "#2DD4BF",
     category: "SUPPLY",
-    type: "LINE",
+    type: "AREA",
   },
   CIRCULATING_SUPPLY: {
     label: "Circulating",
     color: "#A78BFA",
     category: "SUPPLY",
-    type: "LINE",
+    type: "AREA",
   },
   DELEGATIONS: {
     label: "Delegations",
@@ -87,7 +87,7 @@ export const metricsSchema: Record<string, MetricSchema> = {
     label: "Treasury",
     color: "#FAFAFA",
     category: "GOVERNANCE",
-    type: "LINE",
+    type: "AREA",
   },
   TOKEN_PRICE: {
     label: "Token Price",
