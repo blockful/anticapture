@@ -189,10 +189,106 @@ export const useChartMetrics = ({
     historicalTokenData,
     proposalsOnChain,
     enumMetrics,
+    metricsSchema,
   ]);
 
+  // Group data by time periods for BAR metrics
+  const groupDataByPeriod = (
+    data: Record<string, ChartDataSetPoint>,
+    interval: string,
+  ) => {
+    console.log(`Grouping data by ${interval}...`);
+    if (interval === "daily") {
+      console.log("Using daily interval - no grouping needed");
+      return data;
+    }
+
+    const grouped: Record<string, ChartDataSetPoint> = {};
+
+    Object.values(data).forEach((point) => {
+      const date = new Date(point.date * 1000);
+      let groupKey: string;
+
+      switch (interval) {
+        case "weekly": {
+          // Get start of week (Sunday)
+          const startOfWeek = new Date(date);
+          startOfWeek.setDate(date.getDate() - date.getDay());
+          startOfWeek.setHours(0, 0, 0, 0);
+          groupKey = Math.floor(startOfWeek.getTime() / 1000).toString();
+          break;
+        }
+        case "monthly": {
+          // Get start of month
+          const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+          groupKey = Math.floor(startOfMonth.getTime() / 1000).toString();
+          break;
+        }
+        case "quarterly": {
+          // Get start of quarter
+          const quarter = Math.floor(date.getMonth() / 3);
+          const startOfQuarter = new Date(date.getFullYear(), quarter * 3, 1);
+          groupKey = Math.floor(startOfQuarter.getTime() / 1000).toString();
+          break;
+        }
+        default:
+          groupKey = point.date.toString();
+      }
+
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = { ...point, date: Number(groupKey) };
+      } else {
+        // Aggregate BAR metrics (sum them up)
+        Object.entries(point).forEach(([key, value]) => {
+          if (key === "date") return;
+          const config = metricsSchema[key];
+          if (config?.type === "BAR" && typeof value === "number") {
+            grouped[groupKey][key] =
+              ((grouped[groupKey][key] as number) || 0) + value;
+          } else if (
+            key === "PROPOSALS_GOVERNANCE" &&
+            typeof value === "number"
+          ) {
+            grouped[groupKey][key] =
+              ((grouped[groupKey][key] as number) || 0) + value;
+          } else {
+            // For other metrics (AREA, LINE), use latest value
+            grouped[groupKey][key] = value;
+          }
+        });
+      }
+    });
+
+    return grouped;
+  };
+
+  // Determine time interval based on data range
+  const getTimeInterval = () => {
+    const sortedDates = Object.keys(datasets).map(Number).sort();
+    if (sortedDates.length === 0) return "daily";
+
+    const timeRange = sortedDates[sortedDates.length - 1] - sortedDates[0];
+    const days = timeRange / (24 * 60 * 60);
+
+    if (days <= 90) return "daily"; // ≤3mo: Daily
+    if (days <= 365) return "weekly"; // ≤1yr: Weekly
+    if (days <= 730) return "monthly"; // ≤2yr: Monthly
+    return "quarterly"; // >2yr: Quarterly
+  };
+
+  const timeInterval = getTimeInterval();
+  const groupedDatasets = groupDataByPeriod(datasets, timeInterval);
+
+  console.log(`Time interval: ${timeInterval}`, {
+    originalPoints: Object.keys(datasets).length,
+    groupedPoints: Object.keys(groupedDatasets).length,
+    appliedMetrics,
+    sampleOriginal: Object.values(datasets).slice(0, 2),
+    sampleGrouped: Object.values(groupedDatasets).slice(0, 2),
+  });
+
   // Unified chart data
-  const chartData = Object.values(datasets).map((value) => {
+  const chartData = Object.values(groupedDatasets).map((value) => {
     const lastKnownValues: Record<
       keyof typeof metricsSchema,
       number | undefined

@@ -118,6 +118,35 @@ export const TokenDistributionChart = ({
         config={chartConfig}
       >
         <ComposedChart data={chartData} syncId="tokenChart">
+          <defs>
+            {/* Generate gradients for each AREA metric */}
+            {appliedMetrics
+              .filter((metricKey) => chartConfig[metricKey]?.type === "AREA")
+              .map((metricKey) => {
+                const config = chartConfig[metricKey];
+                return (
+                  <linearGradient
+                    key={`gradient-${metricKey}`}
+                    id={`gradient-${metricKey}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor={config.color}
+                      stopOpacity={0.05}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={config.color}
+                      stopOpacity={0.01}
+                    />
+                  </linearGradient>
+                );
+              })}
+          </defs>
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
             dataKey="date"
@@ -136,7 +165,7 @@ export const TokenDistributionChart = ({
             tickFormatter={(value) => formatNumberUserReadable(Number(value))}
           />
 
-          {/* SECONDARY AXIS - For metrics configured with axis: "secondary" */}
+          {/* SECONDARY AXIS - For metrics configured with axis: "secondary" (TOKEN_PRICE) */}
           {appliedMetrics.some(
             (key) => chartConfig[key]?.axis === "secondary",
           ) && (
@@ -147,6 +176,20 @@ export const TokenDistributionChart = ({
               tickFormatter={(value) => `$${Number(value)}`}
               stroke="#8884d8"
               tick={{ fill: "#8884d8", fontSize: 12 }}
+              width={60}
+            />
+          )}
+
+          {/* TERTIARY AXIS - For BAR type metrics (right side) */}
+          {appliedMetrics.some((key) => chartConfig[key]?.type === "BAR") && (
+            <YAxis
+              yAxisId="bars"
+              orientation="right"
+              domain={[0, "dataMax"]}
+              tickFormatter={(value) => formatNumberUserReadable(Number(value))}
+              stroke="#10B981"
+              tick={{ fill: "#10B981", fontSize: 12 }}
+              width={80}
             />
           )}
           <Tooltip
@@ -222,8 +265,8 @@ export const TokenDistributionChart = ({
                 key={`${metricKey}-area`}
                 dataKey={metricKey}
                 stroke={config.color}
-                fill={config.color}
-                fillOpacity={isOpaque ? 0.02 : 0.08}
+                fill={`url(#gradient-${metricKey})`}
+                fillOpacity={isOpaque ? 0.3 : 1}
                 strokeWidth={2}
                 strokeOpacity={isOpaque ? 0.3 : 0.8}
                 yAxisId={config.axis || "primary"}
@@ -243,14 +286,25 @@ export const TokenDistributionChart = ({
               return null;
             }
 
+            // Debug: Log bar data
+            const barData =
+              chartData?.filter(
+                (d) => d[metricKey] && Number(d[metricKey]) > 0,
+              ) || [];
+            console.log(
+              `${metricKey} bar data:`,
+              barData.map((d) => ({ date: d.date, value: d[metricKey] })),
+            );
+
             return (
               <Bar
                 key={`${metricKey}-bar`}
                 dataKey={metricKey}
                 fill={config.color}
-                opacity={isOpaque ? 0.3 : 0.6}
-                barSize={20}
-                yAxisId={config.axis || "primary"}
+                opacity={isOpaque ? 0.3 : 0.8}
+                barSize={40}
+                yAxisId="bars"
+                radius={[2, 2, 0, 0]}
               />
             );
           })}
