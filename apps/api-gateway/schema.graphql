@@ -6,8 +6,6 @@ directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
-directive @regexp(subgraph: String, pattern: String) on SCALAR
-
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
@@ -109,8 +107,8 @@ type Query {
     sortOrder: queryInput_transactions_sortOrder = desc
     from: String
     to: String
-    minAmount: queryInput_transactions_minAmount
-    maxAmount: queryInput_transactions_maxAmount
+    minAmount: String!
+    maxAmount: String!
 
     """
     Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
@@ -1663,10 +1661,6 @@ enum queryInput_transactions_sortOrder {
   asc
   desc
 }
-
-scalar queryInput_transactions_minAmount
-
-scalar queryInput_transactions_maxAmount
 
 type lastUpdate_200_response {
   lastUpdate: String!

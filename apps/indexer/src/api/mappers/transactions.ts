@@ -41,8 +41,8 @@ export const TransactionsRequestSchema = z.object({
     .string()
     .refine((addr) => addr && isAddress(addr))
     .optional(),
-  minAmount: z.coerce.bigint().optional(),
-  maxAmount: z.coerce.bigint().optional(),
+  minAmount: z.string().transform((val) => BigInt(val)), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+  maxAmount: z.string().transform((val) => BigInt(val)), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
   affectedSupply: z
     .union([
       z.nativeEnum(AffectedSupply),
