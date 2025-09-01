@@ -52,6 +52,11 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
     };
     localStorage.setItem("cookie-consent", JSON.stringify(consentData));
     setIsVisible(false);
+
+    // Dispatch custom event to notify other components
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("cookieConsentChange"));
+    }
   };
 
   const handleDecline = () => {
@@ -61,6 +66,11 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
     };
     localStorage.setItem("cookie-consent", JSON.stringify(consentData));
     setIsVisible(false);
+
+    // Dispatch custom event to notify other components
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("cookieConsentChange"));
+    }
   };
 
   // Don't render anything until we've checked localStorage
