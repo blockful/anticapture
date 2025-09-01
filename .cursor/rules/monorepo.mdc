@@ -1,0 +1,16 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Your rule content
+The project is a monorepo and we're using pnpm to run things in the root folder.
+For example, if you would normally do `npm run dev` in the `apps/dashboard` folder to run the dashboard in development mode, in our structure you need to run `pnpm dashboard dev` in the root folder (`anticapture/`), check the root `package.json` to understand better.
+
+
+## Running the indexer
+The indexer is very special, running it wrongly, with the prod database connected can cost a lot of time, the responsible developer may never let you run with the prod database, but just to be sure, if you will run it, do it in test mode with:
+`pnpm indexer dev --config config/test.config.ts`
+or, *IF YOU WILL JUST TEST THE API*:
+`pnpm indexer serve --config config/(any).config.ts`
