@@ -128,7 +128,7 @@ export const ExpandableTableDemoSection = () => {
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-end px-4 text-end"
+          className="!text-table-header w-full justify-start px-4"
           onClick={() => {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
           }}
@@ -149,7 +149,7 @@ export const ExpandableTableDemoSection = () => {
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
         return date ? (
-          <span className="text-secondary w-full text-sm">{date}</span>
+          <span className="text-secondary w-full px-4 text-sm">{date}</span>
         ) : null;
       },
       size: 162,
@@ -157,7 +157,7 @@ export const ExpandableTableDemoSection = () => {
     {
       accessorKey: "from",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
           <span>From</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
@@ -170,7 +170,7 @@ export const ExpandableTableDemoSection = () => {
       cell: ({ row }) => {
         const from = row.getValue("from") as string;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-4">
             <span className="text-secondary text-sm">{from}</span>
           </div>
         );
@@ -186,7 +186,7 @@ export const ExpandableTableDemoSection = () => {
     {
       accessorKey: "to",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
           <span>To</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
@@ -199,7 +199,7 @@ export const ExpandableTableDemoSection = () => {
       cell: ({ row }) => {
         const to = row.getValue("to") as string;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-4">
             <span className="text-secondary text-sm">{to}</span>
           </div>
         );

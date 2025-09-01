@@ -3,8 +3,8 @@ query Transactions(
   $offset: NonNegativeInt
   $from: String
   $to: String
-  $minAmount: queryInput_transactions_minAmount
-  $maxAmount: queryInput_transactions_maxAmount
+  $minAmount: String
+  $maxAmount: String
   $sortOrder: queryInput_transactions_sortOrder
 ) {
   transactions(
@@ -16,7 +16,6 @@ query Transactions(
     maxAmount: $maxAmount
     sortOrder: $sortOrder
   ) {
-    total
     transactions {
       from
       isCex

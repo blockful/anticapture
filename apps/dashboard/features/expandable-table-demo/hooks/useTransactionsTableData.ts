@@ -42,8 +42,8 @@ export const useTransactionsTableData = ({
       offset: (currentPage - 1) * limit,
       from: filters?.from,
       to: filters?.to,
-      minAmount: filters?.minAmount,
-      maxAmount: filters?.maxAmount,
+      minAmount: String(filters?.minAmount ?? 0),
+      maxAmount: String(filters?.maxAmount ?? 0),
       sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
     },
     context: daoId

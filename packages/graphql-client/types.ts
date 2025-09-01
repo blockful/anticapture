@@ -17,8 +17,6 @@ export type Scalars = {
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
   PositiveInt: { input: any; output: any; }
-  queryInput_transactions_maxAmount: { input: any; output: any; }
-  queryInput_transactions_minAmount: { input: any; output: any; }
 };
 
 export enum HttpMethod {
@@ -362,8 +360,8 @@ export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
-  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   sortBy?: InputMaybe<Timestamp_Const>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
@@ -1798,7 +1796,6 @@ export type TransactionPage = {
 
 export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
-  total: Scalars['Float']['output'];
   transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
@@ -2342,10 +2339,10 @@ export type TransactionsQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   to?: InputMaybe<Scalars['String']['input']>;
-  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
-  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
 }>;
 
 
-export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', total: number, transactions: Array<{ __typename?: 'query_transactions_transactions_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_transactions_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_transactions_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
+export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', transactions: Array<{ __typename?: 'query_transactions_transactions_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_transactions_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_transactions_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
