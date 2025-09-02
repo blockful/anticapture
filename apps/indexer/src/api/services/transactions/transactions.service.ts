@@ -67,23 +67,8 @@ export class TransactionsService {
         limit,
       );
 
-    // 5) Counts using count() for each type
-    const transactionsCount =
-      await this.transactionsRepository.getTransactionsCount({
-        from: params.from,
-        to: params.to,
-        affectedSupply,
-        minAmount: params.minAmount,
-        maxAmount: params.maxAmount,
-        limit,
-        offset,
-        sortBy: "timestamp",
-        sortOrder,
-      });
-
     return {
       transactions: transactions.map(TransactionMapper.toApi),
-      total: transactionsCount,
     };
   }
 }
