@@ -5,7 +5,7 @@ import { CookieIcon } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { CookieBackground } from "@/shared/components/icons/CookieBackground";
 import Image from "next/image";
-import Link from "next/link";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 interface CookieConsentProps {
   className?: string;
@@ -83,15 +83,15 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
         className,
       )}
     >
-      <div className="relative z-50 flex w-full flex-col items-start gap-4 rounded-lg border border-[#683719] bg-[#18181B] p-4 shadow-xl sm:flex-row sm:items-center sm:gap-6">
+      <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg shadow-xl sm:flex-row sm:items-center sm:gap-6">
         <Image
-          className="absolute right-0 top-0 h-full w-[330px]"
-          src="/images/cookie.png"
+          className="absolute right-0 top-0 h-full w-[330px] object-cover opacity-50"
+          src="/images/cookie.svg"
           alt="Cookie"
-          width={116}
+          width={330}
           height={116}
         />
-        <div className="z-40 flex w-full items-start gap-4 sm:items-center">
+        <div className="z-40 flex w-full items-start gap-6 sm:items-center">
           <div className="relative hidden size-[116px] flex-shrink-0 items-center justify-center sm:flex">
             <CookieBackground className="text-brand size-[97px]" />
             <CookieIcon className="text-brand absolute inset-0 left-1/2 top-1/2 size-[56px] -translate-x-1/2 -translate-y-1/2" />
@@ -100,33 +100,33 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
             <div className="text-tangerine font-mono text-xs uppercase tracking-wider">
               [mission_control]
             </div>
-            <div className="text-primary text-lg font-semibold">
-              WANT_A_COOKIE? <span className="text-tangerine">_</span>
+            <div className="text-primary font-mono text-lg font-medium uppercase tracking-wider">
+              Want_a_cookie?<span className="text-tangerine">_</span>
             </div>
             <div className="text-secondary text-sm">
               We use cookies to run the site, improve insights, and personalize
               your experience. You can manage your preferences anytime.
             </div>
-            <Link
+            <DefaultLink
               href="/terms-of-service"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary mt-1 text-xs uppercase tracking-wide transition-all duration-300"
+              openInNewTab
+              variant="default"
+              className="text-alternative-xs text-secondary mt-3 flex font-mono uppercase leading-none"
             >
               Read our terms of service
-            </Link>
+            </DefaultLink>
           </div>
         </div>
         <div className="z-50 flex w-full flex-shrink-0 gap-2 sm:w-auto">
           <button
             onClick={handleAccept}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer rounded-md px-2 py-1 text-sm font-medium transition-colors"
+            className="bg-primary text-primary-foreground hover:bg-primary/70 cursor-pointer rounded-md px-2 py-1 text-sm font-medium transition-colors duration-300"
           >
             [Accept]
           </button>
           <button
             onClick={handleDecline}
-            className="bg-background border-border text-secondary bg-surface-default hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-md border px-2 py-1 text-sm font-medium transition-colors"
+            className="bg-background border-border-contrast text-secondary bg-surface-default hover:bg-surface-contrast hover:text-accent-foreground cursor-pointer rounded-md border px-2 py-1 text-sm font-medium transition-colors duration-300"
           >
             [Decline]
           </button>
