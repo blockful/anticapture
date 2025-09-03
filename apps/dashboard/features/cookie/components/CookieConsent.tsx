@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import { CookieIcon } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
-import { CookieBackground } from "@/shared/components/icons/CookieBackground";
+import { CookieBackground } from "@/shared/components/icons";
 import Image from "next/image";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 interface CookieConsentProps {
   className?: string;
 }
+
+const SIX_MONTHS_IN_MILLISECONDS = 6 * 30 * 24 * 60 * 60 * 1000;
 
 export const CookieConsent = ({ className }: CookieConsentProps) => {
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
@@ -21,7 +23,7 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
     if (consentData) {
       try {
         const { status, timestamp } = JSON.parse(consentData);
-        const sixMonthsAgo = Date.now() - 6 * 30 * 24 * 60 * 60 * 1000; // 6 months in milliseconds
+        const sixMonthsAgo = Date.now() - SIX_MONTHS_IN_MILLISECONDS;
 
         // Check if consent is still valid (not expired)
         if (

@@ -1,1 +1,1 @@
-export { CookieConsent } from "./components/Cookie";
+export * from "@/features/cookie/components/CookieConsent";
