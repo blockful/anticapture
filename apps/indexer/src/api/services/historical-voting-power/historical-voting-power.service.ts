@@ -2,9 +2,29 @@ import { Address } from "viem";
 
 import { DaysEnum } from "@/lib/enums";
 
+export interface DelegationInfo {
+  delegateAccountId: string;
+  delegatorAccountId: string;
+  delegatedValue: bigint;
+  previousDelegate: string | null;
+}
+
+export interface TransferInfo {
+  fromAccountId: Address;
+  toAccountId: Address;
+  amount: bigint | null;
+  tokenId: string | null;
+}
+
 export interface HistoricalVotingPower {
   address: Address;
   votingPower: bigint;
+  transactionHash: string;
+  timestamp: bigint;
+  delta: bigint;
+  logIndex: number;
+  delegation?: DelegationInfo;
+  transfer?: TransferInfo;
 }
 
 interface VotingPowerRepository {

@@ -117,6 +117,26 @@ export function historicalOnchain(
                 z.object({
                   address: z.string(),
                   votingPower: z.string(),
+                  transactionHash: z.string(),
+                  timestamp: z.string(),
+                  delta: z.string(),
+                  logIndex: z.number(),
+                  delegation: z
+                    .object({
+                      delegateAccountId: z.string(),
+                      delegatorAccountId: z.string(),
+                      delegatedValue: z.string(),
+                      previousDelegate: z.string().nullable(),
+                    })
+                    .optional(),
+                  transfer: z
+                    .object({
+                      fromAccountId: z.string(),
+                      toAccountId: z.string(),
+                      amount: z.string().nullable(),
+                      tokenId: z.string().nullable(),
+                    })
+                    .optional(),
                 }),
               ),
             },
@@ -132,7 +152,33 @@ export function historicalOnchain(
         days,
       );
 
-      return context.json(votingPowers);
+      // Serialize BigInt values to strings for JSON response
+      const serializedVotingPowers = votingPowers.map((vp) => ({
+        address: vp.address,
+        votingPower: vp.votingPower.toString(),
+        transactionHash: vp.transactionHash,
+        timestamp: vp.timestamp.toString(),
+        delta: vp.delta.toString(),
+        logIndex: vp.logIndex,
+        delegation: vp.delegation
+          ? {
+              delegateAccountId: vp.delegation.delegateAccountId,
+              delegatorAccountId: vp.delegation.delegatorAccountId,
+              delegatedValue: vp.delegation.delegatedValue.toString(),
+              previousDelegate: vp.delegation.previousDelegate,
+            }
+          : undefined,
+        transfer: vp.transfer
+          ? {
+              fromAccountId: vp.transfer.fromAccountId,
+              toAccountId: vp.transfer.toAccountId,
+              amount: vp.transfer.amount?.toString() ?? null,
+              tokenId: vp.transfer.tokenId,
+            }
+          : undefined,
+      }));
+
+      return context.json(serializedVotingPowers);
     },
   );
 }

@@ -1,6 +1,11 @@
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "ponder";
 import { db } from "ponder:api";
-import { proposalsOnchain, votingPowerHistory } from "ponder:schema";
+import {
+  proposalsOnchain,
+  votingPowerHistory,
+  delegation,
+  transfer,
+} from "ponder:schema";
 import { Address } from "viem";
 import { SQL } from "drizzle-orm";
 
@@ -12,6 +17,7 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
+import { HistoricalVotingPower } from "../services/historical-voting-power/historical-voting-power.service";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -156,22 +162,73 @@ export class DrizzleRepository {
   async getVotingPower(
     addresses: Address[],
     timestamp: bigint,
-  ): Promise<{ address: Address; votingPower: bigint }[]> {
+  ): Promise<HistoricalVotingPower[]> {
     return await db
       .selectDistinctOn([votingPowerHistory.accountId], {
         address: votingPowerHistory.accountId,
         votingPower: votingPowerHistory.votingPower,
+        transactionHash: votingPowerHistory.transactionHash,
+        timestamp: votingPowerHistory.timestamp,
+        delta: votingPowerHistory.delta,
+        logIndex: votingPowerHistory.logIndex,
+        // Delegation fields
+        delegateAccountId: delegation.delegateAccountId,
+        delegatorAccountId: delegation.delegatorAccountId,
+        delegatedValue: delegation.delegatedValue,
+        previousDelegate: delegation.previousDelegate,
+        // Transfer fields
+        transferFromAccountId: transfer.fromAccountId,
+        transferToAccountId: transfer.toAccountId,
+        transferAmount: transfer.amount,
+        transferTokenId: transfer.tokenId,
       })
       .from(votingPowerHistory)
+      .leftJoin(
+        delegation,
+        and(
+          eq(votingPowerHistory.transactionHash, delegation.transactionHash),
+          eq(votingPowerHistory.logIndex, delegation.logIndex),
+        ),
+      )
+      .leftJoin(
+        transfer,
+        and(
+          eq(votingPowerHistory.transactionHash, transfer.transactionHash),
+          eq(votingPowerHistory.logIndex, transfer.logIndex),
+        ),
+      )
       .where(
         and(
           inArray(votingPowerHistory.accountId, addresses),
           lte(votingPowerHistory.timestamp, timestamp),
         ),
       )
-      .orderBy(
-        votingPowerHistory.accountId,
-        desc(votingPowerHistory.timestamp),
+      .orderBy(votingPowerHistory.accountId, desc(votingPowerHistory.timestamp))
+      .then((results) =>
+        results.map((row) => ({
+          address: row.address,
+          votingPower: row.votingPower,
+          transactionHash: row.transactionHash,
+          timestamp: row.timestamp,
+          delta: row.delta,
+          logIndex: row.logIndex,
+          delegation: row.delegateAccountId
+            ? {
+                delegateAccountId: row.delegateAccountId,
+                delegatorAccountId: row.delegatorAccountId!,
+                delegatedValue: row.delegatedValue!,
+                previousDelegate: row.previousDelegate,
+              }
+            : undefined,
+          transfer: row.transferFromAccountId
+            ? {
+                fromAccountId: row.transferFromAccountId,
+                toAccountId: row.transferToAccountId!,
+                amount: row.transferAmount,
+                tokenId: row.transferTokenId,
+              }
+            : undefined,
+        })),
       );
   }
 

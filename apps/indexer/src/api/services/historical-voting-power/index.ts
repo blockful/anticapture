@@ -1,5 +1,6 @@
 export { HistoricalVotingPowerService } from "./historical-voting-power.service";
 export type {
   HistoricalVotingPower,
-  HistoricalVotingPowerRequest,
+  DelegationInfo,
+  TransferInfo,
 } from "./historical-voting-power.service";
