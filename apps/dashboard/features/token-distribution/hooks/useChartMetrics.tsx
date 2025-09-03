@@ -128,9 +128,6 @@ export const useChartMetrics = ({
         }
 
         if (timeSeriesData[dataSourceKey]) {
-          console.log(
-            `Found data for ${dataSourceKey}, processing ${timeSeriesData[dataSourceKey].length} items`,
-          );
           timeSeriesData[dataSourceKey].forEach((item: DaoMetricsDayBucket) => {
             const value = valueField === "volume" ? item.volume : item.high;
             console.log(`Item for ${metricKey}:`, {
