@@ -103,8 +103,6 @@ export const useChartMetrics = ({
 
     // Process timeSeriesData (only for enum metrics)
     if (timeSeriesData) {
-      console.log("timeSeriesData available:", Object.keys(timeSeriesData));
-      console.log("enumMetrics:", enumMetrics);
 
       appliedMetrics.forEach((metricKey) => {
         const metricSchema = metricsSchema[metricKey];
