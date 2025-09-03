@@ -125,9 +125,6 @@ export const useChartMetrics = ({
             dataSourceKey = MetricTypesEnum.DELEGATED_SUPPLY;
             valueField = "volume";
           }
-          console.log(
-            `Using dataSourceKey: ${dataSourceKey}, valueField: ${valueField}`,
-          );
         }
 
         if (timeSeriesData[dataSourceKey]) {
