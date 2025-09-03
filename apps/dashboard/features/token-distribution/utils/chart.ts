@@ -22,19 +22,6 @@ export const validateChartData = <T extends Record<string, unknown>>(
   );
 };
 
-// interface TokenDistributionChartData {
-//   TOTAL_SUPPLY: MetricData;
-//   CIRCULATING_SUPPLY: MetricData;
-//   DELEGATED_SUPPLY: MetricData;
-//   CEX_SUPPLY: MetricData;
-//   DEX_SUPPLY: MetricData;
-//   LENDING_SUPPLY: MetricData;
-//   TREASURY: MetricData;
-//   PROPOSALS: MetricData;
-//   ACTIVE_SUPPLY: MetricData;
-//   VOTES: MetricData;
-//   AVERAGE_TURNOUT: MetricData;
-// }
 
 export const calculateChangeRate = (
   data: DaoMetricsDayBucket[] = [],
