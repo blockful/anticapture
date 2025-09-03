@@ -182,9 +182,9 @@ export const proposalsOnchain = onchainTable(
       .text("proposer_account_id")
       .$type<Address>()
       .notNull(),
-    targets: drizzle.json().$type<string[]>().notNull(),
-    values: drizzle.json().$type<bigint[]>().notNull(),
-    signatures: drizzle.json().$type<string[]>().notNull(),
+    targets: drizzle.json().$type<string[]>(),
+    values: drizzle.json().$type<bigint[]>(),
+    signatures: drizzle.json().$type<string[]>(),
     calldatas: drizzle.json().$type<string[]>(),
     startBlock: drizzle.integer("start_block").notNull(),
     endBlock: drizzle.integer("end_block").notNull(),

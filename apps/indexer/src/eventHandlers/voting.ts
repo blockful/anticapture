@@ -70,9 +70,9 @@ export const proposalCreated = async (
     proposalId: string;
     txHash: Hex;
     proposer: Address;
-    targets: Address[];
-    values: bigint[];
-    signatures: string[];
+    targets: Address[] | null;
+    values: bigint[] | null;
+    signatures: string[] | null;
     calldatas: Hex[] | null;
     startBlock: string;
     endBlock: string;
@@ -102,9 +102,9 @@ export const proposalCreated = async (
     txHash,
     daoId,
     proposerAccountId: proposer,
-    targets,
-    values,
-    signatures,
+    targets: targets ?? [],
+    values: values ?? [],
+    signatures: signatures ?? [],
     calldatas: calldatas ?? [],
     startBlock: parseInt(startBlock),
     endBlock: parseInt(endBlock),
