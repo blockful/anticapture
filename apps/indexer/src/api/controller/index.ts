@@ -7,3 +7,4 @@ export { historicalOnchain } from "./historical-onchain.controller";
 export { transactions } from "./transactions.controller";
 export { proposals } from "./proposals";
 export { lastUpdate } from "./last-update.controller";
+export { treasury } from "./treasury.controller";

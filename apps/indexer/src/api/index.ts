@@ -16,6 +16,7 @@ import {
   proposals,
   lastUpdate,
   assets,
+  treasury,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
@@ -30,6 +31,7 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { ZerionService } from "./services/zerion/zerion.service";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -67,6 +69,14 @@ const client = createPublicClient({
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
   assets(app, duneClient);
+}
+
+if (env.ZERION_API_URL && env.ZERION_API_KEY) {
+  const zerionClient = new ZerionService(
+    env.ZERION_API_URL,
+    env.ZERION_API_KEY,
+  );
+  treasury(app, zerionClient);
 }
 
 if (env.COINGECKO_API_KEY) {
