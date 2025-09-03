@@ -13,6 +13,8 @@ const envSchema = z.object({
   CHAIN_ID: z.coerce.number(),
   DUNE_API_URL: z.string().optional(),
   DUNE_API_KEY: z.string().optional(),
+  ZERION_API_URL: z.string().optional(),
+  ZERION_API_KEY: z.string().optional(),
   COINGECKO_API_KEY: z.string().optional(),
   REDIS_URL: z.string().optional(),
   PORT: z.coerce.number().default(42069),
