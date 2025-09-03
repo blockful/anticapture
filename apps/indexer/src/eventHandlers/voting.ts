@@ -73,7 +73,7 @@ export const proposalCreated = async (
     targets: Address[];
     values: bigint[];
     signatures: string[];
-    calldatas: Hex[];
+    calldatas: Hex[] | null;
     startBlock: string;
     endBlock: string;
     description: string;
@@ -105,7 +105,7 @@ export const proposalCreated = async (
     targets,
     values,
     signatures,
-    calldatas,
+    calldatas: calldatas ?? [],
     startBlock: parseInt(startBlock),
     endBlock: parseInt(endBlock),
     description,

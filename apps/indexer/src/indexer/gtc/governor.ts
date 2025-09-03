@@ -60,7 +60,7 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
       targets: [...event.args.targets],
       values: [...event.args.values],
       signatures: [...event.args.signatures],
-      calldatas: [...event.args.calldatas],
+      calldatas: event.args.calldatas ? [...event.args.calldatas] : [],
       startBlock: event.args.startBlock.toString(),
       endBlock: event.args.endBlock.toString(),
       description: event.args.description,

@@ -185,7 +185,7 @@ export const proposalsOnchain = onchainTable(
     targets: drizzle.json().$type<string[]>().notNull(),
     values: drizzle.json().$type<bigint[]>().notNull(),
     signatures: drizzle.json().$type<string[]>().notNull(),
-    calldatas: drizzle.json().$type<string[]>().notNull(),
+    calldatas: drizzle.json().$type<string[]>(),
     startBlock: drizzle.integer("start_block").notNull(),
     endBlock: drizzle.integer("end_block").notNull(),
     description: drizzle.text().notNull(),

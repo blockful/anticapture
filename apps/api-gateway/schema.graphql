@@ -756,7 +756,7 @@ type proposalsOnchain {
   targets: JSON!
   values: JSON!
   signatures: JSON!
-  calldatas: JSON!
+  calldatas: JSON
   startBlock: Int!
   endBlock: Int!
   description: String!
