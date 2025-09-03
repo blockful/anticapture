@@ -12,6 +12,8 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
+import { LastUpdateLabel } from "@/shared/components";
+import { QueryInput_LastUpdate_Chart } from "@anticapture/graphql-client";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
@@ -104,6 +106,10 @@ export const MultilineChartTokenDistribution = ({
         </LineChart>
       </ChartContainer>
       <AnticaptureWatermark />
+      <LastUpdateLabel
+        chart={QueryInput_LastUpdate_Chart.TokenDistribution}
+        className="absolute bottom-2 left-4"
+      />
     </div>
   );
 };

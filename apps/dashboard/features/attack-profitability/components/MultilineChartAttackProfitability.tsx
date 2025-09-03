@@ -22,6 +22,8 @@ import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
+import { LastUpdateLabel } from "@/shared/components";
+import { QueryInput_LastUpdate_Chart } from "@anticapture/graphql-client";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,
@@ -218,6 +220,10 @@ export const MultilineChartAttackProfitability = ({
       </ChartContainer>
       {/* Watermark */}
       <AnticaptureWatermark />
+      <LastUpdateLabel
+        chart={QueryInput_LastUpdate_Chart.AttackProfitability}
+        className="absolute bottom-2 left-4"
+      />
     </div>
   );
 };

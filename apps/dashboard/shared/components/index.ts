@@ -18,6 +18,7 @@ export * from "@/shared/components/badges/SupporterBadge";
 export * from "@/shared/components/cards/SwitchCardDaoInfoItem";
 export * from "@/shared/components/charts/SwitcherChart";
 export * from "@/shared/components/charts/ChartExceptionState";
+export * from "@/shared/components/charts/LastUpdateLabel";
 export * from "@/shared/components/switchers/SwitcherDate";
 export * from "@/shared/components/cards/TheCardChartLayout";
 export * from "@/shared/components/containers/TheSectionLayout";
