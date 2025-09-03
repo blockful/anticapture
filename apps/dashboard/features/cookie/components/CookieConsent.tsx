@@ -5,7 +5,6 @@ import { CookieIcon } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { CookieBackground } from "@/shared/components/icons";
 import Image from "next/image";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 interface CookieConsentProps {
   className?: string;
@@ -95,7 +94,7 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
         />
         <div className="z-40 flex w-full items-start gap-6 sm:items-center">
           <div className="relative hidden size-[116px] flex-shrink-0 items-center justify-center sm:flex">
-            <CookieBackground className="text-brand size-[97px]" />
+            <CookieBackground className="text-brand size-[116px]" />
             <CookieIcon className="text-brand absolute inset-0 left-1/2 top-1/2 size-[56px] -translate-x-1/2 -translate-y-1/2" />
           </div>
           <div className="flex flex-1 flex-col gap-1">
@@ -109,14 +108,14 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
               We use cookies to run the site, improve insights, and personalize
               your experience. You can manage your preferences anytime.
             </div>
-            <DefaultLink
+            {/* <DefaultLink
               href="/terms-of-service"
               openInNewTab
               variant="default"
               className="text-alternative-xs text-secondary mt-3 flex font-mono uppercase leading-none"
             >
               Read our terms of service
-            </DefaultLink>
+            </DefaultLink> */}
           </div>
         </div>
         <div className="z-50 flex w-full flex-shrink-0 gap-2 sm:w-auto">
