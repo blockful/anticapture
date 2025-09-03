@@ -753,10 +753,10 @@ type proposalsOnchain {
   txHash: String!
   daoId: String!
   proposerAccountId: String!
-  targets: JSON!
-  values: JSON!
-  signatures: JSON!
-  calldatas: JSON!
+  targets: JSON
+  values: JSON
+  signatures: JSON
+  calldatas: JSON
   startBlock: Int!
   endBlock: Int!
   description: String!
