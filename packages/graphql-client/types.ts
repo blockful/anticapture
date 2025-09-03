@@ -13,12 +13,13 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
-  queryInput_transactions_maxAmount: { input: any; output: any; }
-  queryInput_transactions_minAmount: { input: any; output: any; }
 };
 
 export enum HttpMethod {
@@ -362,8 +363,8 @@ export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
-  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
+  maxAmount: Scalars['String']['input'];
+  minAmount: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   sortBy?: InputMaybe<Timestamp_Const>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
@@ -1798,7 +1799,6 @@ export type TransactionPage = {
 
 export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
-  total: Scalars['Float']['output'];
   transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
@@ -2299,6 +2299,13 @@ export type GetHistoricalBalancesQueryVariables = Exact<{
 
 
 export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalances?: Array<{ __typename?: 'query_historicalBalances_items', address: string, balance: string, blockNumber: number, tokenAddress: string } | null> | null };
+
+export type GetLastUpdateQueryVariables = Exact<{
+  chart: QueryInput_LastUpdate_Chart;
+}>;
+
+
+export type GetLastUpdateQuery = { __typename?: 'Query', lastUpdate?: { __typename?: 'lastUpdate_200_response', lastUpdate: string } | null };
 
 export type GetProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];

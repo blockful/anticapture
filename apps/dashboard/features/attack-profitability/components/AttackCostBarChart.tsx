@@ -18,7 +18,8 @@ import {
   Cell,
   LabelProps,
 } from "recharts";
-import { SkeletonRow } from "@/shared/components";
+import { SkeletonRow, LastUpdateLabel } from "@/shared/components";
+import { QueryInput_LastUpdate_Chart } from "@anticapture/graphql-client";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatEther } from "viem";
 import { useParams } from "next/navigation";
@@ -294,6 +295,10 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         </BarChart>
       </ResponsiveContainer>
       <AnticaptureWatermark svgClassName="mb-15" />
+      <LastUpdateLabel
+        chart={QueryInput_LastUpdate_Chart.CostComparison}
+        className="absolute bottom-2 left-4"
+      />
     </div>
   );
 };

@@ -16,12 +16,13 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
-  queryInput_transactions_maxAmount: { input: any; output: any; }
-  queryInput_transactions_minAmount: { input: any; output: any; }
 };
 
 export enum HttpMethod {
@@ -365,8 +366,8 @@ export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
-  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
+  maxAmount: Scalars['String']['input'];
+  minAmount: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   sortBy?: InputMaybe<Timestamp_Const>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
@@ -1801,7 +1802,6 @@ export type TransactionPage = {
 
 export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
-  total: Scalars['Float']['output'];
   transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
@@ -2302,6 +2302,13 @@ export type GetHistoricalBalancesQueryVariables = Exact<{
 
 
 export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalances?: Array<{ __typename?: 'query_historicalBalances_items', address: string, balance: string, blockNumber: number, tokenAddress: string } | null> | null };
+
+export type GetLastUpdateQueryVariables = Exact<{
+  chart: QueryInput_LastUpdate_Chart;
+}>;
+
+
+export type GetLastUpdateQuery = { __typename?: 'Query', lastUpdate?: { __typename?: 'lastUpdate_200_response', lastUpdate: string } | null };
 
 export type GetProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -3385,6 +3392,46 @@ export type GetHistoricalBalancesQueryHookResult = ReturnType<typeof useGetHisto
 export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetHistoricalBalancesLazyQuery>;
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
+export const GetLastUpdateDocument = gql`
+    query GetLastUpdate($chart: queryInput_lastUpdate_chart!) {
+  lastUpdate(chart: $chart) {
+    lastUpdate
+  }
+}
+    `;
+
+/**
+ * __useGetLastUpdateQuery__
+ *
+ * To run a query within a React component, call `useGetLastUpdateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLastUpdateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLastUpdateQuery({
+ *   variables: {
+ *      chart: // value for 'chart'
+ *   },
+ * });
+ */
+export function useGetLastUpdateQuery(baseOptions: Apollo.QueryHookOptions<GetLastUpdateQuery, GetLastUpdateQueryVariables> & ({ variables: GetLastUpdateQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLastUpdateQuery, GetLastUpdateQueryVariables>(GetLastUpdateDocument, options);
+      }
+export function useGetLastUpdateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLastUpdateQuery, GetLastUpdateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLastUpdateQuery, GetLastUpdateQueryVariables>(GetLastUpdateDocument, options);
+        }
+export function useGetLastUpdateSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLastUpdateQuery, GetLastUpdateQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLastUpdateQuery, GetLastUpdateQueryVariables>(GetLastUpdateDocument, options);
+        }
+export type GetLastUpdateQueryHookResult = ReturnType<typeof useGetLastUpdateQuery>;
+export type GetLastUpdateLazyQueryHookResult = ReturnType<typeof useGetLastUpdateLazyQuery>;
+export type GetLastUpdateSuspenseQueryHookResult = ReturnType<typeof useGetLastUpdateSuspenseQuery>;
+export type GetLastUpdateQueryResult = Apollo.QueryResult<GetLastUpdateQuery, GetLastUpdateQueryVariables>;
 export const GetProposalsActivityDocument = gql`
     query GetProposalsActivity($address: String!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
   proposalsActivity(
