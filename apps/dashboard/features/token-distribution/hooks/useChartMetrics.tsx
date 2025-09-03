@@ -271,13 +271,6 @@ export const useChartMetrics = ({
   const timeInterval = getTimeInterval();
   const groupedDatasets = groupDataByPeriod(datasets, timeInterval);
 
-  console.log(`Time interval: ${timeInterval}`, {
-    originalPoints: Object.keys(datasets).length,
-    groupedPoints: Object.keys(groupedDatasets).length,
-    appliedMetrics,
-    sampleOriginal: Object.values(datasets).slice(0, 2),
-    sampleGrouped: Object.values(groupedDatasets).slice(0, 2),
-  });
 
   // Unified chart data
   const chartData = Object.values(groupedDatasets).map((value) => {
