@@ -26,6 +26,13 @@ type PercentageProps = Omit<
 };
 
 export const Percentage = ({ className, value, ...props }: PercentageProps) => {
+  if (value === 0)
+    return (
+      <span
+        className={cn(percentageVariants({ variant: "positive" }), className)}
+        {...props}
+      />
+    );
   const variant = value >= 0 ? "positive" : "negative";
 
   return (
@@ -39,7 +46,8 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
           className={cn("size-4", variant === "negative" && "text-error")}
         />
       )}
-      {value}%
+      {value < 0 ? "-" : ""}
+      {Math.abs(value)}%
     </span>
   );
 };
