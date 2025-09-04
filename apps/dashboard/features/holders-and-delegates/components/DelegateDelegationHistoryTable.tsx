@@ -1,8 +1,7 @@
 import { useState } from "react";
-import {
-  AmountFilterState,
-  AmountFilterVariables,
-} from "@/shared/components/design-system/table/filters/AmountFilter";
+import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
+import { GetDelegateDelegationHistoryDeltaRangeQueryVariables } from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
 import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -20,12 +19,19 @@ import {
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/AmountFilter";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
 }
+
+type AmountFilterVariables = Pick<
+  GetDelegateDelegationHistoryDeltaRangeQueryVariables,
+  "delta_gte" | "delta_lte"
+> & {
+  orderDirection?: "asc" | "desc";
+};
 
 export const DelegateDelegationHistoryTable = ({
   accountId,
@@ -36,6 +42,11 @@ export const DelegateDelegationHistoryTable = ({
   const [filterVariables, setFilterVariables] =
     useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
+
+  const sortOptions: SortOption[] = [
+    { value: "largest-first", label: "Largest first" },
+    { value: "smallest-first", label: "Smallest first" },
+  ];
 
   const {
     delegationHistory,
@@ -173,10 +184,27 @@ export const DelegateDelegationHistoryTable = ({
         <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
-            onApply={(
-              _filterState: AmountFilterState,
-              variables: AmountFilterVariables,
-            ) => {
+            onApply={(filterState: AmountFilterState) => {
+              // Mapear o estado do filtro para as variáveis específicas
+              const variables: AmountFilterVariables = {
+                orderDirection:
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+              };
+
+              // Add range filters if values are provided
+              if (filterState.minAmount) {
+                // Convert to BigInt wei format (multiply by 10^18)
+                variables.delta_gte = (
+                  parseFloat(filterState.minAmount) * Math.pow(10, 18)
+                ).toString();
+              }
+              if (filterState.maxAmount) {
+                // Convert to BigInt wei format (multiply by 10^18)
+                variables.delta_lte = (
+                  parseFloat(filterState.maxAmount) * Math.pow(10, 18)
+                ).toString();
+              }
+
               setFilterVariables(variables);
               setIsFilterActive(!!(variables.delta_gte || variables.delta_lte));
               // Update sort to delta when filter is applied
@@ -191,6 +219,7 @@ export const DelegateDelegationHistoryTable = ({
               setSortDirection("desc");
             }}
             isActive={isFilterActive}
+            sortOptions={sortOptions}
           />
         </div>
       ),

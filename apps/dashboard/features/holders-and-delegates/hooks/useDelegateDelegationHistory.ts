@@ -5,7 +5,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
 import { ApolloError } from "@apollo/client";
-import { AmountFilterVariables } from "@/shared/components/design-system/table/filters/AmountFilter";
+import { AmountFilterVariables } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { formatUnits } from "viem";
 
 type VotingPowerHistoryItem =
