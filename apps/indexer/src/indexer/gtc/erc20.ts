@@ -8,6 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
+import { handleTransaction } from "@/eventHandlers/shared";
 
 export function GTCTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.GTC;
@@ -38,6 +39,17 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         timestamp: event.block.timestamp,
         logIndex: event.log.logIndex,
       });
+
+      // Handle transaction creation/update with flag calculation
+      await handleTransaction(
+        context,
+        daoId,
+        event.transaction.hash,
+        event.transaction.from,
+        event.transaction.to,
+        event.block.timestamp,
+        [event.args.from, event.args.to], // Addresses to check
+      );
     },
   );
 
@@ -51,6 +63,17 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
+
+    // Handle transaction creation/update with flag calculation
+    await handleTransaction(
+      context,
+      daoId,
+      event.transaction.hash,
+      event.transaction.from,
+      event.transaction.to,
+      event.block.timestamp,
+      [event.args.delegator, event.args.toDelegate], // Addresses to check
+    );
   });
 
   ponder.on(`GTCToken:DelegateVotesChanged`, async ({ event, context }) => {
@@ -63,5 +86,16 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
+
+    // Handle transaction creation/update with flag calculation
+    await handleTransaction(
+      context,
+      daoId,
+      event.transaction.hash,
+      event.transaction.from,
+      event.transaction.to,
+      event.block.timestamp,
+      [event.args.delegate], // Address to check
+    );
   });
 }

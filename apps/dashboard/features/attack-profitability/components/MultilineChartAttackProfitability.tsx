@@ -158,6 +158,7 @@ export const MultilineChartAttackProfitability = ({
   );
 
   const lastKnownValues: Record<string, number | null> = {};
+
   const chartData = Array.from(allDates)
     .sort((a, b) => a - b)
     .map((date) => {

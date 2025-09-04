@@ -90,6 +90,7 @@ export interface DaoOverviewConfig {
   };
   securityCouncil?: {
     isActive: boolean;
+    vetoCouncilAddress: string;
     multisig: {
       threshold: number;
       signers: number;
@@ -124,6 +125,11 @@ export interface DaoAddresses {
     ArbitrumTimelock: string;
     ArbitrumTokenDistributor: string;
     ArbitrumDaoWallet: string;
+  };
+  [DaoIdEnum.GITCOIN]: {
+    GTCWallet: string;
+    GTCTimelock: string;
+    GTCUniv3Uni: string;
   };
 }
 
