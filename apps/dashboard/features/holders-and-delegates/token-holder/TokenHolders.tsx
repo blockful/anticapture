@@ -267,9 +267,9 @@ export const TokenHolders = ({
                 Math.abs(variation.absoluteChange),
               )}{" "}
             </p>
-            <div>
+            {variation.percentageChange !== 0 && (
               <Percentage value={variation.percentageChange} />
-            </div>
+            )}
           </div>
         );
       },
