@@ -75,7 +75,9 @@ export const DaoTemplate = () => {
           <ResilienceStagesSection daoId={daoIdEnum} />
         )}
 
-        {daoConstants.tokenDistribution && <TokenDistributionSection />}
+        {daoConstants.tokenDistribution && (
+          <TokenDistributionSection daoId={daoIdEnum} />
+        )}
         {daoConstants.dataTables && (
           <HoldersAndDelegatesSection daoId={daoIdEnum} />
         )}

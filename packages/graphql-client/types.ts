@@ -2116,6 +2116,11 @@ export type VotingPowerHistoryPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type GetProposalsOnChainQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProposalsOnChainQuery = { __typename?: 'Query', proposals?: Array<{ __typename?: 'query_proposals_items', daoId: string, id: string, timestamp: string } | null> | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   account: Scalars['String']['input'];
   after?: InputMaybe<Scalars['String']['input']>;

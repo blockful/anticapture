@@ -8,11 +8,7 @@ import {
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
-
-// Existing types
-export enum ChainNameEnum {
-  Ethereum = "ethereum",
-}
+import { metricsSchema } from "@/features/token-distribution/utils";
 
 export type DaoMetricsDayBucket = {
   date: string;
@@ -39,6 +35,11 @@ export interface TokenHistoricalDataMetrics {
 export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number;
+}
+
+export interface ChartDataSetPoint {
+  date: number;
+  [key: keyof typeof metricsSchema]: number | string | undefined;
 }
 
 export type GovernanceImplementation = {

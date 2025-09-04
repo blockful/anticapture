@@ -2119,6 +2119,11 @@ export type VotingPowerHistoryPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type GetProposalsOnChainQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProposalsOnChainQuery = { __typename?: 'Query', proposals?: Array<{ __typename?: 'query_proposals_items', daoId: string, id: string, timestamp: string } | null> | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   account: Scalars['String']['input'];
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2341,6 +2346,47 @@ export type GetTokenHoldersCoutingQueryVariables = Exact<{ [key: string]: never;
 export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
 
+export const GetProposalsOnChainDocument = gql`
+    query GetProposalsOnChain {
+  proposals(orderDirection: desc) {
+    daoId
+    id
+    timestamp
+  }
+}
+    `;
+
+/**
+ * __useGetProposalsOnChainQuery__
+ *
+ * To run a query within a React component, call `useGetProposalsOnChainQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalsOnChainQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProposalsOnChainQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetProposalsOnChainQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>(GetProposalsOnChainDocument, options);
+      }
+export function useGetProposalsOnChainLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>(GetProposalsOnChainDocument, options);
+        }
+export function useGetProposalsOnChainSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>(GetProposalsOnChainDocument, options);
+        }
+export type GetProposalsOnChainQueryHookResult = ReturnType<typeof useGetProposalsOnChainQuery>;
+export type GetProposalsOnChainLazyQueryHookResult = ReturnType<typeof useGetProposalsOnChainLazyQuery>;
+export type GetProposalsOnChainSuspenseQueryHookResult = ReturnType<typeof useGetProposalsOnChainSuspenseQuery>;
+export type GetProposalsOnChainQueryResult = Apollo.QueryResult<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>;
 export const BalanceHistoryDocument = gql`
     query BalanceHistory($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   transfers(

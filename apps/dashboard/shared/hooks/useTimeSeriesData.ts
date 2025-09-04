@@ -44,6 +44,7 @@ const fetchTimeSeriesDataFromGraphQL = async (
           average
           volume
           count
+          volume
         }
       }
     `,
