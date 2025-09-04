@@ -1,7 +1,11 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
+import {
+  useGetDelegateDelegationHistoryQuery,
+  useGetDelegateDelegationHistoryDeltaRangeLazyQuery,
+} from "@anticapture/graphql-client/hooks";
 import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
 import { ApolloError } from "@apollo/client";
+import { AmountFilterVariables } from "@/shared/components/design-system/table/filters/AmountFilter";
 import { formatUnits } from "viem";
 
 type VotingPowerHistoryItem =
@@ -57,6 +61,7 @@ export function useDelegateDelegationHistory(
   daoId: string,
   orderBy: string = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
+  filterVariables?: AmountFilterVariables,
 ): UseDelegateDelegationHistoryResult {
   const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -74,8 +79,9 @@ export function useDelegateDelegationHistory(
       limit: itemsPerPage,
       orderBy, // Now using backend field names directly
       orderDirection,
+      ...filterVariables,
     }),
-    [accountId, itemsPerPage, orderBy, orderDirection],
+    [accountId, itemsPerPage, orderBy, orderDirection, filterVariables],
   );
 
   const queryOptions = {
@@ -89,11 +95,47 @@ export function useDelegateDelegationHistory(
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, loading, error, fetchMore } =
-    useGetDelegateDelegationHistoryQuery({
-      variables: queryVariables,
-      ...queryOptions,
-    });
+  // Use lazy query if filter is active, regular query otherwise
+  const shouldUseLazyQuery =
+    filterVariables?.delta_gte || filterVariables?.delta_lte;
+
+  const [
+    executeFilteredQuery,
+    {
+      data: filteredData,
+      loading: filteredLoading,
+      error: filteredError,
+      fetchMore: fetchMoreFiltered,
+    },
+  ] = useGetDelegateDelegationHistoryDeltaRangeLazyQuery({
+    ...queryOptions,
+  });
+
+  const {
+    data: regularData,
+    loading: regularLoading,
+    error: regularError,
+    fetchMore: fetchMoreRegular,
+  } = useGetDelegateDelegationHistoryQuery({
+    variables: queryVariables,
+    ...queryOptions,
+    skip: Boolean(shouldUseLazyQuery) || !accountId,
+  });
+
+  // Use filtered data when available, otherwise regular data
+  const data = shouldUseLazyQuery ? filteredData : regularData;
+  const loading = shouldUseLazyQuery ? filteredLoading : regularLoading;
+  const error = shouldUseLazyQuery ? filteredError : regularError;
+  const fetchMore = shouldUseLazyQuery ? fetchMoreFiltered : fetchMoreRegular;
+
+  // Execute filtered query when filter variables change
+  useEffect(() => {
+    if (shouldUseLazyQuery && accountId) {
+      executeFilteredQuery({
+        variables: queryVariables,
+      });
+    }
+  }, [shouldUseLazyQuery, accountId, queryVariables, executeFilteredQuery]);
 
   // Transform raw data to our format
   const transformedData = useMemo(() => {
