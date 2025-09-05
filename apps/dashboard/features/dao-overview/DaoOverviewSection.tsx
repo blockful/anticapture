@@ -25,7 +25,6 @@ import {
 } from "@/features/dao-overview/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
-import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -85,11 +84,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       name,
       level: info.riskLevel,
     })),
-  };
-
-  const handleRiskAreaClick = (riskName: RiskAreaEnum) => {
-    // Navigate to risk analysis page - implementation will be handled by the component
-    console.log("Navigate to risk analysis for:", riskName);
   };
 
   return (
@@ -171,9 +165,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <RiskAreaCardWrapper
               title={riskAreas.title}
               riskAreas={riskAreas.risks}
-              onRiskClick={(riskName) => {
-                handleRiskAreaClick(riskName);
-              }}
+              onRiskClick={() => {}}
               variant={RiskAreaCardEnum.DAO_OVERVIEW}
               className="grid grid-cols-2 gap-1"
             />
@@ -244,9 +236,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <RiskAreaCardWrapper
               title={riskAreas.title}
               riskAreas={riskAreas.risks}
-              onRiskClick={(riskName) => {
-                handleRiskAreaClick(riskName);
-              }}
+              onRiskClick={() => {}}
               variant={RiskAreaCardEnum.DAO_OVERVIEW}
               className="grid grid-cols-2 gap-1"
             />
