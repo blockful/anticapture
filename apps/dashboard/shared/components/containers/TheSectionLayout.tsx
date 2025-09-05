@@ -1,9 +1,7 @@
 "use client";
 
 import { getDateRange } from "@/shared/utils";
-import { useScreenSize } from "@/shared/hooks";
-import { ReactNode, useEffect } from "react";
-import { useInView } from "react-intersection-observer";
+import { ReactNode } from "react";
 import { CardDescription, CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
 import { Info } from "lucide-react";
@@ -41,28 +39,14 @@ export const TheSectionLayout = ({
   subHeader,
   leftContent,
 }: TheSectionLayoutProps) => {
-  const { isMobile, isDesktop } = useScreenSize();
-  const { ref, inView } = useInView({
-    threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
-  });
-
-  useEffect(() => {
-    if (inView) {
-      window.dispatchEvent(
-        new CustomEvent("sectionInView", { detail: anchorId }),
-      );
-    }
-  }, [inView, anchorId]);
-
   return (
     <div
       className={cn(
-        "sm:bg-surface-default flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:px-5 sm:py-7",
+        "sm:bg-surface-default flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 py-8 sm:border-none sm:p-5",
         isSwitchDateLinear && "mt-4 gap-4",
         className,
       )}
       id={anchorId}
-      ref={ref}
     >
       <div className="flex h-full w-full flex-col gap-3">
         <div
