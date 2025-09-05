@@ -64,12 +64,11 @@ export const AmountFilter = ({
     onReset();
   };
 
-  const validator = (value: string) => {
-    if (!value.trim()) return true;
-    // Aceita APENAS dígitos de 0-9
-    const onlyDigitsRegex = /^[0-9]+$/;
-    return onlyDigitsRegex.test(value);
-  };
+  // const validator = (value: string) => {
+  //   if (!value.trim()) return true;
+  //   const onlyDigitsRegex = /^[0-9]+$/;
+  //   return onlyDigitsRegex.test(value);
+  // };
 
   return (
     <FilterBox
@@ -85,7 +84,6 @@ export const AmountFilter = ({
         placeholderMin="Min"
         placeholderMax="Max"
         inputType="text"
-        validator={validator}
         setFilter={handleMinMaxChange}
         initialMin={minAmount}
         initialMax={maxAmount}
