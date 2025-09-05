@@ -30,8 +30,8 @@ const supplyTypeConfig = {
   },
   Others: {
     text: "Others",
-    textClass: "text-surface-hover",
-    boxClass: "bg-surface-hover",
+    textClass: "text-secondary",
+    boxClass: "bg-secondary",
   },
 } as const;
 

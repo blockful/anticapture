@@ -10,6 +10,8 @@ import {
   adaptTransactionsToTableData,
   GraphTransaction,
 } from "@/features/expandable-table-demo/utils/transactionsAdapter";
+import { parseEther } from "viem";
+import { SupplyType } from "@/shared/components";
 
 export interface TransactionsFilters {
   from?: string;
@@ -17,6 +19,19 @@ export interface TransactionsFilters {
   minAmount?: number;
   maxAmount?: number;
   sortOrder?: "asc" | "desc";
+}
+
+export interface TransactionData {
+  id: string;
+  affectedSupply: SupplyType[];
+  amount: string;
+  date: string;
+  from: string;
+  to: string;
+  isAutoUpdated?: boolean;
+  direction?: "up" | "down";
+  subRows?: TransactionData[];
+  txHash?: string;
 }
 
 interface UseTransactionsTableDataParams {
@@ -42,8 +57,8 @@ export const useTransactionsTableData = ({
       offset: (currentPage - 1) * limit,
       from: filters?.from,
       to: filters?.to,
-      minAmount: String(filters?.minAmount ?? 0),
-      maxAmount: String(filters?.maxAmount ?? 0),
+      minAmount: parseEther(String(filters?.minAmount ?? 0)).toString(),
+      maxAmount: parseEther(String(filters?.maxAmount ?? 0)).toString(),
       sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
     },
     context: daoId

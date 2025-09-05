@@ -1,17 +1,3 @@
-import { SupplyType } from "@/shared/components/badges/SupplyLabel";
-
-export interface TransactionData {
-  id: string;
-  affectedSupply: SupplyType[];
-  amount: string;
-  date: string;
-  from: string;
-  to: string;
-  isAutoUpdated?: boolean;
-  direction?: "up" | "down";
-  subRows?: TransactionData[];
-}
-
 export const sampleTransactionData: TransactionData[] = [
   {
     id: "1",
