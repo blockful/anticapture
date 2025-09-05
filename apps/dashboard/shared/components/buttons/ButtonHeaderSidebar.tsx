@@ -26,11 +26,16 @@ export const ButtonHeaderSidebar = ({
   const daoId = params?.daoId as string;
   const currentPage = pathname?.split("/").pop();
 
-  const isActive = currentPage === page;
+  // Special case: DAO Overview page has URL /{daoId}/ but page="/"
+  const isDaoOverviewPage =
+    pathname === `/${daoId}` || pathname === `/${daoId}/`;
+  const isActive = page === "/" ? isDaoOverviewPage : currentPage === page;
 
   const handleNavigation = () => {
     if (daoId) {
-      router.push(`/${daoId}/${page}`);
+      // Special case: DAO Overview page uses root path /{daoId}
+      const targetPath = page === "/" ? `/${daoId}` : `/${daoId}/${page}`;
+      router.push(targetPath);
     }
   };
 

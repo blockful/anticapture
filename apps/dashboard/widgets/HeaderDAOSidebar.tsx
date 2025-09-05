@@ -31,7 +31,7 @@ export const HeaderDAOSidebar = () => {
           <div className="flex flex-col gap-3 p-4">
             {daoConfig.daoOverview && (
               <ButtonHeaderSidebar
-                page="dao-overview"
+                page="/"
                 icon={PieChart}
                 label="DAO Overview"
               />
