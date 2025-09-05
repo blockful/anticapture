@@ -30,7 +30,7 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
   const formattedValue = `${Math.abs(value)}%`;
 
   if (value === 0) {
-    return null;
+    return <span />;
   }
 
   return (
