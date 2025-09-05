@@ -19,8 +19,8 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     <TheSectionLayout
       title={PAGES_CONSTANTS.showSupport.title}
       icon={<HeartIcon className="section-layout-icon" />}
-      anchorId={PAGES_CONSTANTS.showSupport.anchorId}
       className="gap-5 sm:gap-4"
+      description={PAGES_CONSTANTS.showSupport.description}
     >
       <CardPetitionInformation isLoading={isLoading} data={signatures} />
       <CardDaoSignature isConnected={isConnected} address={address} />

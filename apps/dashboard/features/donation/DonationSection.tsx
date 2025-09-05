@@ -17,7 +17,6 @@ export const DonationSection = () => {
       title={PAGES_CONSTANTS.donate.title}
       icon={<Heart className="section-layout-icon" />}
       description={PAGES_CONSTANTS.donate.description}
-      anchorId={PAGES_CONSTANTS.donate.anchorId}
       className="bg-surface-background! mt-[56px]! sm:mt-0!"
     >
       <div className="flex flex-col gap-2">

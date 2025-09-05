@@ -53,7 +53,7 @@ export const StagesDaoOverview = ({
       setShowTooltip(!showTooltip);
     } else {
       const section = document.getElementById(
-        PAGES_CONSTANTS.resilienceStages.anchorId,
+        PAGES_CONSTANTS.resilienceStages.page,
       );
       if (section) {
         section.scrollIntoView({ behavior: "smooth" });

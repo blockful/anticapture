@@ -17,7 +17,6 @@ interface TheSectionLayoutProps {
   isSwitchDateLinear?: boolean;
   riskLevel?: ReactNode;
   children: ReactNode;
-  anchorId: string;
   className?: string;
   subHeader?: ReactNode;
   leftContent?: ReactNode;
@@ -34,7 +33,6 @@ export const TheSectionLayout = ({
   isSwitchDateLinear = false,
   riskLevel,
   children,
-  anchorId,
   className,
   subHeader,
   leftContent,
@@ -46,7 +44,6 @@ export const TheSectionLayout = ({
         isSwitchDateLinear && "mt-4 gap-4",
         className,
       )}
-      id={anchorId}
     >
       <div className="flex h-full w-full flex-col gap-3">
         <div

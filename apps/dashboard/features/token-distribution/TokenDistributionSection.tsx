@@ -82,7 +82,6 @@ export const TokenDistributionSection = () => {
         />
       }
       description={PAGES_CONSTANTS.tokenDistribution.description}
-      anchorId={PAGES_CONSTANTS.tokenDistribution.anchorId}
       days={days}
     >
       <TheCardChartLayout

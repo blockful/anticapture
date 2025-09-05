@@ -64,7 +64,6 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
       }
       days={days}
-      anchorId={PAGES_CONSTANTS.holdersAndDelegates.anchorId}
       leftContent={<HoldersAndDelegatesLeftComponent />}
     >
       {tabComponentMap[activeTab]}

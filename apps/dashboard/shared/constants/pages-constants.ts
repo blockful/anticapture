@@ -2,18 +2,22 @@ export const PAGES_CONSTANTS = {
   panel: {
     title: "Panel",
     page: "panel",
+    description: undefined,
   },
   alerts: {
     title: "Alerts",
     page: "alerts",
+    description: undefined,
   },
   daoOverview: {
     title: "DAO Overview",
     page: "dao-overview",
+    description: undefined,
   },
   showSupport: {
     title: "Show Support",
     page: "show-support",
+    description: undefined,
   },
   attackProfitability: {
     title: "Attack Profitability",
@@ -37,10 +41,12 @@ export const PAGES_CONSTANTS = {
     title: "Governance Implementation",
     titleAbbreviation: "Gov Implementation",
     page: "governance-implementation",
+    description: undefined,
   },
   supportDaos: {
     title: "Support DAOs",
     page: "support-daos",
+    description: undefined,
   },
   riskAnalysis: {
     title: "Risk Analysis",

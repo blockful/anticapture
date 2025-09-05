@@ -121,7 +121,6 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       title={PAGES_CONSTANTS.riskAnalysis.title}
       icon={<Gauge className="section-layout-icon" />}
       description={PAGES_CONSTANTS.riskAnalysis.description}
-      anchorId={PAGES_CONSTANTS.riskAnalysis.page}
       riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}
     >
       <div className="flex flex-col gap-[13px] md:flex-row">

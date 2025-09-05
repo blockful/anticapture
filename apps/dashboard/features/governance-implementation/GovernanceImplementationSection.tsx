@@ -52,7 +52,6 @@ export const GovernanceImplementationSection = ({
       title={PAGES_CONSTANTS.governanceImplementation.title}
       icon={<Lightbulb className="section-layout-icon" />}
       description={PAGES_CONSTANTS.governanceImplementation.description}
-      anchorId={PAGES_CONSTANTS.governanceImplementation.anchorId}
     >
       <div className="relative flex flex-wrap gap-4">
         <div

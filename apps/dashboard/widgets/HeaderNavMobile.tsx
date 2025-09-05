@@ -16,42 +16,42 @@ export const HeaderNavMobile = () => {
 
   const options = [
     {
-      anchorId: PAGES_CONSTANTS.showSupport.anchorId,
+      page: PAGES_CONSTANTS.showSupport.page,
       title: PAGES_CONSTANTS.showSupport.title,
       enabled: !!daoConfig.showSupport,
     },
     {
-      anchorId: PAGES_CONSTANTS.daoOverview.anchorId,
+      page: PAGES_CONSTANTS.daoOverview.page,
       title: PAGES_CONSTANTS.daoOverview.title,
       enabled: !!daoConfig.daoOverview,
     },
     {
-      anchorId: PAGES_CONSTANTS.attackProfitability.anchorId,
+      page: PAGES_CONSTANTS.attackProfitability.page,
       title: PAGES_CONSTANTS.attackProfitability.title,
       enabled: !!daoConfig.attackProfitability,
     },
     {
-      anchorId: PAGES_CONSTANTS.riskAnalysis.anchorId,
+      page: PAGES_CONSTANTS.riskAnalysis.page,
       title: PAGES_CONSTANTS.riskAnalysis.title,
       enabled: !!daoConfig.riskAnalysis,
     },
     {
-      anchorId: PAGES_CONSTANTS.governanceImplementation.anchorId,
+      page: PAGES_CONSTANTS.governanceImplementation.page,
       title: PAGES_CONSTANTS.governanceImplementation.titleAbbreviation,
       enabled: !!daoConfig.governanceImplementation,
     },
     {
-      anchorId: PAGES_CONSTANTS.resilienceStages.anchorId,
+      page: PAGES_CONSTANTS.resilienceStages.page,
       title: PAGES_CONSTANTS.resilienceStages.title,
       enabled: !!daoConfig.resilienceStages,
     },
     {
-      anchorId: PAGES_CONSTANTS.tokenDistribution.anchorId,
+      page: PAGES_CONSTANTS.tokenDistribution.page,
       title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
     },
     {
-      anchorId: PAGES_CONSTANTS.holdersAndDelegates.anchorId,
+      page: PAGES_CONSTANTS.holdersAndDelegates.page,
       title: PAGES_CONSTANTS.holdersAndDelegates.title,
       enabled: true,
     },

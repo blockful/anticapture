@@ -22,7 +22,6 @@ export const PanelSection = () => {
           setTimeInterval={setTimeIntervalPanel}
         />
       }
-      anchorId={PAGES_CONSTANTS.panel.anchorId}
       className="bg-surface-background! mt-[56px]! sm:mt-0!"
       isSwitchDateLinear
     >

@@ -34,7 +34,6 @@ export const SupportDaosSection = () => {
       title={PAGES_CONSTANTS.supportDaos.title}
       icon={<HeartIcon className="section-layout-icon" />}
       description={PAGES_CONSTANTS.supportDaos.description}
-      anchorId={PAGES_CONSTANTS.supportDaos.anchorId}
       className="bg-surface-background! gap-4! border-b-0!"
     >
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

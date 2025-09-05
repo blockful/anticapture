@@ -51,7 +51,6 @@ export default function GlossaryPage() {
               title={PAGES_CONSTANTS.glossary.title}
               icon={<BookOpen className="section-layout-icon" />}
               description={PAGES_CONSTANTS.glossary.description}
-              anchorId={PAGES_CONSTANTS.glossary.anchorId}
               className="bg-surface-background! sm:mt-0! gap-4! lg:gap-6!"
             >
               <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 lg:flex-row lg:gap-10 lg:border-none">

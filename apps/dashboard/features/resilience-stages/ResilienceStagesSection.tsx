@@ -91,7 +91,6 @@ export const ResilienceStagesSection = ({
       riskLevel={<RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />}
       icon={<BarChart className="section-layout-icon" />}
       description={PAGES_CONSTANTS.resilienceStages.description}
-      anchorId={PAGES_CONSTANTS.resilienceStages.anchorId}
     >
       <div className="flex h-7 w-full items-center justify-center">
         {/* Timeline Component */}

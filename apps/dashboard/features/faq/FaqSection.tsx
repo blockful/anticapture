@@ -43,7 +43,6 @@ export const FaqSection = () => {
       title={PAGES_CONSTANTS.faq.title}
       icon={<HelpCircle className="section-layout-icon" />}
       description={PAGES_CONSTANTS.faq.description}
-      anchorId={PAGES_CONSTANTS.faq.anchorId}
       className="bg-surface-background! border-b-0!"
     >
       <div className="flex flex-col gap-6">
