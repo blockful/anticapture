@@ -89,14 +89,16 @@ export const RadioButton = forwardRef<HTMLInputElement, RadioButtonProps>(
           )}
         </div>
 
-        <span
-          className={cn(
-            radioLabelVariants({ state: getState() }),
-            !disabled && "group-hover:text-primary",
-          )}
-        >
-          {label}
-        </span>
+        {label && (
+          <span
+            className={cn(
+              radioLabelVariants({ state: getState() }),
+              !disabled && "group-hover:text-primary",
+            )}
+          >
+            {label}
+          </span>
+        )}
       </label>
     );
   },

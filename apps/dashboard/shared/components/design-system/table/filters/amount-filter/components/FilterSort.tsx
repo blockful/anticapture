@@ -51,16 +51,14 @@ export const FilterSort = ({
             key={option.value}
             onClick={() => handleSortChange(option.value)}
             className={cn(
-              "bg-surface-default text-primary border-border-contrast flex items-center justify-between text-nowrap rounded-md border px-2.5 py-2 text-sm font-normal transition-all",
+              "bg-surface-default text-primary border-border-contrast flex w-full items-center text-nowrap rounded-md border px-2.5 py-2 text-sm font-normal transition-all",
               sortOrder === option.value && "bg-surface-hover",
             )}
           >
-            <p>{option.label}</p>
-            <RadioButton
-              label=""
-              className="flex"
-              checked={sortOrder === option.value}
-            />
+            <p className="flex-1 text-left">{option.label}</p>
+            <div className="ml-auto">
+              <RadioButton label="" checked={sortOrder === option.value} />
+            </div>
           </button>
         ))}
       </div>

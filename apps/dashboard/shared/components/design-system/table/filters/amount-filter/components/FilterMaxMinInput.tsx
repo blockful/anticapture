@@ -9,7 +9,6 @@ interface FilterMaxMinInputProps {
   placeholderMin?: string;
   placeholderMax?: string;
   inputType?: "text" | "number";
-  validator?: (value: string) => boolean;
   setFilter: (min: string, max: string) => void;
   initialMin?: string;
   initialMax?: string;
@@ -20,7 +19,6 @@ export const FilterMaxMinInput = ({
   placeholderMin = "Min",
   placeholderMax = "Max",
   inputType = "text",
-  validator,
   setFilter,
   initialMin = "",
   initialMax = "",
@@ -35,16 +33,6 @@ export const FilterMaxMinInput = ({
   useEffect(() => {
     setMaxValue(initialMax);
   }, [initialMax]);
-
-  const isValidInput = (value: string) => {
-    if (!value.trim()) return true;
-    if (validator) return validator(value);
-    if (inputType === "number") {
-      const num = parseFloat(value);
-      return !isNaN(num) && num >= 0;
-    }
-    return true;
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Aceita APENAS números 0-9
@@ -77,7 +65,6 @@ export const FilterMaxMinInput = ({
             onBlur={handleBlur}
             className={cn(
               "bg-surface-default border-border-default text-dimmed placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
-              !isValidInput(minValue) && "border-red-500",
             )}
           />
         </div>
@@ -94,7 +81,6 @@ export const FilterMaxMinInput = ({
             onBlur={handleBlur}
             className={cn(
               "bg-surface-default border-border-default text-dimmed placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
-              !isValidInput(maxValue) && "border-red-500",
             )}
           />
         </div>
