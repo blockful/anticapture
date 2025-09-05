@@ -261,16 +261,10 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
-            <p>
-              {formatNumberUserReadable(
-                Math.abs(variation.absoluteChange),
-              )}{" "}
-            </p>
-            {variation.percentageChange !== 0 && (
-              <Percentage value={variation.percentageChange} />
-            )}
-          </div>
+          <p className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
+            {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
+            <Percentage value={variation.percentageChange} />
+          </p>
         );
       },
     },

@@ -83,15 +83,14 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    if (ensData?.ens) {
-      return ensData.ens;
-    }
+    const displayedName = ensData?.ens || address;
+    const maxLength = 13;
 
-    if (address) {
-      if (showFullAddress) {
-        return address;
+    if (displayedName) {
+      if (showFullAddress || displayedName.length <= maxLength) {
+        return displayedName;
       }
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+      return `${displayedName.slice(0, 6)}...${displayedName.slice(-4)}`;
     }
 
     return "Unknown";
