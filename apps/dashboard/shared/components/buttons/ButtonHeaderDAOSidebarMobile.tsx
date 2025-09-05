@@ -1,49 +1,36 @@
 "use client";
 
 import { cn } from "@/shared/utils/";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { useSectionObserver } from "@/shared/hooks";
+import { useRouter, useParams, usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { useEffect } from "react";
 
 export const ButtonHeaderDAOSidebarMobile = ({
   options,
 }: {
   options: {
-    anchorId: string;
+    page: string;
     title: string;
     enabled?: boolean;
   }[];
   headerOffset?: number;
 }) => {
-  const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
-  });
+  const router = useRouter();
+  const params = useParams();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const sectionId = sessionStorage.getItem("scrollToSection");
-    if (sectionId) {
-      const el = document.getElementById(sectionId);
-      handleSectionClick(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        sessionStorage.removeItem("scrollToSection");
-      }
-    }
-  }, [handleSectionClick]);
+  const daoId = params?.daoId as string;
+  const currentPage = pathname?.split("/").pop();
 
   const handleTabChange = (value: string) => {
-    const section = document.getElementById(value);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
+    if (daoId) {
+      router.push(`/${daoId}/${value}`);
     }
-    handleSectionClick(value);
   };
 
   return (
     <Tabs
-      defaultValue={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      value={activeSection || SECTIONS_CONSTANTS.daoOverview.anchorId}
+      defaultValue="dao-overview"
+      value={currentPage || "dao-overview"}
       onValueChange={handleTabChange}
       className="w-fit min-w-full"
     >
@@ -53,13 +40,13 @@ export const ButtonHeaderDAOSidebarMobile = ({
             option.enabled && (
               <TabsTrigger
                 className={cn(
-                  "text-secondary relative cursor-pointer gap-2 px-2 py-3 text-xs font-medium whitespace-nowrap",
+                  "text-secondary relative cursor-pointer gap-2 whitespace-nowrap px-2 py-3 text-xs font-medium",
                   "data-[state=active]:text-link",
-                  "after:absolute after:right-0 after:-bottom-px after:left-0 after:h-px after:bg-transparent after:content-['']",
+                  "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
                   "data-[state=active]:after:bg-surface-solid-brand",
                 )}
-                key={option.anchorId}
-                value={option.anchorId}
+                key={option.page}
+                value={option.page}
               >
                 {option.title}
               </TabsTrigger>

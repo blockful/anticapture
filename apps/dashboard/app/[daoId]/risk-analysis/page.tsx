@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoOverviewSection } from "@/features/dao-overview";
+import { RiskAnalysisSection } from "@/features/risk-analysis";
+import { GovernanceImplementationSection } from "@/features/governance-implementation";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -29,30 +30,30 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: `Anticapture - ${daoId} DAO Risk Analysis`,
+    description: `Analyze governance risks and security threats for ${daoId} DAO.`,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Risk Analysis`,
+      description: `Analyze governance risks and security threats for ${daoId} DAO.`,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${daoId} DAO Open Graph Image`,
+          alt: `${daoId} DAO Risk Analysis Open Graph Image`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Risk Analysis`,
+      description: `Analyze governance risks and security threats for ${daoId} DAO.`,
       images: [imageUrl],
     },
   };
 }
 
-export default async function DaoPage({
+export default async function RiskAnalysisPage({
   params,
 }: {
   params: Promise<{ daoId: string }>;
@@ -61,9 +62,14 @@ export default async function DaoPage({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
 
-  if (!daoConstants.daoOverview) {
+  if (!daoConstants.riskAnalysis) {
     return null;
   }
 
-  return <DaoOverviewSection daoId={daoIdEnum} />;
+  return (
+    <>
+      <RiskAnalysisSection daoId={daoIdEnum} />
+      <GovernanceImplementationSection daoId={daoIdEnum} />
+    </>
+  );
 }

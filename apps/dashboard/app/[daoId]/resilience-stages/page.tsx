@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoOverviewSection } from "@/features/dao-overview";
+import { ResilienceStagesSection } from "@/features/resilience-stages";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -29,30 +29,30 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: `Anticapture - ${daoId} DAO Resilience Stages`,
+    description: `Assess ${daoId} DAO governance resilience and security stages.`,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Resilience Stages`,
+      description: `Assess ${daoId} DAO governance resilience and security stages.`,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${daoId} DAO Open Graph Image`,
+          alt: `${daoId} DAO Resilience Stages Open Graph Image`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Resilience Stages`,
+      description: `Assess ${daoId} DAO governance resilience and security stages.`,
       images: [imageUrl],
     },
   };
 }
 
-export default async function DaoPage({
+export default async function ResilienceStagesPage({
   params,
 }: {
   params: Promise<{ daoId: string }>;
@@ -61,9 +61,9 @@ export default async function DaoPage({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
 
-  if (!daoConstants.daoOverview) {
+  if (!daoConstants.resilienceStages) {
     return null;
   }
 
-  return <DaoOverviewSection daoId={daoIdEnum} />;
+  return <ResilienceStagesSection daoId={daoIdEnum} />;
 }
