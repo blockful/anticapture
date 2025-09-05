@@ -7,7 +7,7 @@ import {
   SupplyType,
 } from "@/shared/components/badges/SupplyLabel";
 import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
-import { useTransactionsTableData } from "@/features/expandable-table-demo";
+import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
@@ -16,13 +16,13 @@ import { useParams } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
-import { TransactionData } from "@/features/expandable-table-demo/hooks/useTransactionsTableData";
+import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 import Link from "next/link";
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
 
-export const ExpandableTableDemoSection = () => {
+export const TransactionsTable = () => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
 
   // Filters

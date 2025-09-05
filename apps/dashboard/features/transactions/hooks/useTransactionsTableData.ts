@@ -9,7 +9,7 @@ import {
 import {
   adaptTransactionsToTableData,
   GraphTransaction,
-} from "@/features/expandable-table-demo/utils/transactionsAdapter";
+} from "@/features/transactions/utils/transactionsAdapter";
 import { parseEther } from "viem";
 import { SupplyType } from "@/shared/components";
 

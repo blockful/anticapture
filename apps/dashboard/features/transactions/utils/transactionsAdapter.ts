@@ -1,7 +1,7 @@
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatEther } from "viem";
-import { TransactionData } from "@/features/expandable-table-demo/hooks/useTransactionsTableData";
+import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 
 export type GraphTransaction = {
   from: string;

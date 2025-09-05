@@ -1,1 +1,1 @@
-export { ExpandableTableDemoSection } from "@/features/expandable-table-demo/ExpandableTableDemoSection";
+export { ExpandableTableDemoSection } from "@/features/transactions/TransactionsTable";
