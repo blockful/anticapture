@@ -7,8 +7,7 @@ import { cn } from "@/shared/utils/";
 import { X, Menu, BarChart4, BookOpen, Heart, HelpCircle } from "lucide-react";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter, usePathname } from "next/navigation";
-import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+import { AnticaptureIcon } from "@/shared/components/icons";
 
 export const HeaderMobile = ({
   overlayClassName,
@@ -34,17 +33,11 @@ export const HeaderMobile = ({
           setIsMenuOpen(false);
         },
       },
-      {
-        label: "Alerts",
-        icon: TelegramIcon,
-        onClick: () => {
-          window.open(
-            ANTICAPTURE_TELEGRAM_BOT,
-            "_blank",
-            "noopener,noreferrer",
-          );
-        },
-      },
+      // {
+      //   anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
+      //   label: "Get Security Alerts",
+      //   icon: TelegramIcon,
+      // },
     ],
     [router],
   );

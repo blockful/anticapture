@@ -10,8 +10,7 @@ import {
   ConnectWallet,
   BottomNavigationButtons,
 } from "@/shared/components";
-import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+import { AnticaptureIcon } from "@/shared/components/icons";
 export const HeaderSidebar = () => {
   const router = useRouter();
 
@@ -29,18 +28,11 @@ export const HeaderSidebar = () => {
           router.push("/");
         },
       },
-      {
-        anchorId: "get-security-alerts",
-        label: "Alerts",
-        icon: TelegramIcon,
-        onClick: () => {
-          window.open(
-            ANTICAPTURE_TELEGRAM_BOT,
-            "_blank",
-            "noopener,noreferrer",
-          );
-        },
-      },
+      // {
+      //   anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
+      //   label: SECTIONS_CONSTANTS.alerts.title,
+      //   icon: TelegramIcon,
+      // },
     ],
     [router],
   );
@@ -65,12 +57,9 @@ export const HeaderSidebar = () => {
                 icon={item.icon}
                 label={item.label}
                 className="text-xs! font-medium! flex-col gap-1"
-                onClick={
-                  item.onClick ||
-                  (() => {
-                    router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
-                  })
-                }
+                onClick={() => {
+                  router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
+                }}
               />
             ))}
           </div>

@@ -4,9 +4,8 @@ import "tailwindcss";
 import type { Metadata } from "next";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import { ReactNode } from "react";
-import ConditionalHotjar from "@/shared/services/hotjar/ConditionalHotjar";
+import HotjarScript from "@/shared/services/hotjar";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { CookieConsent } from "@/features";
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -63,15 +62,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <ConditionalHotjar />
+        <HotjarScript />
       </head>
       <body
         className={`${inter.className} ${roboto.variable} overflow-x-hidden xl:overflow-hidden`}
       >
-        <GlobalProviders>
-          {children}
-          <CookieConsent />
-        </GlobalProviders>
+        <GlobalProviders>{children}</GlobalProviders>
       </body>
     </html>
   );
