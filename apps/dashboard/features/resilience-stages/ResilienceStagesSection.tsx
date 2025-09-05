@@ -6,7 +6,7 @@ import {
   StagesCardRequirements,
 } from "@/shared/components";
 import { cn } from "@/shared/utils/";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   filterFieldsByRiskLevel,
@@ -87,11 +87,11 @@ export const ResilienceStagesSection = ({
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.resilienceStages.title}
+      title={PAGES_CONSTANTS.resilienceStages.title}
       riskLevel={<RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />}
       icon={<BarChart className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.resilienceStages.description}
-      anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
+      description={PAGES_CONSTANTS.resilienceStages.description}
+      anchorId={PAGES_CONSTANTS.resilienceStages.anchorId}
     >
       <div className="flex h-7 w-full items-center justify-center">
         {/* Timeline Component */}

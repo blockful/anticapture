@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
+import { GovernanceImplementationSection } from "@/features/governance-implementation";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -65,5 +66,10 @@ export default async function RiskAnalysisPage({
     return null;
   }
 
-  return <RiskAnalysisSection daoId={daoIdEnum} />;
+  return (
+    <>
+      <RiskAnalysisSection daoId={daoIdEnum} />
+      <GovernanceImplementationSection daoId={daoIdEnum} />
+    </>
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -16,43 +16,43 @@ export const HeaderNavMobile = () => {
 
   const options = [
     {
-      anchorId: SECTIONS_CONSTANTS.showSupport.anchorId,
-      title: SECTIONS_CONSTANTS.showSupport.title,
+      anchorId: PAGES_CONSTANTS.showSupport.anchorId,
+      title: PAGES_CONSTANTS.showSupport.title,
       enabled: !!daoConfig.showSupport,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.daoOverview.anchorId,
-      title: SECTIONS_CONSTANTS.daoOverview.title,
+      anchorId: PAGES_CONSTANTS.daoOverview.anchorId,
+      title: PAGES_CONSTANTS.daoOverview.title,
       enabled: !!daoConfig.daoOverview,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
-      title: SECTIONS_CONSTANTS.attackProfitability.title,
+      anchorId: PAGES_CONSTANTS.attackProfitability.anchorId,
+      title: PAGES_CONSTANTS.attackProfitability.title,
       enabled: !!daoConfig.attackProfitability,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.riskAnalysis.anchorId,
-      title: SECTIONS_CONSTANTS.riskAnalysis.title,
+      anchorId: PAGES_CONSTANTS.riskAnalysis.anchorId,
+      title: PAGES_CONSTANTS.riskAnalysis.title,
       enabled: !!daoConfig.riskAnalysis,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
-      title: SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation,
+      anchorId: PAGES_CONSTANTS.governanceImplementation.anchorId,
+      title: PAGES_CONSTANTS.governanceImplementation.titleAbbreviation,
       enabled: !!daoConfig.governanceImplementation,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.resilienceStages.anchorId,
-      title: SECTIONS_CONSTANTS.resilienceStages.title,
+      anchorId: PAGES_CONSTANTS.resilienceStages.anchorId,
+      title: PAGES_CONSTANTS.resilienceStages.title,
       enabled: !!daoConfig.resilienceStages,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
-      title: SECTIONS_CONSTANTS.tokenDistribution.title,
+      anchorId: PAGES_CONSTANTS.tokenDistribution.anchorId,
+      title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.holdersAndDelegates.anchorId,
-      title: SECTIONS_CONSTANTS.holdersAndDelegates.title,
+      anchorId: PAGES_CONSTANTS.holdersAndDelegates.anchorId,
+      title: PAGES_CONSTANTS.holdersAndDelegates.title,
       enabled: true,
     },
   ];

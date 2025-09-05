@@ -7,7 +7,7 @@ import {
 } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { mockedTokenMultineDatasets } from "@/shared/constants/mocked-data/mocked-token-dist-datasets";
 import {
   MultilineChartTokenDistribution,
@@ -44,7 +44,7 @@ const ChartLegend = ({
     {items.map((item) => (
       <div key={item.label} className="flex items-center gap-2">
         <span
-          className="size-2 rounded-xs"
+          className="rounded-xs size-2"
           style={{ backgroundColor: item.color }}
         />
         <span className="text-secondary text-sm font-medium">{item.label}</span>
@@ -71,7 +71,7 @@ export const TokenDistributionSection = () => {
   };
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.tokenDistribution.title}
+      title={PAGES_CONSTANTS.tokenDistribution.title}
       subtitle="Token Supply Distribution"
       icon={<ArrowRightLeft className="section-layout-icon" />}
       switchDate={
@@ -81,8 +81,8 @@ export const TokenDistributionSection = () => {
           isSmall
         />
       }
-      description={SECTIONS_CONSTANTS.tokenDistribution.description}
-      anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
+      description={PAGES_CONSTANTS.tokenDistribution.description}
+      anchorId={PAGES_CONSTANTS.tokenDistribution.anchorId}
       days={days}
     >
       <TheCardChartLayout

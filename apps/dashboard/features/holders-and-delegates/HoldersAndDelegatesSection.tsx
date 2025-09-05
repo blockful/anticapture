@@ -3,7 +3,7 @@
 import { ReactElement, useState } from "react";
 import { TheSectionLayout, SwitcherDate } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";
 import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
@@ -56,15 +56,15 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.holdersAndDelegates.title}
+      title={PAGES_CONSTANTS.holdersAndDelegates.title}
       subtitle={"Holders & Delegates"}
       icon={<UserCheck className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.holdersAndDelegates.description}
+      description={PAGES_CONSTANTS.holdersAndDelegates.description}
       switchDate={
         <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
       }
       days={days}
-      anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+      anchorId={PAGES_CONSTANTS.holdersAndDelegates.anchorId}
       leftContent={<HoldersAndDelegatesLeftComponent />}
     >
       {tabComponentMap[activeTab]}

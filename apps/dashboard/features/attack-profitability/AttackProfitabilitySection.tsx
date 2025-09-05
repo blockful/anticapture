@@ -9,7 +9,7 @@ import {
 } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,
@@ -36,10 +36,10 @@ export const AttackProfitabilitySection = ({
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.attackProfitability.title}
+      title={PAGES_CONSTANTS.attackProfitability.title}
       subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.attackProfitability.description}
+      description={PAGES_CONSTANTS.attackProfitability.description}
       infoText={"Treasury values above supply costs indicate high risk."}
       switchDate={
         <SwitcherDate
@@ -49,7 +49,6 @@ export const AttackProfitabilitySection = ({
         />
       }
       days={days}
-      anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <TheCardChartLayout

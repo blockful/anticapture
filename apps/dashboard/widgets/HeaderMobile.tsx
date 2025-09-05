@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { cn } from "@/shared/utils/";
 import { X, Menu, BarChart4, BookOpen, Heart, HelpCircle } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter, usePathname } from "next/navigation";
 import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
@@ -25,16 +24,16 @@ export const HeaderMobile = ({
   const menuItems = useMemo(
     () => [
       {
-        anchorId: SECTIONS_CONSTANTS.panel.anchorId,
+        page: "panel",
         label: "Panel",
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem("scrollToSection", "panel");
           router.push("/");
           setIsMenuOpen(false);
         },
       },
       {
+        page: "alerts",
         label: "Alerts",
         icon: TelegramIcon,
         onClick: () => {
@@ -51,17 +50,17 @@ export const HeaderMobile = ({
 
   const staticPages = [
     {
-      anchorId: "donate",
+      page: "donate",
       label: "Donate",
       icon: Heart,
     },
     {
-      anchorId: "glossary",
+      page: "glossary",
       label: "Glossary",
       icon: BookOpen,
     },
     {
-      anchorId: "faq",
+      page: "faq",
       label: "FAQ",
       icon: HelpCircle,
     },
@@ -146,8 +145,8 @@ export const HeaderMobile = ({
           >
             {menuItems.map((item) => (
               <ButtonHeaderSidebar
-                key={item.anchorId}
-                anchorId={item.anchorId || ""}
+                key={item.page}
+                page={item.page || ""}
                 icon={item.icon}
                 label={item.label}
                 onClick={item.onClick}
@@ -157,10 +156,10 @@ export const HeaderMobile = ({
             <div className="border-light-dark w-full border-t" />
 
             {staticPages.map((item) => (
-              <Link href={`/${item.anchorId}`} key={item.anchorId}>
+              <Link href={`/${item.page}`} key={item.page}>
                 <ButtonHeaderSidebar
-                  key={item.anchorId}
-                  anchorId={item.anchorId || ""}
+                  key={item.page}
+                  page={item.page || ""}
                   icon={item.icon}
                   label={item.label}
                   onClick={() => {

@@ -5,7 +5,7 @@ import { SwitcherDate, TheSectionLayout } from "@/shared/components";
 import { PanelTable } from "@/features/panel/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { BarChart3 } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 export const PanelSection = () => {
   const [timeIntervalPanel, setTimeIntervalPanel] = useState<TimeInterval>(
@@ -14,7 +14,7 @@ export const PanelSection = () => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.panel.title}
+      title={PAGES_CONSTANTS.panel.title}
       icon={<BarChart3 className="section-layout-icon" />}
       switchDate={
         <SwitcherDate
@@ -22,7 +22,7 @@ export const PanelSection = () => {
           setTimeInterval={setTimeIntervalPanel}
         />
       }
-      anchorId={SECTIONS_CONSTANTS.panel.anchorId}
+      anchorId={PAGES_CONSTANTS.panel.anchorId}
       className="bg-surface-background! mt-[56px]! sm:mt-0!"
       isSwitchDateLinear
     >

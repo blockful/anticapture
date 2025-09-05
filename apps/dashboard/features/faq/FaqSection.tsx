@@ -3,7 +3,7 @@
 import { BlankSlate, TheSectionLayout } from "@/shared/components";
 import { useState } from "react";
 import { cn } from "@/shared/utils/";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { HelpCircle, SearchXIcon } from "lucide-react";
 import { useScreenSize } from "@/shared/hooks";
 import { FaqCard } from "@/features/faq/components";
@@ -40,10 +40,10 @@ export const FaqSection = () => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.faq.title}
+      title={PAGES_CONSTANTS.faq.title}
       icon={<HelpCircle className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.faq.description}
-      anchorId={SECTIONS_CONSTANTS.faq.anchorId}
+      description={PAGES_CONSTANTS.faq.description}
+      anchorId={PAGES_CONSTANTS.faq.anchorId}
       className="bg-surface-background! border-b-0!"
     >
       <div className="flex flex-col gap-6">

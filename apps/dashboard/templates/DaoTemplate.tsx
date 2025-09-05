@@ -4,7 +4,6 @@ import { ShowYourSupportStickyBar } from "@/features/show-support/components";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoPageInteractionProvider } from "@/shared/contexts/DaoPageInteractionContext";
 import { ShowSupportSection } from "@/features/show-support";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
@@ -33,7 +32,7 @@ export const DaoTemplate = () => {
     " SECURITY UPDATES.";
 
   return (
-    <DaoPageInteractionProvider>
+    <>
       {/* <MessageStacker messages={messages} /> */}
       {/* <BannerAlert
         icon={<Info className="size-4" />}
@@ -81,6 +80,6 @@ export const DaoTemplate = () => {
         )}
       </div>
       <ShowYourSupportStickyBar />
-    </DaoPageInteractionProvider>
+    </>
   );
 };

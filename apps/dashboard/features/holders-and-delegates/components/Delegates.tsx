@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ColumnDef, HeaderContext } from "@tanstack/react-table";
 

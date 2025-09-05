@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { BarChart4 } from "lucide-react";
 import {
   ButtonHeaderSidebar,
@@ -18,19 +17,15 @@ export const HeaderSidebar = () => {
   const headerItems = useMemo(
     () => [
       {
-        anchorId: SECTIONS_CONSTANTS.panel.anchorId,
-        label: SECTIONS_CONSTANTS.panel.title,
+        page: "panel",
+        label: "Panel",
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem(
-            "scrollToSection",
-            SECTIONS_CONSTANTS.panel.anchorId,
-          );
           router.push("/");
         },
       },
       {
-        anchorId: "get-security-alerts",
+        page: "get-security-alerts",
         label: "Alerts",
         icon: TelegramIcon,
         onClick: () => {
@@ -60,17 +55,12 @@ export const HeaderSidebar = () => {
           <div className="flex h-full flex-col gap-1.5 p-1.5">
             {headerItems.map((item) => (
               <ButtonHeaderSidebar
-                key={item.anchorId}
-                anchorId={item.anchorId || ""}
+                key={item.page}
+                page={item.page || ""}
                 icon={item.icon}
                 label={item.label}
                 className="text-xs! font-medium! flex-col gap-1"
-                onClick={
-                  item.onClick ||
-                  (() => {
-                    router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
-                  })
-                }
+                onClick={item.onClick}
               />
             ))}
           </div>

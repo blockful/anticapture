@@ -5,7 +5,7 @@ import { TheSectionLayout } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
 import { cn } from "@/shared/utils/";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks";
@@ -49,10 +49,10 @@ export const GovernanceImplementationSection = ({
   };
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.governanceImplementation.title}
+      title={PAGES_CONSTANTS.governanceImplementation.title}
       icon={<Lightbulb className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.governanceImplementation.description}
-      anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+      description={PAGES_CONSTANTS.governanceImplementation.description}
+      anchorId={PAGES_CONSTANTS.governanceImplementation.anchorId}
     >
       <div className="relative flex flex-wrap gap-4">
         <div

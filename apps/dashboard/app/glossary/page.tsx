@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { HeaderSidebar } from "@/widgets";
 import { TheSectionLayout } from "@/shared/components";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BookOpen } from "lucide-react";
 import {
   SAMPLE_GLOSSARY_DATA,
@@ -48,10 +48,10 @@ export default function GlossaryPage() {
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="xl4k:max-w-7xl w-full flex-1">
             <TheSectionLayout
-              title={SECTIONS_CONSTANTS.glossary.title}
+              title={PAGES_CONSTANTS.glossary.title}
               icon={<BookOpen className="section-layout-icon" />}
-              description={SECTIONS_CONSTANTS.glossary.description}
-              anchorId={SECTIONS_CONSTANTS.glossary.anchorId}
+              description={PAGES_CONSTANTS.glossary.description}
+              anchorId={PAGES_CONSTANTS.glossary.anchorId}
               className="bg-surface-background! sm:mt-0! gap-4! lg:gap-6!"
             >
               <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 lg:flex-row lg:gap-10 lg:border-none">

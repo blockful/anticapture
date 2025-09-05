@@ -12,15 +12,14 @@ import {
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { fieldsToArray } from "@/shared/dao-config/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 interface RiskAreaDisplayItem {
   name: string;
@@ -29,7 +28,9 @@ interface RiskAreaDisplayItem {
 }
 
 export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const { activeRisk, setActiveRisk } = useDaoPageInteraction();
+  const [activeRisk, setActiveRisk] = useState<RiskAreaEnum | undefined>(
+    RiskAreaEnum.SPAM_VULNERABLE,
+  );
 
   const daoRiskAreas = getDaoRiskAreas(daoId);
 
@@ -117,10 +118,10 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.riskAnalysis.title}
+      title={PAGES_CONSTANTS.riskAnalysis.title}
       icon={<Gauge className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.riskAnalysis.description}
-      anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
+      description={PAGES_CONSTANTS.riskAnalysis.description}
+      anchorId={PAGES_CONSTANTS.riskAnalysis.page}
       riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}
     >
       <div className="flex flex-col gap-[13px] md:flex-row">
