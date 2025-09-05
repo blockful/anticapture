@@ -29,8 +29,12 @@ export const FilterMaxMinInput = ({
   const [maxValue, setMaxValue] = useState<string>(initialMax);
 
   useEffect(() => {
-    setFilter(minValue, maxValue);
-  }, [minValue, maxValue, setFilter]);
+    setMinValue(initialMin);
+  }, [initialMin]);
+
+  useEffect(() => {
+    setMaxValue(initialMax);
+  }, [initialMax]);
 
   const isValidInput = (value: string) => {
     if (!value.trim()) return true;
@@ -47,6 +51,10 @@ export const FilterMaxMinInput = ({
     if (!/^[0-9]$/.test(e.key)) {
       e.preventDefault();
     }
+  };
+
+  const handleBlur = () => {
+    setFilter(minValue, maxValue);
   };
 
   return (
@@ -66,6 +74,7 @@ export const FilterMaxMinInput = ({
             value={minValue}
             onChange={(e) => setMinValue(e.target.value)}
             onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
             className={cn(
               "bg-surface-default border-border-default text-dimmed placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
               !isValidInput(minValue) && "border-red-500",
@@ -82,6 +91,7 @@ export const FilterMaxMinInput = ({
             value={maxValue}
             onChange={(e) => setMaxValue(e.target.value)}
             onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
             className={cn(
               "bg-surface-default border-border-default text-dimmed placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
               !isValidInput(maxValue) && "border-red-500",

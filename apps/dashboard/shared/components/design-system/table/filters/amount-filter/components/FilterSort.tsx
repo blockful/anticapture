@@ -27,11 +27,14 @@ export const FilterSort = ({
   );
 
   useEffect(() => {
-    setFilter(sortOrder);
-  }, [sortOrder, setFilter]);
+    if (initialValue !== undefined) {
+      setSortOrder(initialValue);
+    }
+  }, [initialValue]);
 
   const handleSortChange = (value: string) => {
     setSortOrder(value);
+    setFilter(value);
   };
 
   return (
@@ -52,7 +55,7 @@ export const FilterSort = ({
               sortOrder === option.value && "bg-surface-hover",
             )}
           >
-            <span>{option.label}</span>
+            <p>{option.label}</p>
             <RadioButton
               label=""
               className="flex"

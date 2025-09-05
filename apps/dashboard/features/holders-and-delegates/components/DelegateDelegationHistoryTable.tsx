@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { GetDelegateDelegationHistoryDeltaRangeQueryVariables } from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -20,13 +19,14 @@ import {
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
 }
 
-type AmountFilterVariables = Pick<
+export type AmountFilterVariables = Pick<
   GetDelegateDelegationHistoryDeltaRangeQueryVariables,
   "delta_gte" | "delta_lte"
 > & {

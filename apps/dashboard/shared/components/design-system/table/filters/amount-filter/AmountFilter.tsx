@@ -1,24 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   FilterBox,
   FilterMaxMinInput,
   FilterSort,
   SortOption,
 } from "@/shared/components/design-system/table/filters/amount-filter/components";
-
-export interface AmountFilterState {
-  minAmount: string;
-  maxAmount: string;
-  sortOrder: string;
-}
+import {
+  useAmountFilterStore,
+  AmountFilterState,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface AmountFilterProps {
   className?: string;
   onApply: (state: AmountFilterState) => void;
   onReset: () => void;
-  initialState?: Partial<AmountFilterState>;
   isActive?: boolean;
   sortOptions: SortOption[];
 }
@@ -27,15 +24,27 @@ export const AmountFilter = ({
   className,
   onApply,
   onReset,
-  initialState = {},
   isActive = false,
   sortOptions,
 }: AmountFilterProps) => {
-  const [minAmount, setMinAmount] = useState(initialState.minAmount || "");
-  const [maxAmount, setMaxAmount] = useState(initialState.maxAmount || "");
-  const [sortOrder, setSortOrder] = useState(
-    initialState.sortOrder || sortOptions[0]?.value || "",
-  );
+  const {
+    minAmount,
+    maxAmount,
+    sortOrder,
+    setMinAmount,
+    setMaxAmount,
+    setSortOrder,
+    reset,
+    initialize,
+    getState,
+  } = useAmountFilterStore();
+
+  // Inicializar a store com o sortOrder padrão
+  useEffect(() => {
+    if (sortOptions[0]?.value && sortOrder === "") {
+      initialize(sortOptions[0].value);
+    }
+  }, [sortOptions, sortOrder, initialize]);
 
   const handleMinMaxChange = (min: string, max: string) => {
     setMinAmount(min);
@@ -47,19 +56,11 @@ export const AmountFilter = ({
   };
 
   const handleApply = () => {
-    const filterState: AmountFilterState = {
-      minAmount,
-      maxAmount,
-      sortOrder,
-    };
-
-    onApply(filterState);
+    onApply(getState());
   };
 
   const handleReset = () => {
-    setMinAmount("");
-    setMaxAmount("");
-    setSortOrder(sortOptions[0]?.value || "");
+    reset(sortOptions[0]?.value || "");
     onReset();
   };
 
