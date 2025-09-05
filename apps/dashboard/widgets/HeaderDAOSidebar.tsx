@@ -10,6 +10,7 @@ import { BarChart, Gauge, HeartIcon, UserCheck } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
@@ -31,58 +32,58 @@ export const HeaderDAOSidebar = () => {
           <div className="flex flex-col gap-3 p-4">
             {daoConfig.daoOverview && (
               <ButtonHeaderSidebar
-                page="/"
+                page={PAGES_CONSTANTS.daoOverview.page}
                 icon={PieChart}
-                label="DAO Overview"
+                label={PAGES_CONSTANTS.daoOverview.title}
               />
             )}
             {daoConfig.showSupport && (
               <ButtonHeaderSidebar
-                page="show-support"
+                page={PAGES_CONSTANTS.showSupport.page}
                 icon={HeartIcon}
-                label="Show Support"
+                label={PAGES_CONSTANTS.showSupport.title}
               />
             )}
             {daoConfig.attackProfitability && (
               <ButtonHeaderSidebar
-                page="attack-profitability"
+                page={PAGES_CONSTANTS.attackProfitability.page}
                 icon={Crosshair2Icon}
-                label="Attack Profitability"
+                label={PAGES_CONSTANTS.attackProfitability.title}
               />
             )}
             {daoConfig.riskAnalysis && (
               <ButtonHeaderSidebar
-                page="risk-analysis"
+                page={PAGES_CONSTANTS.riskAnalysis.page}
                 icon={Gauge}
-                label="Risk Analysis"
+                label={PAGES_CONSTANTS.riskAnalysis.title}
               />
             )}
             {/* {daoConfig.governanceImplementation && (
               <ButtonHeaderSidebar
-                page="governance-implementation"
+                page={PAGES_CONSTANTS.governanceImplementation.page}
                 icon={Lightbulb}
-                label="Gov Implementation"
+                label={PAGES_CONSTANTS.governanceImplementation.title}
               />
             )} */}
             {daoConfig.resilienceStages && (
               <ButtonHeaderSidebar
-                page="resilience-stages"
+                page={PAGES_CONSTANTS.resilienceStages.page}
                 icon={BarChart}
-                label="Resilience Stages"
+                label={PAGES_CONSTANTS.resilienceStages.title}
               />
             )}
             {daoConfig.tokenDistribution && (
               <ButtonHeaderSidebar
-                page="token-distribution"
+                page={PAGES_CONSTANTS.tokenDistribution.page}
                 icon={ArrowRightLeft}
-                label="Token Distribution"
+                label={PAGES_CONSTANTS.tokenDistribution.title}
               />
             )}
             {daoConfig.dataTables && (
               <ButtonHeaderSidebar
-                page="holders-and-delegates"
+                page={PAGES_CONSTANTS.holdersAndDelegates.page}
                 icon={UserCheck}
-                label="Holders & Delegates"
+                label={PAGES_CONSTANTS.holdersAndDelegates.title}
               />
             )}
           </div>

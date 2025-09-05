@@ -42,7 +42,7 @@ export const ButtonHeaderSidebar = ({
   return (
     <button
       className={cn(
-        `group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium`,
+        "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium",
         {
           "cursor-default bg-white": isActive,
           "hover:border-light-dark hover:bg-surface-contrast": !isActive,
@@ -59,7 +59,7 @@ export const ButtonHeaderSidebar = ({
         })}
       />
       <p
-        className={cn("", {
+        className={cn({
           "text-inverted": isActive,
           "text-secondary group-hover:text-primary": !isActive,
         })}
