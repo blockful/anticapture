@@ -3,6 +3,13 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { Gauge } from "lucide-react";
+import { TheSectionLayout } from "@/shared/components";
+import {
+  SubSection,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -68,8 +75,30 @@ export default async function RiskAnalysisPage({
 
   return (
     <>
-      <RiskAnalysisSection daoId={daoIdEnum} />
-      <GovernanceImplementationSection daoId={daoIdEnum} />
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.riskAnalysis.title}
+        icon={<Gauge className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.riskAnalysis.description}
+      >
+        <SubSectionsContainer>
+          <SubSection
+            subsectionTitle={PAGES_CONSTANTS.riskAnalysis.title}
+            subsectionDescription={PAGES_CONSTANTS.riskAnalysis.description}
+            dateRange=""
+          >
+            <RiskAnalysisSection daoId={daoIdEnum} />
+          </SubSection>
+          <SubSection
+            subsectionTitle={PAGES_CONSTANTS.governanceImplementation.title}
+            subsectionDescription={
+              PAGES_CONSTANTS.governanceImplementation.description ?? ""
+            }
+            dateRange=""
+          >
+            <GovernanceImplementationSection daoId={daoIdEnum} />
+          </SubSection>
+        </SubSectionsContainer>
+      </TheSectionLayout>
     </>
   );
 }

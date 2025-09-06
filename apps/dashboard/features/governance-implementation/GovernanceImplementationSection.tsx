@@ -1,12 +1,9 @@
 "use client";
 
 import daoConfigByDaoId from "@/shared/dao-config";
-import { TheSectionLayout } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
 import { cn } from "@/shared/utils/";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { Lightbulb } from "lucide-react";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks";
 import { fieldsToArray } from "@/shared/dao-config/utils";
@@ -48,40 +45,34 @@ export const GovernanceImplementationSection = ({
     });
   };
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.governanceImplementation.title}
-      icon={<Lightbulb className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.governanceImplementation.description}
-    >
-      <div className="relative flex flex-wrap gap-4">
-        <div
-          className={cn(
-            "absolute inset-0 z-10 transition-all duration-200 ease-in-out sm:bg-black sm:transition-opacity",
-            openCardIds.length > 0
-              ? "hidden sm:block sm:opacity-50"
-              : "pointer-events-none opacity-0",
-          )}
-          onClick={() => setOpenCardIds([])}
-        />
+    <div className="relative flex flex-wrap gap-4">
+      <div
+        className={cn(
+          "absolute inset-0 z-10 transition-all duration-200 ease-in-out sm:bg-black sm:transition-opacity",
+          openCardIds.length > 0
+            ? "hidden sm:block sm:opacity-50"
+            : "pointer-events-none opacity-0",
+        )}
+        onClick={() => setOpenCardIds([])}
+      />
 
-        {governanceImplementationFields
-          ?.sort((a, b) => sortByRiskLevel(a, b, "desc"))
-          .map((field, index: number) => {
-            const cardId = field.name;
-            const isOpen = openCardIds.includes(cardId);
+      {governanceImplementationFields
+        ?.sort((a, b) => sortByRiskLevel(a, b, "desc"))
+        .map((field, index: number) => {
+          const cardId = field.name;
+          const isOpen = openCardIds.includes(cardId);
 
-            return (
-              <GovernanceImplementationCard
-                key={index}
-                field={field}
-                isOpen={isOpen}
-                onToggle={(e) => {
-                  handleToggle(e, cardId, isOpen);
-                }}
-              />
-            );
-          })}
-      </div>
-    </TheSectionLayout>
+          return (
+            <GovernanceImplementationCard
+              key={index}
+              field={field}
+              isOpen={isOpen}
+              onToggle={(e) => {
+                handleToggle(e, cardId, isOpen);
+              }}
+            />
+          );
+        })}
+    </div>
   );
 };

@@ -2,9 +2,9 @@
 
 import { getDateRange } from "@/shared/utils";
 import { ReactNode } from "react";
-import { CardDescription, CardTitle } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
-import { Info } from "lucide-react";
+import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import { SubSection } from "@/shared/components/design-system/section";
 
 interface TheSectionLayoutProps {
   icon?: ReactNode;
@@ -20,32 +20,51 @@ interface TheSectionLayoutProps {
   className?: string;
   subHeader?: ReactNode;
   leftContent?: ReactNode;
+  subsectionTitle?: string;
+  subsectionDescription?: string;
 }
 
 export const TheSectionLayout = ({
   icon,
   title,
-  subtitle,
+  // subtitle,
   description,
-  infoText,
+  // infoText,
   days,
-  switchDate,
-  isSwitchDateLinear = false,
+  // switchDate,
+  // isSwitchDateLinear = false,
   riskLevel,
   children,
   className,
-  subHeader,
-  leftContent,
+  // subHeader,
+  // leftContent,
+  subsectionTitle,
+  subsectionDescription,
 }: TheSectionLayoutProps) => {
   return (
     <div
       className={cn(
-        "sm:bg-surface-default flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 sm:border-none sm:p-5",
-        isSwitchDateLinear && "mt-4 gap-4",
+        "flex h-full w-full flex-col gap-6 border-b-2 border-b-white/10 px-4 sm:border-none sm:p-5",
         className,
       )}
     >
-      <div className="flex h-full w-full flex-col gap-3">
+      <SectionTitle
+        icon={icon}
+        title={title}
+        riskLevel={riskLevel}
+        description={description ?? ""}
+        // switcher={switcher}
+        // buttons={buttons}
+      />
+      <SubSection
+        subsectionTitle={subsectionTitle ?? ""}
+        subsectionDescription={subsectionDescription ?? ""}
+        dateRange={getDateRange(days ?? "")}
+      >
+        {children}
+      </SubSection>
+
+      {/* <div className="flex h-full w-full flex-col gap-3">
         <div
           className={cn("flex flex-col gap-2", {
             "gap-0": isSwitchDateLinear,
@@ -93,6 +112,7 @@ export const TheSectionLayout = ({
         </div>
       </div>
 
+
       {!isSwitchDateLinear && switchDate && (
         <div
           className={cn(
@@ -127,8 +147,7 @@ export const TheSectionLayout = ({
           </div>
           <p className="text-secondary text-sm font-normal">{infoText}</p>
         </CardDescription>
-      )}
-      {children}
+      )} */}
     </div>
   );
 };

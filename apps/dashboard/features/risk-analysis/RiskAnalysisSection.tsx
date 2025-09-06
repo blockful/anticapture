@@ -1,7 +1,5 @@
 "use client";
 
-import { Gauge } from "lucide-react";
-import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
 import {
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
@@ -12,7 +10,6 @@ import {
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
@@ -100,54 +97,47 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   });
 
   // Determine the highest risk level for the section header
-  const getHighestRiskLevel = (): RiskLevel => {
-    for (const riskAreaInfo of Object.values(daoRiskAreas)) {
-      if (riskAreaInfo.riskLevel === RiskLevel.HIGH) {
-        return RiskLevel.HIGH;
-      }
-    }
+  // const getHighestRiskLevel = (): RiskLevel => {
+  //   for (const riskAreaInfo of Object.values(daoRiskAreas)) {
+  //     if (riskAreaInfo.riskLevel === RiskLevel.HIGH) {
+  //       return RiskLevel.HIGH;
+  //     }
+  //   }
 
-    for (const riskAreaInfo of Object.values(daoRiskAreas)) {
-      if (riskAreaInfo.riskLevel === RiskLevel.MEDIUM) {
-        return RiskLevel.MEDIUM;
-      }
-    }
+  //   for (const riskAreaInfo of Object.values(daoRiskAreas)) {
+  //     if (riskAreaInfo.riskLevel === RiskLevel.MEDIUM) {
+  //       return RiskLevel.MEDIUM;
+  //     }
+  //   }
 
-    return RiskLevel.LOW;
-  };
+  //   return RiskLevel.LOW;
+  // };
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.riskAnalysis.title}
-      icon={<Gauge className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.riskAnalysis.description}
-      riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}
-    >
-      <div className="flex flex-col gap-[13px] md:flex-row">
-        <div className="md:w-2/5">
-          <RiskAreaCardWrapper
-            title="Risk Areas"
-            riskAreas={customizedRiskAreas}
-            activeRiskId={activeRisk}
-            onRiskClick={handleRiskClick}
-            className="grid-cols-2 sm:grid-cols-1"
-            variant={RiskAreaCardEnum.RISK_ANALYSIS}
-            withTitle={false}
-          />
-        </div>
-
-        <div className="md:w-3/5">
-          {activeRisk ? (
-            riskDescriptions[activeRisk]
-          ) : (
-            <div className="border-light-dark bg-surface-default flex h-full items-center justify-center border p-5">
-              <p className="text-secondary text-center">
-                Select a risk area to view details
-              </p>
-            </div>
-          )}
-        </div>
+    <div className="flex flex-col gap-[13px] md:flex-row">
+      <div className="md:w-2/5">
+        <RiskAreaCardWrapper
+          title="Risk Areas"
+          riskAreas={customizedRiskAreas}
+          activeRiskId={activeRisk}
+          onRiskClick={handleRiskClick}
+          className="grid-cols-2 sm:grid-cols-1"
+          variant={RiskAreaCardEnum.RISK_ANALYSIS}
+          withTitle={false}
+        />
       </div>
-    </TheSectionLayout>
+
+      <div className="md:w-3/5">
+        {activeRisk ? (
+          riskDescriptions[activeRisk]
+        ) : (
+          <div className="border-light-dark bg-surface-default flex h-full items-center justify-center border p-5">
+            <p className="text-secondary text-center">
+              Select a risk area to view details
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

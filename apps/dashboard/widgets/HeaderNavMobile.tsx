@@ -35,11 +35,11 @@ export const HeaderNavMobile = () => {
       title: PAGES_CONSTANTS.riskAnalysis.title,
       enabled: !!daoConfig.riskAnalysis,
     },
-    {
-      page: PAGES_CONSTANTS.governanceImplementation.page,
-      title: PAGES_CONSTANTS.governanceImplementation.titleAbbreviation,
-      enabled: !!daoConfig.governanceImplementation,
-    },
+    // {
+    //   page: PAGES_CONSTANTS.governanceImplementation.page,
+    //   title: PAGES_CONSTANTS.governanceImplementation.titleAbbreviation,
+    //   enabled: !!daoConfig.governanceImplementation,
+    // },
     {
       page: PAGES_CONSTANTS.resilienceStages.page,
       title: PAGES_CONSTANTS.resilienceStages.title,
