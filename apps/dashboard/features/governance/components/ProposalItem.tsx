@@ -1,12 +1,14 @@
 "use client";
 
 import { CheckCircle2, XCircle } from "lucide-react";
-import { cn } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import {
   Proposal,
   ProposalStatus,
   // ProposalState,
 } from "@/features/governance/types";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { Address } from "viem";
 
 interface ProposalItemProps {
   proposal: Proposal;
@@ -108,6 +110,10 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
   // const formattedVotes = formatVotes(proposal.votes.total);
   // const quorumText = formatVotes(proposal.quorum);
 
+  const quorumPercentage = proposal.votes.total
+    ? (proposal.quorum / proposal.votes.total) * 100
+    : 0;
+
   return (
     <div
       className={cn(
@@ -130,37 +136,68 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
             {getStatusText(proposal.status)}
           </p>
           <BulletDivider />
-          <p>10d to start</p>
+          <p>{proposal.timeText}</p>
           <BulletDivider />
-          <span>by</span>
-          <p>proposer</p>
+          <span>
+            by{" "}
+            <EnsAvatar
+              address={proposal.proposer as Address}
+              showAvatar={false}
+              nameClassName="text-secondary"
+            />
+          </span>
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center gap-1 md:w-[220px]">
+      <div className="flex w-full shrink-0 flex-col items-center gap-1 md:w-[220px]">
         <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
-          <p> Waiting to start</p>
+          <p>
+            {" "}
+            {proposal.votes.total
+              ? formatNumberUserReadable(proposal.votes.total) + " votes"
+              : "Waiting to start"}
+          </p>
           <div className="flex items-center justify-center gap-2">
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 className="text-success size-4" />
-              <p>0%</p>
+              <p>{proposal.votes.forPercentage}%</p>
             </div>
             <div className="flex items-center justify-center gap-2">
               <XCircle className="text-error size-4" />
-              <p>0%</p>
+              <p>{proposal.votes.againstPercentage}%</p>
             </div>
           </div>
         </div>
         <div className="flex w-full items-center justify-center gap-2">
           <div className="bg-surface-hover relative flex h-1 w-full rounded-full">
-            <div className="bg-success h-full w-[80px] rounded-l-full" />
-            <div className="bg-error h-full w-[110px] rounded-r-full" />
+            <div
+              style={{
+                width: `${proposal.votes.forPercentage}%`,
+              }}
+              className={cn("bg-success h-full rounded-l-full")}
+            />
+            <div
+              style={{
+                width: `${proposal.votes.againstPercentage}%`,
+              }}
+              className={cn("bg-error h-full rounded-r-full")}
+            />
 
-            <div className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]" />
+            <div
+              className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]"
+              style={{
+                left: `${quorumPercentage}%`,
+              }}
+            />
           </div>
         </div>
-        <div className="font-inter text-secondary flex items-center justify-center gap-2 text-xs font-medium not-italic leading-4">
-          Quorum: 1M
+        <div className="relative flex w-full bg-red-500">
+          <div
+            style={{ left: `${quorumPercentage}%` }}
+            className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+          >
+            Quorum: 1M
+          </div>
         </div>
       </div>
     </div>

@@ -29,6 +29,7 @@ export interface Proposal {
   proposer: string;
   votes: ProposalVotes;
   quorum: number;
+  timeText?: string;
   timeRemaining?: string;
   timeAgo?: string;
   hasCheckmark?: boolean;
