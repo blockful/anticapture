@@ -36,7 +36,7 @@ export const TokenDistributionMetrics = ({
   const dataToUse = visibleData.length > 0 ? visibleData : chartData;
 
   const handleApplyMetric = (newMetrics: (MetricTypesEnum | string)[]) => {
-    // ADICIONAR novas métricas às existentes (não substituir)
+    // Add new metrics to existing ones (do not replace)
     const updatedMetrics = [...appliedMetrics, ...newMetrics];
     setAppliedMetrics(updatedMetrics);
   };
@@ -78,13 +78,13 @@ export const TokenDistributionMetrics = ({
                       return null;
                     }
 
-                    // Valor atual: último ponto com dados
+                    // Actual value: last point with data
                     const currentValue = metricData[metricData.length - 1];
 
-                    // Valor anterior: primeiro ponto com dados
+                    // Previous value: first point with data
                     const previousValue = metricData[0];
 
-                    // Calcular variação percentual
+                    // Calculate percentage variation
                     const variation =
                       previousValue && currentValue
                         ? ((Number(currentValue) - Number(previousValue)) /
@@ -92,7 +92,7 @@ export const TokenDistributionMetrics = ({
                           100
                         : 0;
 
-                    // Formatar valor baseado no tipo de métrica
+                    // Format value based on metric type
                     let formattedMetricsValue: string;
                     const metricKey = metric.key as string;
 
@@ -111,7 +111,7 @@ export const TokenDistributionMetrics = ({
                       );
                     }
 
-                    // Formatar variação
+                    // Format variation
                     const formattedVariation =
                       variation !== 0
                         ? `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`
