@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactElement, useState } from "react";
-import { TheSectionLayout, SwitcherDate } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";
@@ -10,6 +10,7 @@ import { TabButton } from "@/features/holders-and-delegates/components/TabButton
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 
 type TabId = "tokenHolders" | "delegates";
 
@@ -70,7 +71,10 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <SubSectionsContainer>
         <div className="flex h-full w-full items-center justify-between">
           <HoldersAndDelegatesLeftComponent />
-          <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
+          <SwitcherDateMobile
+            defaultValue={defaultDays}
+            setTimeInterval={setDays}
+          />
         </div>
         {tabComponentMap[activeTab]}
       </SubSectionsContainer>
