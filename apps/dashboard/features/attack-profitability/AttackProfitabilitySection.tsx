@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  TheSectionLayout,
-  SwitcherDate,
-  RiskLevelCard,
-} from "@/shared/components";
+import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -24,6 +20,7 @@ import {
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
 import { getDateRange } from "@/shared/utils";
+import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -46,13 +43,13 @@ export const AttackProfitabilitySection = ({
       subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={PAGES_CONSTANTS.attackProfitability.description}
-      switchDate={
-        <SwitcherDate
-          defaultValue={defaultDays}
-          setTimeInterval={setDays}
-          disableRecentData={true}
-        />
-      }
+      // switchDate={
+      //   <SwitcherDate
+      //     defaultValue={defaultDays}
+      //     setTimeInterval={setDays}
+      //     disableRecentData={true}
+      //   />
+      // }
       // days={days}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
@@ -60,6 +57,13 @@ export const AttackProfitabilitySection = ({
         <SubSection
           subsectionTitle={"Cost of Attack vs Profit "}
           dateRange={getDateRange(days ?? "")}
+          switchDate={
+            <SwitcherDateMobile
+              defaultValue={defaultDays}
+              setTimeInterval={setDays}
+              disableRecentData={true}
+            />
+          }
         >
           <InlineAlert
             variant="info"

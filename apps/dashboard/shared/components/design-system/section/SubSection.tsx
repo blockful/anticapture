@@ -7,6 +7,7 @@ type SubSectionProps = {
   subsectionTitle: string;
   subsectionDescription?: string;
   dateRange: string;
+  switchDate?: ReactNode;
   children: ReactNode;
   className?: string;
 };
@@ -15,6 +16,7 @@ export const SubSection = ({
   subsectionTitle,
   subsectionDescription,
   dateRange,
+  switchDate,
   children,
   className = "",
 }: SubSectionProps) => {
@@ -25,6 +27,7 @@ export const SubSection = ({
           subsectionTitle={subsectionTitle}
           subsectionDescription={subsectionDescription ?? ""}
           dateRange={dateRange}
+          switchDate={switchDate}
         />
       </div>
       <div>{children}</div>

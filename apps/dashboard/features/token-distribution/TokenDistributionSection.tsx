@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  TheSectionLayout,
-  SwitcherDate,
-  TheCardChartLayout,
-} from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -15,6 +11,12 @@ import {
 } from "@/features/token-distribution/components";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 import { ArrowRightLeft } from "lucide-react";
+import {
+  SubSection,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
+import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
+import { getDateRange } from "@/shared/utils";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -72,45 +74,76 @@ export const TokenDistributionSection = () => {
   return (
     <TheSectionLayout
       title={PAGES_CONSTANTS.tokenDistribution.title}
-      subtitle="Token Supply Distribution"
+      // subtitle="Token Supply Distribution"
       icon={<ArrowRightLeft className="section-layout-icon" />}
-      switchDate={
-        <SwitcherDate
-          defaultValue={TimeInterval.ONE_YEAR}
-          setTimeInterval={setDays}
-          isSmall
-        />
-      }
+      // switchDate={
+      //   <SwitcherDate
+      //     defaultValue={TimeInterval.ONE_YEAR}
+      //     setTimeInterval={setDays}
+      //     isSmall
+      //   />
+      // }
       description={PAGES_CONSTANTS.tokenDistribution.description}
-      days={days}
+      // days={days}
     >
-      <TheCardChartLayout
-        headerComponent={
-          <div className="flex w-full items-center pt-3 sm:flex-row">
-            <ChartLegend
-              items={Object.values(chartConfig).map(({ label, color }) => ({
-                label,
-                color,
-              }))}
+      <SubSectionsContainer>
+        <SubSection
+          subsectionTitle={PAGES_CONSTANTS.tokenDistribution.title}
+          dateRange={getDateRange(days ?? "")}
+          switchDate={
+            <SwitcherDateMobile
+              defaultValue={TimeInterval.ONE_YEAR}
+              setTimeInterval={setDays}
             />
-          </div>
-        }
-      >
-        {Object.values(datasets).some((value) => value!.length > 0) ? (
-          <MultilineChartTokenDistribution
-            datasets={datasets}
-            chartConfig={chartConfig}
+          }
+        >
+          {Object.values(datasets).some((value) => value!.length > 0) ? (
+            <MultilineChartTokenDistribution
+              datasets={datasets}
+              chartConfig={chartConfig}
+            />
+          ) : (
+            <MultilineChartTokenDistribution
+              datasets={mockedTokenMultineDatasets}
+              chartConfig={chartConfig}
+              mocked={true}
+            />
+          )}
+          <ChartLegend
+            items={Object.values(chartConfig).map(({ label, color }) => ({
+              label,
+              color,
+            }))}
           />
-        ) : (
-          <MultilineChartTokenDistribution
-            datasets={mockedTokenMultineDatasets}
-            chartConfig={chartConfig}
-            mocked={true}
-          />
-        )}
-      </TheCardChartLayout>
-      <div className="border-light-dark w-full border-t" />
-      <TokenDistributionTable />
+        </SubSection>
+        {/* <TheCardChartLayout
+          headerComponent={
+            <div className="flex w-full items-center pt-3 sm:flex-row">
+              <ChartLegend
+                items={Object.values(chartConfig).map(({ label, color }) => ({
+                  label,
+                  color,
+                }))}
+              />
+            </div>
+          }
+        >
+          {Object.values(datasets).some((value) => value!.length > 0) ? (
+            <MultilineChartTokenDistribution
+              datasets={datasets}
+              chartConfig={chartConfig}
+            />
+          ) : (
+            <MultilineChartTokenDistribution
+              datasets={mockedTokenMultineDatasets}
+              chartConfig={chartConfig}
+              mocked={true}
+            />
+          )}
+        </TheCardChartLayout> */}
+        <div className="border-light-dark w-full border-t" />
+        <TokenDistributionTable />
+      </SubSectionsContainer>
     </TheSectionLayout>
   );
 };
