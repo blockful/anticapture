@@ -9,6 +9,7 @@ import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
 
 type TabId = "tokenHolders" | "delegates";
 
@@ -60,13 +61,19 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       subtitle={"Holders & Delegates"}
       icon={<UserCheck className="section-layout-icon" />}
       description={PAGES_CONSTANTS.holdersAndDelegates.description}
-      switchDate={
-        <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
-      }
-      days={days}
-      leftContent={<HoldersAndDelegatesLeftComponent />}
+      // switchDate={
+      //   <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
+      // }
+      // days={days}
+      // leftContent={<HoldersAndDelegatesLeftComponent />}
     >
-      {tabComponentMap[activeTab]}
+      <SubSectionsContainer>
+        <div className="flex h-full w-full items-center justify-between">
+          <HoldersAndDelegatesLeftComponent />
+          <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
+        </div>
+        {tabComponentMap[activeTab]}
+      </SubSectionsContainer>
     </TheSectionLayout>
   );
 };

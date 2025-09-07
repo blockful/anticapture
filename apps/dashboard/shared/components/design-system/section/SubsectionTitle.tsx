@@ -21,7 +21,9 @@ export const SubsectionTitle = ({
           {subsectionDescription}
         </p>
       </div>
-      <div className="flex items-center">{dateRange}</div>
+      <div className="text-secondary flex items-center text-sm font-normal">
+        {dateRange}
+      </div>
     </div>
   );
 };

@@ -38,10 +38,13 @@ export const PAGES_CONSTANTS = {
       "Token distribution metrics are based on Blockful's Governance Indexer and are updated daily based on the events and interactions with relevant contracts.",
   },
   governanceImplementation: {
-    title: "Governance Implementation",
+    title: "",
     titleAbbreviation: "Gov Implementation",
     page: "governance-implementation",
     description: undefined,
+    subTitlte: "Governance Implementation",
+    subDescription:
+      "When combined, these requirements determine the risk level of each area above. Here, you can explore each one individually and see why it's considered high risk—or not.",
   },
   supportDaos: {
     title: "Support DAOs",
@@ -52,7 +55,10 @@ export const PAGES_CONSTANTS = {
     title: "Risk Analysis",
     page: "risk-analysis",
     description:
-      "Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
+      "Assess critical vulnerabilities in the DAO's governance setup.",
+    subTitlte: "Risk Areas",
+    subDescription:
+      "Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
   },
   resilienceStages: {
     title: "Resilience Stages",

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   TheSectionLayout,
-  TheCardChartLayout,
   SwitcherDate,
   RiskLevelCard,
 } from "@/shared/components";
@@ -18,6 +17,13 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import {
+  SubSection,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
+import { getDateRange } from "@/shared/utils";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -40,7 +46,6 @@ export const AttackProfitabilitySection = ({
       subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={PAGES_CONSTANTS.attackProfitability.description}
-      infoText={"Treasury values above supply costs indicate high risk."}
       switchDate={
         <SwitcherDate
           defaultValue={defaultDays}
@@ -48,10 +53,46 @@ export const AttackProfitabilitySection = ({
           disableRecentData={true}
         />
       }
-      days={days}
+      // days={days}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
-      <TheCardChartLayout
+      <SubSectionsContainer>
+        <SubSection
+          subsectionTitle={"Cost of Attack vs Profit "}
+          dateRange={getDateRange(days ?? "")}
+        >
+          <InlineAlert
+            variant="info"
+            label="Treasury values above supply costs indicate high risk."
+          />
+          <MultilineChartAttackProfitability
+            days={days}
+            filterData={[treasuryMetric, costMetric]}
+          />
+
+          <AttackProfitabilityToggleHeader
+            treasuryMetric={treasuryMetric}
+            setTreasuryMetric={setTreasuryMetric}
+            costMetric={costMetric}
+            setCostMetric={setCostMetric}
+          />
+        </SubSection>
+        <DividerDefault isHorizontal />
+        <SubSection
+          subsectionTitle={"Cost Comparison"}
+          subsectionDescription={"All values reflect current data."}
+          dateRange=""
+        >
+          <div className="flex flex-row gap-5">
+            <AttackCostBarChart />
+            <div className="flex flex-col gap-2">
+              <AttackProfitabilityAccordion />
+            </div>
+          </div>
+        </SubSection>
+      </SubSectionsContainer>
+
+      {/* <TheCardChartLayout
         headerComponent={
           <div className="flex w-full pt-3">
             <AttackProfitabilityToggleHeader
@@ -79,7 +120,7 @@ export const AttackProfitabilitySection = ({
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
         </div>
-      </div>
+      </div> */}
     </TheSectionLayout>
   );
 };

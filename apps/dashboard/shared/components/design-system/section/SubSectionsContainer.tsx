@@ -12,7 +12,9 @@ export const SubSectionsContainer = ({
   className = "",
 }: SubSectionsContainerProps) => {
   return (
-    <div className={`bg-surface-default rounded-lg p-6 ${className}`}>
+    <div
+      className={`sm:bg-surface-default sm:p-5 ${className} flex h-full flex-col gap-6`}
+    >
       {children}
     </div>
   );

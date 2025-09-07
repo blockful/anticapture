@@ -5,7 +5,7 @@ import { SubsectionTitle } from "@/shared/components/design-system/section/Subse
 
 type SubSectionProps = {
   subsectionTitle: string;
-  subsectionDescription: string;
+  subsectionDescription?: string;
   dateRange: string;
   children: ReactNode;
   className?: string;
@@ -23,7 +23,7 @@ export const SubSection = ({
       <div className={className}>
         <SubsectionTitle
           subsectionTitle={subsectionTitle}
-          subsectionDescription={subsectionDescription}
+          subsectionDescription={subsectionDescription ?? ""}
           dateRange={dateRange}
         />
       </div>

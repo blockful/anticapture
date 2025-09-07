@@ -96,23 +96,6 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     );
   });
 
-  // Determine the highest risk level for the section header
-  // const getHighestRiskLevel = (): RiskLevel => {
-  //   for (const riskAreaInfo of Object.values(daoRiskAreas)) {
-  //     if (riskAreaInfo.riskLevel === RiskLevel.HIGH) {
-  //       return RiskLevel.HIGH;
-  //     }
-  //   }
-
-  //   for (const riskAreaInfo of Object.values(daoRiskAreas)) {
-  //     if (riskAreaInfo.riskLevel === RiskLevel.MEDIUM) {
-  //       return RiskLevel.MEDIUM;
-  //     }
-  //   }
-
-  //   return RiskLevel.LOW;
-  // };
-
   return (
     <div className="flex flex-col gap-[13px] md:flex-row">
       <div className="md:w-2/5">

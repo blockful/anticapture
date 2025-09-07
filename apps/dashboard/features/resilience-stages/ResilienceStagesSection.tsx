@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  TheSectionLayout,
   RiskLevelCard,
   StagesCardRequirements,
+  TheSectionLayout,
 } from "@/shared/components";
 import { cn } from "@/shared/utils/";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   filterFieldsByRiskLevel,
@@ -15,13 +14,18 @@ import {
 } from "@/shared/dao-config/utils";
 import { RiskLevel } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BarChart } from "lucide-react";
 import {
   StageAccordion,
   StageTag,
 } from "@/features/resilience-stages/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
+import {
+  SubSectionsContainer,
+  SubSection,
+} from "@/shared/components/design-system/section";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { BarChart } from "lucide-react";
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;
 }
@@ -92,59 +96,75 @@ export const ResilienceStagesSection = ({
       icon={<BarChart className="section-layout-icon" />}
       description={PAGES_CONSTANTS.resilienceStages.description}
     >
-      <div className="flex h-7 w-full items-center justify-center">
-        {/* Timeline Component */}
-        <div className="bg-middle-dark relative h-0.5 w-full">
-          {/* Horizontal Line */}
-          <div
-            className={cn(
-              "absolute left-0 h-0.5",
-              StagesToLineStyle[currentDaoStage],
-            )}
-          />
+      <SubSectionsContainer>
+        <SubSection
+          subsectionTitle={PAGES_CONSTANTS.resilienceStages.title}
+          subsectionDescription={PAGES_CONSTANTS.resilienceStages.description}
+          dateRange=""
+        >
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3">
+              <div className="flex h-7 w-full items-center justify-center">
+                {/* Timeline Component */}
+                <div className="bg-middle-dark relative h-0.5 w-full">
+                  {/* Horizontal Line */}
+                  <div
+                    className={cn(
+                      "absolute left-0 h-0.5",
+                      StagesToLineStyle[currentDaoStage],
+                    )}
+                  />
 
-          {/* Stage 0 */}
-          <div className="bg-surface-default absolute left-0 top-1/2 -translate-y-1/2">
-            <StageTag tagStage={Stage.ZERO} daoStage={currentDaoStage} />
-          </div>
+                  {/* Stage 0 */}
+                  <div className="bg-surface-default absolute left-0 top-1/2 -translate-y-1/2">
+                    <StageTag
+                      tagStage={Stage.ZERO}
+                      daoStage={currentDaoStage}
+                    />
+                  </div>
 
-          {/* Stage 1 */}
-          <div className="bg-surface-default absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
-          </div>
+                  {/* Stage 1 */}
+                  <div className="bg-surface-default absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <StageTag tagStage={Stage.ONE} daoStage={currentDaoStage} />
+                  </div>
 
-          {/* Current Position Indicator */}
-          {currentDaoStage !== Stage.NONE && (
-            <div
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
-                StagesToDaoAvatarPosition[currentDaoStage],
-              )}
-            >
-              <div
-                className={cn(
-                  "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
-                  StagesToBorderColor[currentDaoStage],
-                )}
-              >
-                <DaoAvatarIcon isRounded daoId={daoId} />
+                  {/* Current Position Indicator */}
+                  {currentDaoStage !== Stage.NONE && (
+                    <div
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 translate-x-1/2",
+                        StagesToDaoAvatarPosition[currentDaoStage],
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
+                          StagesToBorderColor[currentDaoStage],
+                        )}
+                      >
+                        <DaoAvatarIcon isRounded daoId={daoId} />
+                      </div>
+                    </div>
+                  )}
+                  {/* Stage 2 */}
+                  <div className="bg-surface-default absolute right-0 top-1/2 -translate-y-1/2">
+                    <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
+                  </div>
+                </div>
               </div>
+              <StagesCardRequirements
+                issues={issues}
+                daoStage={currentDaoStage}
+              />
             </div>
-          )}
-          {/* Stage 2 */}
-          <div className="bg-surface-default absolute right-0 top-1/2 -translate-y-1/2">
-            <StageTag tagStage={Stage.TWO} daoStage={currentDaoStage} />
+            <StageAccordion
+              daoStage={currentDaoStage}
+              highRiskFields={highRiskItems}
+              mediumRiskFields={mediumRiskItems}
+            />
           </div>
-        </div>
-      </div>
-
-      <StagesCardRequirements issues={issues} daoStage={currentDaoStage} />
-
-      <StageAccordion
-        daoStage={currentDaoStage}
-        highRiskFields={highRiskItems}
-        mediumRiskFields={mediumRiskItems}
-      />
+        </SubSection>
+      </SubSectionsContainer>
     </TheSectionLayout>
   );
 };
