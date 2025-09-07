@@ -152,6 +152,9 @@ importers:
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
+      lottie-react:
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.1.0)
@@ -384,7 +387,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/c2cf7017d27c1d20e74ace4dacb6c5ce4bbbe899
 
 packages:
   "@adobe/css-tools@4.4.4":
@@ -10106,10 +10109,10 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/c2cf7017d27c1d20e74ace4dacb6c5ce4bbbe899:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/c2cf7017d27c1d20e74ace4dacb6c5ce4bbbe899,
       }
     version: 1.10.0
 
@@ -12140,6 +12143,21 @@ packages:
     resolution:
       {
         integrity: sha512-bsHH3x+7acZfqokfn9Ks/ej96yF/z6oGGw1aBmXesq4r3fAjhdG4uYuqzDgZMk5g1CZUd5w3kwwIp9K1LOYUiA==,
+      }
+
+  lottie-react@2.4.1:
+    resolution:
+      {
+        integrity: sha512-LQrH7jlkigIIv++wIyrOYFLHSKQpEY4zehPicL9bQsrt1rnoKRYCYgpCUe5maqylNtacy58/sQDZTkwMcTRxZw==,
+      }
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lottie-web@5.13.0:
+    resolution:
+      {
+        integrity: sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ==,
       }
 
   loupe@3.2.1:
@@ -24899,7 +24917,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/c2cf7017d27c1d20e74ace4dacb6c5ce4bbbe899:
     {}
 
   fork-ts-checker-webpack-plugin@8.0.0(typescript@5.9.2)(webpack@5.101.3(esbuild@0.25.9)):
@@ -26303,6 +26321,14 @@ snapshots:
       js-tokens: 4.0.0
 
   lossless-json@4.2.0: {}
+
+  lottie-react@2.4.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      lottie-web: 5.13.0
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
+  lottie-web@5.13.0: {}
 
   loupe@3.2.1: {}
 

@@ -23,6 +23,8 @@ import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWater
 import { timestampToReadableDate } from "@/shared/utils";
 import React, { useEffect } from "react";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
+import Lottie from "lottie-react";
+import loadingAnimation from "@/public/loading-animation.json";
 
 interface TokenDistributionChartProps {
   appliedMetrics: string[];
@@ -85,8 +87,7 @@ export const TokenDistributionChart = ({
     return (
       <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
         <div className="text-center">
-          <div className="border-primary mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2"></div>
-          <p className="text-muted-foreground text-sm">Loading chart data...</p>
+          <Lottie animationData={loadingAnimation} height={400} width={400} />
         </div>
       </div>
     );
