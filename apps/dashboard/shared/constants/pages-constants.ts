@@ -11,7 +11,7 @@ export const PAGES_CONSTANTS = {
   },
   daoOverview: {
     title: "DAO Overview",
-    page: "dao-overview",
+    page: "/",
     description: undefined,
   },
   showSupport: {
