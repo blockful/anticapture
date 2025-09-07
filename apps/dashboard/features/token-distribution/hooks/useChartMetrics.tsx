@@ -57,6 +57,8 @@ export const useChartMetrics = ({
 
   const shouldFetchTimeSeries = allMetricsToFetch.length > 0;
 
+  //TODO: Create new fetch of the data to doesn't limit to one year, get all the time range.
+
   // Fetch time series data (for all needed metrics)
   const { data: timeSeriesData, isLoading: timeSeriesLoading } =
     useTimeSeriesData(
@@ -103,7 +105,6 @@ export const useChartMetrics = ({
 
     // Process timeSeriesData (only for enum metrics)
     if (timeSeriesData) {
-
       appliedMetrics.forEach((metricKey) => {
         const metricSchema = metricsSchema[metricKey];
         let dataSourceKey = metricKey as MetricTypesEnum;
@@ -270,7 +271,6 @@ export const useChartMetrics = ({
 
   const timeInterval = getTimeInterval();
   const groupedDatasets = groupDataByPeriod(datasets, timeInterval);
-
 
   // Unified chart data
   const chartData = Object.values(groupedDatasets).map((value) => {
