@@ -17,30 +17,21 @@ import {
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 
-/* TODO:
-
-- [ ] The metrics should be applied in the url
-- [ ] The metrics needs to be applied in the chart with multiple data-source differents
-- [ ] I can storage the metrics in the local-storage to remember the user-preferences
-- [ ] I need to transform the data to be used in one unique dataset.
-
-*/
-
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
   const { metrics, setMetrics } = useTokenDistributionStore();
+  const { chartData, chartConfig, isLoading } = useChartMetrics({
+    appliedMetrics: metrics,
+    daoId,
+    metricsSchema,
+  });
+
   // Initialize store with initial metrics if empty
   useEffect(() => {
     if (metrics.length === 0) {
       setMetrics(initialMetrics);
     }
   }, [metrics.length, setMetrics]);
-
-  const { chartData, chartConfig, isLoading } = useChartMetrics({
-    appliedMetrics: metrics,
-    daoId,
-    metricsSchema,
-  });
 
   return (
     <TheSectionLayout
