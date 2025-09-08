@@ -21,7 +21,7 @@ import { TokenDistributionCustomTooltip } from "@/features/token-distribution/co
 import { formatNumberUserReadable } from "@/shared/utils";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { timestampToReadableDate } from "@/shared/utils";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
@@ -286,16 +286,6 @@ export const TokenDistributionChart = ({
             if (!config || config.type !== "BAR") {
               return null;
             }
-
-            // Debug: Log bar data
-            const barData =
-              chartData?.filter(
-                (d) => d[metricKey] && Number(d[metricKey]) > 0,
-              ) || [];
-            console.log(
-              `${metricKey} bar data:`,
-              barData.map((d) => ({ date: d.date, value: d[metricKey] })),
-            );
 
             return (
               <Bar

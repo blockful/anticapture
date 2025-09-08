@@ -112,7 +112,6 @@ export const useChartMetrics = ({
 
         // For TRANSFER VOLUME metrics, use corresponding SUPPLY data with volume field
         if (metricSchema?.category === "TRANSFER VOLUME") {
-          console.log(`Processing TRANSFER VOLUME metric: ${metricKey}`);
           if (metricKey === "CEX_TOKENS") {
             dataSourceKey = MetricTypesEnum.CEX_SUPPLY;
             valueField = "volume";
@@ -131,18 +130,13 @@ export const useChartMetrics = ({
         if (timeSeriesData[dataSourceKey]) {
           timeSeriesData[dataSourceKey].forEach((item: DaoMetricsDayBucket) => {
             const value = valueField === "volume" ? item.volume : item.high;
-            console.log(`Item for ${metricKey}:`, {
-              date: item.date,
-              [valueField]: value,
-            });
+
             result[item.date] = {
               ...result[item.date],
               date: Number(item.date),
               [metricKey]: Number(value) / 1e18, // Convert from wei to token units
             };
           });
-        } else {
-          console.log(`No data found for dataSourceKey: ${dataSourceKey}`);
         }
       });
     }
@@ -181,7 +175,7 @@ export const useChartMetrics = ({
     timeSeriesData,
     historicalTokenData,
     proposalsOnChain,
-    enumMetrics,
+    // enumMetrics,
     metricsSchema,
   ]);
 
@@ -190,9 +184,7 @@ export const useChartMetrics = ({
     data: Record<string, ChartDataSetPoint>,
     interval: string,
   ) => {
-    console.log(`Grouping data by ${interval}...`);
     if (interval === "daily") {
-      console.log("Using daily interval - no grouping needed");
       return data;
     }
 
