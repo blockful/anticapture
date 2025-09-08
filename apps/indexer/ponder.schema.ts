@@ -117,6 +117,11 @@ export const delegation = onchainTable(
         table.delegateAccountId,
       ],
     }),
+    delegationTransactionHashIdx: index().on(table.transactionHash),
+    delegationTimestampIdx: index().on(table.timestamp),
+    delegationDelegatorAccountIdIdx: index().on(table.delegatorAccountId),
+    delegationDelegateAccountIdIdx: index().on(table.delegateAccountId),
+    delegationDelegatedValueIdx: index().on(table.delegatedValue),
   }),
 );
 
@@ -140,6 +145,11 @@ export const transfer = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.fromAccountId, table.toAccountId],
     }),
+    transferTransactionHashIdx: index().on(table.transactionHash),
+    transferTimestampIdx: index().on(table.timestamp),
+    transferFromAccountIdIdx: index().on(table.fromAccountId),
+    transferToAccountIdIdx: index().on(table.toAccountId),
+    transferAmountIdx: index().on(table.amount),
   }),
 );
 
