@@ -29,11 +29,18 @@ export const TokenDistributionMetrics = ({
 }: TokenDistributionMetricsProps) => {
   // Get visible data from Zustand store (filtered by brush)
   const { visibleData } = useBrushStore();
-
   if (!chartData) return null;
 
-  // Use visible data if available, otherwise fallback to full chart data
-  const dataToUse = visibleData.length > 0 ? visibleData : chartData;
+  // Use visible data if available AND it has all the same keys as chartData
+  // Otherwise fallback to full chart data
+  const chartDataKeys = chartData[0] ? Object.keys(chartData[0]) : [];
+  const visibleDataKeys = visibleData[0] ? Object.keys(visibleData[0]) : [];
+  const hasAllKeys = chartDataKeys.every((key) =>
+    visibleDataKeys.includes(key),
+  );
+
+  const dataToUse =
+    visibleData.length > 0 && hasAllKeys ? visibleData : chartData;
 
   const handleApplyMetric = (newMetrics: (MetricTypesEnum | string)[]) => {
     // Add new metrics to existing ones (do not replace)
@@ -76,7 +83,6 @@ export const TokenDistributionMetrics = ({
                       .filter((val) => val !== undefined);
 
                     if (metricData.length === 0) {
-                      console.warn(`No data found for metric: ${metric.key}`);
                       return null;
                     }
 
