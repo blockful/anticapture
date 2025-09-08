@@ -8,6 +8,8 @@ import {
   OrderDirection,
   VoteFilter,
 } from "@/api/repositories/proposals-activity.repository";
+import { DAOClient } from "@/interfaces/client";
+import { DBProposal } from "@/api/mappers";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
@@ -24,20 +26,20 @@ export interface ProposalActivityRequest {
 }
 
 export interface ProposalWithUserVote {
-  proposal: {
-    id: string;
-    daoId: string;
-    proposerAccountId: string;
-    description: string;
-    startBlock: string;
-    endBlock: string;
-    timestamp: string;
-    status: string;
-    forVotes: string;
-    againstVotes: string;
-    abstainVotes: string;
-    proposalEndTimestamp: string;
-  };
+  proposal: Pick<
+    DBProposal,
+    | "id"
+    | "daoId"
+    | "proposerAccountId"
+    | "description"
+    | "startBlock"
+    | "endBlock"
+    | "timestamp"
+    | "status"
+    | "forVotes"
+    | "againstVotes"
+    | "abstainVotes"
+  >;
   userVote: {
     id: string;
     voterAccountId: string;
@@ -61,7 +63,10 @@ export interface DelegateProposalActivity {
 }
 
 export class ProposalsActivityService {
-  constructor(private readonly repository: ProposalsActivityRepository) {}
+  constructor(
+    private readonly repository: ProposalsActivityRepository,
+    private readonly daoClient: DAOClient,
+  ) {}
 
   async getProposalsActivity({
     address,
@@ -114,23 +119,26 @@ export class ProposalsActivityService {
     }
 
     // Transform to the expected format
-    const proposals = proposalsWithVotes.map((item) => ({
-      proposal: {
-        id: item.proposal.id,
-        daoId: item.proposal.dao_id,
-        proposerAccountId: item.proposal.proposer_account_id,
-        description: item.proposal.description,
-        startBlock: item.proposal.start_block,
-        endBlock: item.proposal.end_block,
-        timestamp: item.proposal.timestamp,
-        status: item.proposal.status,
-        forVotes: item.proposal.for_votes,
-        againstVotes: item.proposal.against_votes,
-        abstainVotes: item.proposal.abstain_votes,
-        proposalEndTimestamp: item.proposal.proposal_end_timestamp,
-      },
-      userVote: item.userVote
-        ? {
+    const proposals = await Promise.all(
+      proposalsWithVotes.map(async (item) => {
+        const proposal = {
+          id: item.proposal.id,
+          daoId: item.proposal.dao_id,
+          proposerAccountId: item.proposal.proposer_account_id as Address,
+          description: item.proposal.description,
+          startBlock: item.proposal.start_block,
+          endBlock: item.proposal.end_block,
+          timestamp: BigInt(item.proposal.timestamp),
+          status: item.proposal.status,
+          forVotes: item.proposal.for_votes,
+          againstVotes: item.proposal.against_votes,
+          abstainVotes: item.proposal.abstain_votes,
+          proposalEndTimestamp: item.proposal.proposal_end_timestamp,
+        };
+        proposal.status = await this.daoClient.getProposalStatus(proposal);
+        return {
+          proposal,
+          userVote: item.userVote && {
             id: item.userVote.id,
             voterAccountId: item.userVote.voter_account_id,
             proposalId: item.userVote.proposal_id,
@@ -138,9 +146,10 @@ export class ProposalsActivityService {
             votingPower: item.userVote.voting_power,
             reason: item.userVote.reason,
             timestamp: item.userVote.timestamp,
-          }
-        : null,
-    }));
+          },
+        };
+      }),
+    );
 
     // Calculate analytics (we still need this for the metrics)
     const allProposals = await this.repository.getProposals(
