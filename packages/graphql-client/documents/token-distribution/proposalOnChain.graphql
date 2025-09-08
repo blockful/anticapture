@@ -1,4 +1,4 @@
-query GetProposalsOnChain {
+query GetProposals {
   proposals(orderDirection: desc, limit: 100) {
     daoId
     id
