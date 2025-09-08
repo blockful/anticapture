@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TheSectionLayout } from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import {
@@ -10,10 +10,7 @@ import {
 import { ArrowRightLeft } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  initialMetrics,
-  metricsSchema,
-} from "@/features/token-distribution/utils";
+import { metricsSchema } from "@/features/token-distribution/utils";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 
@@ -25,13 +22,6 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     daoId,
     metricsSchema,
   });
-
-  // Initialize store with initial metrics if empty
-  useEffect(() => {
-    if (metrics.length === 0) {
-      setMetrics(initialMetrics);
-    }
-  }, [metrics.length, setMetrics]);
 
   return (
     <TheSectionLayout
