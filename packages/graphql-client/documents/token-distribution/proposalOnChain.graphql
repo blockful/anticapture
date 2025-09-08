@@ -1,5 +1,5 @@
 query GetProposalsOnChain {
-  proposals(orderDirection: desc) {
+  proposals(orderDirection: desc, limit: 100) {
     daoId
     id
     timestamp
