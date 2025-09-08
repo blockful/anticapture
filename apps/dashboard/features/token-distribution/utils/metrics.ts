@@ -16,7 +16,7 @@ export interface MetricSchema {
   axis?: "primary" | "secondary";
 }
 
-export const metricsSchema: Record<string, MetricSchema> = {
+export const metricsSchema = {
   DELEGATED_SUPPLY: {
     label: "Delegation",
     color: "#93C5FD",
@@ -96,7 +96,7 @@ export const metricsSchema: Record<string, MetricSchema> = {
     type: "AREA",
     axis: "secondary",
   },
-};
+} as const;
 
 /* This function is used to format the metrics by category */
 export const formatMetricsByCategory = (
