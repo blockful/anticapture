@@ -2,7 +2,6 @@ import { cn } from "@/shared/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 
-/*This component need to be refactored to use the new design system. */
 const buttonVariants = cva("flex items-center justify-center cursor-pointer", {
   variants: {
     variant: {
@@ -27,17 +26,18 @@ const buttonVariants = cva("flex items-center justify-center cursor-pointer", {
   },
 });
 
-type TheButtonProps = VariantProps<typeof buttonVariants> &
+type ButtonProps = VariantProps<typeof buttonVariants> &
   ButtonHTMLAttributes<HTMLButtonElement> & {
     className?: string;
-    children: ReactNode;
+    children?: ReactNode;
     onClick?: () => void;
     hasText?: boolean;
     hasIcon?: boolean;
     icon?: ElementType;
+    size?: "default" | "sm" | "lg" | "icon";
   };
 
-export const TheButton = ({
+export const Button = ({
   variant,
   className,
   children,
@@ -45,12 +45,13 @@ export const TheButton = ({
   hasIcon = true,
   icon: Icon,
   disabled = false,
+  size = "default",
   ...props
-}: TheButtonProps) => {
+}: ButtonProps) => {
   return (
     <button
       className={cn(
-        buttonVariants({ variant }),
+        buttonVariants({ variant, size }),
         className,
         disabled && "bg-surface-disabled cursor-default",
       )}
