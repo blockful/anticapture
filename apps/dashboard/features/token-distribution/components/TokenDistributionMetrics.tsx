@@ -50,7 +50,7 @@ export const TokenDistributionMetrics = ({
 
   const appliedMetricsSchema = Object.fromEntries(
     appliedMetrics
-      .map((key) => [key, metricsSchema[key]])
+      .map((key) => [key, metricsSchema[key as keyof typeof metricsSchema]])
       .filter(([, metric]) => !!metric),
   ) as Record<string, MetricSchema>;
 
@@ -70,7 +70,9 @@ export const TokenDistributionMetrics = ({
                 <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
                   {metrics.map((metric: MetricWithKey) => {
                     const metricData = dataToUse
-                      .map((point) => point[metric.key])
+                      .map(
+                        (point) => point[metric.key as keyof ChartDataSetPoint],
+                      )
                       .filter((val) => val !== undefined);
 
                     if (metricData.length === 0) {

@@ -21,7 +21,6 @@ import { TokenDistributionCustomTooltip } from "@/features/token-distribution/co
 import { formatNumberUserReadable } from "@/shared/utils";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { timestampToReadableDate } from "@/shared/utils";
-import { useEffect } from "react";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
@@ -43,15 +42,7 @@ export const TokenDistributionChart = ({
   isLoading = false,
   error = null,
 }: TokenDistributionChartProps) => {
-  // All hooks must be called at the top, before any conditional returns
-  const { initializeData, setVisibleData } = useBrushStore();
-
-  // Initialize store with full chart data when it loads
-  useEffect(() => {
-    if (chartData && chartData.length > 0) {
-      initializeData(chartData);
-    }
-  }, [chartData, initializeData]);
+  const { setVisibleData } = useBrushStore();
 
   // Show error state
   if (error) {
@@ -105,9 +96,7 @@ export const TokenDistributionChart = ({
   if (!appliedMetrics.length) return null;
 
   // Check if data is mocked (all metrics have 0 values)
-  const isMocked = chartData.every((dataPoint) =>
-    appliedMetrics.length == 0
-  );
+  const isMocked = chartData.every(() => appliedMetrics.length == 0);
 
   return (
     <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
