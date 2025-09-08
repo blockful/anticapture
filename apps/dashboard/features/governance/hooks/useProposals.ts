@@ -13,7 +13,6 @@ import { formatEther } from "viem";
 
 export interface PaginationInfo {
   hasNextPage: boolean;
-  hasPreviousPage: boolean;
   totalCount: number;
   currentPage: number;
   totalPages: number;
@@ -27,17 +26,10 @@ type Proposal = Omit<Query_Proposals_Items, "endBlock" | "startBlock">;
 const transformToGovernanceProposal = (
   graphqlProposal: Proposal,
 ): GovernanceProposal => {
-  // Safe parsing function that handles invalid strings
-  const safeParseInt = (value: string | undefined | null): number => {
-    if (!value) return 0;
-    const parsed = parseInt(value);
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  const forVotes = safeParseInt(graphqlProposal.forVotes);
-  const againstVotes = safeParseInt(graphqlProposal.againstVotes);
-  const abstainVotes = safeParseInt(graphqlProposal.abstainVotes);
-  const quorum = safeParseInt(graphqlProposal.quorum);
+  const forVotes = parseInt(graphqlProposal.forVotes);
+  const againstVotes = parseInt(graphqlProposal.againstVotes);
+  const abstainVotes = parseInt(graphqlProposal.abstainVotes);
+  const quorum = parseInt(graphqlProposal.quorum);
 
   const total = forVotes + againstVotes + abstainVotes;
 
@@ -142,8 +134,8 @@ const transformToGovernanceProposal = (
       forPercentage,
       againstPercentage,
     },
-    quorum: formatVotes(quorum), // This would need to come from DAO config
-    timeText, // Add the calculated time text
+    quorum: formatVotes(quorum),
+    timeText,
   };
 };
 
@@ -153,7 +145,6 @@ export interface UseProposalsResult {
   error: ApolloError | undefined;
   pagination: PaginationInfo;
   fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
   isPaginationLoading: boolean;
 }
 
@@ -173,6 +164,7 @@ export const useProposals = ({
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
 
   const queryVariables = useMemo(
     () => ({
@@ -233,31 +225,30 @@ export const useProposals = ({
       );
       setAllProposals(normalizedProposals);
       setHasInitialized(true);
+
+      // Check if we've reached the end on first load
+      if (rawProposals.length < itemsPerPage) {
+        setHasReachedEnd(true);
+      }
     }
-  }, [rawProposals, hasInitialized]);
+  }, [rawProposals, hasInitialized, itemsPerPage]);
 
   // Pagination info
   const pagination: PaginationInfo = useMemo(() => {
-    const currentItemsCount = rawProposals.length;
-    const hasNextPage = currentItemsCount === itemsPerPage; // If we got full page, assume there might be more
-    const hasPreviousPage = false; // Not supporting previous page for infinite scroll
+    const hasNextPage = !hasReachedEnd;
     const currentPage = Math.ceil(allProposals.length / itemsPerPage);
-
-    // Since we don't have total count from this API, we estimate based on current data
-    const estimatedTotalCount =
-      allProposals.length + (hasNextPage ? itemsPerPage : 0);
-    const totalPages = Math.ceil(estimatedTotalCount / itemsPerPage);
+    const totalCount = allProposals.length; // We only know about items we've fetched so far
+    const totalPages = hasReachedEnd ? currentPage : currentPage + 1; // +1 if more pages might exist
 
     return {
       hasNextPage,
-      hasPreviousPage,
-      totalCount: estimatedTotalCount,
+      totalCount,
       currentPage,
       totalPages,
       itemsPerPage,
       currentItemsCount: allProposals.length,
     };
-  }, [rawProposals.length, allProposals.length, itemsPerPage]);
+  }, [allProposals.length, itemsPerPage, hasReachedEnd]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
@@ -322,6 +313,11 @@ export const useProposals = ({
             setAllProposals((prev) => [...prev, ...uniqueNewProposals]);
           }
 
+          // Check if we've reached the end - if we got fewer items than requested page size
+          if (fetchMoreResult.proposals.length < itemsPerPage) {
+            setHasReachedEnd(true);
+          }
+
           return {
             ...fetchMoreResult,
             proposals: [
@@ -344,18 +340,12 @@ export const useProposals = ({
     allProposals,
   ]);
 
-  // Fetch previous page function (not used for infinite scroll)
-  const fetchPreviousPage = useCallback(async () => {
-    console.warn("Previous page not supported in infinite scroll mode");
-  }, []);
-
   return {
-    proposals: allProposals, // Return normalized governance proposals
+    proposals: allProposals,
     loading,
     error,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     isPaginationLoading,
   };
 };
