@@ -2,11 +2,7 @@
 
 import { CheckCircle2, XCircle } from "lucide-react";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
-import {
-  Proposal,
-  ProposalStatus,
-  // ProposalState,
-} from "@/features/governance/types";
+import { Proposal, ProposalStatus } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Address } from "viem";
 
@@ -14,23 +10,6 @@ interface ProposalItemProps {
   proposal: Proposal;
   className?: string;
 }
-
-// const getStatusBadgeVariant = (status: ProposalStatus) => {
-//   switch (status) {
-//     case ProposalStatus.PENDING:
-//       return "warning";
-//     case ProposalStatus.ONGOING:
-//       return "primary";
-//     case ProposalStatus.EXECUTED:
-//       return "success";
-//     case ProposalStatus.DEFEATED:
-//       return "error";
-//     case ProposalStatus.CANCELLED:
-//       return "error";
-//     default:
-//       return "secondary";
-//   }
-// };
 
 const getTextStatusColor = (status: ProposalStatus) => {
   switch (status) {
@@ -83,33 +62,7 @@ const getStatusText = (status: ProposalStatus) => {
   }
 };
 
-// const getTimeText = (proposal: Proposal) => {
-//   if (proposal.state === ProposalState.WAITING_TO_START) {
-//     return proposal.timeRemaining || "Waiting to start";
-//   }
-//   if (proposal.state === ProposalState.ACTIVE) {
-//     return proposal.timeRemaining || "Active";
-//   }
-//   return proposal.timeAgo || "Completed";
-// };
-
-// const formatVotes = (votes: number): string => {
-//   if (votes >= 1000000) {
-//     return `${(votes / 1000000).toFixed(1)}M`;
-//   }
-//   if (votes >= 1000) {
-//     return `${(votes / 1000).toFixed(1)}K`;
-//   }
-//   return votes.toString();
-// };
-
 export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
-  // const statusVariant = getStatusBadgeVariant(proposal.status);
-  // const statusText = getStatusText(proposal.status);
-  // const timeText = getTimeText(proposal);
-  // const formattedVotes = formatVotes(proposal.votes.total);
-  // const quorumText = formatVotes(proposal.quorum);
-
   const quorumPercentage = proposal.votes.total
     ? (proposal.quorum / proposal.votes.total) * 100
     : 0;
