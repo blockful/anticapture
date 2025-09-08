@@ -7,18 +7,22 @@ import {
   SupplyType,
 } from "@/shared/components/badges/SupplyLabel";
 import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
-import { useTransactionsTableData } from "@/features/expandable-table-demo";
+import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/filters/AmountFilter";
 import { useParams } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { TransactionData } from "@/shared/constants/mocked-data/sample-expandable-data";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
+import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
+import Link from "next/link";
+import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { cn } from "@/shared/utils";
 
-export const ExpandableTableDemoSection = () => {
+export const TransactionsTable = () => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
 
   // Filters
@@ -161,7 +165,16 @@ export const ExpandableTableDemoSection = () => {
           <span>From</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
-              onApply={(addr) => setFromFilter(addr || "")}
+              onApply={async (addr) => {
+                if ((addr ?? "").indexOf(".eth") > 0) {
+                  const { address } = await fetchEnsData({
+                    address: addr as `${string}.eth`,
+                  });
+                  setFromFilter(address || "");
+                  return;
+                }
+                setFromFilter(addr || "");
+              }}
               currentFilter={fromFilter}
             />
           </div>
@@ -170,8 +183,16 @@ export const ExpandableTableDemoSection = () => {
       cell: ({ row }) => {
         const from = row.getValue("from") as string;
         return (
-          <div className="flex items-center gap-2 px-4">
-            <span className="text-secondary text-sm">{from}</span>
+          <div className="flex h-10 items-center gap-3 p-2">
+            <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
+              <EnsAvatar
+                address={from as `0x${string}`}
+                size="sm"
+                variant="rounded"
+                showName={true}
+                nameClassName={cn("truncate max-w-[125px]")}
+              />
+            </div>
           </div>
         );
       },
@@ -190,7 +211,16 @@ export const ExpandableTableDemoSection = () => {
           <span>To</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
-              onApply={(addr) => setToFilter(addr || "")}
+              onApply={async (addr) => {
+                if ((addr ?? "").indexOf(".eth") > 0) {
+                  const { address } = await fetchEnsData({
+                    address: addr as `${string}.eth`,
+                  });
+                  setToFilter(address || "");
+                  return;
+                }
+                setToFilter(addr || "");
+              }}
               currentFilter={toFilter}
             />
           </div>
@@ -199,8 +229,16 @@ export const ExpandableTableDemoSection = () => {
       cell: ({ row }) => {
         const to = row.getValue("to") as string;
         return (
-          <div className="flex items-center gap-2 px-4">
-            <span className="text-secondary text-sm">{to}</span>
+          <div className="flex h-10 items-center gap-3 p-2">
+            <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
+              <EnsAvatar
+                address={to as `0x${string}`}
+                size="sm"
+                variant="rounded"
+                showName={true}
+                nameClassName={cn("truncate max-w-[125px]")}
+              />
+            </div>
           </div>
         );
       },
@@ -209,7 +247,18 @@ export const ExpandableTableDemoSection = () => {
     {
       id: "actions",
       header: "",
-      cell: () => <ExternalLink className="h-3 w-3 text-white opacity-50" />,
+      cell: ({ row }) => {
+        const txHash = row.original.txHash;
+        return (
+          <Link
+            href={"https://etherscan.io/tx/" + txHash}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink className="h-3 w-3 text-white opacity-50" />
+          </Link>
+        );
+      },
       size: 40,
     },
   ];

@@ -1,7 +1,7 @@
-import { TransactionData } from "@/shared/constants/mocked-data/sample-expandable-data";
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatEther } from "viem";
+import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 
 export type GraphTransaction = {
   from: string;
@@ -52,11 +52,6 @@ const deduceSupplyTypes = (tx: GraphTransaction): SupplyType[] => {
   return types;
 };
 
-const toShortAddress = (addr: string) =>
-  addr?.startsWith("0x") && addr.length > 10
-    ? `${addr.slice(0, 6)}...${addr.slice(-4)}`
-    : addr;
-
 const formatRelativeTime = (timestampSec: string): string => {
   const ts = Number(timestampSec);
   if (!ts) return "";
@@ -83,18 +78,23 @@ export const adaptTransactionsToTableData = (
       tx.delegations?.reduce((acc, d) => acc + Number(d.delegatedValue), 0) ??
       0;
 
-    const amount =
+    const amount = formatNumberUserReadable(
       Number(formatEther(BigInt(transfersAmountRaw))) +
-        Number(formatEther(BigInt(delegationsAmountRaw))) || 0;
+        Number(formatEther(BigInt(delegationsAmountRaw))) || 0,
+      2,
+    );
 
     // add transfers to subRows also
     const transfersSubRows = tx.transfers?.map((t, tidx) => ({
       id: `${idx + 1}.${tidx + 1}`,
       affectedSupply: ["Others"] as SupplyType[],
-      amount: formatNumberUserReadable(Number(t.amount), 2),
+      amount: formatNumberUserReadable(
+        Number(formatEther(BigInt(t.amount || 0))),
+        2,
+      ),
       date: formatRelativeTime(t.timestamp),
-      from: toShortAddress(t.fromAccountId),
-      to: toShortAddress(t.toAccountId),
+      from: t.fromAccountId,
+      to: t.toAccountId,
     }));
     const delegationsSubRows = tx.delegations?.map((d, didx) => ({
       id: `${idx + 1}.${didx + 1}`,
@@ -104,8 +104,8 @@ export const adaptTransactionsToTableData = (
         2,
       ),
       date: formatRelativeTime(d.timestamp),
-      from: toShortAddress(d.delegatorAccountId),
-      to: toShortAddress(d.delegateAccountId),
+      from: d.delegatorAccountId,
+      to: d.delegateAccountId,
     }));
     const subRows = [...transfersSubRows, ...delegationsSubRows].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -114,10 +114,11 @@ export const adaptTransactionsToTableData = (
     return {
       id: String(idx + 1),
       affectedSupply,
-      amount: formatNumberUserReadable(amount, 2),
+      amount: amount,
       date: formatRelativeTime(tx.timestamp),
-      from: toShortAddress(tx.from),
-      to: toShortAddress(tx.to),
+      from: tx.from,
+      to: tx.to,
+      txHash: tx.transactionHash,
       subRows: subRows.length > 0 ? subRows : undefined,
     } satisfies TransactionData;
   });
