@@ -1,7 +1,8 @@
 query GetProposals {
-  proposals(orderDirection: desc, limit: 100) {
+  proposals(orderDirection: desc, limit: 10) {
     daoId
     id
     timestamp
+    title
   }
 }

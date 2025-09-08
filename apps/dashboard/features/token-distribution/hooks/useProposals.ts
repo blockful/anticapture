@@ -1,8 +1,8 @@
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useGetProposalsOnChainQuery } from "@anticapture/graphql-client/hooks";
+import { useGetProposalsQuery } from "@anticapture/graphql-client/hooks";
 
 export const useProposals = (daoId: DaoIdEnum) => {
-  const { data, loading, error } = useGetProposalsOnChainQuery({
+  const { data, loading, error } = useGetProposalsQuery({
     context: {
       headers: {
         "anticapture-dao-id": daoId,

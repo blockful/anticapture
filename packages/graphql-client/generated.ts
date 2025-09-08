@@ -2313,10 +2313,10 @@ export type GetProposalsActivityQueryVariables = Exact<{
 
 export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: string, endBlock: string, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
-export type GetProposalsOnChainQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetProposalsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProposalsOnChainQuery = { __typename?: 'Query', proposals?: Array<{ __typename?: 'query_proposals_items', daoId: string, id: string, timestamp: string } | null> | null };
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: Array<{ __typename?: 'query_proposals_items', daoId: string, id: string, timestamp: string, title?: string | null } | null> | null };
 
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
   tokenAddresses: Scalars['String']['input'];
@@ -3470,47 +3470,48 @@ export type GetProposalsActivityQueryHookResult = ReturnType<typeof useGetPropos
 export type GetProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetProposalsActivityLazyQuery>;
 export type GetProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetProposalsActivitySuspenseQuery>;
 export type GetProposalsActivityQueryResult = Apollo.QueryResult<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>;
-export const GetProposalsOnChainDocument = gql`
-    query GetProposalsOnChain {
-  proposals(orderDirection: desc) {
+export const GetProposalsDocument = gql`
+    query GetProposals {
+  proposals(orderDirection: desc, limit: 10) {
     daoId
     id
     timestamp
+    title
   }
 }
     `;
 
 /**
- * __useGetProposalsOnChainQuery__
+ * __useGetProposalsQuery__
  *
- * To run a query within a React component, call `useGetProposalsOnChainQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetProposalsOnChainQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetProposalsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetProposalsOnChainQuery({
+ * const { data, loading, error } = useGetProposalsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useGetProposalsOnChainQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>) {
+export function useGetProposalsQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>(GetProposalsOnChainDocument, options);
+        return Apollo.useQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
       }
-export function useGetProposalsOnChainLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>) {
+export function useGetProposalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>(GetProposalsOnChainDocument, options);
+          return Apollo.useLazyQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
         }
-export function useGetProposalsOnChainSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>) {
+export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>(GetProposalsOnChainDocument, options);
+          return Apollo.useSuspenseQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
         }
-export type GetProposalsOnChainQueryHookResult = ReturnType<typeof useGetProposalsOnChainQuery>;
-export type GetProposalsOnChainLazyQueryHookResult = ReturnType<typeof useGetProposalsOnChainLazyQuery>;
-export type GetProposalsOnChainSuspenseQueryHookResult = ReturnType<typeof useGetProposalsOnChainSuspenseQuery>;
-export type GetProposalsOnChainQueryResult = Apollo.QueryResult<GetProposalsOnChainQuery, GetProposalsOnChainQueryVariables>;
+export type GetProposalsQueryHookResult = ReturnType<typeof useGetProposalsQuery>;
+export type GetProposalsLazyQueryHookResult = ReturnType<typeof useGetProposalsLazyQuery>;
+export type GetProposalsSuspenseQueryHookResult = ReturnType<typeof useGetProposalsSuspenseQuery>;
+export type GetProposalsQueryResult = Apollo.QueryResult<GetProposalsQuery, GetProposalsQueryVariables>;
 export const GetDaoAddressesAccountBalancesDocument = gql`
     query GetDaoAddressesAccountBalances($tokenAddresses: String!, $daoAddresses: [String]!) {
   accountBalances(

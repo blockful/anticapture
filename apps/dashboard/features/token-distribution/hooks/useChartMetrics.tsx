@@ -76,8 +76,7 @@ export const useChartMetrics = ({
     useDaoTokenHistoricalData(daoId);
 
   // Fetch proposals data (for proposals metric)
-  const { data: proposalsOnChain, loading: proposalsLoading } =
-    useProposals(daoId);
+  const { data: proposals, loading: proposalsLoading } = useProposals(daoId);
 
   // Create chart configuration from provided metricsSchema
   const chartConfig = useMemo(() => {
@@ -156,9 +155,9 @@ export const useChartMetrics = ({
 
     if (
       appliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
-      proposalsOnChain?.proposals
+      proposals?.proposals
     ) {
-      proposalsOnChain.proposals.forEach((proposal) => {
+      proposals.proposals.forEach((proposal) => {
         if (!proposal) return;
         const timestamp = normalizeTimestamp(proposal.timestamp);
         result[timestamp] = {
@@ -174,7 +173,7 @@ export const useChartMetrics = ({
     appliedMetrics,
     timeSeriesData,
     historicalTokenData,
-    proposalsOnChain,
+    proposals,
     // enumMetrics,
     metricsSchema,
   ]);
