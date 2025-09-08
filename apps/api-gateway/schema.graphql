@@ -1,6 +1,6 @@
-directive @enum(subgraph: String, value: String) on ENUM_VALUE
-
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
+
+directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
@@ -37,11 +37,16 @@ type Query {
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+  """
+  Returns the DAO's liquid treasury in USD, aggregated across multiple addresses.
+  """
+  daoLiquidTreasury(
+    """List of DAO treasury addresses"""
+    addresses: JSON!
 
-  """Get historical market data for a specific token"""
-  historicalTokenData: historicalTokenData_200_response
+    """Symbol of the governance token"""
+    governanceToken: NonEmptyString!
+  ): daoLiquidTreasury_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -107,8 +112,8 @@ type Query {
     sortOrder: queryInput_transactions_sortOrder = desc
     from: String
     to: String
-    minAmount: String!
-    maxAmount: String!
+    minAmount: String
+    maxAmount: String
 
     """
     Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
@@ -1297,24 +1302,15 @@ input transactionFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
+type daoLiquidTreasury_200_response {
+  totalUSD: Float!
+  governanceUSD: Float!
+  liquidUSD: Float!
+  timestamp: String!
 }
 
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
-}
+"""A string that cannot be passed as an empty value"""
+scalar NonEmptyString
 
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
