@@ -53,8 +53,8 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             hoveredMetricKey={hoveredMetricKey}
           />
         </CardContent>
-        <div className="border-light-dark mx-4 w-px border-r border-dashed" />
-        <div className="order-1 w-full items-start sm:order-2 sm:w-full">
+        <div className="border-light-dark mx-4 w-px border border-dashed sm:order-2" />
+        <div className="order-1 w-fit min-w-[280px] items-start sm:order-3">
           <TokenDistributionMetrics
             appliedMetrics={metrics}
             setAppliedMetrics={setMetrics}
