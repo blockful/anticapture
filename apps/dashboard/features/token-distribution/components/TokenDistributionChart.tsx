@@ -106,9 +106,7 @@ export const TokenDistributionChart = ({
 
   // Check if data is mocked (all metrics have 0 values)
   const isMocked = chartData.every((dataPoint) =>
-    appliedMetrics.every(
-      (metric) => !dataPoint[metric] || dataPoint[metric] === 0,
-    ),
+    appliedMetrics.length == 0
   );
 
   return (
