@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
-import { Button, IconButton } from "@/shared/components";
+import { Button } from "@/shared/components";
 
 const Jazzicon = dynamic(
   () => import("react-jazzicon").then((mod) => mod.default),
@@ -14,7 +14,13 @@ const Jazzicon = dynamic(
   },
 );
 
-export const ConnectWallet = ({ className }: { className?: string }) => {
+export const ConnectWallet = ({
+  label = "Connect",
+  className,
+}: {
+  label?: string;
+  className?: string;
+}) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -47,12 +53,14 @@ export const ConnectWallet = ({ className }: { className?: string }) => {
             {(() => {
               if (!connected) {
                 return (
-                  <IconButton
+                  <Button
                     onClick={openConnectModal}
                     type="button"
                     className={cn("btn-connect-wallet size-[36px]", className)}
-                    icon={Wallet}
-                  />
+                  >
+                    <Wallet className="size-3.5" />
+                    {label}
+                  </Button>
                 );
               }
               if (chain.unsupported) {
