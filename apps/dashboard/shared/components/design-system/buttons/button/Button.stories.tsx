@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { Button } from "@/shared/components/design-system/buttons/Button";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 import type { Meta, StoryObj } from "@storybook/react";
 
