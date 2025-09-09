@@ -179,8 +179,11 @@ export const TokenDistributionChart = ({
             />
           )}
 
-          {/* TERTIARY AXIS - For BAR type metrics (right side) */}
-          {appliedMetrics.some((key) => chartConfig[key]?.type === "BAR") && (
+          {/* TERTIARY AXIS - For BAR type metrics and invisible SPORADIC_LINE bars (right side) */}
+          {(appliedMetrics.some((key) => chartConfig[key]?.type === "BAR") ||
+            appliedMetrics.some(
+              (key) => chartConfig[key]?.type === "SPORADIC_LINE",
+            )) && (
             <YAxis
               yAxisId="bars"
               orientation="right"
