@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { TheTable, SkeletonRow, Button } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
@@ -116,12 +115,13 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-start px-2"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "timestamp"
                 ? sortDirection === "asc"
@@ -137,7 +137,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-2">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
@@ -158,12 +158,13 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-start px-4"
           onClick={() => handleSort("delta")}
         >
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "delta"
                 ? sortDirection === "asc"
