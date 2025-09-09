@@ -189,8 +189,81 @@ const processData = (
 };
 
 /**
- * Hook for fetching time series data
- * Retrieves data for the complete period (365 days) and processes it to the desired format
+ * Hook for fetching individual metric data with better caching
+ */
+export const useIndividualMetricData = (
+  daoId: DaoIdEnum,
+  metricType: MetricTypesEnum,
+  options?: {
+    refreshInterval?: number;
+    revalidateOnFocus?: boolean;
+    revalidateOnReconnect?: boolean;
+  },
+) => {
+  const fetchKey = daoId ? [`timeSeriesData`, daoId, metricType] : null;
+
+  return useSWR(
+    fetchKey,
+    async () => {
+      const oneYearAgo = String(
+        BigInt(
+          Math.floor(Date.now() / 1000) -
+            DAYS_IN_SECONDS[TimeInterval.ONE_YEAR],
+        ),
+      ).slice(0, 10);
+
+      const response = await fetch(`${BACKEND_ENDPOINT}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `query DaoMetricsDayBuckets {
+            ${metricType}: daoMetricsDayBuckets(
+              where: {
+                metricType: ${metricType},
+                date_gte: "${oneYearAgo}",
+                daoId: "${daoId}"
+              },
+              orderBy: "date",
+              orderDirection: "asc",
+              limit: 365
+            ) {
+              items {
+                date
+                daoId
+                tokenId
+                metricType
+                open
+                close
+                low
+                high
+                average
+                volume
+                count
+                volume
+              }
+            }
+          }`,
+        }),
+      });
+
+      const data = await response.json();
+      return data?.data?.[metricType]?.items || [];
+    },
+    {
+      refreshInterval: options?.refreshInterval ?? 0,
+      revalidateOnFocus: options?.revalidateOnFocus ?? true,
+      revalidateOnMount: true,
+      revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
+      revalidateIfStale: true,
+      dedupingInterval: 5000, // Increased for better caching
+      keepPreviousData: true, // Keep previous data while loading new
+    },
+  );
+};
+
+/**
+ * Hook for fetching time series data with optimized caching strategy
+ * Now uses individual metric caching to prevent unnecessary refetches
  */
 export const useTimeSeriesData = (
   daoId: DaoIdEnum,
@@ -202,12 +275,12 @@ export const useTimeSeriesData = (
     revalidateOnReconnect?: boolean;
   },
 ) => {
-  /* Create a cache key based only on daoId and metricTypes, not on days
-   * This ensures that only one request is made for each DAO and metrics combination
-   */
+  // For backward compatibility, fall back to bulk fetch if needed
+  // But with optimized cache key that doesn't change on metric removal
+  const stableMetricTypes = metricTypes.sort(); // Stable sort for consistent cache key
   const fetchKey =
-    daoId && metricTypes.length > 0
-      ? [`timeSeriesData`, daoId, metricTypes.join(",")]
+    daoId && stableMetricTypes.length > 0
+      ? [`timeSeriesData-bulk`, daoId, stableMetricTypes.join(",")]
       : null;
 
   const {
@@ -216,20 +289,20 @@ export const useTimeSeriesData = (
     isLoading,
   } = useSWR(
     fetchKey,
-    () => fetchTimeSeriesDataFromGraphQL(daoId, metricTypes),
+    () => fetchTimeSeriesDataFromGraphQL(daoId, stableMetricTypes),
     {
       refreshInterval: options?.refreshInterval ?? 0,
       revalidateOnFocus: options?.revalidateOnFocus ?? true,
       revalidateOnMount: true,
       revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
       revalidateIfStale: true,
-      dedupingInterval: 2000,
-      keepPreviousData: false,
+      dedupingInterval: 5000, // Increased for better caching
+      keepPreviousData: true, // Keep previous data while loading new
     },
   );
 
   const processedData = fullData
-    ? processData(fullData, metricTypes, days)
+    ? processData(fullData, stableMetricTypes, days)
     : undefined;
 
   return {

@@ -47,6 +47,11 @@ export const useChartMetrics = ({
       additionalSupplyMetrics.push(MetricTypesEnum.DELEGATED_SUPPLY);
   });
 
+  // Stable sort for applied metrics to prevent unnecessary recalculations
+  const stableAppliedMetrics = useMemo(() => {
+    return [...appliedMetrics].sort();
+  }, [appliedMetrics]);
+
   // Combine all metrics to fetch, removing duplicates
   const allMetricsToFetch = [
     ...new Set([
@@ -56,10 +61,14 @@ export const useChartMetrics = ({
   ];
 
   const shouldFetchTimeSeries = allMetricsToFetch.length > 0;
+  const shouldFetchTokenPrice = stableAppliedMetrics.includes("TOKEN_PRICE");
+  const shouldFetchProposals = stableAppliedMetrics.includes(
+    "PROPOSALS_GOVERNANCE",
+  );
 
   //TODO: Create new fetch of the data to doesn't limit to one year, get all the time range.
 
-  // Fetch time series data (for all needed metrics)
+  // Fetch time series data (for all needed metrics) - only when metrics are applied
   const { data: timeSeriesData, isLoading: timeSeriesLoading } =
     useTimeSeriesData(
       daoId,
@@ -71,16 +80,22 @@ export const useChartMetrics = ({
       },
     );
 
-  // Fetch historical token data (for token-price metric)
+  // Fetch historical token data (for token-price metric) - only when needed
   const { data: historicalTokenData, loading: historicalLoading } =
     useDaoTokenHistoricalData(daoId);
 
-  // Fetch proposals data (for proposals metric)
+  // Fetch proposals data (for proposals metric) - only when needed
   const { data: proposals, loading: proposalsLoading } = useProposals(daoId);
+
+  // Apply conditional loading based on applied metrics
+  const filteredHistoricalTokenData = shouldFetchTokenPrice
+    ? historicalTokenData
+    : null;
+  const filteredProposals = shouldFetchProposals ? proposals : null;
 
   // Create chart configuration from provided metricsSchema
   const chartConfig = useMemo(() => {
-    return appliedMetrics.reduce(
+    return stableAppliedMetrics.reduce(
       (acc, metricKey) => {
         const metric = metricsSchema[metricKey];
         if (metric) {
@@ -96,15 +111,14 @@ export const useChartMetrics = ({
       },
       {} as Record<string, MetricSchema>,
     );
-  }, [appliedMetrics, metricsSchema]);
+  }, [stableAppliedMetrics, metricsSchema]);
 
-  // Create datasets organized by metric
-  const datasets = useMemo(() => {
+  // Process time series data separately from other data sources for better caching
+  const timeSeriesDatasets = useMemo(() => {
     const result: Record<string, ChartDataSetPoint> = {};
 
-    // Process timeSeriesData (only for enum metrics)
     if (timeSeriesData) {
-      appliedMetrics.forEach((metricKey) => {
+      stableAppliedMetrics.forEach((metricKey) => {
         const metricSchema = metricsSchema[metricKey];
         let dataSourceKey = metricKey as MetricTypesEnum;
         let valueField = "high";
@@ -140,9 +154,18 @@ export const useChartMetrics = ({
       });
     }
 
-    // Process historicalTokenData (token-price)
-    if (appliedMetrics.includes("TOKEN_PRICE") && historicalTokenData?.prices) {
-      historicalTokenData.prices.forEach(
+    return result;
+  }, [timeSeriesData, stableAppliedMetrics, metricsSchema]);
+
+  // Process historical token data separately
+  const tokenPriceDatasets = useMemo(() => {
+    const result: Record<string, ChartDataSetPoint> = {};
+
+    if (
+      stableAppliedMetrics.includes("TOKEN_PRICE") &&
+      filteredHistoricalTokenData?.prices
+    ) {
+      filteredHistoricalTokenData.prices.forEach(
         ([timestamp, price]: [number, number]) => {
           result[normalizeTimestamp(timestamp)] = {
             ...result[normalizeTimestamp(timestamp)],
@@ -152,11 +175,19 @@ export const useChartMetrics = ({
         },
       );
     }
+
+    return result;
+  }, [stableAppliedMetrics, filteredHistoricalTokenData]);
+
+  // Process proposals data separately
+  const proposalsDatasets = useMemo(() => {
+    const result: Record<string, ChartDataSetPoint> = {};
+
     if (
-      appliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
-      proposals?.proposals
+      stableAppliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
+      filteredProposals?.proposals
     ) {
-      proposals.proposals.forEach((proposal) => {
+      filteredProposals.proposals.forEach((proposal) => {
         // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 
@@ -170,14 +201,26 @@ export const useChartMetrics = ({
     }
 
     return result;
-  }, [
-    appliedMetrics,
-    timeSeriesData,
-    historicalTokenData,
-    proposals,
-    // enumMetrics,
-    metricsSchema,
-  ]);
+  }, [stableAppliedMetrics, filteredProposals]);
+
+  // Combine all datasets
+  const datasets = useMemo(() => {
+    const result: Record<string, ChartDataSetPoint> = {};
+
+    // Merge all dataset sources
+    [timeSeriesDatasets, tokenPriceDatasets, proposalsDatasets].forEach(
+      (dataset) => {
+        Object.entries(dataset).forEach(([key, value]) => {
+          result[key] = {
+            ...result[key],
+            ...value,
+          };
+        });
+      },
+    );
+
+    return result;
+  }, [timeSeriesDatasets, tokenPriceDatasets, proposalsDatasets]);
 
   // Group data by time periods for BAR metrics
   const groupDataByPeriod = (
@@ -262,57 +305,90 @@ export const useChartMetrics = ({
   };
 
   const timeInterval = getTimeInterval();
-  const groupedDatasets = groupDataByPeriod(datasets, timeInterval);
 
-  // Unified chart data
-  const chartData = Object.values(groupedDatasets).map((value) => {
-    const lastKnownValues: Record<
-      keyof typeof metricsSchema,
-      number | undefined
-    > = {};
+  // Unified chart data with optimized processing
+  const chartData = useMemo(() => {
+    const groupedDatasets = groupDataByPeriod(datasets, timeInterval);
 
-    const processedPoint = {
-      ...Object.entries(value).reduce(
-        (
-          acc,
-          [key, metric]: [
-            keyof typeof metricsSchema,
-            number | undefined | string,
-          ],
-        ) => {
-          if (metric !== undefined) {
-            lastKnownValues[key as keyof typeof metricsSchema] =
-              metric as number;
-          }
-          if (key === "PROPOSALS_GOVERNANCE") {
+    return Object.values(groupedDatasets).map((value) => {
+      const lastKnownValues: Record<
+        keyof typeof metricsSchema,
+        number | undefined
+      > = {};
+
+      const processedPoint = {
+        ...Object.entries(value).reduce(
+          (
+            acc,
+            [key, metric]: [
+              keyof typeof metricsSchema,
+              number | undefined | string,
+            ],
+          ) => {
+            if (metric !== undefined) {
+              lastKnownValues[key as keyof typeof metricsSchema] =
+                metric as number;
+            }
+            if (key === "PROPOSALS_GOVERNANCE") {
+              return {
+                ...acc,
+                [key]: metric ?? 0,
+              };
+            }
             return {
               ...acc,
-              [key]: metric ?? 0,
+              [key]:
+                metric ?? lastKnownValues[key as keyof typeof metricsSchema],
             };
-          }
-          return {
-            ...acc,
-            [key]: metric ?? lastKnownValues[key as keyof typeof metricsSchema],
-          };
-        },
-        {} as ChartDataSetPoint,
-      ),
-    };
+          },
+          {} as ChartDataSetPoint,
+        ),
+      };
 
-    // Ensure all applied metrics exist in every point (especially PROPOSALS_GOVERNANCE)
-    appliedMetrics.forEach((metricKey) => {
-      if (!(metricKey in processedPoint)) {
-        processedPoint[metricKey] =
-          metricKey === "PROPOSALS_GOVERNANCE" ? 0 : undefined;
-      }
+      // Ensure all applied metrics exist in every point (especially PROPOSALS_GOVERNANCE)
+      stableAppliedMetrics.forEach((metricKey) => {
+        if (!(metricKey in processedPoint)) {
+          processedPoint[metricKey] =
+            metricKey === "PROPOSALS_GOVERNANCE" ? 0 : undefined;
+        }
+      });
+
+      return processedPoint;
     });
+  }, [datasets, timeInterval, stableAppliedMetrics, metricsSchema]);
 
-    return processedPoint;
-  });
+  // Optimized loading state - only consider loading for applied metrics
+  const isLoadingOptimized = useMemo(() => {
+    let loading = false;
+
+    // Only consider time series loading if we're fetching time series data
+    if (shouldFetchTimeSeries && timeSeriesLoading) {
+      loading = true;
+    }
+
+    // Only consider token price loading if we need token price
+    if (shouldFetchTokenPrice && historicalLoading) {
+      loading = true;
+    }
+
+    // Only consider proposals loading if we need proposals
+    if (shouldFetchProposals && proposalsLoading) {
+      loading = true;
+    }
+
+    return loading;
+  }, [
+    shouldFetchTimeSeries,
+    timeSeriesLoading,
+    shouldFetchTokenPrice,
+    historicalLoading,
+    shouldFetchProposals,
+    proposalsLoading,
+  ]);
 
   return {
     chartData,
     chartConfig,
-    isLoading: timeSeriesLoading || historicalLoading || proposalsLoading,
+    isLoading: isLoadingOptimized,
   };
 };

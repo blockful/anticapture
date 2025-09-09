@@ -179,11 +179,8 @@ export const TokenDistributionChart = ({
             />
           )}
 
-          {/* TERTIARY AXIS - For BAR type metrics and invisible SPORADIC_LINE bars (right side) */}
-          {(appliedMetrics.some((key) => chartConfig[key]?.type === "BAR") ||
-            appliedMetrics.some(
-              (key) => chartConfig[key]?.type === "SPORADIC_LINE",
-            )) && (
+          {/* TERTIARY AXIS - For BAR type metrics (right side) */}
+          {appliedMetrics.some((key) => chartConfig[key]?.type === "BAR") && (
             <YAxis
               yAxisId="bars"
               orientation="right"
@@ -192,6 +189,22 @@ export const TokenDistributionChart = ({
               stroke="#10B981"
               tick={{ fill: "#10B981", fontSize: 12 }}
               width={80}
+            />
+          )}
+
+          {/* TERTIARY AXIS - For SPORADIC_LINE type metrics (right side) */}
+          {appliedMetrics.some(
+            (key) => chartConfig[key]?.type === "SPORADIC_LINE",
+          ) && (
+            <YAxis
+              yAxisId="bars"
+              orientation="right"
+              domain={[0, "dataMax"]}
+              tickFormatter={(value) => formatNumberUserReadable(Number(value))}
+              stroke="#10B981"
+              tick={{ fill: "#10B981", fontSize: 12 }}
+              width={80}
+              hide
             />
           )}
 
