@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import { cn } from "@/shared/utils/";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/shared/components";
 
 interface Option {
   value: string;
@@ -31,13 +32,15 @@ export const DaoInfoDropdown = ({
         }
       }}
     >
-      <button
+      <Button
         role="combobox"
         aria-expanded={isOpen}
         aria-controls="timeInterval-value"
+        variant="secondary"
+        size="sm"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "text-primary hover:border-highlight flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
+          "hover:border-highlight border transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
             "bg-surface-contrast border-transparent": !isOpen,
@@ -56,7 +59,7 @@ export const DaoInfoDropdown = ({
             },
           )}
         />
-      </button>
+      </Button>
 
       {isOpen && (
         <div className="text-primary absolute right-0 top-full z-50 mt-1 w-full min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
