@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react";
-
+import { Plus } from "lucide-react";
 import { Button } from "@/shared/components/design-system/buttons/Button";
-import { CircleChevronRight } from "lucide-react";
+
+import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Design System/Buttons/Button",
@@ -17,19 +17,12 @@ const meta = {
     },
     size: {
       control: "select",
-      options: ["xs", "sm", "md", "lg"],
-      description: "Button size: xs(16px), sm(24px), md(36px), lg(48px)",
+      options: ["sm", "md", "lg"],
+      description: "Button size: sm, md, lg",
     },
     variant: {
       control: "select",
-      options: [
-        "primary",
-        "secondary",
-        "outline",
-        "ghost",
-        "destructive",
-        "link",
-      ],
+      options: ["primary", "secondary", "outline", "ghost", "destructive"],
       description: "Button variant",
     },
     className: {
@@ -42,148 +35,90 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Default story with ENS address
 export const Default: Story = {
   args: {
     variant: "primary",
     children: "Button",
   },
 };
+export const Disabled: Story = {
+  args: {
+    variant: "primary",
+    children: "Button",
+    disabled: true,
+  },
+};
 
-// With direct image URL
 export const WithIcon: Story = {
-  args: {
-    variant: "primary",
-    children: "Button",
-    hasIcon: true,
-    icon: CircleChevronRight,
-  },
+  render: () => (
+    <Button>
+      <Plus className="size-4" />
+      Button
+    </Button>
+  ),
 };
 
-// Loading state
 export const Loading: Story = {
-  args: {
-    variant: "primary",
-    children: "Button",
-    hasIcon: true,
-    icon: CircleChevronRight,
-    // isLoading: true,
-  },
-};
-
-// Size variants
-export const SizeVariants: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <Button size="sm" />
+        <Button loading={true}>Button</Button>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <Button loading={true} loadingText="Building...">
+          Button
+        </Button>
+      </div>
+    </div>
+  ),
+};
+
+export const Sizes: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
+        <Button size="sm">Button</Button>
         <span className="text-xs text-gray-400">SM</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Button />
-        <span className="text-xs text-gray-400">DEFAULT</span>
+        <Button>Button</Button>
+        <span className="text-xs text-gray-400">MD</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Button size="lg" />
+        <Button size="lg">Button</Button>
         <span className="text-xs text-gray-400">LG</span>
       </div>
     </div>
   ),
 };
 
-// Shape variants
-export const ShapeVariants: Story = {
+export const Variants: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <Button size="lg" variant="primary" />
+        <Button variant="primary">Button</Button>
         <span className="text-xs text-gray-400">Primary</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Button size="lg" variant="secondary" />
-        <span className="text-xs text-gray-400">Secondary</span>
+        <Button variant="outline">Button</Button>
+        <span className="text-xs text-gray-400">Outline</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <Button variant="ghost">Button</Button>
+        <span className="text-xs text-gray-400">Ghost</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <Button variant="destructive">Button</Button>
+        <span className="text-xs text-gray-400">Destructive</span>
       </div>
     </div>
   ),
 };
 
-// Loading states for different sizes
-// export const LoadingStates: Story = {
-//   render: () => (
-//     <div className="flex items-center gap-4">
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="xs" variant="rounded" loading={true} />
-//         <span className="text-xs text-gray-400">XS Loading</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="sm" variant="rounded" loading={true} />
-//         <span className="text-xs text-gray-400">SM Loading</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="md" variant="rounded" loading={true} />
-//         <span className="text-xs text-gray-400">MD Loading</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="lg" variant="rounded" loading={true} />
-//         <span className="text-xs text-gray-400">LG Loading</span>
-//       </div>
-//     </div>
-//   ),
-// };
-
-// Fallback state (UserIcon fallback)
-export const Fallback: Story = {
-  args: {
-    size: "lg",
-    variant: "primary",
-  },
-};
-
-// Fallback states for different sizes
-// export const FallbackStates: Story = {
-//   render: () => (
-//     <div className="flex items-center gap-4">
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="xs" variant="rounded" />
-//         <span className="text-xs text-gray-400">XS Fallback</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="sm" variant="rounded" />
-//         <span className="text-xs text-gray-400">SM Fallback</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="md" variant="rounded" />
-//         <span className="text-xs text-gray-400">MD Fallback</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="lg" variant="rounded" />
-//         <span className="text-xs text-gray-400">LG Fallback</span>
-//       </div>
-//     </div>
-//   ),
-// };
-
-// Fallback with different shapes
-// export const FallbackShapes: Story = {
-//   render: () => (
-//     <div className="flex items-center gap-4">
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="lg" variant="rounded" />
-//         <span className="text-xs text-gray-400">Rounded Fallback</span>
-//       </div>
-//       <div className="flex flex-col items-center gap-2">
-//         <EnsAvatar size="lg" variant="square" />
-//         <span className="text-xs text-gray-400">Square Fallback</span>
-//       </div>
-//     </div>
-//   ),
-// };
-
-// With custom className
 export const WithCustomStyling: Story = {
   args: {
-    size: "lg",
-    variant: "primary",
-    className: "border-2 border-blue-500 shadow-lg",
+    className:
+      "border-2 border-blue-500 shadow-lg bg-blue-600 hover:bg-blue-700",
+    children: "Custom Button",
   },
 };
