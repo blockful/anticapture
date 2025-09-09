@@ -167,8 +167,7 @@ export const TheTable = <TData, TValue>({
               <TableRow
                 key={row.id}
                 className={cn(
-                  "border-transparent transition-colors duration-300",
-                  enableExpanding && row.depth > 0 && "bg-surface-contrast/50", // Highlight sub-rows
+                  "border-transparent transition-colors duration-300", // Highlight sub-rows
                   onRowClick && !disableRowClick?.(row.original)
                     ? "hover:bg-surface-contrast cursor-pointer"
                     : "cursor-default",

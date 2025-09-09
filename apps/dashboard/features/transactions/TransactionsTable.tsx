@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TheTable } from "@/shared/components/tables/TheTable";
+import { SkeletonRow } from "@/shared/components";
 import {
   SupplyLabel,
   SupplyType,
@@ -34,7 +35,6 @@ export const TransactionsTable = () => {
     "desc",
   );
 
-  // Using ENS as default dao for demo, can be parameterized later
   const {
     data: tableData,
     pagination,
@@ -42,7 +42,7 @@ export const TransactionsTable = () => {
     fetchPreviousPage,
     loading,
   } = useTransactionsTableData({
-    daoId: DaoIdEnum.ENS,
+    daoId: daoId.toUpperCase() as DaoIdEnum,
     limit: 10,
     offset: 0,
     filters: {
@@ -63,6 +63,16 @@ export const TransactionsTable = () => {
       ),
       cell: ({ row }) => {
         const supplies = row.getValue("affectedSupply") as SupplyType[];
+
+        if (loading) {
+          return (
+            <div className="flex flex-wrap gap-2 px-2">
+              <SkeletonRow className="h-5 w-16" />
+              <SkeletonRow className="h-5 w-12" />
+            </div>
+          );
+        }
+
         return (
           <div className="flex flex-wrap gap-2">
             {supplies.map((supply, index) => (
@@ -92,6 +102,14 @@ export const TransactionsTable = () => {
         const amount = row.getValue("amount") as string;
         const hasSubRows =
           row.original.subRows && row.original.subRows.length > 0;
+
+        if (loading) {
+          return (
+            <div className="mr-2 flex w-full items-center justify-end gap-2">
+              <SkeletonRow className="h-5 w-20" />
+            </div>
+          );
+        }
 
         return (
           <div className="mr-2 flex w-full items-center justify-end gap-2">
@@ -152,6 +170,15 @@ export const TransactionsTable = () => {
       ),
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-start px-4">
+              <SkeletonRow className="h-4 w-16" />
+            </div>
+          );
+        }
+
         return date ? (
           <span className="text-secondary w-full px-4 text-sm">{date}</span>
         ) : null;
@@ -182,6 +209,22 @@ export const TransactionsTable = () => {
       ),
       cell: ({ row }) => {
         const from = row.getValue("from") as string;
+
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center gap-3 p-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
+            </div>
+          );
+        }
+
         return (
           <div className="flex h-10 items-center gap-3 p-2">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
@@ -201,7 +244,15 @@ export const TransactionsTable = () => {
     {
       id: "arrow",
       header: "",
-      cell: () => <ArrowRight className="h-3 w-3 text-white opacity-50" />,
+      cell: () => {
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center justify-center px-2"></div>
+          );
+        }
+
+        return <ArrowRight className="h-3 w-3 text-white opacity-50" />;
+      },
       size: 40,
     },
     {
@@ -228,6 +279,22 @@ export const TransactionsTable = () => {
       ),
       cell: ({ row }) => {
         const to = row.getValue("to") as string;
+
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center gap-3 p-2">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
+            </div>
+          );
+        }
+
         return (
           <div className="flex h-10 items-center gap-3 p-2">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
@@ -249,6 +316,13 @@ export const TransactionsTable = () => {
       header: "",
       cell: ({ row }) => {
         const txHash = row.original.txHash;
+
+        if (loading) {
+          return (
+            <div className="flex h-10 items-center justify-center px-2"></div>
+          );
+        }
+
         return (
           <Link
             href={"https://etherscan.io/tx/" + txHash}
@@ -262,6 +336,50 @@ export const TransactionsTable = () => {
       size: 40,
     },
   ];
+
+  if (loading && (!tableData || tableData.length === 0)) {
+    return (
+      <div className="w-full">
+        <div className="bg-surface-default flex flex-col p-4">
+          {/* Table */}
+          <TheTable
+            columns={columns}
+            data={Array.from({ length: 7 }, () => ({
+              id: "loading-row",
+              affectedSupply: ["CEX", "DEX"] as SupplyType[],
+              amount: "1000000",
+              date: "2 hours ago",
+              from: "0x1234567890abcdef",
+              to: "0xabcdef1234567890",
+              txHash:
+                "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+              subRows: [],
+            }))}
+            enableExpanding={true}
+            getSubRows={(row) => row.subRows}
+            stickyFirstColumn={true}
+            withSorting={true}
+            withPagination={true}
+            isTableSmall={true}
+            className="border-0"
+            showParentDividers={true}
+            mobileTableFixed={true}
+          />
+
+          {/* Pagination */}
+          <div className="mt-3">
+            <Pagination
+              currentPage={pagination.currentPage}
+              onPrevious={fetchPreviousPage}
+              onNext={fetchNextPage}
+              hasPreviousPage={pagination.hasPreviousPage}
+              isLoading={loading}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
