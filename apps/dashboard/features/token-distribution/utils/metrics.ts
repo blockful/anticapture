@@ -79,13 +79,13 @@ export const metricsSchema = {
   },
   PROPOSALS_GOVERNANCE: {
     label: "Proposals",
-    color: "#FAFAFA66",
+    color: "#000",
     category: "GOVERNANCE",
     type: "SPORADIC_LINE",
   },
   TREASURY: {
     label: "Treasury",
-    color: "#FAFAFA",
+    color: "#CACACA",
     category: "GOVERNANCE",
     type: "AREA",
   },

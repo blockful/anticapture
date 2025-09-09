@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import {
@@ -190,11 +191,6 @@ export const TokenDistributionChart = ({
               width={80}
             />
           )}
-          <Tooltip
-            content={
-              <TokenDistributionCustomTooltip chartConfig={chartConfig} />
-            }
-          />
 
           {/* Render SPORADIC_LINE metrics as event markers with dashed lines and arrows - BEHIND other elements */}
           {appliedMetrics
@@ -202,21 +198,26 @@ export const TokenDistributionChart = ({
               (metricKey) => chartConfig[metricKey]?.type === "SPORADIC_LINE",
             )
             .map((metricKey) => {
-              const config = chartConfig[metricKey];
+              // const config = chartConfig[metricKey];
               const isOpaque =
                 hoveredMetricKey && !(metricKey === hoveredMetricKey);
 
-              // Get all dates where this metric has values > 0
+              // Get all dates where this metric has values (strings or numbers > 0)
               const eventDates =
-                chartData?.filter(
-                  (d) => d[metricKey] && Number(d[metricKey]) > 0,
-                ) || [];
+                chartData?.filter((d) => {
+                  const value = d[metricKey];
+                  if (typeof value === "string") {
+                    return value && value.length > 0;
+                  }
+                  return value && Number(value) > 0;
+                }) || [];
 
+              // // The stroke color here is different from metrics to render the dialog with different colros
               return eventDates.map((eventData, index) => (
                 <ReferenceLine
                   key={`${metricKey}-event-${index}`}
                   x={eventData.date}
-                  stroke={config.color}
+                  stroke="#FAFAFA66"
                   strokeWidth={2}
                   strokeDasharray="5,5"
                   opacity={isOpaque ? 0.3 : 1}
@@ -296,6 +297,33 @@ export const TokenDistributionChart = ({
               />
             );
           })}
+
+          {/* Add invisible bars for SPORADIC_LINE metrics so they appear in tooltip  Because the Reference-Line not appear with the tooltip*/}
+          {appliedMetrics.map((metricKey) => {
+            const config = chartConfig[metricKey];
+
+            if (!config || config.type !== "SPORADIC_LINE") {
+              return null;
+            }
+
+            return (
+              <Bar
+                key={`${metricKey}-invisible-bar`}
+                dataKey={metricKey}
+                fill="transparent"
+                opacity={0}
+                barSize={1}
+                yAxisId="bars"
+              />
+            );
+          })}
+
+          <Tooltip
+            content={
+              <TokenDistributionCustomTooltip chartConfig={chartConfig} />
+            }
+          />
+
           <Brush
             dataKey="date"
             height={32}

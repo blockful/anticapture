@@ -89,11 +89,15 @@ export const TokenDistributionMetrics = ({
 
                     if (metric.key === "PROPOSALS_GOVERNANCE") {
                       // For proposals, count actual proposals in the visible data range
-                      // Sum all the proposal indicators (each point where there's a proposal gets a count)
+                      // Count all the proposal titles (strings) in the data
                       currentValue = metricData.reduce((sum: number, val) => {
-                        // If val > 0, it means there was at least one proposal at that timestamp
-                        const numVal = Number(val);
-                        return sum + (numVal > 0 ? 1 : 0);
+                        // If val is a non-empty string, it means there's a proposal at that timestamp
+                        return (
+                          sum +
+                          (val && typeof val === "string" && val.length > 0
+                            ? 1
+                            : 0)
+                        );
                       }, 0);
                       previousValue = 0; // Base comparison
                     } else {

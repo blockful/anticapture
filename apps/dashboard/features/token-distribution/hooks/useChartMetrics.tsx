@@ -157,14 +157,14 @@ export const useChartMetrics = ({
       proposals?.proposals
     ) {
       proposals.proposals.forEach((proposal) => {
+        // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 
         const timestamp = normalizeTimestamp(proposal.timestamp);
         result[timestamp] = {
           ...result[timestamp],
           date: timestamp,
-          // Mark this timestamp as having a proposal (value of 1)
-          PROPOSALS_GOVERNANCE: proposal.id,
+          PROPOSALS_GOVERNANCE: proposal.title ?? "",
         };
       });
     }
