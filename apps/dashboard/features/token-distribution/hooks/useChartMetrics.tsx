@@ -152,17 +152,18 @@ export const useChartMetrics = ({
         },
       );
     }
-
     if (
       appliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
       proposals?.proposals
     ) {
       proposals.proposals.forEach((proposal) => {
-        if (!proposal) return;
+        if (!proposal || !proposal.id) return;
+
         const timestamp = normalizeTimestamp(proposal.timestamp);
         result[timestamp] = {
           ...result[timestamp],
           date: timestamp,
+          // Mark this timestamp as having a proposal (value of 1)
           PROPOSALS_GOVERNANCE: proposal.id,
         };
       });

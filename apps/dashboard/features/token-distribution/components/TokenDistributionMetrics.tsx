@@ -84,11 +84,23 @@ export const TokenDistributionMetrics = ({
                       return null;
                     }
 
-                    // Actual value: last point with data
-                    const currentValue = metricData[metricData.length - 1];
+                    let currentValue: number | string | undefined;
+                    let previousValue: number | string | undefined;
 
-                    // Previous value: first point with data
-                    const previousValue = metricData[0];
+                    if (metric.key === "PROPOSALS_GOVERNANCE") {
+                      // For proposals, count actual proposals in the visible data range
+                      // Sum all the proposal indicators (each point where there's a proposal gets a count)
+                      currentValue = metricData.reduce((sum: number, val) => {
+                        // If val > 0, it means there was at least one proposal at that timestamp
+                        const numVal = Number(val);
+                        return sum + (numVal > 0 ? 1 : 0);
+                      }, 0);
+                      previousValue = 0; // Base comparison
+                    } else {
+                      // For other metrics, use last and first values as before
+                      currentValue = metricData[metricData.length - 1];
+                      previousValue = metricData[0];
+                    }
 
                     // Calculate percentage variation
                     const variation =
