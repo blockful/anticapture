@@ -71,11 +71,14 @@ export abstract class GovernorBase<
       });
 
       const quorum = await this.getQuorum(proposal.id);
-      const hasQuorum = proposalQuorum >= quorum;
-      if (!hasQuorum) return ProposalStatus.NO_QUORUM;
+      const voteSum =
+        proposal.forVotes + proposal.againstVotes + proposal.abstainVotes;
 
       const hasMajority = proposal.forVotes > proposal.againstVotes;
-      if (!hasMajority) return ProposalStatus.DEFEATED;
+      if (voteSum > quorum && !hasMajority) return ProposalStatus.DEFEATED;
+
+      const hasQuorum = proposalQuorum >= quorum;
+      if (!hasQuorum) return ProposalStatus.NO_QUORUM;
 
       return ProposalStatus.SUCCEEDED;
     }
