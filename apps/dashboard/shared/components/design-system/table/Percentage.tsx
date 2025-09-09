@@ -9,6 +9,7 @@ const percentageVariants = cva(
       variant: {
         positive: "text-success",
         negative: "text-error",
+        neutral: "text-dimmed",
       },
     },
     defaultVariants: {
@@ -29,9 +30,11 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
   if (value === 0)
     return (
       <span
-        className={cn(percentageVariants({ variant: "positive" }), className)}
+        className={cn(percentageVariants({ variant: "neutral" }), className)}
         {...props}
-      />
+      >
+        0%
+      </span>
     );
   const variant = value >= 0 ? "positive" : "negative";
 
