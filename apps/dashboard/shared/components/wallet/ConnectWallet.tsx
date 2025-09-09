@@ -5,6 +5,7 @@ import { cn } from "@/shared/utils/";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
+import { Button, IconButton } from "@/shared/components";
 
 const Jazzicon = dynamic(
   () => import("react-jazzicon").then((mod) => mod.default),
@@ -13,13 +14,7 @@ const Jazzicon = dynamic(
   },
 );
 
-export const ConnectWallet = ({
-  label = "Connect",
-  className,
-}: {
-  label?: string;
-  className?: string;
-}) => {
+export const ConnectWallet = ({ className }: { className?: string }) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -52,26 +47,24 @@ export const ConnectWallet = ({
             {(() => {
               if (!connected) {
                 return (
-                  <button
+                  <IconButton
                     onClick={openConnectModal}
                     type="button"
                     className={cn("btn-connect-wallet size-[36px]", className)}
-                  >
-                    <Wallet className="size-3.5" />
-                    {label}
-                  </button>
+                    icon={Wallet}
+                  />
                 );
               }
               if (chain.unsupported) {
                 return (
-                  <button onClick={openChainModal} type="button">
+                  <Button onClick={openChainModal} type="button">
                     Wrong network
-                  </button>
+                  </Button>
                 );
               }
               return (
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     onClick={openAccountModal}
                     type="button"
                     className="btn-connect-wallet flex items-center gap-2"
@@ -95,7 +88,7 @@ export const ConnectWallet = ({
                         )}
                       </div>
                     )}
-                  </button>
+                  </Button>
                 </div>
               );
             })()}

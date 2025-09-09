@@ -4,6 +4,7 @@ import { ChevronRight, X } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { cn } from "@/shared/utils";
+import { IconButton } from "@/shared/components";
 
 interface BannerAlertProps {
   icon: ReactNode;
@@ -54,7 +55,7 @@ export const BannerAlert = ({
     >
       <div className="flex items-center gap-2 tracking-wider sm:flex-row">
         <div className="flex flex-wrap items-center gap-1 sm:flex-row">
-          <div className="flex gap-2 font-mono text-xs text-white uppercase">
+          <div className="flex gap-2 font-mono text-xs uppercase text-white">
             <div className="flex-shrink-0">{icon}</div>
             <div className="flex flex-wrap gap-1">
               {text}
@@ -74,13 +75,14 @@ export const BannerAlert = ({
         </div>
       </div>
 
-      <button
+      <IconButton
         onClick={onClose}
-        className="hover:text-tangerine/80 p-1 text-white transition-colors duration-300 hover:cursor-pointer"
+        variant="ghost"
+        className="hover:text-tangerine/80 size-6 p-0 text-white"
         aria-label="Close message"
-      >
-        <X className="size-4" />
-      </button>
+        size="lg"
+        icon={X}
+      />
     </div>
   );
 };

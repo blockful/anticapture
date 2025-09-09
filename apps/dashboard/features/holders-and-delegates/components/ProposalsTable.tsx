@@ -7,8 +7,8 @@ import {
   SkeletonRow,
   TextIconLeft,
   SimpleProgressBar,
+  Button,
 } from "@/shared/components";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
@@ -127,7 +127,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-start px-2"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -239,7 +240,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-end px-2"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -299,7 +301,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2"
+          size="sm"
+          className="text-secondary w-full justify-start px-2"
           onClick={() => {
             if (onSortChange) {
               const newDirection =

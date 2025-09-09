@@ -14,7 +14,6 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   disabled?: boolean;
   loading?: boolean;
   loadingText?: string;
-  onClick?: () => void;
   size?: ButtonSize;
   variant?: ButtonVariant;
 }
