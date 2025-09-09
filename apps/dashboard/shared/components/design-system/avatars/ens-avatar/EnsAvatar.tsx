@@ -2,7 +2,7 @@
 
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
-import { formatAddress } from "@/shared/utils/formatAddress";
+// import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
@@ -84,15 +84,14 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    if (ensData?.ens) {
-      return ensData.ens;
-    }
+    const displayedName = ensData?.ens || address;
+    const maxLengthToDisplay = 15;
 
-    if (address) {
-      if (showFullAddress) {
-        return address;
+    if (displayedName) {
+      if (showFullAddress || displayedName.length <= maxLengthToDisplay) {
+        return displayedName;
       }
-      return formatAddress(address, 12);
+      return `${displayedName.slice(0, 6)}...${displayedName.slice(-4)}`;
     }
 
     return "Unknown";
