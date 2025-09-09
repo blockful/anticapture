@@ -133,11 +133,11 @@ export const TokenDistributionMetrics = ({
                       );
                     }
 
-                    // Format variation
+                    // Format variation - hide when 0
                     const formattedVariation =
-                      variation !== 0
-                        ? `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`
-                        : "0.0";
+                      Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
+                        ? "" // Empty string when variation is essentially zero
+                        : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
 
                     const handleClick = () => {
                       const metricKey = appliedMetrics.find(
