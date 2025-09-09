@@ -1,15 +1,19 @@
 import { create } from "zustand";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
+
+interface BrushRange {
+  startIndex: number;
+  endIndex: number;
+}
 
 interface BrushState {
-  visibleData: ChartDataSetPoint[];
-  setVisibleData: (data: ChartDataSetPoint[]) => void;
+  brushRange: BrushRange;
+  setBrushRange: (brushRange: BrushRange) => void;
 }
 
 export const useBrushStore = create<BrushState>((set) => ({
-  visibleData: [],
+  brushRange: { startIndex: 0, endIndex: 0 },
 
-  setVisibleData: (data: ChartDataSetPoint[]) => {
-    set({ visibleData: data });
+  setBrushRange: (brushRange) => {
+    set({ brushRange });
   },
 }));

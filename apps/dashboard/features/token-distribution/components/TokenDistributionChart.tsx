@@ -24,6 +24,7 @@ import { timestampToReadableDate } from "@/shared/utils";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
+import { useEffect } from "react";
 
 interface TokenDistributionChartProps {
   appliedMetrics: string[];
@@ -42,7 +43,16 @@ export const TokenDistributionChart = ({
   isLoading = false,
   error = null,
 }: TokenDistributionChartProps) => {
-  const { setVisibleData } = useBrushStore();
+  const { brushRange, setBrushRange } = useBrushStore();
+
+  useEffect(() => {
+    if (chartData && chartData.length > 0) {
+      setBrushRange({
+        startIndex: 0,
+        endIndex: chartData.length - 1,
+      });
+    }
+  }, []);
 
   // Show error state
   if (error) {
@@ -293,16 +303,15 @@ export const TokenDistributionChart = ({
             fill="#1f1f1f"
             tickFormatter={(timestamp) => timestampToReadableDate(timestamp)}
             travellerWidth={10}
+            startIndex={brushRange.startIndex}
+            endIndex={brushRange.endIndex}
             onChange={(brushArea) => {
               if (brushArea && chartData) {
                 const { startIndex = 0, endIndex = chartData.length - 1 } =
                   brushArea;
-                const visibleData = chartData.slice(startIndex, endIndex + 1);
 
-                // Use setTimeout to debounce and avoid infinite loops
-                setTimeout(() => {
-                  setVisibleData(visibleData);
-                }, 0);
+                // Update brush range in store
+                setBrushRange({ startIndex, endIndex });
               }
             }}
           >

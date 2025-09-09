@@ -270,7 +270,7 @@ export const useChartMetrics = ({
       number | undefined
     > = {};
 
-    return {
+    const processedPoint = {
       ...Object.entries(value).reduce(
         (
           acc,
@@ -297,6 +297,16 @@ export const useChartMetrics = ({
         {} as ChartDataSetPoint,
       ),
     };
+
+    // Ensure all applied metrics exist in every point (especially PROPOSALS_GOVERNANCE)
+    appliedMetrics.forEach((metricKey) => {
+      if (!(metricKey in processedPoint)) {
+        processedPoint[metricKey] =
+          metricKey === "PROPOSALS_GOVERNANCE" ? 0 : undefined;
+      }
+    });
+
+    return processedPoint;
   });
 
   return {

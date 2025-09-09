@@ -27,20 +27,18 @@ export const TokenDistributionMetrics = ({
   setHoveredMetricKey,
   chartData,
 }: TokenDistributionMetricsProps) => {
-  // Get visible data from Zustand store (filtered by brush)
-  const { visibleData } = useBrushStore();
+  // Get brush range from Zustand store
+  const { brushRange } = useBrushStore();
   if (!chartData) return null;
 
-  // Use visible data if available AND it has all the same keys as chartData
-  // Otherwise fallback to full chart data
-  const chartDataKeys = chartData[0] ? Object.keys(chartData[0]) : [];
-  const visibleDataKeys = visibleData[0] ? Object.keys(visibleData[0]) : [];
-  const hasAllKeys = chartDataKeys.every((key) =>
-    visibleDataKeys.includes(key),
+  // Calculate visible data based on brush range
+  const visibleData = chartData.slice(
+    brushRange.startIndex,
+    brushRange.endIndex + 1,
   );
 
-  const dataToUse =
-    visibleData.length > 0 && hasAllKeys ? visibleData : chartData;
+  // Use visible data if we have a valid range, otherwise use full chart data
+  const dataToUse = visibleData.length > 0 ? visibleData : chartData;
 
   const handleApplyMetric = (newMetrics: (MetricTypesEnum | string)[]) => {
     // Add new metrics to existing ones (do not replace)
