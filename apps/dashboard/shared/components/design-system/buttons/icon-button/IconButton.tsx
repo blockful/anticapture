@@ -9,6 +9,7 @@ import { variantStyles } from "@/shared/components/design-system/buttons/styles"
 
 interface IconButtonProps extends ButtonProps {
   icon: ElementType;
+  iconClassName?: string;
 }
 
 const boxSizeStyles: Record<ButtonSize, string> = {
@@ -25,6 +26,7 @@ const iconSizeStyles: Record<ButtonSize, string> = {
 
 export const IconButton = ({
   icon: Icon,
+  iconClassName,
   className,
   disabled = false,
   onClick,
@@ -50,7 +52,7 @@ export const IconButton = ({
       {loading ? (
         <Spinner label={loadingText} />
       ) : (
-        <Icon className={iconSizeStyles[size]} />
+        <Icon className={cn(iconSizeStyles[size], iconClassName)} />
       )}
     </button>
   );
