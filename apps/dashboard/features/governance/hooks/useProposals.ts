@@ -121,7 +121,6 @@ const transformToGovernanceProposal = (
     id: graphqlProposal.id,
     title:
       graphqlProposal.title ||
-      graphqlProposal.description?.slice(0, 100) + "..." ||
       "Untitled Proposal",
     status: getProposalStatus(graphqlProposal.status),
     state: getProposalState(graphqlProposal.status),
