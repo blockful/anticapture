@@ -2,6 +2,7 @@ import { useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { Filter, Check } from "lucide-react";
 import { cn } from "@/shared/utils";
+import { Button, IconButton } from "@/shared/components";
 
 export interface FilterOption {
   value: string;
@@ -47,17 +48,20 @@ export const FilterDropdown = ({
 
   return (
     <div className={cn("relative", className)}>
-      <button
+      <IconButton
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
+        variant="secondary"
         className={cn(
-          "group flex cursor-pointer items-center rounded-sm border p-1 transition-colors",
+          "group h-auto w-auto border border-transparent p-1 transition-colors",
           "hover:border-highlight bg-surface-hover border-transparent",
           isOpen && "border-highlight bg-surface-hover",
+          className,
         )}
-      >
-        <Filter className="text-primary size-3" />
-      </button>
+        iconClassName="size-3"
+        size="sm"
+        icon={Filter}
+      />
 
       {isOpen &&
         createPortal(
@@ -66,11 +70,12 @@ export const FilterDropdown = ({
             className="bg-surface-contrast border-border-contrast pointer-events-auto rounded-md border py-1"
           >
             {options.map((option, index) => (
-              <button
+              <Button
+                variant="ghost"
                 key={option.value}
                 onClick={() => handleOptionClick(option.value)}
                 className={cn(
-                  "hover:bg-surface-hover flex w-full items-center justify-between px-3 py-2 text-left",
+                  "hover:bg-surface-hover w-full justify-start rounded-none text-left",
                   selectedValue === option.value && "bg-surface-hover",
                   index === 0 && "border-border-contrast border-b",
                 )}
@@ -81,7 +86,7 @@ export const FilterDropdown = ({
                 {selectedValue === option.value && (
                   <Check className="text-primary size-4" />
                 )}
-              </button>
+              </Button>
             ))}
           </div>,
           document.body,
