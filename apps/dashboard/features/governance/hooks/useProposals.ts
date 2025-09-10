@@ -191,11 +191,11 @@ export const useProposals = ({
   // Transform and filter raw GraphQL data
   const rawProposals = useMemo(() => {
     const currentProposals = data?.proposals || [];
-    // Filter for ENS proposals only and remove null values
+    // Remove null values
     return currentProposals
       .filter(
         (proposal): proposal is NonNullable<typeof proposal> =>
-          proposal !== null && proposal.daoId === DaoIdEnum.ENS,
+          proposal !== null,
       )
       .map((proposal) => ({
         id: proposal.id,
