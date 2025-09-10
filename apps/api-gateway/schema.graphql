@@ -536,11 +536,11 @@ type transferPage {
 type transfer {
   transactionHash: String!
   daoId: String!
-  tokenId: String
-  amount: BigInt
+  tokenId: String!
+  amount: BigInt!
   fromAccountId: String!
   toAccountId: String!
-  timestamp: BigInt
+  timestamp: BigInt!
   logIndex: Int!
   isCex: Boolean!
   isDex: Boolean!
