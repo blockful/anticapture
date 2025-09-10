@@ -22,7 +22,7 @@ export const ExpandButton = <TData,>({
           e.stopPropagation();
           row.getToggleExpandedHandler()();
         }}
-        className="text-secondary hover:text-primary p-1 transition-colors"
+        className="text-secondary hover:text-primary cursor-pointer p-1 transition-colors"
       >
         {isExpanded ? (
           <Minus className="size-4" />

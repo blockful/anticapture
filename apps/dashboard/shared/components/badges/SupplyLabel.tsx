@@ -41,6 +41,7 @@ export const SupplyLabel = ({ type, className }: SupplyLabelProps) => {
   return (
     <div className={cn("inline-flex items-center gap-2.5", className)}>
       <div className={cn("rounded-xs size-2", config.boxClass)} />
+
       <span className={cn("text-sm font-normal", config.textClass)}>
         {config.text}
       </span>
