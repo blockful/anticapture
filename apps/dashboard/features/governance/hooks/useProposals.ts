@@ -303,14 +303,8 @@ export const useProposals = ({
             transformToGovernanceProposal,
           );
 
-          // Filter out any duplicates by ID
-          const existingIds = new Set(allProposals.map((p) => p.id));
-          const uniqueNewProposals = newGovernanceProposals.filter(
-            (p) => !existingIds.has(p.id),
-          );
-
-          if (uniqueNewProposals.length > 0) {
-            setAllProposals((prev) => [...prev, ...uniqueNewProposals]);
+          if (newGovernanceProposals.length > 0) {
+            setAllProposals((prev) => [...prev, ...newGovernanceProposals]);
           }
 
           // Check if we've reached the end - if we got fewer items than requested page size
