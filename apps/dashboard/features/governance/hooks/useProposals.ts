@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
-import { useQuery, ApolloError } from "@apollo/client";
+import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
-  GetProposalsDocument,
+  useGetProposalsQuery,
   GetProposalsQuery,
   QueryInput_Proposals_OrderDirection,
   Query_Proposals_Items,
@@ -178,7 +178,7 @@ export const useProposals = ({
   );
 
   // Main proposals query
-  const { data, loading, error, fetchMore } = useQuery(GetProposalsDocument, {
+  const { data, loading, error, fetchMore } = useGetProposalsQuery({
     variables: queryVariables,
     notifyOnNetworkStatusChange: true,
     context: {
@@ -194,12 +194,10 @@ export const useProposals = ({
     // Filter for ENS proposals only and remove null values
     return currentProposals
       .filter(
-        (
-          proposal: Query_Proposals_Items | null,
-        ): proposal is NonNullable<Query_Proposals_Items> =>
+        (proposal): proposal is NonNullable<typeof proposal> =>
           proposal !== null && proposal.daoId === DaoIdEnum.ENS,
       )
-      .map((proposal: NonNullable<Proposal>) => ({
+      .map((proposal) => ({
         id: proposal.id,
         daoId: proposal.daoId,
         txHash: proposal.txHash,
@@ -332,6 +330,7 @@ export const useProposals = ({
     isPaginationLoading,
     queryVariables,
     allProposals,
+    itemsPerPage,
   ]);
 
   return {
