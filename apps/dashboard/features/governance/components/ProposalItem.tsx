@@ -136,21 +136,25 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
               className={cn("bg-error h-full rounded-r-full")}
             />
 
-            <div
-              className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]"
-              style={{
-                left: `${quorumPercentage}%`,
-              }}
-            />
+            {quorumPercentage < 100 && (
+              <div
+                className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]"
+                style={{
+                  left: `${quorumPercentage}%`,
+                }}
+              />
+            )}
           </div>
         </div>
-        <div className="relative flex w-full bg-red-500">
-          <div
-            style={{ left: `${quorumPercentage}%` }}
-            className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
-          >
-            Quorum: {formatNumberUserReadable(proposal.quorum)}
-          </div>
+        <div className="relative flex w-full">
+          {quorumPercentage < 100 && (
+            <div
+              style={{ left: `${quorumPercentage}%` }}
+              className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+            >
+              Quorum: {formatNumberUserReadable(proposal.quorum)}
+            </div>
+          )}
         </div>
       </div>
     </div>
