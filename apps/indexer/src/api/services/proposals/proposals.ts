@@ -10,6 +10,7 @@ interface ProposalsRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]>;
+  getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
   getVotingDelay(): Promise<bigint>;
 }
@@ -22,6 +23,10 @@ export class ProposalsService {
 
   async getVotingDelay(): Promise<bigint> {
     return this.proposalsRepo.getVotingDelay();
+  }
+
+  async getProposalsCount(): Promise<number> {
+    return this.proposalsRepo.getProposalsCount();
   }
 
   /**
