@@ -157,4 +157,5 @@ export interface DaoConfiguration extends BaseInfo {
   };
   riskAnalysis?: boolean;
   noStage?: boolean;
+  governancePage?: boolean;
 }
