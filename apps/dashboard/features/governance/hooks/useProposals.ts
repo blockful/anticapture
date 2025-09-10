@@ -57,7 +57,7 @@ const transformToGovernanceProposal = (
   };
 
   const formatVotes = (votes: number): number => {
-    if (typeof votes !== "number" || isNaN(votes) || votes < 0) {
+    if (isNaN(votes) || votes < 0) {
       return 0;
     }
 
@@ -119,9 +119,7 @@ const transformToGovernanceProposal = (
 
   return {
     id: graphqlProposal.id,
-    title:
-      graphqlProposal.title ||
-      "Untitled Proposal",
+    title: graphqlProposal.title || "Untitled Proposal",
     status: getProposalStatus(graphqlProposal.status),
     state: getProposalState(graphqlProposal.status),
     description: graphqlProposal.description,
