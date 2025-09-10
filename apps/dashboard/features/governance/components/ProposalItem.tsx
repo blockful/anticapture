@@ -158,5 +158,5 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
 };
 
 const BulletDivider = () => {
-  return <div className="bg-surface-hover h-1 w-1 rounded-full" />;
+  return <div className="bg-surface-hover size-1 rounded-full" />;
 };
