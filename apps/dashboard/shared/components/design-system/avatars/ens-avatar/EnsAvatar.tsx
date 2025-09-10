@@ -2,6 +2,7 @@
 
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
+// import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
@@ -83,15 +84,14 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    if (ensData?.ens) {
-      return ensData.ens;
-    }
+    const displayedName = ensData?.ens || address;
+    const maxLengthToDisplay = 15;
 
-    if (address) {
-      if (showFullAddress) {
-        return address;
+    if (displayedName) {
+      if (showFullAddress || displayedName.length <= maxLengthToDisplay) {
+        return displayedName;
       }
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+      return `${displayedName.slice(0, 6)}...${displayedName.slice(-4)}`;
     }
 
     return "Unknown";
@@ -159,10 +159,10 @@ export const EnsAvatar = ({
 
   // Return avatar with name
   return (
-    <div className={cn("flex items-center gap-3", containerClassName)}>
+    <div className={cn("flex min-w-0 items-center gap-3", containerClassName)}>
       {avatarElement()}
 
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col">
         <div className="flex items-center gap-2">
           {isLoadingName ? (
             <SkeletonRow
@@ -172,7 +172,7 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary text-sm",
+                "text-primary block truncate text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 nameClassName,
               )}
