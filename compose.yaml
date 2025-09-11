@@ -34,5 +34,17 @@ services:
     networks:
       - backend
 
+  indexer-db:
+    image: postgres:16.2
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    networks:
+      - backend
+
 networks:
   backend:

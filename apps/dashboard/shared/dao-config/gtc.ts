@@ -33,15 +33,15 @@ export const GTC: DaoConfiguration = {
       proposalThreshold: "150k GTC",
     },
   },
-  attackProfitability: {
-    riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: false,
-    attackCostBarChart: {
-      OptimismTimelock: "",
-      OptimismTokenDistributor: "",
-      OptimismUniv3Uni: "",
-    },
-  },
+  // attackProfitability: {
+  //   riskLevel: RiskLevel.HIGH,
+  //   supportsLiquidTreasuryCall: false,
+  //   attackCostBarChart: {
+  //     OptimismTimelock: "",
+  //     OptimismTokenDistributor: "",
+  //     OptimismUniv3Uni: "",
+  //   },
+  // },
   riskAnalysis: true,
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
