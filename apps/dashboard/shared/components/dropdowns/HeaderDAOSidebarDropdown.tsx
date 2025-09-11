@@ -148,7 +148,7 @@ export const HeaderDAOSidebarDropdown = () => {
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
         <Button
           variant="ghost"
-          size="lg"
+          size="sm"
           className="w-full"
           onClick={toggleDropdown}
           aria-expanded={isOpen}

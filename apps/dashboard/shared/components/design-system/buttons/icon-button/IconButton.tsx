@@ -13,9 +13,9 @@ interface IconButtonProps extends ButtonProps {
 }
 
 const boxSizeStyles: Record<ButtonSize, string> = {
-  sm: "size-7",
-  md: "size-9",
-  lg: "size-10",
+  sm: "p-1",
+  md: "p-2",
+  lg: "p-3",
 };
 
 const iconSizeStyles: Record<ButtonSize, string> = {
@@ -46,7 +46,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         className={cn(
           variantStyles[variant],
           boxSizeStyles[size],
-          "flex cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
+          "flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
           disabled &&
             "bg-surface-disabled hover:bg-surface-disabled cursor-not-allowed",
           className,

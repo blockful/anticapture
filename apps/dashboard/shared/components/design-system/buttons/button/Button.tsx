@@ -28,7 +28,7 @@ export const Button = ({
       className={cn(
         variantStyles[variant],
         sizeStyles[size],
-        "flex cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
+        "flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
         disabled &&
           "bg-surface-disabled hover:bg-surface-disabled cursor-not-allowed",
         className,

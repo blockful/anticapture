@@ -354,7 +354,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <IconButton variant="ghost" icon={ExternalLink} size="lg" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </a>
           </div>
         );
