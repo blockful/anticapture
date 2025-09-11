@@ -53,7 +53,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           />
         </CardContent>
         <div className="border-light-dark mx-4 w-px border border-dashed sm:order-2" />
-        <div className="order-1 w-fit min-w-[280px] items-start sm:order-3">
+        <div className="order-1 w-fit min-w-[300px] items-start sm:order-3">
           <TokenDistributionMetrics
             appliedMetrics={memoizedMetrics}
             setAppliedMetrics={setMetrics}
