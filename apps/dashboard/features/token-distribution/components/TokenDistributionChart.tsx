@@ -26,6 +26,8 @@ import { useBrushStore } from "@/features/token-distribution/store/useBrushStore
 import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
 import { useEffect } from "react";
+import { AlertOctagon } from "lucide-react";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 
 interface TokenDistributionChartProps {
   appliedMetrics: string[];
@@ -58,29 +60,12 @@ export const TokenDistributionChart = ({
   // Show error state
   if (error) {
     return (
-      <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
-        <div className="text-center">
-          <div className="mb-2 text-red-500">
-            <svg
-              className="mx-auto h-8 w-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            Failed to load chart data
-          </p>
-          <p className="text-muted-foreground mt-1 text-xs">{error.message}</p>
-        </div>
-      </div>
+      <BlankSlate
+        variant="title"
+        icon={AlertOctagon}
+        title="Error loading chart data"
+        description="Please check your network connection and refresh the page."
+      />
     );
   }
 
@@ -151,6 +136,7 @@ export const TokenDistributionChart = ({
             domain={["dataMin", "dataMax"]}
             tickMargin={8}
             tickFormatter={(date) => timestampToReadableDate(date)}
+            padding="gap"
           />
           {/* DEFAULT AXIS - Required for Recharts compatibility */}
           <YAxis yAxisId={0} hide domain={["auto", "auto"]} />
