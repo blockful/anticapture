@@ -9,6 +9,7 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 export interface UseChartMetricsResult {
   chartData: ChartDataSetPoint[];
@@ -84,8 +85,17 @@ export const useChartMetrics = ({
   const { data: historicalTokenData, loading: historicalLoading } =
     useDaoTokenHistoricalData(daoId);
 
+  const oneYearAgo = String(
+    BigInt(
+      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.ONE_YEAR],
+    ),
+  ).slice(0, 10);
+
   // Fetch proposals data (for proposals metric) - only when needed
-  const { data: proposals, loading: proposalsLoading } = useProposals(daoId);
+  const { data: proposals, loading: proposalsLoading } = useProposals(
+    daoId,
+    Number(oneYearAgo),
+  );
 
   // Apply conditional loading based on applied metrics
   const filteredHistoricalTokenData = shouldFetchTokenPrice
@@ -187,7 +197,7 @@ export const useChartMetrics = ({
       stableAppliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
       filteredProposals?.proposals
     ) {
-      filteredProposals.proposals.forEach((proposal) => {
+      filteredProposals.proposals.items.forEach((proposal) => {
         // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 

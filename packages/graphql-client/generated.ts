@@ -96,7 +96,7 @@ export type Query = {
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
   /** Returns a list of proposal */
-  proposals?: Maybe<Array<Maybe<Query_Proposals_Items>>>;
+  proposals?: Maybe<Proposals_200_Response>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
@@ -1318,6 +1318,12 @@ export type ProposalsOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type Proposals_200_Response = {
+  __typename?: 'proposals_200_response';
+  items: Array<Maybe<Query_Proposals_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1491,11 +1497,11 @@ export type Query_ProposalsActivity_Proposals_Items_Proposal = {
   againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
-  endBlock: Scalars['String']['output'];
+  endBlock: Scalars['Float']['output'];
   forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
   proposerAccountId: Scalars['String']['output'];
-  startBlock: Scalars['String']['output'];
+  startBlock: Scalars['Float']['output'];
   status: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
 };
@@ -1511,8 +1517,8 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   votingPower?: Maybe<Scalars['String']['output']>;
 };
 
-export type Query_Proposals_Items = {
-  __typename?: 'query_proposals_items';
+export type Query_Proposals_Items_Items = {
+  __typename?: 'query_proposals_items_items';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
@@ -2311,12 +2317,14 @@ export type GetProposalsActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: string, endBlock: string, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
+export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
-export type GetProposalsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetProposalsQueryVariables = Exact<{
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
 
 
-export type GetProposalsQuery = { __typename?: 'Query', proposals?: Array<{ __typename?: 'query_proposals_items', daoId: string, id: string, timestamp: string, title?: string | null } | null> | null };
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', items: Array<{ __typename?: 'query_proposals_items_items', id: string, title?: string | null, timestamp: string } | null> } | null };
 
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
   tokenAddresses: Scalars['String']['input'];
@@ -3471,12 +3479,13 @@ export type GetProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetPr
 export type GetProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetProposalsActivitySuspenseQuery>;
 export type GetProposalsActivityQueryResult = Apollo.QueryResult<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>;
 export const GetProposalsDocument = gql`
-    query GetProposals {
-  proposals(orderDirection: desc, limit: 10) {
-    daoId
-    id
-    timestamp
-    title
+    query GetProposals($fromDate: Float) {
+  proposals(limit: 100, orderDirection: asc, fromDate: $fromDate) {
+    items {
+      id
+      title
+      timestamp
+    }
   }
 }
     `;
@@ -3493,6 +3502,7 @@ export const GetProposalsDocument = gql`
  * @example
  * const { data, loading, error } = useGetProposalsQuery({
  *   variables: {
+ *      fromDate: // value for 'fromDate'
  *   },
  * });
  */

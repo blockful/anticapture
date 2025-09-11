@@ -1,8 +1,9 @@
-query GetProposals {
-  proposals(orderDirection: desc, limit: 10) {
-    daoId
-    id
-    timestamp
-    title
+query GetProposals($fromDate: Float) {
+  proposals(limit: 100, orderDirection: asc, fromDate: $fromDate) {
+    items {
+      id
+      title
+      timestamp
+    }
   }
 }
