@@ -118,6 +118,9 @@ type Query {
 
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
+
+  """Returns a list of voting power changes"""
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
 }
 
 """
@@ -1022,8 +1025,6 @@ type votingPowerHistory {
   delta: BigInt!
   timestamp: BigInt!
   logIndex: Int!
-  transfer: transfer
-  delegation: delegation
   account: account
 }
 
@@ -1670,6 +1671,40 @@ enum queryInput_lastUpdate_chart {
   cost_comparison
   attack_profitability
   token_distribution
+}
+
+type votingPowers_200_response {
+  items: [query_votingPowers_items_items]!
+  totalCount: Float!
+}
+
+type query_votingPowers_items_items {
+  transactionHash: String!
+  daoId: String!
+  accountId: String!
+  votingPower: String!
+  delta: String!
+  timestamp: String!
+  logIndex: Float!
+  delegation: query_votingPowers_items_items_delegation
+  transfer: query_votingPowers_items_items_transfer
+}
+
+type query_votingPowers_items_items_delegation {
+  from: String!
+  value: String!
+  to: String!
+}
+
+type query_votingPowers_items_items_transfer {
+  value: String!
+  from: String!
+  to: String!
+}
+
+enum queryInput_votingPowers_orderDirection {
+  asc
+  desc
 }
 
 scalar ObjMap
