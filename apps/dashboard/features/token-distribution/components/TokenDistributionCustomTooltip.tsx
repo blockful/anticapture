@@ -1,10 +1,7 @@
 "use client";
 
 import { TooltipProps } from "recharts";
-import {
-  formatNumberUserReadable,
-  timestampToReadableDate,
-} from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const TokenDistributionCustomTooltip: React.FC<
   TooltipProps<number, string> & {
@@ -13,10 +10,15 @@ export const TokenDistributionCustomTooltip: React.FC<
 > = ({ active, payload, label, chartConfig }) => {
   if (!active || !payload || payload.length === 0) return null;
 
+  const date = new Date(Number(label) * 1000).toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+  });
+
   return (
-    <div className="max-w-xs rounded bg-white p-2 text-black shadow-md">
-      <p className="font-bold">
-        Date: {timestampToReadableDate(Number(label))}
+    <div className="flex max-w-xs flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 shadow-md">
+      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
+        {date}
       </p>
       {payload
         .filter((entry) => {
@@ -46,7 +48,7 @@ export const TokenDistributionCustomTooltip: React.FC<
             <p
               key={index}
               style={{ color: displayColor }}
-              className="break-words"
+              className="flex gap-1.5 break-words"
             >
               {formattedName}:{" "}
               <strong

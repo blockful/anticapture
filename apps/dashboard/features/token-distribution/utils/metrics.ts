@@ -79,7 +79,7 @@ export const metricsSchema = {
   },
   PROPOSALS_GOVERNANCE: {
     label: "Proposals",
-    color: "#000",
+    color: "#fff",
     category: "GOVERNANCE",
     type: "SPORADIC_LINE",
   },
