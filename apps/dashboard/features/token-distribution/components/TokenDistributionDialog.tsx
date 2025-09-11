@@ -56,7 +56,7 @@ export const TokenDistributionDialog = ({
         <Button
           variant={isAllMetricsApplied ? "disabled" : "ghost"}
           className={
-            "border-light-dark flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+            "border-light-dark bg-surface-default flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
           }
           disabled={isAllMetricsApplied}
         >

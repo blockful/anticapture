@@ -24,7 +24,7 @@ export const Metric = ({
   return (
     <button
       className={cn(
-        "border-light-dark hover:bg-surface-contrast flex h-full w-full flex-col justify-between gap-2 rounded-sm border px-2 py-1 sm:h-7 sm:flex-row sm:items-center",
+        "border-light-dark bg-surface-default hover:bg-surface-contrast flex h-full w-full flex-col justify-between gap-2 rounded-sm border px-2 py-1 sm:h-7 sm:flex-row sm:items-center",
         className,
       )}
       {...props}
