@@ -148,6 +148,8 @@ export const TokenDistributionChart = ({
             yAxisId="primary"
             domain={["auto", "auto"]}
             tickFormatter={(value) => formatNumberUserReadable(Number(value))}
+            tick={{ fontSize: 10 }}
+            width={50}
           />
 
           {/* SECONDARY AXIS - For metrics configured with axis: "secondary" (TOKEN_PRICE) */}
@@ -160,8 +162,8 @@ export const TokenDistributionChart = ({
               domain={["auto", "auto"]}
               tickFormatter={(value) => `$${Number(value)}`}
               stroke="#8884d8"
-              tick={{ fill: "#8884d8", fontSize: 12 }}
-              width={60}
+              tick={{ fill: "#8884d8", fontSize: 10 }}
+              width={45}
             />
           )}
 
@@ -173,8 +175,8 @@ export const TokenDistributionChart = ({
               domain={[0, "dataMax"]}
               tickFormatter={(value) => formatNumberUserReadable(Number(value))}
               stroke="#10B981"
-              tick={{ fill: "#10B981", fontSize: 12 }}
-              width={80}
+              tick={{ fill: "#10B981", fontSize: 10 }}
+              width={50}
               allowDataOverflow={true}
             />
           )}
@@ -189,8 +191,8 @@ export const TokenDistributionChart = ({
               domain={[0, "dataMax"]}
               tickFormatter={(value) => formatNumberUserReadable(Number(value))}
               stroke="#10B981"
-              tick={{ fill: "#10B981", fontSize: 12 }}
-              width={80}
+              tick={{ fill: "#10B981", fontSize: 10 }}
+              width={50}
               hide
             />
           )}
