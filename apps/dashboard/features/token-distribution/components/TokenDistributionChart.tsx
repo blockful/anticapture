@@ -173,6 +173,7 @@ export const TokenDistributionChart = ({
               stroke="#10B981"
               tick={{ fill: "#10B981", fontSize: 12 }}
               width={80}
+              allowDataOverflow={true}
             />
           )}
 
