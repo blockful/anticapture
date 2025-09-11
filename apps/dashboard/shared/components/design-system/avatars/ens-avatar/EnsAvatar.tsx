@@ -170,7 +170,7 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary block text-sm",
+                "text-primary inline-block text-sm",
                 isEnsName && "overflow-hidden truncate whitespace-nowrap",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 nameClassName,
