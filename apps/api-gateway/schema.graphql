@@ -107,8 +107,8 @@ type Query {
     sortOrder: queryInput_transactions_sortOrder = desc
     from: String
     to: String
-    minAmount: String!
-    maxAmount: String!
+    minAmount: String
+    maxAmount: String
 
     """
     Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
@@ -1489,8 +1489,8 @@ type query_proposalsActivity_proposals_items_proposal {
   daoId: String!
   proposerAccountId: String!
   description: String
-  startBlock: String!
-  endBlock: String!
+  startBlock: Float!
+  endBlock: Float!
   timestamp: String!
   status: String!
   forVotes: String!
