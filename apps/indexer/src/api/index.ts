@@ -16,18 +16,23 @@ import {
   proposals,
   lastUpdate,
   assets,
+  votingPower,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
-import { DrizzleRepository, TransactionsRepository } from "./repositories";
+import {
+  DrizzleRepository,
+  TransactionsRepository,
+  VotingPowerRepository,
+} from "./repositories";
 import { TransactionsService } from "./services/transactions";
 import { errorHandler } from "./middlewares";
 import { ProposalsService } from "./services/proposals";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
-import { HistoricalVotingPowerService } from "./services";
+import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
@@ -83,6 +88,7 @@ if (!daoClient) {
 const { blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 const repo = new DrizzleRepository();
+const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
@@ -91,9 +97,14 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
-historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
+historicalOnchain(
+  app,
+  env.DAO_ID,
+  new HistoricalVotingPowerService(votingPowerRepo),
+);
 transactions(app, transactionsService);
 lastUpdate(app);
+votingPower(app, new VotingPowerService(votingPowerRepo));
 docs(app);
 
 export default app;
