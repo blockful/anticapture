@@ -53,7 +53,7 @@ export const FilterDropdown = ({
         onClick={() => setIsOpen(!isOpen)}
         variant="secondary"
         className={cn(
-          "group h-auto w-auto border border-transparent p-1 transition-colors",
+          "group border border-transparent",
           "hover:border-highlight bg-surface-hover border-transparent",
           isOpen && "border-highlight bg-surface-hover",
           className,
@@ -75,8 +75,7 @@ export const FilterDropdown = ({
                 key={option.value}
                 onClick={() => handleOptionClick(option.value)}
                 className={cn(
-                  "hover:bg-surface-hover w-full justify-start rounded-none text-left",
-                  selectedValue === option.value && "bg-surface-hover",
+                  "w-full justify-start text-left",
                   index === 0 && "border-border-contrast border-b",
                 )}
               >

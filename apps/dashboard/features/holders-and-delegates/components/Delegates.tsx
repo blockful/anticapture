@@ -253,7 +253,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end px-4"
+          className="text-secondary w-full justify-end"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -367,7 +367,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end px-4"
+          className="text-secondary w-full justify-end"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>

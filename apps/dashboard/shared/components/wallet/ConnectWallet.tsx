@@ -56,7 +56,7 @@ export const ConnectWallet = ({
                   <Button
                     onClick={openConnectModal}
                     type="button"
-                    className={cn("btn-connect-wallet size-[36px]", className)}
+                    className={cn("btn-connect-wallet", className)}
                   >
                     <Wallet className="size-3.5" />
                     {label}
@@ -75,7 +75,7 @@ export const ConnectWallet = ({
                   <Button
                     onClick={openAccountModal}
                     type="button"
-                    className="btn-connect-wallet flex items-center gap-2"
+                    className="btn-connect-wallet"
                   >
                     {account.ensAvatar ? (
                       <div className="relative size-6 overflow-hidden rounded-full">

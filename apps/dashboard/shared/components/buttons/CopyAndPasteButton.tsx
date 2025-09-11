@@ -36,11 +36,7 @@ export const CopyAndPasteButton = ({
       disabled={disabled || !textToCopy}
       aria-label={isCopied ? "Copied!" : "Copy to clipboard"}
       variant="ghost"
-      className={cn(
-        "group hover:bg-transparent",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
+      className={cn("group", className)}
       size="lg"
       iconClassName={cn(
         isCopied ? "text-success" : "text-secondary group-hover:text-primary",

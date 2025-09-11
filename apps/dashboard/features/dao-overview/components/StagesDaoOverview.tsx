@@ -101,7 +101,7 @@ export const StagesDaoOverview = ({
           <div className="flex justify-start">
             <Button
               variant="ghost"
-              className="group rounded-none p-0 font-mono"
+              className="group font-mono"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >

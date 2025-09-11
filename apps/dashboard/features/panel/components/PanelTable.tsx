@@ -258,7 +258,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-secondary w-full justify-end px-4"
+          className="text-secondary w-full justify-end"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Delegated Supply</h4>

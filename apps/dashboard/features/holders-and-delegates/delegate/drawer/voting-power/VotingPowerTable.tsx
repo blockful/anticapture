@@ -106,7 +106,7 @@ export const VotingPowerTable = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-secondary justify-end px-2"
+              className="text-secondary justify-end"
               onClick={handleSortToggle}
             >
               <ArrowUpDown

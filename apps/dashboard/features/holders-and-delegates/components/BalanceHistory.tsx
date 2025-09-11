@@ -177,7 +177,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start px-2"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("date")}
         >
           <span className="text-xs">Date</span>
@@ -221,7 +221,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end px-2"
+          className="text-secondary w-full justify-end"
           onClick={() => handleSort("amount")}
         >
           <span className="text-xs">Amount ({daoId.toUpperCase()})</span>

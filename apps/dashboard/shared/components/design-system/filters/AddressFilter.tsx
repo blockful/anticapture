@@ -104,7 +104,7 @@ export function AddressFilter({
           aria-label="Filter by address"
           variant="secondary"
           className={cn(
-            "group h-auto w-auto border border-transparent p-1 transition-colors",
+            "group border border-transparent",
             "hover:border-highlight bg-surface-hover border-transparent",
             currentFilter && "border-highlight bg-surface-hover",
             className,

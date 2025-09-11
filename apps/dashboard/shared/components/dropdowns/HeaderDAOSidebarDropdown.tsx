@@ -149,7 +149,7 @@ export const HeaderDAOSidebarDropdown = () => {
         <Button
           variant="ghost"
           size="lg"
-          className="w-full p-1 sm:rounded-md"
+          className="w-full"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
@@ -176,10 +176,7 @@ export const HeaderDAOSidebarDropdown = () => {
               variant="ghost"
               size="lg"
               key={item.id}
-              className={cn(
-                "w-full px-3 py-2",
-                !item.isDisabled && "hover:bg-[#333]",
-              )}
+              className={cn("w-full", !item.isDisabled && "hover:bg-[#333]")}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}

@@ -59,7 +59,7 @@ export const BannerAlert = ({
       <IconButton
         onClick={onClose}
         variant="ghost"
-        className="hover:text-tangerine/80 p-0 text-white"
+        className="hover:text-tangerine/80"
         aria-label="Close message"
         size="lg"
         icon={X}

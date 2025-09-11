@@ -49,7 +49,7 @@ export const VotingPowerTimePeriodSwitcher = ({
         onClick={() => setIsOpen(!isOpen)}
         variant="secondary"
         className={cn(
-          "min-w-[70px] px-2",
+          "min-w-[70px]",
           isOpen
             ? "border-tangerine bg-light-dark"
             : "bg-surface-contrast border-transparent",
@@ -70,10 +70,7 @@ export const VotingPowerTimePeriodSwitcher = ({
             <Button
               key={period}
               variant="ghost"
-              className={cn(
-                "rounded-none px-2 text-left text-sm font-normal",
-                value == period && "bg-middle-dark",
-              )}
+              className={cn("text-left", value == period && "bg-middle-dark")}
               onClick={() => handleSelect(period)}
             >
               {formatPeriod(period)}

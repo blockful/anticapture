@@ -128,7 +128,7 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start px-2"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -241,7 +241,7 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end px-2"
+          className="text-secondary w-full justify-end"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -302,7 +302,7 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start px-2"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =

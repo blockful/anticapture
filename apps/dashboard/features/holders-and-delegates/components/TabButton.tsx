@@ -20,7 +20,7 @@ export const TabButton = <T extends string>({
       onClick={() => setActiveTab(id)}
       variant="outline"
       className={cn(
-        "text-secondary rounded-none font-mono text-[13px] font-medium uppercase tracking-[0.78px]",
+        "text-secondary font-mono uppercase tracking-[0.78px]",
         activeTab === id && "border-link text-link bg-transparent",
       )}
     >

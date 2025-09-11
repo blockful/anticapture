@@ -116,7 +116,7 @@ export const DelegateDelegationHistoryTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start px-2"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
@@ -159,7 +159,7 @@ export const DelegateDelegationHistoryTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start px-4"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("delta")}
         >
           <h4 className="text-table-header">Amount ({daoId})</h4>
