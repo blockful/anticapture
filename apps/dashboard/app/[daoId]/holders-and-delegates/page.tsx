@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoOverviewSection } from "@/features/dao-overview";
+import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -29,30 +29,30 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: `Anticapture - ${daoId} DAO Holders and Delegates`,
+    description: `Explore ${daoId} DAO token holders and delegate distribution.`,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Holders and Delegates`,
+      description: `Explore ${daoId} DAO token holders and delegate distribution.`,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${daoId} DAO Open Graph Image`,
+          alt: `${daoId} DAO Holders and Delegates Open Graph Image`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Holders and Delegates`,
+      description: `Explore ${daoId} DAO token holders and delegate distribution.`,
       images: [imageUrl],
     },
   };
 }
 
-export default async function DaoPage({
+export default async function HoldersAndDelegatesPage({
   params,
 }: {
   params: Promise<{ daoId: string }>;
@@ -61,9 +61,9 @@ export default async function DaoPage({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
 
-  if (!daoConstants.daoOverview) {
+  if (!daoConstants.dataTables) {
     return null;
   }
 
-  return <DaoOverviewSection daoId={daoIdEnum} />;
+  return <HoldersAndDelegatesSection daoId={daoIdEnum} />;
 }

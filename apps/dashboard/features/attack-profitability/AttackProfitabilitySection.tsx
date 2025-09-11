@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  TheSectionLayout,
-  TheCardChartLayout,
-  SwitcherDate,
-  RiskLevelCard,
-} from "@/shared/components";
+import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,
@@ -18,6 +13,14 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import {
+  SubSection,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
+import { getDateRange } from "@/shared/utils";
+import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -36,23 +39,64 @@ export const AttackProfitabilitySection = ({
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.attackProfitability.title}
+      title={PAGES_CONSTANTS.attackProfitability.title}
       subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.attackProfitability.description}
-      infoText={"Treasury values above supply costs indicate high risk."}
-      switchDate={
-        <SwitcherDate
-          defaultValue={defaultDays}
-          setTimeInterval={setDays}
-          disableRecentData={true}
-        />
-      }
-      days={days}
-      anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+      description={PAGES_CONSTANTS.attackProfitability.description}
+      // switchDate={
+      //   <SwitcherDate
+      //     defaultValue={defaultDays}
+      //     setTimeInterval={setDays}
+      //     disableRecentData={true}
+      //   />
+      // }
+      // days={days}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
-      <TheCardChartLayout
+      <SubSectionsContainer>
+        <SubSection
+          subsectionTitle={"Cost of Attack vs Profit "}
+          dateRange={getDateRange(days ?? "")}
+          switchDate={
+            <SwitcherDateMobile
+              defaultValue={defaultDays}
+              setTimeInterval={setDays}
+              disableRecentData={true}
+            />
+          }
+        >
+          <InlineAlert
+            variant="info"
+            label="Treasury values above supply costs indicate high risk."
+          />
+          <MultilineChartAttackProfitability
+            days={days}
+            filterData={[treasuryMetric, costMetric]}
+          />
+
+          <AttackProfitabilityToggleHeader
+            treasuryMetric={treasuryMetric}
+            setTreasuryMetric={setTreasuryMetric}
+            costMetric={costMetric}
+            setCostMetric={setCostMetric}
+          />
+        </SubSection>
+        <DividerDefault isHorizontal />
+        <SubSection
+          subsectionTitle={"Cost Comparison"}
+          subsectionDescription={"All values reflect current data."}
+          dateRange=""
+        >
+          <div className="flex flex-row gap-5">
+            <AttackCostBarChart />
+            <div className="flex flex-col gap-2">
+              <AttackProfitabilityAccordion />
+            </div>
+          </div>
+        </SubSection>
+      </SubSectionsContainer>
+
+      {/* <TheCardChartLayout
         headerComponent={
           <div className="flex w-full pt-3">
             <AttackProfitabilityToggleHeader
@@ -80,7 +124,7 @@ export const AttackProfitabilitySection = ({
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
         </div>
-      </div>
+      </div> */}
     </TheSectionLayout>
   );
 };

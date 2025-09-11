@@ -7,13 +7,8 @@ import {
 } from "@/shared/components";
 import { FilePenLine, LinkIcon, Shield } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useInView } from "react-intersection-observer";
-import { useScreenSize } from "@/shared/hooks";
-import { useEffect } from "react";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import {
   fieldsToArray,
@@ -30,26 +25,10 @@ import {
 } from "@/features/dao-overview/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
-import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
-  const { isMobile, isDesktop } = useScreenSize();
-  const { scrollToSection, setActiveRisk } = useDaoPageInteraction();
-  const { ref, inView } = useInView({
-    threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
-  });
-
-  useEffect(() => {
-    if (inView) {
-      window.dispatchEvent(
-        new CustomEvent("sectionInView", {
-          detail: SECTIONS_CONSTANTS.daoOverview.anchorId,
-        }),
-      );
-    }
-  }, [inView]);
 
   if (!daoOverview) {
     return null;
@@ -107,20 +86,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     })),
   };
 
-  const handleRiskAreaClick = (riskName: RiskAreaEnum) => {
-    // First set the active risk
-    setActiveRisk(riskName);
-
-    // Then scroll to the risk analysis section
-    scrollToSection(SECTIONS_CONSTANTS.riskAnalysis.anchorId);
-  };
-
   return (
-    <div
-      id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="sm:bg-surface-default flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:p-5"
-      ref={ref}
-    >
+    <div className="sm:bg-surface-default flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:p-5">
       <div
         id="dao-info-header"
         className="hidden w-full flex-col sm:flex xl:flex-row"
@@ -198,9 +165,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <RiskAreaCardWrapper
               title={riskAreas.title}
               riskAreas={riskAreas.risks}
-              onRiskClick={(riskName) => {
-                handleRiskAreaClick(riskName);
-              }}
+              onRiskClick={() => {}}
               variant={RiskAreaCardEnum.DAO_OVERVIEW}
               className="grid grid-cols-2 gap-1"
             />
@@ -271,9 +236,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <RiskAreaCardWrapper
               title={riskAreas.title}
               riskAreas={riskAreas.risks}
-              onRiskClick={(riskName) => {
-                handleRiskAreaClick(riskName);
-              }}
+              onRiskClick={() => {}}
               variant={RiskAreaCardEnum.DAO_OVERVIEW}
               className="grid grid-cols-2 gap-1"
             />

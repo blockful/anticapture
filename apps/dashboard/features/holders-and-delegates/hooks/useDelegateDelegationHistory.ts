@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
 import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
