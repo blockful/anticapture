@@ -26,7 +26,7 @@ export class TransfersRepository {
       })
       .from(transfer)
       .where(where)
-      .orderBy(order, desc(transfer.transactionHash))
+      .orderBy(order, desc(transfer.timestamp))
       .limit(limit)
       .offset(offset);
   }
