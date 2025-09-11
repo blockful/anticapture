@@ -433,6 +433,7 @@ export enum ProposalStatus {
   QUEUED = "QUEUED",
   EXPIRED = "EXPIRED",
   EXECUTED = "EXECUTED",
+  NO_QUORUM = "NO_QUORUM",
 }
 
 export enum MetricTypesEnum {
