@@ -130,11 +130,11 @@ export const transfer = onchainTable(
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
-    tokenId: drizzle.text("token_id"),
-    amount: drizzle.bigint(),
+    tokenId: drizzle.text("token_id").notNull(),
+    amount: drizzle.bigint().notNull(),
     fromAccountId: drizzle.text("from_account_id").$type<Address>().notNull(),
     toAccountId: drizzle.text("to_account_id").$type<Address>().notNull(),
-    timestamp: drizzle.bigint(),
+    timestamp: drizzle.bigint().notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
     isCex: drizzle.boolean().notNull().default(false),
     isDex: drizzle.boolean().notNull().default(false),
@@ -350,16 +350,6 @@ export const delegationsRelations = relations(delegation, ({ one }) => ({
 export const votingPowerHistoryRelations = relations(
   votingPowerHistory,
   ({ one }) => ({
-    transfer: one(transfer, {
-      fields: [votingPowerHistory.transactionHash, votingPowerHistory.logIndex],
-      references: [transfer.transactionHash, transfer.logIndex],
-      relationName: "votingPowerTransfer",
-    }),
-    delegation: one(delegation, {
-      fields: [votingPowerHistory.transactionHash, votingPowerHistory.logIndex],
-      references: [delegation.transactionHash, delegation.logIndex],
-      relationName: "votingPowerDelegation",
-    }),
     account: one(account, {
       fields: [votingPowerHistory.accountId],
       references: [account.id],
