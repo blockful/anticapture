@@ -56,11 +56,12 @@ export function proposals(
 
       const votingDelay = await service.getVotingDelay();
 
-      return context.json(
-        result.map((p, index) =>
+      return context.json({
+        items: result.map((p, index) =>
           ProposalMapper.toApi(p, quorums[index]!, blockTime, votingDelay),
         ),
-      );
+        totalCount: await service.getProposalsCount(),
+      });
     },
   );
 
