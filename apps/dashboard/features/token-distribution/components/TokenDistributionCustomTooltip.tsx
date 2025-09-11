@@ -14,7 +14,7 @@ export const TokenDistributionCustomTooltip: React.FC<
   if (!active || !payload || payload.length === 0) return null;
 
   return (
-    <div className="rounded bg-white p-2 text-black shadow-md">
+    <div className="max-w-xs rounded bg-white p-2 text-black shadow-md">
       <p className="font-bold">
         Date: {timestampToReadableDate(Number(label))}
       </p>
@@ -43,9 +43,15 @@ export const TokenDistributionCustomTooltip: React.FC<
             entry.color;
 
           return (
-            <p key={index} style={{ color: displayColor }}>
+            <p
+              key={index}
+              style={{ color: displayColor }}
+              className="break-words"
+            >
               {formattedName}:{" "}
-              <strong>
+              <strong
+                className={typeof value === "string" ? "break-words" : ""}
+              >
                 {typeof value === "string"
                   ? value
                   : formatNumberUserReadable(
