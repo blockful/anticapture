@@ -8,6 +8,7 @@ import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { UserIcon } from "@/shared/components/icons";
 import { SkeletonRow } from "@/shared/components";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -84,17 +85,19 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    const displayedName = ensData?.ens || address;
     const maxLengthToDisplay = 15;
 
-    if (displayedName) {
-      if (showFullAddress || displayedName.length <= maxLengthToDisplay) {
-        return displayedName;
-      }
-      return `${displayedName.slice(0, 6)}...${displayedName.slice(-4)}`;
-    }
+    const getDisplayedName = (name?: string, customTrim?: number) => {
+      if (!name) return null;
+      if (showFullAddress || name.length <= maxLengthToDisplay) return name;
+      return formatAddress(name, customTrim);
+    };
 
-    return "Unknown";
+    return (
+      getDisplayedName(ensData?.ens, 6) ||
+      getDisplayedName(address) ||
+      "Unknown"
+    );
   };
 
   const displayName = getDisplayName();
