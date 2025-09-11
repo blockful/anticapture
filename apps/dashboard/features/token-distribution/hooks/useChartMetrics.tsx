@@ -85,16 +85,16 @@ export const useChartMetrics = ({
   const { data: historicalTokenData, loading: historicalLoading } =
     useDaoTokenHistoricalData(daoId);
 
-  const oneYearAgo = String(
-    BigInt(
+  const oneYearAgo = useMemo(
+    () =>
       Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.ONE_YEAR],
-    ),
-  ).slice(0, 10);
+    [],
+  );
 
   // Fetch proposals data (for proposals metric) - only when needed
   const { data: proposals, loading: proposalsLoading } = useProposals(
     daoId,
-    Number(oneYearAgo),
+    oneYearAgo,
   );
 
   // Apply conditional loading based on applied metrics
@@ -197,7 +197,7 @@ export const useChartMetrics = ({
       stableAppliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
       filteredProposals?.proposals
     ) {
-      filteredProposals.proposals.items.forEach((proposal) => {
+      filteredProposals.proposals.forEach((proposal) => {
         // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 
