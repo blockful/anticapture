@@ -25,7 +25,7 @@ import { timestampToReadableDate } from "@/shared/utils";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AlertOctagon } from "lucide-react";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 
@@ -47,15 +47,17 @@ export const TokenDistributionChart = ({
   error = null,
 }: TokenDistributionChartProps) => {
   const { brushRange, setBrushRange } = useBrushStore();
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (chartData && chartData.length > 0) {
+    if (chartData && chartData.length > 0 && !hasInitialized.current) {
       setBrushRange({
         startIndex: 0,
         endIndex: chartData.length - 1,
       });
+      hasInitialized.current = true;
     }
-  }, []);
+  }, [chartData, setBrushRange]);
 
   // Show error state
   if (error) {
