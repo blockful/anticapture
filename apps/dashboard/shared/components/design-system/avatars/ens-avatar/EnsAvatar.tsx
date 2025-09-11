@@ -85,28 +85,23 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    const maxLengthToDisplay = 15;
-
-    const getDisplayedName = (name?: string, customTrim?: number) => {
-      if (!name) return null;
-      if (showFullAddress || name.length <= maxLengthToDisplay) return name;
-      return formatAddress(name, customTrim);
-    };
-
-    return (
-      getDisplayedName(ensData?.ens, 6) ||
-      getDisplayedName(address) ||
-      "Unknown"
-    );
+    if (ensData?.ens) {
+      return ensData.ens;
+    }
+    if (address) {
+      return showFullAddress ? address : formatAddress(address);
+    }
+    return "Unknown";
   };
 
   const displayName = getDisplayName();
   const isLoadingName = loading || ensLoading;
+  const isEnsName = Boolean(ensData?.ens);
 
   const baseClasses = cn(
     sizeClasses[size],
     variantClasses[variant],
-    "relative overflow-hidden bg-surface-hover flex items-center justify-center",
+    "relative overflow-hidden bg-surface-hover flex items-center justify-center flex-shrink-0",
     className,
   );
 
@@ -175,7 +170,8 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary block truncate text-sm",
+                "text-primary block text-sm",
+                isEnsName && "overflow-hidden truncate whitespace-nowrap",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 nameClassName,
               )}

@@ -181,7 +181,7 @@ export const Delegates = ({
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
       accessorKey: "address",
-      size: 280,
+      size: 550,
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
         if (loading) {
@@ -231,7 +231,7 @@ export const Delegates = ({
     },
     {
       accessorKey: "votingPower",
-      size: 150,
+      size: 145,
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
