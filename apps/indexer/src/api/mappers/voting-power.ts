@@ -25,7 +25,8 @@ export const VotingPowerRequestSchema = z.object({
     .max(100, "Limit cannot exceed 100")
     .optional()
     .default(10),
-  orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
+  orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export type VotingPowerRequest = z.infer<typeof VotingPowerRequestSchema>;

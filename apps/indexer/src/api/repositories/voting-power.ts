@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { and, inArray, lte, desc, eq, asc, lt } from "drizzle-orm";
+import { and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
 import { votingPowerHistory, delegation, transfer } from "ponder:schema";
 
@@ -40,6 +40,7 @@ export class VotingPowerRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "timestamp" | "delta",
   ): Promise<DBVotingPowerWithRelations[]> {
     const result = await db
       .select()
@@ -47,30 +48,52 @@ export class VotingPowerRepository {
       .where(eq(votingPowerHistory.accountId, accountId))
       .leftJoin(
         delegation,
-        and(
-          eq(votingPowerHistory.transactionHash, delegation.transactionHash),
-          lt(delegation.logIndex, votingPowerHistory.logIndex),
-        ),
+        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
+          AND ${delegation.logIndex} = (
+            SELECT MAX(d2.log_index) 
+            FROM ${delegation} d2 
+            WHERE d2.transaction_hash = ${votingPowerHistory.transactionHash} 
+            AND d2.log_index < ${votingPowerHistory.logIndex}
+        )`,
       )
       .leftJoin(
         transfer,
-        and(
-          eq(votingPowerHistory.transactionHash, transfer.transactionHash),
-          lt(transfer.logIndex, votingPowerHistory.logIndex),
-        ),
+        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
+          AND ${transfer.logIndex} = (
+            SELECT MAX(t2.log_index) 
+            FROM ${transfer} t2 
+            WHERE t2.transaction_hash = ${votingPowerHistory.transactionHash} 
+            AND t2.log_index < ${votingPowerHistory.logIndex}
+        )`,
       )
       .orderBy(
         orderDirection === "asc"
-          ? asc(votingPowerHistory.timestamp)
-          : desc(votingPowerHistory.timestamp),
+          ? asc(
+              orderBy === "timestamp"
+                ? votingPowerHistory.timestamp
+                : votingPowerHistory.delta,
+            )
+          : desc(
+              orderBy === "timestamp"
+                ? votingPowerHistory.timestamp
+                : votingPowerHistory.delta,
+            ),
       )
       .limit(limit)
       .offset(skip);
 
     return result.map((row) => ({
       ...row.voting_power_history,
-      delegations: row.delegations,
-      transfers: row.transfers,
+      delegations:
+        row.transfers &&
+        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+          ? null
+          : row.delegations,
+      transfers:
+        row.delegations &&
+        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+          ? null
+          : row.transfers,
     }));
   }
 }

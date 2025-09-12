@@ -31,7 +31,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { account, skip, limit, orderDirection } =
+      const { account, skip, limit, orderDirection, orderBy } =
         context.req.valid("query");
 
       const { items, totalCount } = await service.getVotingPowers(
@@ -39,6 +39,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
         skip,
         limit,
         orderDirection,
+        orderBy,
       );
       return context.json(VotingPowerMapper(items, totalCount));
     },
