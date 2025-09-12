@@ -18,13 +18,11 @@ import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 interface DelegateProposalsActivityProps {
   address: string;
   daoId: DaoIdEnum;
-  fromDate?: number;
 }
 
 export const DelegateProposalsActivity = ({
   address,
   daoId,
-  fromDate,
 }: DelegateProposalsActivityProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -54,7 +52,6 @@ export const DelegateProposalsActivity = ({
   const { data, loading, error, pagination } = useProposalsActivity({
     address,
     daoId,
-    fromDate,
     skip,
     limit: itemsPerPage,
     orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
