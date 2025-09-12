@@ -44,23 +44,35 @@ export const proposalsUserVoteMapping = {
 
 // Final result mapping object
 export const proposalsFinalResultMapping = {
-  ongoing: {
+  PENDING: {
+    text: "Pending",
+    icon: <Clock10 className="text-secondary size-4" />,
+  },
+  ACTIVE: {
     text: "Ongoing",
     icon: <ActivityIndicator className="text-warning" />,
   },
-  yes: {
+  SUCCEEDED: {
     text: "Passed",
     icon: <CheckCircle className="text-success size-4" />,
   },
-  no: {
+  DEFEATED: {
     text: "Defeated",
     icon: <XCircle className="text-error size-4" />,
   },
-  cancel: {
+  CANCELED: {
     text: "Cancel",
     icon: <CircleMinus className="text-secondary size-4" />,
   },
-  "no-quorum": {
+  QUEUED: {
+    text: "Queued",
+    icon: <Clock10 className="text-secondary size-4" />,
+  },
+  EXECUTED: {
+    text: "Executed",
+    icon: <CheckCircle className="text-success size-4" />,
+  },
+  NO_QUORUM: {
     text: "No quorum",
     icon: <UserX className="text-secondary size-4" />,
   },
@@ -68,7 +80,7 @@ export const proposalsFinalResultMapping = {
     text: "Unknown",
     icon: <ThumbsDown className="text-secondary size-4" />,
   },
-};
+} as const;
 
 // Helper function to extract proposal name from description
 export const extractProposalName = (description: string): string => {
@@ -115,130 +127,17 @@ export const getUserVoteData = (
   };
 };
 
-// Status to result mapping
-const statusToResultMapping: Record<
-  string,
-  keyof typeof proposalsFinalResultMapping
-> = {
-  active: "ongoing",
-  executed: "yes",
-  succeeded: "yes",
-  failed: "no",
-  canceled: "cancel",
-  "no-quorum": "no-quorum",
-  noquorum: "no-quorum",
-};
-
-// Helper function to determine the actual status of a proposal
-const determineProposalStatus = (
-  proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
-  daoVotingPeriod: number | undefined,
-  daoQuorum: number | undefined,
-  daoConfig?: any,
-): keyof typeof proposalsFinalResultMapping => {
-  if (!proposal) return "unknown";
-
-  const status = proposal.status?.toLowerCase();
-
-  // For pending proposals, check if voting period has ended
-  if (status === "pending") {
-    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-    const proposalStartTime = Number(proposal.timestamp);
-
-    // Use DAO's voting period if available, otherwise fallback to 30 days
-    const votingDuration = Number(daoVotingPeriod); // DAO voting period or 30 days in seconds
-    const votingEndTime = proposalStartTime + votingDuration;
-
-    // If voting period has ended, check if it met quorum
-    if (currentTime > votingEndTime) {
-      if (daoQuorum) {
-        const quorumLogic = daoConfig?.daoOverview?.rules?.logic;
-        let totalVotesForQuorum = 0;
-
-        // Calculate quorum based on DAO's logic
-        if (quorumLogic === "For + Abstain") {
-          totalVotesForQuorum =
-            Number(proposal.forVotes) + Number(proposal.abstainVotes);
-        } else {
-          // Default to "For" logic - only forVotes count for quorum
-          totalVotesForQuorum = Number(proposal.forVotes);
-        }
-
-        const quorumThreshold = Number(daoQuorum);
-
-        // If total votes didn't reach quorum, it's no-quorum
-        if (totalVotesForQuorum < quorumThreshold) {
-          return "no-quorum";
-        }
-      }
-      return "no";
-    }
-
-    // Otherwise, it's still ongoing
-    return "ongoing";
-  }
-
-  // For defeated/failed proposals, check if they met quorum
-  if (status === "defeated" || status === "failed") {
-    if (daoQuorum) {
-      const quorumLogic = daoConfig?.daoOverview?.rules?.logic;
-      let totalVotesForQuorum = 0;
-
-      // Calculate quorum based on DAO's logic
-      if (quorumLogic === "For + Abstain") {
-        totalVotesForQuorum =
-          Number(proposal.forVotes) + Number(proposal.abstainVotes);
-      } else {
-        // Default to "For" logic - only forVotes count for quorum
-        totalVotesForQuorum = Number(proposal.forVotes);
-      }
-
-      const quorumThreshold = Number(daoQuorum);
-
-      // If total votes didn't reach quorum, it's no-quorum
-      if (totalVotesForQuorum < quorumThreshold) {
-        return "no-quorum";
-      }
-    }
-    // If quorum was met, it's a regular "no" result
-    return "no";
-  }
-
-  // For all other statuses, use the existing mapping
-  return statusToResultMapping[status] || "unknown";
-};
-
-// Helper function to get final result data for TextIconLeft
-export const getFinalResultData = (
-  proposal: Query_ProposalsActivity_Proposals_Items_Proposal | undefined,
-  daoVotingPeriod: number | undefined,
-  daoQuorum: number | undefined,
-  daoConfig?: any,
-): { text: string; icon: ReactNode } => {
-  if (!proposal) return proposalsFinalResultMapping.unknown;
-
-  const resultKey = determineProposalStatus(
-    proposal,
-    daoVotingPeriod,
-    daoQuorum,
-    daoConfig,
-  );
-  return proposalsFinalResultMapping[resultKey];
-};
-
 // Helper function to check if proposal is finished
-export const isProposalFinished = (
-  finalResultStatus: string | undefined,
-): boolean => {
+export const isProposalFinished = (finalResultStatus: string): boolean => {
   const status = finalResultStatus?.toLowerCase();
-  return status !== "ongoing";
+  return status !== "ongoing" && status !== "pending";
 };
 
 // Helper function to format vote timing and calculate percentage
 export const getVoteTimingData = (
   userVote: Query_ProposalsActivity_Proposals_Items_UserVote | null | undefined,
   proposal: Query_ProposalsActivity_Proposals_Items_Proposal,
-  finalResultStatus: string | undefined,
+  finalResultStatus: string,
   daoVotingPeriod: number | undefined,
 ): { text: string; percentage: number } => {
   // If user didn't vote
