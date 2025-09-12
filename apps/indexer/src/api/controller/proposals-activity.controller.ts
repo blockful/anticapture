@@ -6,13 +6,15 @@ import { ProposalsActivityService } from "@/api/services/proposals-activity/prop
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { VoteFilter } from "@/api/repositories/proposals-activity.repository";
+import { DAOClient } from "@/interfaces/client";
 
 export function proposalsActivity(
   app: Hono,
   repository: ProposalsActivityRepository,
   daoId: DaoIdEnum,
+  daoClient: DAOClient,
 ) {
-  const service = new ProposalsActivityService(repository);
+  const service = new ProposalsActivityService(repository, daoClient);
 
   app.openapi(
     createRoute({
@@ -79,8 +81,8 @@ export function proposalsActivity(
                       daoId: z.string(),
                       proposerAccountId: z.string(),
                       description: z.string().nullable(),
-                      startBlock: z.string(),
-                      endBlock: z.string(),
+                      startBlock: z.number(),
+                      endBlock: z.number(),
                       timestamp: z.string(),
                       status: z.string(),
                       forVotes: z.string(),

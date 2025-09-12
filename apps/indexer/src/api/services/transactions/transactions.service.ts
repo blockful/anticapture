@@ -52,7 +52,11 @@ export class TransactionsService {
 
     // 2) Collect transaction hashes from the page results
     const pageHashes = [...pagedTransfersTxHashes, ...pagedDelegationsTxHashes]
-      .sort((a, b) => Number(a.timestamp - b.timestamp))
+      .sort((a, b) =>
+        sortOrder === "asc"
+          ? Number(a.timestamp - b.timestamp)
+          : Number(b.timestamp - a.timestamp),
+      )
       .reduce((acc, t) => {
         acc.add(t.transactionHash);
         return acc;
@@ -65,6 +69,7 @@ export class TransactionsService {
       await this.transactionsRepository.getTransactionsByHashesOnly(
         hashArray,
         limit,
+        sortOrder,
       );
 
     return {

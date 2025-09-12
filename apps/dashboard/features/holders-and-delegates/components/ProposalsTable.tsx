@@ -23,10 +23,10 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import {
-  getFinalResultData,
   getUserVoteData,
   extractProposalName,
   getVoteTimingData,
+  proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 
@@ -72,12 +72,11 @@ export const ProposalsTable = ({
     if (!proposals || proposals.length === 0) return [];
 
     return proposals.map((item): ProposalTableData => {
-      const finalResult = getFinalResultData(
-        item.proposal,
-        Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
-        daoData?.quorum,
-        daoConfigByDaoId[daoIdEnum], // Pass the DAO config to use quorum logic
-      );
+      const finalResult =
+        proposalsFinalResultMapping[
+          item.proposal.status as keyof typeof proposalsFinalResultMapping
+        ];
+
       const userVote = getUserVoteData(
         item.userVote?.support,
         finalResult.text,
@@ -99,7 +98,7 @@ export const ProposalsTable = ({
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoData?.quorum, daoIdEnum]);
+  }, [proposals, daoData?.votingPeriod]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {

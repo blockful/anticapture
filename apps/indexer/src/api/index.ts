@@ -89,7 +89,7 @@ const transactionsService = new TransactionsService(transactionsRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
-proposalsActivity(app, proposalsRepo, env.DAO_ID);
+proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
 historicalOnchain(app, env.DAO_ID, new HistoricalVotingPowerService(repo));
 transactions(app, transactionsService);

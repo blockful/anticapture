@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { delegation } from "ponder:schema";
-import { asc, count, desc, gte, lte, sql, or, eq } from "ponder";
+import { asc, desc, gte, lte, sql, eq } from "ponder";
 import { SQL } from "drizzle-orm";
 import { TransactionsRequest } from "../mappers/transactions";
 
@@ -25,12 +25,6 @@ export type DelegationsFilterBy = {
 };
 
 export class DelegationsRepository {
-  private clampLimit(limit: number): number {
-    const max = 100;
-    if (!Number.isFinite(limit) || limit <= 0) return 10;
-    return Math.min(limit, max);
-  }
-
   async getDelegationsTransactionHashesWithTimestamp(
     filterBy: TransactionsRequest,
   ): Promise<{ timestamp: bigint; transactionHash: string }[]> {
@@ -52,30 +46,9 @@ export class DelegationsRepository {
       })
       .from(delegation)
       .where(where)
-      .orderBy(order, desc(delegation.transactionHash))
+      .orderBy(order, desc(delegation.timestamp))
       .limit(limit)
       .offset(offset);
-  }
-
-  async getDelegationsByHash(hashes: string[]) {
-    if (hashes.length === 0) return [];
-    return db
-      .select()
-      .from(delegation)
-      .where(or(...hashes.map((h) => eq(delegation.transactionHash, h))));
-  }
-
-  async getDelegationsCount(
-    filterBy: Omit<DelegationsFilterBy, "limit" | "offset">,
-  ): Promise<number> {
-    const where = this.buildWhere(filterBy);
-    const result = await db
-      .select({ c: count() })
-      .from(delegation)
-      .where(where);
-    const row = result[0];
-    const value = (row as unknown as { c: number | string }).c;
-    return typeof value === "string" ? Number(value) : value;
   }
 
   private buildWhere(

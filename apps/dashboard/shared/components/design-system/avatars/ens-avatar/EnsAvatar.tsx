@@ -2,11 +2,13 @@
 
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
+// import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { UserIcon } from "@/shared/components/icons";
 import { SkeletonRow } from "@/shared/components";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -86,24 +88,20 @@ export const EnsAvatar = ({
     if (ensData?.ens) {
       return ensData.ens;
     }
-
     if (address) {
-      if (showFullAddress) {
-        return address;
-      }
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+      return showFullAddress ? address : formatAddress(address);
     }
-
     return "Unknown";
   };
 
   const displayName = getDisplayName();
   const isLoadingName = loading || ensLoading;
+  const isEnsName = Boolean(ensData?.ens);
 
   const baseClasses = cn(
     sizeClasses[size],
     variantClasses[variant],
-    "relative overflow-hidden bg-surface-hover flex items-center justify-center",
+    "relative overflow-hidden bg-surface-hover flex items-center justify-center flex-shrink-0",
     className,
   );
 
@@ -159,10 +157,10 @@ export const EnsAvatar = ({
 
   // Return avatar with name
   return (
-    <div className={cn("flex items-center gap-3", containerClassName)}>
+    <div className={cn("flex min-w-0 items-center gap-3", containerClassName)}>
       {avatarElement()}
 
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col">
         <div className="flex items-center gap-2">
           {isLoadingName ? (
             <SkeletonRow
@@ -172,7 +170,8 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary text-sm",
+                "text-primary inline-block text-sm",
+                isEnsName && "overflow-hidden truncate whitespace-nowrap",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 nameClassName,
               )}

@@ -1,3 +1,6 @@
+// Legacy Hotjar script - kept for reference
+// Use ConditionalHotjar instead for cookie consent compliance
+
 import Script from "next/script";
 import { FC } from "react";
 
@@ -19,3 +22,4 @@ const HotjarScript: FC = () => {
 };
 
 export default HotjarScript;
+export { default as ConditionalHotjar } from "@/shared/services/hotjar/ConditionalHotjar";

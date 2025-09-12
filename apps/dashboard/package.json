@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log"
+    "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@anticapture/graphql-client": "workspace:*",

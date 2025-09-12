@@ -16,12 +16,13 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
-  queryInput_transactions_maxAmount: { input: any; output: any; }
-  queryInput_transactions_minAmount: { input: any; output: any; }
 };
 
 export enum HttpMethod {
@@ -365,8 +366,8 @@ export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  maxAmount?: InputMaybe<Scalars['queryInput_transactions_maxAmount']['input']>;
-  minAmount?: InputMaybe<Scalars['queryInput_transactions_minAmount']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   sortBy?: InputMaybe<Timestamp_Const>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
@@ -1493,11 +1494,11 @@ export type Query_ProposalsActivity_Proposals_Items_Proposal = {
   againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
-  endBlock: Scalars['String']['output'];
+  endBlock: Scalars['Float']['output'];
   forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
   proposerAccountId: Scalars['String']['output'];
-  startBlock: Scalars['String']['output'];
+  startBlock: Scalars['Float']['output'];
   status: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
 };
@@ -1801,7 +1802,6 @@ export type TransactionPage = {
 
 export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
-  total: Scalars['Float']['output'];
   transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
@@ -2314,7 +2314,7 @@ export type GetProposalsActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: string, endBlock: string, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
+export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
   tokenAddresses: Scalars['String']['input'];
