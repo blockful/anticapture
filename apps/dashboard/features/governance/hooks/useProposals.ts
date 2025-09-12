@@ -5,11 +5,9 @@ import {
   useGetProposalsQuery,
   GetProposalsQuery,
   QueryInput_Proposals_OrderDirection,
-  Query_Proposals_Items,
 } from "@anticapture/graphql-client/hooks";
-import { ProposalStatus, ProposalState } from "@/features/governance/types";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
-import { formatEther } from "viem";
+import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 
 export interface PaginationInfo {
   hasNextPage: boolean;
@@ -19,122 +17,6 @@ export interface PaginationInfo {
   itemsPerPage: number;
   currentItemsCount: number;
 }
-
-type Proposal = Omit<Query_Proposals_Items, "endBlock" | "startBlock">;
-
-// Helper function to transform GraphQL proposal data to governance component format
-const transformToGovernanceProposal = (
-  graphqlProposal: Proposal,
-): GovernanceProposal => {
-  const forVotes = parseInt(graphqlProposal.forVotes);
-  const againstVotes = parseInt(graphqlProposal.againstVotes);
-  const abstainVotes = parseInt(graphqlProposal.abstainVotes);
-  const quorum = parseInt(graphqlProposal.quorum);
-
-  const total = forVotes + againstVotes + abstainVotes;
-
-  const forPercentage = total > 0 ? Math.round((forVotes / total) * 100) : 0;
-  const againstPercentage =
-    total > 0 ? Math.round((againstVotes / total) * 100) : 0;
-
-  // Map GraphQL status to our enum
-  const getProposalStatus = (status: string): ProposalStatus => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return ProposalStatus.ONGOING;
-      case "succeeded":
-      case "executed":
-        return ProposalStatus.EXECUTED;
-      case "defeated":
-        return ProposalStatus.DEFEATED;
-      case "cancelled":
-        return ProposalStatus.CANCELLED;
-      case "pending":
-        return ProposalStatus.PENDING;
-      default:
-        return ProposalStatus.PENDING;
-    }
-  };
-
-  const formatVotes = (votes: number): number => {
-    if (isNaN(votes) || votes < 0) {
-      return 0;
-    }
-
-    try {
-      const formattedVotes = Number(formatEther(BigInt(Math.floor(votes))));
-      return formattedVotes;
-    } catch (error) {
-      console.warn("Error formatting votes:", votes, error);
-      return 0;
-    }
-  };
-
-  const getProposalState = (status: string): ProposalState => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return ProposalState.ACTIVE;
-      case "succeeded":
-      case "executed":
-      case "defeated":
-      case "cancelled":
-        return ProposalState.COMPLETED;
-      case "pending":
-      default:
-        return ProposalState.WAITING_TO_START;
-    }
-  };
-
-  // Helper function to calculate days difference
-  const calculateDaysDiff = (
-    timestamp: string,
-    currentTime: number,
-  ): number => {
-    const diffSeconds = Math.abs(parseInt(timestamp) - currentTime);
-    return Math.floor(diffSeconds / (24 * 60 * 60));
-  };
-
-  const getTimeText = (startTimestamp: string, endTimestamp: string) => {
-    const now = Date.now() / 1000;
-    const startTime = parseInt(startTimestamp);
-    const endTime = parseInt(endTimestamp);
-
-    if (startTime > now) {
-      const days = calculateDaysDiff(startTimestamp, now);
-      return `${days}d to start`;
-    } else if (endTime > now) {
-      const days = calculateDaysDiff(endTimestamp, now);
-      return `${days}d left`;
-    } else {
-      const days = calculateDaysDiff(endTimestamp, now);
-      return `${days}d ago`;
-    }
-  };
-
-  // Calculate time text using the helper function
-  const timeText = getTimeText(
-    graphqlProposal.startTimestamp,
-    graphqlProposal.endTimestamp,
-  );
-
-  return {
-    id: graphqlProposal.id,
-    title: graphqlProposal.title || "Untitled Proposal",
-    status: getProposalStatus(graphqlProposal.status),
-    state: getProposalState(graphqlProposal.status),
-    description: graphqlProposal.description,
-    proposer: graphqlProposal.proposerAccountId,
-    votes: {
-      for: forVotes,
-      against: againstVotes,
-      total: formatVotes(total),
-      forPercentage,
-      againstPercentage,
-    },
-    quorum: formatVotes(quorum),
-    timeText,
-  };
-};
 
 export interface UseProposalsResult {
   proposals: GovernanceProposal[];
