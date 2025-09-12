@@ -106,6 +106,7 @@ export const HoldersAndDelegatesDrawer = ({
                     variant="rounded"
                     nameClassName="text-lg leading-[18px]"
                     containerClassName="gap-2"
+                    showFullAddress={true}
                   />
                   <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
