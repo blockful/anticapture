@@ -4,7 +4,7 @@ import { TheButton } from "@/shared/components/design-system/buttons/TheButton";
 
 interface PaginationProps {
   currentPage: number;
-  totalPages: number;
+  totalPages?: number;
   onPrevious?: () => void;
   onNext?: () => void;
   className?: string;
@@ -46,7 +46,7 @@ export function Pagination({
         <ChevronLeft className="text-primary size-3.5" />
       </TheButton>
       <span className="text-secondary bg-surface-contrast flex h-8 items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
-        Page {currentPage} of {totalPages}
+        Page {currentPage} {totalPages && `of ${totalPages}`}
       </span>
       <TheButton
         variant="outline"

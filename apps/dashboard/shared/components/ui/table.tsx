@@ -102,11 +102,7 @@ function TableCell({
   ...props
 }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td
-      data-slot="table-cell"
-      className={cn("bg-surface-default p-0", className)}
-      {...props}
-    />
+    <td data-slot="table-cell" className={cn("p-0", className)} {...props} />
   );
 }
 

@@ -30,8 +30,8 @@ const supplyTypeConfig = {
   },
   Others: {
     text: "Others",
-    textClass: "text-surface-hover",
-    boxClass: "bg-surface-hover",
+    textClass: "text-secondary",
+    boxClass: "bg-secondary",
   },
 } as const;
 
@@ -40,9 +40,8 @@ export const SupplyLabel = ({ type, className }: SupplyLabelProps) => {
 
   return (
     <div className={cn("inline-flex items-center gap-2.5", className)}>
-      {/* Colored box - 8px size with 2px border radius */}
       <div className={cn("rounded-xs size-2", config.boxClass)} />
-      {/* 10px gap + text */}
+
       <span className={cn("text-sm font-normal", config.textClass)}>
         {config.text}
       </span>
