@@ -350,6 +350,16 @@ export const delegationsRelations = relations(delegation, ({ one }) => ({
 export const votingPowerHistoryRelations = relations(
   votingPowerHistory,
   ({ one }) => ({
+    transfer: one(transfer, {
+      fields: [votingPowerHistory.transactionHash, votingPowerHistory.logIndex],
+      references: [transfer.transactionHash, transfer.logIndex],
+      relationName: "votingPowerTransfer",
+    }),
+    delegation: one(delegation, {
+      fields: [votingPowerHistory.transactionHash, votingPowerHistory.logIndex],
+      references: [delegation.transactionHash, delegation.logIndex],
+      relationName: "votingPowerDelegation",
+    }),
     account: one(account, {
       fields: [votingPowerHistory.accountId],
       references: [account.id],
