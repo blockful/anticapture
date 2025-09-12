@@ -26,6 +26,24 @@ export default processConfig(
                   endpoint: value,
                 },
               },
+              transforms: [
+                {
+                  rename: {
+                    renames: [
+                      {
+                        from: {
+                          type: "Query",
+                          field: "transactions",
+                        },
+                        to: {
+                          type: "Query",
+                          field: "_",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
             {
               name: `rest_${daoName}`,
