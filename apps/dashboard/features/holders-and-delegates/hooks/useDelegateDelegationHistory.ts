@@ -179,7 +179,7 @@ export function useDelegateDelegationHistory(
       await fetchMore({
         variables: {
           ...queryVariables,
-          skip: (currentPage - 1) * itemsPerPage,
+          skip: (currentPage - 2) * itemsPerPage,
         },
         updateQuery: (_, { fetchMoreResult }) => fetchMoreResult,
       });
@@ -206,7 +206,7 @@ export function useDelegateDelegationHistory(
       totalPages: Math.ceil(data?.votingPowers?.totalCount || 0 / itemsPerPage),
       hasNextPage:
         currentPage * itemsPerPage < (data?.votingPowers?.totalCount || 0),
-      hasPreviousPage: currentPage > 0,
+      hasPreviousPage: currentPage > 1,
     },
     error,
     fetchNextPage,
