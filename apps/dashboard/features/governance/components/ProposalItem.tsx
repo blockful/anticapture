@@ -148,12 +148,15 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
         </div>
         <div className="relative flex w-full">
           {quorumPercentage < 100 && (
-            <div
-              style={{ left: `${quorumPercentage}%` }}
-              className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
-            >
-              Quorum: {formatNumberUserReadable(proposal.quorum)}
-            </div>
+            <>
+              <div
+                style={{ left: `${quorumPercentage}%` }}
+                className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+              >
+                Quorum: {formatNumberUserReadable(proposal.quorum)}
+              </div>
+              <div className="h-4 w-full"></div>
+            </>
           )}
         </div>
       </div>
