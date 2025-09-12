@@ -1,0 +1,36 @@
+query VotingPowers(
+  $account: String!
+  $skip: NonNegativeInt
+  $limit: PositiveInt = 10
+  $orderDirection: queryInput_votingPowers_orderDirection = desc
+  $orderBy: queryInput_votingPowers_orderBy
+) {
+  votingPowers(
+    account: $account
+    skip: $skip
+    orderDirection: $orderDirection
+    limit: $limit
+    orderBy: $orderBy
+  ) {
+    items {
+      accountId
+      daoId
+      votingPower
+      transfer {
+        value
+        to
+        from
+      }
+      transactionHash
+      timestamp
+      logIndex
+      delta
+      delegation {
+        from
+        to
+        value
+      }
+    }
+    totalCount
+  }
+}

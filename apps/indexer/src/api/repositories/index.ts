@@ -1,5 +1,6 @@
-export { DrizzleRepository } from "./drizzle";
-export { DrizzleProposalsActivityRepository } from "./proposals-activity.repository";
-export { TransactionsRepository } from "./transactions.repository";
-export { TransfersRepository } from "./transfers.repository";
-export { DelegationsRepository } from "./delegations.repository";
+export * from "./drizzle";
+export * from "./proposals-activity.repository";
+export * from "./transactions.repository";
+export * from "./transfers.repository";
+export * from "./delegations.repository";
+export * from "./voting-power";

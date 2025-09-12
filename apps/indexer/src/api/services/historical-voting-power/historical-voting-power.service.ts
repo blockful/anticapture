@@ -8,7 +8,7 @@ export interface HistoricalVotingPower {
 }
 
 interface VotingPowerRepository {
-  getVotingPower(
+  getHistoricalVotingPower(
     addresses: Address[],
     timestamp: bigint,
   ): Promise<HistoricalVotingPower[]>;
@@ -21,7 +21,7 @@ export class HistoricalVotingPowerService {
     addresses: Address[],
     daysInSeconds: DaysEnum,
   ): Promise<HistoricalVotingPower[]> {
-    return await this.repository.getVotingPower(
+    return await this.repository.getHistoricalVotingPower(
       addresses,
       BigInt(Math.floor(Date.now() / 1000) - daysInSeconds),
     );
