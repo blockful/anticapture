@@ -120,7 +120,7 @@ type Query {
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
   """Returns a list of voting power changes"""
-  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
 }
 
 """
@@ -1025,6 +1025,8 @@ type votingPowerHistory {
   delta: BigInt!
   timestamp: BigInt!
   logIndex: Int!
+  transfer: transfer
+  delegation: delegation
   account: account
 }
 
@@ -1700,6 +1702,11 @@ type query_votingPowers_items_items_transfer {
   value: String!
   from: String!
   to: String!
+}
+
+enum queryInput_votingPowers_orderBy {
+  timestamp
+  amount
 }
 
 enum queryInput_votingPowers_orderDirection {
