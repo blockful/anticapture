@@ -95,7 +95,7 @@ export const GovernanceSection = () => {
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-4 space-y-0">
+              <div className="flex flex-col gap-2 space-y-0">
                 {proposals.map((proposal) => (
                   <ProposalItem key={proposal.id} proposal={proposal} />
                 ))}
