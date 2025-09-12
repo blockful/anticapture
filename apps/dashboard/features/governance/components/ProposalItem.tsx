@@ -70,7 +70,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
   return (
     <div
       className={cn(
-        "text-primary bg-surface-default relative flex w-full flex-col items-center justify-between gap-6 border-b-2 border-b-white/10 px-3 py-3 sm:border-none sm:px-5 sm:py-7 md:h-[72px] md:flex-row",
+        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-6 border-b-2 border-b-white/10 px-3 py-3 transition-colors duration-300 sm:border-none md:h-[72px] md:flex-row",
         className,
       )}
       id={proposal.id}
@@ -82,7 +82,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
         )}
       />
 
-      <div className="flex w-full flex-col items-start justify-between md:w-auto">
+      <div className="flex w-full flex-col items-start justify-between gap-0.5 md:w-auto">
         <h3 className="text-primary">{proposal.title}</h3>
         <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
           <p className={getTextStatusColor(proposal.status)}>
