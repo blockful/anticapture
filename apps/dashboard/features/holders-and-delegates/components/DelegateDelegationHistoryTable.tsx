@@ -189,11 +189,11 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.delegation.value || "0"), 18)),
+            Number(formatUnits(BigInt(item.delegation.value), 18)),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.value || "0"), 18)),
+            Number(formatUnits(BigInt(item.transfer.value), 18)),
           );
         }
 
@@ -408,7 +408,6 @@ export const DelegateDelegationHistoryTable = ({
 
   return (
     <div className="bg-surface-default flex flex-col">
-      {/* Table */}
       <div className="flex flex-col gap-2 p-4">
         <TheTable
           columns={columns}
@@ -418,18 +417,15 @@ export const DelegateDelegationHistoryTable = ({
           isTableSmall={true}
         />
 
-        {/* Pagination */}
-        {paginationInfo.totalPages > 1 && (
-          <Pagination
-            currentPage={paginationInfo.currentPage}
-            totalPages={paginationInfo.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            hasNextPage={paginationInfo.hasNextPage}
-            hasPreviousPage={paginationInfo.hasPreviousPage}
-            isLoading={loading}
-          />
-        )}
+        <Pagination
+          currentPage={paginationInfo.currentPage}
+          totalPages={paginationInfo.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={paginationInfo.hasNextPage}
+          hasPreviousPage={paginationInfo.hasPreviousPage}
+          isLoading={loading}
+        />
       </div>
     </div>
   );
