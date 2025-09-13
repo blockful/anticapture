@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Loader2 } from "lucide-react";
+import { Building2, Landmark, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 
 import { useProposals } from "@/features/governance/hooks/useProposals";
@@ -77,7 +77,7 @@ export const GovernanceSection = () => {
     <div className="bg-background flex min-h-screen flex-col">
       <TheSectionLayout
         title="Governance"
-        icon={<Building2 className="section-layout-icon" />}
+        icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
         anchorId="governance"
       >
@@ -95,7 +95,7 @@ export const GovernanceSection = () => {
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-4 space-y-0">
+              <div className="flex flex-col gap-2 space-y-0">
                 {proposals.map((proposal) => (
                   <ProposalItem key={proposal.id} proposal={proposal} />
                 ))}

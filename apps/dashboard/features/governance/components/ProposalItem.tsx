@@ -70,7 +70,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
   return (
     <div
       className={cn(
-        "text-primary bg-surface-default relative flex w-full flex-col items-center justify-between gap-6 border-b-2 border-b-white/10 px-3 py-3 sm:border-none sm:px-5 sm:py-7 md:h-[72px] md:flex-row",
+        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 md:flex-row md:gap-6",
         className,
       )}
       id={proposal.id}
@@ -82,7 +82,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
         )}
       />
 
-      <div className="flex w-full flex-col items-start justify-between md:w-auto">
+      <div className="flex w-full flex-col items-start justify-between gap-0.5 md:w-auto">
         <h3 className="text-primary">{proposal.title}</h3>
         <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
           <p className={getTextStatusColor(proposal.status)}>
@@ -136,21 +136,28 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
               className={cn("bg-error h-full rounded-r-full")}
             />
 
-            <div
-              className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]"
-              style={{
-                left: `${quorumPercentage}%`,
-              }}
-            />
+            {quorumPercentage < 100 && (
+              <div
+                className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]"
+                style={{
+                  left: `${quorumPercentage}%`,
+                }}
+              />
+            )}
           </div>
         </div>
-        <div className="relative flex w-full bg-red-500">
-          <div
-            style={{ left: `${quorumPercentage}%` }}
-            className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
-          >
-            Quorum: 1M
-          </div>
+        <div className="relative flex w-full">
+          {quorumPercentage < 100 && (
+            <>
+              <div
+                style={{ left: `${quorumPercentage}%` }}
+                className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+              >
+                Quorum: {formatNumberUserReadable(proposal.quorum)}
+              </div>
+              <div className="h-4 w-full"></div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -158,5 +165,5 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
 };
 
 const BulletDivider = () => {
-  return <div className="bg-surface-hover h-1 w-1 rounded-full" />;
+  return <div className="bg-surface-hover size-1 rounded-full" />;
 };
