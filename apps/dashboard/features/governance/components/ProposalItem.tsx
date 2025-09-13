@@ -8,6 +8,7 @@ import { Address } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { BulletDivider } from "@/features/governance/components/BulletDivider";
 
 interface ProposalItemProps {
   proposal: Proposal;
@@ -167,8 +168,4 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
       </div>
     </Link>
   );
-};
-
-const BulletDivider = () => {
-  return <div className="bg-surface-hover size-1 rounded-full" />;
 };
