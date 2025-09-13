@@ -70,7 +70,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
   return (
     <div
       className={cn(
-        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-6 px-3 py-3 transition-colors duration-300 md:h-[72px] md:flex-row",
+        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-6 px-3 py-3 transition-colors duration-300 md:flex-row",
         className,
       )}
       id={proposal.id}
