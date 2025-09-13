@@ -11,5 +11,5 @@ export const ProposalSection = () => {
 
   // If proposal is found, show proposal section with proposal details
 
-  return <div>Proposal section {proposalId}</div>;
+  return <div className="text-primary p-4">Proposal section {proposalId}</div>;
 };
