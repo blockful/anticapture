@@ -318,6 +318,11 @@ export const useChartMetrics = ({
 
   // Unified chart data with optimized processing
   const chartData = useMemo(() => {
+    // If no metrics are applied, return empty array
+    if (stableAppliedMetrics.length === 0) {
+      return [];
+    }
+
     const groupedDatasets = groupDataByPeriod(datasets, timeInterval);
 
     return Object.values(groupedDatasets).map((value) => {

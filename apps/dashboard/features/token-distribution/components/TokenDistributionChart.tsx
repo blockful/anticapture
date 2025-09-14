@@ -28,6 +28,8 @@ import loadingAnimation from "@/public/loading-animation.json";
 import { useEffect, useRef } from "react";
 import { AlertOctagon } from "lucide-react";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface TokenDistributionChartProps {
   appliedMetrics: string[];
@@ -36,6 +38,7 @@ interface TokenDistributionChartProps {
   hoveredMetricKey?: string | null;
   isLoading?: boolean;
   error?: Error | null;
+  daoId: DaoIdEnum;
 }
 
 export const TokenDistributionChart = ({
@@ -45,9 +48,11 @@ export const TokenDistributionChart = ({
   hoveredMetricKey,
   isLoading = false,
   error = null,
+  daoId,
 }: TokenDistributionChartProps) => {
   const { brushRange, setBrushRange } = useBrushStore();
   const hasInitialized = useRef(false);
+  const daoConfig = daoConfigByDaoId[daoId];
 
   useEffect(() => {
     if (chartData && chartData.length > 0 && !hasInitialized.current) {
@@ -82,8 +87,8 @@ export const TokenDistributionChart = ({
     );
   }
 
-  // Show empty state
-  if (!chartData.length) {
+  // Show research pending when tokenDistribution is not configured in dao-config
+  if (daoConfig && daoConfig.tokenDistribution === false) {
     return (
       <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
         <ResearchPendingChartBlur />
@@ -91,12 +96,8 @@ export const TokenDistributionChart = ({
     );
   }
 
-  // Check if data is mocked (all metrics have 0 values)
-  const isMocked = chartData.every(() => appliedMetrics.length == 0);
-
   return (
     <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
-      {isMocked && <ResearchPendingChartBlur />}
       <ChartContainer
         className="h-full w-full justify-start"
         config={chartConfig}

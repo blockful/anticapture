@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { TheSectionLayout } from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import {
@@ -10,10 +10,7 @@ import {
 import { ArrowRightLeft } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  metricsSchema,
-  initialMetrics,
-} from "@/features/token-distribution/utils";
+import { metricsSchema } from "@/features/token-distribution/utils";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 
@@ -21,13 +18,8 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
   const { metrics, setMetrics } = useTokenDistributionStore();
 
-  // Use initial metrics as fallback when no metrics are selected
-  const memoizedMetrics = useMemo(() => {
-    return metrics.length > 0 ? metrics : initialMetrics;
-  }, [metrics]);
-
   const { chartData, chartConfig, isLoading } = useChartMetrics({
-    appliedMetrics: memoizedMetrics,
+    appliedMetrics: metrics,
     daoId,
     metricsSchema,
   });
@@ -46,7 +38,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </CardTitle>
           <TokenDistributionChart
             isLoading={isLoading}
-            appliedMetrics={memoizedMetrics}
+            appliedMetrics={metrics}
             chartConfig={chartConfig}
             chartData={chartData}
             hoveredMetricKey={hoveredMetricKey}
@@ -55,7 +47,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="border-light-dark mx-4 w-px border border-dashed sm:order-2" />
         <div className="order-1 w-full items-start sm:order-3 sm:w-fit sm:min-w-[300px]">
           <TokenDistributionMetrics
-            appliedMetrics={memoizedMetrics}
+            appliedMetrics={metrics}
             setAppliedMetrics={setMetrics}
             setHoveredMetricKey={setHoveredMetricKey}
             chartData={chartData}
