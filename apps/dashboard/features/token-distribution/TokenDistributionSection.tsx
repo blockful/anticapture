@@ -37,6 +37,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             GOVERNANCE SUPPLY TRENDS ({daoId})
           </CardTitle>
           <TokenDistributionChart
+            daoId={daoId}
             isLoading={isLoading}
             appliedMetrics={metrics}
             chartConfig={chartConfig}
