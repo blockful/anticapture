@@ -82,7 +82,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): [query_proposals_items]
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -1538,7 +1538,12 @@ enum queryInput_proposalsActivity_userVoteFilter {
   no_vote
 }
 
-type query_proposals_items {
+type proposals_200_response {
+  items: [query_proposals_items_items]!
+  totalCount: Float!
+}
+
+type query_proposals_items_items {
   id: String!
   daoId: String!
   txHash: String!
@@ -1706,7 +1711,7 @@ type query_votingPowers_items_items_transfer {
 
 enum queryInput_votingPowers_orderBy {
   timestamp
-  amount
+  delta
 }
 
 enum queryInput_votingPowers_orderDirection {
