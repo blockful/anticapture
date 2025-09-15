@@ -38,7 +38,7 @@ export const transformToGovernanceProposal = (
     // Spread all the original GraphQL fields
     ...graphqlProposal,
     // Add computed fields
-    title: graphqlProposal.description?.split("\n")[0] || "Untitled Proposal",
+    title: graphqlProposal.title || "Untitled Proposal",
     status: getProposalStatus(graphqlProposal.status),
     state: getProposalState(graphqlProposal.status),
     proposer: graphqlProposal.proposerAccountId,
