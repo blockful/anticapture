@@ -1,102 +1,150 @@
+import { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AlertCircle, Info, CheckCircle2, HeartIcon } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 
 import { Table } from "@/shared/components/design-system/table/Table";
 
+interface ExampleData {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+  city: string;
+}
+
+const ExampleDataTable = (props: {
+  data: ExampleData[];
+  columns: ColumnDef<ExampleData, unknown>[];
+  [k: string]: unknown;
+}) => <Table<ExampleData, unknown> {...props} />;
+
+const columns: ColumnDef<ExampleData, unknown>[] = [
+  { header: "Name", accessorKey: "name" },
+  {
+    header: "Email",
+    accessorKey: "email",
+  },
+  {
+    header: "Age",
+    accessorKey: "age",
+    meta: {
+      headerClassName: "w-[50px]",
+    },
+  },
+  {
+    header: "City",
+    accessorKey: "city",
+    meta: {
+      headerClassName: "w-[100px]",
+    },
+  },
+];
+
+const mockFetchPage = async ({
+  pageParam = 0,
+}: {
+  pageParam?: number;
+}): Promise<{ items: ExampleData[]; nextPage?: number }> => {
+  const PAGE_SIZE = 10;
+  const TOTAL_PAGES = 5;
+
+  await new Promise((r) => setTimeout(r, 500));
+
+  const base = pageParam * PAGE_SIZE;
+  const items: ExampleData[] = Array.from({ length: PAGE_SIZE }).map((_, i) => {
+    const id = base + i + 1;
+    return {
+      id,
+      name: `anticapture_user_${id}`,
+      email: `anticapture_user${id}@example.com`,
+      age: 18 + ((id * 3) % 40),
+      city: ["Lisbon", "Berlin", "Paris", "NYC", "Tokyo"][id % 5],
+    };
+  });
+
+  return {
+    items,
+    nextPage: pageParam + 1 < TOTAL_PAGES ? pageParam + 1 : undefined,
+  };
+};
+
 const meta = {
-  title: "Design System/Table/BaseTable",
-  component: Table,
+  title: "Design System/Table",
+  component: ExampleDataTable,
   parameters: {
-    layout: "fullwidth",
+    layout: "fullscreen",
   },
   tags: ["autodocs"],
-  argTypes: {},
-} satisfies Meta<typeof Table>;
+} satisfies Meta<typeof ExampleDataTable>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const BaseTable: Story = {
+export const DefaultTable: Story = {
   args: {
-    columns: [
-      {
-        header: "Name",
-        accessorKey: "name",
-      },
-      {
-        header: "Email",
-        accessorKey: "email",
-      },
-      {
-        header: "Age",
-        accessorKey: "age",
-      },
-      {
-        header: "City",
-        accessorKey: "city",
-      },
-      {
-        header: "Status",
-        accessorKey: "status",
-        cell: ({ row }) => {
-          const rowData = row.original as { status: string };
-
-          const status = rowData.status;
-          if (status === "active") {
-            return <CheckCircle2 className="text-green-500" />;
-          }
-          if (status === "inactive") {
-            return <AlertCircle className="text-red-500" />;
-          }
-          return <Info className="text-yellow-500" />;
-        },
-      },
-      {
-        header: "Favorite",
-        accessorKey: "favorite",
-        cell: ({ row }) => {
-          const rowData = row.original as { favorite: boolean };
-
-          const favorite = rowData.favorite;
-
-          return (
-            <HeartIcon
-              className={`size-5 transition-colors duration-300 ${
-                favorite ? "text-red-500" : "text-gray-400"
-              }`}
-            />
-          );
-        },
-        meta: { headerClassName: "w-[350px] justify-center" },
-      },
-    ],
-    data: [
-      {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        age: 30,
-        city: "New York",
-        status: "active",
-        favorite: true,
-      },
-      {
-        name: "Jane Smith",
-        email: "jane.smith@example.com",
-        age: 25,
-        city: "Los Angeles",
-        status: "inactive",
-        favorite: false,
-      },
-      {
-        name: "Alice Johnson",
-        email: "alice.johnson@example.com",
-        age: 28,
-        city: "Chicago",
-        status: "active",
-        favorite: true,
-      },
-    ],
+    columns,
+    data: (await mockFetchPage({ pageParam: 0 })).items,
     className: "w-full mx-auto",
+    withSorting: true,
   },
+  render: (args) => (
+    <div className="flex w-full justify-center p-4">
+      <ExampleDataTable {...args} />
+    </div>
+  ),
+};
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 0 } },
+});
+
+const TableWithInfiniteScroll = () => {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["example-table"],
+      queryFn: mockFetchPage,
+      getNextPageParam: (last) => last.nextPage,
+      initialPageParam: 0,
+    });
+
+  const flatRows = data?.pages.flatMap((p) => p.items) ?? [];
+
+  const loadMore = useCallback(() => {
+    if (hasNextPage) fetchNextPage();
+  }, [hasNextPage, fetchNextPage]);
+
+  return (
+    <ExampleDataTable
+      columns={columns}
+      data={flatRows}
+      withSorting
+      enableInfiniteScroll
+      onLoadMore={loadMore}
+      hasMore={!!hasNextPage}
+      isLoadingMore={isFetchingNextPage}
+      className="m-4 h-[500px] w-full"
+      showWhenEmpty={<div className="p-6 text-center">No results</div>}
+      isTableSmall
+    />
+  );
+};
+
+export const WithInfiniteScroll: Story = {
+  args: {
+    columns: [],
+    data: [],
+  },
+  render: () => (
+    <QueryClientProvider client={queryClient}>
+      <div className="flex w-full justify-center p-4">
+        <TableWithInfiniteScroll />
+      </div>
+    </QueryClientProvider>
+  ),
 };

@@ -1,12 +1,11 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   ColumnDef as TanstackColumnDef,
   flexRender,
   SortingState,
   getCoreRowModel,
-  getPaginationRowModel,
   getFilteredRowModel,
   ColumnFiltersState,
   getSortedRowModel,
@@ -34,7 +33,6 @@ type ColumnDef<TData, TValue> = TanstackColumnDef<TData, TValue> & {
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
   withSorting?: boolean;
-  withPagination?: boolean;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   className?: string;
@@ -43,11 +41,15 @@ interface DataTableProps<TData, TValue> {
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
   mobileTableFixed?: boolean;
-  showWhenEmpty?: ReactNode; // new prop
+  showWhenEmpty?: ReactNode;
+  enableInfiniteScroll?: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  infiniteRootMargin?: string;
 }
 
 export const Table = <TData, TValue>({
-  withPagination = false,
   withSorting = false,
   filterColumn = "",
   columns,
@@ -59,22 +61,55 @@ export const Table = <TData, TValue>({
   stickyFirstColumn = false,
   mobileTableFixed = false,
   showWhenEmpty,
+  enableInfiniteScroll = false,
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false,
+  infiniteRootMargin = "0px 0px 200px 0px",
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!enableInfiniteScroll || !onLoadMore) return;
+    if (!hasMore) return;
+
+    const node = sentinelRef.current;
+
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && !isLoadingMore) {
+          onLoadMore();
+        }
+      },
+      {
+        root: wrapperRef.current,
+        rootMargin: infiniteRootMargin,
+        threshold: 0,
+      },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [
+    enableInfiniteScroll,
+    onLoadMore,
+    hasMore,
+    isLoadingMore,
+    infiniteRootMargin,
+  ]);
 
   let tableConfig: TableOptions<TData> = {
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   };
-
-  if (withPagination) {
-    tableConfig = {
-      ...tableConfig,
-      getPaginationRowModel: getPaginationRowModel(),
-    };
-  }
 
   if (withSorting) {
     tableConfig = {
@@ -104,7 +139,7 @@ export const Table = <TData, TValue>({
         className,
       )}
     >
-      <TableHeader className="bg-surface-contrast text-secondary text-xs font-semibold sm:font-medium">
+      <TableHeader className="bg-surface-contrast text-secondary sticky top-0 z-30 text-xs font-semibold sm:font-medium">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
@@ -138,8 +173,8 @@ export const Table = <TData, TValue>({
       </TableHeader>
       <TableBody className="min-h-[400px]">
         {table.getRowModel().rows.length > 0 ? (
-          table.getRowModel().rows.map((row) => {
-            return (
+          <>
+            {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 className={`border-transparent transition-colors duration-300 ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
@@ -160,8 +195,25 @@ export const Table = <TData, TValue>({
                   </TableCell>
                 ))}
               </TableRow>
-            );
-          })
+            ))}
+
+            {enableInfiniteScroll && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="p-0">
+                  <div
+                    ref={sentinelRef}
+                    className="text-secondary flex h-12 items-center justify-center text-xs"
+                  >
+                    {isLoadingMore
+                      ? "Loading..."
+                      : hasMore
+                        ? "Load more..."
+                        : "End of data"}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </>
         ) : (
           <TableRow>
             <TableCell colSpan={columns.length} className="h-full text-center">

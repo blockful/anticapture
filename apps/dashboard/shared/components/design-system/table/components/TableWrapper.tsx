@@ -1,16 +1,26 @@
 import { cn } from "@/shared/utils";
+import { forwardRef } from "react";
 
-export const TableWrapper = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLTableElement>) => {
+export const TableWrapper = forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
   return (
-    <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+    <div
+      ref={ref}
+      className={cn(
+        "md:border-light-dark relative w-full md:rounded-lg md:border",
+        "scrollbar-none overflow-x-auto overflow-y-auto",
+        className,
+      )}
+    >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={"w-full caption-bottom text-sm"}
         {...props}
       />
     </div>
   );
-};
+});
+
+TableWrapper.displayName = "TableWrapper";
