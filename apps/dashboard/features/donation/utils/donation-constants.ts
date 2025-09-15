@@ -24,7 +24,7 @@ export const DONATION_CONSTANTS = {
   },
   fundingSources: [
     {
-      name: "ENS Foundation",
+      name: "ENS",
       amount: "$100k+",
       date: "October, 2024",
       daoId: DaoIdEnum.ENS,
