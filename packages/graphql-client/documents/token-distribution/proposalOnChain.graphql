@@ -1,7 +1,9 @@
 query GetProposals($fromDate: Float) {
   proposals(limit: 100, orderDirection: asc, fromDate: $fromDate) {
-    id
-    title
-    timestamp
+    items {
+      id
+      title
+      timestamp
+    }
   }
 }
