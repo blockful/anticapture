@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
   QueryInput_Transactions_SortOrder,
@@ -73,6 +73,16 @@ export const useTransactionsTableData = ({
       },
     },
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    filters?.from,
+    filters?.to,
+    filters?.minAmount,
+    filters?.maxAmount,
+    filters?.sortOrder,
+  ]);
 
   const fetchNextPage = useCallback(() => {
     if (currentPage) {
