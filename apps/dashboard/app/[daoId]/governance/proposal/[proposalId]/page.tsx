@@ -3,7 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
+import { HeaderSidebar } from "@/widgets";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { ProposalSection } from "@/features/governance/components/ProposalSection";
 
@@ -61,11 +61,9 @@ export default function ProposalPage() {
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
-        <HeaderDAOSidebar />
       </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto lg:ml-[330px]">
+      <main className="relative flex-1 overflow-auto pt-[57px] sm:ml-[70px] sm:pt-0">
         <div className="sm:hidden">
-          <StickyPageHeader />
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">

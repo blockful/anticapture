@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useGetProposalQuery } from "@anticapture/graphql-client/hooks";
-import type { Proposal as GovernanceProposal } from "@/features/governance/types";
-import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
+import {
+  GetProposalQuery,
+  useGetProposalQuery,
+} from "@anticapture/graphql-client/hooks";
 
 export interface UseProposalResult {
-  proposal: GovernanceProposal | null;
+  proposal: GetProposalQuery["proposal"] | null;
   loading: boolean;
   error: ApolloError | undefined;
 }
@@ -37,27 +38,7 @@ export const useProposal = ({
       return null;
     }
 
-    const rawProposal = data.proposal;
-
-    // Transform the raw proposal data to match the expected format
-    const transformedData = {
-      id: rawProposal.id,
-      daoId: rawProposal.daoId,
-      txHash: rawProposal.txHash,
-      description: rawProposal.description,
-      forVotes: rawProposal.forVotes,
-      againstVotes: rawProposal.againstVotes,
-      abstainVotes: rawProposal.abstainVotes,
-      timestamp: rawProposal.timestamp,
-      status: rawProposal.status,
-      proposerAccountId: rawProposal.proposerAccountId,
-      title: rawProposal.title || "",
-      endTimestamp: rawProposal.endTimestamp,
-      quorum: rawProposal.quorum,
-      startTimestamp: rawProposal.startTimestamp,
-    };
-
-    return transformToGovernanceProposal(transformedData);
+    return data.proposal;
   }, [data]);
 
   return {
