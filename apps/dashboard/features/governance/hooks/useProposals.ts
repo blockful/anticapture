@@ -42,8 +42,6 @@ export const useProposals = ({
 }: UseProposalsParams = {}): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
-  const [hasInitialized, setHasInitialized] = useState(false);
-  const [hasReachedEnd, setHasReachedEnd] = useState(false);
 
   const queryVariables = useMemo(
     () => ({
@@ -97,26 +95,21 @@ export const useProposals = ({
 
   // Initialize allProposals on first load
   useMemo(() => {
-    if (rawProposals.length > 0 && !hasInitialized) {
+    if (rawProposals.length > 0 && allProposals.length === 0) {
       const normalizedProposals = rawProposals.map(
         transformToGovernanceProposal,
       );
       setAllProposals(normalizedProposals);
-      setHasInitialized(true);
-
-      // Check if we've reached the end on first load
-      if (rawProposals.length < itemsPerPage) {
-        setHasReachedEnd(true);
-      }
     }
-  }, [rawProposals, hasInitialized, itemsPerPage]);
+  }, [rawProposals, allProposals.length]);
 
   // Pagination info
   const pagination: PaginationInfo = useMemo(() => {
-    const hasNextPage = !hasReachedEnd;
-    const currentPage = Math.ceil(allProposals.length / itemsPerPage);
-    const totalCount = allProposals.length; // We only know about items we've fetched so far
-    const totalPages = hasReachedEnd ? currentPage : currentPage + 1; // +1 if more pages might exist
+    const totalCount = data?.proposals?.totalCount || 0;
+    const currentItemsCount = allProposals.length;
+    const hasNextPage = currentItemsCount < totalCount;
+    const currentPage = Math.ceil(currentItemsCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return {
       hasNextPage,
@@ -124,9 +117,9 @@ export const useProposals = ({
       currentPage,
       totalPages,
       itemsPerPage,
-      currentItemsCount: allProposals.length,
+      currentItemsCount,
     };
-  }, [allProposals.length, itemsPerPage, hasReachedEnd]);
+  }, [data?.proposals?.totalCount, allProposals.length, itemsPerPage]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
@@ -185,15 +178,10 @@ export const useProposals = ({
             setAllProposals((prev) => [...prev, ...newGovernanceProposals]);
           }
 
-          // Check if we've reached the end - if we got fewer items than requested page size
-          if (fetchMoreResult.proposals?.items?.length < itemsPerPage) {
-            setHasReachedEnd(true);
-          }
-
           return {
             ...fetchMoreResult,
             proposals: {
-              ...fetchMoreResult.proposals,
+              totalCount: fetchMoreResult.proposals.totalCount,
               items: [
                 ...(previousResult.proposals?.items || []),
                 ...(fetchMoreResult.proposals?.items || []),
@@ -212,8 +200,7 @@ export const useProposals = ({
     pagination.hasNextPage,
     isPaginationLoading,
     queryVariables,
-    allProposals,
-    itemsPerPage,
+    allProposals.length,
   ]);
 
   return {
