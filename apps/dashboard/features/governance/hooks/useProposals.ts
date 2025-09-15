@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -94,7 +94,7 @@ export const useProposals = ({
   }, [data]);
 
   // Initialize allProposals on first load
-  useMemo(() => {
+  useEffect(() => {
     if (rawProposals.length > 0 && allProposals.length === 0) {
       const normalizedProposals = rawProposals.map(
         transformToGovernanceProposal,
