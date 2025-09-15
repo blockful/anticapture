@@ -29,11 +29,9 @@ export const TransactionsTable = () => {
   // Filters
   const [fromFilter, setFromFilter] = useState<string>("");
   const [toFilter, setToFilter] = useState<string>("");
-  const [minAmount, setMinAmount] = useState<number | undefined>(undefined);
-  const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | undefined>(
-    "desc",
-  );
+  const [minAmount, setMinAmount] = useState<number | undefined>();
+  const [maxAmount, setMaxAmount] = useState<number | undefined>();
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const {
     data: tableData,
@@ -43,8 +41,6 @@ export const TransactionsTable = () => {
     loading,
   } = useTransactionsTableData({
     daoId: daoId.toUpperCase() as DaoIdEnum,
-    limit: 10,
-    offset: 0,
     filters: {
       from: fromFilter || undefined,
       to: toFilter || undefined,

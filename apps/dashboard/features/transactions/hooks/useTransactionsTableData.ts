@@ -18,7 +18,7 @@ export interface TransactionsFilters {
   to?: string;
   minAmount?: number;
   maxAmount?: number;
-  sortOrder?: "asc" | "desc";
+  sortOrder: "asc" | "desc";
 }
 
 export interface TransactionData {
@@ -35,7 +35,7 @@ export interface TransactionData {
 }
 
 interface UseTransactionsTableDataParams {
-  daoId?: DaoIdEnum;
+  daoId: DaoIdEnum;
   limit?: number;
   offset?: number;
   filters?: TransactionsFilters;
@@ -55,19 +55,23 @@ export const useTransactionsTableData = ({
     variables: {
       limit,
       offset: (currentPage - 1) * limit,
-      from: filters?.from,
-      to: filters?.to,
-      minAmount: parseEther(String(filters?.minAmount ?? 0)).toString(),
-      maxAmount: parseEther(String(filters?.maxAmount ?? 0)).toString(),
-      sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
+      ...(filters?.from && { from: filters?.from }),
+      ...(filters?.to && { to: filters?.to }),
+      ...(filters?.minAmount && {
+        minAmount: parseEther(String(filters.minAmount)).toString(),
+      }),
+      ...(filters?.maxAmount && {
+        maxAmount: parseEther(String(filters.maxAmount)).toString(),
+      }),
+      ...(filters?.sortOrder && {
+        sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
+      }),
     },
-    context: daoId
-      ? {
-          headers: {
-            "anticapture-dao-id": daoId,
-          },
-        }
-      : undefined,
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
   });
 
   const fetchNextPage = useCallback(() => {
