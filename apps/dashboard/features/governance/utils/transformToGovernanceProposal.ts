@@ -1,4 +1,4 @@
-import { Query_Proposals_Items } from "@anticapture/graphql-client/hooks";
+import { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import {
   getTimeText,
   getProposalStatus,
@@ -7,7 +7,7 @@ import {
 } from "@/features/governance/utils";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 
-type Proposal = Omit<Query_Proposals_Items, "endBlock" | "startBlock">;
+type Proposal = Omit<Query_Proposals_Items_Items, "endBlock" | "startBlock">;
 
 // Helper function to transform GraphQL proposal data to governance component format
 export const transformToGovernanceProposal = (
