@@ -4,6 +4,10 @@ export enum ProposalStatus {
   EXECUTED = "executed",
   DEFEATED = "defeated",
   CANCELLED = "cancelled",
+  QUEUED = "queued",
+  SUCCEEDED = "succeeded",
+  EXPIRED = "expired",
+  NO_QUORUM = "no_quorum",
 }
 
 export enum ProposalState {

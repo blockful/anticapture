@@ -23,6 +23,14 @@ const getTextStatusColor = (status: ProposalStatus) => {
       return "text-error";
     case ProposalStatus.CANCELLED:
       return "text-error";
+    case ProposalStatus.QUEUED:
+      return "text-primary";
+    case ProposalStatus.SUCCEEDED:
+      return "text-success";
+    case ProposalStatus.EXPIRED:
+      return "text-error";
+    case ProposalStatus.NO_QUORUM:
+      return "text-error";
     default:
       return "text-secondary";
   }
@@ -39,6 +47,14 @@ const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.DEFEATED:
       return "bg-error";
     case ProposalStatus.CANCELLED:
+      return "bg-error";
+    case ProposalStatus.QUEUED:
+      return "bg-primary";
+    case ProposalStatus.SUCCEEDED:
+      return "bg-success";
+    case ProposalStatus.EXPIRED:
+      return "bg-error";
+    case ProposalStatus.NO_QUORUM:
       return "bg-error";
     default:
       return "bg-secondary";
@@ -57,6 +73,14 @@ const getStatusText = (status: ProposalStatus) => {
       return "Defeated";
     case ProposalStatus.CANCELLED:
       return "Cancelled";
+    case ProposalStatus.QUEUED:
+      return "Queued";
+    case ProposalStatus.SUCCEEDED:
+      return "Succeeded";
+    case ProposalStatus.EXPIRED:
+      return "Expired";
+    case ProposalStatus.NO_QUORUM:
+      return "No Quorum";
     default:
       return status;
   }
