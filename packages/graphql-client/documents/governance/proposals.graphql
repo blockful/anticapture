@@ -12,19 +12,22 @@ query GetProposals(
     status: $status
     fromDate: $fromDate
   ) {
-    id
-    daoId
-    txHash
-    description
-    quorum
-    forVotes
-    againstVotes
-    abstainVotes
-    timestamp
-    status
-    proposerAccountId
-    title
-    startTimestamp
-    endTimestamp
+    items {
+      id
+      daoId
+      txHash
+      description
+      quorum
+      forVotes
+      againstVotes
+      abstainVotes
+      timestamp
+      status
+      proposerAccountId
+      title
+      startTimestamp
+      endTimestamp
+    }
+    totalCount
   }
 }

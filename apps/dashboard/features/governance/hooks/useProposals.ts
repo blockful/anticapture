@@ -69,7 +69,8 @@ export const useProposals = ({
 
   // Transform and filter raw GraphQL data
   const rawProposals = useMemo(() => {
-    const currentProposals = data?.proposals || [];
+    const currentProposals = data?.proposals?.items || [];
+
     // Remove null values
     return currentProposals
       .filter(
@@ -148,12 +149,12 @@ export const useProposals = ({
           previousResult: GetProposalsQuery,
           { fetchMoreResult }: { fetchMoreResult: GetProposalsQuery },
         ) => {
-          if (!fetchMoreResult || !fetchMoreResult.proposals?.length) {
+          if (!fetchMoreResult || !fetchMoreResult.proposals?.items?.length) {
             return previousResult;
           }
 
           // Filter and transform new proposals
-          const newRawProposals = (fetchMoreResult.proposals || [])
+          const newRawProposals = (fetchMoreResult.proposals?.items || [])
             .filter(
               (proposal): proposal is NonNullable<typeof proposal> =>
                 proposal !== null && proposal.daoId === DaoIdEnum.ENS,
@@ -185,16 +186,19 @@ export const useProposals = ({
           }
 
           // Check if we've reached the end - if we got fewer items than requested page size
-          if (fetchMoreResult.proposals.length < itemsPerPage) {
+          if (fetchMoreResult.proposals?.items?.length < itemsPerPage) {
             setHasReachedEnd(true);
           }
 
           return {
             ...fetchMoreResult,
-            proposals: [
-              ...(previousResult.proposals || []),
+            proposals: {
               ...fetchMoreResult.proposals,
-            ],
+              items: [
+                ...(previousResult.proposals?.items || []),
+                ...(fetchMoreResult.proposals?.items || []),
+              ],
+            },
           };
         },
       });
