@@ -88,7 +88,7 @@ const getStatusText = (status: ProposalStatus) => {
 
 export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
   const quorumPercentage = proposal.votes.total
-    ? (proposal.quorum / proposal.votes.total) * 100
+    ? (Number(proposal.quorum) / Number(proposal.votes.total)) * 100
     : 0;
 
   return (
@@ -131,7 +131,8 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           <p>
             {" "}
             {proposal.votes.total
-              ? formatNumberUserReadable(proposal.votes.total) + " votes"
+              ? formatNumberUserReadable(Number(proposal.votes.total)) +
+                " votes"
               : "Waiting to start"}
           </p>
           <div className="flex items-center justify-center gap-2">
@@ -177,7 +178,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
                 style={{ left: `${quorumPercentage}%` }}
                 className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
               >
-                Quorum: {formatNumberUserReadable(proposal.quorum)}
+                Quorum: {formatNumberUserReadable(Number(proposal.quorum))}
               </div>
               <div className="h-4 w-full"></div>
             </>

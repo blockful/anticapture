@@ -8,6 +8,7 @@ import { useProposals } from "@/features/governance/hooks/useProposals";
 import { ProposalItem } from "@/features/governance/components/ProposalItem";
 import { TheSectionLayout } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
+import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
 
 export const GovernanceSection = () => {
   const {
@@ -19,7 +20,7 @@ export const GovernanceSection = () => {
     isPaginationLoading,
   } = useProposals({
     itemsPerPage: 10,
-    orderDirection: "desc",
+    orderDirection: QueryInput_Proposals_OrderDirection.Desc,
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);

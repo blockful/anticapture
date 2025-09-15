@@ -19,11 +19,11 @@ export enum ProposalState {
 }
 
 export interface ProposalVotes {
-  for: number;
-  against: number;
-  total: number;
-  forPercentage: number;
-  againstPercentage: number;
+  for: string;
+  against: string;
+  total: string;
+  forPercentage: string;
+  againstPercentage: string;
 }
 
 // Use the generated GraphQL type as base and extend with computed properties
@@ -42,7 +42,7 @@ export interface Proposal
   state: ProposalState;
   proposer: string; // Alias for proposerAccountId
   votes: ProposalVotes;
-  quorum: number; // Convert from string to number
+  quorum: string;
   timeText?: string;
   timeRemaining?: string;
   timeAgo?: string;
