@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
+import { GetDelegateDelegationHistoryDeltaRangeQueryVariables } from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
@@ -8,7 +10,7 @@ import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { formatUnits } from "viem";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Inbox } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
 import {
@@ -16,11 +18,20 @@ import {
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
 }
+
+export type AmountFilterVariables = Pick<
+  GetDelegateDelegationHistoryDeltaRangeQueryVariables,
+  "delta_gte" | "delta_lte"
+> & {
+  orderDirection?: "asc" | "desc";
+};
 
 export const DelegateDelegationHistoryTable = ({
   accountId,
@@ -28,6 +39,14 @@ export const DelegateDelegationHistoryTable = ({
 }: DelegateDelegationHistoryTableProps) => {
   const [sortBy, setSortBy] = useState<string>("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [filterVariables, setFilterVariables] =
+    useState<AmountFilterVariables>();
+  const [isFilterActive, setIsFilterActive] = useState(false);
+
+  const sortOptions: SortOption[] = [
+    { value: "largest-first", label: "Largest first" },
+    { value: "smallest-first", label: "Smallest first" },
+  ];
 
   const {
     delegationHistory,
@@ -36,7 +55,13 @@ export const DelegateDelegationHistoryTable = ({
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-  } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
+  } = useDelegateDelegationHistory(
+    accountId,
+    daoId,
+    sortBy,
+    sortDirection,
+    filterVariables,
+  );
 
   // Handle sorting
   const handleSort = (field: string) => {
@@ -156,23 +181,47 @@ export const DelegateDelegationHistoryTable = ({
       accessorKey: "amount",
       size: 200,
       header: () => (
-        <Button
-          variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
-          onClick={() => handleSort("delta")}
-        >
+        <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              sortBy === "delta"
-                ? sortDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+          <AmountFilter
+            onApply={(filterState: AmountFilterState) => {
+              // Mapear o estado do filtro para as variáveis específicas
+              const variables: AmountFilterVariables = {
+                orderDirection:
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+              };
+
+              // Add range filters if values are provided
+              if (filterState.minAmount) {
+                // Convert to BigInt wei format (multiply by 10^18)
+                variables.delta_gte = (
+                  parseFloat(filterState.minAmount) * Math.pow(10, 18)
+                ).toString();
+              }
+              if (filterState.maxAmount) {
+                // Convert to BigInt wei format (multiply by 10^18)
+                variables.delta_lte = (
+                  parseFloat(filterState.maxAmount) * Math.pow(10, 18)
+                ).toString();
+              }
+
+              setFilterVariables(variables);
+              setIsFilterActive(!!(variables.delta_gte || variables.delta_lte));
+              // Update sort to delta when filter is applied
+              setSortBy("delta");
+              setSortDirection(variables.orderDirection || "desc");
+            }}
+            onReset={() => {
+              setFilterVariables(undefined);
+              setIsFilterActive(false);
+              // Reset to default sorting
+              setSortBy("timestamp");
+              setSortDirection("desc");
+            }}
+            isActive={isFilterActive}
+            sortOptions={sortOptions}
           />
-        </Button>
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -418,6 +467,15 @@ export const DelegateDelegationHistoryTable = ({
           withPagination={false}
           withSorting={true}
           isTableSmall={true}
+          showWhenEmpty={
+            <BlankSlate
+              variant="default"
+              icon={Inbox}
+              title=""
+              className="h-full rounded-none"
+              description="No results found"
+            />
+          }
         />
 
         {/* Pagination */}
