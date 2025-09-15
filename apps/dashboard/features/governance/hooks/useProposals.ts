@@ -5,6 +5,7 @@ import {
   useGetProposalsQuery,
   GetProposalsQuery,
   QueryInput_Proposals_OrderDirection,
+  QueryProposalsArgs,
 } from "@anticapture/graphql-client/hooks";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
@@ -27,16 +28,15 @@ export interface UseProposalsResult {
   isPaginationLoading: boolean;
 }
 
-export interface UseProposalsParams {
-  fromDate?: number;
-  orderDirection?: "asc" | "desc";
-  status?: unknown;
+// Use the generated GraphQL arguments type and extend with pagination
+export interface UseProposalsParams
+  extends Omit<QueryProposalsArgs, "skip" | "limit"> {
   itemsPerPage?: number;
 }
 
 export const useProposals = ({
   fromDate,
-  orderDirection = "desc",
+  orderDirection = QueryInput_Proposals_OrderDirection.Desc,
   status,
   itemsPerPage = 10,
 }: UseProposalsParams = {}): UseProposalsResult => {
@@ -47,7 +47,7 @@ export const useProposals = ({
     () => ({
       skip: 0, // Always start from 0 for first query
       limit: itemsPerPage,
-      orderDirection: orderDirection as QueryInput_Proposals_OrderDirection,
+      orderDirection,
       status,
       fromDate,
     }),

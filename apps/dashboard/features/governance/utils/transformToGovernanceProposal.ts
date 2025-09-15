@@ -7,11 +7,14 @@ import {
 } from "@/features/governance/utils";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 
-type Proposal = Omit<Query_Proposals_Items_Items, "endBlock" | "startBlock">;
+type GraphQLProposal = Omit<
+  Query_Proposals_Items_Items,
+  "endBlock" | "startBlock"
+>;
 
 // Helper function to transform GraphQL proposal data to governance component format
 export const transformToGovernanceProposal = (
-  graphqlProposal: Proposal,
+  graphqlProposal: GraphQLProposal,
 ): GovernanceProposal => {
   const forVotes = parseInt(graphqlProposal.forVotes);
   const againstVotes = parseInt(graphqlProposal.againstVotes);
@@ -31,11 +34,12 @@ export const transformToGovernanceProposal = (
   );
 
   return {
-    id: graphqlProposal.id,
-    title: graphqlProposal.title || "Untitled Proposal",
+    // Spread all the original GraphQL fields
+    ...graphqlProposal,
+    // Add computed fields
+    title: graphqlProposal.description?.split("\n")[0] || "Untitled Proposal",
     status: getProposalStatus(graphqlProposal.status),
     state: getProposalState(graphqlProposal.status),
-    description: graphqlProposal.description,
     proposer: graphqlProposal.proposerAccountId,
     votes: {
       for: forVotes,
