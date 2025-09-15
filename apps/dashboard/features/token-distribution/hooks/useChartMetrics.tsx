@@ -197,7 +197,7 @@ export const useChartMetrics = ({
       stableAppliedMetrics.includes("PROPOSALS_GOVERNANCE") &&
       filteredProposals?.proposals
     ) {
-      filteredProposals.proposals.forEach((proposal) => {
+      filteredProposals.proposals.items.forEach((proposal) => {
         // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 
@@ -370,7 +370,7 @@ export const useChartMetrics = ({
 
       return processedPoint;
     });
-  }, [datasets, timeInterval, stableAppliedMetrics, metricsSchema]);
+  }, [stableAppliedMetrics, groupDataByPeriod, datasets, timeInterval]);
 
   // Optimized loading state - only consider loading for applied metrics
   const isLoadingOptimized = useMemo(() => {
