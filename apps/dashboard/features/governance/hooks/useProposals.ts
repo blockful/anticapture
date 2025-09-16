@@ -72,24 +72,7 @@ export const useProposals = ({
     const currentProposals = data?.proposals?.items || [];
 
     // Remove null values
-    return currentProposals
-      .filter((proposal) => proposal !== null)
-      .map((proposal) => ({
-        id: proposal.id,
-        daoId: proposal.daoId,
-        txHash: proposal.txHash,
-        description: proposal.description,
-        forVotes: proposal.forVotes,
-        againstVotes: proposal.againstVotes,
-        abstainVotes: proposal.abstainVotes,
-        timestamp: proposal.timestamp,
-        status: proposal.status,
-        proposerAccountId: proposal.proposerAccountId,
-        title: proposal.title || "",
-        endTimestamp: proposal.endTimestamp,
-        quorum: proposal.quorum,
-        startTimestamp: proposal.startTimestamp,
-      }));
+    return currentProposals.filter((proposal) => proposal !== null);
   }, [data]);
 
   // Initialize allProposals on first load
@@ -146,27 +129,9 @@ export const useProposals = ({
           }
 
           // Filter and transform new proposals
-          const newRawProposals = (fetchMoreResult.proposals?.items || [])
-            .filter(
-              (proposal): proposal is NonNullable<typeof proposal> =>
-                proposal !== null && proposal.daoId === DaoIdEnum.ENS,
-            )
-            .map((proposal) => ({
-              id: proposal.id,
-              daoId: proposal.daoId,
-              txHash: proposal.txHash,
-              description: proposal.description,
-              forVotes: proposal.forVotes,
-              againstVotes: proposal.againstVotes,
-              abstainVotes: proposal.abstainVotes,
-              timestamp: proposal.timestamp,
-              status: proposal.status,
-              proposerAccountId: proposal.proposerAccountId,
-              title: proposal.title || "",
-              endTimestamp: proposal.endTimestamp,
-              quorum: proposal.quorum,
-              startTimestamp: proposal.startTimestamp,
-            }));
+          const newRawProposals = (
+            fetchMoreResult.proposals?.items || []
+          ).filter((proposal) => proposal !== null);
 
           // Transform to governance proposals and append to existing list
           const newGovernanceProposals = newRawProposals.map(
