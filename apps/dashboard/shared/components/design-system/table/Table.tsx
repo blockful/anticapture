@@ -13,7 +13,7 @@ import {
   TableOptions,
 } from "@tanstack/react-table";
 import {
-  TableWrapper,
+  TableBase,
   TableBody,
   TableCell,
   TableHead,
@@ -35,41 +35,43 @@ type ColumnDef<TData, TValue> = TanstackColumnDef<TData, TValue> & {
 };
 
 interface DataTableProps<TData, TValue> {
-  filterColumn?: string;
-  withSorting?: boolean;
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  wrapperClassName?: string;
   className?: string;
-  onRowClick?: (row: TData) => void;
-  disableRowClick?: (row: TData) => boolean;
-  stickyFirstColumn?: boolean;
-  mobileTableFixed?: boolean;
+  columns: ColumnDef<TData, TValue>[];
   customEmptyState?: ReactNode;
-  onLoadMore?: () => void;
+  data: TData[];
+  disableRowClick?: (row: TData) => boolean;
+  filterColumn?: string;
   hasMore?: boolean;
-  isLoadingMore?: boolean;
   infiniteRootMargin?: string;
+  isLoadingMore?: boolean;
+  mobileTableFixed?: boolean;
+  onLoadMore?: () => void;
+  onRowClick?: (row: TData) => void;
   size?: "default" | "sm";
+  stickyFirstColumn?: boolean;
+  withDownloadCSV?: boolean;
+  withSorting?: boolean;
+  wrapperClassName?: string;
 }
 
 export const Table = <TData, TValue>({
-  withSorting = false,
-  filterColumn = "",
-  columns,
-  data,
   className,
-  onRowClick,
-  disableRowClick,
-  stickyFirstColumn = false,
-  mobileTableFixed = false,
+  columns,
   customEmptyState,
-  onLoadMore,
+  data,
+  disableRowClick,
+  filterColumn = "",
   hasMore = false,
-  isLoadingMore = false,
   infiniteRootMargin = "0px 0px 200px 0px",
-  wrapperClassName,
+  isLoadingMore = false,
+  mobileTableFixed = false,
+  onLoadMore,
+  onRowClick,
   size = "default",
+  stickyFirstColumn = false,
+  withDownloadCSV = false,
+  withSorting = false,
+  wrapperClassName,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -137,7 +139,7 @@ export const Table = <TData, TValue>({
 
   return (
     <div className={cn("flex w-full flex-col", wrapperClassName)}>
-      <TableWrapper
+      <TableBase
         className={cn(
           "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
@@ -226,17 +228,19 @@ export const Table = <TData, TValue>({
             </TableRow>
           )}
         </TableBody>
-      </TableWrapper>
-      <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
-        [DOWNLOAD AS{" "}
-        <button
-          onClick={handleExportCSV}
-          className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
-        >
-          CSV <DownloadIcon className="size-3.5" />
-        </button>
-        ]
-      </p>
+      </TableBase>
+      {withDownloadCSV && (
+        <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
+          [DOWNLOAD AS{" "}
+          <button
+            onClick={handleExportCSV}
+            className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
+          >
+            CSV <DownloadIcon className="size-3.5" />
+          </button>
+          ]
+        </p>
+      )}
     </div>
   );
 };

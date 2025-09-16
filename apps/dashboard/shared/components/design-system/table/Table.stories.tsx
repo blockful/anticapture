@@ -74,7 +74,7 @@ const mockFetchPage = async ({
 };
 
 const meta = {
-  title: "Design System/Table",
+  title: "Data Display/Table",
   component: ExampleDataTable,
   parameters: {
     layout: "fullscreen",
@@ -116,29 +116,6 @@ export const SmallTable: Story = {
   },
 };
 
-export const EmptyState: Story = {
-  args: {
-    columns,
-    data: [],
-    className: "w-full",
-    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
-  },
-};
-
-export const WithCustomEmptyState: Story = {
-  args: {
-    columns,
-    data: [],
-    className: "w-full",
-    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
-    customEmptyState: (
-      <div className="text-secondary/70 p-8 text-center text-sm">
-        Nothing here yet
-      </div>
-    ),
-  },
-};
-
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 0 } },
 });
@@ -175,7 +152,7 @@ const TableWithInfiniteScroll = () => {
   );
 };
 
-export const WithInfiniteScroll: Story = {
+export const InfiniteScroll: Story = {
   args: {
     columns: [],
     data: [],
@@ -185,4 +162,37 @@ export const WithInfiniteScroll: Story = {
       <TableWithInfiniteScroll />
     </QueryClientProvider>
   ),
+};
+
+export const DownloadCSV: Story = {
+  args: {
+    columns,
+    data: (await mockFetchPage({ pageParam: 0 })).items,
+    className: "w-full",
+    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
+    withDownloadCSV: true,
+  },
+};
+
+export const EmptyState: Story = {
+  args: {
+    columns,
+    data: [],
+    className: "w-full",
+    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
+  },
+};
+
+export const CustomEmptyState: Story = {
+  args: {
+    columns,
+    data: [],
+    className: "w-full",
+    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
+    customEmptyState: (
+      <div className="text-secondary/70 p-8 text-center text-sm">
+        Nothing here yet
+      </div>
+    ),
+  },
 };
