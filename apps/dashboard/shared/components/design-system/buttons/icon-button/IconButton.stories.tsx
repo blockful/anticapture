@@ -19,7 +19,7 @@ const meta = {
     },
     variant: {
       control: "select",
-      options: ["primary", "secondary", "outline", "ghost", "destructive"],
+      options: ["primary", "outline", "ghost", "destructive"],
       description: "IconButton variant",
     },
     className: {

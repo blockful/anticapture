@@ -93,7 +93,7 @@ export const FaqSection = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button size="sm" variant="secondary">
+            <Button size="sm" variant="outline">
               <TelegramIcon className="size-5" />
               Send Message
             </Button>

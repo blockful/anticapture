@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { Button, IconButton } from "@/shared/components";
+import { IconButton } from "@/shared/components";
 
 interface PaginationProps {
   currentPage: number;
@@ -39,7 +39,6 @@ export function Pagination({
     <div className={cn("flex items-center gap-2", className)}>
       <IconButton
         variant="outline"
-        size="sm"
         onClick={handlePrevious}
         disabled={isLoading || !hasPreviousPage}
         icon={ChevronLeft}
@@ -47,14 +46,12 @@ export function Pagination({
       <span className="text-secondary bg-surface-contrast flex h-8 items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
         Page {currentPage} of {totalPages}
       </span>
-      <Button
+      <IconButton
         variant="outline"
-        size="sm"
         onClick={handleNext}
         disabled={isLoading || !hasNextPage}
-      >
-        <ChevronRight className="text-primary size-3.5" />
-      </Button>
+        icon={ChevronRight}
+      />
     </div>
   );
 }

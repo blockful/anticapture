@@ -22,7 +22,7 @@ const meta = {
     },
     variant: {
       control: "select",
-      options: ["primary", "secondary", "outline", "ghost", "destructive"],
+      options: ["primary", "outline", "ghost", "destructive"],
       description: "Button variant",
     },
     className: {

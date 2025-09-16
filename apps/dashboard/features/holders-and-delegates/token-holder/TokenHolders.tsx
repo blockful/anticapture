@@ -178,10 +178,14 @@ export const TokenHolders = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <Button
+                variant="outline"
+                size="sm"
+                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              >
                 <Plus className="size-3.5" />
                 <span className="text-sm font-medium">Details</span>
-              </div>
+              </Button>
             )}
           </div>
         );

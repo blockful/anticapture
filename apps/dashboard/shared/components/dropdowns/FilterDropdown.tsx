@@ -51,7 +51,7 @@ export const FilterDropdown = ({
       <IconButton
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        variant="secondary"
+        variant="ghost"
         className={cn(
           "group border border-transparent",
           "hover:border-highlight bg-surface-hover border-transparent",

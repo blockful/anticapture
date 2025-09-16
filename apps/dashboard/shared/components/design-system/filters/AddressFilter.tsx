@@ -102,7 +102,7 @@ export function AddressFilter({
       <PopoverTrigger asChild>
         <IconButton
           aria-label="Filter by address"
-          variant="secondary"
+          variant="ghost"
           className={cn(
             "group border border-transparent",
             "hover:border-highlight bg-surface-hover border-transparent",

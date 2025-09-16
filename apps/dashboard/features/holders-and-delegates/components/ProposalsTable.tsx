@@ -8,6 +8,7 @@ import {
   TextIconLeft,
   SimpleProgressBar,
   Button,
+  IconButton,
 } from "@/shared/components";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
@@ -349,7 +350,7 @@ export const ProposalsTable = ({
               className="hover:text-secondary cursor-pointer text-white transition-colors"
               title="View on Tally"
             >
-              <ExternalLink className="size-4" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );

@@ -47,7 +47,7 @@ export const VotingPowerTimePeriodSwitcher = ({
         aria-expanded={isOpen}
         aria-controls="timePeriod-value"
         onClick={() => setIsOpen(!isOpen)}
-        variant="secondary"
+        variant="outline"
         className={cn(
           "min-w-[70px]",
           isOpen

@@ -1,7 +1,6 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { cn } from "@/shared/utils/";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
@@ -56,7 +55,9 @@ export const ConnectWallet = ({
                   <Button
                     onClick={openConnectModal}
                     type="button"
-                    className={cn("btn-connect-wallet", className)}
+                    variant="outline"
+                    className={className}
+                    size="md"
                   >
                     <Wallet className="size-3.5" />
                     {label}

@@ -36,7 +36,7 @@ export const DaoInfoDropdown = ({
         role="combobox"
         aria-expanded={isOpen}
         aria-controls="timeInterval-value"
-        variant="secondary"
+        variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(

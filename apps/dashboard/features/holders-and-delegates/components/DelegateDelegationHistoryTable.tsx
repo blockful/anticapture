@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow, Button } from "@/shared/components";
+import { TheTable, SkeletonRow, Button, IconButton } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
@@ -349,7 +349,7 @@ export const DelegateDelegationHistoryTable = ({
               rel="noopener noreferrer"
               className="cursor-pointer"
             >
-              <ExternalLink className="text-secondary hover:text-primary size-4 transition-colors" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );

@@ -136,7 +136,8 @@ const KeyboardButton = ({
           : "No terms available"
       }
       variant="outline"
-      className={"size-8 p-0"}
+      size="sm"
+      className="w-full"
     >
       {letter}
     </Button>
