@@ -3118,7 +3118,6 @@ export const GetDelegatesDocument = gql`
     items {
       votingPower
       accountId
-      delegationsCount
     }
     pageInfo {
       endCursor
