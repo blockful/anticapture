@@ -1,4 +1,4 @@
-import { ponder } from "ponder:registry";
+import { Context, Event, ponder } from "ponder:registry";
 import { token } from "ponder:schema";
 import { Address } from "viem";
 
@@ -10,10 +10,10 @@ import {
 } from "@/eventHandlers";
 import { handleTransaction } from "@/eventHandlers/shared";
 
-export function OPTokenIndexer(address: Address, decimals: number) {
-  const daoId = DaoIdEnum.OP;
+export function NounsTokenIndexer(address: Address, decimals: number) {
+  const daoId = DaoIdEnum.NOUNS;
 
-  ponder.on("OPToken:setup", async ({ context }) => {
+  ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
       id: address,
       name: daoId,
@@ -21,32 +21,39 @@ export function OPTokenIndexer(address: Address, decimals: number) {
     });
   });
 
-  ponder.on(`OPToken:Transfer`, async ({ event, context }) => {
-    // Process the transfer
-    await tokenTransfer(context, daoId, {
-      from: event.args.from,
-      to: event.args.to,
-      token: address,
-      transactionHash: event.transaction.hash,
-      value: event.args.value,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
-    });
-
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
+  ponder.on(
+    "NounsToken:Transfer",
+    async ({
+      event,
       context,
-      daoId,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.from, event.args.to], // Addresses to check
-    );
-  });
+    }: {
+      event: Event<"NounsToken:Transfer">;
+      context: Context;
+    }) => {
+      await tokenTransfer(context, daoId, {
+        from: event.args.from,
+        to: event.args.to,
+        token: address,
+        transactionHash: event.transaction.hash,
+        value: 1n,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      });
 
-  ponder.on(`OPToken:DelegateChanged`, async ({ event, context }) => {
-    // Process the delegation change
+      // Handle transaction creation/update with flag calculation
+      await handleTransaction(
+        context,
+        daoId,
+        event.transaction.hash,
+        event.transaction.from,
+        event.transaction.to,
+        event.block.timestamp,
+        [event.args.from, event.args.to], // Addresses to check
+      );
+    },
+  );
+
+  ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -69,8 +76,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
     );
   });
 
-  ponder.on(`OPToken:DelegateVotesChanged`, async ({ event, context }) => {
-    // Process the delegate votes change
+  ponder.on(`NounsToken:DelegateVotesChanged`, async ({ event, context }) => {
     await delegatedVotesChanged(context, daoId, {
       tokenId: event.log.address,
       delegate: event.args.delegate,

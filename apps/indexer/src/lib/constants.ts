@@ -87,6 +87,18 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 12497481,
     },
   },
+  [DaoIdEnum.NOUNS]: {
+    blockTime: 12,
+    token: {
+      address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+      decimals: 18,
+      startBlock: 12985438,
+    },
+    governor: {
+      address: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
+      startBlock: 12985453,
+    },
+  },
 } as const;
 
 export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
@@ -105,6 +117,7 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
+  [DaoIdEnum.NOUNS]: {},
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {
     "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
@@ -214,6 +227,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     UpbitColdWallet: "0x245445940B317E509002eb682E03f4429184059d",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.NOUNS]: {},
   [DaoIdEnum.OP]: {
     "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
     "Binance 2": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
@@ -326,6 +340,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.NOUNS]: {},
   [DaoIdEnum.OP]: {
     "Velodrome Finance": "0x47029bc8f5CBe3b464004E87eF9c9419a48018cd",
     "Uniswap 1": "0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3",
@@ -360,6 +375,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.NOUNS]: {},
   [DaoIdEnum.OP]: {
     Aave: "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf",
     Superfluid: "0x1828Bff08BD244F7990edDCd9B19cc654b33cDB4",
@@ -421,6 +437,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
     TokenContract: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
+  },
+  [DaoIdEnum.NOUNS]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
   },
 };
 

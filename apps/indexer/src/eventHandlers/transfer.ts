@@ -140,22 +140,14 @@ export const tokenTransfer = async (
   args: {
     from: Address;
     to: Address;
-    tokenAddress: Address;
+    token: Address;
     transactionHash: Hex;
     value: bigint;
     timestamp: bigint;
     logIndex: number;
   },
 ) => {
-  const {
-    from,
-    to,
-    tokenAddress,
-    transactionHash,
-    value,
-    timestamp,
-    logIndex,
-  } = args;
+  const { from, to, token, transactionHash, value, timestamp, logIndex } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
@@ -168,7 +160,7 @@ export const tokenTransfer = async (
     .insert(accountBalance)
     .values({
       accountId: to,
-      tokenId: tokenAddress,
+      tokenId: token,
       balance: value,
       delegate: zeroAddress,
     })
@@ -182,7 +174,7 @@ export const tokenTransfer = async (
       .insert(accountBalance)
       .values({
         accountId: from,
-        tokenId: tokenAddress,
+        tokenId: token,
         balance: -value,
         delegate: zeroAddress,
       })
@@ -193,7 +185,7 @@ export const tokenTransfer = async (
 
   // Single token query for all supply calculations
   const tokenData = await context.db.find(token, {
-    id: tokenAddress,
+    id: token,
   });
 
   if (!tokenData) {
@@ -221,7 +213,7 @@ export const tokenTransfer = async (
     .values({
       transactionHash,
       daoId,
-      tokenId: tokenAddress,
+      tokenId: token,
       amount: value,
       fromAccountId: from,
       toAccountId: to,
@@ -249,7 +241,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    tokenAddress,
+    token,
     timestamp,
   );
 
@@ -264,7 +256,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    tokenAddress,
+    token,
     timestamp,
   );
 
@@ -279,7 +271,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    tokenAddress,
+    token,
     timestamp,
   );
 
@@ -293,7 +285,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    tokenAddress,
+    token,
     timestamp,
   );
 
@@ -306,7 +298,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    tokenAddress,
+    token,
     timestamp,
   );
 
@@ -316,7 +308,7 @@ export const tokenTransfer = async (
     tokenData,
     MetricTypesEnum.CIRCULATING_SUPPLY,
     daoId,
-    tokenAddress,
+    token,
     timestamp,
   );
 };
