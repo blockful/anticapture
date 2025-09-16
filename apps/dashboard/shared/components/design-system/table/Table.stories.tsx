@@ -79,6 +79,12 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  argTypes: {
+    size: {
+      control: "select",
+      options: ["default", "sm"],
+    },
+  },
   tags: ["autodocs"],
 } satisfies Meta<typeof ExampleDataTable>;
 
@@ -128,7 +134,8 @@ const TableWithInfiniteScroll = () => {
       onLoadMore={loadMore}
       hasMore={!!hasNextPage}
       isLoadingMore={isFetchingNextPage}
-      className="m-4 h-[500px] w-full"
+      className="h-[500px] w-full"
+      wrapperClassName="p-4"
       showWhenEmpty={<div className="p-6 text-center">No results</div>}
       isTableSmall
     />
@@ -142,9 +149,7 @@ export const WithInfiniteScroll: Story = {
   },
   render: () => (
     <QueryClientProvider client={queryClient}>
-      <div className="flex w-full justify-center p-4">
-        <TableWithInfiniteScroll />
-      </div>
+      <TableWithInfiniteScroll />
     </QueryClientProvider>
   ),
 };
