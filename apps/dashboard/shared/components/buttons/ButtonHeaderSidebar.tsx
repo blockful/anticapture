@@ -41,7 +41,7 @@ export const ButtonHeaderSidebar = ({
     <Button
       variant="ghost"
       className={cn(
-        `group w-full justify-start`,
+        "group w-full justify-start",
         {
           "cursor-default bg-white hover:bg-white": isActive(anchorId),
         },

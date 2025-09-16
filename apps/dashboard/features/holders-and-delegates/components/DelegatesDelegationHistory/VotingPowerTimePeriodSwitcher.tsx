@@ -70,7 +70,9 @@ export const VotingPowerTimePeriodSwitcher = ({
             <Button
               key={period}
               variant="ghost"
-              className={cn("text-left", value == period && "bg-middle-dark")}
+              className={cn("text-left", {
+                "bg-middle-dark": value == period,
+              })}
               onClick={() => handleSelect(period)}
             >
               {formatPeriod(period)}
