@@ -147,7 +147,15 @@ export const tokenTransfer = async (
     logIndex: number;
   },
 ) => {
-  const { from, to, token, transactionHash, value, timestamp, logIndex } = args;
+  const {
+    from,
+    to,
+    token: tokenId,
+    transactionHash,
+    value,
+    timestamp,
+    logIndex,
+  } = args;
 
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
@@ -160,7 +168,7 @@ export const tokenTransfer = async (
     .insert(accountBalance)
     .values({
       accountId: to,
-      tokenId: token,
+      tokenId,
       balance: value,
       delegate: zeroAddress,
     })
@@ -174,7 +182,7 @@ export const tokenTransfer = async (
       .insert(accountBalance)
       .values({
         accountId: from,
-        tokenId: token,
+        tokenId,
         balance: -value,
         delegate: zeroAddress,
       })
@@ -185,7 +193,7 @@ export const tokenTransfer = async (
 
   // Single token query for all supply calculations
   const tokenData = await context.db.find(token, {
-    id: token,
+    id: tokenId,
   });
 
   if (!tokenData) {
@@ -213,7 +221,7 @@ export const tokenTransfer = async (
     .values({
       transactionHash,
       daoId,
-      tokenId: token,
+      tokenId,
       amount: value,
       fromAccountId: from,
       toAccountId: to,
@@ -241,7 +249,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    token,
+    tokenId,
     timestamp,
   );
 
@@ -256,7 +264,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    token,
+    tokenId,
     timestamp,
   );
 
@@ -271,7 +279,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    token,
+    tokenId,
     timestamp,
   );
 
@@ -285,7 +293,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    token,
+    tokenId,
     timestamp,
   );
 
@@ -298,7 +306,7 @@ export const tokenTransfer = async (
     to,
     value,
     daoId,
-    token,
+    tokenId,
     timestamp,
   );
 
@@ -308,7 +316,7 @@ export const tokenTransfer = async (
     tokenData,
     MetricTypesEnum.CIRCULATING_SUPPLY,
     daoId,
-    token,
+    tokenId,
     timestamp,
   );
 };

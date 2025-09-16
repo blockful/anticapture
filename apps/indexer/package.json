@@ -10,7 +10,7 @@
     "db:prune": "ponder db prune",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "typecheck": "tsc",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },
   "dependencies": {
