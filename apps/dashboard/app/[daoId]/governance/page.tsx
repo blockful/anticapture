@@ -8,11 +8,11 @@ import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { GovernanceSection } from "@/features/governance";
 
 type Props = {
-  params: { daoId: string };
+  params: Promise<{ daoId: string }>;
 };
 
-export function generateMetadata(props: Props): Metadata {
-  const params = props.params;
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
   const baseUrl =
