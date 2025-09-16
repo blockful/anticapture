@@ -9,8 +9,12 @@ import { ProposalItem } from "@/features/governance/components/ProposalItem";
 import { TheSectionLayout } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
 import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const GovernanceSection = () => {
+  const { daoId }: { daoId: string } = useParams();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const {
     proposals, // Now already normalized to Proposal[] format
     loading,
@@ -21,6 +25,7 @@ export const GovernanceSection = () => {
   } = useProposals({
     itemsPerPage: 10,
     orderDirection: QueryInput_Proposals_OrderDirection.Desc,
+    daoId: daoIdEnum,
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);

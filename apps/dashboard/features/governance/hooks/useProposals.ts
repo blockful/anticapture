@@ -32,6 +32,7 @@ export interface UseProposalsResult {
 export interface UseProposalsParams
   extends Omit<QueryProposalsArgs, "skip" | "limit"> {
   itemsPerPage?: number;
+  daoId?: DaoIdEnum;
 }
 
 export const useProposals = ({
@@ -39,6 +40,7 @@ export const useProposals = ({
   orderDirection = QueryInput_Proposals_OrderDirection.Desc,
   status,
   itemsPerPage = 10,
+  daoId,
 }: UseProposalsParams = {}): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
@@ -60,7 +62,7 @@ export const useProposals = ({
     notifyOnNetworkStatusChange: true,
     context: {
       headers: {
-        "anticapture-dao-id": DaoIdEnum.ENS,
+        "anticapture-dao-id": daoId,
       },
     },
   });
@@ -71,7 +73,7 @@ export const useProposals = ({
 
     // Remove null values
     return currentProposals
-      .filter(proposal => proposal !== null)
+      .filter((proposal) => proposal !== null)
       .map((proposal) => ({
         id: proposal.id,
         daoId: proposal.daoId,
