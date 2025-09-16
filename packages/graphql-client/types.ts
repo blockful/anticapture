@@ -96,7 +96,7 @@ export type Query = {
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
   /** Returns a list of proposal */
-  proposals?: Maybe<Array<Maybe<Query_Proposals_Items>>>;
+  proposals?: Maybe<Proposals_200_Response>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
@@ -1329,6 +1329,12 @@ export type ProposalsOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type Proposals_200_Response = {
+  __typename?: 'proposals_200_response';
+  items: Array<Maybe<Query_Proposals_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1477,7 +1483,7 @@ export enum QueryInput_Transactions_SortOrder {
 }
 
 export enum QueryInput_VotingPowers_OrderBy {
-  Amount = 'amount',
+  Delta = 'delta',
   Timestamp = 'timestamp'
 }
 
@@ -1532,8 +1538,8 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   votingPower?: Maybe<Scalars['String']['output']>;
 };
 
-export type Query_Proposals_Items = {
-  __typename?: 'query_proposals_items';
+export type Query_Proposals_Items_Items = {
+  __typename?: 'query_proposals_items_items';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
@@ -2345,6 +2351,17 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+
+export type GetProposalsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
+  status?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, description: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title?: string | null, startTimestamp: string, endTimestamp: string } | null> } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];

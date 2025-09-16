@@ -99,7 +99,7 @@ export type Query = {
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
   /** Returns a list of proposal */
-  proposals?: Maybe<Array<Maybe<Query_Proposals_Items>>>;
+  proposals?: Maybe<Proposals_200_Response>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
@@ -1332,6 +1332,12 @@ export type ProposalsOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type Proposals_200_Response = {
+  __typename?: 'proposals_200_response';
+  items: Array<Maybe<Query_Proposals_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1480,7 +1486,7 @@ export enum QueryInput_Transactions_SortOrder {
 }
 
 export enum QueryInput_VotingPowers_OrderBy {
-  Amount = 'amount',
+  Delta = 'delta',
   Timestamp = 'timestamp'
 }
 
@@ -1535,8 +1541,8 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   votingPower?: Maybe<Scalars['String']['output']>;
 };
 
-export type Query_Proposals_Items = {
-  __typename?: 'query_proposals_items';
+export type Query_Proposals_Items_Items = {
+  __typename?: 'query_proposals_items_items';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
@@ -2348,6 +2354,17 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+
+export type GetProposalsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
+  status?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, description: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title?: string | null, startTimestamp: string, endTimestamp: string } | null> } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -3406,6 +3423,72 @@ export type GetDelegateProposalsActivityQueryHookResult = ReturnType<typeof useG
 export type GetDelegateProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivityLazyQuery>;
 export type GetDelegateProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivitySuspenseQuery>;
 export type GetDelegateProposalsActivityQueryResult = Apollo.QueryResult<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>;
+export const GetProposalsDocument = gql`
+    query GetProposals($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
+  proposals(
+    skip: $skip
+    limit: $limit
+    orderDirection: $orderDirection
+    status: $status
+    fromDate: $fromDate
+  ) {
+    items {
+      id
+      daoId
+      txHash
+      description
+      quorum
+      forVotes
+      againstVotes
+      abstainVotes
+      timestamp
+      status
+      proposerAccountId
+      title
+      startTimestamp
+      endTimestamp
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetProposalsQuery__
+ *
+ * To run a query within a React component, call `useGetProposalsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProposalsQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      status: // value for 'status'
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
+export function useGetProposalsQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+      }
+export function useGetProposalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+        }
+export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+        }
+export type GetProposalsQueryHookResult = ReturnType<typeof useGetProposalsQuery>;
+export type GetProposalsLazyQueryHookResult = ReturnType<typeof useGetProposalsLazyQuery>;
+export type GetProposalsSuspenseQueryHookResult = ReturnType<typeof useGetProposalsSuspenseQuery>;
+export type GetProposalsQueryResult = Apollo.QueryResult<GetProposalsQuery, GetProposalsQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
   historicalBalances(addresses: $addresses, days: $days) {
