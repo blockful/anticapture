@@ -1,9 +1,9 @@
-import { createConfig } from "ponder";
+import { createConfig, mergeAbis } from "ponder";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { GovernorAbi, TokenAbi } from "@/indexer/nouns/abi";
+import { GovernorAbi, TokenAbi, LegacyGovernorABI } from "@/indexer/nouns/abi";
 
 const NOUNS_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.NOUNS];
 
@@ -18,9 +18,9 @@ export default createConfig({
   },
   contracts: {
     NounsGovernor: {
-      abi: GovernorAbi,
+      abi: mergeAbis([GovernorAbi, LegacyGovernorABI]),
       chain: "ethereum_mainnet",
-      address: [NOUNS_CONTRACTS.governor.address],
+      address: NOUNS_CONTRACTS.governor.address,
       startBlock: NOUNS_CONTRACTS.governor.startBlock,
     },
     NounsToken: {

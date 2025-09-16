@@ -95,7 +95,7 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 12985438,
     },
     governor: {
-      address: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
+      address: "0x6f3e6272a167e8accb32072d08e0957f9c79223d",
       startBlock: 12985453,
     },
   },
