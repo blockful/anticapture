@@ -41,11 +41,7 @@ export const GovernanceSection = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          pagination.hasNextPage &&
-          !isPaginationLoading
-        ) {
+        if (entries[0].isIntersecting) {
           handleLoadMore();
         }
       },
@@ -57,7 +53,7 @@ export const GovernanceSection = () => {
     }
 
     return () => observer.disconnect();
-  }, [handleLoadMore, pagination.hasNextPage, isPaginationLoading]);
+  }, [handleLoadMore]);
 
   if (error) {
     return (
