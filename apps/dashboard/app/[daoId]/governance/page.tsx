@@ -28,16 +28,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.GITCOIN]: `${baseUrl}/opengraph-images/gitcoin.png`,
   };
 
+  const ogTitle = `Anticapture - ${daoId} DAO`;
+  const ogDescription = `Explore and mitigate governance risks in ${daoId} DAO.`;
+
   const imageUrl =
     ogImage[daoId as Exclude<DaoIdEnum, DaoIdEnum.ARBITRUM>] ||
     `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: ogTitle,
+    description: ogDescription,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: ogTitle,
+      description: ogDescription,
       images: [
         {
           url: imageUrl,
@@ -49,8 +52,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: ogTitle,
+      description: ogDescription,
       images: [imageUrl],
     },
   };

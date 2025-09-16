@@ -51,7 +51,10 @@ export const ProposalResponseSchema = z.object({
   quorum: z.string(),
 });
 
-export const ProposalsResponseSchema = z.array(ProposalResponseSchema);
+export const ProposalsResponseSchema = z.object({
+  items: z.array(ProposalResponseSchema),
+  totalCount: z.number(),
+});
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 

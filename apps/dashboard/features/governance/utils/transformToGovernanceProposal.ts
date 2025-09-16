@@ -1,4 +1,4 @@
-import { Query_Proposals_Items } from "@anticapture/graphql-client/hooks";
+import { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import {
   getTimeText,
   getProposalStatus,
@@ -6,17 +6,21 @@ import {
   getProposalState,
 } from "@/features/governance/utils";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
+import { formatEther } from "viem";
 
-type Proposal = Omit<Query_Proposals_Items, "endBlock" | "startBlock">;
+type GraphQLProposal = Omit<
+  Query_Proposals_Items_Items,
+  "endBlock" | "startBlock"
+>;
 
 // Helper function to transform GraphQL proposal data to governance component format
 export const transformToGovernanceProposal = (
-  graphqlProposal: Proposal,
+  graphqlProposal: GraphQLProposal,
 ): GovernanceProposal => {
   const forVotes = parseInt(graphqlProposal.forVotes);
   const againstVotes = parseInt(graphqlProposal.againstVotes);
   const abstainVotes = parseInt(graphqlProposal.abstainVotes);
-  const quorum = parseInt(graphqlProposal.quorum);
+  const quorum = formatEther(BigInt(graphqlProposal.quorum));
 
   const total = forVotes + againstVotes + abstainVotes;
 
@@ -31,20 +35,21 @@ export const transformToGovernanceProposal = (
   );
 
   return {
-    id: graphqlProposal.id,
+    // Spread all the original GraphQL fields
+    ...graphqlProposal,
+    // Add computed fields
     title: graphqlProposal.title || "Untitled Proposal",
     status: getProposalStatus(graphqlProposal.status),
     state: getProposalState(graphqlProposal.status),
-    description: graphqlProposal.description,
     proposer: graphqlProposal.proposerAccountId,
     votes: {
-      for: forVotes,
-      against: againstVotes,
+      for: forVotes.toString(),
+      against: againstVotes.toString(),
       total: formatVotes(total),
-      forPercentage,
-      againstPercentage,
+      forPercentage: forPercentage.toString(),
+      againstPercentage: againstPercentage.toString(),
     },
-    quorum: formatVotes(quorum),
+    quorum: quorum,
     timeText,
   };
 };

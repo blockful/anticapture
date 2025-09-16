@@ -8,8 +8,13 @@ import { useProposals } from "@/features/governance/hooks/useProposals";
 import { ProposalItem } from "@/features/governance/components/ProposalItem";
 import { TheSectionLayout } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
+import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const GovernanceSection = () => {
+  const { daoId }: { daoId: string } = useParams();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const {
     proposals, // Now already normalized to Proposal[] format
     loading,
@@ -19,7 +24,8 @@ export const GovernanceSection = () => {
     isPaginationLoading,
   } = useProposals({
     itemsPerPage: 10,
-    orderDirection: "desc",
+    orderDirection: QueryInput_Proposals_OrderDirection.Desc,
+    daoId: daoIdEnum,
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -35,11 +41,7 @@ export const GovernanceSection = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          pagination.hasNextPage &&
-          !isPaginationLoading
-        ) {
+        if (entries[0].isIntersecting) {
           handleLoadMore();
         }
       },
@@ -51,7 +53,7 @@ export const GovernanceSection = () => {
     }
 
     return () => observer.disconnect();
-  }, [handleLoadMore, pagination.hasNextPage, isPaginationLoading]);
+  }, [handleLoadMore]);
 
   if (error) {
     return (

@@ -35,11 +35,11 @@ export const TransactionsRequestSchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
   from: z
     .string()
-    .refine((addr) => addr && isAddress(addr))
+    .refine((addr) => isAddress(addr))
     .optional(),
   to: z
     .string()
-    .refine((addr) => addr && isAddress(addr))
+    .refine((addr) => isAddress(addr))
     .optional(),
   minAmount: z
     .string()

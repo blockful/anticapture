@@ -27,6 +27,14 @@ const getTextStatusColor = (status: ProposalStatus) => {
       return "text-error";
     case ProposalStatus.CANCELLED:
       return "text-error";
+    case ProposalStatus.QUEUED:
+      return "text-primary";
+    case ProposalStatus.SUCCEEDED:
+      return "text-success";
+    case ProposalStatus.EXPIRED:
+      return "text-error";
+    case ProposalStatus.NO_QUORUM:
+      return "text-error";
     default:
       return "text-secondary";
   }
@@ -43,6 +51,14 @@ const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.DEFEATED:
       return "bg-error";
     case ProposalStatus.CANCELLED:
+      return "bg-error";
+    case ProposalStatus.QUEUED:
+      return "bg-primary";
+    case ProposalStatus.SUCCEEDED:
+      return "bg-success";
+    case ProposalStatus.EXPIRED:
+      return "bg-error";
+    case ProposalStatus.NO_QUORUM:
       return "bg-error";
     default:
       return "bg-secondary";
@@ -61,6 +77,14 @@ const getStatusText = (status: ProposalStatus) => {
       return "Defeated";
     case ProposalStatus.CANCELLED:
       return "Cancelled";
+    case ProposalStatus.QUEUED:
+      return "Queued";
+    case ProposalStatus.SUCCEEDED:
+      return "Succeeded";
+    case ProposalStatus.EXPIRED:
+      return "Expired";
+    case ProposalStatus.NO_QUORUM:
+      return "No Quorum";
     default:
       return status;
   }
@@ -69,7 +93,7 @@ const getStatusText = (status: ProposalStatus) => {
 export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
   const daoId = useParams().daoId as DaoIdEnum;
   const quorumPercentage = proposal.votes.total
-    ? (proposal.quorum / proposal.votes.total) * 100
+    ? (Number(proposal.quorum) / Number(proposal.votes.total)) * 100
     : 0;
 
   return (
@@ -113,7 +137,8 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           <p>
             {" "}
             {proposal.votes.total
-              ? formatNumberUserReadable(proposal.votes.total) + " votes"
+              ? formatNumberUserReadable(Number(proposal.votes.total)) +
+                " votes"
               : "Waiting to start"}
           </p>
           <div className="flex items-center justify-center gap-2">
@@ -159,7 +184,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
                 style={{ left: `${quorumPercentage}%` }}
                 className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
               >
-                Quorum: {formatNumberUserReadable(proposal.quorum)}
+                Quorum: {formatNumberUserReadable(Number(proposal.quorum))}
               </div>
               <div className="h-4 w-full"></div>
             </>

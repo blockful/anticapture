@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
   useGetProposalsQuery,
   GetProposalsQuery,
   QueryInput_Proposals_OrderDirection,
+  QueryProposalsArgs,
 } from "@anticapture/graphql-client/hooks";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
@@ -27,29 +28,28 @@ export interface UseProposalsResult {
   isPaginationLoading: boolean;
 }
 
-export interface UseProposalsParams {
-  fromDate?: number;
-  orderDirection?: "asc" | "desc";
-  status?: unknown;
+// Use the generated GraphQL arguments type and extend with pagination
+export interface UseProposalsParams
+  extends Omit<QueryProposalsArgs, "skip" | "limit"> {
   itemsPerPage?: number;
+  daoId?: DaoIdEnum;
 }
 
 export const useProposals = ({
   fromDate,
-  orderDirection = "desc",
+  orderDirection = QueryInput_Proposals_OrderDirection.Desc,
   status,
   itemsPerPage = 10,
+  daoId,
 }: UseProposalsParams = {}): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
-  const [hasInitialized, setHasInitialized] = useState(false);
-  const [hasReachedEnd, setHasReachedEnd] = useState(false);
 
   const queryVariables = useMemo(
     () => ({
       skip: 0, // Always start from 0 for first query
       limit: itemsPerPage,
-      orderDirection: orderDirection as QueryInput_Proposals_OrderDirection,
+      orderDirection,
       status,
       fromDate,
     }),
@@ -62,60 +62,36 @@ export const useProposals = ({
     notifyOnNetworkStatusChange: true,
     context: {
       headers: {
-        "anticapture-dao-id": DaoIdEnum.ENS,
+        "anticapture-dao-id": daoId,
       },
     },
   });
 
   // Transform and filter raw GraphQL data
   const rawProposals = useMemo(() => {
-    const currentProposals = data?.proposals || [];
+    const currentProposals = data?.proposals?.items || [];
+
     // Remove null values
-    return currentProposals
-      .filter(
-        (proposal): proposal is NonNullable<typeof proposal> =>
-          proposal !== null,
-      )
-      .map((proposal) => ({
-        id: proposal.id,
-        daoId: proposal.daoId,
-        txHash: proposal.txHash,
-        description: proposal.description,
-        forVotes: proposal.forVotes,
-        againstVotes: proposal.againstVotes,
-        abstainVotes: proposal.abstainVotes,
-        timestamp: proposal.timestamp,
-        status: proposal.status,
-        proposerAccountId: proposal.proposerAccountId,
-        title: proposal.title || "",
-        endTimestamp: proposal.endTimestamp,
-        quorum: proposal.quorum,
-        startTimestamp: proposal.startTimestamp,
-      }));
+    return currentProposals.filter((proposal) => proposal !== null);
   }, [data]);
 
   // Initialize allProposals on first load
-  useMemo(() => {
-    if (rawProposals.length > 0 && !hasInitialized) {
+  useEffect(() => {
+    if (rawProposals.length > 0 && allProposals.length === 0) {
       const normalizedProposals = rawProposals.map(
         transformToGovernanceProposal,
       );
       setAllProposals(normalizedProposals);
-      setHasInitialized(true);
-
-      // Check if we've reached the end on first load
-      if (rawProposals.length < itemsPerPage) {
-        setHasReachedEnd(true);
-      }
     }
-  }, [rawProposals, hasInitialized, itemsPerPage]);
+  }, [rawProposals, allProposals.length]);
 
   // Pagination info
   const pagination: PaginationInfo = useMemo(() => {
-    const hasNextPage = !hasReachedEnd;
-    const currentPage = Math.ceil(allProposals.length / itemsPerPage);
-    const totalCount = allProposals.length; // We only know about items we've fetched so far
-    const totalPages = hasReachedEnd ? currentPage : currentPage + 1; // +1 if more pages might exist
+    const totalCount = data?.proposals?.totalCount || 0;
+    const currentItemsCount = allProposals.length;
+    const hasNextPage = currentItemsCount < totalCount;
+    const currentPage = Math.ceil(currentItemsCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return {
       hasNextPage,
@@ -123,9 +99,9 @@ export const useProposals = ({
       currentPage,
       totalPages,
       itemsPerPage,
-      currentItemsCount: allProposals.length,
+      currentItemsCount,
     };
-  }, [allProposals.length, itemsPerPage, hasReachedEnd]);
+  }, [data?.proposals?.totalCount, allProposals.length, itemsPerPage]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
@@ -148,32 +124,14 @@ export const useProposals = ({
           previousResult: GetProposalsQuery,
           { fetchMoreResult }: { fetchMoreResult: GetProposalsQuery },
         ) => {
-          if (!fetchMoreResult || !fetchMoreResult.proposals?.length) {
+          if (!fetchMoreResult || !fetchMoreResult.proposals?.items?.length) {
             return previousResult;
           }
 
           // Filter and transform new proposals
-          const newRawProposals = (fetchMoreResult.proposals || [])
-            .filter(
-              (proposal): proposal is NonNullable<typeof proposal> =>
-                proposal !== null && proposal.daoId === DaoIdEnum.ENS,
-            )
-            .map((proposal) => ({
-              id: proposal.id,
-              daoId: proposal.daoId,
-              txHash: proposal.txHash,
-              description: proposal.description,
-              forVotes: proposal.forVotes,
-              againstVotes: proposal.againstVotes,
-              abstainVotes: proposal.abstainVotes,
-              timestamp: proposal.timestamp,
-              status: proposal.status,
-              proposerAccountId: proposal.proposerAccountId,
-              title: proposal.title || "",
-              endTimestamp: proposal.endTimestamp,
-              quorum: proposal.quorum,
-              startTimestamp: proposal.startTimestamp,
-            }));
+          const newRawProposals = (
+            fetchMoreResult.proposals?.items || []
+          ).filter((proposal) => proposal !== null);
 
           // Transform to governance proposals and append to existing list
           const newGovernanceProposals = newRawProposals.map(
@@ -184,17 +142,15 @@ export const useProposals = ({
             setAllProposals((prev) => [...prev, ...newGovernanceProposals]);
           }
 
-          // Check if we've reached the end - if we got fewer items than requested page size
-          if (fetchMoreResult.proposals.length < itemsPerPage) {
-            setHasReachedEnd(true);
-          }
-
           return {
             ...fetchMoreResult,
-            proposals: [
-              ...(previousResult.proposals || []),
-              ...fetchMoreResult.proposals,
-            ],
+            proposals: {
+              totalCount: fetchMoreResult.proposals.totalCount,
+              items: [
+                ...(previousResult.proposals?.items || []),
+                ...(fetchMoreResult.proposals?.items || []),
+              ],
+            },
           };
         },
       });
@@ -208,8 +164,7 @@ export const useProposals = ({
     pagination.hasNextPage,
     isPaginationLoading,
     queryVariables,
-    allProposals,
-    itemsPerPage,
+    allProposals.length,
   ]);
 
   return {
