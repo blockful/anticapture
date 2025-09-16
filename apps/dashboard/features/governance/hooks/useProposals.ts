@@ -71,10 +71,7 @@ export const useProposals = ({
 
     // Remove null values
     return currentProposals
-      .filter(
-        (proposal): proposal is NonNullable<typeof proposal> =>
-          proposal !== null,
-      )
+      .filter(proposal => proposal !== null)
       .map((proposal) => ({
         id: proposal.id,
         daoId: proposal.daoId,
