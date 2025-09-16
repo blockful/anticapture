@@ -26,14 +26,13 @@ export const Button = ({
   return (
     <button
       className={cn(
+        "disabled:text-border-contrast disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium disabled:cursor-not-allowed",
         variantStyles[variant],
         sizeStyles[size],
-        "flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
-        disabled &&
-          "bg-surface-disabled hover:bg-surface-disabled cursor-not-allowed",
         className,
       )}
       onClick={onClick}
+      disabled={disabled || loading}
       {...props}
     >
       {loading ? <Spinner label={loadingText} /> : children}

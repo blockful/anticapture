@@ -44,14 +44,13 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       <button
         ref={ref}
         className={cn(
+          "disabled:text-border-contrast disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
           variantStyles[variant],
           boxSizeStyles[size],
-          "flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
-          disabled &&
-            "bg-surface-disabled hover:bg-surface-disabled cursor-not-allowed",
           className,
         )}
         onClick={onClick}
+        disabled={disabled || loading}
         {...props}
       >
         {loading ? (
