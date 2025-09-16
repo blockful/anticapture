@@ -24,6 +24,7 @@ import { cn } from "@/shared/utils";
 import { getCsvFromTableData } from "@/shared/components/design-system/table/utils";
 import { DownloadIcon } from "lucide-react";
 import { sizeVariants } from "@/shared/components/design-system/table/styles";
+import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 
 type ColumnMeta = {
   headerClassName?: string;
@@ -44,7 +45,7 @@ interface DataTableProps<TData, TValue> {
   disableRowClick?: (row: TData) => boolean;
   stickyFirstColumn?: boolean;
   mobileTableFixed?: boolean;
-  showWhenEmpty?: ReactNode;
+  customEmptyState?: ReactNode;
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
@@ -62,7 +63,7 @@ export const Table = <TData, TValue>({
   disableRowClick,
   stickyFirstColumn = false,
   mobileTableFixed = false,
-  showWhenEmpty,
+  customEmptyState,
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
@@ -220,7 +221,7 @@ export const Table = <TData, TValue>({
                 colSpan={columns.length}
                 className="h-full text-center"
               >
-                {showWhenEmpty || "No results."}
+                {customEmptyState || <EmptyState />}
               </TableCell>
             </TableRow>
           )}

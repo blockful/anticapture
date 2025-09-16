@@ -106,6 +106,39 @@ export const DefaultTable: Story = {
   ),
 };
 
+export const SmallTable: Story = {
+  args: {
+    columns,
+    data: (await mockFetchPage({ pageParam: 0 })).items,
+    size: "sm",
+    className: "w-full",
+    wrapperClassName: "max-h-[320px] overflow-y-auto p-4",
+  },
+};
+
+export const EmptyState: Story = {
+  args: {
+    columns,
+    data: [],
+    className: "w-full",
+    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
+  },
+};
+
+export const WithCustomEmptyState: Story = {
+  args: {
+    columns,
+    data: [],
+    className: "w-full",
+    wrapperClassName: "max-h-[300px] overflow-y-auto p-4",
+    customEmptyState: (
+      <div className="text-secondary/70 p-8 text-center text-sm">
+        Nothing here yet
+      </div>
+    ),
+  },
+};
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 0 } },
 });
