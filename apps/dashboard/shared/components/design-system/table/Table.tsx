@@ -191,7 +191,6 @@ export const Table = <TData, TValue>({
                         cell.column.getIndex() === 0 &&
                           stickyFirstColumn &&
                           "bg-surface-default sticky left-0 z-50",
-                        sizeVariants[size],
                       )}
                     >
                       {flexRender(
@@ -203,20 +202,17 @@ export const Table = <TData, TValue>({
                 </TableRow>
               ))}
 
-              <TableRow>
-                <TableCell colSpan={columns.length} className="p-0">
-                  <span
-                    ref={sentinelRef}
-                    className="text-link flex h-12 items-center justify-center text-xs tracking-wider"
-                  >
-                    {isLoadingMore
-                      ? "LOADING..."
-                      : hasMore
-                        ? "LOAD MORE"
-                        : "END OF DATA"}
-                  </span>
-                </TableCell>
-              </TableRow>
+              <div ref={sentinelRef} aria-hidden="true" />
+
+              {isLoadingMore && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="p-0">
+                    <div className="text-link flex h-12 items-center justify-center text-xs tracking-wider">
+                      LOADING...
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </>
           ) : (
             <TableRow>
