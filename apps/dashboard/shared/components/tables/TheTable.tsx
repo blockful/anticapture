@@ -107,6 +107,7 @@ export const TheTable = <TData, TValue>({
       onExpandedChange: setExpanded,
       getSubRows,
       getExpandedRowModel: getExpandedRowModel(),
+      paginateExpandedRows: false,
     };
   }
 
@@ -155,79 +156,65 @@ export const TheTable = <TData, TValue>({
           </TableRow>
         ))}
       </TableHeader>
-      <TableBody className="min-h-[400px]">
-        {table.getRowModel().rows.length > 0 ? (
+      <TableBody className="h-max min-h-[400px]">
+        {(table.getRowModel()?.rows?.length ?? 0 > 0) ? (
           table.getRowModel().rows.map((row, rowIndex) => {
             // Check if we need a divider before this row
             const needsDivider =
               showParentDividers && row.depth === 0 && rowIndex > 0;
 
             return (
-              <>
-                {/* Parent row divider */}
-                {needsDivider && (
-                  <tr key={`divider-${row.id}`}>
-                    <td colSpan={columns.length} className="p-0">
-                      <div className="border-border-default border-t" />
-                    </td>
-                  </tr>
+              <TableRow
+                key={row.id}
+                className={cn(
+                  "border-transparent transition-colors duration-300", // Highlight sub-rows
+                  onRowClick && !disableRowClick?.(row.original)
+                    ? "hover:bg-surface-contrast cursor-pointer"
+                    : "cursor-default",
+                  isTableSmall ? "h-10" : "h-13",
+                  needsDivider && "border-border-default border-b",
                 )}
-
-                <TableRow
-                  key={row.id}
-                  className={cn(
-                    "border-transparent transition-colors duration-300",
-                    enableExpanding &&
-                      row.depth > 0 &&
-                      "bg-surface-contrast/50", // Highlight sub-rows
-                    onRowClick && !disableRowClick?.(row.original)
-                      ? "hover:bg-surface-contrast cursor-pointer"
-                      : "cursor-default",
-                    isTableSmall ? "h-10" : "h-13",
-                  )}
-                  onClick={() =>
-                    !disableRowClick?.(row.original) &&
-                    onRowClick?.(row.original)
-                  }
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        cell.column.getIndex() === 0 &&
-                          stickyFirstColumn &&
-                          "bg-surface-default z-1 sticky left-0",
+                onClick={() =>
+                  !disableRowClick?.(row.original) && onRowClick?.(row.original)
+                }
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cn(
+                      cell.column.getIndex() === 0 &&
+                        stickyFirstColumn &&
+                        "bg-surface-default z-1 sticky left-0",
+                    )}
+                    style={{
+                      width: cell.column.getSize(),
+                    }}
+                  >
+                    <div className="flex items-center">
+                      {/* Tree lines for hierarchical visualization */}
+                      {index === 0 && enableExpanding && (
+                        <TreeLines row={row} />
                       )}
-                      style={{
-                        width: cell.column.getSize(),
-                      }}
-                    >
-                      <div className="flex items-center">
-                        {/* Tree lines for hierarchical visualization */}
-                        {index === 0 && enableExpanding && (
-                          <TreeLines row={row} />
-                        )}
 
-                        {/* Expand/Collapse button */}
-                        {index === 0 && (
-                          <div className="flex items-center px-1">
-                            <ExpandButton
-                              row={row}
-                              enableExpanding={enableExpanding}
-                            />
-                          </div>
-                        )}
+                      {/* Expand/Collapse button */}
+                      {index === 0 && (
+                        <div className="flex items-center px-1">
+                          <ExpandButton
+                            row={row}
+                            enableExpanding={enableExpanding}
+                          />
+                        </div>
+                      )}
 
-                        {/* Cell content */}
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </>
+                      {/* Cell content */}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </div>
+                  </TableCell>
+                ))}
+              </TableRow>
             );
           })
         ) : (

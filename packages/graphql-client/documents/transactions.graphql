@@ -1,0 +1,58 @@
+query Transactions(
+  $limit: PositiveInt
+  $offset: NonNegativeInt
+  $from: String!
+  $to: String!
+  $minAmount: String!
+  $maxAmount: String!
+  $sortOrder: queryInput_transactions_sortOrder
+) {
+  transactions(
+    limit: $limit
+    offset: $offset
+    from: $from
+    to: $to
+    minAmount: $minAmount
+    maxAmount: $maxAmount
+    sortOrder: $sortOrder
+  ) {
+    transactions {
+      from
+      isCex
+      isDex
+      isLending
+      isTotal
+      timestamp
+      to
+      transactionHash
+      delegations {
+        daoId
+        delegateAccountId
+        delegatedValue
+        delegatorAccountId
+        isCex
+        isDex
+        isTotal
+        isLending
+        logIndex
+        previousDelegate
+        timestamp
+        transactionHash
+      }
+      transfers {
+        amount
+        daoId
+        fromAccountId
+        isCex
+        isDex
+        isLending
+        isTotal
+        logIndex
+        timestamp
+        toAccountId
+        tokenId
+        transactionHash
+      }
+    }
+  }
+}
