@@ -56,6 +56,7 @@ export const TheButton = ({
       )}
       {...props}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
       {hasIcon && Icon && <Icon className="size-4" />}
