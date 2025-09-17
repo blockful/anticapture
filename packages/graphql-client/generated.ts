@@ -2403,10 +2403,10 @@ export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalance
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  from: Scalars['String']['input'];
-  to: Scalars['String']['input'];
-  minAmount: Scalars['String']['input'];
-  maxAmount: Scalars['String']['input'];
+  from?: InputMaybe<Scalars['String']['input']>;
+  to?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
 }>;
 
@@ -3703,7 +3703,7 @@ export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGet
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
 export const TransactionsDocument = gql`
-    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String!, $to: String!, $minAmount: String!, $maxAmount: String!, $sortOrder: queryInput_transactions_sortOrder) {
+    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder) {
   transactions(
     limit: $limit
     offset: $offset
@@ -3777,7 +3777,7 @@ export const TransactionsDocument = gql`
  *   },
  * });
  */
-export function useTransactionsQuery(baseOptions: Apollo.QueryHookOptions<TransactionsQuery, TransactionsQueryVariables> & ({ variables: TransactionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useTransactionsQuery(baseOptions?: Apollo.QueryHookOptions<TransactionsQuery, TransactionsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
       }

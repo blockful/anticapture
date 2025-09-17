@@ -1,10 +1,10 @@
 query Transactions(
   $limit: PositiveInt
   $offset: NonNegativeInt
-  $from: String!
-  $to: String!
-  $minAmount: String!
-  $maxAmount: String!
+  $from: String
+  $to: String
+  $minAmount: String
+  $maxAmount: String
   $sortOrder: queryInput_transactions_sortOrder
 ) {
   transactions(
