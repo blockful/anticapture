@@ -13,7 +13,7 @@ import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
-import { TransactionsTable } from "@/features/transactions/TransactionsTable";
+// import { TransactionsTable } from "@/features/transactions/TransactionsTable";
 
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import { Send } from "lucide-react";
@@ -82,7 +82,7 @@ export const DaoTemplate = () => {
         )}
 
         {/* Demo section for expandable table - remove this in production */}
-        <TransactionsTable />
+        {/* <TransactionsTable /> */}
       </div>
       <ShowYourSupportStickyBar />
     </DaoPageInteractionProvider>
