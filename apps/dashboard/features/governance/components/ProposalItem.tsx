@@ -65,7 +65,7 @@ const getBackgroundStatusColor = (status: ProposalStatus) => {
   }
 };
 
-const getStatusText = (status: ProposalStatus) => {
+export const getStatusText = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
       return "Pending";
