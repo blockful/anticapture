@@ -1,6 +1,6 @@
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Loader } from "lucide-react";
-import { ProposalTimeline } from "@/features/governance/components/ProposalTimeline";
+import { ProposalTimeline } from "@/features/governance/components/proposal-overview/ProposalTimeline";
 
 export const ProposalStatusSection = ({
   proposal,

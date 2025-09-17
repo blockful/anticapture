@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 import { useProposals } from "@/features/governance/hooks/useProposals";
 
-import { ProposalItem } from "@/features/governance/components/ProposalItem";
+import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { TheSectionLayout } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
 import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";

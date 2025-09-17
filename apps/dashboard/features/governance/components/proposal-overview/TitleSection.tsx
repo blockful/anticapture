@@ -1,12 +1,12 @@
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BulletDivider } from "@/features/governance/components/BulletDivider";
+import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Share2 } from "lucide-react";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Address } from "viem";
-import { ProposalInfoText } from "@/features/governance/components/ProposalInfoText";
-import { ProposalBadge } from "@/features/governance/components/ProposalBadge";
+import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
+import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 
 export const TitleSection = ({
   proposal,

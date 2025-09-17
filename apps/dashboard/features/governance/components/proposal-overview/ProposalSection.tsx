@@ -4,9 +4,9 @@ import { useParams } from "next/navigation";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import { SkeletonRow } from "@/shared/components";
 
-import { ProposalStatusSection } from "@/features/governance/components/ProposalStatusSection";
-import { ProposalInfoSection } from "@/features/governance/components/ProposalInfoSection";
-import { TitleSection } from "@/features/governance/components/TitleSection";
+import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
+import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
+import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
 
 export const ProposalSection = () => {
   const { proposalId } = useParams();

@@ -5,7 +5,7 @@ import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderSidebar } from "@/widgets";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { ProposalSection } from "@/features/governance/components/ProposalSection";
+import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
 
 type Props = {
   params: Promise<{ daoId: string }>;
