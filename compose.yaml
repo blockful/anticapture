@@ -33,7 +33,7 @@ services:
       - "42069:42069"
     networks:
       - backend
-      
+
   indexer-db:
     image: postgres:16.2
     ports:
