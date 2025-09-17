@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { useProposal } from "@/features/governance/hooks/useProposal";
-import { SkeletonRow } from "@/shared/components";
 
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
@@ -16,38 +15,30 @@ export const ProposalSection = () => {
     proposalId: proposalId as string,
   });
 
-  console.log(proposal);
-
+  // If loading, show loading skeleton - @todo: align with design
   if (loading) {
     return (
       <>
-        <SkeletonRow className="h-10 w-full" />
         <div className="text-primary p-4">Loading...</div>
       </>
     );
   }
 
+  // If there is an error, show error message - @todo: align with design
   if (error) {
     return <div className="text-primary p-4">Error: {error.message}</div>;
   }
 
+  // If proposal is not found, show 404 page - @todo: align with design
   if (!proposal) {
     return <div className="text-primary p-4">Proposal not found</div>;
   }
-
-  // Load proposal by id
-
-  // If proposal is not found, show 404 page
-
-  // If proposal is found, show proposal section with proposal details
 
   return (
     <div className="flex gap-6 p-5">
       <div className="flex w-[420px] flex-col gap-6">
         <TitleSection proposal={proposal} />
-
         <ProposalInfoSection proposal={proposal} />
-
         <ProposalStatusSection proposal={proposal} />
       </div>
 
