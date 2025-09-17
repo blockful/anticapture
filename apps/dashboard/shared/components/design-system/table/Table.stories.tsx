@@ -33,14 +33,14 @@ const columns: ColumnDef<ExampleData, unknown>[] = [
     header: "Age",
     accessorKey: "age",
     meta: {
-      headerClassName: "w-[50px]",
+      columnClassName: "w-[50px]",
     },
   },
   {
     header: "City",
     accessorKey: "city",
     meta: {
-      headerClassName: "w-[100px]",
+      columnClassName: "w-[100px]",
     },
   },
 ];

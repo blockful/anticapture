@@ -27,7 +27,7 @@ import { sizeVariants } from "@/shared/components/design-system/table/styles";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 
 type ColumnMeta = {
-  headerClassName?: string;
+  columnClassName?: string;
 };
 
 type ColumnDef<TData, TValue> = TanstackColumnDef<TData, TValue> & {
@@ -160,7 +160,7 @@ export const Table = <TData, TValue>({
                         stickyFirstColumn &&
                         "bg-surface-contrast sticky left-0 z-50",
                       sizeVariants[size],
-                      columnMeta?.headerClassName,
+                      columnMeta?.columnClassName,
                     )}
                   >
                     {header.isPlaceholder
@@ -194,6 +194,7 @@ export const Table = <TData, TValue>({
                         cell.column.getIndex() === 0 &&
                           stickyFirstColumn &&
                           "bg-surface-default sticky left-0 z-50",
+                        sizeVariants[size],
                       )}
                     >
                       {flexRender(
