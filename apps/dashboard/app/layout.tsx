@@ -6,7 +6,7 @@ import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import { ReactNode } from "react";
 import ConditionalHotjar from "@/shared/services/hotjar/ConditionalHotjar";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { CookieConsent } from "@/features";
+import { CookieConsent } from "@/features/cookie";
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
