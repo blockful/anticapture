@@ -166,7 +166,6 @@ export const delegatedVotesChanged = async (
   }
 
   // Transaction handling moved to DAO-specific indexer
-
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -176,7 +175,7 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
       delta: newBalance - oldBalance,
       timestamp,
-      logIndex: logIndex - 1,
+      logIndex,
     })
     .onConflictDoNothing();
 

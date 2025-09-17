@@ -2404,6 +2404,17 @@ export type GetTokenHoldersCoutingQueryVariables = Exact<{ [key: string]: never;
 
 export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
+export type VotingPowersQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+}>;
+
+
+export type VotingPowersQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, daoId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_votingPowers_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_votingPowers_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
+
 
 export const BalanceHistoryDocument = gql`
     query BalanceHistory($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
@@ -3726,3 +3737,72 @@ export type GetTokenHoldersCoutingQueryHookResult = ReturnType<typeof useGetToke
 export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingLazyQuery>;
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
+export const VotingPowersDocument = gql`
+    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy) {
+  votingPowers(
+    account: $account
+    skip: $skip
+    orderDirection: $orderDirection
+    limit: $limit
+    orderBy: $orderBy
+  ) {
+    items {
+      accountId
+      daoId
+      votingPower
+      transfer {
+        value
+        to
+        from
+      }
+      transactionHash
+      timestamp
+      logIndex
+      delta
+      delegation {
+        from
+        to
+        value
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useVotingPowersQuery__
+ *
+ * To run a query within a React component, call `useVotingPowersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVotingPowersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVotingPowersQuery({
+ *   variables: {
+ *      account: // value for 'account'
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useVotingPowersQuery(baseOptions: Apollo.QueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables> & ({ variables: VotingPowersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
+      }
+export function useVotingPowersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
+        }
+export function useVotingPowersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
+        }
+export type VotingPowersQueryHookResult = ReturnType<typeof useVotingPowersQuery>;
+export type VotingPowersLazyQueryHookResult = ReturnType<typeof useVotingPowersLazyQuery>;
+export type VotingPowersSuspenseQueryHookResult = ReturnType<typeof useVotingPowersSuspenseQuery>;
+export type VotingPowersQueryResult = Apollo.QueryResult<VotingPowersQuery, VotingPowersQueryVariables>;
