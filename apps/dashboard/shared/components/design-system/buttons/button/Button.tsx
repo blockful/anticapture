@@ -12,6 +12,15 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: "py-3 px-6",
 };
 
+const iconSizeStyles: Record<ButtonSize, string> = {
+  sm: "size-3.5", // 14px
+  md: "size-3.5", // 14px
+  lg: "size-4", // 16px
+};
+
+// Export icon size styles for use in stories and other components
+export { iconSizeStyles };
+
 export const Button = ({
   children,
   className,
@@ -26,7 +35,7 @@ export const Button = ({
   return (
     <button
       className={cn(
-        "disabled:text-border-contrast disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium disabled:cursor-not-allowed",
+        "disabled:text-dimmed disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-1.5 rounded-md text-sm/tight font-medium transition-colors duration-300 disabled:cursor-not-allowed",
         variantStyles[variant],
         sizeStyles[size],
         className,

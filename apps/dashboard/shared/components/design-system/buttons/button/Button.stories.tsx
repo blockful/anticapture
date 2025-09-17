@@ -1,7 +1,16 @@
 import { Plus } from "lucide-react";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import {
+  Button,
+  iconSizeStyles,
+} from "@/shared/components/design-system/buttons/button/Button";
+import { ButtonProps } from "@/shared/components/design-system/buttons/types";
 
 import type { Meta, StoryObj } from "@storybook/react";
+
+// Extended type for stories that includes the custom showIcon property
+type ButtonStoryArgs = ButtonProps & {
+  showIcon?: boolean;
+};
 
 const meta = {
   title: "Design System/Buttons/Button",
@@ -25,20 +34,34 @@ const meta = {
       options: ["primary", "outline", "ghost", "destructive"],
       description: "Button variant",
     },
+    showIcon: {
+      control: "boolean",
+      description: "Show/hide icon",
+    },
     className: {
       control: "text",
       description: "Additional CSS classes",
     },
   },
-} satisfies Meta<typeof Button>;
+} satisfies Meta<ButtonStoryArgs>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<ButtonStoryArgs>;
 
 export const Default: Story = {
   args: {
     variant: "primary",
     children: "Button",
+    showIcon: false,
+  },
+  render: (args) => {
+    const { showIcon, ...buttonProps } = args;
+    return (
+      <Button {...buttonProps}>
+        {showIcon && <Plus className={iconSizeStyles[args.size || "md"]} />}
+        {args.children}
+      </Button>
+    );
   },
 };
 export const Disabled: Story = {
@@ -46,13 +69,26 @@ export const Disabled: Story = {
     variant: "primary",
     children: "Button",
     disabled: true,
+    showIcon: false,
+  },
+  render: (args) => {
+    const { showIcon, ...buttonProps } = args;
+    return (
+      <Button {...buttonProps}>
+        {showIcon && <Plus className={iconSizeStyles[args.size || "md"]} />}
+        {args.children}
+      </Button>
+    );
   },
 };
 
 export const WithIcon: Story = {
-  render: () => (
-    <Button>
-      <Plus className="size-4" />
+  args: {
+    size: "md",
+  },
+  render: (args) => (
+    <Button {...args}>
+      <Plus className={iconSizeStyles[args.size || "md"]} />
       Button
     </Button>
   ),
