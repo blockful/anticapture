@@ -7,6 +7,7 @@ import { SkeletonRow } from "@/shared/components";
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
+import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
 
 export const ProposalSection = () => {
   const { proposalId } = useParams();
@@ -41,7 +42,7 @@ export const ProposalSection = () => {
   // If proposal is found, show proposal section with proposal details
 
   return (
-    <div className="flex p-5">
+    <div className="flex gap-6 p-5">
       <div className="flex w-[420px] flex-col gap-6">
         <TitleSection proposal={proposal} />
 
@@ -49,6 +50,8 @@ export const ProposalSection = () => {
 
         <ProposalStatusSection proposal={proposal} />
       </div>
+
+      <TabsSection />
     </div>
   );
 };
