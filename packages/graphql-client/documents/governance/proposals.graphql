@@ -31,3 +31,22 @@ query GetProposals(
     totalCount
   }
 }
+
+query GetProposal($id: String!) {
+  proposal(id: $id) {
+    id
+    daoId
+    txHash
+    proposerAccountId
+    title
+    description
+    quorum
+    timestamp
+    status
+    forVotes
+    againstVotes
+    abstainVotes
+    startTimestamp
+    endTimestamp
+  }
+}
