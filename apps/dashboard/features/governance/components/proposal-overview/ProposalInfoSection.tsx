@@ -2,6 +2,7 @@ import { GetProposalQuery } from "@anticapture/graphql-client";
 import { getTimeLeftText } from "@/features/governance/utils";
 import {
   BarChart4,
+  Check,
   CheckCircle2,
   DivideCircle,
   Users,
@@ -174,6 +175,14 @@ export const ProposalInfoSection = ({
               Number(formatEther(BigInt(proposal.quorum))),
             )}
           </p>
+          {quorumVotes >= Number(proposal.quorum) && (
+            <div className="bg-surface-opacity-success flex items-center gap-1 rounded-full px-[6px] py-[2px]">
+              <Check className="text-success size-3.5" />
+              <p className="text-success font-inter text-[12px] font-medium not-italic leading-4">
+                Reached
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
