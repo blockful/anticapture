@@ -7,6 +7,8 @@ import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Address } from "viem";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
+import { getStatusText } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { ProposalStatus } from "@/features/governance/types";
 
 export const TitleSection = ({
   proposal,
@@ -17,7 +19,9 @@ export const TitleSection = ({
     <div className="border-surface-default flex w-full flex-col gap-3 rounded-lg border p-4">
       <div className="flex w-full items-center justify-start gap-2">
         {/* Badge Ongoing Proposal */}
-        <ProposalBadge>Ongoing Proposal</ProposalBadge>
+        <ProposalBadge>
+          {getStatusText(proposal.status.toLowerCase() as ProposalStatus)}
+        </ProposalBadge>
 
         <BulletDivider />
 
