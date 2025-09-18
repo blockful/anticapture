@@ -2,14 +2,22 @@
 
 import { cn } from "@/shared/utils";
 import { useState } from "react";
+import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
+import { GetProposalQuery } from "@anticapture/graphql-client";
 
 type TabId = "description" | "votes" | "actions";
 
-export const TabsSection = () => {
+interface TabsSectionProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+}
+
+export const TabsSection = ({ proposal }: TabsSectionProps) => {
   const [activeTab, setActiveTab] = useState<TabId>("description");
 
+  const ActiveTabComponent = TabToContentMap[activeTab];
+
   return (
-    <div className="bg-surface-default flex w-full flex-col">
+    <div className="bg-surface-default flex flex-1 flex-col overflow-hidden">
       {/* Tabs Section */}
       <div className="border-border-default flex w-full gap-2 border-b px-4">
         <Tab
@@ -32,7 +40,9 @@ export const TabsSection = () => {
         </Tab>
       </div>
 
-      <div>{getTabContent(activeTab)}</div>
+      <div>
+        <ActiveTabComponent proposal={proposal} />
+      </div>
     </div>
   );
 };
@@ -57,13 +67,23 @@ export const Tab = ({ children, isActive = false, onClick }: TabProps) => {
   );
 };
 
-const getTabContent = (tabId: TabId) => {
-  switch (tabId) {
-    case "description":
-      return <div className="text-primary p-4">Description</div>;
-    case "votes":
-      return <div className="text-primary p-4">Votes</div>;
-    case "actions":
-      return <div className="text-primary p-4">Actions</div>;
-  }
-};
+// Tab content components
+const VotesTabContent = ({
+  proposal,
+}: {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+}) => <div className="text-primary p-4">Votes for proposal {proposal.id}</div>;
+
+const ActionsTabContent = ({
+  proposal,
+}: {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+}) => (
+  <div className="text-primary p-4">Actions for proposal {proposal.id}</div>
+);
+
+const TabToContentMap = {
+  description: DescriptionTabContent,
+  votes: VotesTabContent,
+  actions: ActionsTabContent,
+} as const;
