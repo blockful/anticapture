@@ -27,7 +27,7 @@ export const TitleSection = ({
 
         {/* Proposer  */}
         <EnsAvatar
-          size="sm"
+          size="xs"
           address={proposal?.proposerAccountId as Address}
           nameClassName="text-secondary"
         />
