@@ -27,6 +27,9 @@ query GetProposals(
       title
       startTimestamp
       endTimestamp
+      calldatas
+      targets
+      values
     }
     totalCount
   }
