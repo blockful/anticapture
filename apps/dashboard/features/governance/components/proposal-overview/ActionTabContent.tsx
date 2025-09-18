@@ -8,6 +8,67 @@ export const ActionsTabContent = ({
   console.log(proposal);
 
   return (
-    <div className="text-primary p-4">Actions for proposal {proposal.id}</div>
+    <div className="text-primary flex flex-col gap-3 p-4">
+      {proposal.targets.map((target, index) => (
+        <ActionItem
+          key={index}
+          target={proposal.targets[index]}
+          value={proposal.values[index]}
+          calldata={proposal.calldatas[index]}
+        />
+      ))}
+    </div>
+  );
+};
+
+interface ActionItemProps {
+  target: string | null;
+  value: string | null;
+  calldata: string | null;
+}
+
+const ActionItem = ({ target, value, calldata }: ActionItemProps) => {
+  return (
+    <div className="border-border-default flex w-full flex-col gap-2 border">
+      <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
+        <div>
+          <p className="text-primary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]">
+            Action 1
+          </p>
+        </div>
+        <div className="text-secondary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]">
+          Contract
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col gap-2 p-3">
+        <div className="flex w-full gap-2">
+          <p className="font-menlo min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+            Target:
+          </p>
+          <p className="text-secondary font-menlo text-[14px] font-normal not-italic leading-[20px]">
+            {target}
+          </p>
+        </div>
+
+        <div className="flex w-full gap-2">
+          <p className="font-menlo min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+            Calldata:
+          </p>
+          <p className="text-secondary font-menlo overflow-wrap-anywhere break-all text-[14px] font-normal not-italic leading-[20px]">
+            {calldata}
+          </p>
+        </div>
+
+        <div className="flex w-full gap-2">
+          <p className="font-menlo min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+            Value:
+          </p>
+          <p className="text-secondary font-menlo text-[14px] font-normal not-italic leading-[20px]">
+            {value}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
