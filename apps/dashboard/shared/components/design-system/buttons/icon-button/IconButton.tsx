@@ -19,9 +19,9 @@ const boxSizeStyles: Record<ButtonSize, string> = {
 };
 
 const iconSizeStyles: Record<ButtonSize, string> = {
-  sm: "size-3.5",
-  md: "size-3.5",
-  lg: "size-4",
+  sm: "size-3.5", // 14px
+  md: "size-3.5", // 14px
+  lg: "size-4", // 16px
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -44,7 +44,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "disabled:text-border-contrast disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium",
+          "disabled:text-dimmed disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium transition-colors duration-300",
           variantStyles[variant],
           boxSizeStyles[size],
           className,
