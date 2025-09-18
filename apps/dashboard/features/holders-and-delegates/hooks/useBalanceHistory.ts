@@ -9,6 +9,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import { formatUnits } from "viem";
+import { ApolloError, NetworkStatus } from "@apollo/client";
 
 // Interface for a single transfer
 export interface Transfer {
@@ -37,10 +38,11 @@ export interface PaginationInfo {
 export interface UseBalanceHistoryResult {
   transfers: Transfer[];
   loading: boolean;
-  error: any;
+  error?: ApolloError;
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
+  fetchingMore: boolean;
 }
 
 export function useBalanceHistory(
@@ -59,12 +61,15 @@ export function useBalanceHistory(
     setCurrentPage(1);
   }, [transactionType, orderBy, orderDirection]);
 
-  const queryVariables = {
-    account: accountId,
-    limit: itemsPerPage,
-    orderBy,
-    orderDirection,
-  };
+  const queryVariables = useMemo(
+    () => ({
+      account: accountId,
+      limit: itemsPerPage,
+      orderBy,
+      orderDirection,
+    }),
+    [accountId, itemsPerPage, orderBy, orderDirection],
+  );
 
   const queryOptions = {
     context: {
@@ -141,13 +146,13 @@ export function useBalanceHistory(
         : allTotalCountQuery;
 
   const { data, loading, error, fetchMore } = activeQuery;
-  const { data: totalCountData } = activeTotalCountQuery;
+  const { data: totalCountData, networkStatus } = activeTotalCountQuery;
 
   // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
     if (!data?.transfers?.items) return [];
 
-    return data.transfers.items.map((transfer: any) => ({
+    return data.transfers.items.map((transfer) => ({
       timestamp: transfer.timestamp?.toString() || "",
       amount: formatUnits(BigInt(transfer.amount || "0"), 18),
       fromAccountId: transfer.fromAccountId || null,
@@ -204,17 +209,23 @@ export function useBalanceHistory(
           ...queryVariables,
           after: paginationInfo.endCursor,
         },
-        updateQuery: (
-          previousResult: any,
-          { fetchMoreResult }: { fetchMoreResult: any },
-        ) => {
+        updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.transfers.items ?? [];
+          const newItems = fetchMoreResult.transfers.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) =>
+                !prevItems.some((p) => p.transactionHash === n.transactionHash),
+            ),
+          ];
 
           return {
             ...fetchMoreResult,
             transfers: {
               ...fetchMoreResult.transfers,
-              items: fetchMoreResult.transfers.items,
+              items: merged,
             },
           };
         },
@@ -253,17 +264,23 @@ export function useBalanceHistory(
           ...queryVariables,
           before: paginationInfo.startCursor,
         },
-        updateQuery: (
-          previousResult: any,
-          { fetchMoreResult }: { fetchMoreResult: any },
-        ) => {
+        updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.transfers.items ?? [];
+          const newItems = fetchMoreResult.transfers.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) =>
+                !prevItems.some((p) => p.transactionHash === n.transactionHash),
+            ),
+          ];
 
           return {
             ...fetchMoreResult,
             transfers: {
               ...fetchMoreResult.transfers,
-              items: fetchMoreResult.transfers.items,
+              items: merged,
             },
           };
         },
@@ -290,5 +307,7 @@ export function useBalanceHistory(
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 }

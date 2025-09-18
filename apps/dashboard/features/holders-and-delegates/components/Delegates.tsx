@@ -484,6 +484,7 @@ export const Delegates = ({
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
+          withDownloadCSV={true}
           wrapperClassName="max-h-[475px]"
         />
       </div>

@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -16,6 +15,7 @@ import {
 } from "@/shared/components/dropdowns/FilterDropdown";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 interface BalanceHistoryData {
   id: string;
@@ -51,19 +51,14 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     typeFilter === "Buy" ? "buy" : typeFilter === "Sell" ? "sell" : "all";
 
   // Use the balance history hook
-  const {
-    transfers,
-    loading,
-    paginationInfo,
-    fetchNextPage,
-    fetchPreviousPage,
-  } = useBalanceHistory(
-    accountId,
-    daoId,
-    orderBy,
-    orderDirection,
-    transactionType,
-  );
+  const { transfers, loading, paginationInfo, fetchNextPage, fetchingMore } =
+    useBalanceHistory(
+      accountId,
+      daoId,
+      orderBy,
+      orderDirection,
+      transactionType,
+    );
 
   // Handle sorting - both date and amount now control the GraphQL query
   const handleSort = (field: string) => {
@@ -91,6 +86,8 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       setSortBy("amount");
     }
   };
+
+  const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
   // Transform transfers to table data format
   const transformedData = useMemo(() => {
@@ -136,7 +133,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
   // Handle loading state with skeleton data
   const tableData = useMemo(() => {
-    if (loading) {
+    if (isInitialLoading) {
       // Return skeleton data while loading
       return Array.from({ length: 10 }, (_, i) => ({
         id: `skeleton-${i}`,
@@ -148,18 +145,20 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       }));
     }
     return transformedData;
-  }, [loading, transformedData]);
+  }, [isInitialLoading, transformedData]);
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
       accessorKey: "date",
-      size: 120,
+      meta: {
+        columnClassName: "w-32",
+      },
       cell: ({ row }) => {
         const date = row.getValue("date") as string;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
-            <div className="flex h-10 items-center px-2 py-2">
+            <div className="flex items-center">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="h-4 w-20"
@@ -169,7 +168,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center whitespace-nowrap px-2 py-2">
+          <div className="flex items-center whitespace-nowrap">
             <span className="text-primary text-sm">{date}</span>
           </div>
         );
@@ -177,7 +176,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header h-8 w-full justify-start px-2 text-sm"
+          className="!text-table-header h-min w-full justify-start p-0 text-sm"
           onClick={() => handleSort("date")}
         >
           <span className="text-xs">Date</span>
@@ -196,13 +195,15 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "amount",
-      size: 120,
+      meta: {
+        columnClassName: "w-32",
+      },
       cell: ({ row }) => {
         const amount = row.getValue("amount") as string;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
-            <div className="flex h-10 items-center justify-end px-2 py-2">
+            <div className="flex items-center justify-end">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
@@ -212,7 +213,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center justify-end px-2 py-2">
+          <div className="flex items-center justify-end">
             <span className="text-secondary text-sm font-medium">{amount}</span>
           </div>
         );
@@ -220,7 +221,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header h-8 w-full justify-end px-2 text-sm"
+          className="!text-table-header h-min w-full justify-end p-0 text-sm"
           onClick={() => handleSort("amount")}
         >
           <span className="text-xs">Amount ({daoId.toUpperCase()})</span>
@@ -239,13 +240,15 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "type",
-      size: 80,
+      meta: {
+        columnClassName: "w-20",
+      },
       cell: ({ row }) => {
         const type = row.getValue("type") as "Buy" | "Sell";
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
-            <div className="flex h-10 items-center px-2 py-2">
+            <div className="flex items-center">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="h-6 w-12 rounded-full"
@@ -255,13 +258,13 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 items-center px-2 py-2">
+          <div className="flex items-center">
             <BadgeStatus variant="dimmed">{type}</BadgeStatus>
           </div>
         );
       },
       header: () => (
-        <div className="flex items-center gap-2 px-2">
+        <div className="flex items-center gap-2">
           <h4 className="text-table-header text-xs">Type</h4>
           <FilterDropdown
             options={typeFilterOptions}
@@ -273,13 +276,15 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
     {
       accessorKey: "fromAddress",
-      size: 204,
+      meta: {
+        columnClassName: "w-52",
+      },
       cell: ({ row }) => {
         const fromAddress = row.getValue("fromAddress") as string;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
-            <div className="flex h-10 items-center gap-3 px-2 py-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -293,7 +298,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 w-full items-center justify-between gap-3 px-2 py-2">
+          <div className="flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-[160px] items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={fromAddress as `0x${string}`}
@@ -311,17 +316,19 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-2 text-xs">From</h4>,
+      header: () => <h4 className="text-table-header text-xs">From</h4>,
     },
     {
       accessorKey: "toAddress",
-      size: 204,
+      meta: {
+        columnClassName: "w-52",
+      },
       cell: ({ row }) => {
         const toAddress = row.getValue("toAddress") as string;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
-            <div className="flex h-10 items-center gap-3 px-2 py-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -335,7 +342,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex h-10 w-full items-center justify-between gap-3 px-2 py-2">
+          <div className="flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-[160px] items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={toAddress as `0x${string}`}
@@ -360,26 +367,20 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header px-2 text-xs">To</h4>,
+      header: () => <h4 className="text-table-header text-xs">To</h4>,
     },
   ];
 
   return (
     <div className="flex w-full flex-col gap-2 p-4">
-      <TheTable
+      <Table
         columns={balanceHistoryColumns}
         data={tableData}
-        isTableSmall={true}
-      />
-
-      {/* Pagination */}
-      <Pagination
-        currentPage={paginationInfo.currentPage}
-        totalPages={paginationInfo.totalPages}
-        onPrevious={fetchPreviousPage}
-        onNext={fetchNextPage}
-        hasNextPage={paginationInfo.hasNextPage}
-        hasPreviousPage={paginationInfo.hasPreviousPage}
+        size="sm"
+        hasMore={paginationInfo.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        wrapperClassName="max-h-[475px]"
       />
     </div>
   );
