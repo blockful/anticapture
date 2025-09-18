@@ -66,7 +66,7 @@ export const DescriptionTabContent = ({
             hr: {
               component: "hr",
               props: {
-                className: "border-secondary mt-7",
+                className: "border-border-default mt-7",
               },
             },
             pre: {
