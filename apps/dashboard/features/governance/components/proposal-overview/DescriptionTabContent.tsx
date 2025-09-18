@@ -85,13 +85,13 @@ export const DescriptionTabContent = ({
             ul: {
               component: "ul",
               props: {
-                className: "list-disc list-inside space-y-2 mt-4 mb-4 pl-4",
+                className: "list-disc space-y-2 mt-4 mb-4 pl-4",
               },
             },
             ol: {
               component: "ol",
               props: {
-                className: "list-decimal list-inside space-y-2 mt-4 mb-4 pl-4",
+                className: "list-decimal space-y-2 mt-4 mb-4 pl-4",
               },
             },
             li: {
