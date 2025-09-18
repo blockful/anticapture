@@ -159,7 +159,7 @@ export const ProposalInfoSection = ({
         <div className="flex items-center gap-2">
           <Users className="text-secondary size-3.5" />
           <p
-            className="text-secondary font-roboto-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]"
+            className="text-secondary font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]"
             style={{ fontStyle: "normal" }}
           >
             Quorum
@@ -178,7 +178,7 @@ export const ProposalInfoSection = ({
       {/* Time Left  */}
       <div className="bg-surface-opacity-brand flex w-full items-center gap-2 p-3">
         <BulletDivider className="bg-link" />
-        <p className="text-link font-roboto-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.72px]">
+        <p className="text-link font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.72px]">
           {timeLeftText}
         </p>
       </div>
