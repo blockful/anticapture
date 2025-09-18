@@ -41,6 +41,12 @@ export const DescriptionTabContent = ({
                   "text-secondary text-[14px] leading-[20px] break-words",
               },
             },
+            hr: {
+              component: "hr",
+              props: {
+                className: "border-secondary mt-7",
+              },
+            },
             pre: {
               component: "pre",
               props: {
