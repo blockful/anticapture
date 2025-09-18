@@ -187,12 +187,14 @@ export const ProposalInfoSection = ({
       </div>
 
       {/* Time Left  */}
-      <div className="bg-surface-opacity-brand flex w-full items-center gap-2 p-3">
-        <BulletDivider className="bg-link" />
-        <p className="text-link font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.72px]">
-          {timeLeftText}
-        </p>
-      </div>
+      {proposal.status.toLowerCase() === "active" && (
+        <div className="bg-surface-opacity-brand flex w-full items-center gap-2 p-3">
+          <BulletDivider className="bg-link" />
+          <p className="text-link font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.72px]">
+            {timeLeftText}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
