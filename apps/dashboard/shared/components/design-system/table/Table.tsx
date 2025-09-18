@@ -13,7 +13,7 @@ import {
   TableOptions,
 } from "@tanstack/react-table";
 import {
-  TableBase,
+  TableContainer,
   TableBody,
   TableCell,
   TableHead,
@@ -80,19 +80,15 @@ export const Table = <TData, TValue>({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!onLoadMore) return;
-    if (!hasMore) return;
+    if (!onLoadMore || !hasMore) return;
 
     const node = sentinelRef.current;
 
     if (!node) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-        if (first.isIntersecting && !isLoadingMore) {
-          onLoadMore();
-        }
+      ([entry]) => {
+        if (entry.isIntersecting && !isLoadingMore) onLoadMore();
       },
       {
         root: wrapperRef.current,
@@ -100,7 +96,6 @@ export const Table = <TData, TValue>({
         threshold: 0,
       },
     );
-
     observer.observe(node);
     return () => observer.disconnect();
   }, [onLoadMore, hasMore, isLoadingMore, infiniteRootMargin]);
@@ -139,7 +134,7 @@ export const Table = <TData, TValue>({
 
   return (
     <div className={cn("flex w-full flex-col", wrapperClassName)}>
-      <TableBase
+      <TableContainer
         className={cn(
           "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
@@ -229,7 +224,7 @@ export const Table = <TData, TValue>({
             </TableRow>
           )}
         </TableBody>
-      </TableBase>
+      </TableContainer>
       {withDownloadCSV && (
         <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
           [DOWNLOAD AS{" "}

@@ -69,7 +69,6 @@ export const useTokenHolders = ({
 
   const {
     data: tokenHoldersData,
-    loading: tokenHoldersLoading,
     error: tokenHoldersError,
     refetch,
     fetchMore,
@@ -172,13 +171,19 @@ export const useTokenHolders = ({
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
-
-          // Replace the current data with the new page data
+          const prevItems = previousResult.accountBalances.items ?? [];
+          const newItems = fetchMoreResult.accountBalances.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+            ),
+          ];
           return {
             ...fetchMoreResult,
             accountBalances: {
               ...fetchMoreResult.accountBalances,
-              items: fetchMoreResult.accountBalances.items,
+              items: merged,
             },
           };
         },
@@ -262,7 +267,7 @@ export const useTokenHolders = ({
 
   return {
     data: processedData,
-    loading: tokenHoldersLoading,
+    loading: networkStatus === NetworkStatus.loading,
     error: tokenHoldersError || null,
     refetch: handleRefetch,
     pagination,

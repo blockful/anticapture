@@ -1,7 +1,7 @@
 import { cn } from "@/shared/utils";
 import { forwardRef } from "react";
 
-export const TableBase = forwardRef<
+export const TableContainer = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
@@ -23,4 +23,4 @@ export const TableBase = forwardRef<
   );
 });
 
-TableBase.displayName = "TableBase";
+TableContainer.displayName = "TableContainer";

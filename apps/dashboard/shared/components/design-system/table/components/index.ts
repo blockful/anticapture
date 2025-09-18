@@ -5,4 +5,4 @@ export * from "@/shared/components/design-system/table/components/TableFooter";
 export * from "@/shared/components/design-system/table/components/TableHead";
 export * from "@/shared/components/design-system/table/components/TableHeader";
 export * from "@/shared/components/design-system/table/components/TableRow";
-export * from "@/shared/components/design-system/table/components/TableBase";
+export * from "@/shared/components/design-system/table/components/TableContainer";

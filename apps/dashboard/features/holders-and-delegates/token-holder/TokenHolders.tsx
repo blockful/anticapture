@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { TheTable } from "@/shared/components/tables/TheTable";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -13,12 +12,12 @@ import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useToken
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 import { BlankSlate } from "@/shared/components";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 interface TokenHolderTableData {
   address: Address;
@@ -51,7 +50,6 @@ export const TokenHolders = ({
     error,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore,
   } = useTokenHolders({
     daoId: daoId,
@@ -140,7 +138,7 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
@@ -149,11 +147,10 @@ export const TokenHolders = ({
           />
         </div>
       ),
-      size: 280,
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 px-2 py-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -169,7 +166,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
+          <div className="group flex w-full items-center gap-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -186,6 +183,9 @@ export const TokenHolders = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "balance",
@@ -197,7 +197,7 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
+          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
             Balance ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -222,7 +222,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-end px-4 py-2">
+            <div className="flex items-center justify-end">
               <SkeletonRow className="h-4 w-20" />
             </div>
           );
@@ -230,7 +230,7 @@ export const TokenHolders = ({
 
         const balance: number = row.getValue("balance");
         return (
-          <div className="font-nomal flex h-10 w-full items-center justify-end px-4 py-2 text-sm">
+          <div className="flex w-full items-center justify-end text-sm font-normal">
             {formatNumberUserReadable(balance, 1)}
           </div>
         );
@@ -239,14 +239,14 @@ export const TokenHolders = ({
     {
       accessorKey: "variation",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           Variation ({daoId})
         </div>
       ),
       cell: ({ row }) => {
         if (historicalDataLoading || loading) {
           return (
-            <div className="flex h-10 items-center justify-start px-4 py-2">
+            <div className="flex items-center justify-start">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -261,7 +261,7 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
+          <div className="flex w-full items-center justify-start gap-2 text-sm">
             <p>
               {formatNumberUserReadable(
                 Math.abs(variation.absoluteChange),
@@ -277,14 +277,14 @@ export const TokenHolders = ({
     {
       accessorKey: "delegate",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           Delegate
         </div>
       ),
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-1.5 px-4 py-2">
+            <div className="flex items-center gap-1.5">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -300,7 +300,7 @@ export const TokenHolders = ({
         const delegate: string = row.getValue("delegate");
 
         return (
-          <div className="flex h-10 items-center gap-1.5 px-4 py-2">
+          <div className="flex items-center gap-1.5">
             <EnsAvatar
               address={delegate as Address}
               size="sm"
@@ -316,7 +316,8 @@ export const TokenHolders = ({
     return (
       <div className="w-full text-white">
         <div className="flex flex-col gap-2">
-          <TheTable
+          <Table
+            size="sm"
             columns={tokenHoldersColumns}
             data={
               Array.from({ length: 10 }, () => ({
@@ -329,18 +330,6 @@ export const TokenHolders = ({
             }
             withSorting={true}
             onRowClick={() => {}}
-            isTableSmall={true}
-          />
-
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            className="text-white"
-            hasNextPage={pagination.hasNextPage}
-            hasPreviousPage={pagination.hasPreviousPage}
-            isLoading={fetchingMore}
           />
         </div>
       </div>
@@ -358,7 +347,7 @@ export const TokenHolders = ({
                   {tokenHoldersColumns.map((column, index) => (
                     <th
                       key={index}
-                      className="h-8 text-left [&:has([role=checkbox])]:pr-0"
+                      className="text-left [&:has([role=checkbox])]:pr-0"
                       style={{
                         width: column.size !== 150 ? column.size : "auto",
                       }}
@@ -391,16 +380,6 @@ export const TokenHolders = ({
               </tbody>
             </table>
           </div>
-
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            className="text-white"
-            hasNextPage={pagination.hasNextPage}
-            hasPreviousPage={pagination.hasPreviousPage}
-          />
         </div>
       </div>
     );
@@ -410,13 +389,9 @@ export const TokenHolders = ({
     <>
       <div className="w-full text-white">
         <div className="flex flex-col gap-2">
-          <TheTable
+          <Table
             columns={tokenHoldersColumns}
-            data={tableData}
-            withSorting={true}
-            onRowClick={(row) => handleOpenDrawer(row.address as Address)}
-            isTableSmall={true}
-            showWhenEmpty={
+            customEmptyState={
               <BlankSlate
                 variant="default"
                 icon={Inbox}
@@ -425,16 +400,15 @@ export const TokenHolders = ({
                 description="No addresses found"
               />
             }
-          />
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            className="text-white"
-            hasNextPage={pagination.hasNextPage}
-            hasPreviousPage={pagination.hasPreviousPage}
-            isLoading={fetchingMore}
+            data={tableData}
+            hasMore={pagination.hasNextPage}
+            isLoadingMore={fetchingMore}
+            onLoadMore={fetchNextPage}
+            onRowClick={(row) => handleOpenDrawer(row.address as Address)}
+            size="sm"
+            withDownloadCSV={true}
+            withSorting={true}
+            wrapperClassName="max-h-[475px]"
           />
         </div>
       </div>
