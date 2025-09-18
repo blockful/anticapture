@@ -13,6 +13,7 @@
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
+    "typecheck": "turbo typecheck",
     "prepare": "husky"
   },
   "lint-staged": {

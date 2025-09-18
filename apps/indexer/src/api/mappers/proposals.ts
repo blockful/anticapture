@@ -49,6 +49,9 @@ export const ProposalResponseSchema = z.object({
   startTimestamp: z.string(),
   endTimestamp: z.string(),
   quorum: z.string(),
+  calldatas: z.array(z.string()),
+  values: z.array(z.string()),
+  targets: z.array(z.string()),
 });
 
 export const ProposalsResponseSchema = z.object({
@@ -93,6 +96,9 @@ export const ProposalMapper = {
         (BigInt(p.endBlock - p.startBlock) + votingDelay) * BigInt(blockTime)
       ).toString(),
       quorum: quorum.toString(),
+      calldatas: p.calldatas,
+      values: p.values.map((v) => v.toString()),
+      targets: p.targets,
     };
   },
 };
