@@ -4,6 +4,7 @@ import { cn } from "@/shared/utils";
 import { useState } from "react";
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { GetProposalQuery } from "@anticapture/graphql-client";
+import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
 
 type TabId = "description" | "votes" | "actions";
 
@@ -73,14 +74,6 @@ const VotesTabContent = ({
 }: {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => <div className="text-primary p-4">Votes for proposal {proposal.id}</div>;
-
-const ActionsTabContent = ({
-  proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => (
-  <div className="text-primary p-4">Actions for proposal {proposal.id}</div>
-);
 
 const TabToContentMap = {
   description: DescriptionTabContent,
