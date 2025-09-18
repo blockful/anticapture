@@ -48,5 +48,8 @@ query GetProposal($id: String!) {
     abstainVotes
     startTimestamp
     endTimestamp
+    calldatas
+    targets
+    values
   }
 }

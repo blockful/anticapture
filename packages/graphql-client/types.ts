@@ -1137,6 +1137,7 @@ export type Proposal_200_Response = {
   __typename?: 'proposal_200_response';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
+  calldatas: Array<Maybe<Scalars['String']['output']>>;
   daoId: Scalars['String']['output'];
   description: Scalars['String']['output'];
   endBlock: Scalars['Float']['output'];
@@ -1148,9 +1149,11 @@ export type Proposal_200_Response = {
   startBlock: Scalars['Float']['output'];
   startTimestamp: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
+  values: Array<Maybe<Scalars['String']['output']>>;
 };
 
 export type ProposalsActivity_200_Response = {
@@ -1539,6 +1542,7 @@ export type Query_Proposals_Items_Items = {
   __typename?: 'query_proposals_items_items';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
+  calldatas: Array<Maybe<Scalars['String']['output']>>;
   daoId: Scalars['String']['output'];
   description: Scalars['String']['output'];
   endBlock: Scalars['Float']['output'];
@@ -1550,9 +1554,11 @@ export type Query_Proposals_Items_Items = {
   startBlock: Scalars['Float']['output'];
   startTimestamp: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
+  values: Array<Maybe<Scalars['String']['output']>>;
 };
 
 export type Query_TotalAssets_Items = {
@@ -2365,7 +2371,7 @@ export type GetProposalQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title?: string | null, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string } | null };
+export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title?: string | null, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
