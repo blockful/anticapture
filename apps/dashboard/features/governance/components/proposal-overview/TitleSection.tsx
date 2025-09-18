@@ -16,7 +16,7 @@ export const TitleSection = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   return (
-    <div className="border-surface-default flex w-full flex-col gap-3 rounded-lg border p-4">
+    <div className="flex w-full flex-col gap-3">
       <div className="flex w-full items-center justify-start gap-2">
         {/* Badge Ongoing Proposal */}
         <ProposalBadge>
