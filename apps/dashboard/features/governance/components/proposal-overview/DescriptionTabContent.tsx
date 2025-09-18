@@ -15,7 +15,7 @@ export const DescriptionTabContent = ({
         options={{
           overrides: {
             h1: {
-              component: "p",
+              component: "h1",
               props: {
                 className:
                   "text-primary break-words font-inter text-[24px] font-medium not-italic leading-[32px] tracking-[-0.144px]",
@@ -79,7 +79,8 @@ export const DescriptionTabContent = ({
             code: {
               component: "code",
               props: {
-                className: "break-all bg-surface-contrast px-1 rounded text-sm",
+                className:
+                  "break-all bg-surface-contrast px-1 rounded-[4px] text-sm",
               },
             },
             ul: {
@@ -160,6 +161,7 @@ export const DescriptionTabContent = ({
       >
         {proposal.description}
       </Markdown>
+      {proposal.description}
     </div>
   );
 };
