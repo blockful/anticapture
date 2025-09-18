@@ -130,7 +130,12 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Progress bar */}
-            <div className="relative h-1 w-[184px] bg-[#3F3F46]"></div>
+            <div className="relative h-1 w-[184px] bg-[#3F3F46]">
+              <div
+                className="bg-secondary absolute h-full"
+                style={{ width: `${abstainVotesPercentage}%` }}
+              />
+            </div>
 
             {/* Votes */}
             <div className="flex w-12 items-center">
