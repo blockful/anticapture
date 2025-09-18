@@ -5,7 +5,7 @@ import {
   useGetDelegateProposalsActivityLazyQuery,
   QueryInput_HistoricalVotingPower_Days,
 } from "@anticapture/graphql-client/hooks";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -45,7 +45,8 @@ interface UseDelegatesResult {
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
-  historicalDataLoading: boolean;
+  isHistoricalLoadingFor: (addr: string) => boolean;
+  isActivityLoadingFor: (addr: string) => boolean;
 }
 
 interface UseDelegatesParams {
@@ -79,6 +80,12 @@ export const useDelegates = ({
   >({});
   const [activitiesLoading, setActivitiesLoading] = useState(false);
 
+  const loadedHistoricalAddressesRef = useRef<Set<string>>(new Set());
+  const loadedActivityAddressesRef = useRef<Set<string>>(new Set());
+  const [loadingActivityAddresses, setLoadingActivityAddresses] = useState<
+    Set<string>
+  >(new Set());
+
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
@@ -86,7 +93,6 @@ export const useDelegates = ({
 
   const {
     data: delegatesData,
-    loading: delegatesLoading,
     error: delegatesError,
     refetch,
     fetchMore,
@@ -155,6 +161,21 @@ export const useDelegates = ({
     skip: delegateAddresses.length === 0,
   });
 
+  useEffect(() => {
+    const list = historicalData?.historicalVotingPower;
+    if (!list || list.length === 0) return;
+    let mutated = false;
+    list.forEach((h) => {
+      if (h?.address && !loadedHistoricalAddressesRef.current.has(h.address)) {
+        loadedHistoricalAddressesRef.current.add(h.address);
+        mutated = true;
+      }
+    });
+    if (mutated) {
+      loadedHistoricalAddressesRef.current;
+    }
+  }, [historicalData]);
+
   // Lazy query for individual delegate proposals activity
   const [getDelegateProposalsActivity] =
     useGetDelegateProposalsActivityLazyQuery({
@@ -169,47 +190,57 @@ export const useDelegates = ({
   useEffect(() => {
     if (delegateAddresses.length === 0) return;
 
+    const newAddresses = delegateAddresses.filter(
+      (addr) => addr && !loadedActivityAddressesRef.current.has(addr),
+    );
+    if (newAddresses.length === 0) return;
+
     const fetchDelegateActivities = async () => {
       setActivitiesLoading(true);
+      setLoadingActivityAddresses(
+        (prev) => new Set([...prev, ...newAddresses]),
+      );
       try {
-        const activityPromises = delegateAddresses.map(async (address) => {
-          if (!address) return { address: "", activity: null };
-
+        const activityPromises = newAddresses.map(async (addr) => {
           const result = await getDelegateProposalsActivity({
-            variables: {
-              address,
-              fromDate,
-            },
+            variables: { address: addr, fromDate },
           });
           return {
-            address,
-            activity: result.data?.proposalsActivity,
+            address: addr,
+            activity: result.data?.proposalsActivity ?? null,
           };
         });
 
         const activities = await Promise.all(activityPromises);
 
-        const activitiesMap: Record<string, ProposalsActivity> = {};
-        activities.forEach(({ address, activity }) => {
-          if (activity && address) {
-            activitiesMap[address] = {
-              totalProposals: activity.totalProposals,
-              votedProposals: activity.votedProposals,
-              neverVoted: activity.neverVoted ? 1 : 0,
-            };
-          }
+        setDelegateActivities((prev) => {
+          const next = { ...prev };
+          activities.forEach(({ address, activity }) => {
+            if (activity) {
+              next[address] = {
+                totalProposals: activity.totalProposals,
+                votedProposals: activity.votedProposals,
+                neverVoted: activity.neverVoted ? 1 : 0,
+              };
+              loadedActivityAddressesRef.current.add(address);
+            }
+          });
+          return next;
         });
-
-        setDelegateActivities(activitiesMap);
-      } catch (error) {
-        console.error("Error fetching delegate activities:", error);
+      } catch (err) {
+        console.error("Error fetching delegate activities:", err);
       } finally {
         setActivitiesLoading(false);
+        setLoadingActivityAddresses((prev) => {
+          const next = new Set(prev);
+          newAddresses.forEach((a) => next.delete(a));
+          return next;
+        });
       }
     };
 
     fetchDelegateActivities();
-  }, [delegateAddresses, getDelegateProposalsActivity, daoId, fromDate]);
+  }, [delegateAddresses, getDelegateProposalsActivity, fromDate]);
 
   // Create base data first (without historical data)
   const baseData = useMemo(() => {
@@ -302,13 +333,20 @@ export const useDelegates = ({
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.accountPowers.items ?? [];
+          const newItems = fetchMoreResult.accountPowers.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+            ),
+          ];
 
-          // Replace the current data with the new page data
           return {
             ...fetchMoreResult,
             accountPowers: {
               ...fetchMoreResult.accountPowers,
-              items: fetchMoreResult.accountPowers.items,
+              items: merged,
             },
           };
         },
@@ -396,9 +434,22 @@ export const useDelegates = ({
     });
   }, [refetch, orderBy, orderDirection, address]);
 
+  const isHistoricalLoadingFor = useCallback(
+    (addr: string) =>
+      historicalLoading && !loadedHistoricalAddressesRef.current.has(addr),
+    [historicalLoading],
+  );
+
+  const isActivityLoadingFor = useCallback(
+    (addr: string) =>
+      (activitiesLoading && !loadedActivityAddressesRef.current.has(addr)) ||
+      loadingActivityAddresses.has(addr),
+    [activitiesLoading, loadingActivityAddresses],
+  );
+
   return {
     data: finalData,
-    loading: delegatesLoading,
+    loading: networkStatus === NetworkStatus.loading,
     error: delegatesError || historicalError || null,
     refetch: handleRefetch,
     pagination,
@@ -406,6 +457,7 @@ export const useDelegates = ({
     fetchPreviousPage,
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
-    historicalDataLoading: historicalLoading || activitiesLoading,
+    isHistoricalLoadingFor,
+    isActivityLoadingFor,
   };
 };

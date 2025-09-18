@@ -6,18 +6,18 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
+import { SkeletonRow, BlankSlate } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { Inbox, Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 interface DelegateTableData {
   address: string;
@@ -86,9 +86,9 @@ export const Delegates = ({
     error,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore,
-    historicalDataLoading,
+    isHistoricalLoadingFor,
+    isActivityLoadingFor,
   } = useDelegates({
     fromDate,
     orderBy: sortBy,
@@ -181,12 +181,11 @@ export const Delegates = ({
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
       accessorKey: "address",
-      size: 280,
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -200,7 +199,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 p-2">
+          <div className="flex items-center gap-3">
             <EnsAvatar
               address={address as `0x${string}`}
               size="sm"
@@ -219,7 +218,7 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           <p>Address</p>
           <AddressFilter
             onApply={handleAddressFilterApply}
@@ -228,10 +227,15 @@ export const Delegates = ({
           />
         </div>
       ),
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "votingPower",
-      size: 150,
+      meta: {
+        columnClassName: "w-80",
+      },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
@@ -245,7 +249,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex items-center justify-end text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -253,7 +257,7 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end rounded-b-none px-4"
+          className="flex h-min w-full justify-end rounded-b-none p-0"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -275,13 +279,16 @@ export const Delegates = ({
     },
     {
       accessorKey: "variation",
-      size: 250,
+      meta: {
+        columnClassName: "w-64",
+      },
       cell: ({ row }) => {
         const variation = row.getValue("variation") as string;
+        const addr = row.original.address;
 
-        if (historicalDataLoading || loading) {
+        if (isHistoricalLoadingFor(addr)) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow
                 className="h-5 w-16"
                 parentClassName="justify-start flex animate-pulse"
@@ -291,7 +298,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center justify-start gap-1 whitespace-nowrap px-4 py-2 text-end text-sm">
+          <div className="flex items-center justify-start gap-1 whitespace-nowrap text-end text-sm">
             <p className="text-secondary">{variation.split(" ")[0]}</p>
             <p
               className={cn(
@@ -308,7 +315,7 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <h4 className="text-table-header flex w-full items-center justify-start">
           Variation
         </h4>
       ),
@@ -316,28 +323,27 @@ export const Delegates = ({
     },
     {
       accessorKey: "activity",
-      size: 150,
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string;
         const activityPercentage = row.original.activityPercentage;
-
-        if (historicalDataLoading || loading) {
+        const addr = row.original.address;
+        if (isActivityLoadingFor(addr)) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-10" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start gap-2 px-4 py-2">
+          <div className="flex items-center justify-start gap-2">
             <ProgressCircle percentage={activityPercentage} />
             {activity}
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <h4 className="text-table-header flex w-full items-center justify-start">
           Activity
         </h4>
       ),
@@ -345,20 +351,22 @@ export const Delegates = ({
     },
     {
       accessorKey: "delegators",
-      size: 120,
+      meta: {
+        columnClassName: "w-28",
+      },
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-start px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex items-center justify-start text-end text-sm font-normal">
             {delegators}
           </div>
         );
@@ -366,7 +374,7 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end rounded-b-none px-4"
+          className="flex h-min w-full rounded-b-none p-0"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
@@ -389,7 +397,7 @@ export const Delegates = ({
   if (loading) {
     return (
       <div className="flex flex-col gap-2">
-        <TheTable
+        <Table
           columns={delegateColumns}
           data={Array.from({ length: 10 }, () => ({
             address: `0x${"0".repeat(40)}`,
@@ -400,19 +408,9 @@ export const Delegates = ({
             activityPercentage: 0,
             delegators: 0,
           }))}
-          withPagination={true}
           withSorting={true}
-          isTableSmall={true}
-        />
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
+          size="sm"
+          wrapperClassName="max-h-[475px]"
         />
       </div>
     );
@@ -461,16 +459,6 @@ export const Delegates = ({
             </tbody>
           </table>
         </div>
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
-        />
       </div>
     );
   }
@@ -478,14 +466,13 @@ export const Delegates = ({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <TheTable
+        <Table
           columns={delegateColumns}
           data={tableData}
-          withPagination={true}
           withSorting={true}
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
-          isTableSmall={true}
-          showWhenEmpty={
+          size="sm"
+          customEmptyState={
             <BlankSlate
               variant="default"
               icon={Inbox}
@@ -494,16 +481,10 @@ export const Delegates = ({
               description="No addresses found"
             />
           }
-        />
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
+          hasMore={pagination.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          wrapperClassName="max-h-[475px]"
         />
       </div>
       <HoldersAndDelegatesDrawer
