@@ -57,7 +57,7 @@ export const DescriptionTabContent = ({
             code: {
               component: "code",
               props: {
-                className: "break-all bg-muted px-1 rounded text-sm",
+                className: "break-all bg-surface-contrast px-1 rounded text-sm",
               },
             },
             ul: {
@@ -86,13 +86,57 @@ export const DescriptionTabContent = ({
                   "text-primary text-[14px] leading-[20px] break-words",
               },
             },
+            table: {
+              component: "table",
+              props: {
+                className: "w-full mt-4 mb-4",
+              },
+            },
+            thead: {
+              component: "thead",
+              props: {
+                className: "bg-surface-contrast overflow-hidden",
+              },
+            },
+            tbody: {
+              component: "tbody",
+              props: {
+                className: "border border-border-default overflow-hidden",
+              },
+            },
+            tr: {
+              component: "tr",
+              props: {
+                className: "hover:bg-muted/50",
+              },
+            },
+            th: {
+              component: "th",
+              props: {
+                className:
+                  "text-left p-3  text-primary h-[32px]  px-2  text-[14px] font-semibold",
+              },
+            },
+            td: {
+              component: "td",
+              props: {
+                className:
+                  "p-3 text-secondary text-[14px] leading-[20px] break-words",
+              },
+            },
+            a: {
+              component: "a",
+              props: {
+                className: "text-link hover:text-link/80 uppercase",
+                target: "_blank",
+                rel: "noopener noreferrer",
+              },
+            },
           },
         }}
       >
         {proposal.description}
       </Markdown>
-
-      {proposal.description}
     </div>
   );
 };
