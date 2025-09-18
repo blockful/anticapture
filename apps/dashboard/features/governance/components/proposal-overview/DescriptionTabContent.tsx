@@ -17,21 +17,43 @@ export const DescriptionTabContent = ({
             h1: {
               component: "p",
               props: {
-                className: "text-primary break-words",
+                className:
+                  "text-primary break-words font-inter text-[24px] font-medium not-italic leading-[32px] tracking-[-0.144px]",
               },
             },
             h2: {
               component: "h2",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 text-[16px] leading-[24px] break-words",
+                  "text-primary mt-7 mb-4 font-inter text-[20px] font-medium not-italic leading-[28px] tracking-[-0.1px] break-words",
               },
             },
             h3: {
               component: "h3",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 text-[16px] leading-[24px] break-words",
+                  "text-primary mt-7 mb-4 font-inter text-[16px] font-medium not-italic leading-[24px] break-words",
+              },
+            },
+            h4: {
+              component: "h4",
+              props: {
+                className:
+                  "text-primary mt-7 mb-4 font-inter text-[14px] font-medium not-italic leading-[20px] tracking-[-0.084px] break-words",
+              },
+            },
+            h5: {
+              component: "h5",
+              props: {
+                className:
+                  "text-primary mt-7 mb-4 font-inter text-[12px] font-medium not-italic leading-[16px] tracking-[-0.072px] break-words",
+              },
+            },
+            h6: {
+              component: "h6",
+              props: {
+                className:
+                  "text-primary mt-7 mb-4 font-inter text-[10px] font-medium not-italic leading-[14px] tracking-[-0.06px] break-words",
               },
             },
             p: {
@@ -127,7 +149,8 @@ export const DescriptionTabContent = ({
             a: {
               component: "a",
               props: {
-                className: "text-link hover:text-link/80 uppercase",
+                className:
+                  "text-link hover:text-link/80 font-mono text-[13px] font-medium leading-[20px] tracking-[0.78px] uppercase",
                 target: "_blank",
                 rel: "noopener noreferrer",
               },
