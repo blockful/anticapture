@@ -1,6 +1,6 @@
 "use client";
 
-import { SkeletonRow, TheTable } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -14,8 +14,9 @@ import {
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
+
 import { DaoIdEnum } from "@/shared/types/daos";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 interface DelegationData {
   address: string;
@@ -42,7 +43,6 @@ export const DelegationHistoryTable = ({
     error,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore,
   } = useDelegationHistory({
     daoId,
@@ -83,14 +83,14 @@ export const DelegationHistoryTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           Delegate Address
         </div>
       ),
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 items-center gap-2 px-2">
+            <div className="flex items-center gap-2">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -105,7 +105,7 @@ export const DelegationHistoryTable = ({
 
         const addressValue: string = row.getValue("address");
         return (
-          <div className="flex h-10 w-full items-center gap-2 px-2">
+          <div className="flex w-full items-center gap-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -126,7 +126,7 @@ export const DelegationHistoryTable = ({
         };
 
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-end px-2">
+          <div className="text-table-header flex w-full items-center justify-end">
             Amount ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -149,7 +149,7 @@ export const DelegationHistoryTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 w-full items-center justify-end px-2">
+            <div className="flex w-full items-center justify-end">
               <SkeletonRow
                 parentClassName="flex animate-pulse justify-end"
                 className="h-4 w-16"
@@ -161,7 +161,7 @@ export const DelegationHistoryTable = ({
         const amount: string = row.getValue("amount");
 
         return (
-          <div className="flex h-10 w-full items-center justify-end px-2 text-sm">
+          <div className="flex w-full items-center justify-end text-sm">
             {formatNumberUserReadable(Number(amount), 1)}
           </div>
         );
@@ -177,7 +177,7 @@ export const DelegationHistoryTable = ({
           column.toggleSorting(newSortOrder === "desc");
         };
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex w-full items-center justify-start">
             Date
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -210,7 +210,7 @@ export const DelegationHistoryTable = ({
         const date: string = row.getValue("date");
 
         return (
-          <div className="flex h-10 w-full items-center justify-start px-2 text-sm">
+          <div className="flex w-full items-center justify-start text-sm">
             {date}
           </div>
         );
@@ -246,25 +246,19 @@ export const DelegationHistoryTable = ({
   return (
     <div className="flex h-full w-full flex-col gap-4 p-4">
       <div className="h-full w-full overflow-y-auto">
-        <TheTable
-          isTableSmall={true}
+        <Table
+          size="sm"
           columns={delegationHistoryColumns}
           data={loading ? Array(5).fill({}) : data}
           withSorting={true}
-          withPagination={true}
           filterColumn="address"
+          hasMore={pagination.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          withDownloadCSV={true}
+          wrapperClassName="max-h-[475px]"
         />
       </div>
-
-      <Pagination
-        currentPage={pagination.currentPage}
-        totalPages={pagination.totalPages}
-        onPrevious={fetchPreviousPage}
-        onNext={fetchNextPage}
-        hasNextPage={pagination.hasNextPage}
-        hasPreviousPage={pagination.hasPreviousPage}
-        isLoading={fetchingMore}
-      />
     </div>
   );
 };
