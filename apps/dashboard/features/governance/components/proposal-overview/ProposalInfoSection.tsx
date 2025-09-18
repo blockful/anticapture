@@ -34,120 +34,122 @@ export const ProposalInfoSection = ({
 
   return (
     <div className="border-surface-default flex w-[420px] flex-col border">
-      <div className="flex w-[420px] flex-col gap-2 p-3">
-        <ProposalInfoText>
+      <div className="flex w-[420px] flex-col p-3">
+        <ProposalInfoText className="pb-4">
           <BarChart4 className="text-secondary size-4" /> Current Results
         </ProposalInfoText>
 
-        {/* For Votes */}
-        <div className="flex items-center gap-2">
-          {/* Votes  */}
-          <div className="flex w-[100px] items-center gap-2">
-            <CheckCircle2 className="text-success size-3.5" />
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              For
-            </p>
-          </div>
+        <div className="flex flex-col gap-3">
+          {/* For Votes */}
+          <div className="flex items-center gap-2">
+            {/* Votes  */}
+            <div className="flex w-[100px] items-center gap-2">
+              <CheckCircle2 className="text-success size-3.5" />
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                For
+              </p>
+            </div>
 
-          {/* Progress bar */}
-          <div className="relative h-1 w-[184px] bg-[#3F3F46]">
-            <div
-              className="bg-success absolute h-full"
-              style={{ width: `${forVotesPercentage}%` }}
-            />
-          </div>
+            {/* Progress bar */}
+            <div className="relative h-1 w-[184px] bg-[#3F3F46]">
+              <div
+                className="bg-success absolute h-full"
+                style={{ width: `${forVotesPercentage}%` }}
+              />
+            </div>
 
-          {/* Votes */}
-          <div className="flex w-12 items-center">
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              {formatNumberUserReadable(
-                Number(
-                  Number(formatEther(BigInt(proposal.forVotes || "0"))).toFixed(
-                    1,
+            {/* Votes */}
+            <div className="flex w-12 items-center">
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {formatNumberUserReadable(
+                  Number(
+                    Number(
+                      formatEther(BigInt(proposal.forVotes || "0")),
+                    ).toFixed(1),
                   ),
-                ),
-              )}
-            </p>
+                )}
+              </p>
+            </div>
+
+            {/* Votes Percentage */}
+            <div className="flex w-12 items-center">
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {forVotesPercentage.toFixed(1)}%
+              </p>
+            </div>
           </div>
 
-          {/* Votes Percentage */}
-          <div className="flex w-12 items-center">
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              {forVotesPercentage.toFixed(1)}%
-            </p>
-          </div>
-        </div>
+          {/* Against Votes */}
+          <div className="flex items-center gap-2">
+            {/* Votes  */}
+            <div className="flex w-[100px] items-center gap-2">
+              <XCircle className="text-error size-3.5" />
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                Against
+              </p>
+            </div>
 
-        {/* Against Votes */}
-        <div className="flex items-center gap-2">
-          {/* Votes  */}
-          <div className="flex w-[100px] items-center gap-2">
-            <XCircle className="text-error size-3.5" />
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              Against
-            </p>
-          </div>
+            {/* Progress bar */}
+            <div className="relative h-1 w-[184px] bg-[#3F3F46]">
+              <div
+                className="bg-error absolute h-full"
+                style={{ width: `${againstVotesPercentage}%` }}
+              />
+            </div>
 
-          {/* Progress bar */}
-          <div className="relative h-1 w-[184px] bg-[#3F3F46]">
-            <div
-              className="bg-error absolute h-full"
-              style={{ width: `${againstVotesPercentage}%` }}
-            />
-          </div>
-
-          {/* Votes */}
-          <div className="flex w-12 items-center">
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              {formatNumberUserReadable(
-                Number(
+            {/* Votes */}
+            <div className="flex w-12 items-center">
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {formatNumberUserReadable(
                   Number(
-                    formatEther(BigInt(proposal.againstVotes || "0")),
-                  ).toFixed(1),
-                ),
-              )}
-            </p>
+                    Number(
+                      formatEther(BigInt(proposal.againstVotes || "0")),
+                    ).toFixed(1),
+                  ),
+                )}
+              </p>
+            </div>
+
+            {/* Votes Percentage */}
+            <div className="flex w-12 items-center">
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {againstVotesPercentage.toFixed(1)}%
+              </p>
+            </div>
           </div>
 
-          {/* Votes Percentage */}
-          <div className="flex w-12 items-center">
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              {againstVotesPercentage.toFixed(1)}%
-            </p>
-          </div>
-        </div>
+          {/* Abstain Votes */}
+          <div className="flex items-center gap-2">
+            {/* Votes  */}
+            <div className="flex w-[100px] items-center gap-2">
+              <DivideCircle className="text-secondary size-3.5" />
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                Abstain
+              </p>
+            </div>
 
-        {/* Abstain Votes */}
-        <div className="flex items-center gap-2">
-          {/* Votes  */}
-          <div className="flex w-[100px] items-center gap-2">
-            <DivideCircle className="text-secondary size-3.5" />
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              Abstain
-            </p>
-          </div>
+            {/* Progress bar */}
+            <div className="relative h-1 w-[184px] bg-[#3F3F46]"></div>
 
-          {/* Progress bar */}
-          <div className="relative h-1 w-[184px] bg-[#3F3F46]"></div>
-
-          {/* Votes */}
-          <div className="flex w-12 items-center">
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              {formatNumberUserReadable(
-                Number(
+            {/* Votes */}
+            <div className="flex w-12 items-center">
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {formatNumberUserReadable(
                   Number(
-                    formatEther(BigInt(proposal.abstainVotes || "0")),
-                  ).toFixed(1),
-                ),
-              )}
-            </p>
-          </div>
+                    Number(
+                      formatEther(BigInt(proposal.abstainVotes || "0")),
+                    ).toFixed(1),
+                  ),
+                )}
+              </p>
+            </div>
 
-          {/* Votes Percentage */}
-          <div className="flex w-12 items-center">
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              {abstainVotesPercentage.toFixed(1)}%
-            </p>
+            {/* Votes Percentage */}
+            <div className="flex w-12 items-center">
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {abstainVotesPercentage.toFixed(1)}%
+              </p>
+            </div>
           </div>
         </div>
 
