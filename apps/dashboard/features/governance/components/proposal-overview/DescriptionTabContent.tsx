@@ -5,6 +5,21 @@ interface DescriptionTabContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }
 
+const cleanMarkdown = (content: string): string => {
+  return (
+    content
+      // Fix malformed headings like "# Title # [link]**Bold Text**"
+      .replace(
+        /^(#{1,6})\s*(.+?)\s*#{1,6}\s*(\[.*?\]\(.*?\))\*\*\\?\[(.*?)\].*?\*\*/gm,
+        "$1 $2",
+      )
+      // Remove empty anchor links at the beginning of lines
+      .replace(/^\[.*?\]\(#.*?\)\s*/gm, "")
+      // Clean up duplicate titles that appear as bold text after headings
+      .replace(/^(#{1,6}\s+.*?)\n\*\*\\?\[.*?\]\*\*/gm, "$1")
+  );
+};
+
 export const DescriptionTabContent = ({
   proposal,
 }: DescriptionTabContentProps) => {
@@ -159,7 +174,7 @@ export const DescriptionTabContent = ({
           },
         }}
       >
-        {proposal.description}
+        {cleanMarkdown(proposal.description)}
       </Markdown>
       {proposal.description}
     </div>
