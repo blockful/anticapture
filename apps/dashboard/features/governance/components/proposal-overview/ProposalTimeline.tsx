@@ -34,18 +34,44 @@ export const ProposalTimeline = ({
       status: getTimelineItemStatus(createdTime),
     },
     {
-      label: "Started",
+      label: startTime <= now ? "Started" : "Starts",
       timestamp: startTime,
       date: formatTimestamp(startTime),
       status: getTimelineItemStatus(startTime),
     },
     {
-      label: "Ends",
+      label: endTime <= now ? "Ended" : "Ends",
       timestamp: endTime,
       date: formatTimestamp(endTime),
       status: getTimelineItemStatus(endTime),
     },
   ];
+
+  const getTimelineItemBgColor = (index: number) => {
+    // Created is always primary
+    if (index === 0) return "bg-primary";
+
+    // Find the first pending item (after created)
+    const firstPendingIndex = timelineItems.findIndex(
+      (item, i) => i > 0 && item.status === "pending",
+    );
+
+    if (firstPendingIndex === -1) {
+      // All items are completed
+      return "bg-primary";
+    }
+
+    if (index < firstPendingIndex) {
+      // Completed items
+      return "bg-primary";
+    } else if (index === firstPendingIndex) {
+      // Next item to be completed
+      return "bg-link";
+    } else {
+      // Future items
+      return "bg-secondary";
+    }
+  };
 
   return (
     <div className="flex flex-col gap-0">
@@ -55,9 +81,7 @@ export const ProposalTimeline = ({
             {/* Timeline dot */}
             <div className="flex flex-col items-start">
               <div
-                className={`size-2 rounded-full ${
-                  item.status === "completed" ? "bg-success" : "bg-secondary"
-                }`}
+                className={`size-2 rounded-full ${getTimelineItemBgColor(index)}`}
               />
             </div>
 
