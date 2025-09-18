@@ -40,48 +40,48 @@ export const DescriptionTabContent = ({
               component: "h2",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 font-inter text-[20px] font-medium not-italic leading-[28px] tracking-[-0.1px] break-words",
+                  "text-primary pt-4 font-inter text-[20px] font-medium not-italic leading-[28px] tracking-[-0.1px] break-words",
               },
             },
             h3: {
               component: "h3",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 font-inter text-[16px] font-medium not-italic leading-[24px] break-words",
+                  "text-primary pt-4 font-inter text-[16px] font-medium not-italic leading-[24px] break-words",
               },
             },
             h4: {
               component: "h4",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 font-inter text-[14px] font-medium not-italic leading-[20px] tracking-[-0.084px] break-words",
+                  "text-primary pt-4 font-inter text-[14px] font-medium not-italic leading-[20px] tracking-[-0.084px] break-words",
               },
             },
             h5: {
               component: "h5",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 font-inter text-[12px] font-medium not-italic leading-[16px] tracking-[-0.072px] break-words",
+                  "text-primary pt-4 font-inter text-[12px] font-medium not-italic leading-[16px] tracking-[-0.072px] break-words",
               },
             },
             h6: {
               component: "h6",
               props: {
                 className:
-                  "text-primary mt-7 mb-4 font-inter text-[10px] font-medium not-italic leading-[14px] tracking-[-0.06px] break-words",
+                  "text-primary pt-4 font-inter text-[10px] font-medium not-italic leading-[14px] tracking-[-0.06px] break-words",
               },
             },
             p: {
               component: "p",
               props: {
                 className:
-                  "text-secondary text-[14px] leading-[20px] break-words",
+                  "text-secondary text-[14px] py-1 leading-[20px] break-words",
               },
             },
             hr: {
               component: "hr",
               props: {
-                className: "border-border-default mt-7",
+                className: "border-border-default mt-4",
               },
             },
             pre: {
@@ -120,8 +120,7 @@ export const DescriptionTabContent = ({
             strong: {
               component: "strong",
               props: {
-                className:
-                  "text-primary text-[14px] leading-[20px] break-words",
+                className: "text-primary  break-words",
               },
             },
             table: {
@@ -176,7 +175,6 @@ export const DescriptionTabContent = ({
       >
         {cleanMarkdown(proposal.description)}
       </Markdown>
-      {proposal.description}
     </div>
   );
 };
