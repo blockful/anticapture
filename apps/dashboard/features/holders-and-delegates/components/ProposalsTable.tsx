@@ -3,7 +3,6 @@
 import { ReactNode, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  TheTable,
   SkeletonRow,
   TextIconLeft,
   SimpleProgressBar,
@@ -12,7 +11,7 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
-import { useDaoData, useScreenSize } from "@/shared/hooks";
+import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
@@ -29,6 +28,7 @@ import {
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 interface ProposalTableData {
   proposalId: string;
@@ -51,6 +51,9 @@ interface ProposalsTableProps {
   orderDirection?: "asc" | "desc";
   onSortChange?: (field: string, direction: "asc" | "desc") => void;
   daoIdEnum: DaoIdEnum;
+  pagination: { hasNextPage: boolean; totalPages: number; currentPage: number };
+  fetchingMore: boolean;
+  fetchNextPage: () => void;
 }
 
 export const ProposalsTable = ({
@@ -64,9 +67,11 @@ export const ProposalsTable = ({
   orderDirection,
   onSortChange,
   daoIdEnum,
+  pagination,
+  fetchingMore,
+  fetchNextPage,
 }: ProposalsTableProps) => {
   const { data: daoData } = useDaoData(daoIdEnum);
-  const { isMobile } = useScreenSize();
 
   const tableData = useMemo(() => {
     if (!proposals || proposals.length === 0) return [];
@@ -103,21 +108,23 @@ export const ProposalsTable = ({
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
       accessorKey: "proposalName",
-      size: isMobile ? 160 : 220,
+      meta: {
+        columnClassName: "w-32",
+      },
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center px-4 py-2">
+            <div className="flex items-center">
               <SkeletonRow className="h-5 w-48" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center px-4 py-2">
-            <span className="text-primary font-regular truncate text-sm">
+          <div className="flex items-center">
+            <span className="text-primary font-regular max-w-48 truncate text-sm">
               {proposalName}
             </span>
           </div>
@@ -126,7 +133,7 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2 text-xs"
+          className="flex h-min justify-start gap-1 p-0 text-xs"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -153,7 +160,9 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "finalResult",
-      size: 118,
+      meta: {
+        columnClassName: "w-28",
+      },
       cell: ({ row }) => {
         const finalResult = row.getValue("finalResult") as {
           text: string;
@@ -162,23 +171,25 @@ export const ProposalsTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-start px-2 py-2">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-16" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start px-2 py-2">
+          <div className="flex items-center justify-start">
             <TextIconLeft text={finalResult.text} icon={finalResult.icon} />
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Final Result</h4>,
+      header: () => <h4 className="text-table-header">Final Result</h4>,
     },
     {
       accessorKey: "userVote",
-      size: 118,
+      meta: {
+        columnClassName: "w-28",
+      },
       cell: ({ row }) => {
         const userVote = row.getValue("userVote") as {
           text: string;
@@ -187,20 +198,20 @@ export const ProposalsTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-start px-2 py-2">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-16" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start px-2 py-2">
+          <div className="flex items-center justify-start">
             <TextIconLeft text={userVote.text} icon={userVote.icon} />
           </div>
         );
       },
       header: () => (
-        <div className="flex items-center gap-2 px-2 font-medium">
+        <div className="flex items-center gap-2 font-medium">
           User Vote
           {userVoteFilterOptions && onUserVoteFilterChange && (
             <FilterDropdown
@@ -215,20 +226,22 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "votingPower",
-      size: 118,
+      meta: {
+        columnClassName: "w-28",
+      },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-end px-2 py-2">
+            <div className="flex items-center justify-end">
               <SkeletonRow className="h-5 w-16" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-end px-2 py-2 text-sm font-normal">
+          <div className="text-secondary flex items-center justify-end text-sm font-normal">
             {votingPower === "-"
               ? "-"
               : `${votingPower} ${daoData?.id || "ENS"}`}
@@ -238,7 +251,7 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
+          className="flex h-min w-full justify-end gap-1 p-0 text-xs"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -265,7 +278,9 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "voteTiming",
-      size: 154,
+      meta: {
+        columnClassName: "w-40",
+      },
       cell: ({ row }) => {
         const voteTiming = row.getValue("voteTiming") as {
           text: string;
@@ -274,14 +289,14 @@ export const ProposalsTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-start px-2 py-2">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 flex-col justify-center gap-1 px-2 py-2">
+          <div className="flex flex-col justify-center gap-1">
             <div
               className={cn("text-secondary text-xs font-normal", {
                 "text-end text-sm": voteTiming.text === "-",
@@ -298,7 +313,7 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2"
+          className="flex h-min w-full justify-start gap-1 p-0"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -325,19 +340,21 @@ export const ProposalsTable = ({
     },
     {
       accessorKey: "proposalId",
-      size: 38,
+      meta: {
+        columnClassName: "w-10",
+      },
       cell: ({ row }) => {
         const proposalId = row.getValue("proposalId") as string;
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-center py-2 pl-1 pr-0.5">
+            <div className="flex items-center justify-center">
               <SkeletonRow className="h-4 w-4" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-center py-2 pl-1 pr-0.5">
+          <div className="flex items-center justify-center">
             <Link
               href={`${daoConfigByDaoId[daoIdEnum]?.daoOverview?.tally}/proposal/${proposalId}`}
               target="_blank"
@@ -358,7 +375,7 @@ export const ProposalsTable = ({
   if (loading) {
     return (
       <div className="flex flex-col gap-4">
-        <TheTable
+        <Table
           columns={proposalColumns}
           data={Array.from({ length: 10 }, (_, i) => ({
             proposalId: `loading-${i}`,
@@ -369,8 +386,7 @@ export const ProposalsTable = ({
             voteTiming: { text: "", percentage: 0 },
             status: "",
           }))}
-          isTableSmall={true}
-          withPagination={false}
+          size="sm"
           withSorting={true}
         />
       </div>
@@ -401,15 +417,12 @@ export const ProposalsTable = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <TheTable
+      <Table
         columns={proposalColumns}
         data={tableData}
-        withPagination={false}
         withSorting={true}
-        stickyFirstColumn={true}
-        mobileTableFixed={true}
-        isTableSmall={true}
-        showWhenEmpty={
+        size="sm"
+        customEmptyState={
           <BlankSlate
             variant="default"
             icon={Inbox}
@@ -418,6 +431,11 @@ export const ProposalsTable = ({
             description="No voted proposals to show"
           />
         }
+        hasMore={pagination.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        withDownloadCSV={true}
+        wrapperClassName="max-h-[475px]"
       />
     </div>
   );
