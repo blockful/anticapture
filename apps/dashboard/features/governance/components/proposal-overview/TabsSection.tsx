@@ -17,7 +17,7 @@ export const TabsSection = ({ proposal }: TabsSectionProps) => {
   const ActiveTabComponent = TabToContentMap[activeTab];
 
   return (
-    <div className="bg-surface-default flex w-full flex-col">
+    <div className="bg-surface-default flex flex-1 flex-col overflow-hidden">
       {/* Tabs Section */}
       <div className="border-border-default flex w-full gap-2 border-b px-4">
         <Tab
