@@ -46,7 +46,7 @@ export const ProposalSection = () => {
           <ProposalStatusSection proposal={proposal} />
         </div>
 
-        <TabsSection />
+        <TabsSection proposal={proposal} />
       </div>
     </div>
   );
