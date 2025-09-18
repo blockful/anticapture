@@ -151,7 +151,7 @@ export const DescriptionTabContent = ({
               component: "th",
               props: {
                 className:
-                  "text-left p-3  text-primary h-[32px]  px-2  text-[14px] font-semibold",
+                  "text-left p-3 text-primary h-[32px] px-2 text-[12px] font-medium leading-[20px] font-inter text-secondary",
               },
             },
             td: {
