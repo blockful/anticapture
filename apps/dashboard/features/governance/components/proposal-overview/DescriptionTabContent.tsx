@@ -60,6 +60,32 @@ export const DescriptionTabContent = ({
                 className: "break-all bg-muted px-1 rounded text-sm",
               },
             },
+            ul: {
+              component: "ul",
+              props: {
+                className: "list-disc list-inside space-y-2 mt-4 mb-4 pl-4",
+              },
+            },
+            ol: {
+              component: "ol",
+              props: {
+                className: "list-decimal list-inside space-y-2 mt-4 mb-4 pl-4",
+              },
+            },
+            li: {
+              component: "li",
+              props: {
+                className:
+                  "text-secondary text-[14px] leading-[20px] break-words",
+              },
+            },
+            strong: {
+              component: "strong",
+              props: {
+                className:
+                  "text-primary text-[14px] leading-[20px] break-words",
+              },
+            },
           },
         }}
       >
