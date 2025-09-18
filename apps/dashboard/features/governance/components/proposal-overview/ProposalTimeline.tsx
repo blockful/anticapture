@@ -87,9 +87,7 @@ export const ProposalTimeline = ({
 
             {/* Timeline content */}
             <div className="flex flex-col">
-              <p
-                className={`font-roboto-mono eading-[20px] text-[13px] font-medium tracking-[0.78px]`}
-              >
+              <p className={`font-roboto-mono text-[13px]`}>
                 <span className="text-primary">{item.label}</span>{" "}
                 <span className="text-secondary">on {item.date}</span>
               </p>
