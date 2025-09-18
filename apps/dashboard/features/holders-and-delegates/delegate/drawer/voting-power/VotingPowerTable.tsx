@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { SkeletonRow, TheTable } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address } from "viem";
@@ -12,7 +12,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 export const VotingPowerTable = ({
   address,
@@ -25,20 +25,13 @@ export const VotingPowerTable = ({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortBy, setSortBy] = useState<"balance">("balance");
 
-  const {
-    balances,
-    loading,
-    error,
-    pagination,
-    fetchNextPage,
-    fetchPreviousPage,
-    fetchingMore,
-  } = useVotingPower({
-    daoId: daoId as DaoIdEnum,
-    address: address,
-    orderBy: sortBy,
-    orderDirection: sortOrder,
-  });
+  const { balances, loading, error, pagination, fetchNextPage, fetchingMore } =
+    useVotingPower({
+      daoId: daoId as DaoIdEnum,
+      address: address,
+      orderBy: sortBy,
+      orderDirection: sortOrder,
+    });
 
   useEffect(() => {
     setIsMounted(true);
@@ -60,14 +53,17 @@ export const VotingPowerTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           Address
         </div>
       ),
+      meta: {
+        columnClassName: "w-72",
+      },
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex h-10 w-full items-center gap-3 px-2">
+            <div className="flex w-full items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -81,7 +77,7 @@ export const VotingPowerTable = ({
         }
         const addressValue: string = row.getValue("address");
         return (
-          <div className="flex h-10 w-full items-center gap-2 px-2">
+          <div className="flex w-full items-center gap-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -101,7 +97,7 @@ export const VotingPowerTable = ({
           column.toggleSorting(newSortOrder === "desc");
         };
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
+          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
             Amount ({daoId})
             <button
               className="!text-table-header cursor-pointer justify-end text-end"
@@ -132,7 +128,7 @@ export const VotingPowerTable = ({
         }
         const amount: number = row.getValue("amount");
         return (
-          <div className="flex h-10 w-full items-center justify-end px-2 text-sm">
+          <div className="flex w-full items-center justify-end text-sm">
             {formatNumberUserReadable(
               Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0,
             )}
@@ -144,7 +140,7 @@ export const VotingPowerTable = ({
       accessorKey: "date",
       header: () => {
         return (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex w-full items-center justify-start">
             Date
           </div>
         );
@@ -152,9 +148,9 @@ export const VotingPowerTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <div className="flex w-full px-2">
+            <div className="flex w-full">
               <SkeletonRow
-                parentClassName="flex animate-pulse px-2"
+                parentClassName="flex animate-pulse"
                 className="h-4 w-20"
               />
             </div>
@@ -164,7 +160,7 @@ export const VotingPowerTable = ({
         const date: string = row.getValue("date");
 
         return (
-          <div className="flex h-10 w-full items-center justify-start whitespace-nowrap px-2 text-sm">
+          <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
             {date
               ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -204,27 +200,19 @@ export const VotingPowerTable = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex w-full flex-col gap-2">
-        <TheTable
-          columns={columns}
-          data={loading ? Array(6).fill({}) : tableData}
-          withSorting={true}
-          withPagination={true}
-          filterColumn="address"
-          isTableSmall={true}
-        />
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          className="text-white"
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
-        />
-      </div>
+    <div className="flex w-full flex-col gap-2">
+      <Table
+        columns={columns}
+        data={loading ? Array(6).fill({}) : tableData}
+        withSorting={true}
+        filterColumn="address"
+        size="sm"
+        hasMore={pagination.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        withDownloadCSV={true}
+        wrapperClassName="max-h-[475px]"
+      />
     </div>
   );
 };

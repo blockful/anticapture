@@ -27,7 +27,9 @@ type DelegationItem =
   GetDelegationsTimestampQuery["delegations"]["items"][number];
 type AccountBalanceBase =
   GetDelegatorVotingPowerDetailsQuery["accountBalances"]["items"][number];
-type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
+type BalanceWithTimestamp = AccountBalanceBase & {
+  timestamp?: string | number;
+};
 
 type TopFiveDelegatorsWithBalance =
   GetTopFiveDelegatorsQuery["accountBalances"]["items"][number] & {
@@ -75,7 +77,6 @@ export const useVotingPower = ({
   // Main data query
   const {
     data: delegatorsVotingPowerDetails,
-    loading,
     error,
     refetch,
     fetchMore,
@@ -234,15 +235,23 @@ export const useVotingPower = ({
           orderBy,
           orderDirection,
           limit: itemsPerPage,
-        } as any,
+        },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.accountBalances.items ?? [];
+          const newItems = fetchMoreResult.accountBalances.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+            ),
+          ];
 
           return {
             ...fetchMoreResult,
             accountBalances: {
               ...fetchMoreResult.accountBalances,
-              items: fetchMoreResult.accountBalances.items,
+              items: merged,
             },
           };
         },
@@ -285,7 +294,7 @@ export const useVotingPower = ({
           orderBy,
           orderDirection,
           limit: itemsPerPage,
-        } as any,
+        },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
 
@@ -334,7 +343,7 @@ export const useVotingPower = ({
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,
-    loading: loading || tsLoading,
+    loading: networkStatus === NetworkStatus.loading,
     error: error || tsError || null,
     refetch: handleRefetch,
     pagination,

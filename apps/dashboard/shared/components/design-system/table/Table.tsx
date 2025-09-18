@@ -176,7 +176,12 @@ export const Table = <TData, TValue>({
               {table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className={`border-transparent transition-colors duration-300 ${onRowClick && !disableRowClick?.(row.original) ? "hover:bg-surface-contrast cursor-pointer" : "cursor-default"}`}
+                  className={cn(
+                    "border-transparent transition-colors duration-300",
+                    onRowClick && !disableRowClick?.(row.original)
+                      ? "hover:bg-surface-contrast cursor-pointer"
+                      : "cursor-default",
+                  )}
                   onClick={() =>
                     !disableRowClick?.(row.original) &&
                     onRowClick?.(row.original)
