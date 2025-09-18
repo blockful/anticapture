@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
 import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
-import { ApolloError } from "@apollo/client";
+import { ApolloError, NetworkStatus } from "@apollo/client";
 import { formatUnits } from "viem";
 
 type VotingPowerHistoryItem =
@@ -50,6 +50,7 @@ export interface UseDelegateDelegationHistoryResult {
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
+  fetchingMore: boolean;
 }
 
 export function useDelegateDelegationHistory(
@@ -89,7 +90,7 @@ export function useDelegateDelegationHistory(
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, loading, error, fetchMore } =
+  const { data, error, fetchMore, networkStatus } =
     useGetDelegateDelegationHistoryQuery({
       variables: queryVariables,
       ...queryOptions,
@@ -213,12 +214,21 @@ export function useDelegateDelegationHistory(
           }: { fetchMoreResult: GetDelegateDelegationHistoryQuery },
         ) => {
           if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.votingPowerHistorys.items ?? [];
+          const newItems = fetchMoreResult.votingPowerHistorys.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) =>
+                !prevItems.some((p) => p.transactionHash === n.transactionHash),
+            ),
+          ];
 
           return {
             ...fetchMoreResult,
             votingPowerHistorys: {
               ...fetchMoreResult.votingPowerHistorys,
-              items: fetchMoreResult.votingPowerHistorys.items,
+              items: merged,
             },
           };
         },
@@ -291,10 +301,12 @@ export function useDelegateDelegationHistory(
 
   return {
     delegationHistory: transformedData,
-    loading,
+    loading: networkStatus === NetworkStatus.loading,
     error,
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 }

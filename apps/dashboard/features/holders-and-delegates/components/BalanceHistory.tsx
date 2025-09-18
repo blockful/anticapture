@@ -381,6 +381,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         wrapperClassName="max-h-[475px]"
+        withDownloadCSV={true}
       />
     </div>
   );

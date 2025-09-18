@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { formatUnits } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -16,6 +15,7 @@ import {
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -35,7 +35,7 @@ export const DelegateDelegationHistoryTable = ({
     error,
     paginationInfo,
     fetchNextPage,
-    fetchPreviousPage,
+    fetchingMore,
   } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
 
   // Handle sorting
@@ -112,11 +112,13 @@ export const DelegateDelegationHistoryTable = ({
   const columns: ColumnDef<DelegationHistoryItem>[] = [
     {
       accessorKey: "timestamp",
-      size: 150,
+      meta: {
+        columnClassName: "w-32",
+      },
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          className="flex h-min w-full justify-start rounded-b-none p-0"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
@@ -137,14 +139,14 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-2">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start px-2 py-2">
+          <div className="flex items-center justify-start">
             <span className="text-primary whitespace-nowrap text-sm font-medium">
               {formatRelativeTime(timestamp)}
             </span>
@@ -154,11 +156,13 @@ export const DelegateDelegationHistoryTable = ({
     },
     {
       accessorKey: "amount",
-      size: 200,
+      meta: {
+        columnClassName: "w-52",
+      },
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          className="flex h-min w-full justify-start rounded-b-none p-0"
           onClick={() => handleSort("delta")}
         >
           <h4 className="text-table-header">Amount ({daoId})</h4>
@@ -180,7 +184,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-16" />
             </div>
           );
@@ -200,7 +204,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex h-10 flex-col items-start justify-center px-4 py-2">
+          <div className="flex flex-col items-start justify-center">
             <div className="flex items-center gap-1">
               <span className={cn("text-sm font-medium", delegationType.color)}>
                 {delegationType.symbol}
@@ -216,9 +220,11 @@ export const DelegateDelegationHistoryTable = ({
     },
     {
       accessorKey: "delegator",
-      size: 150,
+      meta: {
+        columnClassName: "w-32",
+      },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+        <h4 className="text-table-header flex w-full items-center justify-start">
           Delegator
         </h4>
       ),
@@ -227,7 +233,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -253,7 +259,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 p-2">
+          <div className="flex items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
@@ -274,17 +280,17 @@ export const DelegateDelegationHistoryTable = ({
     },
     {
       accessorKey: "arrow",
-      size: 60,
+      meta: {
+        columnClassName: "w-16",
+      },
       header: () => <div className="w-full"></div>,
       cell: () => {
         if (loading) {
-          return (
-            <div className="flex h-10 items-center justify-center px-2"></div>
-          );
+          return <div className="flex items-center justify-center"></div>;
         }
 
         return (
-          <div className="flex h-10 items-center justify-center px-2">
+          <div className="flex items-center justify-center">
             <ArrowRight className="text-secondary size-4" />
           </div>
         );
@@ -292,9 +298,11 @@ export const DelegateDelegationHistoryTable = ({
     },
     {
       accessorKey: "delegate",
-      size: 150,
+      meta: {
+        columnClassName: "w-32",
+      },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start pl-4">
+        <h4 className="text-table-header flex w-full items-center justify-start">
           Delegate
         </h4>
       ),
@@ -303,7 +311,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -327,7 +335,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex h-10 items-center justify-between gap-3 p-2">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={delegateAddress as `0x${string}`}
@@ -361,7 +369,7 @@ export const DelegateDelegationHistoryTable = ({
       <div className="bg-surface-default flex flex-col">
         {/* Table */}
         <div className="flex flex-col gap-2 p-4">
-          <TheTable
+          <Table
             columns={columns}
             data={Array.from({ length: 7 }, () => ({
               timestamp: "1716153600",
@@ -376,19 +384,8 @@ export const DelegateDelegationHistoryTable = ({
               delegator: "0x1234567890",
               delegate: "0x1234567890",
             }))}
-            withPagination={true}
             withSorting={true}
-            isTableSmall={true}
-          />
-
-          <Pagination
-            currentPage={paginationInfo.currentPage}
-            totalPages={paginationInfo.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            hasNextPage={paginationInfo.hasNextPage}
-            hasPreviousPage={paginationInfo.hasPreviousPage}
-            isLoading={loading}
+            size="sm"
           />
         </div>
       </div>
@@ -412,26 +409,17 @@ export const DelegateDelegationHistoryTable = ({
     <div className="bg-surface-default flex flex-col">
       {/* Table */}
       <div className="flex flex-col gap-2 p-4">
-        <TheTable
+        <Table
           columns={columns}
           data={delegationHistory}
-          withPagination={false}
           withSorting={true}
-          isTableSmall={true}
+          size="sm"
+          hasMore={paginationInfo.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          withDownloadCSV={true}
+          wrapperClassName="max-h-[475px]"
         />
-
-        {/* Pagination */}
-        {paginationInfo.totalPages > 1 && (
-          <Pagination
-            currentPage={paginationInfo.currentPage}
-            totalPages={paginationInfo.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            hasNextPage={paginationInfo.hasNextPage}
-            hasPreviousPage={paginationInfo.hasPreviousPage}
-            isLoading={loading}
-          />
-        )}
       </div>
     </div>
   );
