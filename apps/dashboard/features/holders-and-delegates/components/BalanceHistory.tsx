@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -51,19 +51,14 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     typeFilter === "Buy" ? "buy" : typeFilter === "Sell" ? "sell" : "all";
 
   // Use the balance history hook
-  const {
-    transfers,
-    loading,
-    paginationInfo,
-    fetchNextPage,
-    fetchPreviousPage,
-  } = useBalanceHistory(
-    accountId,
-    daoId,
-    orderBy,
-    orderDirection,
-    transactionType,
-  );
+  const { transfers, loading, paginationInfo, fetchNextPage, isLoadingMore } =
+    useBalanceHistory(
+      accountId,
+      daoId,
+      orderBy,
+      orderDirection,
+      transactionType,
+    );
 
   // Handle sorting - both date and amount now control the GraphQL query
   const handleSort = (field: string) => {
@@ -366,20 +361,14 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
   return (
     <div className="flex w-full flex-col gap-2 p-4">
-      <TheTable
+      <Table
         columns={balanceHistoryColumns}
         data={tableData}
-        isTableSmall={true}
-      />
-
-      {/* Pagination */}
-      <Pagination
-        currentPage={paginationInfo.currentPage}
-        totalPages={paginationInfo.totalPages}
-        onPrevious={fetchPreviousPage}
-        onNext={fetchNextPage}
-        hasNextPage={paginationInfo.hasNextPage}
-        hasPreviousPage={paginationInfo.hasPreviousPage}
+        size="sm"
+        onLoadMore={fetchNextPage}
+        hasMore={paginationInfo.hasNextPage}
+        isLoadingMore={isLoadingMore}
+        wrapperClassName="max-h-[600px] overflow-y-auto"
       />
     </div>
   );

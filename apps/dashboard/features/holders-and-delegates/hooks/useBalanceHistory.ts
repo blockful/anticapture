@@ -37,10 +37,10 @@ export interface PaginationInfo {
 export interface UseBalanceHistoryResult {
   transfers: Transfer[];
   loading: boolean;
-  error: any;
+  error: unknown;
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
+  isLoadingMore: boolean;
 }
 
 export function useBalanceHistory(
@@ -53,18 +53,23 @@ export function useBalanceHistory(
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const [allTransfers, setAllTransfers] = useState<Transfer[]>([]);
 
-  // Reset page to 1 when transaction type or sorting changes
+  // Reset page to 1 and clear accumulated data when transaction type or sorting changes
   useEffect(() => {
     setCurrentPage(1);
+    setAllTransfers([]);
   }, [transactionType, orderBy, orderDirection]);
 
-  const queryVariables = {
-    account: accountId,
-    limit: itemsPerPage,
-    orderBy,
-    orderDirection,
-  };
+  const queryVariables = useMemo(
+    () => ({
+      account: accountId,
+      limit: itemsPerPage,
+      orderBy,
+      orderDirection,
+    }),
+    [accountId, itemsPerPage, orderBy, orderDirection],
+  );
 
   const queryOptions = {
     context: {
@@ -147,17 +152,34 @@ export function useBalanceHistory(
   const transformedTransfers = useMemo(() => {
     if (!data?.transfers?.items) return [];
 
-    return data.transfers.items.map((transfer: any) => ({
+    return data.transfers.items.map((transfer: Record<string, unknown>) => ({
       timestamp: transfer.timestamp?.toString() || "",
-      amount: formatUnits(BigInt(transfer.amount || "0"), 18),
-      fromAccountId: transfer.fromAccountId || null,
-      toAccountId: transfer.toAccountId || null,
-      transactionHash: transfer.transactionHash,
+      amount: formatUnits(BigInt((transfer.amount as string) || "0"), 18),
+      fromAccountId: (transfer.fromAccountId as string) || null,
+      toAccountId: (transfer.toAccountId as string) || null,
+      transactionHash: transfer.transactionHash as string,
       direction: (transfer.fromAccountId === accountId ? "out" : "in") as
         | "in"
         | "out",
     }));
   }, [data, accountId]);
+
+  // Update accumulated transfers when new data comes in
+  useEffect(() => {
+    if (transformedTransfers.length > 0 && currentPage === 1) {
+      // For first page, replace all transfers
+      setAllTransfers(transformedTransfers);
+    } else if (transformedTransfers.length > 0 && currentPage > 1) {
+      // For subsequent pages, append transfers (avoid duplicates)
+      setAllTransfers((prev) => {
+        const existingHashes = new Set(prev.map((t) => t.transactionHash));
+        const newTransfers = transformedTransfers.filter(
+          (t) => !existingHashes.has(t.transactionHash),
+        );
+        return [...prev, ...newTransfers];
+      });
+    }
+  }, [transformedTransfers, currentPage]);
 
   // Real pagination info from GraphQL query
   const paginationInfo: PaginationInfo = useMemo(() => {
@@ -205,16 +227,24 @@ export function useBalanceHistory(
           after: paginationInfo.endCursor,
         },
         updateQuery: (
-          previousResult: any,
-          { fetchMoreResult }: { fetchMoreResult: any },
+          previousResult: Record<string, unknown>,
+          { fetchMoreResult }: { fetchMoreResult: Record<string, unknown> },
         ) => {
           if (!fetchMoreResult) return previousResult;
+
+          // For infinite scroll, we need to merge the data
+          const prevItems =
+            ((previousResult?.transfers as Record<string, unknown>)
+              ?.items as unknown[]) || [];
+          const newItems =
+            ((fetchMoreResult.transfers as Record<string, unknown>)
+              ?.items as unknown[]) || [];
 
           return {
             ...fetchMoreResult,
             transfers: {
               ...fetchMoreResult.transfers,
-              items: fetchMoreResult.transfers.items,
+              items: [...prevItems, ...newItems],
             },
           };
         },
@@ -234,61 +264,12 @@ export function useBalanceHistory(
     queryVariables,
   ]);
 
-  // Fetch previous page function
-  const fetchPreviousPage = useCallback(async () => {
-    if (
-      !paginationInfo.hasPreviousPage ||
-      !paginationInfo.startCursor ||
-      isPaginationLoading
-    ) {
-      console.warn("No previous page available or already loading");
-      return;
-    }
-
-    setIsPaginationLoading(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          ...queryVariables,
-          before: paginationInfo.startCursor,
-        },
-        updateQuery: (
-          previousResult: any,
-          { fetchMoreResult }: { fetchMoreResult: any },
-        ) => {
-          if (!fetchMoreResult) return previousResult;
-
-          return {
-            ...fetchMoreResult,
-            transfers: {
-              ...fetchMoreResult.transfers,
-              items: fetchMoreResult.transfers.items,
-            },
-          };
-        },
-      });
-
-      setCurrentPage((prev) => prev - 1);
-    } catch (error) {
-      console.error("Error fetching previous page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    paginationInfo.hasPreviousPage,
-    paginationInfo.startCursor,
-    isPaginationLoading,
-    queryVariables,
-  ]);
-
   return {
-    transfers: transformedTransfers,
+    transfers: allTransfers,
     loading,
     error,
     paginationInfo,
     fetchNextPage,
-    fetchPreviousPage,
+    isLoadingMore: isPaginationLoading,
   };
 }
