@@ -14,7 +14,8 @@ import {
   TokenDistributionTable,
 } from "@/features/token-distribution/components";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
-import { ArrowRightLeft } from "lucide-react";
+import { ArrowRightLeft, DownloadIcon } from "lucide-react";
+import { convertToCSV, downloadCSV } from "@/shared/utils/formatDatasetsToCSV";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -44,7 +45,7 @@ const ChartLegend = ({
     {items.map((item) => (
       <div key={item.label} className="flex items-center gap-2">
         <span
-          className="size-2 rounded-xs"
+          className="rounded-xs size-2"
           style={{ backgroundColor: item.color }}
         />
         <span className="text-secondary text-sm font-medium">{item.label}</span>
@@ -69,6 +70,31 @@ export const TokenDistributionSection = () => {
     dexSupply: dexSupplyChart,
     lendingSupply: lendingSupplyChart,
   };
+
+  const handleDownload = () => {
+    const normalize = (data?: DaoMetricsDayBucket[]) =>
+      data?.map((d) => ({
+        date: d.date,
+        value: String(d.high),
+      }));
+
+    const normalizedDatasets = {
+      delegatedSupply: normalize(delegatedSupplyChart),
+      cexSupply: normalize(cexSupplyChart),
+      dexSupply: normalize(dexSupplyChart),
+      lendingSupply: normalize(lendingSupplyChart),
+    };
+
+    const csv = convertToCSV(
+      normalizedDatasets as Record<
+        string,
+        { date: string; value: string }[] | undefined
+      >,
+      chartConfig,
+    );
+    downloadCSV(csv, "token_distribution.csv");
+  };
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
@@ -109,6 +135,16 @@ export const TokenDistributionSection = () => {
             mocked={true}
           />
         )}
+        <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
+          [DOWNLOAD AS{" "}
+          <button
+            onClick={handleDownload}
+            className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
+          >
+            CSV <DownloadIcon className="size-3.5" />
+          </button>
+          ]
+        </p>
       </TheCardChartLayout>
       <div className="border-light-dark w-full border-t" />
       <TokenDistributionTable />
