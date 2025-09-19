@@ -35,6 +35,14 @@ import {
 } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { DownloadIcon } from "lucide-react";
+import { convertToCSV, downloadCSV } from "@/shared/utils/formatDatasetsToCSV";
+
+type ChartSeriesKey = "treasuryNonDAO" | "all" | "quorum" | "delegated";
+type AttackChartConfig = Record<
+  ChartSeriesKey | string,
+  { label: string; color: string }
+>;
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -84,7 +92,7 @@ export const MultilineChartAttackProfitability = ({
     ? Number(daoData.quorum) / 10 ** 18
     : null;
 
-  const chartConfig = {
+  const chartConfig: AttackChartConfig = {
     treasuryNonDAO: {
       label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
       color: "#4ade80",
@@ -178,46 +186,84 @@ export const MultilineChartAttackProfitability = ({
 
       return dataPoint;
     });
+
+  const handleDownload = () => {
+    const activeKeys = Object.keys(chartConfig).filter((key) => {
+      if (!filterData?.length) return true;
+      const { label } = chartConfig[key];
+      return filterData.includes(key) || filterData.includes(label);
+    });
+
+    const normalizeDataset = (key: string) =>
+      chartData.map((point) => ({
+        date: String(point.date),
+        value: point[key] == null ? "" : String(point[key]),
+      }));
+
+    const normalizedDatasets = Object.fromEntries(
+      activeKeys.map((key) => [key, normalizeDataset(key)]),
+    );
+
+    const subsetChartConfig = Object.fromEntries(
+      activeKeys.map((key) => [key, chartConfig[key]]),
+    );
+
+    const csv = convertToCSV(normalizedDatasets, subsetChartConfig);
+    downloadCSV(csv, `attack_profitability_${daoId}.csv`);
+  };
+
   return (
-    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-      {mocked && <ResearchPendingChartBlur />}
-      <ChartContainer className="h-full w-full" config={chartConfig}>
-        <LineChart data={chartData}>
-          <CartesianGrid vertical={false} stroke="#27272a" />
-          <XAxis
-            dataKey="date"
-            scale="time"
-            type="number"
-            domain={["auto", "auto"]}
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(date) => timestampToReadableDate(date)}
-          />
-          <YAxis hide={true} />
-          <Tooltip
-            content={
-              <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />
-            }
-          />
-          {Object.entries(chartConfig)
-            .filter(
-              ([key], index: number) =>
-                !filterData || key !== filterData[index],
-            )
-            .map(([key, config]) => (
-              <Line
-                key={key}
-                dataKey={key}
-                stroke={config.color}
-                strokeWidth={2}
-                dot={false}
-              />
-            ))}
-        </LineChart>
-      </ChartContainer>
-      {/* Watermark */}
-      <AnticaptureWatermark />
-    </div>
+    <>
+      <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
+        {mocked && <ResearchPendingChartBlur />}
+        <ChartContainer className="h-full w-full" config={chartConfig}>
+          <LineChart data={chartData}>
+            <CartesianGrid vertical={false} stroke="#27272a" />
+            <XAxis
+              dataKey="date"
+              scale="time"
+              type="number"
+              domain={["auto", "auto"]}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(date) => timestampToReadableDate(date)}
+            />
+            <YAxis hide={true} />
+            <Tooltip
+              content={
+                <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />
+              }
+            />
+            {Object.entries(chartConfig)
+              .filter(
+                ([key], index: number) =>
+                  !filterData || key !== filterData[index],
+              )
+              .map(([key, config]) => (
+                <Line
+                  key={key}
+                  dataKey={key}
+                  stroke={config.color}
+                  strokeWidth={2}
+                  dot={false}
+                />
+              ))}
+          </LineChart>
+        </ChartContainer>
+        {/* Watermark */}
+        <AnticaptureWatermark />
+      </div>
+      <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
+        [DOWNLOAD AS{" "}
+        <button
+          onClick={handleDownload}
+          className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
+        >
+          CSV <DownloadIcon className="size-3.5" />
+        </button>
+        ]
+      </p>
+    </>
   );
 };
