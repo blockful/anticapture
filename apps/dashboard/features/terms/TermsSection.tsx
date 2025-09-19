@@ -153,8 +153,6 @@ export const TermsSection = () => {
             accessing or using the Service, you agree to these Terms. If you do
             not agree, you should not use the Service.
           </span>
-          {/* Dashed line separator - Mobile only */}
-          {/* <div className="border-light-dark -mx-4 border-t border-dashed sm:hidden" /> */}
 
           {termsData.map((item, index) => (
             <div
