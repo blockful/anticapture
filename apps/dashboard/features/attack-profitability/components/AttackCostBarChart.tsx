@@ -99,17 +99,13 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   }, [daoTokenPriceHistoricalData]);
 
   useEffect(() => {
-    if (
+    setMocked(
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
-      activeSupply.data?.activeSupply === undefined &&
-      averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === undefined
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        activeSupply.data?.activeSupply === undefined &&
+        averageTurnout.data?.currentAverageTurnout === undefined &&
+        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+        vetoCouncilVotingPower === undefined,
+    );
   }, [
     delegatedSupply,
     activeSupply,
@@ -155,7 +151,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         value:
           Number(
             formatEther(
-              BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+              BigInt(
+                parseInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
+              ),
             ),
           ) * lastPrice,
         type: BarChartEnum.REGULAR,
@@ -167,8 +165,11 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
         value:
-          Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
-          lastPrice,
+          Number(
+            formatEther(
+              BigInt(parseInt(activeSupply.data?.activeSupply || "0")),
+            ),
+          ) * lastPrice,
       },
       {
         id: "averageTurnout",
@@ -178,7 +179,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         value:
           Number(
             formatEther(
-              BigInt(averageTurnout.data?.currentAverageTurnout || "0"),
+              BigInt(
+                parseInt(averageTurnout.data?.currentAverageTurnout || "0"),
+              ),
             ),
           ) * lastPrice,
       },
@@ -190,7 +193,9 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         value:
           Number(
             formatEther(
-              BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0"),
+              BigInt(
+                parseInt(daoTopTokenHolderExcludingTheDao?.balance || "0"),
+              ),
             ),
           ) * lastPrice,
       },
