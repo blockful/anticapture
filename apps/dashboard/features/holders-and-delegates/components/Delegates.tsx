@@ -10,8 +10,9 @@ import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { formatNumberUserReadable, cn } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Inbox, Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -22,7 +23,7 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation: string;
+  variation: { percentageChange: number; absoluteChange: number };
   activity: string;
   activityPercentage: number;
   delegators: number;
@@ -139,7 +140,7 @@ export const Delegates = ({
         100;
 
       // Calculate variation using real historical voting power
-      let variation = "0 0%";
+      let variation = { percentageChange: 0, absoluteChange: 0 };
       if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
@@ -148,23 +149,22 @@ export const Delegates = ({
           historicalVotingPowerBigInt / BigInt(10 ** 18),
         );
 
-        // Calculate absolute change and percentage
-        const absoluteChange =
-          votingPowerFormatted - historicalVotingPowerFormatted;
-        const percentageChange =
-          (votingPowerFormatted / historicalVotingPowerFormatted) * 100 - 100;
-        const roundedPercentage = Math.round(percentageChange * 100) / 100;
-        const absPercentage = Math.abs(roundedPercentage);
-        const displayPercentage =
-          absPercentage > 1000 ? ">1000" : absPercentage.toString();
+        if (historicalVotingPowerFormatted === 0) {
+          variation = { percentageChange: 0, absoluteChange: 0 };
+        } else {
+          // Calculate absolute change and percentage
+          const absoluteChange =
+            votingPowerFormatted - historicalVotingPowerFormatted;
+          const percentageChange =
+            ((votingPowerFormatted - historicalVotingPowerFormatted) /
+              historicalVotingPowerFormatted) *
+            100;
 
-        // Format the variation string
-        const absChangeFormatted = formatNumberUserReadable(
-          Math.abs(absoluteChange),
-        );
-        const arrow = absoluteChange > 0 ? "↑" : absoluteChange < 0 ? "↓" : "";
-
-        variation = `${absChangeFormatted} ${arrow} ${displayPercentage}%`;
+          variation = {
+            percentageChange: Number(percentageChange.toFixed(2)),
+            absoluteChange: Number(absoluteChange.toFixed(2)),
+          };
+        }
       }
 
       return {
@@ -277,7 +277,10 @@ export const Delegates = ({
       accessorKey: "variation",
       size: 250,
       cell: ({ row }) => {
-        const variation = row.getValue("variation") as string;
+        const variation = row.getValue("variation") as {
+          percentageChange: number;
+          absoluteChange: number;
+        };
 
         if (historicalDataLoading || loading) {
           return (
@@ -291,19 +294,9 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center justify-start gap-1 whitespace-nowrap px-4 py-2 text-end text-sm">
-            <p className="text-secondary">{variation.split(" ")[0]}</p>
-            <p
-              className={cn(
-                variation.includes("↑")
-                  ? "text-success"
-                  : variation.includes("↓")
-                    ? "text-error"
-                    : "text-secondary",
-              )}
-            >
-              {variation.split(" ").slice(2).join(" ")}
-            </p>
+          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
+            {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
+            <Percentage value={variation.percentageChange} />
           </div>
         );
       },
@@ -395,7 +388,7 @@ export const Delegates = ({
             address: `0x${"0".repeat(40)}`,
             type: "",
             votingPower: "0",
-            variation: "0%",
+            variation: { percentageChange: 0, absoluteChange: 0 },
             activity: "0/0",
             activityPercentage: 0,
             delegators: 0,
