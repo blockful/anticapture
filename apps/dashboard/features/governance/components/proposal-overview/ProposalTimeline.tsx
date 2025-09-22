@@ -76,8 +76,8 @@ export const ProposalTimeline = ({
   return (
     <div className="flex flex-col gap-0">
       {timelineItems.map((item, index) => (
-        <>
-          <div key={item.label} className="flex items-center gap-2">
+        <div key={item.label}>
+          <div className="flex items-center gap-2">
             {/* Timeline dot */}
             <div className="flex flex-col items-start">
               <div
@@ -96,7 +96,7 @@ export const ProposalTimeline = ({
           {index < timelineItems.length - 1 && (
             <div className="bg-secondary ml-[3px] h-5 w-0.5" />
           )}
-        </>
+        </div>
       ))}
     </div>
   );
