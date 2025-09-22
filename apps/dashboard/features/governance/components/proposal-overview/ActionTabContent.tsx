@@ -5,7 +5,6 @@ export const ActionsTabContent = ({
 }: {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
-  console.log(proposal);
 
   return (
     <div className="text-primary flex flex-col gap-3 p-4">
