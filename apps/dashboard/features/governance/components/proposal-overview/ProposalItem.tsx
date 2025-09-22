@@ -5,6 +5,10 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Proposal, ProposalStatus } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Address } from "viem";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 
 interface ProposalItemProps {
   proposal: Proposal;
@@ -61,7 +65,7 @@ const getBackgroundStatusColor = (status: ProposalStatus) => {
   }
 };
 
-const getStatusText = (status: ProposalStatus) => {
+export const getStatusText = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
       return "Pending";
@@ -87,12 +91,14 @@ const getStatusText = (status: ProposalStatus) => {
 };
 
 export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
+  const daoId = useParams().daoId as DaoIdEnum;
   const quorumPercentage = proposal.votes.total
     ? (Number(proposal.quorum) / Number(proposal.votes.total)) * 100
     : 0;
 
   return (
-    <div
+    <Link
+      href={`/${daoId}/governance/proposal/${proposal.id}`}
       className={cn(
         "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 md:flex-row md:gap-6",
         className,
@@ -185,10 +191,6 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
-};
-
-const BulletDivider = () => {
-  return <div className="bg-surface-hover size-1 rounded-full" />;
 };
