@@ -7,7 +7,6 @@ type SectionTitleProps = {
   title: string;
   riskLevel: ReactNode;
   description: string;
-  // variant?: "no-description" | "hasDecription" | "hasButtons" | "hasSwitcher";
 };
 
 export const SectionTitle = ({
@@ -15,7 +14,6 @@ export const SectionTitle = ({
   title,
   riskLevel,
   description,
-  // variant = "no-description",
 }: SectionTitleProps) => {
   return (
     <div className="flex w-full flex-col gap-2">
