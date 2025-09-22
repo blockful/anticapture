@@ -1,11 +1,12 @@
 "use client";
 
 import { cn } from "@/shared/utils/";
-import { useRouter, useParams, usePathname } from "next/navigation";
-import { ButtonHTMLAttributes } from "react";
+import { useParams, usePathname } from "next/navigation";
+import Link from "next/link";
+import { AnchorHTMLAttributes } from "react";
 import { ElementType } from "react";
 
-interface ButtonHeaderSidebar extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonHeaderSidebar extends AnchorHTMLAttributes<HTMLAnchorElement> {
   page: string;
   icon: ElementType;
   label: string;
@@ -19,7 +20,6 @@ export const ButtonHeaderSidebar = ({
   className,
   ...props
 }: ButtonHeaderSidebar) => {
-  const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
 
@@ -31,16 +31,16 @@ export const ButtonHeaderSidebar = ({
     pathname === `/${daoId}` || pathname === `/${daoId}/`;
   const isActive = page === "/" ? isDaoOverviewPage : currentPage === page;
 
-  const handleNavigation = () => {
-    if (daoId) {
-      // Special case: DAO Overview page uses root path /{daoId}
-      const targetPath = page === "/" ? `/${daoId}` : `/${daoId}/${page}`;
-      router.push(targetPath);
-    }
-  };
+  // Generate the target path
+  const targetPath = daoId
+    ? page === "/"
+      ? `/${daoId}`
+      : `/${daoId}/${page}`
+    : "#";
 
   return (
-    <button
+    <Link
+      href={targetPath}
       className={cn(
         "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium",
         {
@@ -49,7 +49,6 @@ export const ButtonHeaderSidebar = ({
         },
         className,
       )}
-      onClick={handleNavigation}
       {...props}
     >
       <Icon
@@ -66,6 +65,6 @@ export const ButtonHeaderSidebar = ({
       >
         {label}
       </p>
-    </button>
+    </Link>
   );
 };
