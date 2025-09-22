@@ -1,3 +1,4 @@
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 
 export const ActionsTabContent = ({
@@ -12,6 +13,7 @@ export const ActionsTabContent = ({
       {proposal.targets.map((target, index) => (
         <ActionItem
           key={index}
+          index={index}
           target={proposal.targets[index]}
           value={proposal.values[index]}
           calldata={proposal.calldatas[index]}
@@ -25,20 +27,25 @@ interface ActionItemProps {
   target: string | null;
   value: string | null;
   calldata: string | null;
+  index: number;
 }
 
-const ActionItem = ({ target, value, calldata }: ActionItemProps) => {
+const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
   return (
     <div className="border-border-default flex w-full flex-col gap-2 border">
       <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
         <div>
           <p className="text-primary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]">
-            Action 1
+            Action {index + 1}
           </p>
         </div>
-        <div className="text-secondary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]">
+        <DefaultLink
+          href={`https://etherscan.io/address/${target}`}
+          openInNewTab
+          className="text-secondary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]"
+        >
           Contract
-        </div>
+        </DefaultLink>
       </div>
 
       <div className="flex w-full flex-col gap-2 p-3">
