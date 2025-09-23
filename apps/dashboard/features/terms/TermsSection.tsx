@@ -146,7 +146,7 @@ export const TermsSection = () => {
       <TheSectionLayout
         title={SECTIONS_CONSTANTS.terms.title}
         anchorId={SECTIONS_CONSTANTS.terms.anchorId}
-        className="bg-surface-background! mt-[56px]! sm:mt-0! max-w-[770px]"
+        className="bg-surface-background! mt-[56px]! sm:mt-0! max-w-[770px] gap-4"
       >
         <div className="flex w-full flex-col items-center justify-center gap-2 px-2">
           <span className="text-secondary text-sm">
@@ -167,7 +167,8 @@ export const TermsSection = () => {
               <div className="bg-surface-default text-primary flex gap-1 px-3 py-2 font-mono text-[13px] font-medium uppercase tracking-wider">
                 <span>{index + 1}.</span>
                 <span>
-                  {item.title} <span className="text-link">_</span>
+                  {item.title}
+                  <span className="text-link">_</span>
                 </span>
               </div>
               <div className="text-secondary p-3 text-sm">{item.content}</div>
