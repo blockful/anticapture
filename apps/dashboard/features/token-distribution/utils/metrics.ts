@@ -56,25 +56,25 @@ export const metricsSchema = {
   DELEGATIONS: {
     label: "Delegated",
     color: "#3B82F6",
-    category: "TRANSFER VOLUME",
+    category: "VOLUME",
     type: "BAR",
   },
   CEX_TOKENS: {
     label: "CEX Tokens",
     color: "#FDE047",
-    category: "TRANSFER VOLUME",
+    category: "VOLUME",
     type: "BAR",
   },
   DEX_TOKENS: {
     label: "DEX Tokens",
     color: "#10B981",
-    category: "TRANSFER VOLUME",
+    category: "VOLUME",
     type: "BAR",
   },
   LENDING_TOKENS: {
     label: "Lending Tokens",
     color: "#8B5CF6",
-    category: "TRANSFER VOLUME",
+    category: "VOLUME",
     type: "BAR",
   },
   PROPOSALS_GOVERNANCE: {

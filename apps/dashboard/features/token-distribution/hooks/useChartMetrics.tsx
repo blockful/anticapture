@@ -33,7 +33,7 @@ export const useChartMetrics = ({
 
   // Get additional SUPPLY metrics needed for TRANSFER VOLUME metrics
   const transferVolumeMetrics = appliedMetrics.filter(
-    (key) => metricsSchema[key]?.category === "TRANSFER VOLUME",
+    (key) => metricsSchema[key]?.category === "VOLUME",
   );
 
   const additionalSupplyMetrics: MetricTypesEnum[] = [];
@@ -134,7 +134,7 @@ export const useChartMetrics = ({
         let valueField = "high";
 
         // For TRANSFER VOLUME metrics, use corresponding SUPPLY data with volume field
-        if (metricSchema?.category === "TRANSFER VOLUME") {
+        if (metricSchema?.category === "VOLUME") {
           if (metricKey === "CEX_TOKENS") {
             dataSourceKey = MetricTypesEnum.CEX_SUPPLY;
             valueField = "volume";

@@ -139,11 +139,16 @@ export const TokenDistributionMetrics = ({
                             100
                           : 0;
 
+                      // Hide amount and variation for VOLUME category metrics
+                      const isVolumeMetric = metric.category === "VOLUME";
+
                       // Format value based on metric type
                       let formattedMetricsValue: string;
                       const metricKey = metric.key as string;
 
-                      if (metricKey === "TOKEN_PRICE") {
+                      if (isVolumeMetric) {
+                        formattedMetricsValue = ""; // No amount for volume metrics
+                      } else if (metricKey === "TOKEN_PRICE") {
                         formattedMetricsValue = `$${Number(currentValue).toFixed(2)}`;
                       } else if (metricKey === "PROPOSALS_GOVERNANCE") {
                         formattedMetricsValue = formatNumberUserReadable(
@@ -158,9 +163,10 @@ export const TokenDistributionMetrics = ({
                         );
                       }
 
-                      // Format variation - hide when 0
-                      const formattedVariation =
-                        Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
+                      // Format variation - hide for volume metrics or when 0
+                      const formattedVariation = isVolumeMetric
+                        ? "" // No variation for volume metrics
+                        : Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
                           ? "" // Empty string when variation is essentially zero
                           : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
 

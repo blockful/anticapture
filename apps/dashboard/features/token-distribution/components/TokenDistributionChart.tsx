@@ -307,7 +307,7 @@ export const TokenDistributionChart = ({
                 dataKey={metricKey}
                 fill={config.color}
                 opacity={isOpaque ? 0.3 : 0.8}
-                barSize={40}
+                barSize={2}
                 yAxisId="bars"
                 radius={[2, 2, 0, 0]}
               />
