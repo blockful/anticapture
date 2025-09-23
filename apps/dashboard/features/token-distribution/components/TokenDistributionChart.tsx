@@ -175,10 +175,20 @@ export const TokenDistributionChart = ({
               orientation="right"
               domain={[0, "dataMax"]}
               tickFormatter={(value) => formatNumberUserReadable(Number(value))}
-              stroke="#10B981"
-              tick={{ fill: "#10B981", fontSize: 10 }}
-              width={50}
+              stroke="#ffffff"
+              tick={{ fill: "#ffffff", fontSize: 10 }}
+              width={60}
               allowDataOverflow={true}
+              label={{
+                value: "Volume",
+                angle: 90,
+                position: "insideRight",
+                style: {
+                  textAnchor: "middle",
+                  fill: "#ffffff",
+                  fontSize: "12px",
+                },
+              }}
             />
           )}
 
