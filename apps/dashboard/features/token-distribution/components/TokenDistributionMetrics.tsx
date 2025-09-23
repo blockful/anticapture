@@ -13,7 +13,7 @@ import { Metric } from "@/features/token-distribution/components/Metric";
 import { MetricWithKey } from "@/features/token-distribution/types";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { BlankSlate } from "@/shared/components";
+import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { Inbox } from "lucide-react";
 
 interface TokenDistributionMetricsProps {
@@ -81,9 +81,21 @@ export const TokenDistributionMetrics = ({
             Object.entries(appliedMetricsFormatted).map(
               ([category, metrics]) => (
                 <div key={category} className="mb-4 flex flex-col gap-2">
-                  <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
-                    {category}
-                  </CardTitle>
+                  {category === "SUPPLY" ? (
+                    <CardTitle className="flex items-center gap-2">
+                      <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
+                        SUPPLY
+                      </p>
+                      <TooltipInfo
+                        text="Next to each supply you'll see the latest value from the selected timeframe, along with the % change between its first and last points."
+                        className="text-secondary"
+                      />
+                    </CardTitle>
+                  ) : (
+                    <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                      {category}
+                    </CardTitle>
+                  )}
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
                     {metrics.map((metric: MetricWithKey) => {
                       const metricData = dataToUse
