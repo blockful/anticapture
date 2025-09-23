@@ -1,1 +1,9 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Source the shell profile to get pnpm in PATH
+if [ -f ~/.zshrc ]; then
+  . ~/.zshrc
+fi
+
 pnpm lint-staged
