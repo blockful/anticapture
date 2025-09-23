@@ -11,9 +11,11 @@ export const VotesTabContent = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
 
+  const TabsContent = TabsContentMapping[activeTab];
+
   console.log(proposal);
   return (
-    <div className="text-primary w-full p-4">
+    <div className="text-primary flex w-full flex-col gap-3 p-4">
       <div className="grid grid-cols-2 gap-4">
         <div
           onClick={() => setActiveTab("voted")}
@@ -40,6 +42,32 @@ export const VotesTabContent = ({
           </div>
         </div>
       </div>
+
+      <div className="flex flex-col gap-3">
+        <TabsContent proposal={proposal} />
+      </div>
     </div>
   );
+};
+const TabsVotedContent = ({
+  proposal,
+}: {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+}) => {
+  console.log(proposal);
+  return <div>Voted</div>;
+};
+
+const TabsDidntVoteContent = ({
+  proposal,
+}: {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+}) => {
+  console.log(proposal);
+  return <div>Didn&apos;t vote</div>;
+};
+
+const TabsContentMapping = {
+  voted: TabsVotedContent,
+  didntVote: TabsDidntVoteContent,
 };
