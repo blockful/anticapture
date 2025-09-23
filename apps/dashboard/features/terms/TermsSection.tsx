@@ -1,13 +1,12 @@
-"use client";
-
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { TheSectionLayout } from "@/shared/components";
+import Link from "next/link";
 
 const termsData = [
   {
     title: "Service Overview",
     content: (
-      <span>
+      <p>
         Anticapture is an open-source, research-driven platform that indexes and
         organizes public governance data from DAOs. The Service offers
         visualizations, dashboards, alerts, and metadata to support transparency
@@ -15,7 +14,7 @@ const termsData = [
         <br />
         Anticapture is not a governance tool, financial product, or security
         service.
-      </span>
+      </p>
     ),
   },
   {
@@ -63,23 +62,23 @@ const termsData = [
   {
     title: "No Liability for DAO Incidents",
     content: (
-      <span>
+      <p>
         Blockful is not liable for any form of governance failure, security
         breach, loss of funds, or protocol incident—even if the platform failed
         to identify risks prior to such events. <br /> <br />
         The Service is informational only and does not substitute internal
         security, audits, or governance practices within DAOs.
-      </span>
+      </p>
     ),
   },
   {
     title: "Limited Use and Scope",
     content: (
       <div className="flex flex-col gap-2">
-        <span>
+        <p>
           You may use Anticapture for informational and research purposes. You
           may not:
-        </span>
+        </p>
         <ul className="list-inside list-disc">
           <li className="mb-2">
             Represent Anticapture data as official or complete.
@@ -99,38 +98,44 @@ const termsData = [
   {
     title: "third-party content",
     content: (
-      <span>
+      <p>
         The Service may reference or link to third-party DAOs, protocols, and
         external tools. We are not responsible for the content, actions, or
         failures of these third parties.
-      </span>
+      </p>
     ),
   },
   {
     title: "Modifications to Service",
     content: (
-      <span>
+      <p>
         We may update or pause the Service at any time without prior notice.
         Being open source, others are free to fork, modify, or extend
         Anticapture under the terms of its license.
-      </span>
+      </p>
     ),
   },
   {
     title: "Governing Law",
     content: (
-      <span>
+      <p>
         These Terms are governed by the laws of the jurisdiction where Blockful
         is established, excluding any conflict of laws principles.
-      </span>
+      </p>
     ),
   },
   {
     title: "Contact",
     content: (
-      <span>
-        For legal inquiries, you may contact us at: contact@blockful.io.
-      </span>
+      <p>
+        For legal inquiries, you may contact us at:{" "}
+        <Link
+          href="mailto:contact@blockful.io"
+          className="text-secondary hover:text-primary transition-colors duration-300"
+        >
+          contact@blockful.io
+        </Link>
+      </p>
     ),
   },
 ];
@@ -159,10 +164,12 @@ export const TermsSection = () => {
               key={index}
               className="border-light-dark mt-4 flex w-full flex-col gap-1 border"
             >
-              <span className="bg-surface-default text-primary px-3 py-2 text-[13px] font-medium uppercase tracking-wider">
-                {index + 1}. {item.title}
-                <span className="text-link">_</span>
-              </span>
+              <div className="bg-surface-default text-primary flex gap-1.5 px-3 py-2 font-mono text-[13px] font-medium uppercase tracking-wider">
+                <span>{index + 1}.</span>
+                <span>
+                  {item.title} <span className="text-link">_</span>
+                </span>
+              </div>
               <div className="text-secondary p-3 text-sm">{item.content}</div>
             </div>
           ))}
