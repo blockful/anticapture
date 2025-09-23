@@ -56,3 +56,27 @@ query GetProposal($id: String!) {
     values
   }
 }
+
+#  Get proposal votes
+query GetVotesOnchains($proposalId: String) {
+  votesOnchains(limit: 100, where: { proposalId: $proposalId }) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    totalCount
+    items {
+      voterAccountId
+      txHash
+      daoId
+      voterAccountId
+      proposalId
+      support
+      votingPower
+      reason
+      timestamp
+    }
+  }
+}

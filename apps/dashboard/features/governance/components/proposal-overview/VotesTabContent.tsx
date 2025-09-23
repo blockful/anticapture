@@ -3,6 +3,9 @@
 import { cn } from "@/shared/utils";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { useState } from "react";
+import { useParams } from "next/navigation";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { useVotes } from "@/features/governance/hooks/useVotes";
 
 export const VotesTabContent = ({
   proposal,
@@ -10,9 +13,23 @@ export const VotesTabContent = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
+  const { daoId } = useParams();
 
   const TabsContent = TabsContentMapping[activeTab];
 
+  // Get votes for this proposal
+  const { votes, loading, error, pageInfo, totalCount } = useVotes({
+    proposalId: proposal.id,
+    daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
+  });
+
+  console.log("Proposal votes:", {
+    votes,
+    loading,
+    error,
+    pageInfo,
+    totalCount,
+  });
   console.log(proposal);
   return (
     <div className="text-primary flex w-full flex-col gap-3 p-4">
