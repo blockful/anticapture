@@ -164,7 +164,7 @@ export const TermsSection = () => {
               key={index}
               className="border-light-dark mt-4 flex w-full flex-col gap-1 border"
             >
-              <div className="bg-surface-default text-primary flex gap-1.5 px-3 py-2 font-mono text-[13px] font-medium uppercase tracking-wider">
+              <div className="bg-surface-default text-primary flex gap-1 px-3 py-2 font-mono text-[13px] font-medium uppercase tracking-wider">
                 <span>{index + 1}.</span>
                 <span>
                   {item.title} <span className="text-link">_</span>
