@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
+import { DaoIdEnum, DaysOpts } from "@/lib/enums";
 import {
   CoingeckoTokenId,
   CoingeckoTokenIdEnum,
@@ -35,7 +35,7 @@ export function tokenHistoricalData(
           days: z
             .enum(DaysOpts)
             .default("7d")
-            .transform((val) => DaysEnum[val]),
+            .transform((val) => parseInt(val.replace("d", ""))),
         }),
       },
       responses: {
@@ -54,9 +54,9 @@ export function tokenHistoricalData(
       },
     }),
     async (context) => {
-      const { toCurrency, days } = context.req.query();
+      const { toCurrency, days } = context.req.valid("query");
 
-      const daysNumber = Number(days) || DAYS_IN_YEAR;
+      const daysNumber = days || DAYS_IN_YEAR;
       const currency = toCurrency || "usd";
 
       const tokenId =
