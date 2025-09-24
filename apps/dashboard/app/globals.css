@@ -229,7 +229,7 @@
   }
 
   .card-header-about-text {
-    @apply text-base leading-normal font-normal;
+    @apply text-base font-normal leading-normal;
   }
 
   .card-body-about {
@@ -257,7 +257,7 @@
   }
 
   .card-text-accordion {
-    @apply text-secondary text-sm leading-normal font-normal;
+    @apply text-secondary text-sm font-normal leading-normal;
   }
 
   .section-title-gap {
@@ -265,7 +265,7 @@
   }
 
   .link-tangerine {
-    @apply hover:text-tangerine/80 text-tangerine font-mono text-[13px] leading-none font-medium tracking-wider uppercase;
+    @apply hover:text-tangerine/80 text-tangerine font-mono text-[13px] font-medium uppercase leading-none tracking-wider;
   }
 
   .text-table-header {
@@ -280,6 +280,12 @@
 
   .section-layout-icon {
     @apply text-secondary size-5;
+  }
+
+  /* Recharts Brush tick formatting */
+  .recharts-brush-texts text {
+    fill: #fafafa !important;
+    font-size: 10px;
   }
 }
 
