@@ -17,7 +17,7 @@ export class CoingeckoService {
   ): Promise<CoingeckoHistoricalMarketData> {
     try {
       const response = await fetch(
-        `${this.coingeckoApiUrl}/coins/${tokenId}/market_chart?vs_currency=${toCurrency}&days=${days}`,
+        `${this.coingeckoApiUrl}/coins/${tokenId}/market_chart?vs_currency=${toCurrency}&days=${days}&interval=daily`,
         {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,
