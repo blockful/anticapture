@@ -143,10 +143,6 @@ export const Table = <TData, TValue>({
     });
   };
 
-  const dataFormatted = formatCsvData(data);
-
-  console.log(dataFormatted);
-
   return (
     <div className={cn("flex w-full flex-col", wrapperClassName)}>
       <TableContainer
