@@ -161,6 +161,9 @@ importers:
       react:
         specifier: 19.1.0
         version: 19.1.0
+      react-csv:
+        specifier: ^2.2.2
+        version: 2.2.2
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
@@ -228,6 +231,9 @@ importers:
       "@types/react":
         specifier: 19.1.4
         version: 19.1.4
+      "@types/react-csv":
+        specifier: ^1.1.10
+        version: 1.1.10
       "@types/react-dom":
         specifier: 19.1.5
         version: 19.1.5(@types/react@19.1.4)
@@ -381,7 +387,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49
 
 packages:
   "@adobe/css-tools@4.4.3":
@@ -6163,6 +6169,12 @@ packages:
         integrity: sha512-I6UNVBAoYbvuWkkU3oosC8yxqH21f4/Jc4DK71JLG3dT2mdlGe1z+ep/LQGXaKaOgcvUrsQoPRqfgtMcvZiJhg==,
       }
 
+  "@types/react-csv@1.1.10":
+    resolution:
+      {
+        integrity: sha512-PESAyASL7Nfi/IyBR3ufd8qZkyoS+7jOylKmJxRZUZLFASLo4NZaRsJ8rNP8pCcbIziADyWBbLPD1nPddhsL4g==,
+      }
+
   "@types/react-dom@19.1.5":
     resolution:
       {
@@ -10057,10 +10069,10 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49,
       }
     version: 1.10.0
 
@@ -13750,6 +13762,12 @@ packages:
     engines: { node: ">=16" }
     peerDependencies:
       react: ^16.3.0 || ^17.0.1 || ^18.0.0 || ^19.0.0
+
+  react-csv@2.2.2:
+    resolution:
+      {
+        integrity: sha512-RG5hOcZKZFigIGE8LxIEV/OgS1vigFQT4EkaHeKgyuCbUAu9Nbd/1RYq++bJcJJ9VOqO/n9TZRADsXNDR4VEpw==,
+      }
 
   react-docgen-typescript@2.4.0:
     resolution:
@@ -21634,6 +21652,10 @@ snapshots:
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 
+  "@types/react-csv@1.1.10":
+    dependencies:
+      "@types/react": 19.1.4
+
   "@types/react-dom@19.1.5(@types/react@19.1.4)":
     dependencies:
       "@types/react": 19.1.4
@@ -24250,7 +24272,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.2.0(eslint@8.57.1)
@@ -24290,7 +24312,7 @@ snapshots:
       tinyglobby: 0.2.14
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -24305,7 +24327,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       "@rtsao/scc": 1.1.0
       array-includes: 3.1.9
@@ -24738,7 +24760,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/6bce1540c7a5d1c40eec032a1ae16f0e01f82b92:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49:
     {}
 
   fork-ts-checker-webpack-plugin@8.0.0(typescript@5.8.3)(webpack@5.100.2(esbuild@0.25.8)):
@@ -27147,6 +27169,8 @@ snapshots:
     dependencies:
       react: 19.1.0
       tween-functions: 1.2.0
+
+  react-csv@2.2.2: {}
 
   react-docgen-typescript@2.4.0(typescript@5.8.3):
     dependencies:
