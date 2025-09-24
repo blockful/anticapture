@@ -104,13 +104,16 @@ export const AttackCostBarChart = ({
     return prices.length > 0 ? prices[prices.length - 1][1] : 0;
   }, [daoTokenPriceHistoricalData]);
 
-  const formatValue = (value: number | undefined) => {
+  const formatValue = (value: number): number => {
     if (value == null) return 0;
+
+    const formattedValue = Number(formatEther(BigInt(value || 0)));
+
     if (valueMode === "usd") {
-      return Number(formatEther(BigInt(value || 0))) * lastPrice;
+      return formattedValue * lastPrice;
     }
 
-    return value;
+    return formattedValue;
   };
 
   useEffect(() => {
