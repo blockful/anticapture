@@ -16,7 +16,6 @@ import { useParams } from "next/navigation";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
-import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useState } from "react";
@@ -54,8 +53,9 @@ export const MultilineChartAttackProfitability = ({
     TimeInterval.ONE_YEAR,
   );
 
-  const { data: daoTokenPriceHistoricalData = { prices: [] } } =
-    useDaoTokenHistoricalData(daoId.toUpperCase() as DaoIdEnum);
+  const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData(
+    daoId.toUpperCase() as DaoIdEnum,
+  );
 
   const { data: timeSeriesData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
@@ -94,15 +94,9 @@ export const MultilineChartAttackProfitability = ({
     delegated: { label: "Delegated", color: "#f87171" },
   } satisfies ChartConfig;
 
-  const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
-    daoTokenPriceHistoricalData.prices,
-  );
-
-  const selectedPriceHistory =
-    priceHistoryByTimeInterval[days as TimeInterval] ??
-    priceHistoryByTimeInterval.full ??
-    priceHistoryByTimeInterval;
-  let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
+  const selectedPriceHistory = daoTokenPriceHistoricalData;
+  let datasets: Record<string, MultilineChartDataSetPoint[]> =
+    mockedAttackProfitabilityDatasets;
   if (!mocked) {
     datasets = {
       treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
@@ -147,8 +141,6 @@ export const MultilineChartAttackProfitability = ({
           ).slice(365 - Number(days.split("d")[0]))
         : [],
     };
-  } else {
-    datasets = mockedAttackProfitabilityDatasets;
   }
 
   const allDates = new Set(

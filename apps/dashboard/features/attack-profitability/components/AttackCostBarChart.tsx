@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -24,7 +24,6 @@ import { formatEther } from "viem";
 import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { useScreenSize } from "@/shared/hooks";
-import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
 import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,
@@ -62,8 +61,8 @@ interface AttackCostBarChartProps {
 export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const [mocked, setMocked] = useState<boolean>(false);
   const timeInterval = TimeInterval.NINETY_DAYS;
+
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -88,31 +87,15 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     loading: daoTopTokenHolderExcludingTheDaoLoading,
   } = useTopTokenHolderNonDao(selectedDaoId, tokenAddress, daoAddresses);
 
-  const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
+  const { isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);
 
   const { isMobile } = useScreenSize();
 
   const lastPrice = useMemo(() => {
-    const prices = daoTokenPriceHistoricalData.prices;
-    return prices.length > 0 ? prices[prices.length - 1][1] : 0;
+    const prices = daoTokenPriceHistoricalData;
+    return prices?.length > 0 ? prices[prices.length - 1].price : 0;
   }, [daoTokenPriceHistoricalData]);
-
-  useEffect(() => {
-    setMocked(
-      delegatedSupply.data?.currentDelegatedSupply === undefined &&
-        activeSupply.data?.activeSupply === undefined &&
-        averageTurnout.data?.currentAverageTurnout === undefined &&
-        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-        vetoCouncilVotingPower === undefined,
-    );
-  }, [
-    delegatedSupply,
-    activeSupply,
-    averageTurnout,
-    daoTopTokenHolderExcludingTheDao,
-    vetoCouncilVotingPower,
-  ]);
 
   const isLoading =
     liquidTreasury.loading ||
@@ -131,84 +114,70 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     );
   }
 
-  let chartData: ChartDataItem[] = [];
-  if (!mocked) {
-    chartData = [
-      {
-        id: "liquidTreasury",
-        name: "Liquid Treasury",
-        type: BarChartEnum.REGULAR,
-        value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
-        customColor: "#EC762EFF",
-        displayValue:
-          Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
-            ? undefined
-            : "<$10,000",
-      },
-      {
-        id: "delegatedSupply",
-        name: "Delegated Supply",
-        value:
-          Number(
-            formatEther(
-              BigInt(
-                parseInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
-              ),
+  const chartData: ChartDataItem[] = [
+    {
+      id: "liquidTreasury",
+      name: "Liquid Treasury",
+      type: BarChartEnum.REGULAR,
+      value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+      customColor: "#EC762EFF",
+      displayValue:
+        Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+          ? undefined
+          : "<$10,000",
+    },
+    {
+      id: "delegatedSupply",
+      name: "Delegated Supply",
+      value:
+        Number(
+          formatEther(
+            BigInt(
+              parseInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
             ),
-          ) * lastPrice,
-        type: BarChartEnum.REGULAR,
-        customColor: "#EC762ECC",
-      },
-      {
-        id: "activeSupply",
-        name: "Active Supply (90d)",
-        type: BarChartEnum.REGULAR,
-        customColor: "#EC762EE6",
-        value:
-          Number(
-            formatEther(
-              BigInt(parseInt(activeSupply.data?.activeSupply || "0")),
-            ),
-          ) * lastPrice,
-      },
-      {
-        id: "averageTurnout",
-        name: "Average Turnout (90d)",
-        type: BarChartEnum.REGULAR,
-        customColor: "#EC762EB3",
-        value:
-          Number(
-            formatEther(
-              BigInt(
-                parseInt(averageTurnout.data?.currentAverageTurnout || "0"),
-              ),
-            ),
-          ) * lastPrice,
-      },
-      {
-        id: "topTokenHolder",
-        name: "Top Holder",
-        type: BarChartEnum.REGULAR,
-        customColor: "#EC762E80",
-        value:
-          Number(
-            formatEther(
-              BigInt(
-                parseInt(daoTopTokenHolderExcludingTheDao?.balance || "0"),
-              ),
-            ),
-          ) * lastPrice,
-      },
-    ];
-  } else {
-    chartData = mockedAttackCostBarData as ChartDataItem[];
-  }
+          ),
+        ) * lastPrice,
+      type: BarChartEnum.REGULAR,
+      customColor: "#EC762ECC",
+    },
+    {
+      id: "activeSupply",
+      name: "Active Supply (90d)",
+      type: BarChartEnum.REGULAR,
+      customColor: "#EC762EE6",
+      value:
+        Number(
+          formatEther(BigInt(parseInt(activeSupply.data?.activeSupply || "0"))),
+        ) * lastPrice,
+    },
+    {
+      id: "averageTurnout",
+      name: "Average Turnout (90d)",
+      type: BarChartEnum.REGULAR,
+      customColor: "#EC762EB3",
+      value:
+        Number(
+          formatEther(
+            BigInt(parseInt(averageTurnout.data?.currentAverageTurnout || "0")),
+          ),
+        ) * lastPrice,
+    },
+    {
+      id: "topTokenHolder",
+      name: "Top Holder",
+      type: BarChartEnum.REGULAR,
+      customColor: "#EC762E80",
+      value:
+        Number(
+          formatEther(
+            BigInt(parseInt(daoTopTokenHolderExcludingTheDao?.balance || "0")),
+          ),
+        ) * lastPrice,
+    },
+  ];
 
   return (
     <div className={`relative w-full ${className || ""}`}>
-      {mocked && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]" />
-      )}
       <ResponsiveContainer width="100%" height={280}>
         <BarChart
           data={chartData}
@@ -235,67 +204,58 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             />
           </Bar>
 
-          {chartData.some(
-            (item) =>
-              item.type === BarChartEnum.STACKED && item.stackedValues?.length,
-          ) &&
-            chartData
-              .find((item) => item.type === BarChartEnum.STACKED)
-              ?.stackedValues?.map((_, index) => (
-                <Bar
-                  key={`stacked-bar-${index}`}
-                  dataKey={`stackedValues[${index}].value`}
-                  stackId="stack"
-                  radius={[
-                    index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
-                      1
-                      ? 4
-                      : 0,
-                    index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
-                      1
-                      ? 4
-                      : 0,
-                    index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
-                      1
-                      ? 0
-                      : 0,
-                    index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
-                      1
-                      ? 0
-                      : 0,
-                  ]}
-                >
-                  {chartData.map((entry, cellIndex) => (
-                    <Cell
-                      key={`cell-${cellIndex}`}
-                      fill={entry.stackedValues?.[index]?.color || "#EC762E"}
-                    />
-                  ))}
-                  {index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
-                      1 && (
-                    <LabelList
-                      content={(props) => (
-                        <StackedLabel {...props} data={chartData} />
-                      )}
-                    />
-                  )}
-                </Bar>
-              ))}
+          {chartData
+            .find((item) => item.type === BarChartEnum.STACKED)
+            ?.stackedValues?.map((_, index) => (
+              <Bar
+                key={`stacked-bar-${index}`}
+                dataKey={`stackedValues[${index}].value`}
+                stackId="stack"
+                radius={[
+                  index ===
+                  (chartData.find((item) => item.type === BarChartEnum.STACKED)
+                    ?.stackedValues?.length || 0) -
+                    1
+                    ? 4
+                    : 0,
+                  index ===
+                  (chartData.find((item) => item.type === BarChartEnum.STACKED)
+                    ?.stackedValues?.length || 0) -
+                    1
+                    ? 4
+                    : 0,
+                  index ===
+                  (chartData.find((item) => item.type === BarChartEnum.STACKED)
+                    ?.stackedValues?.length || 0) -
+                    1
+                    ? 0
+                    : 0,
+                  index ===
+                  (chartData.find((item) => item.type === BarChartEnum.STACKED)
+                    ?.stackedValues?.length || 0) -
+                    1
+                    ? 0
+                    : 0,
+                ]}
+              >
+                {chartData.map((entry, cellIndex) => (
+                  <Cell
+                    key={`cell-${cellIndex}`}
+                    fill={entry.stackedValues?.[index]?.color || "#EC762E"}
+                  />
+                ))}
+                {index ===
+                  (chartData.find((item) => item.type === BarChartEnum.STACKED)
+                    ?.stackedValues?.length || 0) -
+                    1 && (
+                  <LabelList
+                    content={(props) => (
+                      <StackedLabel {...props} data={chartData} />
+                    )}
+                  />
+                )}
+              </Bar>
+            ))}
         </BarChart>
       </ResponsiveContainer>
       <AnticaptureWatermark svgClassName="mb-15" />

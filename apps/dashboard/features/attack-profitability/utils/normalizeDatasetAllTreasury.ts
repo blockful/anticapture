@@ -1,6 +1,5 @@
 import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 import {
-  PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
@@ -11,7 +10,7 @@ import { findMostRecentValue } from "@/features/attack-profitability/utils";
 // The problem is that the governance token treasury is not updated every day, so we need to normalize it
 // The solution is to use the last value available for the governance token treasury
 export function normalizeDatasetAllTreasury(
-  tokenPrices: PriceEntry[],
+  tokenPrices: { timestamp: number; price: number }[],
   key: string,
   assetTreasuries: TreasuryAssetNonDaoToken[],
   governanceTokenTreasuries?: DaoMetricsDayBucket[],
@@ -31,10 +30,12 @@ export function normalizeDatasetAllTreasury(
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const sortedDataset = [...tokenPrices].sort((a, b) => a[0] - b[0]);
+  const sortedDataset = [...tokenPrices].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   // Map each token price point to a normalized data point
-  return sortedDataset.map(([timestamp, price]) => {
+  return sortedDataset.map(({ timestamp, price }) => {
     // Find the most recent asset value at or before this timestamp
     const lastAssetValue = findMostRecentValue(
       sortedAssets,

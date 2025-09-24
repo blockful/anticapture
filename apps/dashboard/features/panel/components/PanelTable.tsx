@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   BadgeInAnalysis,
@@ -31,6 +30,11 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+
+type PanelDao = {
+  dao: string;
+  inAnalysis?: boolean;
+};
 
 export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const router = useRouter();
