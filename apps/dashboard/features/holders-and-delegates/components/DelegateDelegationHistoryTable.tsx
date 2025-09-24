@@ -26,7 +26,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const [sortBy, setSortBy] = useState<string>("timestamp");
+  const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const {
@@ -39,7 +39,7 @@ export const DelegateDelegationHistoryTable = ({
   } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
 
   // Handle sorting
-  const handleSort = (field: string) => {
+  const handleSort = (field: "timestamp" | "delta") => {
     if (sortBy === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -193,13 +193,11 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            Number(
-              formatUnits(BigInt(item.delegation.delegatedValue || "0"), 18),
-            ),
+            Number(formatUnits(BigInt(item.delegation.value), 18)),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.amount || "0"), 18)),
+            Number(formatUnits(BigInt(item.transfer.value), 18)),
           );
         }
 
@@ -249,13 +247,13 @@ export const DelegateDelegationHistoryTable = ({
         // Get delegator address based on the transaction type and direction
         let delegatorAddress = "";
         if (item.delegation) {
-          delegatorAddress = item.delegation.delegatorAccountId;
+          delegatorAddress = item.delegation.from;
         } else if (item.transfer) {
           // For transfers: if delta is negative, fromAccountId is delegator
           // If delta is positive, toAccountId is delegator
           delegatorAddress = item.isGain
-            ? item.transfer.toAccountId
-            : item.transfer.fromAccountId;
+            ? item.transfer.to
+            : item.transfer.from;
         }
 
         return (
@@ -328,7 +326,7 @@ export const DelegateDelegationHistoryTable = ({
         let delegateAddress = accountId;
         if (item.delegation) {
           // For delegation, delegate is the one receiving the delegation
-          delegateAddress = item.delegation.delegateAccountId;
+          delegateAddress = item.delegation.to;
         } else if (item.transfer) {
           // For transfers, the selected address should always be at the delegates column
           delegateAddress = accountId;
@@ -407,7 +405,6 @@ export const DelegateDelegationHistoryTable = ({
 
   return (
     <div className="bg-surface-default flex flex-col">
-      {/* Table */}
       <div className="flex flex-col gap-2 p-4">
         <Table
           columns={columns}

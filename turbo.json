@@ -5,11 +5,9 @@
     "build": {
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
-    "clean": {
-    },
-    "lint": {
-    },
-    "lint:fix": {
-    }
+    "clean": {},
+    "lint": {},
+    "lint:fix": {},
+    "typecheck": {}
   }
 }
