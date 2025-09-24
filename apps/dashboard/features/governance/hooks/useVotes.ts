@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -8,37 +8,72 @@ import {
 
 export interface UseVotesResult {
   votes: GetVotesOnchainsQuery["votesOnchains"]["items"];
-  pageInfo: GetVotesOnchainsQuery["votesOnchains"]["pageInfo"];
   totalCount: number;
   loading: boolean;
   error: ApolloError | undefined;
+  // Infinite scroll functions
+  loadMore: () => Promise<void>;
+  hasNextPage: boolean;
+  isLoadingMore: boolean;
 }
 
 export interface UseVotesParams {
   daoId?: DaoIdEnum;
   proposalId?: string;
+  limit?: number;
 }
 
 export const useVotes = ({
   daoId,
   proposalId,
+  limit = 10,
 }: UseVotesParams = {}): UseVotesResult => {
-  // Main votes query
-  const { data, loading, error } = useGetVotesOnchainsQuery({
-    variables: {
+  // State for infinite scroll
+  const [allVotes, setAllVotes] = useState<
+    GetVotesOnchainsQuery["votesOnchains"]["items"]
+  >([]);
+  const [currentCursor, setCurrentCursor] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Build query variables for infinite scroll (forward only)
+  const queryVariables = useMemo(() => {
+    const baseVars = {
       proposalId,
-    },
+      limit,
+    };
+
+    if (!currentCursor) {
+      // First page
+      return baseVars;
+    }
+
+    // Always forward for infinite scroll
+    return {
+      ...baseVars,
+      after: currentCursor,
+    };
+  }, [proposalId, limit, currentCursor]);
+
+  // Main votes query
+  const { data, loading, error, fetchMore } = useGetVotesOnchainsQuery({
+    variables: queryVariables,
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
+    notifyOnNetworkStatusChange: true,
   });
 
-  // Transform raw GraphQL data (no need to filter since it's done server-side)
-  const votes = useMemo(() => {
-    return data?.votesOnchains?.items || [];
-  }, [data?.votesOnchains?.items]);
+  // Initialize allVotes on first load
+  useEffect(() => {
+    if (data?.votesOnchains?.items && allVotes.length === 0 && !currentCursor) {
+      setAllVotes(data.votesOnchains.items);
+    }
+  }, [data?.votesOnchains?.items, allVotes.length, currentCursor]);
+
+  // Use accumulated votes for infinite scroll
+  const votes = allVotes;
 
   // Extract pagination info
   const pageInfo = useMemo(() => {
@@ -57,11 +92,62 @@ export const useVotes = ({
     return data?.votesOnchains?.totalCount || 0;
   }, [data?.votesOnchains?.totalCount]);
 
+  // Load more votes for infinite scroll
+  const loadMore = useCallback(async () => {
+    if (!pageInfo.hasNextPage || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+
+    try {
+      await fetchMore({
+        variables: {
+          proposalId,
+          limit,
+          after: pageInfo.endCursor,
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
+
+          // Append new votes to existing ones in the GraphQL cache
+          const newVotes = fetchMoreResult.votesOnchains?.items || [];
+          setAllVotes((prev) => [...prev, ...newVotes]);
+
+          // Return the new result for the cache
+          return {
+            ...fetchMoreResult,
+            votesOnchains: {
+              ...fetchMoreResult.votesOnchains,
+              items: [
+                ...(previousResult.votesOnchains?.items || []),
+                ...newVotes,
+              ],
+            },
+          };
+        },
+      });
+
+      setCurrentCursor(pageInfo.endCursor || null);
+    } catch (error) {
+      console.error("Error loading more votes:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    pageInfo.hasNextPage,
+    pageInfo.endCursor,
+    isLoadingMore,
+    fetchMore,
+    proposalId,
+    limit,
+  ]);
+
   return {
     votes,
-    pageInfo,
     totalCount,
     loading,
     error,
+    loadMore,
+    hasNextPage: pageInfo.hasNextPage,
+    isLoadingMore,
   };
 };

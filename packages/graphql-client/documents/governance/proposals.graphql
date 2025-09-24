@@ -58,8 +58,18 @@ query GetProposal($id: String!) {
 }
 
 #  Get proposal votes
-query GetVotesOnchains($proposalId: String) {
-  votesOnchains(limit: 100, where: { proposalId: $proposalId }) {
+query GetVotesOnchains(
+  $proposalId: String
+  $limit: Int
+  $after: String
+  $before: String
+) {
+  votesOnchains(
+    limit: $limit
+    after: $after
+    before: $before
+    where: { proposalId: $proposalId }
+  ) {
     pageInfo {
       startCursor
       endCursor

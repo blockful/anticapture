@@ -2375,6 +2375,9 @@ export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?:
 
 export type GetVotesOnchainsQueryVariables = Exact<{
   proposalId?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 

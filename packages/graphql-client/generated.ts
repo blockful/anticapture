@@ -2378,6 +2378,9 @@ export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?:
 
 export type GetVotesOnchainsQueryVariables = Exact<{
   proposalId?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -3579,8 +3582,13 @@ export type GetProposalLazyQueryHookResult = ReturnType<typeof useGetProposalLaz
 export type GetProposalSuspenseQueryHookResult = ReturnType<typeof useGetProposalSuspenseQuery>;
 export type GetProposalQueryResult = Apollo.QueryResult<GetProposalQuery, GetProposalQueryVariables>;
 export const GetVotesOnchainsDocument = gql`
-    query GetVotesOnchains($proposalId: String) {
-  votesOnchains(limit: 100, where: {proposalId: $proposalId}) {
+    query GetVotesOnchains($proposalId: String, $limit: Int, $after: String, $before: String) {
+  votesOnchains(
+    limit: $limit
+    after: $after
+    before: $before
+    where: {proposalId: $proposalId}
+  ) {
     pageInfo {
       startCursor
       endCursor
@@ -3616,6 +3624,9 @@ export const GetVotesOnchainsDocument = gql`
  * const { data, loading, error } = useGetVotesOnchainsQuery({
  *   variables: {
  *      proposalId: // value for 'proposalId'
+ *      limit: // value for 'limit'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
  *   },
  * });
  */

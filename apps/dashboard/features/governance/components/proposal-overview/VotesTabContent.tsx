@@ -3,9 +3,8 @@
 import { cn } from "@/shared/utils";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useVotes } from "@/features/governance/hooks/useVotes";
+
+import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 
 export const VotesTabContent = ({
   proposal,
@@ -13,24 +12,11 @@ export const VotesTabContent = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
-  const { daoId } = useParams();
 
   const TabsContent = TabsContentMapping[activeTab];
 
-  // Get votes for this proposal
-  const { votes, loading, error, pageInfo, totalCount } = useVotes({
-    proposalId: proposal.id,
-    daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
-  });
-
-  console.log("Proposal votes:", {
-    votes,
-    loading,
-    error,
-    pageInfo,
-    totalCount,
-  });
   console.log(proposal);
+
   return (
     <div className="text-primary flex w-full flex-col gap-3 p-4">
       <div className="grid grid-cols-2 gap-4">
@@ -66,14 +52,6 @@ export const VotesTabContent = ({
     </div>
   );
 };
-const TabsVotedContent = ({
-  proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
-  console.log(proposal);
-  return <div>Voted</div>;
-};
 
 const TabsDidntVoteContent = ({
   proposal,
@@ -84,7 +62,15 @@ const TabsDidntVoteContent = ({
   return <div>Didn&apos;t vote</div>;
 };
 
+interface TabContentProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+}
+
 const TabsContentMapping = {
-  voted: TabsVotedContent,
-  didntVote: TabsDidntVoteContent,
+  voted: (props: TabContentProps) => (
+    <TabsVotedContent proposal={props.proposal} />
+  ),
+  didntVote: (props: TabContentProps) => (
+    <TabsDidntVoteContent proposal={props.proposal} />
+  ),
 };
