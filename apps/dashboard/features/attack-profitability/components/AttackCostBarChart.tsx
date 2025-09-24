@@ -33,8 +33,7 @@ import {
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { DownloadIcon } from "lucide-react";
-import { downloadCSV } from "@/shared/utils/formatDatasetsToCSV";
+import { Data } from "react-csv/lib/core";
 
 interface StackedValue {
   value: number;
@@ -58,10 +57,14 @@ interface ChartDataItem {
 }
 
 interface AttackCostBarChartProps {
+  setCsvData: (data: Data) => void;
   className?: string;
 }
 
-export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
+export const AttackCostBarChart = ({
+  className,
+  setCsvData,
+}: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const [mocked, setMocked] = useState<boolean>(false);
@@ -129,17 +132,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
 
-  if (isLoading) {
-    return (
-      <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow className="h-70 w-full" />
-      </div>
-    );
-  }
+  const chartData: ChartDataItem[] = useMemo(() => {
+    if (isLoading) return [];
 
-  let chartData: ChartDataItem[] = [];
-  if (!mocked) {
-    chartData = [
+    if (mocked) {
+      return mockedAttackCostBarData as ChartDataItem[];
+    }
+
+    return [
       {
         id: "liquidTreasury",
         name: "Liquid Treasury",
@@ -197,165 +197,127 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           ) * lastPrice,
       },
     ];
-  } else {
-    chartData = mockedAttackCostBarData as ChartDataItem[];
+  }, [
+    isLoading,
+    mocked,
+    liquidTreasury.data,
+    delegatedSupply.data,
+    activeSupply.data,
+    averageTurnout.data,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    lastPrice,
+  ]);
+
+  useEffect(() => {
+    if (!mocked && chartData.length) {
+      setCsvData(chartData as Data);
+    }
+  }, [chartData, mocked, setCsvData]);
+
+  if (isLoading) {
+    return (
+      <div className={`h-80 w-full ${className || ""}`}>
+        <SkeletonRow className="h-70 w-full" />
+      </div>
+    );
   }
 
-  const buildAttackCostCSV = (chartData: ChartDataItem[]) => {
-    if (!chartData.length) return "";
-
-    const stackedLabels = [
-      ...new Set(
-        chartData
-          .filter((i) => i.type === BarChartEnum.STACKED)
-          .flatMap((i) => i.stackedValues?.map((sv) => sv.label) ?? []),
-      ),
-    ];
-
-    const header = ["name", "type", "value", ...stackedLabels];
-
-    const formatStackedCols = (item: ChartDataItem) =>
-      stackedLabels.map((label) => {
-        if (item.type !== BarChartEnum.STACKED) return "";
-        return (
-          item.stackedValues?.find((sv) => sv.label === label)?.value ?? ""
-        );
-      });
-
-    const rows = chartData.map((item) => {
-      const total =
-        item.type === BarChartEnum.STACKED
-          ? getStackedTotal(item)
-          : (item.value ?? 0);
-
-      return [
-        `"${item.name}"`,
-        item.type,
-        total,
-        ...formatStackedCols(item),
-      ].join(",");
-    });
-
-    return [header.join(","), ...rows].join("\n");
-  };
-
-  const handleDownload = () => {
-    const csv = buildAttackCostCSV(chartData);
-
-    downloadCSV(csv, `attack_cost_${daoId}.csv`);
-  };
-
   return (
-    <>
-      <div className={`relative w-full ${className || ""}`}>
-        {mocked && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]" />
-        )}
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart
-            data={chartData}
-            barSize={isMobile ? 30 : 40}
-            margin={{ top: 20 }}
-          >
-            <XAxis
-              dataKey="name"
-              height={60}
-              tick={(props) => <CustomXAxisTick {...props} />}
-              interval={0}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
-            <Tooltip content={<CustomTooltip />} cursor={false} />
-
-            <Bar dataKey="value" stackId="stack" radius={[4, 4, 4, 4]}>
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.customColor} />
-              ))}
-              <LabelList
-                content={(props) => (
-                  <RegularLabel {...props} data={chartData} />
-                )}
-              />
-            </Bar>
-
-            {chartData.some(
-              (item) =>
-                item.type === BarChartEnum.STACKED &&
-                item.stackedValues?.length,
-            ) &&
-              chartData
-                .find((item) => item.type === BarChartEnum.STACKED)
-                ?.stackedValues?.map((_, index) => (
-                  <Bar
-                    key={`stacked-bar-${index}`}
-                    dataKey={`stackedValues[${index}].value`}
-                    stackId="stack"
-                    radius={[
-                      index ===
-                      (chartData.find(
-                        (item) => item.type === BarChartEnum.STACKED,
-                      )?.stackedValues?.length || 0) -
-                        1
-                        ? 4
-                        : 0,
-                      index ===
-                      (chartData.find(
-                        (item) => item.type === BarChartEnum.STACKED,
-                      )?.stackedValues?.length || 0) -
-                        1
-                        ? 4
-                        : 0,
-                      index ===
-                      (chartData.find(
-                        (item) => item.type === BarChartEnum.STACKED,
-                      )?.stackedValues?.length || 0) -
-                        1
-                        ? 0
-                        : 0,
-                      index ===
-                      (chartData.find(
-                        (item) => item.type === BarChartEnum.STACKED,
-                      )?.stackedValues?.length || 0) -
-                        1
-                        ? 0
-                        : 0,
-                    ]}
-                  >
-                    {chartData.map((entry, cellIndex) => (
-                      <Cell
-                        key={`cell-${cellIndex}`}
-                        fill={entry.stackedValues?.[index]?.color || "#EC762E"}
-                      />
-                    ))}
-                    {index ===
-                      (chartData.find(
-                        (item) => item.type === BarChartEnum.STACKED,
-                      )?.stackedValues?.length || 0) -
-                        1 && (
-                      <LabelList
-                        content={(props) => (
-                          <StackedLabel {...props} data={chartData} />
-                        )}
-                      />
-                    )}
-                  </Bar>
-                ))}
-          </BarChart>
-        </ResponsiveContainer>
-        <AnticaptureWatermark svgClassName="mb-15" />
-      </div>
-      <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
-        [DOWNLOAD AS{" "}
-        <button
-          onClick={handleDownload}
-          className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
+    <div className={`relative w-full ${className || ""}`}>
+      {mocked && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]" />
+      )}
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart
+          data={chartData}
+          barSize={isMobile ? 30 : 40}
+          margin={{ top: 20 }}
         >
-          CSV <DownloadIcon className="size-3.5" />
-        </button>
-        ]
-      </p>
-    </>
+          <XAxis
+            dataKey="name"
+            height={60}
+            tick={(props) => <CustomXAxisTick {...props} />}
+            interval={0}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
+          <Tooltip content={<CustomTooltip />} cursor={false} />
+
+          <Bar dataKey="value" stackId="stack" radius={[4, 4, 4, 4]}>
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.customColor} />
+            ))}
+            <LabelList
+              content={(props) => <RegularLabel {...props} data={chartData} />}
+            />
+          </Bar>
+
+          {chartData.some(
+            (item) =>
+              item.type === BarChartEnum.STACKED && item.stackedValues?.length,
+          ) &&
+            chartData
+              .find((item) => item.type === BarChartEnum.STACKED)
+              ?.stackedValues?.map((_, index) => (
+                <Bar
+                  key={`stacked-bar-${index}`}
+                  dataKey={`stackedValues[${index}].value`}
+                  stackId="stack"
+                  radius={[
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 4
+                      : 0,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 4
+                      : 0,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 0
+                      : 0,
+                    index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1
+                      ? 0
+                      : 0,
+                  ]}
+                >
+                  {chartData.map((entry, cellIndex) => (
+                    <Cell
+                      key={`cell-${cellIndex}`}
+                      fill={entry.stackedValues?.[index]?.color || "#EC762E"}
+                    />
+                  ))}
+                  {index ===
+                    (chartData.find(
+                      (item) => item.type === BarChartEnum.STACKED,
+                    )?.stackedValues?.length || 0) -
+                      1 && (
+                    <LabelList
+                      content={(props) => (
+                        <StackedLabel {...props} data={chartData} />
+                      )}
+                    />
+                  )}
+                </Bar>
+              ))}
+        </BarChart>
+      </ResponsiveContainer>
+      <AnticaptureWatermark svgClassName="mb-15" />
+    </div>
   );
 };
 

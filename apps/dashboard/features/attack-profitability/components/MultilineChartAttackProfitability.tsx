@@ -14,12 +14,15 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { MultilineChartDataSetPoint } from "@/shared/dao-config/types";
+import {
+  DaoMetricsDayBucket,
+  MultilineChartDataSetPoint,
+} from "@/shared/dao-config/types";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
@@ -35,23 +38,18 @@ import {
 } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { DownloadIcon } from "lucide-react";
-import { convertToCSV, downloadCSV } from "@/shared/utils/formatDatasetsToCSV";
-
-type ChartSeriesKey = "treasuryNonDAO" | "all" | "quorum" | "delegated";
-type AttackChartConfig = Record<
-  ChartSeriesKey | string,
-  { label: string; color: string }
->;
+import { Data } from "react-csv/lib/core";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
   filterData?: string[];
+  setCsvData: (data: Data) => void;
 }
 
 export const MultilineChartAttackProfitability = ({
   filterData,
   days,
+  setCsvData,
 }: MultilineChartAttackProfitabilityProps) => {
   const { daoId }: { daoId: string } = useParams();
   const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
@@ -81,18 +79,11 @@ export const MultilineChartAttackProfitability = ({
     );
   }, [timeSeriesData]);
 
-  let delegatedSupplyChart;
-  let treasurySupplyChart;
-  if (timeSeriesData) {
-    treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
-    delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
-  }
-
   const quorumValue = daoData?.quorum
     ? Number(daoData.quorum) / 10 ** 18
     : null;
 
-  const chartConfig: AttackChartConfig = {
+  const chartConfig = {
     treasuryNonDAO: {
       label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
       color: "#4ade80",
@@ -110,8 +101,20 @@ export const MultilineChartAttackProfitability = ({
     priceHistoryByTimeInterval[days as TimeInterval] ??
     priceHistoryByTimeInterval.full ??
     priceHistoryByTimeInterval;
-  let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
-  if (!mocked) {
+
+  const chartData = useMemo(() => {
+    let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
+    let treasurySupplyChart: DaoMetricsDayBucket[] = [];
+    if (timeSeriesData) {
+      treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
+      delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
+    }
+
+    let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
+    if (mocked) {
+      datasets = mockedAttackProfitabilityDatasets;
+    }
+
     datasets = {
       treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
         treasuryAssetNonDAOToken,
@@ -155,115 +158,95 @@ export const MultilineChartAttackProfitability = ({
           ).slice(365 - Number(days.split("d")[0]))
         : [],
     };
-  } else {
-    datasets = mockedAttackProfitabilityDatasets;
-  }
 
-  const allDates = new Set(
-    Object.values(datasets).flatMap((dataset) =>
-      dataset.map((item) => item.date),
-    ),
-  );
+    const lastKnownValues: Record<string, number | null> = {};
 
-  const lastKnownValues: Record<string, number | null> = {};
+    const allDates = new Set(
+      Object.values(datasets).flatMap((dataset) =>
+        dataset.map((item) => item.date),
+      ),
+    );
 
-  const chartData = Array.from(allDates)
-    .sort((a, b) => a - b)
-    .map((date) => {
-      const dataPoint: Record<string, number | null> = { date };
+    const data = Array.from(allDates)
+      .sort((a, b) => a - b)
+      .map((date) => {
+        const dataPoint: Record<string, number | null> = { date };
 
-      Object.entries(datasets).forEach(([key, dataset]) => {
-        const chartLabel = chartConfig[key as keyof typeof chartConfig]?.label;
-        const isKeySelected = filterData?.includes(key);
-        const isLabelSelected = filterData?.includes(chartLabel);
+        Object.entries(datasets).forEach(([key, dataset]) => {
+          const chartLabel =
+            chartConfig[key as keyof typeof chartConfig]?.label;
+          const isKeySelected = filterData?.includes(key);
+          const isLabelSelected = filterData?.includes(chartLabel);
 
-        if (isKeySelected || isLabelSelected) {
-          const value = dataset.find((d) => d.date === date)?.[key] ?? null;
-          if (value !== null) lastKnownValues[key] = value;
-          dataPoint[key] = lastKnownValues[key] ?? null;
-        }
+          if (isKeySelected || isLabelSelected) {
+            const value = dataset.find((d) => d.date === date)?.[key] ?? null;
+            if (value !== null) lastKnownValues[key] = value;
+            dataPoint[key] = lastKnownValues[key] ?? null;
+          }
+        });
+
+        return dataPoint;
       });
 
-      return dataPoint;
-    });
+    return data;
+  }, [
+    filterData,
+    chartConfig,
+    days,
+    daoId,
+    mocked,
+    quorumValue,
+    selectedPriceHistory,
+    treasuryAssetNonDAOToken,
+    timeSeriesData,
+  ]);
 
-  const handleDownload = () => {
-    const activeKeys = Object.keys(chartConfig).filter((key) => {
-      if (!filterData?.length) return true;
-      const { label } = chartConfig[key];
-      return filterData.includes(key) || filterData.includes(label);
-    });
-
-    const normalizeDataset = (key: string) =>
-      chartData.map((point) => ({
-        date: String(point.date),
-        value: point[key] == null ? "" : String(point[key]),
-      }));
-
-    const normalizedDatasets = Object.fromEntries(
-      activeKeys.map((key) => [key, normalizeDataset(key)]),
-    );
-
-    const subsetChartConfig = Object.fromEntries(
-      activeKeys.map((key) => [key, chartConfig[key]]),
-    );
-
-    const csv = convertToCSV(normalizedDatasets, subsetChartConfig);
-    downloadCSV(csv, `attack_profitability_${daoId}.csv`);
-  };
+  useEffect(() => {
+    if (!mocked && chartData.length) {
+      setCsvData(chartData as Data);
+    }
+  }, [chartData, mocked, setCsvData]);
 
   return (
-    <>
-      <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
-        {mocked && <ResearchPendingChartBlur />}
-        <ChartContainer className="h-full w-full" config={chartConfig}>
-          <LineChart data={chartData}>
-            <CartesianGrid vertical={false} stroke="#27272a" />
-            <XAxis
-              dataKey="date"
-              scale="time"
-              type="number"
-              domain={["auto", "auto"]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(date) => timestampToReadableDate(date)}
-            />
-            <YAxis hide={true} />
-            <Tooltip
-              content={
-                <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />
-              }
-            />
-            {Object.entries(chartConfig)
-              .filter(
-                ([key], index: number) =>
-                  !filterData || key !== filterData[index],
-              )
-              .map(([key, config]) => (
-                <Line
-                  key={key}
-                  dataKey={key}
-                  stroke={config.color}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              ))}
-          </LineChart>
-        </ChartContainer>
-        {/* Watermark */}
-        <AnticaptureWatermark />
-      </div>
-      <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
-        [DOWNLOAD AS{" "}
-        <button
-          onClick={handleDownload}
-          className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
-        >
-          CSV <DownloadIcon className="size-3.5" />
-        </button>
-        ]
-      </p>
-    </>
+    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
+      {mocked && <ResearchPendingChartBlur />}
+      <ChartContainer className="h-full w-full" config={chartConfig}>
+        <LineChart data={chartData}>
+          <CartesianGrid vertical={false} stroke="#27272a" />
+          <XAxis
+            dataKey="date"
+            scale="time"
+            type="number"
+            domain={["auto", "auto"]}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tickFormatter={(date) => timestampToReadableDate(date)}
+          />
+          <YAxis hide={true} />
+          <Tooltip
+            content={
+              <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />
+            }
+          />
+          {Object.entries(chartConfig)
+            .filter(
+              ([key], index: number) =>
+                !filterData || key !== filterData[index],
+            )
+            .map(([key, config]) => (
+              <Line
+                key={key}
+                dataKey={key}
+                stroke={config.color}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
+        </LineChart>
+      </ChartContainer>
+      {/* Watermark */}
+      <AnticaptureWatermark />
+    </div>
   );
 };
