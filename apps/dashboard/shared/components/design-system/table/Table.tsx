@@ -21,10 +21,10 @@ import {
   TableRow,
 } from "@/shared/components/design-system/table/components";
 import { cn } from "@/shared/utils";
-import { getCsvFromTableData } from "@/shared/components/design-system/table/utils";
 import { DownloadIcon } from "lucide-react";
 import { sizeVariants } from "@/shared/components/design-system/table/styles";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
+import { CSVLink } from "react-csv";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -126,11 +126,26 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const handleExportCSV = () => {
-    if (!data.length) return;
-
-    getCsvFromTableData(data, table);
+  const formatCsvData = (data: TData[]): object[] => {
+    return data.map((row) => {
+      const serialized: Record<string, string | number | null> = {};
+      Object.entries(row as Record<string, unknown>).forEach(([key, value]) => {
+        if (value === null || value === undefined) {
+          serialized[key] = "";
+        } else if (typeof value === "object") {
+          const json = JSON.stringify(value).replace(/"/g, '""');
+          serialized[key] = `"${json}"`;
+        } else {
+          serialized[key] = value as string | number;
+        }
+      });
+      return serialized;
+    });
   };
+
+  const dataFormatted = formatCsvData(data);
+
+  console.log(dataFormatted);
 
   return (
     <div className={cn("flex w-full flex-col", wrapperClassName)}>
@@ -233,12 +248,14 @@ export const Table = <TData, TValue>({
       {withDownloadCSV && (
         <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
           [DOWNLOAD AS{" "}
-          <button
-            onClick={handleExportCSV}
+          <CSVLink
+            data={formatCsvData(data)}
+            filename={"table-data.csv"}
             className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
+            separator=";"
           >
             CSV <DownloadIcon className="size-3.5" />
-          </button>
+          </CSVLink>
           ]
         </p>
       )}
