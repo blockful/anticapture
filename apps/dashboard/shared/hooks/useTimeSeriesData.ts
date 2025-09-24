@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import {
@@ -50,7 +50,7 @@ const fetchTimeSeriesDataFromGraphQL = async (
     )
     .join("\n");
 
-  const response = await fetch(`${BACKEND_ENDPOINT}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -1,10 +1,7 @@
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
-import { DaoIdEnum } from "@/shared/types/daos";
-import useSWR, { SWRConfiguration } from "swr";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import axios from "axios";
+import useSWR, { SWRConfiguration } from "swr";
 
+import { DaoIdEnum } from "@/shared/types/daos";
 interface AverageTurnoutResponse {
   currentAverageTurnout: string;
   oldAverageTurnout: string;
@@ -19,9 +16,6 @@ export const fetchAverageTurnout = async ({
   daoId: DaoIdEnum;
   days: string;
 }): Promise<AverageTurnoutResponse | null> => {
-  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
-    return null;
-  }
   const query = `query AverageTurnout {
     compareAverageTurnout(days: _${days}) {
         currentAverageTurnout
@@ -29,10 +23,10 @@ export const fetchAverageTurnout = async ({
         changeRate
     }
   }`;
-  const response: {
-    data: { data: { compareAverageTurnout: AverageTurnoutResponse } };
-  } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
+  const response = await axios.post<{
+    data: { compareAverageTurnout: AverageTurnoutResponse };
+  }>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}`,
     { query },
     {
       headers: {
@@ -40,10 +34,7 @@ export const fetchAverageTurnout = async ({
       },
     },
   );
-  const { compareAverageTurnout } = response.data.data as {
-    compareAverageTurnout: AverageTurnoutResponse;
-  };
-  return compareAverageTurnout as AverageTurnoutResponse;
+  return response.data.data.compareAverageTurnout;
 };
 
 /**
@@ -58,13 +49,9 @@ export const useAverageTurnout = (
   days: string,
   config?: Partial<SWRConfiguration<AverageTurnoutResponse | null, Error>>,
 ) => {
-  const key = daoId && days ? [`averageTurnout`, daoId, days] : null;
-
   return useSWR<AverageTurnoutResponse | null>(
-    key,
-    async () => {
-      return await fetchAverageTurnout({ daoId, days });
-    },
+    [`averageTurnout`, daoId, days],
+    async () => await fetchAverageTurnout({ daoId, days }),
     {
       revalidateOnFocus: false,
       ...config,
