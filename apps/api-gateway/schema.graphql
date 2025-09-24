@@ -1305,9 +1305,12 @@ enum queryInput_totalAssets_days {
 }
 
 type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
+  items: [query_historicalTokenData_items_items]!
+}
+
+type query_historicalTokenData_items_items {
+  timestamp: Float!
+  price: Float!
 }
 
 type compareTotalSupply_200_response {
