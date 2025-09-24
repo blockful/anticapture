@@ -138,7 +138,9 @@ export const TokenDistributionChart = ({
             type="number"
             domain={["dataMin", "dataMax"]}
             tickMargin={8}
-            tickFormatter={(date) => timestampToReadableDate(date)}
+            tickFormatter={(date) =>
+              timestampToReadableDate(date, "abbreviated")
+            }
             padding="gap"
           />
           {/* DEFAULT AXIS - Required for Recharts compatibility */}
@@ -345,7 +347,9 @@ export const TokenDistributionChart = ({
             height={32}
             stroke="#333"
             fill="#1f1f1f"
-            tickFormatter={(timestamp) => timestampToReadableDate(timestamp)}
+            tickFormatter={(timestamp) =>
+              timestampToReadableDate(timestamp, "abbreviated")
+            }
             travellerWidth={10}
             startIndex={brushRange.startIndex}
             endIndex={brushRange.endIndex}
