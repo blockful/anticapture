@@ -6,6 +6,7 @@ import { cn } from "@/shared/utils";
 import { CookieBackground } from "@/shared/components/icons";
 import Image from "next/image";
 import { Button } from "@/shared/components";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 interface CookieConsentProps {
   className?: string;
@@ -109,14 +110,14 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
               We use cookies to run the site, improve insights, and personalize
               your experience. You can manage your preferences anytime.
             </div>
-            {/* <DefaultLink
+            <DefaultLink
               href="/terms-of-service"
               openInNewTab
               variant="default"
               className="text-alternative-xs text-secondary mt-3 flex font-mono uppercase leading-none"
             >
               Read our terms of service
-            </DefaultLink> */}
+            </DefaultLink>
           </div>
         </div>
         <div className="z-50 flex w-full flex-shrink-0 gap-2 sm:w-auto">
