@@ -35,7 +35,7 @@ export const Metric = ({
             className="rounded-xs size-2"
             style={{ backgroundColor: color }}
           />
-          <p className="text-primary text-sm font-medium">{label}</p>
+          <p className="text-primary text-sm font-normal">{label}</p>
         </div>
         <div className="flex items-center gap-2">
           <X
