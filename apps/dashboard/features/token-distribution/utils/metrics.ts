@@ -59,20 +59,20 @@ export const metricsSchema = {
     category: "VOLUME",
     type: "BAR",
   },
-  CEX_TOKENS: {
-    label: "CEX Tokens",
+  CEX_TRANSFERS: {
+    label: "CEX Transfers",
     color: "#FDE047",
     category: "VOLUME",
     type: "BAR",
   },
-  DEX_TOKENS: {
-    label: "DEX Tokens",
+  DEX_TRANSFERS: {
+    label: "DEX Transfers",
     color: "#10B981",
     category: "VOLUME",
     type: "BAR",
   },
-  LENDING_TOKENS: {
-    label: "Lending Tokens",
+  LENDING_TRANSFERS: {
+    label: "Lending Transfers",
     color: "#8B5CF6",
     category: "VOLUME",
     type: "BAR",

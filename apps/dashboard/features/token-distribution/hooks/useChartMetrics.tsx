@@ -38,11 +38,11 @@ export const useChartMetrics = ({
 
   const additionalSupplyMetrics: MetricTypesEnum[] = [];
   transferVolumeMetrics.forEach((metric) => {
-    if (metric === "CEX_TOKENS")
+    if (metric === "CEX_TRANSFERS")
       additionalSupplyMetrics.push(MetricTypesEnum.CEX_SUPPLY);
-    if (metric === "DEX_TOKENS")
+    if (metric === "DEX_TRANSFERS")
       additionalSupplyMetrics.push(MetricTypesEnum.DEX_SUPPLY);
-    if (metric === "LENDING_TOKENS")
+    if (metric === "LENDING_TRANSFERS")
       additionalSupplyMetrics.push(MetricTypesEnum.LENDING_SUPPLY);
     if (metric === "DELEGATIONS")
       additionalSupplyMetrics.push(MetricTypesEnum.DELEGATED_SUPPLY);
@@ -135,13 +135,13 @@ export const useChartMetrics = ({
 
         // For TRANSFER VOLUME metrics, use corresponding SUPPLY data with volume field
         if (metricSchema?.category === "VOLUME") {
-          if (metricKey === "CEX_TOKENS") {
+          if (metricKey === "CEX_TRANSFERS") {
             dataSourceKey = MetricTypesEnum.CEX_SUPPLY;
             valueField = "volume";
-          } else if (metricKey === "DEX_TOKENS") {
+          } else if (metricKey === "DEX_TRANSFERS") {
             dataSourceKey = MetricTypesEnum.DEX_SUPPLY;
             valueField = "volume";
-          } else if (metricKey === "LENDING_TOKENS") {
+          } else if (metricKey === "LENDING_TRANSFERS") {
             dataSourceKey = MetricTypesEnum.LENDING_SUPPLY;
             valueField = "volume";
           } else if (metricKey === "DELEGATIONS") {
