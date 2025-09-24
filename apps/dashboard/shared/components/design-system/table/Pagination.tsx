@@ -4,7 +4,7 @@ import { IconButton } from "@/shared/components";
 
 interface PaginationProps {
   currentPage: number;
-  totalPages: number;
+  totalPages?: number;
   onPrevious?: () => void;
   onNext?: () => void;
   className?: string;
@@ -44,7 +44,7 @@ export function Pagination({
         icon={ChevronLeft}
       />
       <span className="text-secondary bg-surface-contrast flex h-8 items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
-        Page {currentPage} of {totalPages}
+        Page {currentPage} {totalPages && `of ${totalPages}`}
       </span>
       <IconButton
         variant="outline"

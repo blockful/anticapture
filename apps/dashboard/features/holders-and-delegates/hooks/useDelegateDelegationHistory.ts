@@ -1,27 +1,27 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { useGetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client/hooks";
-import { GetDelegateDelegationHistoryQuery } from "@anticapture/graphql-client";
 import { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";
 
-type VotingPowerHistoryItem =
-  GetDelegateDelegationHistoryQuery["votingPowerHistorys"]["items"][0];
+import {
+  useVotingPowersQuery,
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client/hooks";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
   timestamp: string;
   transactionHash: string;
   delta: string; // Amount the selected address won or lost in votingPower
-  delegation: {
-    delegatorAccountId: string;
-    delegatedValue: string;
-    previousDelegate: string | null;
-    delegateAccountId: string;
+  delegation?: {
+    from: string;
+    value: string;
+    to: string;
   } | null;
-  transfer: {
-    amount: string;
-    fromAccountId: string;
-    toAccountId: string;
+  transfer?: {
+    value: string;
+    from: string;
+    to: string;
   } | null;
   votingPower: string;
   type: "delegation" | "transfer";
@@ -33,13 +33,8 @@ export interface DelegationHistoryItem {
 export interface PaginationInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-  startCursor?: string | null;
-  endCursor?: string | null;
-  totalCount: number;
   currentPage: number;
   totalPages: number;
-  itemsPerPage: number;
-  currentItemsCount: number;
 }
 
 // Interface for the hook result
@@ -53,9 +48,9 @@ export interface UseDelegateDelegationHistoryResult {
 }
 
 export function useDelegateDelegationHistory(
-  accountId: string,
+  account: string,
   daoId: string,
-  orderBy: string = "timestamp",
+  orderBy: "timestamp" | "delta" = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
 ): UseDelegateDelegationHistoryResult {
   const itemsPerPage = 7;
@@ -70,12 +65,12 @@ export function useDelegateDelegationHistory(
 
   const queryVariables = useMemo(
     () => ({
-      accountId,
+      account,
       limit: itemsPerPage,
-      orderBy, // Now using backend field names directly
-      orderDirection,
+      orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
+      orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
     }),
-    [accountId, itemsPerPage, orderBy, orderDirection],
+    [account, itemsPerPage, orderBy, orderDirection],
   );
 
   const queryOptions = {
@@ -84,23 +79,23 @@ export function useDelegateDelegationHistory(
         "anticapture-dao-id": daoId,
       },
     },
-    skip: !accountId,
+    skip: !account,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, loading, error, fetchMore } =
-    useGetDelegateDelegationHistoryQuery({
-      variables: queryVariables,
-      ...queryOptions,
-    });
+  const { data, loading, error, fetchMore } = useVotingPowersQuery({
+    variables: queryVariables,
+    ...queryOptions,
+  });
 
   // Transform raw data to our format
   const transformedData = useMemo(() => {
-    if (!data?.votingPowerHistorys?.items) return [];
+    if (!data?.votingPowers?.items) return [];
 
-    return data.votingPowerHistorys.items.map(
-      (item: VotingPowerHistoryItem) => {
+    return data.votingPowers.items
+      .filter((item) => !!item)
+      .map((item) => {
         // Determine the type, action, and direction based on the data and delta
         let type: "delegation" | "transfer" = "delegation";
         let action = "Unknown";
@@ -114,12 +109,12 @@ export function useDelegateDelegationHistory(
         if (item.delegation) {
           type = "delegation";
           // Check if delegate gains or loses voting power
-          if (item.delegation.delegateAccountId === accountId) {
+          if (item.delegation.to === account) {
             // Delegate gains voting power - someone delegated to them
-            action = `Received delegation from ${item.delegation.delegatorAccountId}`;
+            action = `Received delegation from ${item.delegation.from}`;
           } else {
             // Delegate loses voting power - delegator transferred delegation to someone else
-            action = `Lost delegation from ${item.delegation.delegatorAccountId}`;
+            action = `Lost delegation from ${item.delegation.from}`;
           }
         } else if (item.transfer) {
           type = "transfer";
@@ -127,101 +122,38 @@ export function useDelegateDelegationHistory(
           // If delta is negative, fromAccountId should be at the delegator column
           // If delta is positive, toAccountId should be at the delegator column
           if (isGain) {
-            action = `Received transfer from ${item.transfer.fromAccountId}`;
+            action = `Received transfer from ${item.transfer.from}`;
           } else {
-            action = `Sent transfer to ${item.transfer.toAccountId}`;
+            action = `Sent transfer to ${item.transfer.to}`;
           }
         }
 
         return {
-          timestamp: item.timestamp?.toString() || "",
-          transactionHash: item.transactionHash || "",
-          delta: item.delta || "0",
-          delegation: item.delegation
-            ? {
-                delegatorAccountId: item.delegation.delegatorAccountId || "",
-                delegatedValue: item.delegation.delegatedValue || "0",
-                previousDelegate: item.delegation.previousDelegate || null,
-                delegateAccountId: item.delegation.delegateAccountId || "",
-              }
-            : null,
-          transfer: item.transfer
-            ? {
-                amount: item.transfer.amount || "0",
-                fromAccountId: item.transfer.fromAccountId || "",
-                toAccountId: item.transfer.toAccountId || "",
-              }
-            : null,
-          votingPower: item.votingPower || "0",
+          timestamp: item.timestamp,
+          transactionHash: item.transactionHash,
+          delta: item.delta,
+          delegation: item.delegation,
+          transfer: item.transfer,
+          votingPower: item.votingPower,
           type,
           action,
           isGain,
         };
-      },
-    );
-  }, [data, accountId]);
-
-  // Pagination info
-  const paginationInfo: PaginationInfo = useMemo(() => {
-    const pageInfo = data?.votingPowerHistorys?.pageInfo;
-    const totalCount = data?.votingPowerHistorys?.totalCount || 0;
-    const currentItemsCount = data?.votingPowerHistorys?.items?.length || 0;
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-    return {
-      hasNextPage: pageInfo?.hasNextPage ?? false,
-      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
-      endCursor: pageInfo?.endCursor,
-      startCursor: pageInfo?.startCursor,
-      totalCount,
-      currentPage,
-      totalPages,
-      itemsPerPage,
-      currentItemsCount,
-    };
-  }, [
-    data?.votingPowerHistorys?.pageInfo,
-    data?.votingPowerHistorys?.totalCount,
-    data?.votingPowerHistorys?.items?.length,
-    currentPage,
-    itemsPerPage,
-  ]);
+      });
+  }, [data, account]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (
-      !paginationInfo.hasNextPage ||
-      !paginationInfo.endCursor ||
-      isPaginationLoading
-    ) {
-      console.warn("No next page available or already loading");
-      return;
-    }
-
+    if (isPaginationLoading) return;
     setIsPaginationLoading(true);
 
     try {
       await fetchMore({
         variables: {
           ...queryVariables,
-          after: paginationInfo.endCursor,
+          skip: currentPage * itemsPerPage,
         },
-        updateQuery: (
-          previousResult: GetDelegateDelegationHistoryQuery,
-          {
-            fetchMoreResult,
-          }: { fetchMoreResult: GetDelegateDelegationHistoryQuery },
-        ) => {
-          if (!fetchMoreResult) return previousResult;
-
-          return {
-            ...fetchMoreResult,
-            votingPowerHistorys: {
-              ...fetchMoreResult.votingPowerHistorys,
-              items: fetchMoreResult.votingPowerHistorys.items,
-            },
-          };
-        },
+        updateQuery: (_, { fetchMoreResult }) => fetchMoreResult,
       });
 
       setCurrentPage((prev) => prev + 1);
@@ -232,47 +164,24 @@ export function useDelegateDelegationHistory(
     }
   }, [
     fetchMore,
-    paginationInfo.hasNextPage,
-    paginationInfo.endCursor,
     isPaginationLoading,
     queryVariables,
+    currentPage,
+    itemsPerPage,
   ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
-    if (
-      !paginationInfo.hasPreviousPage ||
-      !paginationInfo.startCursor ||
-      isPaginationLoading
-    ) {
-      console.warn("No previous page available or already loading");
-      return;
-    }
-
+    if (isPaginationLoading) return;
     setIsPaginationLoading(true);
 
     try {
       await fetchMore({
         variables: {
           ...queryVariables,
-          before: paginationInfo.startCursor,
+          skip: (currentPage - 2) * itemsPerPage,
         },
-        updateQuery: (
-          previousResult: GetDelegateDelegationHistoryQuery,
-          {
-            fetchMoreResult,
-          }: { fetchMoreResult: GetDelegateDelegationHistoryQuery },
-        ) => {
-          if (!fetchMoreResult) return previousResult;
-
-          return {
-            ...fetchMoreResult,
-            votingPowerHistorys: {
-              ...fetchMoreResult.votingPowerHistorys,
-              items: fetchMoreResult.votingPowerHistorys.items,
-            },
-          };
-        },
+        updateQuery: (_, { fetchMoreResult }) => fetchMoreResult,
       });
 
       setCurrentPage((prev) => prev - 1);
@@ -283,17 +192,23 @@ export function useDelegateDelegationHistory(
     }
   }, [
     fetchMore,
-    paginationInfo.hasPreviousPage,
-    paginationInfo.startCursor,
     isPaginationLoading,
     queryVariables,
+    currentPage,
+    itemsPerPage,
   ]);
 
   return {
     delegationHistory: transformedData,
     loading,
+    paginationInfo: {
+      currentPage,
+      totalPages: Math.ceil(data?.votingPowers?.totalCount || 0 / itemsPerPage),
+      hasNextPage:
+        currentPage * itemsPerPage < (data?.votingPowers?.totalCount || 0),
+      hasPreviousPage: currentPage > 1,
+    },
     error,
-    paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
   };

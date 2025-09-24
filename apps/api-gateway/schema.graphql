@@ -82,7 +82,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): [query_proposals_items]
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -107,8 +107,8 @@ type Query {
     sortOrder: queryInput_transactions_sortOrder = desc
     from: String
     to: String
-    minAmount: String!
-    maxAmount: String!
+    minAmount: String
+    maxAmount: String
 
     """
     Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
@@ -118,6 +118,9 @@ type Query {
 
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
+
+  """Returns a list of voting power changes"""
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
 }
 
 """
@@ -536,11 +539,11 @@ type transferPage {
 type transfer {
   transactionHash: String!
   daoId: String!
-  tokenId: String
-  amount: BigInt
+  tokenId: String!
+  amount: BigInt!
   fromAccountId: String!
   toAccountId: String!
-  timestamp: BigInt
+  timestamp: BigInt!
   logIndex: Int!
   isCex: Boolean!
   isDex: Boolean!
@@ -1489,8 +1492,8 @@ type query_proposalsActivity_proposals_items_proposal {
   daoId: String!
   proposerAccountId: String!
   description: String
-  startBlock: String!
-  endBlock: String!
+  startBlock: Float!
+  endBlock: Float!
   timestamp: String!
   status: String!
   forVotes: String!
@@ -1535,7 +1538,12 @@ enum queryInput_proposalsActivity_userVoteFilter {
   no_vote
 }
 
-type query_proposals_items {
+type proposals_200_response {
+  items: [query_proposals_items_items]!
+  totalCount: Float!
+}
+
+type query_proposals_items_items {
   id: String!
   daoId: String!
   txHash: String!
@@ -1670,6 +1678,45 @@ enum queryInput_lastUpdate_chart {
   cost_comparison
   attack_profitability
   token_distribution
+}
+
+type votingPowers_200_response {
+  items: [query_votingPowers_items_items]!
+  totalCount: Float!
+}
+
+type query_votingPowers_items_items {
+  transactionHash: String!
+  daoId: String!
+  accountId: String!
+  votingPower: String!
+  delta: String!
+  timestamp: String!
+  logIndex: Float!
+  delegation: query_votingPowers_items_items_delegation
+  transfer: query_votingPowers_items_items_transfer
+}
+
+type query_votingPowers_items_items_delegation {
+  from: String!
+  value: String!
+  to: String!
+}
+
+type query_votingPowers_items_items_transfer {
+  value: String!
+  from: String!
+  to: String!
+}
+
+enum queryInput_votingPowers_orderBy {
+  timestamp
+  delta
+}
+
+enum queryInput_votingPowers_orderDirection {
+  asc
+  desc
 }
 
 scalar ObjMap
