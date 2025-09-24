@@ -333,21 +333,10 @@ export const TabsVotedContent = ({
             );
           }
 
-          // This would need historical data - for now showing placeholder
-          const change =
-            Math.random() > 0.5 ? Math.random() * 20 : -Math.random() * 20;
-          const isPositive = change > 0;
-
           return (
             <div className="flex h-10 items-center p-2">
-              <span
-                className={cn(
-                  "text-sm font-medium",
-                  isPositive ? "text-green-400" : "text-red-400",
-                )}
-              >
-                {isPositive ? "↑" : "↓"}
-                {Math.abs(change).toFixed(1)}%
+              <span className={cn("text-sm font-medium")}>
+                not showing for now
               </span>
             </div>
           );
