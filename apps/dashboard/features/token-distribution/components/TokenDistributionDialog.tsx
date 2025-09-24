@@ -97,7 +97,7 @@ export const TokenDistributionDialog = ({
                       if (isMetricAlreadyApplied) return null;
 
                       return (
-                        <div
+                        <Button
                           key={metric.label}
                           onClick={() => handleSelectMetric(metric.key)}
                           className={cn(
@@ -113,12 +113,12 @@ export const TokenDistributionDialog = ({
                             <Plus className="size-3" />
                           )}
                           {metric.label}
-                        </div>
+                        </Button>
                       );
                     })}
                   </div>
                   {index !== Object.keys(metricsSchema).length - 1 && (
-                    <div className="border-light-dark mt-4 h-px w-full border-t border-dashed" />
+                    <div className="border-light-dark my-4 h-px w-full border-t border-dashed" />
                   )}
                 </div>
               );
