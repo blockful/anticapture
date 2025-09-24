@@ -35,9 +35,6 @@ export function governanceActivity(
           days: z
             .enum(DaysOpts)
             .default("90d")
-            .openapi({
-              example: "90d",
-            })
             .transform((val) => DaysEnum[val]),
         }),
       },
@@ -46,15 +43,9 @@ export function governanceActivity(
           description: "Active supply value",
           content: {
             "application/json": {
-              schema: z
-                .object({
-                  activeSupply: z.string(),
-                })
-                .openapi({
-                  example: {
-                    activeSupply: "1000000000000000000000000",
-                  },
-                }),
+              schema: z.object({
+                activeSupply: z.string(),
+              }),
             },
           },
         },

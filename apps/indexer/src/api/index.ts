@@ -17,24 +17,29 @@ import {
   lastUpdate,
   assets,
   votingPower,
+  TokenHistoricalDataClient,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
-import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
   DrizzleRepository,
   TransactionsRepository,
   VotingPowerRepository,
 } from "./repositories";
-import { TransactionsService } from "./services/transactions";
 import { errorHandler } from "./middlewares";
-import { ProposalsService } from "./services/proposals";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
-import { HistoricalVotingPowerService, VotingPowerService } from "./services";
-import { DuneService } from "./services/dune/dune.service";
+import {
+  HistoricalVotingPowerService,
+  VotingPowerService,
+  CoingeckoService,
+  ProposalsService,
+  TransactionsService,
+  DuneService,
+} from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -75,8 +80,17 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
 }
 
 if (env.COINGECKO_API_KEY) {
-  const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
-  tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
+  const coingeckoClient: TokenHistoricalDataClient = new CoingeckoService(
+    env.DAO_ID,
+    env.COINGECKO_API_KEY,
+  );
+
+  // ERC-721 historical pricing is handled differently
+  if (env.DAO_ID === DaoIdEnum.NOUNS) {
+    // coingeckoClient = new CoingeckoService(env.DAO_ID, env.COINGECKO_API_KEY);
+  }
+
+  tokenHistoricalData(app, coingeckoClient);
 }
 
 const daoClient = getClient(env.DAO_ID, client);
