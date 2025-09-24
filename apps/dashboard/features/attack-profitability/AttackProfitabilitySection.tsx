@@ -21,6 +21,7 @@ import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 import { ChartType } from "@/shared/hooks/useLastUpdate";
+import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -36,9 +37,17 @@ export const AttackProfitabilitySection = ({
   const attackUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
   const costUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
 
+  const [dropdownValue, setDropdownValue] = useState<Option>({
+    value: "usd",
+    label: "USD Value",
+  });
   if (!attackProfitability) {
     return null;
   }
+
+  const handleDropdownClick = (option: Option) => {
+    setDropdownValue(option);
+  };
 
   return (
     <TheSectionLayout
@@ -101,8 +110,20 @@ export const AttackProfitabilitySection = ({
               Last updated: {costUpdate.label}
             </BadgeStatus>
           }
+          switcherComponent={
+            <Dropdown
+              value={dropdownValue}
+              options={[
+                { value: "usd", label: "USD Value" },
+                { value: "token", label: "Token Amount" },
+              ]}
+              onClick={handleDropdownClick}
+            />
+          }
         >
-          <AttackCostBarChart />
+          <AttackCostBarChart
+            valueMode={dropdownValue.value as "usd" | "token"}
+          />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
