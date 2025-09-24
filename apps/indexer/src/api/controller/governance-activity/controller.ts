@@ -188,9 +188,9 @@ export function governanceActivity(
           content: {
             "application/json": {
               schema: z.object({
-                currentAverageTurnout: z.number(),
-                oldAverageTurnout: z.number(),
-                changeRate: z.number(),
+                currentAverageTurnout: z.string(),
+                oldAverageTurnout: z.string(),
+                changeRate: z.string(),
               }),
             },
           },
@@ -203,9 +203,9 @@ export function governanceActivity(
       const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
         return context.json({
-          currentAverageTurnout: 0,
-          oldAverageTurnout: 0,
-          changeRate: 0,
+          currentAverageTurnout: "0",
+          oldAverageTurnout: "0",
+          changeRate: "0",
         });
       }
       const changeRate =
@@ -214,8 +214,9 @@ export function governanceActivity(
 
       return context.json(
         {
-          ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+          currentAverageTurnout: data.currentAverageTurnout.toString(),
+          oldAverageTurnout: data.oldAverageTurnout.toString(),
+          changeRate: changeRate ? Number(changeRate).toFixed(2) : "0",
         },
         200,
       );
