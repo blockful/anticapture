@@ -7,6 +7,7 @@ import { SkeletonRow, TheTable } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { CheckCircle2, CircleMinus, ThumbsDown, XCircle } from "lucide-react";
 
 export const TabsVotedContent = ({
   proposal,
@@ -30,6 +31,8 @@ export const TabsVotedContent = ({
     daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
     limit: 10, // Load 10 items at a time
   });
+
+  console.log(votes);
 
   // Intersection observer on the loading row
   useEffect(() => {
@@ -147,26 +150,22 @@ export const TabsVotedContent = ({
               case "1":
                 return {
                   label: "For",
-                  color: "text-green-400",
-                  bgColor: "bg-green-400/10",
+                  icon: <CheckCircle2 className="text-success size-4" />,
                 };
               case "0":
                 return {
                   label: "Against",
-                  color: "text-red-400",
-                  bgColor: "bg-red-400/10",
+                  icon: <XCircle className="text-error size-4" />,
                 };
               case "2":
                 return {
                   label: "Abstain",
-                  color: "text-yellow-400",
-                  bgColor: "bg-yellow-400/10",
+                  icon: <CircleMinus className="text-secondary size-4" />,
                 };
               default:
                 return {
                   label: "Unknown",
-                  color: "text-gray-400",
-                  bgColor: "bg-gray-400/10",
+                  icon: <ThumbsDown className="text-secondary size-4" />,
                 };
             }
           };
@@ -174,20 +173,12 @@ export const TabsVotedContent = ({
           const choiceInfo = getChoiceInfo(support);
 
           return (
-            <div className="flex h-10 items-center p-2">
+            <div className="flex items-center p-2">
               <div
-                className={cn(
-                  "flex items-center gap-2 rounded-full px-3 py-1",
-                  choiceInfo.bgColor,
-                )}
+                className={cn("flex items-center gap-2 rounded-full px-3 py-1")}
               >
-                <div
-                  className={cn(
-                    "size-2 rounded-full",
-                    choiceInfo.color.replace("text-", "bg-"),
-                  )}
-                />
-                <span className={cn("text-sm font-medium", choiceInfo.color)}>
+                {choiceInfo.icon}
+                <span className={cn("text-sm font-medium")}>
                   {choiceInfo.label}
                 </span>
               </div>
