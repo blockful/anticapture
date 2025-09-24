@@ -67,7 +67,7 @@ export const TokenDistributionMetrics = ({
   return (
     <div className="flex h-full w-full flex-col justify-between gap-2 sm:gap-4">
       <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
-        <div className="scrollbar-none contents max-h-[310px] gap-2 overflow-y-auto sm:flex sm:flex-col">
+        <div className="scrollbar-none hover:scrollbar-thin gap-2 overflow-y-auto sm:flex sm:max-h-[310px] sm:flex-col">
           {Object.keys(appliedMetricsFormatted).length === 0 ? (
             <>
               <div className="hidden w-full flex-col items-center justify-center sm:flex sm:min-h-[300px]">
@@ -90,7 +90,7 @@ export const TokenDistributionMetrics = ({
           ) : (
             Object.entries(appliedMetricsFormatted).map(
               ([category, metrics]) => (
-                <div key={category} className="flex flex-col gap-2 sm:mb-4">
+                <div key={category} className="mb-4 flex flex-col gap-2">
                   {category === "SUPPLY" ? (
                     <CardTitle className="flex items-center gap-2">
                       <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
