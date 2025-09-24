@@ -12,6 +12,7 @@ export const filterPriceHistoryByTimeInterval = (
   if (dataset.length === 0) {
     return {
       full: dataset,
+      [TimeInterval.ONE_DAY]: [],
       [TimeInterval.SEVEN_DAYS]: [],
       [TimeInterval.THIRTY_DAYS]: [],
       [TimeInterval.NINETY_DAYS]: [],
