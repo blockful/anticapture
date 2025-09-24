@@ -41,7 +41,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
+  historicalTokenData(toCurrency: String = "usd", days: queryInput_historicalTokenData_days = _7d): historicalTokenData_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
