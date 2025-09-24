@@ -6,6 +6,7 @@ export const SECONDS_PER_DAY = 86400;
 export const DAYS_PER_MONTH = 30;
 
 export const TIME_INTERVAL_TO_DAYS = {
+  [TimeInterval.ONE_DAY]: 1,
   [TimeInterval.SEVEN_DAYS]: 7,
   [TimeInterval.THIRTY_DAYS]: 30,
   [TimeInterval.NINETY_DAYS]: 90,
@@ -13,6 +14,7 @@ export const TIME_INTERVAL_TO_DAYS = {
 };
 
 export const DAYS_IN_SECONDS: Record<TimeInterval, number> = {
+  [TimeInterval.ONE_DAY]: SECONDS_PER_DAY,
   [TimeInterval.SEVEN_DAYS]: 7 * SECONDS_PER_DAY,
   [TimeInterval.THIRTY_DAYS]: 30 * SECONDS_PER_DAY,
   [TimeInterval.NINETY_DAYS]: 90 * SECONDS_PER_DAY,
