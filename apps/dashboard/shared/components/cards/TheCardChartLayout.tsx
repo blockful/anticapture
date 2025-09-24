@@ -42,6 +42,7 @@ export const TheCardChartLayout = ({
                 </CardTitle>
                 {csvData && (
                   <CSVLink
+                    filename={`${title.toLowerCase().replace(/\s+/g, "_")}.csv`}
                     data={csvData}
                     className="!text-alternative-sm text-primary mb-0.5 flex items-center font-mono font-medium"
                   >
