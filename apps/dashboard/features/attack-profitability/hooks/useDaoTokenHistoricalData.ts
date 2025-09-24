@@ -14,20 +14,8 @@ export interface DaoTokenHistoricalDataResponse {
   total_volumes: PriceEntry[];
 }
 
-const TIME_INTERVAL_TO_GQL: Record<TimeInterval, string> = {
-  [TimeInterval.ONE_DAY]: "_1d",
-  [TimeInterval.SEVEN_DAYS]: "_7d",
-  [TimeInterval.THIRTY_DAYS]: "_30d",
-  [TimeInterval.NINETY_DAYS]: "_90d",
-  [TimeInterval.ONE_YEAR]: "_365d",
-};
-
 const DEFAULT_INTERVAL = TimeInterval.SEVEN_DAYS;
 const DEFAULT_CURRENCY = "usd";
-
-const mapInterval = (ti: TimeInterval | undefined) =>
-  TIME_INTERVAL_TO_GQL[ti as TimeInterval] ??
-  TIME_INTERVAL_TO_GQL[DEFAULT_INTERVAL];
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
@@ -42,10 +30,8 @@ export const fetchDaoTokenHistoricalData = async ({
     return null;
   }
 
-  const gqlDays = mapInterval(days);
-
   const query = `query GetHistoricalTokenData {
-  historicalTokenData(days: ${gqlDays}, toCurrency: "${toCurrency}") {
+  historicalTokenData(days: _${days}, toCurrency: "${toCurrency}") {
     market_caps
     prices
   }
