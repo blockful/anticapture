@@ -1,6 +1,6 @@
 "use client";
 
-import { BlankSlate, TheSectionLayout } from "@/shared/components";
+import { BlankSlate, Button, TheSectionLayout } from "@/shared/components";
 import { useState } from "react";
 import { cn } from "@/shared/utils/";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
@@ -93,10 +93,10 @@ export const FaqSection = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <button className="border-light-dark bg-surface-contrast text-primary hover:bg-surface-hover inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2 py-1 text-sm font-normal transition-all duration-200">
+            <Button size="sm" variant="outline">
               <TelegramIcon className="size-5" />
               Send Message
-            </button>
+            </Button>
           </Link>
         </BlankSlate>
       </div>

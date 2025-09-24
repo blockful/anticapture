@@ -5,6 +5,7 @@ import { CookieIcon } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { CookieBackground } from "@/shared/components/icons";
 import Image from "next/image";
+import { Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 interface CookieConsentProps {
@@ -85,7 +86,7 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
         className,
       )}
     >
-      <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg shadow-xl sm:flex-row sm:items-center sm:gap-6">
+      <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg sm:flex-row sm:items-center sm:gap-6">
         <Image
           className="absolute right-0 top-0 h-full w-[330px] object-cover opacity-50"
           src="/images/cookie.svg"
@@ -120,18 +121,12 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
           </div>
         </div>
         <div className="z-50 flex w-full flex-shrink-0 gap-2 sm:w-auto">
-          <button
-            onClick={handleAccept}
-            className="bg-primary text-primary-foreground hover:bg-primary/70 cursor-pointer rounded-md px-2 py-1 text-sm font-medium transition-colors duration-300"
-          >
+          <Button onClick={handleAccept} variant="primary" size="sm">
             [Accept]
-          </button>
-          <button
-            onClick={handleDecline}
-            className="bg-background border-border-contrast text-secondary bg-surface-default hover:bg-surface-contrast hover:text-accent-foreground cursor-pointer rounded-md border px-2 py-1 text-sm font-medium transition-colors duration-300"
-          >
+          </Button>
+          <Button onClick={handleDecline} variant="outline" size="sm">
             [Decline]
-          </button>
+          </Button>
         </div>
       </div>
     </div>

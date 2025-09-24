@@ -15,6 +15,7 @@ import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ResetIcon } from "@radix-ui/react-icons";
 import { publicClient } from "@/shared/services/wallet/wallet";
+import { IconButton } from "@/shared/components";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
@@ -99,17 +100,19 @@ export function AddressFilter({
   return (
     <Popover onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <button
+        <IconButton
           aria-label="Filter by address"
+          variant="ghost"
           className={cn(
-            "group flex cursor-pointer items-center rounded-sm border p-1 transition-colors",
+            "group border border-transparent",
             "hover:border-highlight bg-surface-hover border-transparent",
             currentFilter && "border-highlight bg-surface-hover",
             className,
           )}
-        >
-          <Filter className="text-primary size-3" />
-        </button>
+          iconClassName="size-3"
+          size="sm"
+          icon={Filter}
+        />
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
