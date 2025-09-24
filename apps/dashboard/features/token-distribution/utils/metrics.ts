@@ -19,7 +19,7 @@ export interface MetricSchema {
 export const metricsSchema = {
   DELEGATED_SUPPLY: {
     label: "Delegated",
-    color: "#93C5FD",
+    color: "#3B82F6",
     category: "SUPPLY",
     type: "AREA",
   },
@@ -55,7 +55,7 @@ export const metricsSchema = {
   },
   DELEGATIONS: {
     label: "Delegated",
-    color: "#3B82F6",
+    color: "#93C5FD",
     category: "VOLUME",
     type: "BAR",
   },
