@@ -12,7 +12,7 @@ import {
 import { CardTitle } from "@/shared/components/ui/card";
 import { X, Plus, PlusIcon, Check } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { MetricWithKey } from "@/features/token-distribution/types";
@@ -53,23 +53,17 @@ export const TokenDistributionDialog = ({
   return (
     <Root>
       <Trigger asChild>
-        <Button
-          variant={isAllMetricsApplied ? "disabled" : "ghost"}
-          className={
-            "border-light-dark bg-surface-default flex h-7 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border px-2 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
-          }
-          disabled={isAllMetricsApplied}
-        >
+        <Button variant="outline" disabled={isAllMetricsApplied} size="sm">
           {isAllMetricsApplied ? (
             <>
-              <Check className="text-primary" />
-              <p className="text-primary text-sm font-medium">
+              <Check className="text-dimmed size-3.5" />
+              <p className="text-dimmed text-sm font-medium">
                 All metrics added
               </p>
             </>
           ) : (
             <>
-              <PlusIcon className="text-primary" />
+              <PlusIcon className="text-primary size-3.5" />
               <p className="text-primary text-sm font-medium">Add metric</p>
             </>
           )}
