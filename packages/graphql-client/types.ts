@@ -285,6 +285,12 @@ export type QueryHistoricalBalancesArgs = {
 };
 
 
+export type QueryHistoricalTokenDataArgs = {
+  days?: InputMaybe<QueryInput_HistoricalTokenData_Days>;
+  toCurrency?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
@@ -1140,6 +1146,7 @@ export type Proposal_200_Response = {
   __typename?: 'proposal_200_response';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
+  calldatas: Array<Maybe<Scalars['String']['output']>>;
   daoId: Scalars['String']['output'];
   description: Scalars['String']['output'];
   endBlock: Scalars['Float']['output'];
@@ -1151,9 +1158,11 @@ export type Proposal_200_Response = {
   startBlock: Scalars['Float']['output'];
   startTimestamp: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
+  values: Array<Maybe<Scalars['String']['output']>>;
 };
 
 export type ProposalsActivity_200_Response = {
@@ -1336,6 +1345,7 @@ export type Proposals_200_Response = {
 };
 
 export enum QueryInput_CompareActiveSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1344,6 +1354,7 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1352,6 +1363,7 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1360,6 +1372,7 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1368,6 +1381,7 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1376,6 +1390,7 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1384,6 +1399,7 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1392,6 +1408,7 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1400,6 +1417,7 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1408,6 +1426,7 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1416,6 +1435,7 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1424,6 +1444,16 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
+  '1d' = '_1d',
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_HistoricalTokenData_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1432,6 +1462,7 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1470,6 +1501,7 @@ export enum QueryInput_Proposals_OrderDirection {
 }
 
 export enum QueryInput_TotalAssets_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1542,6 +1574,7 @@ export type Query_Proposals_Items_Items = {
   __typename?: 'query_proposals_items_items';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
+  calldatas: Array<Maybe<Scalars['String']['output']>>;
   daoId: Scalars['String']['output'];
   description: Scalars['String']['output'];
   endBlock: Scalars['Float']['output'];
@@ -1553,9 +1586,11 @@ export type Query_Proposals_Items_Items = {
   startBlock: Scalars['Float']['output'];
   startTimestamp: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
+  values: Array<Maybe<Scalars['String']['output']>>;
 };
 
 export type Query_TotalAssets_Items = {
