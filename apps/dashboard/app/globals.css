@@ -59,8 +59,6 @@
   --color-error: var(--base-error);
   --color-link: var(--base-brand);
   --color-link-hover: var(--base-brand);
-
-  /* Icon Colors*/
   --color-highlight: var(--base-brand);
 
   /* Surface Colors */
@@ -69,7 +67,7 @@
   --color-surface-contrast: var(--base-muted);
   --color-surface-hover: var(--base-border);
   --color-surface-action: var(--base-primary);
-  --color-surface-action-hover: var(--base-primary-opacity);
+  --color-surface-action-hover: var(--base-primary-opacity-darker);
   --color-surface-destructive: var(--base-destructive);
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);
@@ -165,7 +163,7 @@
 
   /* Custom Colors */
   --base-primary-opacity: #fafafa1f;
-  --base-primary-opacity-darker: #fafafab3;
+  --base-primary-opacity-darker: #fafafab2;
   --base-brand: #ec762e;
   --base-brand-lighter: #fb8f4d;
   --base-brand-opacity: #fb8f4d1f;
@@ -381,7 +379,7 @@
 
     /* Custom Colors */
     --base-primary-opacity: #fafafa1f;
-    --base-primary-opacity-darker: #fafafab3;
+    --base-primary-opacity-darker: #fafafab2;
     --base-brand: #ec762e;
     --base-brand-lighter: #fb8f4d;
     --base-brand-opacity: #fb8f4d1f;
