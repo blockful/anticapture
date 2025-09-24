@@ -18,6 +18,7 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -30,9 +31,17 @@ export const AttackProfitabilitySection = ({
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
+  const [dropdownValue, setDropdownValue] = useState<Option>({
+    value: "usd",
+    label: "USD Value",
+  });
   if (!attackProfitability) {
     return null;
   }
+
+  const handleDropdownClick = (option: Option) => {
+    setDropdownValue(option);
+  };
 
   return (
     <TheSectionLayout
@@ -74,8 +83,20 @@ export const AttackProfitabilitySection = ({
         <TheCardChartLayout
           title="Cost Comparison"
           subtitle="All values reflect current data."
+          switcherComponent={
+            <Dropdown
+              value={dropdownValue}
+              options={[
+                { value: "usd", label: "USD Value" },
+                { value: "token", label: "Token Amount" },
+              ]}
+              onClick={handleDropdownClick}
+            />
+          }
         >
-          <AttackCostBarChart />
+          <AttackCostBarChart
+            valueMode={dropdownValue.value as "usd" | "token"}
+          />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
