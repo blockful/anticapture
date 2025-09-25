@@ -1,4 +1,5 @@
 import { ponder } from "ponder:registry";
+import { dao } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -7,7 +8,6 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
-import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
 import { env } from "@/env";
 

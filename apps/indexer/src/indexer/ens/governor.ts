@@ -1,4 +1,5 @@
 import { ponder } from "ponder:registry";
+import { dao } from "ponder:schema";
 
 import {
   updateProposalStatus,
