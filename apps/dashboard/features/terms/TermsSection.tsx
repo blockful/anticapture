@@ -1,5 +1,5 @@
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { TheSectionLayout } from "@/shared/components";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import Link from "next/link";
 
 const termsData = [
@@ -144,8 +144,7 @@ export const TermsSection = () => {
   return (
     <div className="flex w-full justify-center">
       <TheSectionLayout
-        title={SECTIONS_CONSTANTS.terms.title}
-        anchorId={SECTIONS_CONSTANTS.terms.anchorId}
+        title={PAGES_CONSTANTS.terms.title}
         className="bg-surface-background! mt-[56px]! sm:mt-0! max-w-[770px] gap-4"
       >
         <div className="flex w-full flex-col items-center justify-center gap-2 px-2">
