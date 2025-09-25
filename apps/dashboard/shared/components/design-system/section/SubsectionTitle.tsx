@@ -23,7 +23,7 @@ export const SubsectionTitle = ({
       })}
     >
       <div className="flex flex-col items-start">
-        <p className="text-primary text-alternative-sm uppercase">
+        <p className="text-primary text-alternative-sm font-mono uppercase">
           {subsectionTitle}
         </p>
         <p className="text-secondary text-sm font-normal">

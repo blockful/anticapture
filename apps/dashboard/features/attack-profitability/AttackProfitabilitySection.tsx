@@ -40,7 +40,6 @@ export const AttackProfitabilitySection = ({
   return (
     <TheSectionLayout
       title={PAGES_CONSTANTS.attackProfitability.title}
-      subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={PAGES_CONSTANTS.attackProfitability.description}
       // switchDate={
@@ -55,7 +54,7 @@ export const AttackProfitabilitySection = ({
     >
       <SubSectionsContainer>
         <SubSection
-          subsectionTitle={"Cost of Attack vs Profit "}
+          subsectionTitle={"Cost of Attack vs Profit"}
           dateRange={getDateRange(days ?? "")}
           switchDate={
             <SwitcherDateMobile
