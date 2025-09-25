@@ -97,11 +97,7 @@ export const ResilienceStagesSection = ({
       description={PAGES_CONSTANTS.resilienceStages.description}
     >
       <SubSectionsContainer>
-        <SubSection
-          subsectionTitle={PAGES_CONSTANTS.resilienceStages.title}
-          subsectionDescription={PAGES_CONSTANTS.resilienceStages.description}
-          dateRange=""
-        >
+        <SubSection dateRange="">
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-3">
               <div className="flex h-7 w-full items-center justify-center">
