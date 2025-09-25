@@ -42,14 +42,6 @@ export const AttackProfitabilitySection = ({
       title={PAGES_CONSTANTS.attackProfitability.title}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={PAGES_CONSTANTS.attackProfitability.description}
-      // switchDate={
-      //   <SwitcherDate
-      //     defaultValue={defaultDays}
-      //     setTimeInterval={setDays}
-      //     disableRecentData={true}
-      //   />
-      // }
-      // days={days}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <SubSectionsContainer>
@@ -86,44 +78,14 @@ export const AttackProfitabilitySection = ({
           subsectionDescription={"All values reflect current data."}
           dateRange=""
         >
-          <div className="flex flex-row gap-5">
+          <div className="flex flex-col gap-5 sm:flex-row">
             <AttackCostBarChart />
-            <div className="flex flex-col gap-2">
+            <div className="flex w-full flex-col gap-2 lg:w-2/3">
               <AttackProfitabilityAccordion />
             </div>
           </div>
         </SubSection>
       </SubSectionsContainer>
-
-      {/* <TheCardChartLayout
-        headerComponent={
-          <div className="flex w-full pt-3">
-            <AttackProfitabilityToggleHeader
-              treasuryMetric={treasuryMetric}
-              setTreasuryMetric={setTreasuryMetric}
-              costMetric={costMetric}
-              setCostMetric={setCostMetric}
-            />
-          </div>
-        }
-      >
-        <MultilineChartAttackProfitability
-          days={days}
-          filterData={[treasuryMetric, costMetric]}
-        />
-      </TheCardChartLayout>
-      <div className="border-light-dark w-full border-t" />
-      <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
-        <TheCardChartLayout
-          title="Cost Comparison"
-          subtitle="All values reflect current data."
-        >
-          <AttackCostBarChart />
-        </TheCardChartLayout>
-        <div className="flex flex-col gap-2">
-          <AttackProfitabilityAccordion />
-        </div>
-      </div> */}
     </TheSectionLayout>
   );
 };
