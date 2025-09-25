@@ -138,10 +138,16 @@ export const TokenDistributionChart = ({
             type="number"
             domain={["dataMin", "dataMax"]}
             tickMargin={8}
-            tickFormatter={(date) =>
-              timestampToReadableDate(date, "abbreviated")
-            }
+            tickFormatter={(date) => {
+              const format =
+                brushRange.endIndex - brushRange.startIndex < 14 // 14 points is equals to 3 months, So, if the range is less than 14, we show the full date, otherwise we show the abbreviated date
+                  ? "full"
+                  : "abbreviated";
+              return timestampToReadableDate(date, format);
+            }}
             padding="gap"
+            allowDuplicatedCategory={false}
+            interval={"equidistantPreserveStart"}
           />
           {/* DEFAULT AXIS - Required for Recharts compatibility */}
           <YAxis yAxisId={0} hide domain={["auto", "auto"]} />
