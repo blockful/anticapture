@@ -2,11 +2,11 @@ name: Deploy Indexers and API Gateway to Railway
 
 on:
   push:
-    # branches: [dev, main]
-    # paths:
-    #   - "apps/indexer/**/*.ts"
-    #   - "apps/api-gateway/**/*.ts"
-    #   - "infra/**"
+    branches: [dev, main]
+    paths:
+      - "apps/indexer/**/*.ts"
+      - "apps/api-gateway/**/*.ts"
+      - "infra/**"
 
 jobs:
   changes:
@@ -31,78 +31,78 @@ jobs:
               - 'apps/indexer/src/*.ts'
               - 'apps/indexer/*.ts'
 
-  # get-daos:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     daos: ${{ steps.get-daos.outputs.daos }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Get available DAOs
-  #       id: get-daos
-  #       run: |
-  #         # Extract DAO names from config files (excluding local configs)
-  #         daos=$(ls apps/indexer/config/*.config.ts | grep -v test | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
+  get-daos:
+    runs-on: ubuntu-latest
+    outputs:
+      daos: ${{ steps.get-daos.outputs.daos }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get available DAOs
+        id: get-daos
+        run: |
+          # Extract DAO names from config files (excluding local configs)
+          daos=$(ls apps/indexer/config/*.config.ts | grep -v test | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
 
-  #         # Create DAO array
-  #         dao_array="["
-  #         for dao in $daos; do
-  #           dao_array="${dao_array}\"${dao}\","
-  #         done
-  #         dao_array="${dao_array%,}]"
+          # Create DAO array
+          dao_array="["
+          for dao in $daos; do
+            dao_array="${dao_array}\"${dao}\","
+          done
+          dao_array="${dao_array%,}]"
 
-  #         echo "daos=$dao_array" >> $GITHUB_OUTPUT
-  #         echo "Detected DAOs: $dao_array"
+          echo "daos=$dao_array" >> $GITHUB_OUTPUT
+          echo "Detected DAOs: $dao_array"
 
-  # environment:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     environment: ${{ steps.determine.outputs.environment }}
-  #     railway_token: ${{ steps.determine.outputs.railway_token }}
-  #   steps:
-  #     - name: Determine environment and token
-  #       id: determine
-  #       run: |
-  #         if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-  #           echo "environment=production" >> $GITHUB_OUTPUT
-  #         else
-  #           echo "environment=dev" >> $GITHUB_OUTPUT
-  #         fi
-  #         echo "Deploying to: $([ '${{ github.ref }}' == 'refs/heads/main' ] && echo 'production' || echo 'dev')"
+  environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.determine.outputs.environment }}
+      railway_token: ${{ steps.determine.outputs.railway_token }}
+    steps:
+      - name: Determine environment and token
+        id: determine
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+          echo "Deploying to: $([ '${{ github.ref }}' == 'refs/heads/main' ] && echo 'production' || echo 'dev')"
 
-  # deploy-indexers:
-  #   needs: [get-daos, changes, environment]
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/railwayapp/cli:latest
-  #   environment: ${{ needs.environment.outputs.environment }}
-  #   strategy:
-  #     matrix:
-  #       dao: ${{ fromJson(needs.get-daos.outputs.daos) }}
-  #   env:
-  #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Deploy ${{ matrix.dao }}-indexer
-  #       if: ${{ needs.changes.outputs.indexer == 'true' }}
-  #       run: |
-  #         echo "Deploying ${{ matrix.dao }}-indexer to ${{ needs.environment.outputs.environment }}"
-  #         railway up -s ${{ matrix.dao }}-indexer -e ${{ needs.environment.outputs.environment }} --ci -d
-  #     - name: Deploy ${{ matrix.dao }}-api
-  #       if: ${{ needs.changes.outputs.api == 'true' }}
-  #       run: |
-  #         echo "Deploying ${{ matrix.dao }}-api to ${{ needs.environment.outputs.environment }}"
-  #         railway up -s ${{ matrix.dao }}-api -e ${{ needs.environment.outputs.environment }} --ci
+  deploy-indexers:
+    needs: [get-daos, changes, environment]
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ needs.environment.outputs.environment }}
+    strategy:
+      matrix:
+        dao: ${{ fromJson(needs.get-daos.outputs.daos) }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy ${{ matrix.dao }}-indexer
+        if: ${{ needs.changes.outputs.indexer == 'true' }}
+        run: |
+          echo "Deploying ${{ matrix.dao }}-indexer to ${{ needs.environment.outputs.environment }}"
+          railway up -s ${{ matrix.dao }}-indexer -e ${{ needs.environment.outputs.environment }} --ci -d
+      - name: Deploy ${{ matrix.dao }}-api
+        if: ${{ needs.changes.outputs.api == 'true' }}
+        run: |
+          echo "Deploying ${{ matrix.dao }}-api to ${{ needs.environment.outputs.environment }}"
+          railway up -s ${{ matrix.dao }}-api -e ${{ needs.environment.outputs.environment }} --ci
 
-  # deploy-api-gateway:
-  #   needs: [deploy-indexers, changes, environment]
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/railwayapp/cli:latest
-  #   environment: ${{ needs.environment.outputs.environment }}
-  #   env:
-  #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Deploy api-gateway
-  #       if: ${{ needs.changes.outputs.api == 'true' }}
-  #       run: |
-  #         echo "Deploying api-gateway to ${{ needs.environment.outputs.environment }}"
-  #         railway up -s api-gateway -e ${{ needs.environment.outputs.environment }} --ci
+  deploy-api-gateway:
+    needs: [deploy-indexers, changes, environment]
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    environment: ${{ needs.environment.outputs.environment }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy api-gateway
+        if: ${{ needs.changes.outputs.api == 'true' }}
+        run: |
+          echo "Deploying api-gateway to ${{ needs.environment.outputs.environment }}"
+          railway up -s api-gateway -e ${{ needs.environment.outputs.environment }} --ci
