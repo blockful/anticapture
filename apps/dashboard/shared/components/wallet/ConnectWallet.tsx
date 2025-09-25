@@ -1,10 +1,10 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { cn } from "@/shared/utils/";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
+import { Button } from "@/shared/components";
 
 const Jazzicon = dynamic(
   () => import("react-jazzicon").then((mod) => mod.default),
@@ -52,29 +52,31 @@ export const ConnectWallet = ({
             {(() => {
               if (!connected) {
                 return (
-                  <button
+                  <Button
                     onClick={openConnectModal}
                     type="button"
-                    className={cn("btn-connect-wallet size-[36px]", className)}
+                    variant="outline"
+                    className={className}
+                    size="md"
                   >
                     <Wallet className="size-3.5" />
                     {label}
-                  </button>
+                  </Button>
                 );
               }
               if (chain.unsupported) {
                 return (
-                  <button onClick={openChainModal} type="button">
+                  <Button onClick={openChainModal} type="button">
                     Wrong network
-                  </button>
+                  </Button>
                 );
               }
               return (
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     onClick={openAccountModal}
                     type="button"
-                    className="btn-connect-wallet flex items-center gap-2"
+                    className="btn-connect-wallet"
                   >
                     {account.ensAvatar ? (
                       <div className="relative size-6 overflow-hidden rounded-full">
@@ -95,7 +97,7 @@ export const ConnectWallet = ({
                         )}
                       </div>
                     )}
-                  </button>
+                  </Button>
                 </div>
               );
             })()}
