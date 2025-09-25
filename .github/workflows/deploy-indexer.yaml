@@ -20,13 +20,16 @@ jobs:
         id: changes
         with:
           base: ${{ github.ref_name }}
-          predicate-quantifier: "every"
           filters: |
             api:
               - 'apps/indexer/src/api/**'
             indexer:
-              - 'apps/indexer/**/*.ts'
-              - '!apps/indexer/src/api/**'
+              - 'apps/indexer/src/eventHandlers/**'
+              - 'apps/indexer/src/indexer/**'
+              - 'apps/indexer/src/interfaces/**'
+              - 'apps/indexer/src/lib/**'
+              - 'apps/indexer/src/*.ts'
+              - 'apps/indexer/*.ts'
 
   # get-daos:
   #   runs-on: ubuntu-latest
