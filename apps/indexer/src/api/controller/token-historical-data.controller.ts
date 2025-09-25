@@ -1,6 +1,6 @@
-import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { z, OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DAYS_IN_YEAR } from "@/lib/constants";
+import { DaysOpts } from "@/lib/enums";
 import { TokenValueResponseSchema, TokenValueResponseType } from "../mappers";
 
 export interface TokenHistoricalDataClient {
@@ -19,7 +19,15 @@ export function tokenHistoricalData(
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
       tags: ["tokens"],
-      request: {},
+      request: {
+        query: z.object({
+          days: z
+            .enum(DaysOpts)
+            .optional()
+            .default("365d")
+            .transform((val) => parseInt(val.replace("d", ""))),
+        }),
+      },
       responses: {
         200: {
           description: "Returns the historical market data for the token",
@@ -32,7 +40,8 @@ export function tokenHistoricalData(
       },
     }),
     async (context) => {
-      const data = await client.getHistoricalTokenData(DAYS_IN_YEAR);
+      const { days } = context.req.valid("query");
+      const data = await client.getHistoricalTokenData(days);
       return context.json(data, 200);
     },
   );

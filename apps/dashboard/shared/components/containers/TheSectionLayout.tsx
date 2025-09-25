@@ -67,7 +67,7 @@ export const TheSectionLayout = ({
       <div className="flex h-full w-full flex-col gap-3">
         <div
           className={cn("flex flex-col gap-2", {
-            "gap-0": isSwitchDateLinear,
+            "gap-0": isSwitchDateLinear && !description,
           })}
         >
           <div className="flex h-full w-full flex-col gap-2 sm:flex-row sm:gap-3">
@@ -101,11 +101,13 @@ export const TheSectionLayout = ({
               </>
             )}
           </div>
-          <div className="flex w-full">
-            <p className="text-secondary flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] sm:text-sm">
-              {description}
-            </p>
-          </div>
+          {description && (
+            <div className="flex w-full">
+              <p className="text-secondary flex w-full flex-col text-justify text-[12px] font-normal leading-[18px] sm:text-sm">
+                {description}
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex items-center sm:hidden">
           {riskLevel && <div className="flex h-full w-full">{riskLevel}</div>}

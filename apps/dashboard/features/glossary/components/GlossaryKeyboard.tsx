@@ -5,6 +5,7 @@ import {
   GlossaryLetter,
   getAvailableLetters,
 } from "@/features/glossary/glossary";
+import { Button } from "@/shared/components";
 import { cn, formatPlural } from "@/shared/utils";
 
 interface GlossaryKeyboardProps {
@@ -126,7 +127,7 @@ const KeyboardButton = ({
   onClick: () => void;
 }) => {
   return (
-    <button
+    <Button
       onClick={onClick}
       disabled={!isAvailable}
       title={
@@ -134,13 +135,11 @@ const KeyboardButton = ({
           ? `${termCount} ${formatPlural(termCount, "term")}`
           : "No terms available"
       }
-      className={`flex w-8 flex-shrink-0 items-center justify-center rounded-md border px-2 py-1 text-sm font-medium transition-all duration-200 ${
-        isAvailable
-          ? "bg-surface-default border-border-contrast text-primary hover:bg-surface-hover hover:border-primary cursor-pointer shadow-sm hover:shadow-md"
-          : "bg-surface-disabled border-border-contrast text-dimmed cursor-not-allowed"
-      } `}
+      variant="outline"
+      size="sm"
+      className="w-full"
     >
       {letter}
-    </button>
+    </Button>
   );
 };

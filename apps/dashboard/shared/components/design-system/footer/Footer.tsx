@@ -56,6 +56,15 @@ export const Footer = ({ variant, className }: FooterProps) => {
           </DefaultLink>
           <p className="text-alternative-xs text-secondary">/</p>
           <DefaultLink
+            href="/terms-of-service"
+            openInNewTab
+            variant="default"
+            className="uppercase leading-none"
+          >
+            Terms of Service
+          </DefaultLink>
+          <p className="text-alternative-xs text-secondary">/</p>
+          <DefaultLink
             href="https://surveys.hotjar.com/346670a7-5423-4d65-8e93-30d0191a926a"
             openInNewTab
             variant="default"
@@ -73,6 +82,17 @@ export const Footer = ({ variant, className }: FooterProps) => {
               className="uppercase leading-none"
             >
               Docs
+            </DefaultLink>
+            <p className="text-dimmed mx-2 hidden items-center uppercase sm:flex">
+              /
+            </p>
+            <DefaultLink
+              href="/terms-of-service"
+              openInNewTab
+              variant="default"
+              className="uppercase leading-none"
+            >
+              Terms of Service
             </DefaultLink>
             <p className="text-dimmed mx-2 hidden items-center uppercase sm:flex">
               /
