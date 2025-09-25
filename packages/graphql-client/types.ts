@@ -287,7 +287,6 @@ export type QueryHistoricalBalancesArgs = {
 
 export type QueryHistoricalTokenDataArgs = {
   days?: InputMaybe<QueryInput_HistoricalTokenData_Days>;
-  toCurrency?: InputMaybe<Scalars['String']['input']>;
 };
 
 
