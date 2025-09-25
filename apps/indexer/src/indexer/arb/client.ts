@@ -23,12 +23,11 @@ export class ARBClient<
 
   async getQuorum(_: string | null): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
-    const targetBlock = blockNumber - 10n;
     return readContract(this.client, {
       abi: this.abi,
       address: this.address,
       functionName: "quorum",
-      args: [targetBlock < 0n ? 0n : targetBlock],
+      args: [blockNumber],
     });
   }
 

@@ -14,7 +14,7 @@ import { env } from "@/env";
 export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.ARB;
 
-  ponder.on(`OPGovernor:setup`, async ({ context }) => {
+  ponder.on(`ARBGovernor:setup`, async ({ context }) => {
     const [
       votingPeriod,
       quorum,

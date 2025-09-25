@@ -39,7 +39,7 @@ export const CONTRACT_ADDRESSES = {
     token: {
       address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
       decimals: 18,
-      startBlock: 70398200,
+      startBlock: 70398215,
     },
     // https://arbiscan.io/address/0x789fC99093B09aD01C34DC7251D0C89ce743e5a4
     governorTreasury: {

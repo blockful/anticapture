@@ -292,8 +292,8 @@ importers:
         specifier: ^4.7.10
         version: 4.8.5
       ponder:
-        specifier: ^0.11.40
-        version: 0.11.40(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        specifier: ^0.13.6
+        version: 0.13.6(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(bufferutil@4.0.9)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       viem:
         specifier: ^2.29.4
         version: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -4572,10 +4572,10 @@ packages:
       webpack-plugin-serve:
         optional: true
 
-  "@ponder/utils@0.2.9":
+  "@ponder/utils@0.2.13":
     resolution:
       {
-        integrity: sha512-lyvxgHXQbJugLFaNMIHB0oLy6uRfUC0SddxOgx/CSTnv/fT2RXM6/pXz9D9ODfPY7LcAu3fNOZBbCCU0PoVO+g==,
+        integrity: sha512-Yjkr2j9xerqPtsGCrVWTvC/HzjrPsdYPSBnqlj1ZwivIjkB371pTYmj6T1+kNshCyBuClXCp5ZxHReBaG2Fz0A==,
       }
     peerDependencies:
       typescript: ">=5.0.4"
@@ -13303,10 +13303,10 @@ packages:
       }
     engines: { node: ">=10" }
 
-  ponder@0.11.40:
+  ponder@0.13.6:
     resolution:
       {
-        integrity: sha512-E00KQmcu37UrGleg8CFDDY9/eRkDqt0jH0ZBKesPjxcp5lDAf5PO38G6lMwkbqi7pW4i3KC6qJpMaZVt2daONQ==,
+        integrity: sha512-/LtSCfso7yshF7t7irNJyfQWvLfGI65quJiG4zaE902+coGm6YX9dqoVM+CxRtnOudSADTLsC3U3HAOJFfQXWQ==,
       }
     engines: { node: ">=18.14" }
     hasBin: true
@@ -20229,7 +20229,7 @@ snapshots:
       type-fest: 4.41.0
       webpack-hot-middleware: 2.26.1
 
-  "@ponder/utils@0.2.9(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))":
+  "@ponder/utils@0.2.13(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))":
     dependencies:
       viem: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
     optionalDependencies:
@@ -26866,7 +26866,7 @@ snapshots:
     dependencies:
       "@babel/runtime": 7.27.6
 
-  ponder@0.11.40(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  ponder@0.13.6(@opentelemetry/api@1.9.0)(@types/node@20.19.9)(@types/pg@8.15.4)(bufferutil@4.0.9)(hono@4.8.5)(lightningcss@1.30.1)(terser@5.43.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
     dependencies:
       "@babel/code-frame": 7.27.1
       "@commander-js/extra-typings": 12.1.0(commander@12.1.0)
@@ -26875,7 +26875,7 @@ snapshots:
       "@escape.tech/graphql-armor-max-depth": 2.4.1
       "@escape.tech/graphql-armor-max-tokens": 2.5.1
       "@hono/node-server": 1.13.3(hono@4.8.5)
-      "@ponder/utils": 0.2.9(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
+      "@ponder/utils": 0.2.13(typescript@5.8.3)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
       abitype: 0.10.3(typescript@5.8.3)(zod@3.25.76)
       ansi-escapes: 7.0.0
       commander: 12.1.0
@@ -26905,6 +26905,7 @@ snapshots:
       vite: 5.0.7(@types/node@20.19.9)(lightningcss@1.30.1)(terser@5.43.1)
       vite-node: 1.0.2(@types/node@20.19.9)(lightningcss@1.30.1)(terser@5.43.1)
       vite-tsconfig-paths: 4.3.1(typescript@5.8.3)(vite@5.0.7(@types/node@20.19.9)(lightningcss@1.30.1)(terser@5.43.1))
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.8.3
     transitivePeerDependencies:
@@ -26925,6 +26926,7 @@ snapshots:
       - "@vercel/postgres"
       - "@xata.io/client"
       - better-sqlite3
+      - bufferutil
       - bun-types
       - expo-sqlite
       - gel
@@ -26942,6 +26944,7 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+      - utf-8-validate
       - zod
 
   pony-cause@2.1.11: {}
