@@ -48,13 +48,17 @@ export const TheSectionLayout = ({
         riskLevel={riskLevel}
         description={description ?? ""}
       />
-      <SubSection
-        subsectionTitle={subsectionTitle ?? ""}
-        subsectionDescription={subsectionDescription ?? ""}
-        dateRange={getDateRange(days ?? "")}
-      >
-        {children}
-      </SubSection>
+      {subsectionTitle ? (
+        <SubSection
+          subsectionTitle={subsectionTitle}
+          subsectionDescription={subsectionDescription ?? ""}
+          dateRange={getDateRange(days ?? "")}
+        >
+          {children}
+        </SubSection>
+      ) : (
+        children
+      )}
     </div>
   );
 };
