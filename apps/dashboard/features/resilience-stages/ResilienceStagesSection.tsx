@@ -97,10 +97,10 @@ export const ResilienceStagesSection = ({
       description={PAGES_CONSTANTS.resilienceStages.description}
     >
       <SubSectionsContainer>
-        <SubSection dateRange="">
+        <SubSection dateRange="" subsectionTitle="">
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-3">
-              <div className="flex h-7 w-full items-center justify-center">
+              <div className="flex h-7 w-full flex-col items-center justify-start">
                 {/* Timeline Component */}
                 <div className="bg-middle-dark relative h-0.5 w-full">
                   {/* Horizontal Line */}
@@ -132,13 +132,15 @@ export const ResilienceStagesSection = ({
                         StagesToDaoAvatarPosition[currentDaoStage],
                       )}
                     >
-                      <div
-                        className={cn(
-                          "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
-                          StagesToBorderColor[currentDaoStage],
-                        )}
-                      >
-                        <DaoAvatarIcon isRounded daoId={daoId} />
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={cn(
+                            "flex size-10 items-center justify-center overflow-hidden rounded-full border-2 bg-white",
+                            StagesToBorderColor[currentDaoStage],
+                          )}
+                        >
+                          <DaoAvatarIcon isRounded daoId={daoId} />
+                        </div>
                       </div>
                     </div>
                   )}
