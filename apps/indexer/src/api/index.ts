@@ -105,8 +105,8 @@ historicalOnchain(
   new HistoricalVotingPowerService(votingPowerRepo),
 );
 transactions(app, transactionsService);
-lastUpdate(app);
 votingPower(app, new VotingPowerService(votingPowerRepo));
+lastUpdate(app);
 docs(app);
 
 export default app;
