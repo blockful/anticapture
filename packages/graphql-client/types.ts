@@ -285,6 +285,11 @@ export type QueryHistoricalBalancesArgs = {
 };
 
 
+export type QueryHistoricalTokenDataArgs = {
+  days?: InputMaybe<QueryInput_HistoricalTokenData_Days>;
+};
+
+
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
@@ -1140,6 +1145,7 @@ export type Proposal_200_Response = {
   __typename?: 'proposal_200_response';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
+  calldatas: Array<Maybe<Scalars['String']['output']>>;
   daoId: Scalars['String']['output'];
   description: Scalars['String']['output'];
   endBlock: Scalars['Float']['output'];
@@ -1151,9 +1157,11 @@ export type Proposal_200_Response = {
   startBlock: Scalars['Float']['output'];
   startTimestamp: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
+  values: Array<Maybe<Scalars['String']['output']>>;
 };
 
 export type ProposalsActivity_200_Response = {
@@ -1431,6 +1439,14 @@ export enum QueryInput_HistoricalBalances_Days {
   '365d' = '_365d'
 }
 
+export enum QueryInput_HistoricalTokenData_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
 export enum QueryInput_HistoricalVotingPower_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1542,6 +1558,7 @@ export type Query_Proposals_Items_Items = {
   __typename?: 'query_proposals_items_items';
   abstainVotes: Scalars['String']['output'];
   againstVotes: Scalars['String']['output'];
+  calldatas: Array<Maybe<Scalars['String']['output']>>;
   daoId: Scalars['String']['output'];
   description: Scalars['String']['output'];
   endBlock: Scalars['Float']['output'];
@@ -1553,9 +1570,11 @@ export type Query_Proposals_Items_Items = {
   startBlock: Scalars['Float']['output'];
   startTimestamp: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
+  values: Array<Maybe<Scalars['String']['output']>>;
 };
 
 export type Query_TotalAssets_Items = {
