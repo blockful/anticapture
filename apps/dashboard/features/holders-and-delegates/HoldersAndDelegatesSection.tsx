@@ -62,11 +62,6 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       subtitle={"Holders & Delegates"}
       icon={<UserCheck className="section-layout-icon" />}
       description={PAGES_CONSTANTS.holdersAndDelegates.description}
-      // switchDate={
-      //   <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
-      // }
-      // days={days}
-      // leftContent={<HoldersAndDelegatesLeftComponent />}
     >
       <SubSectionsContainer>
         <div className="flex h-full w-full items-center justify-between">
