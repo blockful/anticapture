@@ -1,6 +1,6 @@
 "use client";
 
-import { SkeletonRow } from "@/shared/components";
+import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -128,8 +128,10 @@ export const DelegationHistoryTable = ({
         return (
           <div className="text-table-header flex w-full items-center justify-end">
             Amount ({daoId})
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
@@ -142,7 +144,7 @@ export const DelegationHistoryTable = ({
                     : ArrowState.DEFAULT
                 }
               />
-            </button>
+            </Button>
           </div>
         );
       },
@@ -179,8 +181,10 @@ export const DelegationHistoryTable = ({
         return (
           <div className="text-table-header flex w-full items-center justify-start">
             Date
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
@@ -193,7 +197,7 @@ export const DelegationHistoryTable = ({
                     : ArrowState.DEFAULT
                 }
               />
-            </button>
+            </Button>
           </div>
         );
       },

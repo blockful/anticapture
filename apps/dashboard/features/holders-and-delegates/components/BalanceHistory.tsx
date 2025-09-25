@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { SkeletonRow } from "@/shared/components";
+import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -176,12 +175,13 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header h-min w-full justify-start p-0 text-sm"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("date")}
         >
           <span className="text-xs">Date</span>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "date"
                 ? orderDirection === "asc"
@@ -221,7 +221,8 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header h-min w-full justify-end p-0 text-sm"
+          size="sm"
+          className="text-secondary w-full justify-end"
           onClick={() => handleSort("amount")}
         >
           <span className="text-xs">Amount ({daoId.toUpperCase()})</span>
@@ -360,9 +361,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button variant="ghost" size="icon">
-                <ExternalLink className="text-primary size-4" />
-              </Button>
+              <IconButton variant="ghost" icon={ExternalLink} />
             </a>
           </div>
         );

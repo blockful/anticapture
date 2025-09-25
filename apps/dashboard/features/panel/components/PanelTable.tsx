@@ -4,12 +4,12 @@ import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
-import { Button } from "@/shared/components/ui/button";
 import {
   BadgeInAnalysis,
   SkeletonRow,
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
+  Button,
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -114,7 +114,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         <div className="flex items-center justify-center">
           <Button
             variant="ghost"
-            className="h-min gap-2 p-0"
+            className="text-secondary"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             <ArrowUpDown
@@ -265,13 +265,13 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex h-min w-full justify-end p-0"
+          className="text-secondary w-full justify-end"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Delegated Supply</h4>
           <ArrowUpDown
             props={{
-              className: "ml-2 size-4",
+              className: "size-4",
             }}
             activeState={
               column.getIsSorted() === "asc"

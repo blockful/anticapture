@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { cn } from "@/shared/utils/";
 import { useScreenSize } from "@/shared/hooks";
 import { CheckIcon, ChevronDown } from "lucide-react";
+import { Button } from "@/shared/components";
 
 export type VotingPowerTimePeriod = "30d" | "90d" | "all";
 
@@ -41,41 +42,42 @@ export const VotingPowerTimePeriodSwitcher = ({
         }
       }}
     >
-      <button
+      <Button
         role="combobox"
         aria-expanded={isOpen}
         aria-controls="timePeriod-value"
         onClick={() => setIsOpen(!isOpen)}
+        variant="outline"
         className={cn(
-          "text-primary flex min-w-[70px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
+          "min-w-[70px]",
           isOpen
             ? "border-tangerine bg-light-dark"
             : "bg-surface-contrast border-transparent",
         )}
       >
-        <span className="font-medium- text-sm">{formatPeriod(value)}</span>
+        <span className="text-sm font-medium">{formatPeriod(value)}</span>
         <ChevronDown
           className={cn(
             "size-3 transition-transform duration-200",
             isOpen && "rotate-180",
           )}
         />
-      </button>
+      </Button>
 
       {isOpen && (
         <div className="border-border-contrast bg-surface-contrast absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border py-1">
           {activeTimePeriods.map((period) => (
-            <button
+            <Button
               key={period}
-              className={cn(
-                "text-primary hover:bg-surface-hover flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal",
-                value == period && "bg-middle-dark",
-              )}
+              variant="ghost"
+              className={cn("text-left", {
+                "bg-middle-dark": value == period,
+              })}
               onClick={() => handleSelect(period)}
             >
               {formatPeriod(period)}
               {value == period && <CheckIcon className="size-3.5" />}
-            </button>
+            </Button>
           ))}
         </div>
       )}

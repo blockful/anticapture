@@ -6,8 +6,9 @@ import {
   SkeletonRow,
   TextIconLeft,
   SimpleProgressBar,
+  Button,
+  IconButton,
 } from "@/shared/components";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
@@ -133,7 +134,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-min justify-start gap-1 p-0 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -251,7 +253,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-min w-full justify-end gap-1 p-0 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-end"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -313,7 +316,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-min w-full justify-start gap-1 p-0"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -362,7 +366,7 @@ export const ProposalsTable = ({
               className="hover:text-secondary cursor-pointer text-white transition-colors"
               title="View on Tally"
             >
-              <ExternalLink className="size-4" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );

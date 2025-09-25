@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { SkeletonRow } from "@/shared/components";
+import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address } from "viem";
@@ -99,12 +99,14 @@ export const VotingPowerTable = ({
         return (
           <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
             Amount ({daoId})
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
-                props={{ className: "ml-2 size-4" }}
+                props={{ className: "size-4" }}
                 activeState={
                   sortBy === "balance" && sortOrder === "asc"
                     ? ArrowState.UP
@@ -113,7 +115,7 @@ export const VotingPowerTable = ({
                       : ArrowState.DEFAULT
                 }
               />
-            </button>
+            </Button>
           </div>
         );
       },
