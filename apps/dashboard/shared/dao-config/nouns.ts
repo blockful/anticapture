@@ -222,5 +222,5 @@ export const NOUNS: DaoConfiguration = {
     },
   },
   resilienceStages: true,
-  tokenDistribution: true,
+  tokenDistribution: false,
 };
