@@ -102,7 +102,7 @@ export const TokenDistributionChart = ({
         className="h-full w-full justify-start"
         config={chartConfig}
       >
-        <ComposedChart data={chartData} syncId="tokenChart">
+        <ComposedChart data={chartData} margin={{ right: 20 }}>
           <defs>
             {/* Generate gradients for each AREA metric */}
             {appliedMetrics
