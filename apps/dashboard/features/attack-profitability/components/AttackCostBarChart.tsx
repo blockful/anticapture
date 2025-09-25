@@ -80,7 +80,7 @@ export const AttackCostBarChart = ({
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData({
     daoId: selectedDaoId,
-    days: TimeInterval.ONE_DAY,
+    days: TimeInterval.SEVEN_DAYS,
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
