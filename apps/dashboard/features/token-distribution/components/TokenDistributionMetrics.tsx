@@ -115,14 +115,19 @@ export const TokenDistributionMetrics = ({
                         )
                         .filter((val) => val !== undefined);
 
-                      if (metricData.length === 0) {
-                        return null;
-                      }
+                      // Always render the metric, even if no data - show as undefined
+                      // if (metricData.length === 0) {
+                      //   return null;
+                      // }
 
                       let currentValue: number | string | undefined;
                       let previousValue: number | string | undefined;
 
-                      if (metric.key === "PROPOSALS_GOVERNANCE") {
+                      if (metricData.length === 0) {
+                        // No data available - show as undefined
+                        currentValue = undefined;
+                        previousValue = undefined;
+                      } else if (metric.key === "PROPOSALS_GOVERNANCE") {
                         // For proposals, count actual proposals in the visible data range
                         // Count all the proposal titles (strings) in the data
                         currentValue = metricData.reduce((sum: number, val) => {
@@ -156,7 +161,9 @@ export const TokenDistributionMetrics = ({
                       let formattedMetricsValue: string;
                       const metricKey = metric.key as string;
 
-                      if (isVolumeMetric) {
+                      if (currentValue === undefined) {
+                        formattedMetricsValue = ""; // Show "No data" when undefined
+                      } else if (isVolumeMetric) {
                         formattedMetricsValue = ""; // No amount for volume metrics
                       } else if (metricKey === "TOKEN_PRICE") {
                         formattedMetricsValue = `$${Number(currentValue).toFixed(2)}`;
@@ -173,12 +180,13 @@ export const TokenDistributionMetrics = ({
                         );
                       }
 
-                      // Format variation - hide for volume metrics or when 0
-                      const formattedVariation = isVolumeMetric
-                        ? "" // No variation for volume metrics
-                        : Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
-                          ? "" // Empty string when variation is essentially zero
-                          : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
+                      // Format variation - hide for volume metrics, when 0, or when no data
+                      const formattedVariation =
+                        isVolumeMetric || currentValue === undefined
+                          ? "" // No variation for volume metrics or when no data
+                          : Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
+                            ? "" // Empty string when variation is essentially zero
+                            : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
 
                       const handleClick = () => {
                         const metricKey = appliedMetrics.find(
