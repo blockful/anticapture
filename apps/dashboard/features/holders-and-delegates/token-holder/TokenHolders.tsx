@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -23,7 +23,7 @@ interface TokenHolderTableData {
   address: Address;
   type: string | undefined;
   balance: number;
-  variation: { percentageChange: number; absoluteChange: number };
+  variation: { percentageChange: number; absoluteChange: number } | null;
   delegate: Address;
 }
 
@@ -58,9 +58,41 @@ export const TokenHolders = ({
     address: currentAddressFilter,
   });
 
-  const addresses = tokenHoldersData?.map((holder) => holder.accountId);
-  const { data: historicalBalancesData, loading: historicalDataLoading } =
-    useHistoricalBalances(daoId, addresses || [], days);
+  const [historicalBalancesCache, setHistoricalBalancesCache] = useState<
+    Map<string, string>
+  >(new Map());
+
+  const newAddressesToFetch = useMemo(
+    () =>
+      tokenHoldersData
+        ?.map((h) => h.accountId.toLowerCase())
+        .filter((addr) => !historicalBalancesCache.has(addr)) || [],
+    [tokenHoldersData, historicalBalancesCache],
+  );
+
+  const { data: newHistoricalBalances } = useHistoricalBalances(
+    daoId,
+    newAddressesToFetch,
+    days,
+  );
+
+  useEffect(() => {
+    if (newHistoricalBalances && newHistoricalBalances.length > 0) {
+      setHistoricalBalancesCache((prevCache) => {
+        const newCache = new Map(prevCache);
+        newHistoricalBalances.forEach((h) => {
+          if (h) {
+            newCache.set(h.address.toLowerCase(), h.balance);
+          }
+        });
+        return newCache;
+      });
+    }
+  }, [newHistoricalBalances]);
+
+  useEffect(() => {
+    setHistoricalBalancesCache(new Map());
+  }, [sortOrder, currentAddressFilter, days]);
 
   const handleOpenDrawer = (address: string) => {
     setSelectedTokenHolder(address);
@@ -73,9 +105,8 @@ export const TokenHolders = ({
   const calculateVariation = (
     currentBalance: string,
     historicalBalance: string | undefined,
-  ): { percentageChange: number; absoluteChange: number } => {
-    if (!currentBalance || !historicalBalance)
-      return { percentageChange: 0, absoluteChange: 0 };
+  ): { percentageChange: number; absoluteChange: number } | null => {
+    if (!historicalBalance) return null;
 
     try {
       const current = Number(formatUnits(BigInt(currentBalance), 18));
@@ -98,41 +129,25 @@ export const TokenHolders = ({
     }
   };
 
-  // Create base data first (without historical data)
-  const baseData: TokenHolderTableData[] =
-    tokenHoldersData?.map((holder) => ({
-      address: holder.accountId as Address,
-      type: holder.account?.type,
-      balance: Number(formatUnits(BigInt(holder.balance), 18)),
-      variation: { percentageChange: 0, absoluteChange: 0 }, // Default values
-      delegate: holder.delegate as Address,
-    })) || [];
+  const tableData: TokenHolderTableData[] = useMemo(
+    () =>
+      tokenHoldersData?.map((holder) => {
+        const historicalBalance = historicalBalancesCache.get(
+          holder.accountId.toLowerCase(),
+        );
 
-  // Enrich data with historical information when available
-  const enrichedData: TokenHolderTableData[] =
-    tokenHoldersData?.map((holder) => {
-      const historicalBalance = historicalBalancesData?.find(
-        (h) => h.address.toLowerCase() === holder.accountId.toLowerCase(),
-      );
+        const variation = calculateVariation(holder.balance, historicalBalance);
 
-      const variation = calculateVariation(
-        holder.balance,
-        historicalBalance?.balance,
-      );
-
-      return {
-        address: holder.accountId as Address,
-        type: holder.account?.type,
-        balance: Number(formatUnits(BigInt(holder.balance), 18)),
-        variation,
-        delegate: holder.delegate as Address,
-      };
-    }) || [];
-
-  // Use enriched data if available, otherwise use base data
-  const data = historicalBalancesData ? enrichedData : baseData;
-
-  const tableData = data;
+        return {
+          address: holder.accountId as Address,
+          type: holder.account?.type,
+          balance: Number(formatUnits(BigInt(holder.balance), 18)),
+          variation,
+          delegate: holder.delegate as Address,
+        };
+      }) || [],
+    [tokenHoldersData, historicalBalancesCache],
+  );
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -253,7 +268,12 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (historicalDataLoading || loading) {
+        const variation = row.getValue("variation") as {
+          percentageChange: number;
+          absoluteChange: number;
+        } | null;
+
+        if (variation === null) {
           return (
             <div className="flex w-full items-center justify-start">
               <SkeletonRow
@@ -263,11 +283,6 @@ export const TokenHolders = ({
             </div>
           );
         }
-
-        const variation = row.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
 
         return (
           <div className="flex w-full items-center justify-start gap-2 px-4 text-sm">
