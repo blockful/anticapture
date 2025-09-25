@@ -6,13 +6,10 @@ import {
   CoingeckoTokenIdEnum,
   CoingeckoHistoricalMarketData,
 } from "../services/coingecko/types";
-import { DAYS_IN_YEAR } from "@/lib/constants";
-
 interface TokenHistoricalDataClient {
   getHistoricalTokenData(
     tokenId: CoingeckoTokenId,
     days: number,
-    toCurrency: string,
   ): Promise<CoingeckoHistoricalMarketData>;
 }
 
@@ -31,10 +28,10 @@ export function tokenHistoricalData(
       tags: ["tokens"],
       request: {
         query: z.object({
-          toCurrency: z.string().default("usd"),
           days: z
             .enum(DaysOpts)
-            .default("7d")
+            .optional()
+            .default("365d")
             .transform((val) => parseInt(val.replace("d", ""))),
         }),
       },
@@ -54,18 +51,11 @@ export function tokenHistoricalData(
       },
     }),
     async (context) => {
-      const { toCurrency, days } = context.req.valid("query");
-
-      const daysNumber = days || DAYS_IN_YEAR;
-      const currency = toCurrency || "usd";
+      const { days } = context.req.valid("query");
 
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
-      const data = await client.getHistoricalTokenData(
-        tokenId,
-        daysNumber,
-        currency,
-      );
+      const data = await client.getHistoricalTokenData(tokenId, days);
 
       return context.json(data, 200);
     },

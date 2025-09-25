@@ -15,23 +15,20 @@ export interface DaoTokenHistoricalDataResponse {
 }
 
 const DEFAULT_INTERVAL = TimeInterval.SEVEN_DAYS;
-const DEFAULT_CURRENCY = "usd";
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
   days = DEFAULT_INTERVAL,
-  toCurrency = DEFAULT_CURRENCY,
 }: {
   daoId: DaoIdEnum;
   days?: TimeInterval;
-  toCurrency?: string;
 }): Promise<DaoTokenHistoricalDataResponse | null> => {
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
 
   const query = `query GetHistoricalTokenData {
-  historicalTokenData(days: _${days}, toCurrency: "${toCurrency}") {
+  historicalTokenData(days: _${days}) {
     market_caps
     prices
   }
@@ -58,22 +55,15 @@ export const fetchDaoTokenHistoricalData = async ({
 export const useDaoTokenHistoricalData = ({
   daoId,
   days,
-  toCurrency,
   config,
 }: {
   daoId: DaoIdEnum;
   days?: TimeInterval;
-  toCurrency?: string;
   config?: Partial<
     SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>
   >;
 }) => {
-  const effectiveDays = days ?? DEFAULT_INTERVAL;
-  const effectiveCurrency = toCurrency ?? DEFAULT_CURRENCY;
-
-  const key = daoId
-    ? ["daoTokenHistoricalData", daoId, effectiveDays, effectiveCurrency]
-    : null;
+  const key = daoId ? ["daoTokenHistoricalData", daoId, days] : null;
 
   const { data, error, isValidating, mutate } =
     useSWR<DaoTokenHistoricalDataResponse | null>(
@@ -81,8 +71,7 @@ export const useDaoTokenHistoricalData = ({
       () =>
         fetchDaoTokenHistoricalData({
           daoId,
-          days: effectiveDays,
-          toCurrency: effectiveCurrency,
+          days,
         }),
       { revalidateOnFocus: false, ...config },
     );

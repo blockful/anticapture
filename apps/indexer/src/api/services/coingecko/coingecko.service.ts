@@ -13,11 +13,10 @@ export class CoingeckoService {
   async getHistoricalTokenData(
     tokenId: CoingeckoTokenId,
     days: number = DAYS_IN_YEAR,
-    toCurrency: string = "usd",
   ): Promise<CoingeckoHistoricalMarketData> {
     try {
       const response = await fetch(
-        `${this.coingeckoApiUrl}/coins/${tokenId}/market_chart?vs_currency=${toCurrency}&days=${days}&interval=daily`,
+        `${this.coingeckoApiUrl}/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
         {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,
