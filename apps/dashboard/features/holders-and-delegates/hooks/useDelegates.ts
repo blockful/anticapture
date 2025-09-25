@@ -57,6 +57,7 @@ interface UseDelegatesParams {
   orderDirection?: string;
   days: TimeInterval;
   address?: string;
+  limit?: number;
 }
 
 export const useDelegates = ({
@@ -66,8 +67,9 @@ export const useDelegates = ({
   orderDirection = "desc",
   days,
   address,
+  limit = 15,
 }: UseDelegatesParams): UseDelegatesResult => {
-  const itemsPerPage = 10; // This should match the limit in the GraphQL query
+  const itemsPerPage = limit; // This should match the limit in the GraphQL query
 
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState(1);
@@ -99,6 +101,7 @@ export const useDelegates = ({
       before: undefined,
       orderBy,
       orderDirection,
+      limit,
       ...(address && { addresses: [address] }),
     },
     context: {

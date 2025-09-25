@@ -38,7 +38,7 @@ export const TokenHolders = ({
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
-  const pageLimit: number = 10;
+  const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
 
   const handleAddressFilterApply = (address: string | undefined) => {
@@ -319,7 +319,7 @@ export const TokenHolders = ({
           <TheTable
             columns={tokenHoldersColumns}
             data={
-              Array.from({ length: 10 }, () => ({
+              Array.from({ length: pageLimit }, () => ({
                 address: zeroAddress,
                 type: "EOA" as string | undefined,
                 balance: 0,
