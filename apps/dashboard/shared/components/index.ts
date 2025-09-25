@@ -32,5 +32,7 @@ export * from "@/shared/components/cards/MetricCard";
 export * from "@/shared/components/design-system/TextIconLeft";
 export * from "@/shared/components/design-system/SimpleProgressBar";
 export * from "@/shared/components/design-system/ActivityIndicator";
+export * from "@/shared/components/design-system/buttons/button/Button";
+export * from "@/shared/components/design-system/buttons/icon-button/IconButton";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";

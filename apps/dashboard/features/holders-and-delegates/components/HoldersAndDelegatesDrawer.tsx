@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
@@ -15,6 +14,7 @@ import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/vo
 import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
+import { IconButton } from "@/shared/components";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -112,15 +112,12 @@ export const HoldersAndDelegatesDrawer = ({
                 </div>
               </div>
 
-              <Button
-                variant="ghost"
+              <IconButton
+                variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="bg-surface-default hover:bg-surface-contrast border-middle-dark size-7 border p-0"
-              >
-                <X className="text-primary size-3" />
-                <span className="sr-only">Close</span>
-              </Button>
+                icon={X}
+              />
             </div>
             <Tabs
               defaultValue={entities[entityType].tabs[0].id}
