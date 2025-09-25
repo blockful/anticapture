@@ -9,13 +9,13 @@ export type DbProposal = {
   dao_id: string;
   proposer_account_id: string;
   description: string;
-  start_block: string;
-  end_block: string;
+  start_block: number;
+  end_block: number;
   timestamp: string;
   status: string;
-  for_votes: string;
-  against_votes: string;
-  abstain_votes: string;
+  for_votes: bigint;
+  against_votes: bigint;
+  abstain_votes: bigint;
   proposal_end_timestamp: string;
 };
 
@@ -214,8 +214,8 @@ export class DrizzleProposalsActivityRepository
         dao_id: string;
         proposer_account_id: string;
         description: string;
-        start_block: string;
-        end_block: string;
+        start_block: number;
+        end_block: number;
         timestamp: string;
         status: string;
         for_votes: string;
@@ -246,9 +246,9 @@ export class DrizzleProposalsActivityRepository
         end_block: row.end_block,
         timestamp: row.timestamp,
         status: row.status,
-        for_votes: row.for_votes,
-        against_votes: row.against_votes,
-        abstain_votes: row.abstain_votes,
+        for_votes: BigInt(row.for_votes),
+        against_votes: BigInt(row.against_votes),
+        abstain_votes: BigInt(row.abstain_votes),
         proposal_end_timestamp: row.proposal_end_timestamp,
       },
       userVote: row.vote_id

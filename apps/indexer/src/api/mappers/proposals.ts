@@ -19,10 +19,15 @@ export const ProposalsRequestSchema = z.object({
     .optional(),
   orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
   status: z
-    .string()
+    .union([z.string(), z.array(z.string())])
     .optional()
-    .transform((val) => val?.toUpperCase()),
-  fromDate: z.number().optional(),
+    .transform((val) => {
+      if (!val) return undefined;
+      // Always normalize to array and uppercase
+      const normalized = typeof val === "string" ? [val] : val;
+      return normalized.map((v) => v.toUpperCase());
+    }),
+  fromDate: z.coerce.number().optional(),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
@@ -41,10 +46,18 @@ export const ProposalResponseSchema = z.object({
   forVotes: z.string(),
   againstVotes: z.string(),
   abstainVotes: z.string(),
+  startTimestamp: z.string(),
   endTimestamp: z.string(),
+  quorum: z.string(),
+  calldatas: z.array(z.string()),
+  values: z.array(z.string()),
+  targets: z.array(z.string()),
 });
 
-export const ProposalsResponseSchema = z.array(ProposalResponseSchema);
+export const ProposalsResponseSchema = z.object({
+  items: z.array(ProposalResponseSchema),
+  totalCount: z.number(),
+});
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
@@ -57,7 +70,12 @@ export type ProposalParams = z.infer<typeof ProposalRequestSchema>;
 export type ProposalResponse = z.infer<typeof ProposalResponseSchema>;
 
 export const ProposalMapper = {
-  toApi: (p: DBProposal): ProposalResponse => {
+  toApi: (
+    p: DBProposal,
+    quorum: bigint,
+    blockTime: number,
+    votingDelay: bigint,
+  ): ProposalResponse => {
     return {
       id: p.id,
       daoId: p.daoId,
@@ -73,6 +91,14 @@ export const ProposalMapper = {
       againstVotes: p.againstVotes.toString(),
       abstainVotes: p.abstainVotes.toString(),
       endTimestamp: p.endTimestamp.toString(),
+      startTimestamp: (
+        p.endTimestamp -
+        (BigInt(p.endBlock - p.startBlock) + votingDelay) * BigInt(blockTime)
+      ).toString(),
+      quorum: quorum.toString(),
+      calldatas: p.calldatas,
+      values: p.values.map((v) => v.toString()),
+      targets: p.targets,
     };
   },
 };

@@ -88,7 +88,10 @@ function TableHead({
   return (
     <th
       data-slot="table-head"
-      className={cn("h-10 text-left [&:has([role=checkbox])]:pr-0", className)}
+      className={cn(
+        "h-10 text-left font-normal [&:has([role=checkbox])]:pr-0",
+        className,
+      )}
       {...props}
     />
   );
@@ -99,11 +102,7 @@ function TableCell({
   ...props
 }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td
-      data-slot="table-cell"
-      className={cn("bg-light p-0", className)}
-      {...props}
-    />
+    <td data-slot="table-cell" className={cn("p-0", className)} {...props} />
   );
 }
 

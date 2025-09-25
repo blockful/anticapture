@@ -1,3 +1,5 @@
+import { createPublicClient, http } from "viem";
+
 import { env } from "@/env";
 import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
@@ -18,8 +20,13 @@ import {
   ARBTokenIndexer,
   GovernorIndexer as ARBGovernorIndexer,
 } from "@/indexer/arb";
+import {
+  GTCTokenIndexer,
+  GovernorIndexer as GTCGovernorIndexer,
+} from "@/indexer/gtc";
+import { getClient } from "./lib/client";
 
-const { DAO_ID: daoId, CHAIN_ID: chainId } = env;
+const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
 const chain = getChain(chainId);
 if (!chain) {
@@ -27,26 +34,46 @@ if (!chain) {
 }
 console.log("Connected to chain", chain.name);
 
+const client = createPublicClient({
+  chain,
+  transport: http(rpcUrl),
+});
+
+const daoClient = getClient(daoId, client);
+if (!daoClient) {
+  throw new Error(`DAO client not found for DAO ${daoId}`);
+}
+
 const { token, blockTime } = CONTRACT_ADDRESSES[daoId];
 switch (daoId) {
   case DaoIdEnum.ENS: {
     ENSTokenIndexer(token.address, token.decimals);
-    ENSGovernorIndexer(blockTime);
+    ENSGovernorIndexer(daoClient, blockTime);
     break;
   }
   case DaoIdEnum.UNI: {
     UNITokenIndexer(token.address, token.decimals);
-    UNIGovernorIndexer(blockTime);
+    UNIGovernorIndexer(daoClient, blockTime);
     break;
   }
   case DaoIdEnum.ARB: {
     ARBTokenIndexer(token.address, token.decimals);
-    ARBGovernorIndexer(blockTime);
+    ARBGovernorIndexer(daoClient, blockTime);
     break;
   }
   case DaoIdEnum.OP: {
     OPTokenIndexer(token.address, token.decimals);
-    OPGovernorIndexer(blockTime);
+    OPGovernorIndexer(daoClient, blockTime);
+    break;
+  }
+  case DaoIdEnum.TEST: {
+    ENSTokenIndexer(token.address, token.decimals, daoId);
+    ENSGovernorIndexer(daoClient, blockTime);
+    break;
+  }
+  case DaoIdEnum.GTC: {
+    GTCTokenIndexer(token.address, token.decimals);
+    GTCGovernorIndexer(daoClient, blockTime);
     break;
   }
   default:

@@ -10,22 +10,32 @@ import {
   governanceActivity,
   tokenHistoricalData,
   tokenDistribution,
-  assets,
   proposalsActivity,
   historicalOnchain,
+  transactions,
   proposals,
   daoController,
+  lastUpdate,
+  assets,
+  votingPower,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
-import { DuneService } from "@/api/services/dune/dune.service";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
-import { DrizzleRepository } from "./repositories";
+import {
+  DrizzleRepository,
+  TransactionsRepository,
+  VotingPowerRepository,
+} from "./repositories";
+import { TransactionsService } from "./services/transactions";
 import { errorHandler } from "./middlewares";
 import { ProposalsService } from "./services/proposals";
-import { getGovernor } from "@/lib/governor";
+import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
+import { HistoricalVotingPowerService, VotingPowerService } from "./services";
+import { DuneService } from "./services/dune/dune.service";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -70,22 +80,33 @@ if (env.COINGECKO_API_KEY) {
   tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
 }
 
-const governorClient = getGovernor(env.DAO_ID, client);
+const daoClient = getClient(env.DAO_ID, client);
 
-if (!governorClient) {
-  throw new Error(`Governor client not found for DAO ${env.DAO_ID}`);
+if (!daoClient) {
+  throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
+const { blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
+
 const repo = new DrizzleRepository();
+const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
+const transactionsRepo = new TransactionsRepository();
+const transactionsService = new TransactionsService(transactionsRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
-proposalsActivity(app, proposalsRepo, env.DAO_ID);
-proposals(app, new ProposalsService(repo, governorClient));
-historicalOnchain(app, env.DAO_ID);
-daoController(app, governorClient, env.DAO_ID);
-
+daoController(app, daoClient, env.DAO_ID);
+proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
+proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
+historicalOnchain(
+  app,
+  env.DAO_ID,
+  new HistoricalVotingPowerService(votingPowerRepo),
+);
+transactions(app, transactionsService);
+lastUpdate(app);
+votingPower(app, new VotingPowerService(votingPowerRepo));
 docs(app);
 
 export default app;

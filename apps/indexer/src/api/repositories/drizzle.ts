@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, sql } from "ponder";
+import { and, asc, desc, eq, gte, inArray, sql } from "ponder";
 import { db } from "ponder:api";
 import { proposalsOnchain } from "ponder:schema";
 import { SQL } from "drizzle-orm";
@@ -11,7 +11,6 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
-import { ProposalStatus } from "@/lib/constants";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -49,6 +48,16 @@ export class DrizzleRepository {
     `;
     const result = await db.execute<ActiveSupplyQueryResult>(query);
     return result.rows[0];
+  }
+
+  async getVotingDelay(): Promise<bigint> {
+    const result = await db.query.dao.findFirst({
+      columns: {
+        votingDelay: true,
+      },
+    });
+
+    return result!.votingDelay;
   }
 
   async getProposalsCompare(days: DaysEnum) {
@@ -111,23 +120,15 @@ export class DrizzleRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    status: string | undefined,
+    status: string[] | undefined,
     fromDate: number | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
-    if (status) {
-      // the following statuses are not handled by the indexing process
-      // being stored as "PENDING" in the database to be further processed
-      if (
-        status === ProposalStatus.ACTIVE ||
-        status === ProposalStatus.DEFEATED ||
-        status === ProposalStatus.SUCCEEDED
-      ) {
-        whereClauses.push(eq(proposalsOnchain.status, ProposalStatus.PENDING));
-      } else {
-        whereClauses.push(eq(proposalsOnchain.status, status));
-      }
+
+    if (status && status.length > 0) {
+      whereClauses.push(inArray(proposalsOnchain.status, status));
     }
+
     if (fromDate) {
       whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
     }
@@ -149,6 +150,10 @@ export class DrizzleRepository {
     return await db.query.proposalsOnchain.findFirst({
       where: eq(proposalsOnchain.id, proposalId),
     });
+  }
+
+  async getProposalsCount(): Promise<number> {
+    return db.$count(proposalsOnchain);
   }
 
   now() {

@@ -42,16 +42,19 @@ export const UNI: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
-          "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
-          "Currently, the DAO’s domains have no DNS-level protections (High Risk).",
-          "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
+          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable",
+          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity",
+          "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
+          "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
         ],
+        riskExplanation: `Although protected from spoofing or hijacking, the service used for voting could still be internally compromised.\n
+          A change in the voting interface could be used to manipulate the results of the vote, hiding malicious txns, or even changing selection of votes.`,
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         value: "<10k USD",

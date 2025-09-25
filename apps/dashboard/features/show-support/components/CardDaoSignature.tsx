@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { Address } from "viem";
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, Loader2, Pencil } from "lucide-react";
 
@@ -53,7 +52,7 @@ export const CardDaoSignature = ({
             />
           </div>
         </div>
-        <div className="border-light-dark bg-surface-default flex w-full items-center justify-center rounded-md border py-2.5 pr-[15px] pl-3.5 sm:hidden">
+        <div className="border-light-dark bg-surface-default flex w-full items-center justify-center rounded-md border py-2.5 pl-3.5 pr-[15px] sm:hidden">
           <Image
             alt={`${signatures?.userSigned ? "Show Support Arbitrum" : "Dao Supported"}`}
             src={
@@ -68,30 +67,27 @@ export const CardDaoSignature = ({
       {!signatures?.userSigned && (
         <div className="flex w-full flex-col justify-center gap-4">
           <div className="flex flex-col gap-1.5">
-            <h3 className="text-primary flex text-[18px] leading-6 font-medium">
-              Sign to request Arbitrum DAO DATA
+            <h3 className="text-primary flex text-[18px] font-medium leading-6">
+              Sign to request Arbitrum DAO data
             </h3>
             <p className="text-secondary flex text-sm font-normal">
-              By signing, we do not collect any information, and the only
-              signature involved is related to a message, which carries no risk.
-              This helps us understand how many members and delegates are
-              interested in the data of a particular DAO. We appreciate your
+              By signing, we don&apos;t collect any personal information, and
+              the only signature involved is related to a message, which carries
+              no risk. This helps us understand how many members and delegates
+              are interested in the data of a particular DAO. We appreciate your
               support.
             </p>
           </div>
           {!isConnected && (
             <div className="flex">
-              <ConnectWallet
-                label="Connect Wallet"
-                className="text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! py-1 transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
-              />
+              <ConnectWallet label="Connect Wallet" />
             </div>
           )}
           {isConnected && !signatures?.userSigned && (
             <div className="flex">
               <button
                 onClick={handleSubmit}
-                className="btn-connect-wallet text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!"
+                className="btn-connect-wallet text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! transition-all! duration-1000! ease-in-out! hover:bg-white/70! text-sm font-medium"
               >
                 {isLoading ? (
                   <>
@@ -109,7 +105,7 @@ export const CardDaoSignature = ({
           )}
           {isConnected && signatures?.userSigned && (
             <div className="flex">
-              <button className="btn-connect-wallet text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! text-sm font-medium transition-all! duration-1000! ease-in-out! hover:bg-white/70!">
+              <button className="btn-connect-wallet text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! transition-all! duration-1000! ease-in-out! hover:bg-white/70! text-sm font-medium">
                 <CheckCircle2 className="size-4" />
                 Signed
               </button>
@@ -122,7 +118,7 @@ export const CardDaoSignature = ({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="text-success size-5" />
-              <h3 className="text-primary flex text-[18px] leading-6 font-medium">
+              <h3 className="text-primary flex text-[18px] font-medium leading-6">
                 Arbitrum DAO support confirmed
               </h3>
             </div>

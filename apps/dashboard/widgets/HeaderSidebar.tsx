@@ -10,7 +10,8 @@ import {
   ConnectWallet,
   BottomNavigationButtons,
 } from "@/shared/components";
-import { AnticaptureIcon } from "@/shared/components/icons";
+import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 export const HeaderSidebar = () => {
   const router = useRouter();
 
@@ -28,11 +29,18 @@ export const HeaderSidebar = () => {
           router.push("/");
         },
       },
-      // {
-      //   anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
-      //   label: SECTIONS_CONSTANTS.alerts.title,
-      //   icon: TelegramIcon,
-      // },
+      {
+        anchorId: "get-security-alerts",
+        label: "Alerts",
+        icon: TelegramIcon,
+        onClick: () => {
+          window.open(
+            ANTICAPTURE_TELEGRAM_BOT,
+            "_blank",
+            "noopener,noreferrer",
+          );
+        },
+      },
     ],
     [router],
   );
@@ -57,9 +65,12 @@ export const HeaderSidebar = () => {
                 icon={item.icon}
                 label={item.label}
                 className="text-xs! font-medium! flex-col gap-1"
-                onClick={() => {
-                  router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
-                }}
+                onClick={
+                  item.onClick ||
+                  (() => {
+                    router.push(`/${item.anchorId ? `#${item.anchorId}` : ""}`);
+                  })
+                }
               />
             ))}
           </div>
@@ -68,8 +79,8 @@ export const HeaderSidebar = () => {
             <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-b border-t py-2">
               <BottomNavigationButtons isCompact />
             </div>
-            <div className="mx-1.5 flex flex-col px-2 py-4">
-              <ConnectWallet label="" />
+            <div className="mx-auto flex flex-col px-2 py-4">
+              <ConnectWallet label="" className="px-2.5" />
             </div>
           </div>
         </div>

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
@@ -15,8 +14,7 @@ import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/vo
 import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
-import { TimeInterval } from "@/shared/types/enums";
-import { getTimeDataFromPeriod } from "@/features/holders-and-delegates/components/Delegates";
+import { IconButton } from "@/shared/components";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -35,7 +33,6 @@ export const HoldersAndDelegatesDrawer = ({
   address,
   daoId,
 }: HoldersAndDelegatesDrawerProps) => {
-  const fromDate = getTimeDataFromPeriod(TimeInterval.ONE_YEAR);
   const entities = {
     delegate: {
       title: "Delegate",
@@ -44,11 +41,7 @@ export const HoldersAndDelegatesDrawer = ({
           id: "votes",
           label: "Votes",
           content: (
-            <DelegateProposalsActivity
-              address={address}
-              daoId={daoId}
-              fromDate={fromDate}
-            />
+            <DelegateProposalsActivity address={address} daoId={daoId} />
           ),
         },
         {
@@ -113,20 +106,18 @@ export const HoldersAndDelegatesDrawer = ({
                     variant="rounded"
                     nameClassName="text-lg leading-[18px]"
                     containerClassName="gap-2"
+                    showFullAddress={true}
                   />
                   <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
               </div>
 
-              <Button
-                variant="ghost"
+              <IconButton
+                variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="bg-surface-default hover:bg-surface-contrast border-middle-dark size-7 border p-0"
-              >
-                <X className="text-primary size-3" />
-                <span className="sr-only">Close</span>
-              </Button>
+                icon={X}
+              />
             </div>
             <Tabs
               defaultValue={entities[entityType].tabs[0].id}

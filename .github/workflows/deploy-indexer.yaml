@@ -37,7 +37,7 @@ jobs:
         id: get-daos
         run: |
           # Extract DAO names from config files (excluding local configs)
-          daos=$(ls apps/indexer/config/*.config.ts | grep -v local | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
+          daos=$(ls apps/indexer/config/*.config.ts | grep -v test | grep -v arbitrum | sed 's/.*\/\([^.]*\)\.config\.ts/\1/')
 
           # Create DAO array
           dao_array="["
@@ -77,11 +77,6 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
-      - name: Prune DB inactive schemas
-        if: ${{ needs.changes.outputs.indexer == 'true' }}
-        run: |
-          pnpm indexer db:list
-          pnpm indexer db:prune
       - name: Deploy ${{ matrix.dao }}-indexer
         if: ${{ needs.changes.outputs.indexer == 'true' }}
         run: |

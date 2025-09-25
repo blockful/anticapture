@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { BadgeInAnalysis } from "@/shared/components";
+import { BadgeInAnalysis, Button } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronsUpDown } from "lucide-react";
@@ -107,6 +107,22 @@ export const HeaderDAOSidebarDropdown = () => {
           daoConfigByDaoId[DaoIdEnum.OPTIMISM].supportStage ===
           SupportStageEnum.ANALYSIS,
       },
+      {
+        id: 4,
+        label: "Gitcoin",
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.GITCOIN}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
+        href: `/${DaoIdEnum.GITCOIN.toLowerCase()}`,
+        name: DaoIdEnum.GITCOIN,
+        isDisabled:
+          daoConfigByDaoId[DaoIdEnum.GITCOIN].supportStage ===
+          SupportStageEnum.ANALYSIS,
+      },
     ],
     [],
   );
@@ -130,8 +146,10 @@ export const HeaderDAOSidebarDropdown = () => {
       ref={dropdownRef}
     >
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
-        <button
-          className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md p-1 hover:bg-[#333] sm:rounded-md sm:p-1"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
@@ -145,7 +163,7 @@ export const HeaderDAOSidebarDropdown = () => {
           <div>
             <ChevronsUpDown className="text-secondary size-5" />
           </div>
-        </button>
+        </Button>
       </div>
 
       {isOpen && (
@@ -154,12 +172,11 @@ export const HeaderDAOSidebarDropdown = () => {
           role="menu"
         >
           {dropdownItems.map((item) => (
-            <button
+            <Button
+              variant="ghost"
+              size="lg"
               key={item.id}
-              className={cn(
-                "flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2",
-                !item.isDisabled && "hover:bg-[#333]",
-              )}
+              className={cn("w-full", !item.isDisabled && "hover:bg-muted")}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
@@ -189,7 +206,7 @@ export const HeaderDAOSidebarDropdown = () => {
                   />
                 )}
               </div>
-            </button>
+            </Button>
           ))}
         </div>
       )}

@@ -7,8 +7,9 @@ import { ENSClient } from "@/indexer/ens/client";
 import { OPClient } from "@/indexer/op";
 import { DAOClient } from "@/interfaces/client";
 import { ARBClient } from "@/indexer/arb";
+import { GTCClient } from "@/indexer/gtc/client";
 
-export function getGovernor<
+export function getClient<
   TTransport extends Transport = Transport,
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
@@ -29,6 +30,14 @@ export function getGovernor<
     }
     case DaoIdEnum.ARB: {
       return new ARBClient(client, governor.address);
+    }
+    case DaoIdEnum.TEST: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new ENSClient(client, governor.address);
+    }
+    case DaoIdEnum.GTC: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new GTCClient(client, governor.address);
     }
     default:
       return null;

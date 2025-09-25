@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import { TheTable, SkeletonRow, Button, IconButton } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
@@ -26,7 +25,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const [sortBy, setSortBy] = useState<string>("timestamp");
+  const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const {
@@ -39,7 +38,7 @@ export const DelegateDelegationHistoryTable = ({
   } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
 
   // Handle sorting
-  const handleSort = (field: string) => {
+  const handleSort = (field: "timestamp" | "delta") => {
     if (sortBy === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -116,12 +115,13 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "timestamp"
                 ? sortDirection === "asc"
@@ -137,7 +137,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-2">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
@@ -158,12 +158,13 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("delta")}
         >
-          <h4 className="text-table-header">Amount (ENS)</h4>
+          <h4 className="text-table-header">Amount ({daoId})</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "delta"
                 ? sortDirection === "asc"
@@ -189,13 +190,11 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            Number(
-              formatUnits(BigInt(item.delegation.delegatedValue || "0"), 18),
-            ),
+            Number(formatUnits(BigInt(item.delegation.value), 18)),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.amount || "0"), 18)),
+            Number(formatUnits(BigInt(item.transfer.value), 18)),
           );
         }
 
@@ -243,13 +242,13 @@ export const DelegateDelegationHistoryTable = ({
         // Get delegator address based on the transaction type and direction
         let delegatorAddress = "";
         if (item.delegation) {
-          delegatorAddress = item.delegation.delegatorAccountId;
+          delegatorAddress = item.delegation.from;
         } else if (item.transfer) {
           // For transfers: if delta is negative, fromAccountId is delegator
           // If delta is positive, toAccountId is delegator
           delegatorAddress = item.isGain
-            ? item.transfer.toAccountId
-            : item.transfer.fromAccountId;
+            ? item.transfer.to
+            : item.transfer.from;
         }
 
         return (
@@ -320,7 +319,7 @@ export const DelegateDelegationHistoryTable = ({
         let delegateAddress = accountId;
         if (item.delegation) {
           // For delegation, delegate is the one receiving the delegation
-          delegateAddress = item.delegation.delegateAccountId;
+          delegateAddress = item.delegation.to;
         } else if (item.transfer) {
           // For transfers, the selected address should always be at the delegates column
           delegateAddress = accountId;
@@ -348,7 +347,7 @@ export const DelegateDelegationHistoryTable = ({
               rel="noopener noreferrer"
               className="cursor-pointer"
             >
-              <ExternalLink className="text-secondary hover:text-primary size-4 transition-colors" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );
@@ -410,7 +409,6 @@ export const DelegateDelegationHistoryTable = ({
 
   return (
     <div className="bg-surface-default flex flex-col">
-      {/* Table */}
       <div className="flex flex-col gap-2 p-4">
         <TheTable
           columns={columns}
@@ -420,18 +418,15 @@ export const DelegateDelegationHistoryTable = ({
           isTableSmall={true}
         />
 
-        {/* Pagination */}
-        {paginationInfo.totalPages > 1 && (
-          <Pagination
-            currentPage={paginationInfo.currentPage}
-            totalPages={paginationInfo.totalPages}
-            onPrevious={fetchPreviousPage}
-            onNext={fetchNextPage}
-            hasNextPage={paginationInfo.hasNextPage}
-            hasPreviousPage={paginationInfo.hasPreviousPage}
-            isLoading={loading}
-          />
-        )}
+        <Pagination
+          currentPage={paginationInfo.currentPage}
+          totalPages={paginationInfo.totalPages}
+          onPrevious={fetchPreviousPage}
+          onNext={fetchNextPage}
+          hasNextPage={paginationInfo.hasNextPage}
+          hasPreviousPage={paginationInfo.hasPreviousPage}
+          isLoading={loading}
+        />
       </div>
     </div>
   );

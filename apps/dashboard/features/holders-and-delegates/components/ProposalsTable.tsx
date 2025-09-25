@@ -7,8 +7,9 @@ import {
   SkeletonRow,
   TextIconLeft,
   SimpleProgressBar,
+  Button,
+  IconButton,
 } from "@/shared/components";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
@@ -23,10 +24,10 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import {
-  getFinalResultData,
   getUserVoteData,
   extractProposalName,
   getVoteTimingData,
+  proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 
@@ -72,12 +73,11 @@ export const ProposalsTable = ({
     if (!proposals || proposals.length === 0) return [];
 
     return proposals.map((item): ProposalTableData => {
-      const finalResult = getFinalResultData(
-        item.proposal,
-        Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
-        daoData?.quorum,
-        daoConfigByDaoId[daoIdEnum], // Pass the DAO config to use quorum logic
-      );
+      const finalResult =
+        proposalsFinalResultMapping[
+          item.proposal.status as keyof typeof proposalsFinalResultMapping
+        ];
+
       const userVote = getUserVoteData(
         item.userVote?.support,
         finalResult.text,
@@ -99,7 +99,7 @@ export const ProposalsTable = ({
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoData?.quorum, daoIdEnum]);
+  }, [proposals, daoData?.votingPeriod]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
@@ -127,7 +127,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -239,7 +240,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-end"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -299,7 +301,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -346,7 +349,7 @@ export const ProposalsTable = ({
               className="hover:text-secondary cursor-pointer text-white transition-colors"
               title="View on Tally"
             >
-              <ExternalLink className="size-4" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );
