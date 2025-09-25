@@ -456,7 +456,7 @@ export const useDelegates = ({
     fetchNextPage,
     fetchPreviousPage,
     fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+      isPaginationLoading || networkStatus === NetworkStatus.fetchMore,
     isHistoricalLoadingFor,
     isActivityLoadingFor,
   };

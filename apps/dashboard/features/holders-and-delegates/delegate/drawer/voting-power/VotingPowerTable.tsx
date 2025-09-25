@@ -102,7 +102,7 @@ export const VotingPowerTable = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-secondary justify-end"
+              className="text-secondary justify-end p-0"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
@@ -213,7 +213,7 @@ export const VotingPowerTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="max-h-[475px]"
+        wrapperClassName="h-[475px]"
       />
     </div>
   );

@@ -176,7 +176,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => handleSort("date")}
         >
           <span className="text-xs">Date</span>
@@ -222,7 +222,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => handleSort("amount")}
         >
           <span className="text-xs">Amount ({daoId.toUpperCase()})</span>
@@ -379,7 +379,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
-        wrapperClassName="max-h-[475px]"
+        wrapperClassName="h-[475px]"
         withDownloadCSV={true}
       />
     </div>

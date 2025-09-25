@@ -22,9 +22,9 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation: { percentageChange: number; absoluteChange: number };
-  activity: string;
-  activityPercentage: number;
+  variation?: { percentageChange: number; absoluteChange: number } | null;
+  activity?: string | null;
+  activityPercentage?: number | null;
   delegators: number;
 }
 
@@ -128,19 +128,22 @@ export const Delegates = ({
       const votingPowerBigInt = BigInt(delegate.votingPower || "0");
       const votingPowerFormatted = Number(votingPowerBigInt / BigInt(10 ** 18));
 
-      // Get activity from real proposals data
       const activity = delegate.proposalsActivity
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
-        : "0/0";
+        : null;
 
-      const activityPercentage =
-        ((delegate.proposalsActivity?.votedProposals || 0) /
-          (delegate.proposalsActivity?.totalProposals || 1)) *
-        100;
+      const activityPercentage = delegate.proposalsActivity
+        ? (delegate.proposalsActivity.votedProposals /
+            delegate.proposalsActivity.totalProposals) *
+          100
+        : null;
 
-      // Calculate variation using real historical voting power
-      let variation = { percentageChange: 0, absoluteChange: 0 };
-      if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
+      let variation: {
+        percentageChange: number;
+        absoluteChange: number;
+      } | null = null;
+
+      if (delegate.historicalVotingPower !== undefined) {
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
         );
@@ -148,28 +151,25 @@ export const Delegates = ({
           historicalVotingPowerBigInt / BigInt(10 ** 18),
         );
 
-        if (historicalVotingPowerFormatted === 0) {
-          variation = { percentageChange: 0, absoluteChange: 0 };
-        } else {
-          // Calculate absolute change and percentage
-          const absoluteChange =
-            votingPowerFormatted - historicalVotingPowerFormatted;
-          const percentageChange =
-            ((votingPowerFormatted - historicalVotingPowerFormatted) /
-              historicalVotingPowerFormatted) *
-            100;
+        const absoluteChange =
+          votingPowerFormatted - historicalVotingPowerFormatted;
+        const percentageChange =
+          historicalVotingPowerFormatted === 0
+            ? 0
+            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
+                historicalVotingPowerFormatted) *
+              100;
 
-          variation = {
-            percentageChange: Number(percentageChange.toFixed(2)),
-            absoluteChange: Number(absoluteChange.toFixed(2)),
-          };
-        }
+        variation = {
+          percentageChange: Number(percentageChange.toFixed(2)),
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
       }
 
       return {
         address: delegate.accountId || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation: variation,
+        variation,
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,
@@ -261,7 +261,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -288,10 +288,12 @@ export const Delegates = ({
       },
       cell: ({ row }) => {
         const addr = row.original.address;
-        const variation = row.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
+        const variation = row.getValue("variation") as
+          | {
+              percentageChange: number;
+              absoluteChange: number;
+            }
+          | undefined;
 
         if (isHistoricalLoadingFor(addr)) {
           return (
@@ -305,9 +307,9 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
-            {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
-            <Percentage value={variation.percentageChange} />
+          <div className="flex w-full items-center justify-start gap-2 px-4 text-sm">
+            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+            <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
@@ -321,7 +323,7 @@ export const Delegates = ({
     {
       accessorKey: "activity",
       cell: ({ row }) => {
-        const activity = row.getValue("activity") as string;
+        const activity = row.getValue("activity") as string | undefined;
         const activityPercentage = row.original.activityPercentage;
         const addr = row.original.address;
         if (isActivityLoadingFor(addr)) {
@@ -334,8 +336,8 @@ export const Delegates = ({
 
         return (
           <div className="flex items-center justify-start gap-2">
-            <ProgressCircle percentage={activityPercentage} />
-            {activity}
+            <ProgressCircle percentage={activityPercentage || 0} />
+            {activity || "0/0"}
           </div>
         );
       },
@@ -349,7 +351,7 @@ export const Delegates = ({
     {
       accessorKey: "delegators",
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-20",
       },
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
@@ -372,7 +374,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
@@ -408,7 +410,7 @@ export const Delegates = ({
           }))}
           withSorting={true}
           size="sm"
-          wrapperClassName="max-h-[475px]"
+          wrapperClassName="h-[475px]"
         />
       </div>
     );
@@ -483,7 +485,7 @@ export const Delegates = ({
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="max-h-[475px]"
+          wrapperClassName="h-[475px]"
         />
       </div>
       <HoldersAndDelegatesDrawer

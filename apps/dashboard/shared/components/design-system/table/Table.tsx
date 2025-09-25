@@ -198,22 +198,28 @@ export const Table = <TData, TValue>({
                     onRowClick?.(row.original)
                   }
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        cell.column.getIndex() === 0 &&
-                          stickyFirstColumn &&
-                          "bg-surface-default sticky left-0 z-50",
-                        sizeVariants[size],
-                      )}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const colMeta = (
+                      cell.column.columnDef as { meta?: ColumnMeta }
+                    ).meta;
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          cell.column.getIndex() === 0 &&
+                            stickyFirstColumn &&
+                            "bg-surface-default sticky left-0 z-50",
+                          sizeVariants[size],
+                          colMeta?.columnClassName,
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
 

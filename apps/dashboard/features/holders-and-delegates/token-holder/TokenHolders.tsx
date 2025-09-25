@@ -150,7 +150,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex items-center gap-3">
+            <div className="flex w-full items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -206,7 +206,7 @@ export const TokenHolders = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-secondary justify-end"
+              className="text-secondary justify-end p-0"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
@@ -228,7 +228,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex w-full items-center justify-end">
               <SkeletonRow className="h-4 w-20" />
             </div>
           );
@@ -241,6 +241,9 @@ export const TokenHolders = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-48",
+      },
     },
     {
       accessorKey: "variation",
@@ -252,7 +255,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (historicalDataLoading || loading) {
           return (
-            <div className="flex items-center justify-start">
+            <div className="flex w-full items-center justify-start">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -267,11 +270,14 @@ export const TokenHolders = ({
         };
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
+          <div className="flex w-full items-center justify-start gap-2 px-4 text-sm">
             {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
             <Percentage value={variation.percentageChange} />
           </div>
         );
+      },
+      meta: {
+        columnClassName: "w-72",
       },
     },
     {
@@ -308,6 +314,9 @@ export const TokenHolders = ({
             />
           </div>
         );
+      },
+      meta: {
+        columnClassName: "w-72",
       },
     },
   ];
@@ -408,7 +417,7 @@ export const TokenHolders = ({
             size="sm"
             withDownloadCSV={true}
             withSorting={true}
-            wrapperClassName="max-h-[475px]"
+            wrapperClassName="h-[475px]"
           />
         </div>
       </div>

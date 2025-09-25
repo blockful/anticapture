@@ -118,7 +118,7 @@ export const DelegateDelegationHistoryTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
@@ -163,7 +163,7 @@ export const DelegateDelegationHistoryTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => handleSort("delta")}
         >
           <h4 className="text-table-header">Amount ({daoId})</h4>
@@ -416,7 +416,7 @@ export const DelegateDelegationHistoryTable = ({
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="max-h-[475px]"
+          wrapperClassName="h-[475px]"
         />
       </div>
     </div>

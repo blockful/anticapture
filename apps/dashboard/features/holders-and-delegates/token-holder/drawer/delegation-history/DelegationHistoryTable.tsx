@@ -260,7 +260,7 @@ export const DelegationHistoryTable = ({
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="max-h-[475px]"
+          wrapperClassName="h-[475px]"
         />
       </div>
     </div>

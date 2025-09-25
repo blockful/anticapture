@@ -135,7 +135,7 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -254,7 +254,7 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -317,7 +317,7 @@ export const ProposalsTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -439,7 +439,7 @@ export const ProposalsTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="max-h-[475px]"
+        wrapperClassName="h-[475px]"
       />
     </div>
   );
