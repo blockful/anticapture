@@ -79,7 +79,7 @@ export const TokenDistributionChart = ({
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
     if (daysInRange <= 14) return "daily";
-    if (daysInRange <= 60) return "weekly";
+    if (daysInRange <= 90) return "weekly";
     if (daysInRange <= 264) return "monthly";
     return "quarterly";
   }, [chartData, brushRange.startIndex, brushRange.endIndex]);
@@ -107,18 +107,27 @@ export const TokenDistributionChart = ({
       return [firstDate, lastDate];
     }
 
-    const finalTicks: number[] = [];
-    const step = Math.floor((slicedData.length - 1) / (tickCount - 1));
+    const duration = lastDate - firstDate;
+    const timeStep = duration / (tickCount - 1);
 
-    for (let i = 0; i < tickCount; i++) {
-      const index = Math.min(i * step, slicedData.length - 1);
-      finalTicks.push(slicedData[index].date);
-    }
+    const idealTimestamps = Array.from(
+      { length: tickCount },
+      (_, i) => firstDate + i * timeStep,
+    );
 
-    if (!finalTicks.includes(lastDate)) {
-      finalTicks.pop();
-      finalTicks.push(lastDate);
-    }
+    const finalTicks = idealTimestamps.map((idealTimestamp) => {
+      let closestPoint = slicedData[0];
+      let minDiff = Math.abs(closestPoint.date - idealTimestamp);
+
+      for (const point of slicedData) {
+        const diff = Math.abs(point.date - idealTimestamp);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestPoint = point;
+        }
+      }
+      return closestPoint.date;
+    });
 
     return finalTicks;
   }, [chartData, brushRange.startIndex, brushRange.endIndex, interval]);
