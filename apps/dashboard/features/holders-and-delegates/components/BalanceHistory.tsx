@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { TheTable, SkeletonRow, Button, IconButton } from "@/shared/components";
