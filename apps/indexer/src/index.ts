@@ -23,6 +23,7 @@ import { ARBTokenIndexer } from "@/indexer/arb";
 import { GTCClient } from "@/indexer/gtc/client";
 import { GTCTokenIndexer } from "@/indexer/gtc/erc20";
 import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
+import { SCRClient } from "./indexer/scr/client";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -77,6 +78,12 @@ switch (daoId) {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     GTCTokenIndexer(token.address, token.decimals);
     GTCGovernorIndexer(new GTCClient(client, governor.address), blockTime);
+    break;
+  }
+  case DaoIdEnum.SCR: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    GTCTokenIndexer(token.address, token.decimals);
+    GTCGovernorIndexer(new SCRClient(client, governor.address), blockTime);
     break;
   }
   default:
