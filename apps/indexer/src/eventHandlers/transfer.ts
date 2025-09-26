@@ -164,6 +164,7 @@ export const tokenTransfer = async (
 
   // Transfer record will be created later with proper flags after address list calculations
 
+  console.log({ value, to });
   await context.db
     .insert(accountBalance)
     .values({

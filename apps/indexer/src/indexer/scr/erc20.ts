@@ -1,6 +1,6 @@
 import { accountBalance, accountPower, delegation, token } from "ponder:schema";
 import { ponder } from "ponder:registry";
-import { Address, zeroAddress } from "viem";
+import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { delegatedVotesChanged, tokenTransfer } from "@/eventHandlers";
@@ -48,10 +48,12 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`SCRToken:DelegateChanged`, async ({ event, context }) => {
+    // TODO: Adjust delegation data model to allow for partial delegation natively
     // Process the delegation change
+
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
-      const { delegator: delegator } = event.args;
+      const { delegator } = event.args;
       const { address: tokenId, logIndex: logIndex } = event.log;
       const { hash: txHash } = event.transaction;
       const { timestamp } = event.block;
@@ -64,8 +66,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         accountId: delegator,
         tokenId,
       });
-
-      if (!delegatorBalance) return;
 
       // Pre-compute address lists for flag determination
       const lendingAddressList = Object.values(
@@ -101,8 +101,9 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           daoId,
           delegateAccountId: delegate,
           delegatorAccountId: delegator,
-          delegatedValue:
-            (delegatorBalance.balance * BigInt(percentage)) / 10000n,
+          delegatedValue: delegatorBalance
+            ? (delegatorBalance.balance * BigInt(percentage)) / 10000n
+            : 0n,
           timestamp,
           logIndex,
           isCex,
@@ -129,15 +130,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         .onConflictDoUpdate({
           delegate: delegate,
         });
-
-      // Update the old delegate's delegations count
-      if (delegator != zeroAddress) {
-        await context.db
-          .update(accountPower, {
-            accountId: delegator,
-          })
-          .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
-      }
 
       // Update the delegate's delegations count
       await context.db
