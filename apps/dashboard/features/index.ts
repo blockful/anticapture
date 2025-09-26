@@ -1,1 +1,1 @@
-export * from "./cookie";
+export * from "@/features/cookie";

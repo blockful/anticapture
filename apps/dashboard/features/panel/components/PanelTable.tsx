@@ -4,13 +4,13 @@ import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
-import { Button } from "@/shared/components/ui/button";
 import {
   BadgeInAnalysis,
   TheTable,
   SkeletonRow,
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
+  Button,
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -83,7 +83,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="text-secondary flex items-center justify-end px-4 py-3 text-end text-sm font-normal">
+      <div className="text-secondary flex w-full items-center justify-end px-4 py-3 text-end text-sm font-normal">
         {formattedSupply}
       </div>
     );
@@ -97,7 +97,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
         return (
-          <div className="flex min-h-[68px] items-center justify-center gap-3 pr-3 sm:min-h-0">
+          <div className="flex min-h-[68px] w-full items-center justify-center gap-3 pr-3 sm:min-h-0">
             <p className="scrollbar-none text-secondary flex items-center overflow-auto py-3">
               {row.index + 1}
             </p>
@@ -115,7 +115,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         <div className="flex w-full items-center justify-center">
           <Button
             variant="ghost"
-            className="gap-2"
+            className="text-secondary"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             <ArrowUpDown
@@ -258,13 +258,13 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="flex w-full justify-end px-4"
+          className="text-secondary w-full justify-end"
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header">Delegated Supply</h4>
           <ArrowUpDown
             props={{
-              className: "ml-2 size-4",
+              className: "size-4",
             }}
             activeState={
               column.getIsSorted() === "asc"

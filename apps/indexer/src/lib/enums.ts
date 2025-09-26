@@ -14,6 +14,7 @@ const SECONDS_IN_DAY = 24 * 60 * 60;
  * Used for filtering data over specific time ranges
  */
 export enum DaysEnum {
+  "1d" = 1 * SECONDS_IN_DAY,
   "7d" = 7 * SECONDS_IN_DAY,
   "30d" = 30 * SECONDS_IN_DAY,
   "90d" = 90 * SECONDS_IN_DAY,
@@ -21,4 +22,4 @@ export enum DaysEnum {
   "365d" = 365 * SECONDS_IN_DAY,
 }
 
-export const DaysOpts = ["7d", "30d", "90d", "180d", "365d"] as const;
+export const DaysOpts = ["1d", "7d", "30d", "90d", "180d", "365d"] as const;

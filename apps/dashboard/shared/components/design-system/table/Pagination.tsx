@@ -1,10 +1,10 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { TheButton } from "@/shared/components/design-system/buttons/TheButton";
+import { IconButton } from "@/shared/components";
 
 interface PaginationProps {
   currentPage: number;
-  totalPages: number;
+  totalPages?: number;
   onPrevious?: () => void;
   onNext?: () => void;
   className?: string;
@@ -37,25 +37,21 @@ export function Pagination({
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <TheButton
+      <IconButton
         variant="outline"
-        size="sm"
         onClick={handlePrevious}
         disabled={isLoading || !hasPreviousPage}
-      >
-        <ChevronLeft className="text-primary size-3.5" />
-      </TheButton>
+        icon={ChevronLeft}
+      />
       <span className="text-secondary bg-surface-contrast flex h-8 items-center gap-1 rounded-md border border-[#3F3F46] px-2 py-1 text-sm font-normal">
-        Page {currentPage} of {totalPages}
+        Page {currentPage} {totalPages && `of ${totalPages}`}
       </span>
-      <TheButton
+      <IconButton
         variant="outline"
-        size="sm"
         onClick={handleNext}
         disabled={isLoading || !hasNextPage}
-      >
-        <ChevronRight className="text-primary size-3.5" />
-      </TheButton>
+        icon={ChevronRight}
+      />
     </div>
   );
 }

@@ -16,7 +16,7 @@ type EnsData = {
 export const fetchEnsData = async ({
   address,
 }: {
-  address: Address;
+  address: Address | `${string}.eth`;
 }): Promise<EnsData> => {
   const response = await fetch(`${ensUrl}/${address}`);
   return response.json();
@@ -48,7 +48,7 @@ export const fetchMultipleEnsData = async (
   return ensDataMap;
 };
 
-export const useEnsData = (address: Address) => {
+export const useEnsData = (address: Address | `${string}.eth`) => {
   const { data, error, isLoading } = useSWR<EnsData>(
     address ? [`ensData`, address] : null,
     () => fetchEnsData({ address }),

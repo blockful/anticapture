@@ -78,4 +78,8 @@ export const SECTIONS_CONSTANTS = {
       "Find answers to common questions about DAO security and how Anticapture works.",
     anchorId: "faqSection",
   },
+  terms: {
+    title: "Terms of Service",
+    anchorId: "termsSection",
+  },
 };
