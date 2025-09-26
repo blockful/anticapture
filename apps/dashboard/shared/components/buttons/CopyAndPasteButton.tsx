@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/shared/utils";
+import { IconButton } from "@/shared/components";
 
 interface CopyButtonProps {
   textToCopy: string;
@@ -30,21 +31,17 @@ export const CopyAndPasteButton = ({
   };
 
   return (
-    <button
+    <IconButton
       onClick={handleCopy}
       disabled={disabled || !textToCopy}
       aria-label={isCopied ? "Copied!" : "Copy to clipboard"}
-      className={cn(
-        "bg-surface-accent hover:bg-surface-accent-hover group flex size-8 cursor-pointer items-center justify-center rounded-md transition-all duration-200 active:scale-95",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+      variant="ghost"
+      className={cn("group", className)}
+      size="lg"
+      iconClassName={cn(
+        isCopied ? "text-success" : "text-secondary group-hover:text-primary",
       )}
-    >
-      {isCopied ? (
-        <Check className="text-success size-4" />
-      ) : (
-        <Copy className="group-hover:text-primary text-secondary size-4" />
-      )}
-    </button>
+      icon={isCopied ? Check : Copy}
+    />
   );
 };
