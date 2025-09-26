@@ -157,6 +157,8 @@ export const MultilineChartAttackProfitability = ({
     ),
   );
 
+  console.log(datasets);
+
   const lastKnownValues: Record<string, number | null> = {};
 
   const chartData = Array.from(allDates)
@@ -169,8 +171,6 @@ export const MultilineChartAttackProfitability = ({
         const isKeySelected = filterData?.includes(key);
         const isLabelSelected = filterData?.includes(chartLabel);
 
-        console.log(filterData, key);
-
         if (isKeySelected || isLabelSelected) {
           const value = dataset.find((d) => d.date === date)?.[key] ?? null;
           if (value !== null) lastKnownValues[key] = value;
@@ -178,7 +178,6 @@ export const MultilineChartAttackProfitability = ({
         }
       });
 
-      console.log(dataPoint);
       return dataPoint;
     });
   return (
