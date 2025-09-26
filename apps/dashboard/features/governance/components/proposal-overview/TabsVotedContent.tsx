@@ -29,7 +29,6 @@ export const TabsVotedContent = ({
         // Toggle direction if same field
         setSortDirection(sortDirection === "asc" ? "desc" : "asc");
       } else {
-        // New field, default to desc for timestamp
         setSortBy(field);
         setSortDirection("desc");
       }
@@ -335,9 +334,26 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p>Voting Power (CAT)</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start"
+            onClick={() => handleSort("votingPower")}
+          >
+            <h4 className="text-table-header whitespace-nowrap">
+              Voting Power (CAT)
+            </h4>
+            <ArrowUpDown
+              props={{ className: "size-4 ml-1" }}
+              activeState={
+                sortBy === "votingPower"
+                  ? sortDirection === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         ),
       },
       {
