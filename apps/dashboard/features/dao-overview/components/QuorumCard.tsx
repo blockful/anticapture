@@ -20,6 +20,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { QuorumTypeEnum } from "@/shared/dao-config/types";
 
 export const QuorumCard = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -101,12 +102,14 @@ export const QuorumCard = () => {
     : "(N/A)";
 
   const quorumPercentage =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+    daoConfig.daoOverview.rules?.quorumCalculation ===
+    QuorumTypeEnum.DELEGATED_SUPPLY
       ? quorumPercentageDelSupply
       : quorumPercentageTotalSupply;
 
   const quorumValue =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+    daoConfig.daoOverview.rules?.quorumCalculation ===
+    QuorumTypeEnum.DELEGATED_SUPPLY
       ? quorumValueDelSupply
       : quorumValueTotalSupply;
 
