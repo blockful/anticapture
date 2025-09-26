@@ -127,19 +127,10 @@ export const TokenDistributionDialog = ({
           <div className="border-light-dark h-px w-full border-t" />
           <div className="flex justify-end gap-2 px-4 py-3">
             <Close asChild>
-              <Button
-                variant="ghost"
-                className="text-primary bg-surface-default border-light-dark flex cursor-pointer items-center rounded-md border px-4 py-2 text-sm font-medium"
-              >
-                Cancel
-              </Button>
+              <Button variant="outline">Cancel</Button>
             </Close>
             <Close asChild>
-              <Button
-                variant="ghost"
-                onClick={handleApplyMetric}
-                className="text-inverted flex cursor-pointer items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium"
-              >
+              <Button variant="primary" onClick={handleApplyMetric}>
                 Apply metrics
               </Button>
             </Close>
