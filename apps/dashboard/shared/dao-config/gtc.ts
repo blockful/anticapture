@@ -1,4 +1,4 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -29,7 +29,7 @@ export const GTC: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For + Abstain",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QuorumTypeEnum.TOTAL_SUPPLY,
       proposalThreshold: "150k GTC",
     },
   },

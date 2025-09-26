@@ -1,4 +1,4 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -26,7 +26,7 @@ export const SCR: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain + Against",
-      quorumCalculation: "21M $SCR (0.21% Total Supply)",
+      quorumCalculation: QuorumTypeEnum.SCR,
       proposalThreshold: "50M $SCR",
     },
   },

@@ -14,6 +14,12 @@ export enum ChainNameEnum {
   Ethereum = "ethereum",
 }
 
+export enum QuorumTypeEnum {
+  TOTAL_SUPPLY = "Total Supply",
+  DELEGATED_SUPPLY = "Del. Supply",
+  SCR = "21M $SCR (0.21% Total Supply)",
+}
+
 export type DaoMetricsDayBucket = {
   date: string;
   daoId: DaoIdEnum;
@@ -84,7 +90,7 @@ export interface DaoOverviewConfig {
       | "For + Abstain"
       | "For + Abstain + Against"
       | "All Votes Cast";
-    quorumCalculation: string;
+    quorumCalculation: QuorumTypeEnum;
     proposalThreshold?: string;
   };
   securityCouncil?: {

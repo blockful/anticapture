@@ -20,6 +20,21 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { QuorumTypeEnum } from "@/shared/dao-config/types";
+
+const getQuorumPercentageDelSupply = (
+  quorumMinPercentageDelSupply: string | false | null | undefined,
+  quorumCalculation: QuorumTypeEnum | undefined,
+): string => {
+  if (quorumMinPercentageDelSupply) return "(N/A)";
+
+  switch (quorumCalculation) {
+    case QuorumTypeEnum.SCR:
+      return quorumCalculation;
+    default:
+      return `(30% ${quorumCalculation})`;
+  }
+};
 
 export const QuorumCard = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -92,21 +107,24 @@ export const QuorumCard = () => {
     ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
     : "No Quorum";
 
-  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
-    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
-    : "(N/A)";
+  const quorumPercentageDelSupply = getQuorumPercentageDelSupply(
+    quorumMinPercentageDelSupply,
+    daoConfig.daoOverview.rules?.quorumCalculation,
+  );
 
   const quorumPercentageTotalSupply = quorumMinPercentage
     ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
     : "(N/A)";
 
   const quorumPercentage =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+    daoConfig.daoOverview.rules?.quorumCalculation ===
+    QuorumTypeEnum.TOTAL_SUPPLY
       ? quorumPercentageDelSupply
       : quorumPercentageTotalSupply;
 
   const quorumValue =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+    daoConfig.daoOverview.rules?.quorumCalculation ===
+    QuorumTypeEnum.TOTAL_SUPPLY
       ? quorumValueDelSupply
       : quorumValueTotalSupply;
 
