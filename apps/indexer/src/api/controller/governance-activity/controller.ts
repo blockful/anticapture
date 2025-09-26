@@ -35,9 +35,6 @@ export function governanceActivity(
           days: z
             .enum(DaysOpts)
             .default("90d")
-            .openapi({
-              example: "90d",
-            })
             .transform((val) => DaysEnum[val]),
         }),
       },
@@ -46,15 +43,9 @@ export function governanceActivity(
           description: "Active supply value",
           content: {
             "application/json": {
-              schema: z
-                .object({
-                  activeSupply: z.string(),
-                })
-                .openapi({
-                  example: {
-                    activeSupply: "1000000000000000000000000",
-                  },
-                }),
+              schema: z.object({
+                activeSupply: z.string(),
+              }),
             },
           },
         },
@@ -197,9 +188,9 @@ export function governanceActivity(
           content: {
             "application/json": {
               schema: z.object({
-                currentAverageTurnout: z.number(),
-                oldAverageTurnout: z.number(),
-                changeRate: z.number(),
+                currentAverageTurnout: z.string(),
+                oldAverageTurnout: z.string(),
+                changeRate: z.string(),
               }),
             },
           },
@@ -212,9 +203,9 @@ export function governanceActivity(
       const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
         return context.json({
-          currentAverageTurnout: 0,
-          oldAverageTurnout: 0,
-          changeRate: 0,
+          currentAverageTurnout: "0",
+          oldAverageTurnout: "0",
+          changeRate: "0",
         });
       }
       const changeRate =
@@ -223,8 +214,9 @@ export function governanceActivity(
 
       return context.json(
         {
-          ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+          currentAverageTurnout: data.currentAverageTurnout.toString(),
+          oldAverageTurnout: data.oldAverageTurnout.toString(),
+          changeRate: changeRate ? Number(changeRate).toFixed(2) : "0",
         },
         200,
       );

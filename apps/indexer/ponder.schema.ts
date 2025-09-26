@@ -60,7 +60,6 @@ export const accountPower = onchainTable(
     votingPower: drizzle.bigint("voting_power").default(BigInt(0)).notNull(),
     votesCount: drizzle.integer("votes_count").default(0).notNull(),
     proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
-    delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
     lastVoteTimestamp: drizzle
       .bigint("last_vote_timestamp")
       .default(BigInt(0))
@@ -135,7 +134,7 @@ export const transfer = onchainTable(
     fromAccountId: drizzle.text("from_account_id").$type<Address>().notNull(),
     toAccountId: drizzle.text("to_account_id").$type<Address>().notNull(),
     timestamp: drizzle.bigint().notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
+    logIndex: drizzle.integer("log_index"),
     isCex: drizzle.boolean().notNull().default(false),
     isDex: drizzle.boolean().notNull().default(false),
     isLending: drizzle.boolean().notNull().default(false),

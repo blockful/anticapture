@@ -26,7 +26,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
     await tokenTransfer(context, daoId, {
       from: event.args.from,
       to: event.args.to,
-      tokenAddress: address,
+      token: address,
       transactionHash: event.transaction.hash,
       value: event.args.value,
       timestamp: event.block.timestamp,

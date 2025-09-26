@@ -13,7 +13,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit -w"
   },
   "dependencies": {
     "@anticapture/graphql-client": "workspace:*",
@@ -63,6 +64,7 @@
     "@types/node": "^20",
     "@types/react": "19.1.4",
     "@types/react-dom": "19.1.5",
+    "dotenv": "^16.6.1",
     "eslint": "^8",
     "eslint-config-next": "15.3.2",
     "eslint-plugin-storybook": "^0.12.0",

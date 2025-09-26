@@ -1,4 +1,3 @@
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
@@ -29,7 +28,7 @@ export const fetchActiveSupply = async ({
   const response: {
     data: { data: { compareActiveSupply: ActiveSupplyResponse } };
   } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}`,
     { query },
     {
       headers: {

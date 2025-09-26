@@ -10,13 +10,12 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 const queryClient = new QueryClient();
 
 // Apollo Client setup
 const apolloClient = new ApolloClient({
-  uri: BACKEND_ENDPOINT,
+  uri: `${process.env.NEXT_PUBLIC_BASE_URL}`,
   cache: new InMemoryCache(),
 });
 

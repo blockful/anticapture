@@ -1,5 +1,5 @@
 import daoConfigByDaoId from "@/shared/dao-config";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
@@ -23,7 +23,7 @@ export const fetchTreasuryAssetNonDaoToken = async ({
   }
 }`;
   const response = await axios.post(
-    `${BACKEND_ENDPOINT}`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}`,
     {
       query,
     },

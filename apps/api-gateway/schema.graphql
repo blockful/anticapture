@@ -365,7 +365,6 @@ type accountPower {
   votingPower: BigInt!
   votesCount: Int!
   proposalsCount: Int!
-  delegationsCount: Int!
   lastVoteTimestamp: BigInt!
   firstVoteTimestamp: BigInt
   account: account
@@ -467,14 +466,6 @@ input accountPowerFilter {
   proposalsCount_lt: Int
   proposalsCount_gte: Int
   proposalsCount_lte: Int
-  delegationsCount: Int
-  delegationsCount_not: Int
-  delegationsCount_in: [Int]
-  delegationsCount_not_in: [Int]
-  delegationsCount_gt: Int
-  delegationsCount_lt: Int
-  delegationsCount_gte: Int
-  delegationsCount_lte: Int
   lastVoteTimestamp: BigInt
   lastVoteTimestamp_not: BigInt
   lastVoteTimestamp_in: [BigInt]
@@ -544,7 +535,7 @@ type transfer {
   fromAccountId: String!
   toAccountId: String!
   timestamp: BigInt!
-  logIndex: Int!
+  logIndex: Int
   isCex: Boolean!
   isDex: Boolean!
   isLending: Boolean!
@@ -1315,9 +1306,12 @@ enum queryInput_totalAssets_days {
 }
 
 type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
+  items: [query_historicalTokenData_items_items]!
+}
+
+type query_historicalTokenData_items_items {
+  timestamp: Float!
+  price: Float!
 }
 
 enum queryInput_historicalTokenData_days {
@@ -1478,9 +1472,9 @@ enum queryInput_compareVotes_days {
 }
 
 type compareAverageTurnout_200_response {
-  currentAverageTurnout: Float!
-  oldAverageTurnout: Float!
-  changeRate: Float!
+  currentAverageTurnout: String!
+  oldAverageTurnout: String!
+  changeRate: String!
 }
 
 enum queryInput_compareAverageTurnout_days {

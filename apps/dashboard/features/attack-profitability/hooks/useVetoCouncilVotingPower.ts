@@ -1,11 +1,11 @@
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR from "swr";
 import axios from "axios";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+
 import daoConfigByDaoId from "@/shared/dao-config";
 
 const api = axios.create({
-  baseURL: BACKEND_ENDPOINT,
+  baseURL: `${process.env.NEXT_PUBLIC_BASE_URL}`,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

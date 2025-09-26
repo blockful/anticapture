@@ -86,12 +86,12 @@ export class VotingPowerRepository {
       ...row.voting_power_history,
       delegations:
         row.transfers &&
-        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+        (row.transfers?.logIndex || 0) > (row.delegations?.logIndex || 0)
           ? null
           : row.delegations,
       transfers:
         row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+        (row.delegations?.logIndex || 0) > (row.transfers?.logIndex || 0)
           ? null
           : row.transfers,
     }));

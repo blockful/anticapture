@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Address, Chain } from "viem";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import {
@@ -8,11 +9,6 @@ import {
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
-
-// Existing types
-export enum ChainNameEnum {
-  Ethereum = "ethereum",
-}
 
 export type DaoMetricsDayBucket = {
   date: string;
@@ -27,14 +23,6 @@ export type DaoMetricsDayBucket = {
   volume: string;
   count: number;
 };
-
-export type PriceEntry = [timestamp: number, value: number];
-
-export interface TokenHistoricalDataMetrics {
-  prices: PriceEntry[];
-  market_caps: PriceEntry[];
-  total_volumes: PriceEntry[];
-}
 
 export interface MultilineChartDataSetPoint {
   date: number;
@@ -84,7 +72,7 @@ export interface DaoOverviewConfig {
       | "For + Abstain"
       | "For + Abstain + Against"
       | "All Votes Cast";
-    quorumCalculation: "Total Supply" | "Del. Supply";
+    quorumCalculation: string;
     proposalThreshold?: string;
   };
   securityCouncil?: {
@@ -129,6 +117,11 @@ export interface DaoAddresses {
     GTCWallet: string;
     GTCTimelock: string;
     GTCUniv3Uni: string;
+  };
+  [DaoIdEnum.NOUNS]: {
+    NounsTimelock: string;
+    PayerContract: string;
+    ClientIncentivesRewardsProxy: string;
   };
 }
 

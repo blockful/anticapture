@@ -3,10 +3,7 @@
 import React, { useState, useEffect, ReactNode } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import {
-  mockedTableChartMetrics,
-  TokenDistribution,
-} from "@/shared/constants/mocked-data/mocked-data";
+import { mockedTableChartMetrics } from "@/shared/constants/mocked-data/mocked-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   Sparkline,
@@ -20,6 +17,14 @@ import { useTokenDistributionContext } from "@/features/token-distribution/conte
 import { useParams } from "next/navigation";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+
+type TokenDistribution = {
+  metric: string | null;
+  currentValue?: string | null;
+  variation?: string | null;
+  chartLastDays?: DaoMetricsDayBucket[];
+};
+
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
   rowB: Row<TokenDistribution>,
@@ -125,7 +130,7 @@ export const TokenDistributionTable = () => {
           const randomNumber = Math.floor(Math.random() * 999);
           const randomValues = ["K", "M"];
           return (
-            <div className="flex items-center justify-end px-4 py-3 text-end blur-xs">
+            <div className="blur-xs flex items-center justify-end px-4 py-3 text-end">
               {randomNumber}
               {randomValues[randomNumber % 2]}
             </div>
@@ -177,7 +182,7 @@ export const TokenDistributionTable = () => {
         }
         if (variation === null) {
           return (
-            <div className="text-success flex items-center justify-end blur-xs">
+            <div className="text-success blur-xs flex items-center justify-end">
               {(Math.random() * 100).toFixed(2)}%
             </div>
           );
@@ -238,7 +243,7 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="flex w-full justify-center py-2.5 blur-xs">
+            <div className="blur-xs flex w-full justify-center py-2.5">
               <Sparkline
                 data={mockedTableChartMetrics.map((item) => Number(item.high))}
                 strokeColor={"#4ADE80"}
@@ -255,7 +260,7 @@ export const TokenDistributionTable = () => {
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <div className="text-table-header flex w-full items-center justify-center pr-20">
           Last {days.slice(0, -1)} days
         </div>
@@ -269,7 +274,7 @@ export const TokenDistributionTable = () => {
       data={[
         {
           metric: "Total",
-          currentValue: !!totalSupply.value
+          currentValue: totalSupply.value
             ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
             : totalSupply.value,
           variation: totalSupply.changeRate
@@ -279,7 +284,7 @@ export const TokenDistributionTable = () => {
         },
         {
           metric: "Delegated",
-          currentValue: !!delegatedSupply.value
+          currentValue: delegatedSupply.value
             ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
             : delegatedSupply.value,
           variation: delegatedSupply.changeRate
