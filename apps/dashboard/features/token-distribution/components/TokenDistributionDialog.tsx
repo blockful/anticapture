@@ -77,52 +77,55 @@ export const TokenDistributionDialog = ({
           </Title>
           <div className="border-light-dark h-px w-full border-t" />
           <div className="flex flex-col p-4">
-            {Object.entries(metricsSchema).map(([category, metrics], index) => {
-              if (appliedMetrics[category]?.length === metrics.length)
-                return null;
+            {Object.entries(metricsSchema)
+              .filter(
+                ([category, metrics]) =>
+                  appliedMetrics[category]?.length !== metrics.length,
+              )
+              .map(([category, metrics], index, visibleEntries) => {
+                return (
+                  <div key={category}>
+                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                      {category}
+                    </CardTitle>
+                    <div className="flex w-full flex-wrap gap-2 sm:gap-3">
+                      {metrics.map((metric) => {
+                        const isMetricAlreadyApplied = appliedMetrics[
+                          category
+                        ]?.some((i) => i.key === metric.key);
 
-              return (
-                <div key={category}>
-                  <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
-                    {category}
-                  </CardTitle>
-                  <div className="flex w-full flex-wrap gap-2 sm:gap-3">
-                    {metrics.map((metric) => {
-                      const isMetricAlreadyApplied = appliedMetrics[
-                        category
-                      ]?.some((i) => i.key === metric.key);
+                        const isSelected = selectedMetrics.includes(metric.key);
 
-                      const isSelected = selectedMetrics.includes(metric.key);
+                        if (isMetricAlreadyApplied) return null;
 
-                      if (isMetricAlreadyApplied) return null;
-
-                      return (
-                        <Button
-                          key={metric.label}
-                          onClick={() => handleSelectMetric(metric.key)}
-                          className={cn(
-                            "bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm",
-                            isSelected
-                              ? "border-tangerine"
-                              : "border-transparent",
-                          )}
-                        >
-                          {isSelected ? (
-                            <Check className="size-3" />
-                          ) : (
-                            <Plus className="size-3" />
-                          )}
-                          {metric.label}
-                        </Button>
-                      );
-                    })}
+                        return (
+                          <Button
+                            key={metric.label}
+                            onClick={() => handleSelectMetric(metric.key)}
+                            className={cn(
+                              "bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm",
+                              isSelected
+                                ? "border-tangerine"
+                                : "border-transparent",
+                            )}
+                          >
+                            {isSelected ? (
+                              <Check className="size-3" />
+                            ) : (
+                              <Plus className="size-3" />
+                            )}
+                            {metric.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    {visibleEntries.length > 1 &&
+                      index !== visibleEntries.length - 1 && (
+                        <div className="border-light-dark my-4 h-px w-full border-t border-dashed" />
+                      )}
                   </div>
-                  {index !== Object.keys(metricsSchema).length - 1 && (
-                    <div className="border-light-dark my-4 h-px w-full border-t border-dashed" />
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
           <div className="border-light-dark h-px w-full border-t" />
           <div className="flex justify-end gap-2 px-4 py-3">
