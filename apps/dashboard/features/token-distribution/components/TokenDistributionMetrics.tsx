@@ -67,7 +67,7 @@ export const TokenDistributionMetrics = ({
   return (
     <div className="flex h-full w-full flex-col justify-between gap-2 sm:gap-4">
       <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
-        <div className="scrollbar-none hover:scrollbar-thin hover:scrollbar-track-transparent hover:scrollbar-thumb-gray-400 relative gap-2 overflow-y-auto sm:flex sm:max-h-[310px] sm:flex-col">
+        <div className="scrollbar-none hover:scrollbar-thin gap-2 overflow-y-auto sm:flex sm:max-h-[310px] sm:flex-col">
           {Object.keys(appliedMetricsFormatted).length === 0 ? (
             <>
               <div className="hidden w-full flex-col items-center justify-center sm:flex sm:min-h-[300px]">
