@@ -1,5 +1,3 @@
-"use client";
-
 export const DaoOverviewSkeleton = () => {
   return (
     <div className="flex min-h-screen w-full flex-col gap-8 border-b-2 border-b-white/10 px-4 sm:gap-6 sm:border-none sm:p-5">
