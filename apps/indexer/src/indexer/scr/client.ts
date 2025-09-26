@@ -75,7 +75,7 @@ export class SCRClient<
       abi: [
         {
           inputs: [],
-          name: "delay",
+          name: "getMinDelay",
           outputs: [
             {
               internalType: "uint256",
@@ -88,7 +88,7 @@ export class SCRClient<
         },
       ],
       address: timelockAddress,
-      functionName: "delay",
+      functionName: "getMinDelay",
     });
   }
 

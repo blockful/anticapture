@@ -11,7 +11,7 @@ import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
 import { env } from "@/env";
 
-export function GovernorIndexer(client: DAOClient, blockTime: number) {
+export function SCRGovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.SCR;
 
   ponder.on(`SCRGovernor:setup`, async ({ context }) => {
