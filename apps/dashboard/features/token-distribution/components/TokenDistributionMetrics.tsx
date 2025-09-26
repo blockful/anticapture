@@ -89,139 +89,160 @@ export const TokenDistributionMetrics = ({
             </>
           ) : (
             Object.entries(appliedMetricsFormatted).map(
-              ([category, metrics]) => (
-                <div key={category} className="mb-4 flex flex-col gap-2">
-                  {category === "SUPPLY" ? (
+              ([category, metrics]) => {
+                // Define tooltip text for each category
+                const getTooltipText = (category: string) => {
+                  switch (category) {
+                    case "SUPPLY":
+                      return "Next to each supply you'll see the latest value from the selected timeframe, along with the % change between its first and last points.";
+                    case "VOLUME":
+                      return "Total weekly transaction volume.";
+                    case "GOVERNANCE":
+                      return "Displays proposal count for the selected period, and the treasury's latest value and its % change over that timeframe.";
+                    case "MARKET":
+                      return "Next to the metric you'll see the latest value from the selected timeframe, along with the % change between its first and last points.";
+                    default:
+                      return "";
+                  }
+                };
+
+                const tooltipText = getTooltipText(category);
+
+                return (
+                  <div key={category} className="mb-4 flex flex-col gap-2">
                     <CardTitle className="flex items-center gap-2">
                       <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
-                        SUPPLY
+                        {category}
                       </p>
-                      <TooltipInfo
-                        text="Next to each supply you'll see the latest value from the selected timeframe, along with the % change between its first and last points."
-                        className="text-secondary"
-                      />
-                    </CardTitle>
-                  ) : (
-                    <CardTitle className="!text-alternative-sm text-secondary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
-                      {category}
-                    </CardTitle>
-                  )}
-                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
-                    {metrics.map((metric: MetricWithKey) => {
-                      const metricData = dataToUse
-                        .map(
-                          (point) =>
-                            point[metric.key as keyof ChartDataSetPoint],
-                        )
-                        .filter((val) => val !== undefined);
-
-                      // Always render the metric, even if no data - show as undefined
-                      // if (metricData.length === 0) {
-                      //   return null;
-                      // }
-
-                      let currentValue: number | string | undefined;
-                      let previousValue: number | string | undefined;
-
-                      if (metricData.length === 0) {
-                        // No data available - show as undefined
-                        currentValue = undefined;
-                        previousValue = undefined;
-                      } else if (metric.key === "PROPOSALS_GOVERNANCE") {
-                        // For proposals, count actual proposals in the visible data range
-                        // Count all the proposal titles (strings) in the data
-                        currentValue = metricData.reduce((sum: number, val) => {
-                          // If val is a non-empty string, it means there's a proposal at that timestamp
-                          return (
-                            sum +
-                            (val && typeof val === "string" && val.length > 0
-                              ? 1
-                              : 0)
-                          );
-                        }, 0);
-                        previousValue = 0; // Base comparison
-                      } else {
-                        // For other metrics, use last and first values as before
-                        currentValue = metricData[metricData.length - 1];
-                        previousValue = metricData[0];
-                      }
-
-                      // Calculate percentage variation
-                      const variation =
-                        previousValue && currentValue
-                          ? ((Number(currentValue) - Number(previousValue)) /
-                              Number(previousValue)) *
-                            100
-                          : 0;
-
-                      // Hide amount and variation for VOLUME category metrics
-                      const isVolumeMetric = metric.category === "VOLUME";
-
-                      // Format value based on metric type
-                      let formattedMetricsValue: string;
-                      const metricKey = metric.key as string;
-
-                      if (currentValue === undefined) {
-                        formattedMetricsValue = ""; // Show "No data" when undefined
-                      } else if (isVolumeMetric) {
-                        formattedMetricsValue = ""; // No amount for volume metrics
-                      } else if (metricKey === "TOKEN_PRICE") {
-                        formattedMetricsValue = `$${Number(currentValue).toFixed(2)}`;
-                      } else if (metricKey === "PROPOSALS_GOVERNANCE") {
-                        formattedMetricsValue = formatNumberUserReadable(
-                          Number(currentValue) || 0,
-                        );
-                      } else {
-                        const numericValue = Number(currentValue);
-                        formattedMetricsValue = formatNumberUserReadable(
-                          Number.isFinite(numericValue)
-                            ? Math.floor(numericValue)
-                            : 0,
-                        );
-                      }
-
-                      // Format variation - hide for volume metrics, when 0, or when no data
-                      const formattedVariation =
-                        isVolumeMetric || currentValue === undefined
-                          ? "" // No variation for volume metrics or when no data
-                          : Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
-                            ? "" // Empty string when variation is essentially zero
-                            : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
-
-                      const handleClick = () => {
-                        const metricKey = appliedMetrics.find(
-                          (key) => key === metric.key,
-                        );
-                        if (metricKey) handleRemoveMetric(metricKey);
-                      };
-
-                      const handleMouseEnter = () => {
-                        const hoveredKey = appliedMetrics.find(
-                          (key) => key === metric.key,
-                        );
-                        setHoveredMetricKey(hoveredKey ?? null);
-                      };
-
-                      const handleMouseLeave = () => {
-                        setHoveredMetricKey(null);
-                      };
-
-                      return (
-                        <Metric
-                          key={metric.key}
-                          label={metric.label}
-                          color={metric.color}
-                          value={formattedMetricsValue}
-                          percentage={formattedVariation}
-                          onRemove={handleClick}
-                          onMouseEnter={handleMouseEnter}
-                          onMouseLeave={handleMouseLeave}
+                      {tooltipText && (
+                        <TooltipInfo
+                          text={tooltipText}
+                          className="text-secondary"
                         />
-                      );
-                    })}
+                      )}
+                    </CardTitle>
+                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
+                      {metrics.map((metric: MetricWithKey) => {
+                        const metricData = dataToUse
+                          .map(
+                            (point) =>
+                              point[metric.key as keyof ChartDataSetPoint],
+                          )
+                          .filter((val) => val !== undefined);
+
+                        // Always render the metric, even if no data - show as undefined
+                        // if (metricData.length === 0) {
+                        //   return null;
+                        // }
+
+                        let currentValue: number | string | undefined;
+                        let previousValue: number | string | undefined;
+
+                        if (metricData.length === 0) {
+                          // No data available - show as undefined
+                          currentValue = undefined;
+                          previousValue = undefined;
+                        } else if (metric.key === "PROPOSALS_GOVERNANCE") {
+                          // For proposals, count actual proposals in the visible data range
+                          // Count all the proposal titles (strings) in the data
+                          currentValue = metricData.reduce(
+                            (sum: number, val) => {
+                              // If val is a non-empty string, it means there's a proposal at that timestamp
+                              return (
+                                sum +
+                                (val &&
+                                typeof val === "string" &&
+                                val.length > 0
+                                  ? 1
+                                  : 0)
+                              );
+                            },
+                            0,
+                          );
+                          previousValue = 0; // Base comparison
+                        } else {
+                          // For other metrics, use last and first values as before
+                          currentValue = metricData[metricData.length - 1];
+                          previousValue = metricData[0];
+                        }
+
+                        // Calculate percentage variation
+                        const variation =
+                          previousValue && currentValue
+                            ? ((Number(currentValue) - Number(previousValue)) /
+                                Number(previousValue)) *
+                              100
+                            : 0;
+
+                        // Hide amount and variation for VOLUME category metrics
+                        const isVolumeMetric = metric.category === "VOLUME";
+
+                        // Format value based on metric type
+                        let formattedMetricsValue: string;
+                        const metricKey = metric.key as string;
+
+                        if (currentValue === undefined) {
+                          formattedMetricsValue = ""; // Show "No data" when undefined
+                        } else if (isVolumeMetric) {
+                          formattedMetricsValue = ""; // No amount for volume metrics
+                        } else if (metricKey === "TOKEN_PRICE") {
+                          formattedMetricsValue = `$${Number(currentValue).toFixed(2)}`;
+                        } else if (metricKey === "PROPOSALS_GOVERNANCE") {
+                          formattedMetricsValue = formatNumberUserReadable(
+                            Number(currentValue) || 0,
+                          );
+                        } else {
+                          const numericValue = Number(currentValue);
+                          formattedMetricsValue = formatNumberUserReadable(
+                            Number.isFinite(numericValue)
+                              ? Math.floor(numericValue)
+                              : 0,
+                          );
+                        }
+
+                        // Format variation - hide for volume metrics, when 0, or when no data
+                        const formattedVariation =
+                          isVolumeMetric || currentValue === undefined
+                            ? "" // No variation for volume metrics or when no data
+                            : Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
+                              ? "" // Empty string when variation is essentially zero
+                              : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
+
+                        const handleClick = () => {
+                          const metricKey = appliedMetrics.find(
+                            (key) => key === metric.key,
+                          );
+                          if (metricKey) handleRemoveMetric(metricKey);
+                        };
+
+                        const handleMouseEnter = () => {
+                          const hoveredKey = appliedMetrics.find(
+                            (key) => key === metric.key,
+                          );
+                          setHoveredMetricKey(hoveredKey ?? null);
+                        };
+
+                        const handleMouseLeave = () => {
+                          setHoveredMetricKey(null);
+                        };
+
+                        return (
+                          <Metric
+                            key={metric.key}
+                            label={metric.label}
+                            color={metric.color}
+                            value={formattedMetricsValue}
+                            percentage={formattedVariation}
+                            onRemove={handleClick}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ),
+                );
+              },
             )
           )}
         </div>
