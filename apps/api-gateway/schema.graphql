@@ -535,7 +535,7 @@ type transfer {
   fromAccountId: String!
   toAccountId: String!
   timestamp: BigInt!
-  logIndex: Int!
+  logIndex: Int
   isCex: Boolean!
   isDex: Boolean!
   isLending: Boolean!

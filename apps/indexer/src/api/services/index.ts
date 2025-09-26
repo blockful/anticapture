@@ -5,3 +5,4 @@ export * from "./coingecko";
 export * from "./proposals";
 export * from "./transactions";
 export * from "./dune";
+export * from "./nouns";

@@ -32,7 +32,7 @@ export const QuorumCard = () => {
     useTimeSeriesData(
       daoIdEnum,
       [MetricTypesEnum.TOTAL_SUPPLY],
-      TimeInterval.ONE_YEAR,
+      TimeInterval.ONE_YEAR, // TODO: change it to 1 day
     );
 
   const loading = isDaoDataLoading || isTimeSeriesDataLoading;
@@ -56,6 +56,7 @@ export const QuorumCard = () => {
     ),
   };
 
+  console.log({ daoData, totalSupply, delSupply });
   if (loading) {
     return <SkeletonDaoInfoCards />;
   }
@@ -64,8 +65,7 @@ export const QuorumCard = () => {
     daoData?.quorum &&
     totalSupply.value !== undefined &&
     formatEther(
-      (BigInt(daoData.quorum) * BigInt(1e20)) /
-        BigInt(totalSupply.value ?? ("1" as string)),
+      (BigInt(daoData.quorum) * BigInt(1e20)) / BigInt(totalSupply.value || 1n),
     );
 
   const quorumMinPercentageDelSupply =

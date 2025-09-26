@@ -24,6 +24,7 @@ import { docs } from "./docs";
 import { env } from "@/env";
 import {
   DrizzleRepository,
+  NftRepository,
   TransactionsRepository,
   VotingPowerRepository,
 } from "./repositories";
@@ -37,6 +38,7 @@ import {
   ProposalsService,
   TransactionsService,
   DuneService,
+  NounsService,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -79,20 +81,6 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   assets(app, duneClient);
 }
 
-if (env.COINGECKO_API_KEY) {
-  const coingeckoClient: TokenHistoricalDataClient = new CoingeckoService(
-    env.DAO_ID,
-    env.COINGECKO_API_KEY,
-  );
-
-  // ERC-721 historical pricing is handled differently
-  if (env.DAO_ID === DaoIdEnum.NOUNS) {
-    // coingeckoClient = new CoingeckoService(env.DAO_ID, env.COINGECKO_API_KEY);
-  }
-
-  tokenHistoricalData(app, coingeckoClient);
-}
-
 const daoClient = getClient(env.DAO_ID, client);
 
 if (!daoClient) {
@@ -106,6 +94,16 @@ const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
+const nftRepo = new NftRepository();
+
+if (env.COINGECKO_API_KEY) {
+  const tokenPriceClient: TokenHistoricalDataClient =
+    env.DAO_ID === DaoIdEnum.NOUNS
+      ? new NounsService(nftRepo) // NFT pricing is handled differently
+      : new CoingeckoService(env.DAO_ID, env.COINGECKO_API_KEY);
+
+  tokenHistoricalData(app, tokenPriceClient);
+}
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);

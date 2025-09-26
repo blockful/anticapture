@@ -13,7 +13,7 @@ import {
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountExists, storeDailyBucket } from "./shared";
 
-const updateSupplyMetric = async (
+export const updateSupplyMetric = async (
   context: Context,
   tokenData: {
     lendingSupply: bigint;
@@ -59,7 +59,7 @@ const updateSupplyMetric = async (
   }
 };
 
-const updateTotalSupplyMetric = async (
+export const updateTotalSupplyMetric = async (
   context: Context,
   tokenData: { totalSupply: bigint },
   addressList: Address[],
@@ -100,7 +100,7 @@ const updateTotalSupplyMetric = async (
   }
 };
 
-const updateCirculatingSupplyMetric = async (
+export const updateCirculatingSupplyMetric = async (
   context: Context,
   tokenData: {
     circulatingSupply: bigint;
@@ -237,85 +237,87 @@ export const tokenTransfer = async (
 
   // Transaction flag updates moved to DAO-specific indexer
 
-  // Update lending supply
-  await updateSupplyMetric(
-    context,
-    tokenData,
-    "lendingSupply",
-    lendingAddressList,
-    MetricTypesEnum.LENDING_SUPPLY,
-    from,
-    to,
-    value,
-    daoId,
-    tokenId,
-    timestamp,
-  );
+  if (value > 0n) {
+    // Update lending supply
+    await updateSupplyMetric(
+      context,
+      tokenData,
+      "lendingSupply",
+      lendingAddressList,
+      MetricTypesEnum.LENDING_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      tokenId,
+      timestamp,
+    );
 
-  // Update CEX supply
-  await updateSupplyMetric(
-    context,
-    tokenData,
-    "cexSupply",
-    cexAddressList,
-    MetricTypesEnum.CEX_SUPPLY,
-    from,
-    to,
-    value,
-    daoId,
-    tokenId,
-    timestamp,
-  );
+    // Update CEX supply
+    await updateSupplyMetric(
+      context,
+      tokenData,
+      "cexSupply",
+      cexAddressList,
+      MetricTypesEnum.CEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      tokenId,
+      timestamp,
+    );
 
-  // Update DEX supply
-  await updateSupplyMetric(
-    context,
-    tokenData,
-    "dexSupply",
-    dexAddressList,
-    MetricTypesEnum.DEX_SUPPLY,
-    from,
-    to,
-    value,
-    daoId,
-    tokenId,
-    timestamp,
-  );
+    // Update DEX supply
+    await updateSupplyMetric(
+      context,
+      tokenData,
+      "dexSupply",
+      dexAddressList,
+      MetricTypesEnum.DEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      tokenId,
+      timestamp,
+    );
 
-  await updateSupplyMetric(
-    context,
-    tokenData,
-    "treasury",
-    treasuryAddressList,
-    MetricTypesEnum.TREASURY,
-    from,
-    to,
-    value,
-    daoId,
-    tokenId,
-    timestamp,
-  );
+    await updateSupplyMetric(
+      context,
+      tokenData,
+      "treasury",
+      treasuryAddressList,
+      MetricTypesEnum.TREASURY,
+      from,
+      to,
+      value,
+      daoId,
+      tokenId,
+      timestamp,
+    );
 
-  await updateTotalSupplyMetric(
-    context,
-    tokenData,
-    burningAddressList,
-    MetricTypesEnum.TOTAL_SUPPLY,
-    from,
-    to,
-    value,
-    daoId,
-    tokenId,
-    timestamp,
-  );
+    await updateTotalSupplyMetric(
+      context,
+      tokenData,
+      burningAddressList,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      tokenId,
+      timestamp,
+    );
 
-  // Update circulating supply
-  await updateCirculatingSupplyMetric(
-    context,
-    tokenData,
-    MetricTypesEnum.CIRCULATING_SUPPLY,
-    daoId,
-    tokenId,
-    timestamp,
-  );
+    // Update circulating supply
+    await updateCirculatingSupplyMetric(
+      context,
+      tokenData,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      daoId,
+      tokenId,
+      timestamp,
+    );
+  }
 };

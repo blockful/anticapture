@@ -7,6 +7,8 @@ import {
   delegateChanged,
   delegatedVotesChanged,
   tokenTransfer,
+  // updateSupplyMetric,
+  // updateTotalSupplyMetric,
 } from "@/eventHandlers";
 import { handleTransaction } from "@/eventHandlers/shared";
 
@@ -36,6 +38,84 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       .onConflictDoUpdate({
         amount: event.args.amount,
       });
+
+    // await updateSupplyMetric(
+    //   context,
+    //   tokenData,
+    //   "lendingSupply",
+    //   lendingAddressList,
+    //   MetricTypesEnum.LENDING_SUPPLY,
+    //   from,
+    //   to,
+    //   value,
+    //   daoId,
+    //   tokenId,
+    //   timestamp,
+    // );
+
+    // await updateSupplyMetric(
+    //   context,
+    //   tokenData,
+    //   "cexSupply",
+    //   cexAddressList,
+    //   MetricTypesEnum.CEX_SUPPLY,
+    //   from,
+    //   to,
+    //   value,
+    //   daoId,
+    //   tokenId,
+    //   timestamp,
+    // );
+
+    // await updateSupplyMetric(
+    //   context,
+    //   tokenData,
+    //   "dexSupply",
+    //   dexAddressList,
+    //   MetricTypesEnum.DEX_SUPPLY,
+    //   from,
+    //   to,
+    //   value,
+    //   daoId,
+    //   tokenId,
+    //   timestamp,
+    // );
+
+    // await updateSupplyMetric(
+    //   context,
+    //   tokenData,
+    //   "treasury",
+    //   treasuryAddressList,
+    //   MetricTypesEnum.TREASURY,
+    //   from,
+    //   to,
+    //   value,
+    //   daoId,
+    //   tokenId,
+    //   timestamp,
+    // );
+
+    // await updateTotalSupplyMetric(
+    //   context,
+    //   tokenData,
+    //   burningAddressList,
+    //   MetricTypesEnum.TOTAL_SUPPLY,
+    //   from,
+    //   to,
+    //   value,
+    //   daoId,
+    //   tokenId,
+    //   timestamp,
+    // );
+
+    // await updateCirculatingSupplyMetric(
+    //   context,
+    //   tokenData,
+    //   MetricTypesEnum.CIRCULATING_SUPPLY,
+    //   daoId,
+    //   tokenId,
+    //   timestamp,
+    // );
   });
 
   ponder.on(
