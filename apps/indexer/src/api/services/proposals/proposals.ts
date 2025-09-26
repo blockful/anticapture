@@ -22,7 +22,10 @@ interface ProposalsRepository {
   ): Promise<{ voter: Address; votingPower: bigint }[]>;
   getProposalNonVotersCount(proposalId: string): Promise<number>;
   getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
-  getVotingPowerVariation(voters: Address[]): Promise<string[]>;
+  getVotingPowerVariation(
+    voters: Address[],
+    days: number,
+  ): Promise<Record<Address, string>>;
 }
 
 export class ProposalsService {
@@ -134,9 +137,9 @@ export class ProposalsService {
       this.proposalsRepo.getProposalNonVotersCount(proposalId),
     ]);
     const addresses = nonVoters.map((v) => v.voter);
-    const [lastVotersTimestamp] = await Promise.all([
+    const [lastVotersTimestamp, votingPowerVariation] = await Promise.all([
       this.proposalsRepo.getLastVotersTimestamp(addresses),
-      // this.proposalsRepo.getVotingPowerVariation(addresses),
+      this.proposalsRepo.getVotingPowerVariation(addresses, 30),
     ]);
     return {
       totalCount,
@@ -144,8 +147,7 @@ export class ProposalsService {
         voter: v.voter,
         votingPower: v.votingPower.toString(),
         lastVoteTimestamp: Number(lastVotersTimestamp[v.voter] || 0),
-        votingPowerVariation: "0",
-        // votingPowerVariation: votingPowerVariation[index]!,
+        votingPowerVariation: votingPowerVariation[v.voter] || "0",
       })),
     };
   }
