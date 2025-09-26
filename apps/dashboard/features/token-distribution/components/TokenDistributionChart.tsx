@@ -79,7 +79,7 @@ export const TokenDistributionChart = ({
   // Show loading state
   if (isLoading || !chartData) {
     return (
-      <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
+      <div className="border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
         <div className="text-center">
           <Lottie animationData={loadingAnimation} height={400} width={400} />
         </div>
@@ -90,14 +90,14 @@ export const TokenDistributionChart = ({
   // Show research pending when tokenDistribution is not configured in dao-config
   if (daoConfig && daoConfig.tokenDistribution === false) {
     return (
-      <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
+      <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center sm:rounded-lg">
         <ResearchPendingChartBlur />
       </div>
     );
   }
 
   return (
-    <div className="border-light-dark bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center rounded-lg">
+    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center sm:rounded-lg">
       <ChartContainer
         className="h-full w-full justify-start"
         config={chartConfig}
