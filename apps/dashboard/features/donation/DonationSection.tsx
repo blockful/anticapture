@@ -1,5 +1,3 @@
-"use client";
-
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Heart } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
