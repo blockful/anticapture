@@ -126,14 +126,6 @@ export const QuorumCard = () => {
   const textCardDaoInfo =
     daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
 
-  console.log("quorumPercentageDelSupply", quorumPercentageDelSupply);
-  console.log("quorumPercentageTotalSupply", quorumPercentageTotalSupply);
-  console.log("quorumPercentage", quorumPercentage);
-  console.log("quorumValue", quorumValue);
-  console.log(
-    `${quorumValue} ${daoData?.id || "Unknown ID"} ${quorumPercentage}`,
-  );
-
   const quorumData: CardData = {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,

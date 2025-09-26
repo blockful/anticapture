@@ -169,6 +169,8 @@ export const MultilineChartAttackProfitability = ({
         const isKeySelected = filterData?.includes(key);
         const isLabelSelected = filterData?.includes(chartLabel);
 
+        console.log(filterData, key);
+
         if (isKeySelected || isLabelSelected) {
           const value = dataset.find((d) => d.date === date)?.[key] ?? null;
           if (value !== null) lastKnownValues[key] = value;
