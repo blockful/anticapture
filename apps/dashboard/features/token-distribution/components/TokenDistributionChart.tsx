@@ -132,6 +132,23 @@ export const TokenDistributionChart = ({
     return finalTicks;
   }, [chartData, brushRange.startIndex, brushRange.endIndex, interval]);
 
+  const dynamicBarSize = useMemo(() => {
+    if (!chartData || chartData.length === 0) return 2;
+
+    const start = brushRange.startIndex ?? 0;
+    const end = brushRange.endIndex ?? chartData.length - 1;
+    const visiblePoints = end - start + 1;
+
+    if (visiblePoints <= 1) return 50;
+
+    const baseWidthFactor = 1500;
+    const calculatedSize = baseWidthFactor / visiblePoints;
+    const minSize = 2;
+    const maxSize = 50;
+
+    return Math.max(minSize, Math.min(calculatedSize, maxSize));
+  }, [chartData, brushRange.startIndex, brushRange.endIndex]);
+
   const formatTick = (tick: number) => {
     if (interval === "daily" || interval === "weekly") {
       return timestampToReadableDate(tick, "day_abbreviated");
@@ -392,7 +409,7 @@ export const TokenDistributionChart = ({
                 dataKey={metricKey}
                 fill={config.color}
                 opacity={isOpaque ? 0.3 : 0.5}
-                barSize={2}
+                barSize={dynamicBarSize}
                 yAxisId="bars"
                 radius={[2, 2, 0, 0]}
               />
