@@ -22,20 +22,6 @@ import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { QuorumTypeEnum } from "@/shared/dao-config/types";
 
-const getQuorumPercentageDelSupply = (
-  quorumMinPercentageDelSupply: string | false | null | undefined,
-  quorumCalculation: QuorumTypeEnum | undefined,
-): string => {
-  if (quorumMinPercentageDelSupply) return "(N/A)";
-
-  switch (quorumCalculation) {
-    case QuorumTypeEnum.SCR:
-      return quorumCalculation;
-    default:
-      return `(30% ${quorumCalculation})`;
-  }
-};
-
 export const QuorumCard = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -107,10 +93,9 @@ export const QuorumCard = () => {
     ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
     : "No Quorum";
 
-  const quorumPercentageDelSupply = getQuorumPercentageDelSupply(
-    quorumMinPercentageDelSupply,
-    daoConfig.daoOverview.rules?.quorumCalculation,
-  );
+  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
+    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
+    : "(N/A)";
 
   const quorumPercentageTotalSupply = quorumMinPercentage
     ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
@@ -118,13 +103,13 @@ export const QuorumCard = () => {
 
   const quorumPercentage =
     daoConfig.daoOverview.rules?.quorumCalculation ===
-    QuorumTypeEnum.TOTAL_SUPPLY
+    QuorumTypeEnum.DELEGATED_SUPPLY
       ? quorumPercentageDelSupply
       : quorumPercentageTotalSupply;
 
   const quorumValue =
     daoConfig.daoOverview.rules?.quorumCalculation ===
-    QuorumTypeEnum.TOTAL_SUPPLY
+    QuorumTypeEnum.DELEGATED_SUPPLY
       ? quorumValueDelSupply
       : quorumValueTotalSupply;
 
@@ -140,6 +125,14 @@ export const QuorumCard = () => {
 
   const textCardDaoInfo =
     daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
+
+  console.log("quorumPercentageDelSupply", quorumPercentageDelSupply);
+  console.log("quorumPercentageTotalSupply", quorumPercentageTotalSupply);
+  console.log("quorumPercentage", quorumPercentage);
+  console.log("quorumValue", quorumValue);
+  console.log(
+    `${quorumValue} ${daoData?.id || "Unknown ID"} ${quorumPercentage}`,
+  );
 
   const quorumData: CardData = {
     title: "Quorum",
