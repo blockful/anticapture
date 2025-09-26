@@ -1,5 +1,3 @@
-"use client";
-
 import { getDateRange } from "@/shared/utils";
 import { ReactNode } from "react";
 import { cn } from "@/shared/utils";
