@@ -33,6 +33,7 @@ import {
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { Data } from "react-csv/lib/core";
 
 interface StackedValue {
   value: number;
@@ -56,10 +57,14 @@ interface ChartDataItem {
 }
 
 interface AttackCostBarChartProps {
+  setCsvData: (data: Data) => void;
   className?: string;
 }
 
-export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
+export const AttackCostBarChart = ({
+  className,
+  setCsvData,
+}: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const [mocked, setMocked] = useState<boolean>(false);
@@ -127,17 +132,14 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
 
-  if (isLoading) {
-    return (
-      <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow className="h-70 w-full" />
-      </div>
-    );
-  }
+  const chartData: ChartDataItem[] = useMemo(() => {
+    if (isLoading) return [];
 
-  let chartData: ChartDataItem[] = [];
-  if (!mocked) {
-    chartData = [
+    if (mocked) {
+      return mockedAttackCostBarData as ChartDataItem[];
+    }
+
+    return [
       {
         id: "liquidTreasury",
         name: "Liquid Treasury",
@@ -195,8 +197,29 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
           ) * lastPrice,
       },
     ];
-  } else {
-    chartData = mockedAttackCostBarData as ChartDataItem[];
+  }, [
+    isLoading,
+    mocked,
+    liquidTreasury.data,
+    delegatedSupply.data,
+    activeSupply.data,
+    averageTurnout.data,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    lastPrice,
+  ]);
+
+  useEffect(() => {
+    if (!mocked && chartData.length) {
+      setCsvData(chartData as Data);
+    }
+  }, [chartData, mocked, setCsvData]);
+
+  if (isLoading) {
+    return (
+      <div className={`h-80 w-full ${className || ""}`}>
+        <SkeletonRow className="h-70 w-full" />
+      </div>
+    );
   }
 
   return (
