@@ -16,10 +16,11 @@ import {
 } from "@/shared/components";
 import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { formatVariation } from "@/shared/utils";
-import { useTokenDistributionContext } from "@/features/token-distribution/contexts/TokenDistributionContext";
 import { useParams } from "next/navigation";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { TokenDistributionContextProps } from "@/shared/contexts/types";
+
 const sortingByAscendingOrDescendingNumber = (
   rowA: Row<TokenDistribution>,
   rowB: Row<TokenDistribution>,
@@ -60,23 +61,15 @@ const metricDetails: Record<string, { icon: ReactNode; tooltip: string }> = {
   },
 };
 
-export const TokenDistributionTable = () => {
+interface TokenDistributionTableProps {
+  value: TokenDistributionContextProps;
+}
+
+export const TokenDistributionTable = ({
+  value,
+}: TokenDistributionTableProps) => {
   const [mounted, setMounted] = useState<boolean>(false);
-  const {
-    totalSupply,
-    days,
-    totalSupplyChart,
-    delegatedSupply,
-    delegatedSupplyChart,
-    circulatingSupply,
-    circulatingSupplyChart,
-    cexSupply,
-    cexSupplyChart,
-    dexSupply,
-    dexSupplyChart,
-    lendingSupply,
-    lendingSupplyChart,
-  } = useTokenDistributionContext();
+
   const { daoId } = useParams();
 
   useEffect(() => {
@@ -125,7 +118,7 @@ export const TokenDistributionTable = () => {
           const randomNumber = Math.floor(Math.random() * 999);
           const randomValues = ["K", "M"];
           return (
-            <div className="flex items-center justify-end px-4 py-3 text-end blur-xs">
+            <div className="blur-xs flex items-center justify-end px-4 py-3 text-end">
               {randomNumber}
               {randomValues[randomNumber % 2]}
             </div>
@@ -177,7 +170,7 @@ export const TokenDistributionTable = () => {
         }
         if (variation === null) {
           return (
-            <div className="text-success flex items-center justify-end blur-xs">
+            <div className="text-success blur-xs flex items-center justify-end">
               {(Math.random() * 100).toFixed(2)}%
             </div>
           );
@@ -238,7 +231,7 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="flex w-full justify-center py-2.5 blur-xs">
+            <div className="blur-xs flex w-full justify-center py-2.5">
               <Sparkline
                 data={mockedTableChartMetrics.map((item) => Number(item.high))}
                 strokeColor={"#4ADE80"}
@@ -255,9 +248,9 @@ export const TokenDistributionTable = () => {
           </div>
         );
       },
-      header: ({ column }) => (
+      header: () => (
         <div className="text-table-header flex w-full items-center justify-center pr-20">
-          Last {days.slice(0, -1)} days
+          Last {value.days.slice(0, -1)} days
         </div>
       ),
     },
@@ -269,63 +262,63 @@ export const TokenDistributionTable = () => {
       data={[
         {
           metric: "Total",
-          currentValue: !!totalSupply.value
-            ? String(BigInt(totalSupply.value) / BigInt(10 ** 18))
-            : totalSupply.value,
-          variation: totalSupply.changeRate
-            ? formatVariation(totalSupply.changeRate)
-            : totalSupply.changeRate,
-          chartLastDays: totalSupplyChart,
+          currentValue: value.totalSupply.value
+            ? String(BigInt(value.totalSupply.value) / BigInt(10 ** 18))
+            : value.totalSupply.value,
+          variation: value.totalSupply.changeRate
+            ? formatVariation(value.totalSupply.changeRate)
+            : value.totalSupply.changeRate,
+          chartLastDays: value.totalSupplyChart,
         },
         {
           metric: "Delegated",
-          currentValue: !!delegatedSupply.value
-            ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
-            : delegatedSupply.value,
-          variation: delegatedSupply.changeRate
-            ? formatVariation(delegatedSupply.changeRate)
-            : delegatedSupply.changeRate,
-          chartLastDays: delegatedSupplyChart,
+          currentValue: value.delegatedSupply.value
+            ? String(BigInt(value.delegatedSupply.value) / BigInt(10 ** 18))
+            : value.delegatedSupply.value,
+          variation: value.delegatedSupply.changeRate
+            ? formatVariation(value.delegatedSupply.changeRate)
+            : value.delegatedSupply.changeRate,
+          chartLastDays: value.delegatedSupplyChart,
         },
         {
           metric: "Circulating",
-          currentValue: circulatingSupply.value
-            ? String(BigInt(circulatingSupply.value) / BigInt(10 ** 18))
-            : circulatingSupply.value,
-          variation: circulatingSupply.changeRate
-            ? formatVariation(circulatingSupply.changeRate)
-            : circulatingSupply.changeRate,
-          chartLastDays: circulatingSupplyChart,
+          currentValue: value.circulatingSupply.value
+            ? String(BigInt(value.circulatingSupply.value) / BigInt(10 ** 18))
+            : value.circulatingSupply.value,
+          variation: value.circulatingSupply.changeRate
+            ? formatVariation(value.circulatingSupply.changeRate)
+            : value.circulatingSupply.changeRate,
+          chartLastDays: value.circulatingSupplyChart,
         },
         {
           metric: "CEX",
-          currentValue: cexSupply.value
-            ? String(BigInt(cexSupply.value) / BigInt(10 ** 18))
-            : cexSupply.value,
-          variation: cexSupply.changeRate
-            ? formatVariation(cexSupply.changeRate)
-            : cexSupply.changeRate,
-          chartLastDays: cexSupplyChart,
+          currentValue: value.cexSupply.value
+            ? String(BigInt(value.cexSupply.value) / BigInt(10 ** 18))
+            : value.cexSupply.value,
+          variation: value.cexSupply.changeRate
+            ? formatVariation(value.cexSupply.changeRate)
+            : value.cexSupply.changeRate,
+          chartLastDays: value.cexSupplyChart,
         },
         {
           metric: "DEX",
-          currentValue: dexSupply.value
-            ? String(BigInt(dexSupply.value) / BigInt(10 ** 18))
-            : dexSupply.value,
-          variation: dexSupply.changeRate
-            ? formatVariation(dexSupply.changeRate)
-            : dexSupply.changeRate,
-          chartLastDays: dexSupplyChart,
+          currentValue: value.dexSupply.value
+            ? String(BigInt(value.dexSupply.value) / BigInt(10 ** 18))
+            : value.dexSupply.value,
+          variation: value.dexSupply.changeRate
+            ? formatVariation(value.dexSupply.changeRate)
+            : value.dexSupply.changeRate,
+          chartLastDays: value.dexSupplyChart,
         },
         {
           metric: "Lending",
-          currentValue: lendingSupply.value
-            ? String(BigInt(lendingSupply.value) / BigInt(10 ** 18))
-            : lendingSupply.value,
-          variation: lendingSupply.changeRate
-            ? formatVariation(lendingSupply.changeRate)
-            : lendingSupply.changeRate,
-          chartLastDays: lendingSupplyChart,
+          currentValue: value.lendingSupply.value
+            ? String(BigInt(value.lendingSupply.value) / BigInt(10 ** 18))
+            : value.lendingSupply.value,
+          variation: value.lendingSupply.changeRate
+            ? formatVariation(value.lendingSupply.changeRate)
+            : value.lendingSupply.changeRate,
+          chartLastDays: value.lendingSupplyChart,
         },
       ]}
       withPagination={true}

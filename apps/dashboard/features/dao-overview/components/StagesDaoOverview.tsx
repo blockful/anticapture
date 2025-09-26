@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { BulletPoint } from "@/shared/components/icons";
 import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Stage } from "@/shared/types/enums/Stage";
 import { Button } from "@/shared/components";
 interface StagesDaoOverviewProps {
@@ -54,7 +54,7 @@ export const StagesDaoOverview = ({
       setShowTooltip(!showTooltip);
     } else {
       const section = document.getElementById(
-        SECTIONS_CONSTANTS.resilienceStages.anchorId,
+        PAGES_CONSTANTS.resilienceStages.page,
       );
       if (section) {
         section.scrollIntoView({ behavior: "smooth" });

@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";

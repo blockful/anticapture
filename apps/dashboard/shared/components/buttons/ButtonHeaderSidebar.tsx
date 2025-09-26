@@ -1,69 +1,70 @@
 "use client";
 
 import { cn } from "@/shared/utils/";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { useSectionObserver } from "@/shared/hooks";
-import { ButtonHTMLAttributes, useEffect } from "react";
+import { useParams, usePathname } from "next/navigation";
+import Link from "next/link";
+import { AnchorHTMLAttributes } from "react";
 import { ElementType } from "react";
-import { Button } from "@/shared/components";
 
-interface ButtonHeaderSidebar extends ButtonHTMLAttributes<HTMLButtonElement> {
-  anchorId: string;
+interface ButtonHeaderSidebar extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  page: string;
   icon: ElementType;
   label: string;
   className?: string;
 }
+
 export const ButtonHeaderSidebar = ({
-  anchorId,
+  page,
   icon: Icon,
   label,
   className,
   ...props
 }: ButtonHeaderSidebar) => {
-  const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
-  });
-  const isActive = (sectionId: string) => activeSection === sectionId;
+  const params = useParams();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const sectionId = sessionStorage.getItem("scrollToSection");
-    if (sectionId) {
-      const el = document.getElementById(sectionId);
-      handleSectionClick(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        sessionStorage.removeItem("scrollToSection");
-      }
-    }
-  }, [handleSectionClick]);
+  const daoId = params?.daoId as string;
+  const currentPage = pathname?.split("/").pop();
+
+  // Special case: DAO Overview page has URL /{daoId}/ but page="/"
+  const isDaoOverviewPage =
+    pathname === `/${daoId}` || pathname === `/${daoId}/`;
+  const isActive = page === "/" ? isDaoOverviewPage : currentPage === page;
+
+  // Generate the target path
+  const targetPath = daoId
+    ? page === "/"
+      ? `/${daoId}`
+      : `/${daoId}/${page}`
+    : "#";
 
   return (
-    <Button
-      variant="ghost"
+    <Link
+      href={targetPath}
       className={cn(
-        "group w-full justify-start",
+        "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium",
         {
-          "cursor-default bg-white hover:bg-white": isActive(anchorId),
+          "cursor-default bg-white": isActive,
+          "hover:border-light-dark hover:bg-surface-contrast": !isActive,
         },
         className,
       )}
-      onClick={() => handleSectionClick(anchorId)}
       {...props}
     >
       <Icon
         className={cn("size-4", {
-          "text-inverted": isActive(anchorId),
-          "text-secondary group-hover:text-primary": !isActive(anchorId),
+          "text-inverted": isActive,
+          "text-secondary group-hover:text-primary": !isActive,
         })}
       />
       <p
-        className={cn("", {
-          "text-inverted": isActive(anchorId),
-          "text-secondary group-hover:text-primary": !isActive(anchorId),
+        className={cn({
+          "text-inverted": isActive,
+          "text-secondary group-hover:text-primary": !isActive,
         })}
       >
         {label}
       </p>
-    </Button>
+    </Link>
   );
 };

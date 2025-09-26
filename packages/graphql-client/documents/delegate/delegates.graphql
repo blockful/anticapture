@@ -4,11 +4,12 @@ query GetDelegates(
   $orderBy: String = "votingPower"
   $orderDirection: String = "desc"
   $addresses: [String]
+  $limit: Int = 10
 ) {
   accountPowers(
     orderBy: $orderBy
     orderDirection: $orderDirection
-    limit: 10
+    limit: $limit
     after: $after
     before: $before
     where: { votingPower_gt: 0, accountId_in: $addresses }
