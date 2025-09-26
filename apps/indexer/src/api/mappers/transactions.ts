@@ -134,7 +134,7 @@ export const TransactionMapper = {
       fromAccountId: t.fromAccountId,
       toAccountId: t.toAccountId,
       timestamp: t.timestamp.toString(),
-      logIndex: t.logIndex,
+      logIndex: t.logIndex || 0,
       isCex: t.isCex,
       isDex: t.isDex,
       isLending: t.isLending,
