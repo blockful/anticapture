@@ -90,12 +90,18 @@ export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.NOUNS]: {
     blockTime: 12,
     token: {
+      // https://etherscan.io/address/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03
       address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
       decimals: 18,
       startBlock: 12985438,
     },
     governor: {
+      // https://etherscan.io/address/0x6f3e6272a167e8accb32072d08e0957f9c79223d
       address: "0x6f3e6272a167e8accb32072d08e0957f9c79223d",
+      startBlock: 12985453,
+    },
+    auction: {
+      address: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
       startBlock: 12985453,
     },
   },

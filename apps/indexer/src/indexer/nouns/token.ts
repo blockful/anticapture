@@ -1,5 +1,5 @@
 import { Context, Event, ponder } from "ponder:registry";
-import { token } from "ponder:schema";
+import { token, transfer } from "ponder:schema";
 import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
@@ -21,6 +21,23 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
     });
   });
 
+  ponder.on("NounsAuction:AuctionSettled", async ({ event, context }) => {
+    await context.db
+      .insert(transfer)
+      .values({
+        daoId,
+        tokenId: address,
+        amount: event.args.amount,
+        timestamp: event.block.timestamp,
+        transactionHash: event.transaction.hash,
+        fromAccountId: event.transaction.from,
+        toAccountId: event.args.winner,
+      })
+      .onConflictDoUpdate({
+        amount: event.args.amount,
+      });
+  });
+
   ponder.on(
     "NounsToken:Transfer",
     async ({
@@ -35,7 +52,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         to: event.args.to,
         token: address,
         transactionHash: event.transaction.hash,
-        value: 1n,
+        value: 0n,
         timestamp: event.block.timestamp,
         logIndex: event.log.logIndex,
       });

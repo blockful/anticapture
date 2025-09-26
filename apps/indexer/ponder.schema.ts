@@ -134,7 +134,7 @@ export const transfer = onchainTable(
     fromAccountId: drizzle.text("from_account_id").$type<Address>().notNull(),
     toAccountId: drizzle.text("to_account_id").$type<Address>().notNull(),
     timestamp: drizzle.bigint().notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
+    logIndex: drizzle.integer("log_index"),
     isCex: drizzle.boolean().notNull().default(false),
     isDex: drizzle.boolean().notNull().default(false),
     isLending: drizzle.boolean().notNull().default(false),

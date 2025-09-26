@@ -3,7 +3,12 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { GovernorAbi, TokenAbi, LegacyGovernorABI } from "@/indexer/nouns/abi";
+import {
+  GovernorAbi,
+  TokenAbi,
+  LegacyGovernorABI,
+  AuctionAbi,
+} from "@/indexer/nouns/abi";
 
 const NOUNS_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.NOUNS];
 
@@ -28,6 +33,12 @@ export default createConfig({
       chain: "ethereum_mainnet",
       address: NOUNS_CONTRACTS.token.address,
       startBlock: NOUNS_CONTRACTS.token.startBlock,
+    },
+    NounsAuction: {
+      abi: AuctionAbi,
+      chain: "ethereum_mainnet",
+      address: NOUNS_CONTRACTS.auction.address,
+      startBlock: NOUNS_CONTRACTS.auction.startBlock,
     },
   },
 });

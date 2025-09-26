@@ -196,9 +196,7 @@ export const tokenTransfer = async (
     id: tokenId,
   });
 
-  if (!tokenData) {
-    return;
-  }
+  if (!tokenData) return;
 
   // Pre-compute address lists
   const lendingAddressList = Object.values(LendingAddresses[daoId]);
@@ -232,8 +230,9 @@ export const tokenTransfer = async (
       isLending,
       isTotal,
     })
-    .onConflictDoUpdate((current) => ({
-      amount: (current.amount ?? 0n) + value,
+    .onConflictDoUpdate(() => ({
+      logIndex,
+      timestamp,
     }));
 
   // Transaction flag updates moved to DAO-specific indexer
