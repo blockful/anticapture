@@ -9,8 +9,9 @@ const blankSlateVariants = cva(
   {
     variants: {
       variant: {
-        default: " h-fit flex flex-col",
-        title: " h-fit flex flex-col",
+        default: "h-fit flex flex-col",
+        title: "h-fit flex flex-col",
+        small: "h-fit flex p-3",
       },
     },
     defaultVariants: {
@@ -24,6 +25,7 @@ const iconVariants = cva("size-6", {
     variant: {
       default: "text-secondary",
       title: "text-secondary",
+      small: "text-secondary size-4",
     },
   },
   defaultVariants: {
@@ -32,7 +34,7 @@ const iconVariants = cva("size-6", {
 });
 
 interface BlankSlateProps {
-  variant: "default" | "title";
+  variant: "default" | "title" | "small";
   icon: ElementType;
   title?: string;
   className?: string;
@@ -59,7 +61,11 @@ export const BlankSlate = ({
             {title}
           </div>
         )}
-        <div className="text-secondary font-regular flex text-sm">
+        <div
+          className={cn("text-secondary font-regular flex text-sm", {
+            "font-normal": variant === "small",
+          })}
+        >
           {description}
         </div>
       </div>
