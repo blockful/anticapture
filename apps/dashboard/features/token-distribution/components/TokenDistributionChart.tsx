@@ -30,6 +30,7 @@ import { AlertOctagon } from "lucide-react";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { useScreenSize } from "@/shared/hooks/useScreenSize";
 
 interface TokenDistributionChartProps {
   appliedMetrics: string[];
@@ -53,6 +54,7 @@ export const TokenDistributionChart = ({
   const { brushRange, setBrushRange } = useBrushStore();
   const hasInitialized = useRef(false);
   const daoConfig = daoConfigByDaoId[daoId];
+  const { isMobile } = useScreenSize();
 
   useEffect(() => {
     if (chartData && chartData.length > 0 && !hasInitialized.current) {
@@ -102,7 +104,15 @@ export const TokenDistributionChart = ({
         className="h-full w-full justify-start"
         config={chartConfig}
       >
-        <ComposedChart data={chartData} margin={{ right: 20 }}>
+        <ComposedChart
+          data={chartData}
+          margin={{
+            right: isMobile ? 5 : 20,
+            left: isMobile ? -35 : 0,
+            top: isMobile ? 5 : 10,
+            bottom: isMobile ? 5 : 10,
+          }}
+        >
           <defs>
             {/* Generate gradients for each AREA metric */}
             {appliedMetrics
