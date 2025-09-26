@@ -178,6 +178,7 @@ export const MultilineChartAttackProfitability = ({
         }
       });
 
+      console.log(dataPoint);
       return dataPoint;
     });
   return (
