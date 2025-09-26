@@ -5,6 +5,7 @@ import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useSectionObserver } from "@/shared/hooks";
 import { ButtonHTMLAttributes, useEffect } from "react";
 import { ElementType } from "react";
+import { Button } from "@/shared/components";
 
 interface ButtonHeaderSidebar extends ButtonHTMLAttributes<HTMLButtonElement> {
   anchorId: string;
@@ -37,13 +38,12 @@ export const ButtonHeaderSidebar = ({
   }, [handleSectionClick]);
 
   return (
-    <button
+    <Button
+      variant="ghost"
       className={cn(
-        `group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium`,
+        "group w-full justify-start",
         {
-          "cursor-default bg-white": isActive(anchorId),
-          "hover:border-light-dark hover:bg-surface-contrast":
-            !isActive(anchorId),
+          "cursor-default bg-white hover:bg-white": isActive(anchorId),
         },
         className,
       )}
@@ -64,6 +64,6 @@ export const ButtonHeaderSidebar = ({
       >
         {label}
       </p>
-    </button>
+    </Button>
   );
 };
