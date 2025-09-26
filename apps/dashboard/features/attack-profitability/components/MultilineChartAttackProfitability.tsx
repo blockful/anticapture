@@ -157,8 +157,6 @@ export const MultilineChartAttackProfitability = ({
     ),
   );
 
-  console.log(datasets);
-
   const lastKnownValues: Record<string, number | null> = {};
 
   const chartData = Array.from(allDates)
@@ -180,6 +178,7 @@ export const MultilineChartAttackProfitability = ({
 
       return dataPoint;
     });
+
   return (
     <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}
