@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement, useState } from "react";
 import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
