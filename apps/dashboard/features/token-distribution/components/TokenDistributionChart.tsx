@@ -242,6 +242,7 @@ export const TokenDistributionChart = ({
             tickMargin={8}
             tickFormatter={formatTick}
             allowDuplicatedCategory={false}
+            padding={{ left: 20, right: 20 }}
           />
           {/* DEFAULT AXIS - Required for Recharts compatibility */}
           <YAxis yAxisId={0} hide domain={["auto", "auto"]} />

@@ -4,8 +4,8 @@ import { formatUnits } from "viem";
 // Timestamp utility functions
 export const normalizeTimestamp = (timestamp: number | string): number => {
   const ts = Number(timestamp);
-  // Convert milliseconds to seconds if needed
-  return ts > 1000000000000 ? Math.floor(ts / 1000) : ts;
+  const seconds = ts > 1e12 ? Math.floor(ts / 1000) : ts;
+  return Math.floor(seconds / 86400) * 86400;
 };
 
 export const validateChartData = <T extends Record<string, unknown>>(
@@ -22,7 +22,6 @@ export const validateChartData = <T extends Record<string, unknown>>(
   );
 };
 
-
 export const calculateChangeRate = (
   data: DaoMetricsDayBucket[] = [],
 ): string | null => {
@@ -36,4 +35,3 @@ export const calculateChangeRate = (
   const change = (BigInt(last) * BigInt(1e18)) / BigInt(first) - BigInt(1e18);
   return formatUnits(change, 18);
 };
-

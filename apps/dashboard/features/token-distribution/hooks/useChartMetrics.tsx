@@ -154,9 +154,9 @@ export const useChartMetrics = ({
           timeSeriesData[dataSourceKey].forEach((item: DaoMetricsDayBucket) => {
             const value = valueField === "volume" ? item.volume : item.high;
 
-            result[item.date] = {
-              ...result[item.date],
-              date: Number(item.date),
+            result[normalizeTimestamp(item.date)] = {
+              ...result[normalizeTimestamp(item.date)],
+              date: normalizeTimestamp(item.date),
               [metricKey]: Number(value) / 1e18, // Convert from wei to token units
             };
           });
@@ -202,11 +202,13 @@ export const useChartMetrics = ({
         if (!proposal || !proposal.id) return;
 
         const timestamp = normalizeTimestamp(proposal.timestamp);
-        result[timestamp] = {
-          ...result[timestamp],
-          date: timestamp,
-          PROPOSALS_GOVERNANCE: proposal.title ?? "",
+
+        result[normalizeTimestamp(timestamp)] = {
+          ...result[normalizeTimestamp(timestamp)],
+          date: normalizeTimestamp(timestamp),
+          PROPOSALS_GOVERNANCE: proposal.title || "",
         };
+        // }
       });
     }
 
@@ -239,54 +241,33 @@ export const useChartMetrics = ({
       return [];
     }
 
-    return Object.values(datasets)
-      .sort((a, b) => a.date - b.date)
-      .map((value) => {
-        const lastKnownValues: Record<
-          keyof typeof metricsSchema,
-          number | undefined
-        > = {};
+    const sortedData = Object.values(datasets).sort((a, b) => a.date - b.date);
 
-        const processedPoint = {
-          ...Object.entries(value).reduce(
-            (
-              acc,
-              [key, metric]: [
-                keyof typeof metricsSchema,
-                number | undefined | string,
-              ],
-            ) => {
-              if (metric !== undefined) {
-                lastKnownValues[key as keyof typeof metricsSchema] =
-                  metric as number;
-              }
-              if (key === "PROPOSALS_GOVERNANCE") {
-                return {
-                  ...acc,
-                  [key]: metric ?? 0,
-                };
-              }
-              return {
-                ...acc,
-                [key]:
-                  metric ?? lastKnownValues[key as keyof typeof metricsSchema],
-              };
-            },
-            {} as ChartDataSetPoint,
-          ),
-        };
+    const lastKnownValues: Partial<ChartDataSetPoint> = {};
 
-        // Ensure all applied metrics exist in every point (especially PROPOSALS_GOVERNANCE)
-        stableAppliedMetrics.forEach((metricKey) => {
-          if (!(metricKey in processedPoint)) {
-            processedPoint[metricKey] =
-              metricKey === "PROPOSALS_GOVERNANCE" ? 0 : undefined;
+    return sortedData.map((point) => {
+      const processedPoint: ChartDataSetPoint = { date: point.date };
+
+      stableAppliedMetrics.forEach((metricKey) => {
+        const config = metricsSchema[metricKey];
+        const value = point[metricKey];
+        if (value !== undefined) {
+          processedPoint[metricKey] = value;
+          if (config?.type === "LINE" || config?.type === "AREA") {
+            lastKnownValues[metricKey] = value;
           }
-        });
-
-        return processedPoint;
+        } else {
+          if (config?.type === "LINE" || config?.type === "AREA") {
+            processedPoint[metricKey] = lastKnownValues[metricKey];
+          } else {
+            processedPoint[metricKey] = 0;
+          }
+        }
       });
-  }, [stableAppliedMetrics, datasets]);
+
+      return processedPoint;
+    });
+  }, [stableAppliedMetrics, datasets, metricsSchema]);
 
   // Optimized loading state - only consider loading for applied metrics
   const isLoadingOptimized = useMemo(() => {
