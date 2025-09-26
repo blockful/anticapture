@@ -1,6 +1,7 @@
-import { DBProposal, ProposalsRequest } from "@/api/mappers";
+import { DBProposal, ProposalsRequest, VotersResponse } from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
+import { Address } from "viem";
 
 interface ProposalsRepository {
   getProposals(
@@ -13,6 +14,15 @@ interface ProposalsRepository {
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
   getVotingDelay(): Promise<bigint>;
+  getProposalNonVoters(
+    proposalId: string,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<{ voter: Address; votingPower: bigint }[]>;
+  getProposalNonVotersCount(proposalId: string): Promise<number>;
+  getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
+  getVotingPowerVariation(voters: Address[]): Promise<string[]>;
 }
 
 export class ProposalsService {
@@ -103,5 +113,40 @@ export class ProposalsService {
     const status = await this.daoClient.getProposalStatus(proposal);
 
     return { ...proposal, status };
+  }
+
+  /**
+   * Returns the delegates with active delegations that didn't vote on a given proposal
+   */
+  async getProposalNonVoters(
+    proposalId: string,
+    skip: number = 0,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<VotersResponse> {
+    const [nonVoters, totalCount] = await Promise.all([
+      this.proposalsRepo.getProposalNonVoters(
+        proposalId,
+        skip,
+        limit,
+        orderDirection,
+      ),
+      this.proposalsRepo.getProposalNonVotersCount(proposalId),
+    ]);
+    const addresses = nonVoters.map((v) => v.voter);
+    const [lastVotersTimestamp] = await Promise.all([
+      this.proposalsRepo.getLastVotersTimestamp(addresses),
+      // this.proposalsRepo.getVotingPowerVariation(addresses),
+    ]);
+    return {
+      totalCount,
+      items: nonVoters.map((v) => ({
+        voter: v.voter,
+        votingPower: v.votingPower.toString(),
+        lastVoteTimestamp: Number(lastVotersTimestamp[v.voter] || 0),
+        votingPowerVariation: "0",
+        // votingPowerVariation: votingPowerVariation[index]!,
+      })),
+    };
   }
 }
