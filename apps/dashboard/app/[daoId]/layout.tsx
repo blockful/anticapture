@@ -1,4 +1,7 @@
 import { ReactNode } from "react";
+import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
+import NotFound from "@/app/[daoId]/not-found";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
@@ -13,7 +16,22 @@ interface DaoLayoutProps {
   params: Promise<DaoParams>;
 }
 
-export default async function DaoLayout({ children }: DaoLayoutProps) {
+export default async function DaoLayout({ children, params }: DaoLayoutProps) {
+  const { daoId } = await params;
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConfigByDaoId[daoIdEnum];
+
+  // Check if DAO exists and handle support stages
+  if (!ALL_DAOS.includes(daoIdEnum)) {
+    return <NotFound reason="not_found" />;
+  }
+
+  // Handle empty analysis DAOs
+  if (daoConstants.disableDaoPage) {
+    return <NotFound reason={"disabled"} />;
+  }
+
+  // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <BaseHeaderLayoutSidebar>
