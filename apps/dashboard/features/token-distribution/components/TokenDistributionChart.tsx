@@ -25,7 +25,7 @@ import { timestampToReadableDate } from "@/shared/utils";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { AlertOctagon } from "lucide-react";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -65,6 +65,70 @@ export const TokenDistributionChart = ({
       hasInitialized.current = true;
     }
   }, [chartData, setBrushRange]);
+
+  const interval = useMemo(() => {
+    if (!chartData || chartData.length < 2) return "monthly";
+    const start = brushRange.startIndex ?? 0;
+    const end = brushRange.endIndex ?? chartData.length - 1;
+    const slicedData = chartData.slice(start, end + 1);
+    if (slicedData.length < 2) return "monthly";
+
+    const startDate = new Date(slicedData[0].date * 1000);
+    const endDate = new Date(slicedData[slicedData.length - 1].date * 1000);
+    const daysInRange =
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (daysInRange <= 14) return "daily";
+    if (daysInRange <= 60) return "weekly";
+    if (daysInRange <= 264) return "monthly";
+    return "quarterly";
+  }, [chartData, brushRange.startIndex, brushRange.endIndex]);
+
+  const dynamicTicks = useMemo(() => {
+    if (!chartData || chartData.length < 2) return [];
+
+    const start = brushRange.startIndex ?? 0;
+    const end = brushRange.endIndex ?? chartData.length - 1;
+    const slicedData = chartData.slice(start, end + 1);
+
+    if (slicedData.length < 2) return [slicedData[0].date];
+
+    if (interval === "daily") {
+      return slicedData.map((point) => point.date);
+    }
+
+    const firstDate = slicedData[0].date;
+    const lastDate = slicedData[slicedData.length - 1].date;
+
+    const maxTicks = 7;
+    const tickCount = Math.min(slicedData.length, maxTicks);
+
+    if (tickCount <= 2) {
+      return [firstDate, lastDate];
+    }
+
+    const finalTicks: number[] = [];
+    const step = Math.floor((slicedData.length - 1) / (tickCount - 1));
+
+    for (let i = 0; i < tickCount; i++) {
+      const index = Math.min(i * step, slicedData.length - 1);
+      finalTicks.push(slicedData[index].date);
+    }
+
+    if (!finalTicks.includes(lastDate)) {
+      finalTicks.pop();
+      finalTicks.push(lastDate);
+    }
+
+    return finalTicks;
+  }, [chartData, brushRange.startIndex, brushRange.endIndex, interval]);
+
+  const formatTick = (tick: number) => {
+    if (interval === "daily" || interval === "weekly") {
+      return timestampToReadableDate(tick, "day_abbreviated");
+    }
+    return timestampToReadableDate(tick, "abbreviated");
+  };
 
   // Show error state
   if (error) {
@@ -147,17 +211,11 @@ export const TokenDistributionChart = ({
             dataKey="date"
             type="number"
             domain={["dataMin", "dataMax"]}
+            ticks={dynamicTicks}
+            interval={0}
             tickMargin={8}
-            tickFormatter={(date) => {
-              const format =
-                brushRange.endIndex - brushRange.startIndex < 14 // 14 points is equals to 3 months, So, if the range is less than 14, we show the full date, otherwise we show the abbreviated date
-                  ? "full"
-                  : "abbreviated";
-              return timestampToReadableDate(date, format);
-            }}
-            padding={{ left: 20, right: 20 }}
+            tickFormatter={formatTick}
             allowDuplicatedCategory={false}
-            interval={"equidistantPreserveStart"}
           />
           {/* DEFAULT AXIS - Required for Recharts compatibility */}
           <YAxis yAxisId={0} hide domain={["auto", "auto"]} />

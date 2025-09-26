@@ -1,6 +1,6 @@
 export const timestampToReadableDate = (
   date: number,
-  format: "abbreviated" | "full" = "full",
+  format: "abbreviated" | "full" | "day_abbreviated" = "full",
 ) => {
   if (isNaN(date) || date === null || date === undefined) return "Invalid Date";
 
@@ -24,9 +24,11 @@ export const timestampToReadableDate = (
 
   return format === "abbreviated"
     ? `${month} '${year}`
-    : newDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      });
+    : format === "day_abbreviated"
+      ? `${newDate.getDate()}. ${month}`
+      : newDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+        });
 };
