@@ -6,11 +6,10 @@ import {
   QueryInput_ProposalsActivity_OrderDirection,
   QueryInput_ProposalsActivity_UserVoteFilter,
 } from "@anticapture/graphql-client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
@@ -24,8 +23,6 @@ export const DelegateProposalsActivity = ({
   address,
   daoId,
 }: DelegateProposalsActivityProps) => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<string>("timestamp");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
@@ -46,30 +43,20 @@ export const DelegateProposalsActivity = ({
     setOrderDirection(direction);
   };
 
-  // Calculate skip for pagination
-  const skip = (currentPage - 1) * itemsPerPage;
-
-  const { data, loading, error, pagination } = useProposalsActivity({
-    address,
-    daoId,
-    skip,
-    limit: itemsPerPage,
-    orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
-    orderDirection:
-      orderDirection as QueryInput_ProposalsActivity_OrderDirection,
-    userVoteFilter:
-      userVoteFilter === "all"
-        ? undefined
-        : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
-    itemsPerPage,
-  });
-
-  // Update totalPages when not loading to preserve it during loading
-  useEffect(() => {
-    if (!loading && pagination.totalPages) {
-      setTotalPages(pagination.totalPages);
-    }
-  }, [loading, pagination.totalPages]);
+  const { data, loading, error, pagination, fetchingMore, fetchNextPage } =
+    useProposalsActivity({
+      address,
+      daoId,
+      limit: itemsPerPage,
+      orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
+      orderDirection:
+        orderDirection as QueryInput_ProposalsActivity_OrderDirection,
+      userVoteFilter:
+        userVoteFilter === "all"
+          ? undefined
+          : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
+      itemsPerPage,
+    });
 
   // Helper function to format average time (convert seconds to days)
   const formatAvgTime = (
@@ -86,12 +73,6 @@ export const DelegateProposalsActivity = ({
       return "< 1d before the end";
     }
     return `${Math.round(avgTimeBeforeEndDays)}d before the end`;
-  };
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
   };
 
   // Prepare values - undefined when loading/error, actual values when data is available
@@ -152,17 +133,9 @@ export const DelegateProposalsActivity = ({
             orderDirection={orderDirection}
             onSortChange={handleSortChange}
             daoIdEnum={daoId}
-          />
-
-          {/* Pagination Controls */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPrevious={() => handlePageChange(currentPage - 1)}
-            onNext={() => handlePageChange(currentPage + 1)}
-            hasNextPage={pagination.hasNextPage}
-            hasPreviousPage={pagination.hasPreviousPage}
-            className="text-white"
+            pagination={pagination}
+            fetchingMore={fetchingMore}
+            fetchNextPage={fetchNextPage}
           />
         </div>
       </div>

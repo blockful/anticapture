@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { ApolloError } from "@apollo/client";
+import { ApolloError, NetworkStatus } from "@apollo/client";
 import { formatUnits } from "viem";
 
 import {
   useVotingPowersQuery,
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
+  VotingPowersQuery,
 } from "@anticapture/graphql-client/hooks";
 
 // Interface for a single delegation history item
@@ -45,6 +46,7 @@ export interface UseDelegateDelegationHistoryResult {
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
+  fetchingMore: boolean;
 }
 
 export function useDelegateDelegationHistory(
@@ -84,7 +86,7 @@ export function useDelegateDelegationHistory(
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, loading, error, fetchMore } = useVotingPowersQuery({
+  const { data, error, fetchMore, networkStatus } = useVotingPowersQuery({
     variables: queryVariables,
     ...queryOptions,
   });
@@ -151,9 +153,33 @@ export function useDelegateDelegationHistory(
       await fetchMore({
         variables: {
           ...queryVariables,
-          skip: currentPage * itemsPerPage,
         },
-        updateQuery: (_, { fetchMoreResult }) => fetchMoreResult,
+        updateQuery: (
+          previousResult: VotingPowersQuery,
+          { fetchMoreResult },
+        ): VotingPowersQuery => {
+          if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.votingPowers?.items ?? [];
+          const newItems = fetchMoreResult.votingPowers?.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) =>
+                !prevItems.some(
+                  (p) => p?.transactionHash === n?.transactionHash,
+                ),
+            ),
+          ];
+
+          return {
+            ...fetchMoreResult,
+            votingPowers: {
+              ...fetchMoreResult.votingPowers,
+              items: merged,
+              totalCount: fetchMoreResult.votingPowers?.totalCount ?? 0,
+            },
+          };
+        },
       });
 
       setCurrentPage((prev) => prev + 1);
@@ -162,13 +188,7 @@ export function useDelegateDelegationHistory(
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [
-    fetchMore,
-    isPaginationLoading,
-    queryVariables,
-    currentPage,
-    itemsPerPage,
-  ]);
+  }, [fetchMore, isPaginationLoading, queryVariables]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
@@ -200,7 +220,7 @@ export function useDelegateDelegationHistory(
 
   return {
     delegationHistory: transformedData,
-    loading,
+    loading: networkStatus === NetworkStatus.loading,
     paginationInfo: {
       currentPage,
       totalPages: Math.ceil(data?.votingPowers?.totalCount || 0 / itemsPerPage),
@@ -211,5 +231,7 @@ export function useDelegateDelegationHistory(
     error,
     fetchNextPage,
     fetchPreviousPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 }
