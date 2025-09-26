@@ -145,7 +145,7 @@ export const TokenDistributionChart = ({
                   : "abbreviated";
               return timestampToReadableDate(date, format);
             }}
-            padding="gap"
+            padding={{ left: 20, right: 20 }}
             allowDuplicatedCategory={false}
             interval={"equidistantPreserveStart"}
           />
