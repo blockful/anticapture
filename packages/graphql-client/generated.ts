@@ -285,6 +285,11 @@ export type QueryHistoricalBalancesArgs = {
 };
 
 
+export type QueryHistoricalTokenDataArgs = {
+  days?: InputMaybe<QueryInput_HistoricalTokenData_Days>;
+};
+
+
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
@@ -1339,6 +1344,7 @@ export type Proposals_200_Response = {
 };
 
 export enum QueryInput_CompareActiveSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1347,6 +1353,7 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1355,6 +1362,7 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1363,6 +1371,7 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1371,6 +1380,7 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1379,6 +1389,7 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1387,6 +1398,7 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1395,6 +1407,7 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1403,6 +1416,7 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1411,6 +1425,7 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1419,6 +1434,7 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1427,6 +1443,16 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
+  '1d' = '_1d',
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_HistoricalTokenData_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1435,6 +1461,7 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1473,6 +1500,7 @@ export enum QueryInput_Proposals_OrderDirection {
 }
 
 export enum QueryInput_TotalAssets_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -2375,6 +2403,18 @@ export type GetProposalQueryVariables = Exact<{
 
 
 export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title?: string | null, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
+
+export type GetVotesOnchainsQueryVariables = Exact<{
+  proposalId?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetVotesOnchainsQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, items: Array<{ __typename?: 'votesOnchain', voterAccountId: string, txHash?: string | null, daoId: string, proposalId?: string | null, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp?: any | null }> } };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -3571,6 +3611,75 @@ export type GetProposalQueryHookResult = ReturnType<typeof useGetProposalQuery>;
 export type GetProposalLazyQueryHookResult = ReturnType<typeof useGetProposalLazyQuery>;
 export type GetProposalSuspenseQueryHookResult = ReturnType<typeof useGetProposalSuspenseQuery>;
 export type GetProposalQueryResult = Apollo.QueryResult<GetProposalQuery, GetProposalQueryVariables>;
+export const GetVotesOnchainsDocument = gql`
+    query GetVotesOnchains($proposalId: String, $limit: Int, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+  votesOnchains(
+    limit: $limit
+    after: $after
+    before: $before
+    where: {proposalId: $proposalId}
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    totalCount
+    items {
+      voterAccountId
+      txHash
+      daoId
+      voterAccountId
+      proposalId
+      support
+      votingPower
+      reason
+      timestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVotesOnchainsQuery__
+ *
+ * To run a query within a React component, call `useGetVotesOnchainsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotesOnchainsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVotesOnchainsQuery({
+ *   variables: {
+ *      proposalId: // value for 'proposalId'
+ *      limit: // value for 'limit'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useGetVotesOnchainsQuery(baseOptions?: Apollo.QueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+      }
+export function useGetVotesOnchainsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+        }
+export function useGetVotesOnchainsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+        }
+export type GetVotesOnchainsQueryHookResult = ReturnType<typeof useGetVotesOnchainsQuery>;
+export type GetVotesOnchainsLazyQueryHookResult = ReturnType<typeof useGetVotesOnchainsLazyQuery>;
+export type GetVotesOnchainsSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsSuspenseQuery>;
+export type GetVotesOnchainsQueryResult = Apollo.QueryResult<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
   historicalBalances(addresses: $addresses, days: $days) {
