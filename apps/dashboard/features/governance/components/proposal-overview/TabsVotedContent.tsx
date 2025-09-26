@@ -1,13 +1,14 @@
 import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery, VotesOnchain } from "@anticapture/graphql-client";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVotes } from "@/features/governance/hooks/useVotes";
-import { SkeletonRow, TheTable } from "@/shared/components";
+import { SkeletonRow, TheTable, Button } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { CheckCircle2, CircleMinus, ThumbsDown, XCircle } from "lucide-react";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 
 export const TabsVotedContent = ({
   proposal,
@@ -16,6 +17,25 @@ export const TabsVotedContent = ({
 }) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams();
+
+  // State for managing sort order
+  const [sortBy, setSortBy] = useState<string>("timestamp");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  // Handle sorting
+  const handleSort = useCallback(
+    (field: string) => {
+      if (sortBy === field) {
+        // Toggle direction if same field
+        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      } else {
+        // New field, default to desc for timestamp
+        setSortBy(field);
+        setSortDirection("desc");
+      }
+    },
+    [sortBy, sortDirection],
+  );
 
   // Get votes for this proposal
   const {
@@ -30,8 +50,8 @@ export const TabsVotedContent = ({
     proposalId: proposal.id,
     daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
     limit: 10, // Load 10 items at a time
-    orderBy: "timestamp",
-    orderDirection: "desc",
+    orderBy: sortBy,
+    orderDirection: sortDirection,
   });
 
   console.log(votes);
@@ -240,9 +260,24 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p>Date</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start"
+            onClick={() => handleSort("timestamp")}
+          >
+            <h4 className="text-table-header whitespace-nowrap">Date</h4>
+            <ArrowUpDown
+              props={{ className: "size-4 ml-1" }}
+              activeState={
+                sortBy === "timestamp"
+                  ? sortDirection === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         ),
       },
       {
@@ -350,7 +385,7 @@ export const TabsVotedContent = ({
         ),
       },
     ],
-    [loading, proposal],
+    [proposal, handleSort, sortBy, sortDirection],
   );
 
   // Prepare table data with loading row if needed

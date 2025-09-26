@@ -71,7 +71,14 @@ export const useVotes = ({
     notifyOnNetworkStatusChange: true,
   });
 
-  // Initialize allVotes on first load
+  // Reset accumulated votes when sorting parameters change
+  useEffect(() => {
+    setAllVotes([]);
+    setCurrentCursor(null);
+    setIsLoadingMore(false);
+  }, [orderBy, orderDirection]);
+
+  // Initialize allVotes on first load or when data changes after reset
   useEffect(() => {
     if (data?.votesOnchains?.items && allVotes.length === 0 && !currentCursor) {
       setAllVotes(data.votesOnchains.items);
