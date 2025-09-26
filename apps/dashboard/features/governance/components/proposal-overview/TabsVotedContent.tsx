@@ -30,6 +30,8 @@ export const TabsVotedContent = ({
     proposalId: proposal.id,
     daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
     limit: 10, // Load 10 items at a time
+    orderBy: "timestamp",
+    orderDirection: "desc",
   });
 
   console.log(votes);

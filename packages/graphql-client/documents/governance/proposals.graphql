@@ -63,12 +63,16 @@ query GetVotesOnchains(
   $limit: Int
   $after: String
   $before: String
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
 ) {
   votesOnchains(
     limit: $limit
     after: $after
     before: $before
     where: { proposalId: $proposalId }
+    orderBy: $orderBy
+    orderDirection: $orderDirection
   ) {
     pageInfo {
       startCursor

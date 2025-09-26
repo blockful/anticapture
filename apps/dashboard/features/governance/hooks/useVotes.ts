@@ -21,12 +21,16 @@ export interface UseVotesParams {
   daoId?: DaoIdEnum;
   proposalId?: string;
   limit?: number;
+  orderBy?: string;
+  orderDirection?: string;
 }
 
 export const useVotes = ({
   daoId,
   proposalId,
   limit = 10,
+  orderBy = "timestamp",
+  orderDirection = "desc",
 }: UseVotesParams = {}): UseVotesResult => {
   // State for infinite scroll
   const [allVotes, setAllVotes] = useState<
@@ -40,6 +44,8 @@ export const useVotes = ({
     const baseVars = {
       proposalId,
       limit,
+      orderBy,
+      orderDirection,
     };
 
     if (!currentCursor) {
@@ -52,7 +58,7 @@ export const useVotes = ({
       ...baseVars,
       after: currentCursor,
     };
-  }, [proposalId, limit, currentCursor]);
+  }, [proposalId, limit, orderBy, orderDirection, currentCursor]);
 
   // Main votes query
   const { data, loading, error, fetchMore } = useGetVotesOnchainsQuery({
