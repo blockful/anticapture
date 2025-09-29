@@ -51,7 +51,7 @@ export const FilterSort = ({
             key={option.value}
             onClick={() => handleSortChange(option.value)}
             className={cn(
-              "bg-surface-default text-primary border-border-contrast flex w-full items-center text-nowrap rounded-md border px-2.5 py-2 text-sm font-normal transition-all",
+              "bg-surface-default text-primary border-border-contrast flex w-full cursor-pointer items-center text-nowrap rounded-md border px-2.5 py-2 text-sm font-normal transition-all",
               sortOrder === option.value && "bg-surface-hover",
             )}
           >
