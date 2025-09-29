@@ -8,6 +8,7 @@ import {
 } from "@/shared/components/ui/popover";
 import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 import { ResetIcon } from "@radix-ui/react-icons";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 interface FilterBoxProps<T> {
   className?: string;
@@ -83,13 +84,15 @@ export const FilterBox = <T,>({
 
           {/* Apply button */}
           <div className="flex px-3 py-2">
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleApply}
               disabled={disabled}
               className="text-inverted w-full cursor-pointer rounded-md bg-[#FAFAFA] px-2 py-1 text-sm font-normal transition-all hover:bg-[#FAFAFA]/80 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {buttonTitle}
-            </button>
+            </Button>
           </div>
         </div>
       </PopoverContent>
