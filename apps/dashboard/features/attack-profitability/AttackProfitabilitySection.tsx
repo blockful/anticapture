@@ -80,7 +80,7 @@ export const AttackProfitabilitySection = ({
         >
           <div className="flex flex-col gap-5 sm:flex-row">
             <AttackCostBarChart />
-            <div className="flex w-full flex-col gap-2 lg:w-2/3">
+            <div className="flex w-full flex-col gap-2">
               <AttackProfitabilityAccordion />
             </div>
           </div>
