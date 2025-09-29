@@ -7,10 +7,10 @@ const termsData = [
     title: "Service Overview",
     content: (
       <p>
-        Anticapture is an open-source, research-driven platform that indexes and
-        organizes public governance data from DAOs. The Service offers
-        visualizations, dashboards, alerts, and metadata to support transparency
-        and monitoring in decentralized governance systems. <br />
+        Anticapture is an open-source, research-driven platform and framework
+        that indexes and organizes public governance data from DAOs. The Service
+        offers visualizations, dashboards, alerts, and metadata to support
+        transparency and monitoring in decentralized governance systems. <br />
         <br />
         Anticapture is not a governance tool, financial product, or security
         service.
@@ -149,13 +149,13 @@ export const TermsSection = () => {
       >
         <div className="flex w-full flex-col items-center justify-center gap-2 px-2">
           <span className="text-secondary text-sm">
-            Welcome to Anticapture, an open-source governance security platform.
-            Please read these Terms of Service (&quot;Terms&quot;) carefully
-            before using the Anticapture dashboard or any of its public data
-            feeds (the &quot;Service&quot;), operated by Blockful
-            (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;). <br /> <br /> By
-            accessing or using the Service, you agree to these Terms. If you do
-            not agree, you should not use the Service.
+            Welcome to Anticapture, an open-source governance security platform
+            and framework. Please read these Terms of Service
+            (&quot;Terms&quot;) carefully before using the Anticapture dashboard
+            or any of its public data feeds (the &quot;Service&quot;), operated
+            by Blockful (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;).{" "}
+            <br /> <br /> By accessing or using the Service, you agree to these
+            Terms. If you do not agree, you should not use the Service.
           </span>
 
           {termsData.map((item, index) => (
