@@ -2,9 +2,14 @@ import { useState } from "react";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { GetDelegateDelegationHistoryDeltaRangeQueryVariables } from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
+import {
+  TheTable,
+  SkeletonRow,
+  Button,
+  IconButton,
+  BlankSlate,
+} from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
@@ -141,12 +146,13 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "timestamp"
                 ? sortDirection === "asc"
@@ -162,7 +168,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-2">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
@@ -395,7 +401,7 @@ export const DelegateDelegationHistoryTable = ({
               rel="noopener noreferrer"
               className="cursor-pointer"
             >
-              <ExternalLink className="text-secondary hover:text-primary size-4 transition-colors" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );

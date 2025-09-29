@@ -18,7 +18,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import { BlankSlate } from "@/shared/components";
+import { BlankSlate, Button } from "@/shared/components";
 
 interface TokenHolderTableData {
   address: Address;
@@ -178,10 +178,14 @@ export const TokenHolders = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <Button
+                variant="outline"
+                size="sm"
+                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              >
                 <Plus className="size-3.5" />
                 <span className="text-sm font-medium">Details</span>
-              </div>
+              </Button>
             )}
           </div>
         );
@@ -199,13 +203,15 @@ export const TokenHolders = ({
         return (
           <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
             Balance ({daoId})
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
                 props={{
-                  className: "ml-2 size-4",
+                  className: "size-4",
                 }}
                 activeState={
                   sortOrder === "asc"
@@ -215,7 +221,7 @@ export const TokenHolders = ({
                       : ArrowState.DEFAULT
                 }
               />
-            </button>
+            </Button>
           </div>
         );
       },
