@@ -10,11 +10,11 @@ import {
   BlankSlate,
 } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import { ArrowRight, ExternalLink, Inbox } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
@@ -48,6 +48,7 @@ export const DelegateDelegationHistoryTable = ({
     useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
 
+  console.log("filterVariables", filterVariables);
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -65,18 +66,18 @@ export const DelegateDelegationHistoryTable = ({
     daoId,
     sortBy,
     sortDirection,
-    filterVariables,
+    // filterVariables,
   );
 
   // Handle sorting
-  const handleSort = (field: "timestamp" | "delta") => {
-    if (sortBy === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortDirection("desc"); // Always start with desc for new sort field
-    }
-  };
+  // const handleSort = (field: "timestamp" | "delta") => {
+  //   if (sortBy === field) {
+  //     setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+  //   } else {
+  //     setSortBy(field);
+  //     setSortDirection("desc"); // Always start with desc for new sort field
+  //   }
+  // };
 
   // Format timestamp to relative time
   const formatRelativeTime = (timestamp: string) => {
@@ -148,18 +149,18 @@ export const DelegateDelegationHistoryTable = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-start"
-          onClick={() => handleSort("timestamp")}
+          // onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
-            activeState={
-              sortBy === "timestamp"
-                ? sortDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+            // activeState={
+            //   sortBy === "timestamp"
+            //     ? sortDirection === "asc"
+            //       ? ArrowState.UP
+            //       : ArrowState.DOWN
+            //     : ArrowState.DEFAULT
+            // }
           />
         </Button>
       ),
@@ -199,16 +200,28 @@ export const DelegateDelegationHistoryTable = ({
 
               // Add range filters if values are provided
               if (filterState.minAmount) {
-                // Convert to BigInt wei format (multiply by 10^18)
-                variables.delta_gte = (
-                  parseFloat(filterState.minAmount) * Math.pow(10, 18)
-                ).toString();
+                try {
+                  // Use parseUnits for safe conversion to wei (18 decimals)
+                  variables.delta_gte = parseUnits(
+                    filterState.minAmount,
+                    18,
+                  ).toString();
+                } catch (error) {
+                  console.error("Error parsing minAmount:", error);
+                  // Skip invalid values
+                }
               }
               if (filterState.maxAmount) {
-                // Convert to BigInt wei format (multiply by 10^18)
-                variables.delta_lte = (
-                  parseFloat(filterState.maxAmount) * Math.pow(10, 18)
-                ).toString();
+                try {
+                  // Use parseUnits for safe conversion to wei (18 decimals)
+                  variables.delta_lte = parseUnits(
+                    filterState.maxAmount,
+                    18,
+                  ).toString();
+                } catch (error) {
+                  console.error("Error parsing maxAmount:", error);
+                  // Skip invalid values
+                }
               }
 
               setFilterVariables(variables);
@@ -218,11 +231,11 @@ export const DelegateDelegationHistoryTable = ({
               setSortDirection(variables.orderDirection || "desc");
             }}
             onReset={() => {
-              setFilterVariables(undefined);
+              // setFilterVariables(undefined);
               setIsFilterActive(false);
               // Reset to default sorting
               setSortBy("timestamp");
-              setSortDirection("desc");
+              // setSortDirection("desc");
             }}
             isActive={isFilterActive}
             sortOptions={sortOptions}
