@@ -35,10 +35,38 @@ export const FilterMaxMinInput = ({
   }, [initialMax]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Aceita APENAS números 0-9
-    if (!/^[0-9]$/.test(e.key)) {
-      e.preventDefault();
+    // Permite números, teclas de navegação e edição
+    const allowedKeys = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Escape",
+      "Enter",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+      "Clear",
+      "Copy",
+      "Paste",
+      "Cut",
+      "Select",
+      "SelectAll",
+    ];
+
+    // Permite teclas especiais, números, e ponto decimal
+    if (
+      allowedKeys.includes(e.key) ||
+      /^[0-9.]$/.test(e.key) ||
+      e.ctrlKey ||
+      e.metaKey
+    ) {
+      return;
     }
+
+    e.preventDefault();
   };
 
   const handleBlur = () => {
