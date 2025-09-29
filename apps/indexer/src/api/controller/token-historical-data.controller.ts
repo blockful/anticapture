@@ -1,13 +1,11 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, DaysOpts } from "@/lib/enums";
 import {
   CoingeckoTokenId,
   CoingeckoTokenIdEnum,
   CoingeckoHistoricalMarketData,
 } from "../services/coingecko/types";
-import { DAYS_IN_YEAR } from "@/lib/constants";
-
 interface TokenHistoricalDataClient {
   getHistoricalTokenData(
     tokenId: CoingeckoTokenId,
@@ -28,7 +26,15 @@ export function tokenHistoricalData(
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
       tags: ["tokens"],
-      request: {},
+      request: {
+        query: z.object({
+          days: z
+            .enum(DaysOpts)
+            .optional()
+            .default("365d")
+            .transform((val) => parseInt(val.replace("d", ""))),
+        }),
+      },
       responses: {
         200: {
           description: "Returns the historical market data for the token",
@@ -45,9 +51,11 @@ export function tokenHistoricalData(
       },
     }),
     async (context) => {
+      const { days } = context.req.valid("query");
+
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
-      const data = await client.getHistoricalTokenData(tokenId, DAYS_IN_YEAR);
+      const data = await client.getHistoricalTokenData(tokenId, days);
 
       return context.json(data, 200);
     },
