@@ -43,11 +43,6 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "governanceImplementationSection",
   },
-  supportDaos: {
-    title: "Support DAOs",
-    description: "",
-    anchorId: "supportDaosSection",
-  },
   riskAnalysis: {
     title: "Risk Analysis",
     description:
