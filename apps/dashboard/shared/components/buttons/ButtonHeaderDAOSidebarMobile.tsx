@@ -19,18 +19,28 @@ export const ButtonHeaderDAOSidebarMobile = ({
   const pathname = usePathname();
 
   const daoId = params?.daoId as string;
-  const currentPage = pathname?.split("/").pop();
+  const pathSegments = pathname?.split("/").filter(Boolean);
+
+  // If pathname is /{daoId}, it's the overview page
+  const isDaoOverviewPage =
+    pathname === `/${daoId}` || pathname === `/${daoId}/`;
+  const currentPage = isDaoOverviewPage ? "/" : pathSegments?.pop();
 
   const handleTabChange = (value: string) => {
     if (daoId) {
-      router.push(`/${daoId}/${value}`);
+      // Handle DAO Overview special case
+      if (value === "/") {
+        router.push(`/${daoId}`);
+      } else {
+        router.push(`/${daoId}/${value}`);
+      }
     }
   };
 
   return (
     <Tabs
-      defaultValue="dao-overview"
-      value={currentPage || "dao-overview"}
+      defaultValue="/"
+      value={currentPage || "/"}
       onValueChange={handleTabChange}
       className="w-fit min-w-full"
     >
