@@ -71,13 +71,9 @@ export const useDaoTokenHistoricalData = ({
   const effectiveDays = days ?? DEFAULT_INTERVAL;
   const effectiveCurrency = toCurrency ?? DEFAULT_CURRENCY;
 
-  const key = daoId
-    ? ["daoTokenHistoricalData", daoId, effectiveDays, effectiveCurrency]
-    : null;
-
   const { data, error, isValidating, mutate } =
     useSWR<DaoTokenHistoricalDataResponse | null>(
-      key,
+      ["daoTokenHistoricalData", daoId, days, effectiveDays, effectiveCurrency],
       () =>
         fetchDaoTokenHistoricalData({
           daoId,
