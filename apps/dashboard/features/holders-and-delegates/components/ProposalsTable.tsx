@@ -381,6 +381,8 @@ export const ProposalsTable = ({
     );
   }
 
+  console.log("tableData", tableData);
+
   if (error) {
     return (
       <BlankSlate
