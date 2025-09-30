@@ -1,7 +1,7 @@
 query GetDelegateDelegationHistoryDeltaRange(
   $accountId: String!
-  $delta_gte: BigInt
-  $delta_lte: BigInt
+  $deltaMod_gte: BigInt
+  $deltaMod_lte: BigInt
   $orderBy: String = "timestamp"
   $orderDirection: String = "desc"
   $limit: Int = 10
@@ -13,8 +13,8 @@ query GetDelegateDelegationHistoryDeltaRange(
     orderDirection: $orderDirection
     where: {
       accountId: $accountId
-      delta_gte: $delta_gte
-      delta_lte: $delta_lte
+      deltaMod_gte: $deltaMod_gte
+      deltaMod_lte: $deltaMod_lte
     }
     limit: $limit
     after: $after
@@ -22,6 +22,7 @@ query GetDelegateDelegationHistoryDeltaRange(
   ) {
     items {
       delta
+      deltaMod
       transactionHash
       timestamp
       delegation {

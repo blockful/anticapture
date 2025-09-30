@@ -33,7 +33,7 @@ interface DelegateDelegationHistoryTableProps {
 
 export type AmountFilterVariables = Pick<
   GetDelegateDelegationHistoryDeltaRangeQueryVariables,
-  "delta_gte" | "delta_lte"
+  "deltaMod_gte" | "deltaMod_lte"
 > & {
   orderDirection?: "asc" | "desc";
 };
@@ -42,13 +42,11 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
+  const [sortBy, setSortBy] = useState<"timestamp" | "deltaMod">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [filterVariables, setFilterVariables] =
-    useState<AmountFilterVariables>();
+  const [, setFilterVariables] = useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
 
-  console.log("filterVariables", filterVariables);
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -61,13 +59,7 @@ export const DelegateDelegationHistoryTable = ({
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-  } = useDelegateDelegationHistory(
-    accountId,
-    daoId,
-    sortBy,
-    sortDirection,
-    // filterVariables,
-  );
+  } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
 
   // Handle sorting
   // const handleSort = (field: "timestamp" | "delta") => {
@@ -202,7 +194,7 @@ export const DelegateDelegationHistoryTable = ({
               if (filterState.minAmount) {
                 try {
                   // Use parseUnits for safe conversion to wei (18 decimals)
-                  variables.delta_gte = parseUnits(
+                  variables.deltaMod_gte = parseUnits(
                     filterState.minAmount,
                     18,
                   ).toString();
@@ -214,7 +206,7 @@ export const DelegateDelegationHistoryTable = ({
               if (filterState.maxAmount) {
                 try {
                   // Use parseUnits for safe conversion to wei (18 decimals)
-                  variables.delta_lte = parseUnits(
+                  variables.deltaMod_lte = parseUnits(
                     filterState.maxAmount,
                     18,
                   ).toString();
@@ -225,9 +217,11 @@ export const DelegateDelegationHistoryTable = ({
               }
 
               setFilterVariables(variables);
-              setIsFilterActive(!!(variables.delta_gte || variables.delta_lte));
+              setIsFilterActive(
+                !!(variables.deltaMod_gte || variables.deltaMod_lte),
+              );
               // Update sort to delta when filter is applied
-              setSortBy("delta");
+              setSortBy("deltaMod");
               setSortDirection(variables.orderDirection || "desc");
             }}
             onReset={() => {

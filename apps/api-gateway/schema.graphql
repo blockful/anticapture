@@ -1023,6 +1023,7 @@ type votingPowerHistory {
   accountId: String!
   votingPower: BigInt!
   delta: BigInt!
+  deltaMod: BigInt!
   timestamp: BigInt!
   logIndex: Int!
   transfer: transfer
@@ -1085,6 +1086,14 @@ input votingPowerHistoryFilter {
   delta_lt: BigInt
   delta_gte: BigInt
   delta_lte: BigInt
+  deltaMod: BigInt
+  deltaMod_not: BigInt
+  deltaMod_in: [BigInt]
+  deltaMod_not_in: [BigInt]
+  deltaMod_gt: BigInt
+  deltaMod_lt: BigInt
+  deltaMod_gte: BigInt
+  deltaMod_lte: BigInt
   timestamp: BigInt
   timestamp_not: BigInt
   timestamp_in: [BigInt]
