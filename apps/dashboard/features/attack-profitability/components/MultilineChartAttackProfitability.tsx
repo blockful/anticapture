@@ -22,7 +22,7 @@ import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
@@ -53,7 +53,6 @@ export const MultilineChartAttackProfitability = ({
 }: MultilineChartAttackProfitabilityProps) => {
   const { daoId }: { daoId: string } = useParams();
   const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
-  const [mocked, setMocked] = useState<boolean>(false);
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoId.toUpperCase() as DaoIdEnum,
@@ -72,35 +71,41 @@ export const MultilineChartAttackProfitability = ({
       revalidateOnFocus: false,
     },
   );
-  useEffect(() => {
-    setMocked(
+
+  const mocked = useMemo(
+    () =>
       timeSeriesData !== undefined &&
-        Object.values(timeSeriesData).every((data) => data.length === 0),
-    );
-  }, [timeSeriesData]);
+      Object.values(timeSeriesData).every((d) => d.length === 0),
+    [timeSeriesData],
+  );
 
   const quorumValue = daoData?.quorum
     ? Number(daoData.quorum) / 10 ** 18
     : null;
 
-  const chartConfig = {
-    treasuryNonDAO: {
-      label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
-      color: "#4ade80",
-    },
-    all: { label: "All", color: "#4ade80" },
-    quorum: { label: "Quorum", color: "#f87171" },
-    delegated: { label: "Delegated", color: "#f87171" },
-  } satisfies ChartConfig;
+  const chartConfig = useMemo(
+    () => ({
+      treasuryNonDAO: {
+        label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
+        color: "#4ade80",
+      },
+      all: { label: "All", color: "#4ade80" },
+      quorum: { label: "Quorum", color: "#f87171" },
+      delegated: { label: "Delegated", color: "#f87171" },
+    }),
+    [daoId],
+  ) satisfies ChartConfig;
 
-  const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
-    daoTokenPriceHistoricalData.prices,
-  );
-
-  const selectedPriceHistory =
-    priceHistoryByTimeInterval[days as TimeInterval] ??
-    priceHistoryByTimeInterval.full ??
-    priceHistoryByTimeInterval;
+  const selectedPriceHistory = useMemo(() => {
+    const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
+      daoTokenPriceHistoricalData.prices,
+    );
+    return (
+      priceHistoryByTimeInterval[days as TimeInterval] ??
+      priceHistoryByTimeInterval.full ??
+      priceHistoryByTimeInterval
+    );
+  }, [daoTokenPriceHistoricalData.prices, days]);
 
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
@@ -201,8 +206,14 @@ export const MultilineChartAttackProfitability = ({
     timeSeriesData,
   ]);
 
+  const prevHashRef = useRef<string>("");
   useEffect(() => {
-    if (!mocked && chartData.length) {
+    if (mocked || !chartData.length) return;
+    const last = chartData[chartData.length - 1];
+    const keys = Object.keys(last).sort().join("|");
+    const hash = `${chartData.length}:${last.date}:${keys}`;
+    if (hash !== prevHashRef.current) {
+      prevHashRef.current = hash;
       setCsvData(chartData as Data);
     }
   }, [chartData, mocked, setCsvData]);

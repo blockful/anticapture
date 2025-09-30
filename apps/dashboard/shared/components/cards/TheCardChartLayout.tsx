@@ -44,10 +44,10 @@ export const TheCardChartLayout = ({
                   <CSVLink
                     filename={`${title.toLowerCase().replace(/\s+/g, "_")}.csv`}
                     data={csvData}
-                    className="!text-alternative-sm text-primary mb-0.5 flex items-center font-mono font-medium"
+                    className="!text-alternative-sm text-secondary mb-0.5 flex items-center font-mono font-medium"
                   >
                     [
-                    <p className="text-link hover:text-link-hover flex cursor-pointer items-center gap-1">
+                    <p className="text-link hover:text-link/80 flex cursor-pointer items-center gap-1">
                       CSV <DownloadIcon className="size-3.5" />
                     </p>
                     ]
