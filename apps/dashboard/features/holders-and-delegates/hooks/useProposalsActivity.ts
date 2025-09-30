@@ -54,6 +54,16 @@ export const useProposalsActivity = ({
     Query_ProposalsActivity_Proposals_Items[]
   >([]);
 
+  const queryOptions = {
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network" as const,
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const { data, networkStatus, error, refetch, fetchMore } =
     useGetProposalsActivityQuery({
@@ -66,11 +76,7 @@ export const useProposalsActivity = ({
         orderDirection,
         userVoteFilter,
       },
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
+      ...queryOptions,
     });
 
   useEffect(() => {

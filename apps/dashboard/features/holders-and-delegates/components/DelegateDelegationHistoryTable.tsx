@@ -405,20 +405,18 @@ export const DelegateDelegationHistoryTable = ({
   }
 
   return (
-    <div className="bg-surface-default flex flex-col">
-      <div className="flex flex-col gap-2 p-4">
-        <Table
-          columns={columns}
-          data={delegationHistory}
-          withSorting={true}
-          size="sm"
-          hasMore={paginationInfo.hasNextPage}
-          isLoadingMore={fetchingMore}
-          onLoadMore={fetchNextPage}
-          withDownloadCSV={true}
-          wrapperClassName="h-[475px]"
-        />
-      </div>
+    <div className="flex flex-col gap-2 p-4">
+      <Table
+        columns={columns}
+        data={delegationHistory}
+        withSorting={true}
+        size="sm"
+        hasMore={paginationInfo.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        withDownloadCSV={true}
+        wrapperClassName="h-[475px]"
+      />
     </div>
   );
 };

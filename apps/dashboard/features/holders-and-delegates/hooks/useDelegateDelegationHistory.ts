@@ -55,7 +55,7 @@ export function useDelegateDelegationHistory(
   orderBy: "timestamp" | "delta" = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
 ): UseDelegateDelegationHistoryResult {
-  const itemsPerPage = 7;
+  const itemsPerPage = 15;
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
@@ -63,7 +63,7 @@ export function useDelegateDelegationHistory(
   // Reset page to 1 when sorting changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection]);
+  }, [orderBy, orderDirection, account]);
 
   const queryVariables = useMemo(
     () => ({
@@ -71,8 +71,9 @@ export function useDelegateDelegationHistory(
       limit: itemsPerPage,
       orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
       orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
+      skip: 0,
     }),
-    [account, itemsPerPage, orderBy, orderDirection],
+    [account, orderBy, orderDirection],
   );
 
   const queryOptions = {
@@ -81,7 +82,6 @@ export function useDelegateDelegationHistory(
         "anticapture-dao-id": daoId,
       },
     },
-    skip: !account,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network" as const,
   };
@@ -144,15 +144,20 @@ export function useDelegateDelegationHistory(
       });
   }, [data, account]);
 
+  const totalCount = data?.votingPowers?.totalCount ?? 0;
+  const currentItemsCount = transformedData.length;
+  const hasNextPage = currentItemsCount < totalCount;
+
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (isPaginationLoading) return;
+    if (isPaginationLoading || !hasNextPage) return;
     setIsPaginationLoading(true);
 
     try {
       await fetchMore({
         variables: {
           ...queryVariables,
+          skip: currentItemsCount,
         },
         updateQuery: (
           previousResult: VotingPowersQuery,
@@ -188,7 +193,13 @@ export function useDelegateDelegationHistory(
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [fetchMore, isPaginationLoading, queryVariables]);
+  }, [
+    fetchMore,
+    isPaginationLoading,
+    queryVariables,
+    currentItemsCount,
+    hasNextPage,
+  ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
