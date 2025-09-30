@@ -14,7 +14,7 @@ export interface DaoTokenHistoricalDataResponse {
   total_volumes: PriceEntry[];
 }
 
-const DEFAULT_INTERVAL = TimeInterval.SEVEN_DAYS;
+const DEFAULT_INTERVAL = TimeInterval.ONE_YEAR;
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
@@ -63,11 +63,9 @@ export const useDaoTokenHistoricalData = ({
     SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>
   >;
 }) => {
-  const key = daoId ? ["daoTokenHistoricalData", daoId, days] : null;
-
   const { data, error, isValidating, mutate } =
     useSWR<DaoTokenHistoricalDataResponse | null>(
-      key,
+      ["daoTokenHistoricalData", daoId, days],
       () =>
         fetchDaoTokenHistoricalData({
           daoId,
