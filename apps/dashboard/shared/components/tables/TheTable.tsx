@@ -38,7 +38,6 @@ interface DataTableProps<TData, TValue> {
   disableRowClick?: (row: TData) => boolean;
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
-  mobileTableFixed?: boolean;
   showWhenEmpty?: ReactNode;
   // Expandable functionality - optional props
   enableExpanding?: boolean;
@@ -58,7 +57,6 @@ export const TheTable = <TData, TValue>({
   disableRowClick,
   isTableSmall = false,
   stickyFirstColumn = false,
-  mobileTableFixed = false,
   showWhenEmpty,
   enableExpanding = false,
   getSubRows,
@@ -117,11 +115,10 @@ export const TheTable = <TData, TValue>({
     <Table
       className={cn(
         "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
-        mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
         className,
       )}
     >
-      <TableHeader className="bg-surface-contrast text-secondary text-xs font-medium font-normal">
+      <TableHeader className="bg-surface-contrast text-secondary text-xs font-normal">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}

@@ -411,7 +411,6 @@ export const ProposalsTable = ({
         withPagination={false}
         withSorting={true}
         stickyFirstColumn={true}
-        mobileTableFixed={true}
         isTableSmall={true}
         showWhenEmpty={
           <BlankSlate
