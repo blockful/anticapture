@@ -103,12 +103,6 @@ export const MultilineChartAttackProfitability = ({
     priceHistoryByTimeInterval.full ??
     priceHistoryByTimeInterval;
   let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
-  console.log(
-    "dynamicQuorum.percentage",
-    daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]?.attackProfitability
-      ?.dynamicQuorum?.percentage,
-  );
-  console.log("quorumValue", quorumValue);
 
   if (!mocked) {
     datasets = {
@@ -157,7 +151,6 @@ export const MultilineChartAttackProfitability = ({
   } else {
     datasets = mockedAttackProfitabilityDatasets;
   }
-  console.log("quorum", datasets["quorum"]);
 
   const allDates = new Set(
     Object.values(datasets).flatMap((dataset) =>

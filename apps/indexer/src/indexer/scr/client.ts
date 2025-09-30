@@ -4,6 +4,7 @@ import {
   Chain,
   Client,
   fromHex,
+  parseEther,
   toHex,
   Transport,
 } from "viem";
@@ -31,7 +32,7 @@ export class SCRClient<
   }
 
   async getQuorum(_: string | null): Promise<bigint> {
-    return 2_100_000n; // 2.1M $SCR (0.21% Total Supply)
+    return parseEther("2100000"); // 2.1M $SCR (0.21% Total Supply)
   }
 
   async getProposalThreshold(): Promise<bigint> {

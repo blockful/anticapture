@@ -15,6 +15,7 @@ export enum ChainNameEnum {
 }
 
 export enum QuorumTypeEnum {
+  // TODO: Use this typedef to streamline decision tree in `QuorumCard.tsx` range L96:L111
   TOTAL_SUPPLY = "Total Supply",
   DELEGATED_SUPPLY = "Del. Supply",
   SCR = "2.1M $SCR (0.21% Total Supply)",
