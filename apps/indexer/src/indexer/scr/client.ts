@@ -30,8 +30,8 @@ export class SCRClient<
     this.abi = GovernorAbi;
   }
 
-  async getQuorum(): Promise<bigint> {
-    return 21000000n; // maybe?
+  async getQuorum(_: string | null): Promise<bigint> {
+    return 2_100_000n; // 2.1M $SCR (0.21% Total Supply)
   }
 
   async getProposalThreshold(): Promise<bigint> {

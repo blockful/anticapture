@@ -17,7 +17,7 @@ export enum ChainNameEnum {
 export enum QuorumTypeEnum {
   TOTAL_SUPPLY = "Total Supply",
   DELEGATED_SUPPLY = "Del. Supply",
-  SCR = "21M $SCR (0.21% Total Supply)",
+  SCR = "2.1M $SCR (0.21% Total Supply)",
 }
 
 export type DaoMetricsDayBucket = {
