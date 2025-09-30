@@ -137,7 +137,7 @@ export const HeaderDAOSidebarDropdown = () => {
         name: DaoIdEnum.SCR,
         isDisabled:
           daoConfigByDaoId[DaoIdEnum.SCR].supportStage ===
-          SupportStageEnum.ANALYSIS, // ?
+          SupportStageEnum.ANALYSIS,
       },
     ],
     [],
