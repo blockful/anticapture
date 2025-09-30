@@ -176,7 +176,10 @@ export const HeaderDAOSidebarDropdown = () => {
               variant="ghost"
               size="lg"
               key={item.id}
-              className={cn("w-full", !item.isDisabled && "hover:bg-muted")}
+              className={cn(
+                "w-full",
+                !item.isDisabled && "hover:bg-middle-dark",
+              )}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
