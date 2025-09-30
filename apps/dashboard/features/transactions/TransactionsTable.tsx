@@ -359,6 +359,7 @@ export const TransactionsTable = () => {
             isTableSmall={true}
             className="border-0"
             showParentDividers={true}
+            mobileTableFixed={true}
           />
 
           {/* Pagination */}
@@ -391,6 +392,7 @@ export const TransactionsTable = () => {
           isTableSmall={true}
           className="border-0"
           showParentDividers={true}
+          mobileTableFixed={true}
         />
 
         {/* Pagination */}

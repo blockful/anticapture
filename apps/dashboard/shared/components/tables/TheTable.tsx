@@ -39,6 +39,7 @@ interface DataTableProps<TData, TValue> {
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
   showWhenEmpty?: ReactNode;
+  mobileTableFixed?: boolean;
   // Expandable functionality - optional props
   enableExpanding?: boolean;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
@@ -58,6 +59,7 @@ export const TheTable = <TData, TValue>({
   isTableSmall = false,
   stickyFirstColumn = false,
   showWhenEmpty,
+  mobileTableFixed = false,
   enableExpanding = false,
   getSubRows,
   defaultExpanded = {},
@@ -115,6 +117,7 @@ export const TheTable = <TData, TValue>({
     <Table
       className={cn(
         "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
+        mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
         className,
       )}
     >
