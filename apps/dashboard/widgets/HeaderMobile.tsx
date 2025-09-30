@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { cn } from "@/shared/utils/";
 import { X, Menu, BarChart4, BookOpen, Heart, HelpCircle } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 
@@ -17,25 +17,24 @@ export const HeaderMobile = ({
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  const router = useRouter();
-
   const pathname = usePathname();
 
   const menuItems = useMemo(
     () => [
       {
-        page: "panel",
+        page: "/",
         label: "Panel",
         icon: BarChart4,
+        isGlobal: true,
         onClick: () => {
-          router.push("/");
           setIsMenuOpen(false);
         },
       },
       {
-        page: "alerts",
+        page: "",
         label: "Alerts",
         icon: TelegramIcon,
+        isAction: true,
         onClick: () => {
           window.open(
             ANTICAPTURE_TELEGRAM_BOT,
@@ -45,7 +44,7 @@ export const HeaderMobile = ({
         },
       },
     ],
-    [router],
+    [],
   );
 
   const staticPages = [
@@ -53,16 +52,19 @@ export const HeaderMobile = ({
       page: "donate",
       label: "Donate",
       icon: Heart,
+      isGlobal: true,
     },
     {
       page: "glossary",
       label: "Glossary",
       icon: BookOpen,
+      isGlobal: true,
     },
     {
       page: "faq",
       label: "FAQ",
       icon: HelpCircle,
+      isGlobal: true,
     },
   ];
 
@@ -145,10 +147,12 @@ export const HeaderMobile = ({
           >
             {menuItems.map((item) => (
               <ButtonHeaderSidebar
-                key={item.page}
+                key={item.page || item.label}
                 page={item.page || ""}
                 icon={item.icon}
                 label={item.label}
+                isGlobal={item.isGlobal}
+                isAction={item.isAction}
                 onClick={item.onClick}
               />
             ))}
@@ -156,17 +160,16 @@ export const HeaderMobile = ({
             <div className="border-light-dark w-full border-t" />
 
             {staticPages.map((item) => (
-              <Link href={`/${item.page}`} key={item.page}>
-                <ButtonHeaderSidebar
-                  key={item.page}
-                  page={item.page || ""}
-                  icon={item.icon}
-                  label={item.label}
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                  }}
-                />
-              </Link>
+              <ButtonHeaderSidebar
+                key={item.page}
+                page={item.page || ""}
+                icon={item.icon}
+                label={item.label}
+                isGlobal={item.isGlobal}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                }}
+              />
             ))}
           </div>
         </div>

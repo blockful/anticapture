@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BarChart4 } from "lucide-react";
 import {
@@ -12,22 +11,19 @@ import {
 import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 export const HeaderSidebar = () => {
-  const router = useRouter();
-
   const headerItems = useMemo(
     () => [
       {
-        page: "panel",
+        page: "/",
         label: "Panel",
         icon: BarChart4,
-        onClick: () => {
-          router.push("/");
-        },
+        isGlobal: true,
       },
       {
-        page: "get-security-alerts",
+        page: "",
         label: "Alerts",
         icon: TelegramIcon,
+        isAction: true,
         onClick: () => {
           window.open(
             ANTICAPTURE_TELEGRAM_BOT,
@@ -37,7 +33,7 @@ export const HeaderSidebar = () => {
         },
       },
     ],
-    [router],
+    [],
   );
 
   return (
@@ -55,11 +51,13 @@ export const HeaderSidebar = () => {
           <div className="flex h-full flex-col gap-1.5 p-1.5">
             {headerItems.map((item) => (
               <ButtonHeaderSidebar
-                key={item.page}
+                key={item.page || item.label}
                 page={item.page || ""}
                 icon={item.icon}
                 label={item.label}
                 className="text-xs! font-medium! flex-col gap-1"
+                isGlobal={item.isGlobal}
+                isAction={item.isAction}
                 onClick={item.onClick}
               />
             ))}
