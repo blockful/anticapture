@@ -20,6 +20,9 @@ import {
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { Data } from "react-csv/lib/core";
 import { getDateRange } from "@/shared/utils";
+import { ChartType } from "@/shared/hooks/useLastUpdate";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -37,6 +40,8 @@ export const AttackProfitabilitySection = ({
   const [attackProfitabilityCsvData, setAttackProfitabilityCsvData] =
     useState<Data>([]);
 
+  const attackUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
+  const costUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
   if (!attackProfitability) {
     return null;
   }
@@ -53,7 +58,17 @@ export const AttackProfitabilitySection = ({
         title="Cost of Attack vs Profit"
         subtitle={getDateRange(days ?? "")}
         headerComponent={
-          <div className="flex w-full pt-3">
+          <div className="flex w-full items-center gap-3 pt-3">
+            <BadgeStatus
+              variant="outline"
+              iconVariant={attackUpdate.hasData ? "success" : "warning"}
+              isLoading={attackUpdate.isLoading}
+              icon={attackUpdate.icon}
+            >
+              Last updated: {attackUpdate.label}
+            </BadgeStatus>
+            <div className="border-border-default border-1 hidden h-5 sm:block" />
+
             <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
               setTreasuryMetric={setTreasuryMetric}
@@ -84,6 +99,17 @@ export const AttackProfitabilitySection = ({
           title="Cost Comparison"
           subtitle="All values reflect current data."
           csvData={costProfitabilityCsvData}
+          headerComponent={
+            <BadgeStatus
+              variant="outline"
+              iconVariant={costUpdate.hasData ? "success" : "warning"}
+              isLoading={costUpdate.isLoading}
+              icon={costUpdate.icon}
+              className="w-fit"
+            >
+              Last updated: {costUpdate.label}
+            </BadgeStatus>
+          }
         >
           <AttackCostBarChart setCsvData={setCostProfitabilityCsvData} />
         </TheCardChartLayout>
