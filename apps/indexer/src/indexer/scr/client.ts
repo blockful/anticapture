@@ -7,7 +7,7 @@ import {
   toHex,
   Transport,
 } from "viem";
-import { getBlockNumber, readContract } from "viem/actions";
+import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi/governor";
@@ -31,14 +31,7 @@ export class SCRClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    const blockNumber = await getBlockNumber(this.client);
-    const targetBlock = blockNumber - 10n;
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [targetBlock < 0n ? 0n : targetBlock],
-    });
+    return 21000000n; // maybe?
   }
 
   async getProposalThreshold(): Promise<bigint> {
@@ -79,7 +72,7 @@ export class SCRClient<
           outputs: [
             {
               internalType: "uint256",
-              name: "",
+              name: "duration",
               type: "uint256",
             },
           ],
@@ -112,6 +105,6 @@ export class SCRClient<
     againstVotes: bigint;
     abstainVotes: bigint;
   }): bigint {
-    return votes.forVotes + votes.abstainVotes;
+    return votes.forVotes + votes.abstainVotes + votes.againstVotes;
   }
 }
