@@ -3,12 +3,13 @@ import { GetProposalQuery, VotesOnchain } from "@anticapture/graphql-client";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVotes } from "@/features/governance/hooks/useVotes";
-import { SkeletonRow, TheTable, Button } from "@/shared/components";
+import { SkeletonRow, Button } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { CheckCircle2, CircleMinus, ThumbsDown, XCircle } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 
 export const TabsVotedContent = ({
   proposal,
@@ -440,7 +441,7 @@ export const TabsVotedContent = ({
   if (loading && !hasValidData) {
     return (
       <div className="w-full">
-        <TheTable
+        <VotesTable
           columns={columns}
           data={Array.from({ length: 7 }, () => ({}) as VotesOnchain)}
         />
@@ -450,7 +451,7 @@ export const TabsVotedContent = ({
 
   return (
     <div className="w-full">
-      <TheTable columns={columns} data={tableData} />
+      <VotesTable columns={columns} data={tableData} />
 
       {/* End state */}
       {!hasNextPage && votes.length > 0 && (
