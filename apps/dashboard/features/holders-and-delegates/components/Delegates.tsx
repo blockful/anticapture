@@ -348,14 +348,14 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex w-full items-center justify-end px-4">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-start px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 w-full items-center justify-end px-4 py-2 text-end text-sm font-normal">
             {delegators}
           </div>
         );
