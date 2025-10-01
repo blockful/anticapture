@@ -199,6 +199,13 @@ export const TokenDistributionMetrics = ({
                           formattedMetricsValue = formatNumberUserReadable(
                             Number(currentValue) || 0,
                           );
+                        } else if (metricKey === "TREASURY") {
+                          const numericValue = Number(currentValue);
+                          formattedMetricsValue = `$${formatNumberUserReadable(
+                            Number.isFinite(numericValue)
+                              ? Math.floor(numericValue)
+                              : 0,
+                          )} ${daoId}`;
                         } else {
                           const numericValue = Number(currentValue);
                           formattedMetricsValue = formatNumberUserReadable(
