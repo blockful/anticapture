@@ -34,7 +34,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none shadow-none sm:max-w-full sm:gap-0 sm:border md:flex-row">
         <CardContent className="order-2 flex h-full w-full flex-col gap-6 p-0 sm:order-1">
           <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
-            GOVERNANCE SUPPLY TRENDS ({daoId})
+            GOVERNANCE SUPPLY TRENDS
           </CardTitle>
           <TokenDistributionChart
             daoId={daoId}
