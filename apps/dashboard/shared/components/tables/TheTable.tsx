@@ -25,7 +25,6 @@ import {
 } from "@/shared/components/ui/table";
 import { cn } from "@/shared/utils";
 import { TreeLines } from "@/shared/components/tables/TreeLines";
-import { ExpandButton } from "@/shared/components/tables/ExpandButton";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
@@ -194,16 +193,6 @@ export const TheTable = <TData, TValue>({
                       {/* Tree lines for hierarchical visualization */}
                       {index === 0 && enableExpanding && (
                         <TreeLines row={row} />
-                      )}
-
-                      {/* Expand/Collapse button */}
-                      {index === 0 && (
-                        <div className="flex items-center px-1">
-                          <ExpandButton
-                            row={row}
-                            enableExpanding={enableExpanding}
-                          />
-                        </div>
                       )}
 
                       {/* Cell content */}
