@@ -25,7 +25,6 @@ import {
 } from "@/shared/components/ui/table";
 import { cn } from "@/shared/utils";
 import { TreeLines } from "@/shared/components/tables/TreeLines";
-import { ExpandButton } from "@/shared/components/tables/ExpandButton";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
@@ -38,8 +37,8 @@ interface DataTableProps<TData, TValue> {
   disableRowClick?: (row: TData) => boolean;
   isTableSmall?: boolean;
   stickyFirstColumn?: boolean;
-  mobileTableFixed?: boolean;
   showWhenEmpty?: ReactNode;
+  mobileTableFixed?: boolean;
   // Expandable functionality - optional props
   enableExpanding?: boolean;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
@@ -58,8 +57,8 @@ export const TheTable = <TData, TValue>({
   disableRowClick,
   isTableSmall = false,
   stickyFirstColumn = false,
-  mobileTableFixed = false,
   showWhenEmpty,
+  mobileTableFixed = false,
   enableExpanding = false,
   getSubRows,
   defaultExpanded = {},
@@ -121,7 +120,7 @@ export const TheTable = <TData, TValue>({
         className,
       )}
     >
-      <TableHeader className="bg-surface-contrast text-secondary text-xs font-medium font-normal">
+      <TableHeader className="bg-surface-contrast text-secondary text-xs font-normal">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
@@ -138,10 +137,7 @@ export const TheTable = <TData, TValue>({
                       "bg-surface-contrast z-1 sticky left-0",
                   )}
                   style={{
-                    width:
-                      header.column.getSize() !== 150
-                        ? header.column.getSize()
-                        : "auto",
+                    width: header.column.getSize(),
                   }}
                 >
                   {header.isPlaceholder
@@ -194,16 +190,6 @@ export const TheTable = <TData, TValue>({
                       {/* Tree lines for hierarchical visualization */}
                       {index === 0 && enableExpanding && (
                         <TreeLines row={row} />
-                      )}
-
-                      {/* Expand/Collapse button */}
-                      {index === 0 && (
-                        <div className="flex items-center px-1">
-                          <ExpandButton
-                            row={row}
-                            enableExpanding={enableExpanding}
-                          />
-                        </div>
                       )}
 
                       {/* Cell content */}
