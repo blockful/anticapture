@@ -14,11 +14,6 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "daoOverviewSection",
   },
-  showSupport: {
-    title: "Show Support",
-    description: undefined,
-    anchorId: "showSupportSection",
-  },
   attackProfitability: {
     title: "Attack Profitability",
     description:

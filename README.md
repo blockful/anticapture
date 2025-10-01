@@ -7,7 +7,7 @@
 
 ## Overview
 
-Anticapture is a data-driven platform that helps DAO communities identify, assess, and mitigate governance capture risks. The platform provides comprehensive security analysis, attack profitability assessments, and real-time governance monitoring for major DAOs including Uniswap, ENS, Optimism, and Arbitrum.
+Anticapture is a data-driven platform that helps DAO communities identify, assess, and mitigate governance capture risks. The platform provides comprehensive security analysis, attack profitability assessments, and real-time governance monitoring for major DAOs including Uniswap, ENS, and Optimism.
 
 ## Key Features
 

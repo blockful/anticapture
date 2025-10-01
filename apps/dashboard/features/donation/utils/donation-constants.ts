@@ -8,12 +8,10 @@ export const DONATION_CONSTANTS = {
     address: "0x3c37e9187baea29e6a75abec0ad5a070693d4502",
     ensAddress: "donate.blockful.eth",
     qrCodeUrl: "/donation-qr-code.svg", // This would be a generated QR code
-    supportedChains: ["Ethereum", "Arbitrum", "Optimism", "Scroll", "ZKsync"],
+    supportedChains: ["Ethereum", "Optimism", "Scroll", "ZKsync"],
     chainLinks: {
       Ethereum:
         "https://etherscan.io/address/0x3c37e9187baea29e6a75abec0ad5a070693d4502",
-      Arbitrum:
-        "https://arbiscan.io/address/0x3c37e9187baea29e6a75abec0ad5a070693d4502",
       Optimism:
         "https://optimistic.etherscan.io/address/0x3c37e9187baea29e6a75abec0ad5a070693d4502",
       Scroll:

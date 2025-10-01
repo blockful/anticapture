@@ -21,7 +21,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const ogImage: Record<Exclude<DaoIdEnum>, string> = {
+  const ogImage: Record<DaoIdEnum, string> = {
     [DaoIdEnum.ENS]: `${baseUrl}/opengraph-images/ens.png`,
     [DaoIdEnum.UNISWAP]: `${baseUrl}/opengraph-images/uni.png`,
     [DaoIdEnum.OPTIMISM]: `${baseUrl}/opengraph-images/op.png`,
@@ -29,8 +29,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 
   const imageUrl =
-    ogImage[daoId as Exclude<DaoIdEnum>] ||
-    `${baseUrl}/opengraph-images/default.png`;
+    ogImage[daoId as DaoIdEnum] || `${baseUrl}/opengraph-images/default.png`;
 
   return {
     title: `Anticapture - ${daoId} DAO`,
