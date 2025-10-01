@@ -18,6 +18,9 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
+import { ChartType } from "@/shared/hooks/useLastUpdate";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -30,6 +33,9 @@ export const AttackProfitabilitySection = ({
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
+  const attackUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
+  const costUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
+
   if (!attackProfitability) {
     return null;
   }
@@ -54,7 +60,17 @@ export const AttackProfitabilitySection = ({
     >
       <TheCardChartLayout
         headerComponent={
-          <div className="flex w-full pt-3">
+          <div className="flex w-full items-center gap-3 pt-3">
+            <BadgeStatus
+              variant="outline"
+              iconVariant={attackUpdate.hasData ? "success" : "warning"}
+              isLoading={attackUpdate.isLoading}
+              icon={attackUpdate.icon}
+            >
+              Last updated: {attackUpdate.label}
+            </BadgeStatus>
+            <div className="border-border-default border-1 hidden h-5 sm:block" />
+
             <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
               setTreasuryMetric={setTreasuryMetric}
@@ -74,6 +90,17 @@ export const AttackProfitabilitySection = ({
         <TheCardChartLayout
           title="Cost Comparison"
           subtitle="All values reflect current data."
+          headerComponent={
+            <BadgeStatus
+              variant="outline"
+              iconVariant={costUpdate.hasData ? "success" : "warning"}
+              isLoading={costUpdate.isLoading}
+              icon={costUpdate.icon}
+              className="w-fit"
+            >
+              Last updated: {costUpdate.label}
+            </BadgeStatus>
+          }
         >
           <AttackCostBarChart />
         </TheCardChartLayout>
