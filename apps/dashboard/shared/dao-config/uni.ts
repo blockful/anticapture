@@ -1,5 +1,5 @@
 import { RiskLevel, SupportStageEnum } from "@/shared/types/enums";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
@@ -26,7 +26,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QuorumTypeEnum.TOTAL_SUPPLY,
     },
   },
   governanceImplementation: {

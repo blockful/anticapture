@@ -1,4 +1,4 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -28,7 +28,7 @@ export const ENS: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QuorumTypeEnum.TOTAL_SUPPLY,
     },
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {

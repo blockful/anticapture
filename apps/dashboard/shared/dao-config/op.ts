@@ -1,4 +1,4 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -29,7 +29,7 @@ export const OP: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "All Votes Cast",
-      quorumCalculation: "Del. Supply",
+      quorumCalculation: QuorumTypeEnum.DELEGATED_SUPPLY,
       proposalThreshold: "Only Foundation Proposes",
     },
   },

@@ -14,6 +14,13 @@ export enum ChainNameEnum {
   Ethereum = "ethereum",
 }
 
+export enum QuorumTypeEnum {
+  // TODO: Use this typedef to streamline decision tree in `QuorumCard.tsx` range L96:L111
+  TOTAL_SUPPLY = "Total Supply",
+  DELEGATED_SUPPLY = "Del. Supply",
+  SCR = "2.1M $SCR (0.21% Total Supply)",
+}
+
 export type DaoMetricsDayBucket = {
   date: string;
   daoId: DaoIdEnum;
@@ -84,7 +91,7 @@ export interface DaoOverviewConfig {
       | "For + Abstain"
       | "For + Abstain + Against"
       | "All Votes Cast";
-    quorumCalculation: "Total Supply" | "Del. Supply";
+    quorumCalculation: QuorumTypeEnum;
     proposalThreshold?: string;
   };
   securityCouncil?: {
@@ -130,6 +137,7 @@ export interface DaoAddresses {
     GTCTimelock: string;
     GTCUniv3Uni: string;
   };
+  [DaoIdEnum.SCR]: Record<string, never>;
 }
 
 export interface AttackProfitabilityConfig {
