@@ -37,7 +37,7 @@ export const Dropdown = ({ value, options, onClick }: DropdownProps) => {
         aria-controls="dropdown-options"
         onClick={() => setIsOpen((o) => !o)}
         className={cn(
-          "text-primary hover:border-highlight flex min-w-[140px] cursor-pointer items-center justify-between gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
+          "text-primary hover:border-highlight flex min-w-[100px] cursor-pointer items-center justify-between gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           {
             "border-tangerine bg-[#26262A]": isOpen,
             "bg-surface-contrast border-transparent": !isOpen,
