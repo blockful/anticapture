@@ -126,7 +126,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="border-light-dark relative z-50 inline-block h-[57px] w-full border-b sm:h-[65px]"
+      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b sm:h-[65px]"
       ref={dropdownRef}
     >
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
@@ -160,7 +160,10 @@ export const HeaderDAOSidebarDropdown = () => {
               variant="ghost"
               size="lg"
               key={item.id}
-              className={cn("w-full", !item.isDisabled && "hover:bg-muted")}
+              className={cn(
+                "w-full",
+                !item.isDisabled && "hover:bg-middle-dark",
+              )}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
