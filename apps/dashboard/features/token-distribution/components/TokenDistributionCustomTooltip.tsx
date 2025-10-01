@@ -3,12 +3,14 @@
 import { TooltipProps } from "recharts";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { metricsSchema } from "@/features/token-distribution/utils/metrics";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const TokenDistributionCustomTooltip: React.FC<
   TooltipProps<number, string> & {
     chartConfig: Record<string, { label: string; color: string }>;
+    daoId: DaoIdEnum;
   }
-> = ({ active, payload, label, chartConfig }) => {
+> = ({ active, payload, label, chartConfig, daoId }) => {
   if (!active || !payload || payload.length === 0) return null;
 
   const date = new Date(Number(label) * 1000).toLocaleDateString("en-US", {
@@ -72,6 +74,11 @@ export const TokenDistributionCustomTooltip: React.FC<
                 chartConfig[entry.name as keyof typeof chartConfig]?.color ||
                 entry.color;
 
+              // Check if this metric should NOT have daoId suffix
+              const shouldSkipDaoId =
+                entry.name === "PROPOSALS_GOVERNANCE" ||
+                entry.name === "TOKEN_PRICE";
+
               return (
                 <p
                   key={index}
@@ -84,9 +91,9 @@ export const TokenDistributionCustomTooltip: React.FC<
                   >
                     {typeof value === "string"
                       ? value
-                      : formatNumberUserReadable(
+                      : `${formatNumberUserReadable(
                           Number.isFinite(value) ? Math.floor(value) : 0,
-                        )}
+                        )}${shouldSkipDaoId ? "" : ` ${daoId}`}`}
                   </strong>
                 </p>
               );

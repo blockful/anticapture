@@ -455,7 +455,10 @@ export const TokenDistributionChart = ({
 
           <Tooltip
             content={
-              <TokenDistributionCustomTooltip chartConfig={chartConfig} />
+              <TokenDistributionCustomTooltip
+                chartConfig={chartConfig}
+                daoId={daoId}
+              />
             }
           />
 
