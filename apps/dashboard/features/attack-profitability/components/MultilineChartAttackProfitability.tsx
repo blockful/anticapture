@@ -103,7 +103,6 @@ export const MultilineChartAttackProfitability = ({
     priceHistoryByTimeInterval.full ??
     priceHistoryByTimeInterval;
   let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
-
   if (!mocked) {
     datasets = {
       treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
@@ -179,7 +178,6 @@ export const MultilineChartAttackProfitability = ({
 
       return dataPoint;
     });
-
   return (
     <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
       {mocked && <ResearchPendingChartBlur />}

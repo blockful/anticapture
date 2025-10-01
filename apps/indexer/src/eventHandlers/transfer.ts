@@ -163,6 +163,7 @@ export const tokenTransfer = async (
   // Transaction handling moved to DAO-specific indexer
 
   // Transfer record will be created later with proper flags after address list calculations
+
   await context.db
     .insert(accountBalance)
     .values({
