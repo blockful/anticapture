@@ -277,10 +277,26 @@ export const TokenDistributionChart = ({
               yAxisId="bars"
               orientation="right"
               domain={[0, "dataMax"]}
-              tickFormatter={(value) => formatNumberUserReadable(Number(value))}
+              tickFormatter={(value) =>
+                `$${formatNumberUserReadable(Number(value))} ${daoId}`
+              }
               stroke="#ffffff"
-              tick={{ fill: "#ffffff", fontSize: 10 }}
-              width={60}
+              tick={(props) => {
+                const { x, y, payload } = props;
+                return (
+                  <text
+                    x={x}
+                    y={y}
+                    fill="#ffffff"
+                    fontSize={10}
+                    textAnchor="start"
+                    dominantBaseline="middle"
+                  >
+                    {`$${formatNumberUserReadable(Number(payload.value))} ${daoId}`}
+                  </text>
+                );
+              }}
+              width={80}
               allowDataOverflow={true}
               label={{
                 value: "Volume",
