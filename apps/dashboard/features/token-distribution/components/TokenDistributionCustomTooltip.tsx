@@ -8,7 +8,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 export const TokenDistributionCustomTooltip: React.FC<
   TooltipProps<number, string> & {
     chartConfig: Record<string, { label: string; color: string }>;
-    daoId: DaoIdEnum;
+    daoId?: DaoIdEnum;
   }
 > = ({ active, payload, label, chartConfig, daoId }) => {
   if (!active || !payload || payload.length === 0) return null;
