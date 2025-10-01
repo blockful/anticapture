@@ -39,7 +39,7 @@ export const AttackProfitabilitySection = ({
 
   const [dropdownValue, setDropdownValue] = useState<Option>({
     value: "usd",
-    label: "USD Value",
+    label: "USD",
   });
   if (!attackProfitability) {
     return null;
@@ -114,7 +114,7 @@ export const AttackProfitabilitySection = ({
             <Dropdown
               value={dropdownValue}
               options={[
-                { value: "usd", label: "USD Value" },
+                { value: "usd", label: "USD" },
                 { value: "token", label: "Token Amount" },
               ]}
               onClick={handleDropdownClick}
