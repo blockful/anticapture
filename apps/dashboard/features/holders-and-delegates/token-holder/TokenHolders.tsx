@@ -169,7 +169,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="flex h-10 w-full items-center gap-2 px-2 py-2">
+          <div className="flex h-10 items-center gap-2 px-2 py-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -229,7 +229,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-end px-4 py-2">
+            <div className="font-nomal flex h-10 w-full items-center justify-end px-4 py-2 text-sm">
               <SkeletonRow className="h-4 w-20" />
             </div>
           );
@@ -250,10 +250,11 @@ export const TokenHolders = ({
           Variation ({daoId})
         </div>
       ),
+      size: 250,
       cell: ({ row }) => {
         if (historicalDataLoading || loading) {
           return (
-            <div className="flex h-10 items-center justify-start px-4 py-2">
+            <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -418,7 +419,7 @@ export const TokenHolders = ({
             withSorting={true}
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
-            className="md:table-auto"
+            className="md:table-fixed"
             showWhenEmpty={
               <BlankSlate
                 variant="default"

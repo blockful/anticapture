@@ -137,10 +137,7 @@ export const TheTable = <TData, TValue>({
                       "bg-surface-contrast z-1 sticky left-0",
                   )}
                   style={{
-                    width:
-                      header.column.getSize() !== 150
-                        ? header.column.getSize()
-                        : "auto",
+                    width: header.column.getSize(),
                   }}
                 >
                   {header.isPlaceholder
