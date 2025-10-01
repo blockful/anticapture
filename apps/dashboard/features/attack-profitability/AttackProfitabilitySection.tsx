@@ -88,7 +88,7 @@ export const AttackProfitabilitySection = ({
               value={dropdownValue}
               options={[
                 { value: "usd", label: "USD" },
-                { value: "token", label: "Token Amount" },
+                { value: "token", label: "Token" },
               ]}
               onClick={handleDropdownClick}
             />
