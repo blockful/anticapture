@@ -418,6 +418,7 @@ export const TokenHolders = ({
             withSorting={true}
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
+            className="md:table-auto"
             showWhenEmpty={
               <BlankSlate
                 variant="default"
