@@ -48,6 +48,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="border-light-dark mx-4 w-px border border-dashed sm:order-2" />
         <div className="order-1 w-full items-start sm:order-3 sm:w-fit sm:min-w-[300px]">
           <TokenDistributionMetrics
+            daoId={daoId}
             appliedMetrics={metrics}
             setAppliedMetrics={setMetrics}
             setHoveredMetricKey={setHoveredMetricKey}

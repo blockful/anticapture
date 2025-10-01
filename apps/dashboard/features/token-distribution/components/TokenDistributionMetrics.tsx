@@ -15,8 +15,10 @@ import { useBrushStore } from "@/features/token-distribution/store/useBrushStore
 import { formatNumberUserReadable } from "@/shared/utils";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { Inbox } from "lucide-react";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface TokenDistributionMetricsProps {
+  daoId: DaoIdEnum;
   appliedMetrics: (MetricTypesEnum | string)[];
   setAppliedMetrics: (metrics: string[]) => void;
   setHoveredMetricKey: (metricKey: string | null) => void;
@@ -24,6 +26,7 @@ interface TokenDistributionMetricsProps {
 }
 
 export const TokenDistributionMetrics = ({
+  daoId,
   appliedMetrics,
   setAppliedMetrics,
   setHoveredMetricKey,
@@ -114,6 +117,11 @@ export const TokenDistributionMetrics = ({
                       <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
                         {category}
                       </p>
+                      {category !== "GOVERNANCE" && category !== "MARKET" && (
+                        <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
+                          ({daoId})
+                        </p>
+                      )}
                       {tooltipText && (
                         <TooltipInfo
                           text={tooltipText}
