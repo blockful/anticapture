@@ -169,7 +169,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
+          <div className="flex h-10 w-full items-center gap-2 px-2 py-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
