@@ -83,7 +83,7 @@ export const useChartMetrics = ({
 
   // Fetch historical token data (for token-price metric) - only when needed
   const { data: historicalTokenData, loading: historicalLoading } =
-    useDaoTokenHistoricalData(daoId);
+    useDaoTokenHistoricalData({ daoId });
 
   const oneYearAgo = useMemo(
     () =>
