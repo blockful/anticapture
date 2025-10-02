@@ -205,8 +205,7 @@ export const VotingPowerTable = ({
     <div className="flex w-full flex-col gap-2">
       <Table
         columns={columns}
-        data={loading ? Array(10).fill({}) : tableData}
-        withSorting={true}
+        data={loading ? Array(12).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         hasMore={pagination.hasNextPage}

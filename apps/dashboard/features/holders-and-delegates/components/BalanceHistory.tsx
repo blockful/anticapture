@@ -130,22 +130,6 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     });
   }, [transfers]);
 
-  // Handle loading state with skeleton data
-  const tableData = useMemo(() => {
-    if (isInitialLoading) {
-      // Return skeleton data while loading
-      return Array.from({ length: 10 }, (_, i) => ({
-        id: `skeleton-${i}`,
-        date: "",
-        amount: "",
-        type: "Buy" as "Buy" | "Sell",
-        fromAddress: "",
-        toAddress: "",
-      }));
-    }
-    return transformedData;
-  }, [isInitialLoading, transformedData]);
-
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
       accessorKey: "date",
@@ -370,11 +354,33 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
     },
   ];
 
+  if (isInitialLoading) {
+    return (
+      <div className="flex w-full flex-col gap-2 p-4">
+        <Table
+          columns={balanceHistoryColumns}
+          data={Array.from({ length: 12 }, (_, i) => ({
+            id: `skeleton-${i}`,
+            date: "",
+            amount: "",
+            type: "Buy" as "Buy" | "Sell",
+            fromAddress: "",
+            toAddress: "",
+          }))}
+          withDownloadCSV={true}
+          size="sm"
+          wrapperClassName="h-[475px]"
+          className="h-[400px]"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col gap-2 p-4">
       <Table
         columns={balanceHistoryColumns}
-        data={tableData}
+        data={transformedData}
         size="sm"
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}

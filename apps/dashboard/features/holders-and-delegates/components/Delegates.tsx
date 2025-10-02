@@ -399,7 +399,7 @@ export const Delegates = ({
       <div className="flex flex-col gap-2">
         <Table
           columns={delegateColumns}
-          data={Array.from({ length: 10 }, () => ({
+          data={Array.from({ length: 12 }, () => ({
             address: `0x${"0".repeat(40)}`,
             type: "",
             votingPower: "0",
@@ -408,9 +408,9 @@ export const Delegates = ({
             activityPercentage: 0,
             delegators: 0,
           }))}
-          withSorting={true}
           withDownloadCSV={true}
           size="sm"
+          wrapperClassName="h-[475px]"
           className="h-[400px]"
         />
       </div>

@@ -347,7 +347,7 @@ export const TokenHolders = ({
             size="sm"
             columns={tokenHoldersColumns}
             data={
-              Array.from({ length: 10 }, () => ({
+              Array.from({ length: 12 }, () => ({
                 address: zeroAddress,
                 type: "EOA" as string | undefined,
                 balance: 0,
@@ -355,10 +355,10 @@ export const TokenHolders = ({
                 delegate: zeroAddress,
               })) as TokenHolderTableData[]
             }
-            withSorting={true}
             withDownloadCSV={true}
             onRowClick={() => {}}
             className="h-[400px]"
+            wrapperClassName="h-[475px]"
           />
         </div>
       </div>
@@ -427,7 +427,6 @@ export const TokenHolders = ({
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             size="sm"
             withDownloadCSV={true}
-            withSorting={true}
             wrapperClassName="h-[475px]"
             className="h-[400px]"
           />

@@ -381,7 +381,7 @@ export const ProposalsTable = ({
       <div className="flex flex-col gap-4">
         <Table
           columns={proposalColumns}
-          data={Array.from({ length: 10 }, (_, i) => ({
+          data={Array.from({ length: 12 }, (_, i) => ({
             proposalId: `loading-${i}`,
             proposalName: "",
             finalResult: { text: "", icon: null },
@@ -390,9 +390,9 @@ export const ProposalsTable = ({
             voteTiming: { text: "", percentage: 0 },
             status: "",
           }))}
-          size="sm"
-          withSorting={true}
           withDownloadCSV={true}
+          size="sm"
+          wrapperClassName="h-[475px]"
           className="h-[400px]"
         />
       </div>
@@ -426,7 +426,6 @@ export const ProposalsTable = ({
       <Table
         columns={proposalColumns}
         data={tableData}
-        withSorting={true}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}

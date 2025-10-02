@@ -253,8 +253,7 @@ export const DelegationHistoryTable = ({
         <Table
           size="sm"
           columns={delegationHistoryColumns}
-          data={loading ? Array(5).fill({}) : data}
-          withSorting={true}
+          data={loading ? Array(12).fill({}) : data}
           filterColumn="address"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
