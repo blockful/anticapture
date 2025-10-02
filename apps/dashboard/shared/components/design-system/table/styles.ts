@@ -1,4 +1,9 @@
-export const sizeVariants = {
-  default: "py-2.5 px-4",
-  sm: "py-1.5 px-2",
+export const headerSizeVariants = {
+  default: "h-10 px-4 py-0",
+  sm: "h-8 px-2 py-0",
+};
+
+export const rowSizeVariants = {
+  default: "h-[52px] px-4 py-0",
+  sm: "h-10 px-2 py-0",
 };

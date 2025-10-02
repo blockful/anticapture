@@ -148,6 +148,8 @@ export const VotingPowerTable = ({
         );
       },
       cell: ({ row }) => {
+        const date: string = row.getValue("date");
+
         if (!isMounted || loading) {
           return (
             <div className="flex w-full">
@@ -158,8 +160,6 @@ export const VotingPowerTable = ({
             </div>
           );
         }
-
-        const date: string = row.getValue("date");
 
         return (
           <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
@@ -205,7 +205,7 @@ export const VotingPowerTable = ({
     <div className="flex w-full flex-col gap-2">
       <Table
         columns={columns}
-        data={loading ? Array(6).fill({}) : tableData}
+        data={loading ? Array(10).fill({}) : tableData}
         withSorting={true}
         filterColumn="address"
         size="sm"
@@ -214,6 +214,7 @@ export const VotingPowerTable = ({
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         wrapperClassName="h-[475px]"
+        className="h-[400px]"
       />
     </div>
   );

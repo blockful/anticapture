@@ -63,11 +63,12 @@ export const useVotingPower = ({
   orderBy = "balance",
   orderDirection = "desc",
 }: UseVotingPowerParams): UseVotingPowerResult => {
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
+  const [allDelegations, setAllDelegations] = useState<DelegationItem[]>([]);
 
   // Reset to page 1 when sorting changes (new query)
   useEffect(() => {
@@ -155,13 +156,27 @@ export const useVotingPower = ({
   // ------------------------------------------------------------------
   // Build timestamp lookup <delegatorAccountId> -> timestamp
   // ------------------------------------------------------------------
-  const timestampMap: Record<string, string | number | undefined> =
-    Object.fromEntries(
-      (delegationsTimestampData?.delegations.items || []).map((delegation) => [
-        delegation.delegatorAccountId?.toLowerCase(),
-        delegation.timestamp,
-      ]),
-    );
+  useEffect(() => {
+    if (delegationsTimestampData?.delegations.items) {
+      setAllDelegations((prev) => {
+        const merged = [
+          ...prev,
+          ...delegationsTimestampData.delegations.items.filter(
+            (d) =>
+              !prev.some((p) => p.delegatorAccountId === d.delegatorAccountId),
+          ),
+        ];
+        return merged;
+      });
+    }
+  }, [delegationsTimestampData]);
+
+  const timestampMap = Object.fromEntries(
+    allDelegations.map((d) => [
+      d.delegatorAccountId?.toLowerCase(),
+      d.timestamp,
+    ]),
+  );
 
   // ------------------------------------------------------------------
   // Enrich balances with timestamp (fallback to undefined)
@@ -338,12 +353,20 @@ export const useVotingPower = ({
     }),
   );
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     topFiveDelegators: topDelegatorsItems || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,
-    loading: networkStatus === NetworkStatus.loading,
+    loading: isLoading,
     error: error || tsError || null,
     refetch: handleRefetch,
     pagination,

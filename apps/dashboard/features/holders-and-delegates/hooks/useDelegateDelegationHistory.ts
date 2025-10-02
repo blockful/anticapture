@@ -229,9 +229,17 @@ export function useDelegateDelegationHistory(
     itemsPerPage,
   ]);
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     delegationHistory: transformedData,
-    loading: networkStatus === NetworkStatus.loading,
+    loading: isLoading,
     paginationInfo: {
       currentPage,
       totalPages: Math.ceil(data?.votingPowers?.totalCount || 0 / itemsPerPage),

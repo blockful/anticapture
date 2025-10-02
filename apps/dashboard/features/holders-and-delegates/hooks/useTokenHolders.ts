@@ -265,9 +265,17 @@ export const useTokenHolders = ({
     refetch();
   }, [refetch]);
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     data: processedData,
-    loading: networkStatus === NetworkStatus.loading,
+    loading: isLoading,
     error: tokenHoldersError || null,
     refetch: handleRefetch,
     pagination,

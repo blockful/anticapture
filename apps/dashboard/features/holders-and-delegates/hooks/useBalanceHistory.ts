@@ -145,8 +145,8 @@ export function useBalanceHistory(
         ? sellTotalCountQuery
         : allTotalCountQuery;
 
-  const { data, loading, error, fetchMore } = activeQuery;
-  const { data: totalCountData, networkStatus } = activeTotalCountQuery;
+  const { data, networkStatus, error, fetchMore } = activeQuery;
+  const { data: totalCountData } = activeTotalCountQuery;
 
   // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
@@ -300,9 +300,17 @@ export function useBalanceHistory(
     queryVariables,
   ]);
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     transfers: transformedTransfers,
-    loading,
+    loading: isLoading,
     error,
     paginationInfo,
     fetchNextPage,

@@ -370,7 +370,7 @@ export const DelegateDelegationHistoryTable = ({
         <div className="flex flex-col gap-2 p-4">
           <Table
             columns={columns}
-            data={Array.from({ length: 7 }, () => ({
+            data={Array.from({ length: 10 }, () => ({
               timestamp: "1716153600",
               transactionHash: "0x1234567890",
               delta: "1000000000000000000",
@@ -383,7 +383,9 @@ export const DelegateDelegationHistoryTable = ({
               delegator: "0x1234567890",
               delegate: "0x1234567890",
             }))}
+            className="h-[400px]"
             withSorting={true}
+            withDownloadCSV={true}
             size="sm"
           />
         </div>
@@ -416,6 +418,7 @@ export const DelegateDelegationHistoryTable = ({
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         wrapperClassName="h-[475px]"
+        className="h-[400px]"
       />
     </div>
   );

@@ -194,9 +194,17 @@ export const useProposalsActivity = ({
     };
   }, [data, accumulatedProposals]);
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     data: processedData,
-    loading: networkStatus === NetworkStatus.loading,
+    loading: isLoading,
     error: error || null,
     refetch,
     pagination,

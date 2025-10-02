@@ -22,7 +22,10 @@ import {
 } from "@/shared/components/design-system/table/components";
 import { cn } from "@/shared/utils";
 import { DownloadIcon } from "lucide-react";
-import { sizeVariants } from "@/shared/components/design-system/table/styles";
+import {
+  headerSizeVariants,
+  rowSizeVariants,
+} from "@/shared/components/design-system/table/styles";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { CSVLink } from "react-csv";
 
@@ -100,29 +103,30 @@ export const Table = <TData, TValue>({
     return () => observer.disconnect();
   }, [onLoadMore, hasMore, isLoadingMore, infiniteRootMargin]);
 
-  let tableConfig: TableOptions<TData> = {
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  };
+  let state: TableOptions<TData>["state"] = {};
 
   if (withSorting) {
-    tableConfig = {
-      ...tableConfig,
-      getSortedRowModel: getSortedRowModel(),
-      onSortingChange: setSorting,
-      state: { sorting },
-    };
+    state = { ...state, sorting };
   }
 
   if (filterColumn) {
-    tableConfig = {
-      ...tableConfig,
-      onColumnFiltersChange: setColumnFilters,
-      getFilteredRowModel: getFilteredRowModel(),
-      state: { ...tableConfig.state, columnFilters },
-    };
+    state = { ...state, columnFilters };
   }
+
+  const tableConfig: TableOptions<TData> = {
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    state,
+    ...(withSorting && {
+      getSortedRowModel: getSortedRowModel(),
+      onSortingChange: setSorting,
+    }),
+    ...(filterColumn && {
+      getFilteredRowModel: getFilteredRowModel(),
+      onColumnFiltersChange: setColumnFilters,
+    }),
+  };
 
   const table = useReactTable(tableConfig);
 
@@ -144,15 +148,17 @@ export const Table = <TData, TValue>({
   };
 
   return (
-    <div className={cn("flex w-full flex-col", wrapperClassName)}>
+    <div
+      className={cn("flex w-full flex-col", wrapperClassName)}
+      ref={wrapperRef}
+    >
       <TableContainer
         className={cn(
           "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
-          className,
         )}
       >
-        <TableHeader className="bg-surface-contrast text-secondary sticky top-0 z-30 text-xs font-semibold sm:font-medium">
+        <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-semibold sm:font-medium">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className={"border-light-dark"}>
               {headerGroup.headers.map((header) => {
@@ -165,7 +171,7 @@ export const Table = <TData, TValue>({
                       header.column.getIndex() === 0 &&
                         stickyFirstColumn &&
                         "bg-surface-contrast sticky left-0 z-50",
-                      sizeVariants[size],
+                      headerSizeVariants[size],
                       columnMeta?.columnClassName,
                     )}
                   >
@@ -181,7 +187,7 @@ export const Table = <TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className="min-h-[400px]">
+        <TableBody className={className}>
           {table.getRowModel().rows.length > 0 ? (
             <>
               {table.getRowModel().rows.map((row) => (
@@ -209,7 +215,7 @@ export const Table = <TData, TValue>({
                           cell.column.getIndex() === 0 &&
                             stickyFirstColumn &&
                             "bg-surface-default sticky left-0 z-50",
-                          sizeVariants[size],
+                          rowSizeVariants[size],
                           colMeta?.columnClassName,
                         )}
                       >
@@ -239,7 +245,7 @@ export const Table = <TData, TValue>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-full text-center"
+                className={cn("text-center", className)}
               >
                 {customEmptyState || <EmptyState />}
               </TableCell>

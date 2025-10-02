@@ -19,7 +19,7 @@ const ChartLegend = ({
   if (loading) {
     return (
       <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
-        {Array.from({ length: 5 }, (_, i) => (
+        {Array.from({ length: 10 }, (_, i) => (
           <div key={i} className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"

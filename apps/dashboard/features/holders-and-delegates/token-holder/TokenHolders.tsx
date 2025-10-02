@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
-import { Inbox, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -17,7 +17,7 @@ import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
-import { BlankSlate, Button } from "@/shared/components";
+import { Button } from "@/shared/components";
 
 interface TokenHolderTableData {
   address: Address;
@@ -353,7 +353,9 @@ export const TokenHolders = ({
               })) as TokenHolderTableData[]
             }
             withSorting={true}
+            withDownloadCSV={true}
             onRowClick={() => {}}
+            className="h-[400px]"
           />
         </div>
       </div>
@@ -415,15 +417,6 @@ export const TokenHolders = ({
         <div className="flex flex-col gap-2">
           <Table
             columns={tokenHoldersColumns}
-            customEmptyState={
-              <BlankSlate
-                variant="default"
-                icon={Inbox}
-                title=""
-                className="h-full rounded-none"
-                description="No addresses found"
-              />
-            }
             data={tableData}
             hasMore={pagination.hasNextPage}
             isLoadingMore={fetchingMore}
@@ -433,6 +426,7 @@ export const TokenHolders = ({
             withDownloadCSV={true}
             withSorting={true}
             wrapperClassName="h-[475px]"
+            className="h-[400px]"
           />
         </div>
       </div>

@@ -380,6 +380,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         wrapperClassName="h-[475px]"
+        className="h-[400px]"
         withDownloadCSV={true}
       />
     </div>

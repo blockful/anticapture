@@ -6,11 +6,11 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { SkeletonRow, BlankSlate, Button } from "@/shared/components";
+import { SkeletonRow, Button } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { Inbox, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
@@ -409,8 +409,9 @@ export const Delegates = ({
             delegators: 0,
           }))}
           withSorting={true}
+          withDownloadCSV={true}
           size="sm"
-          wrapperClassName="h-[475px]"
+          className="h-[400px]"
         />
       </div>
     );
@@ -469,23 +470,14 @@ export const Delegates = ({
         <Table
           columns={delegateColumns}
           data={tableData}
-          withSorting={true}
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
           size="sm"
-          customEmptyState={
-            <BlankSlate
-              variant="default"
-              icon={Inbox}
-              title=""
-              className="h-full rounded-none"
-              description="No addresses found"
-            />
-          }
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
           wrapperClassName="h-[475px]"
+          className="h-[400px]"
         />
       </div>
       <HoldersAndDelegatesDrawer

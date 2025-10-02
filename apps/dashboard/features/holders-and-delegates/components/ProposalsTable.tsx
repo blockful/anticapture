@@ -392,6 +392,8 @@ export const ProposalsTable = ({
           }))}
           size="sm"
           withSorting={true}
+          withDownloadCSV={true}
+          className="h-[400px]"
         />
       </div>
     );
@@ -426,20 +428,12 @@ export const ProposalsTable = ({
         data={tableData}
         withSorting={true}
         size="sm"
-        customEmptyState={
-          <BlankSlate
-            variant="default"
-            icon={Inbox}
-            title=""
-            className="h-full rounded-none"
-            description="No voted proposals to show"
-          />
-        }
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         wrapperClassName="h-[475px]"
+        className="h-[400px]"
       />
     </div>
   );

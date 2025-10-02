@@ -354,9 +354,17 @@ export const useDelegates = ({
     });
   }, [refetch, orderBy, orderDirection, address]);
 
+  const isLoading = useMemo(() => {
+    return (
+      (networkStatus === NetworkStatus.loading && !finalData?.length) ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus, finalData]);
+
   return {
     data: finalData,
-    loading: networkStatus === NetworkStatus.loading && !finalData?.length,
+    loading: isLoading,
     error: delegatesError || null,
     refetch: handleRefetch,
     pagination,
