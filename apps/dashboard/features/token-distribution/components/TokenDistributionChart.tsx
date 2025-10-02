@@ -251,7 +251,9 @@ export const TokenDistributionChart = ({
           <YAxis
             yAxisId="primary"
             domain={["auto", "auto"]}
-            tickFormatter={(value) => formatNumberUserReadable(Number(value))}
+            tickFormatter={(value) =>
+              `$${formatNumberUserReadable(Number(value))} ${daoId}`
+            }
             tick={{ fontSize: 10 }}
             width={50}
           />
