@@ -295,7 +295,7 @@ export const Delegates = ({
             }
           | undefined;
 
-        if (isHistoricalLoadingFor(addr)) {
+        if (isHistoricalLoadingFor(addr) || loading) {
           return (
             <div className="flex items-center justify-start">
               <SkeletonRow
@@ -326,7 +326,7 @@ export const Delegates = ({
         const activity = row.getValue("activity") as string | undefined;
         const activityPercentage = row.original.activityPercentage;
         const addr = row.original.address;
-        if (isActivityLoadingFor(addr)) {
+        if (isActivityLoadingFor(addr) || loading) {
           return (
             <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-10" />

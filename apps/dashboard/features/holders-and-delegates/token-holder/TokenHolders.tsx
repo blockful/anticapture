@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -70,10 +70,12 @@ export const TokenHolders = ({
     [tokenHoldersData, historicalBalancesCache],
   );
 
-  const { data: newHistoricalBalances } = useHistoricalBalances(
-    daoId,
-    newAddressesToFetch,
-    days,
+  const { data: newHistoricalBalances, loading: historicalLoading } =
+    useHistoricalBalances(daoId, newAddressesToFetch, days);
+
+  const isHistoricalLoadingFor = useCallback(
+    (addr: string) => historicalLoading && !historicalBalancesCache.has(addr),
+    [historicalBalancesCache, historicalLoading],
   );
 
   useEffect(() => {
@@ -270,12 +272,16 @@ export const TokenHolders = ({
       ),
       size: 250,
       cell: ({ row }) => {
-        const variation = row.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        } | null;
+        const addr = row.original.address;
 
-        if (variation === null) {
+        const variation = row.getValue("variation") as
+          | {
+              percentageChange: number;
+              absoluteChange: number;
+            }
+          | undefined;
+
+        if (isHistoricalLoadingFor(addr) || loading) {
           return (
             <div className="flex w-full items-center justify-start">
               <SkeletonRow
@@ -288,8 +294,8 @@ export const TokenHolders = ({
 
         return (
           <div className="flex w-full items-center justify-start gap-2 text-sm">
-            {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
-            <Percentage value={variation.percentageChange} />
+            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+            <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
