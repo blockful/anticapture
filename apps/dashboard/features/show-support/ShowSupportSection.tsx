@@ -1,6 +1,6 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { HeartIcon } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
 import {
@@ -17,10 +17,10 @@ export const ShowSupportSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.showSupport.title}
+      title={PAGES_CONSTANTS.showSupport.title}
       icon={<HeartIcon className="section-layout-icon" />}
-      anchorId={SECTIONS_CONSTANTS.showSupport.anchorId}
       className="gap-5 sm:gap-4"
+      description={PAGES_CONSTANTS.showSupport.description}
     >
       <CardPetitionInformation isLoading={isLoading} data={signatures} />
       <CardDaoSignature isConnected={isConnected} address={address} />

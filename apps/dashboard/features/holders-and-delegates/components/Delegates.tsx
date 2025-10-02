@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ColumnDef, HeaderContext } from "@tanstack/react-table";
 
@@ -69,6 +71,7 @@ export const Delegates = ({
 
   // State for address filtering
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+  const pageLimit: number = 15;
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -96,6 +99,7 @@ export const Delegates = ({
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
+    limit: pageLimit,
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
@@ -389,7 +393,7 @@ export const Delegates = ({
       <div className="flex flex-col gap-2">
         <TheTable
           columns={delegateColumns}
-          data={Array.from({ length: 10 }, () => ({
+          data={Array.from({ length: pageLimit }, () => ({
             address: `0x${"0".repeat(40)}`,
             type: "",
             votingPower: "0",
@@ -398,7 +402,6 @@ export const Delegates = ({
             activityPercentage: 0,
             delegators: 0,
           }))}
-          withPagination={true}
           withSorting={true}
           isTableSmall={true}
         />
@@ -479,7 +482,6 @@ export const Delegates = ({
         <TheTable
           columns={delegateColumns}
           data={tableData}
-          withPagination={true}
           withSorting={true}
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
           isTableSmall={true}

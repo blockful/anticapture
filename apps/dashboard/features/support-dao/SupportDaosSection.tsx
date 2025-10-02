@@ -8,7 +8,7 @@ import {
   SupportDaoCard,
   ReachOutToUsCard,
 } from "@/features/support-dao/components";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoConfiguration } from "@/shared/dao-config/types";
@@ -31,10 +31,9 @@ export const SupportDaosSection = () => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.supportDaos.title}
+      title={PAGES_CONSTANTS.supportDaos.title}
       icon={<HeartIcon className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.supportDaos.description}
-      anchorId={SECTIONS_CONSTANTS.supportDaos.anchorId}
+      description={PAGES_CONSTANTS.supportDaos.description}
       className="bg-surface-background! gap-4! border-b-0!"
     >
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

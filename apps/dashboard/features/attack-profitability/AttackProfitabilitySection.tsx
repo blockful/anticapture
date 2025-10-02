@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  TheSectionLayout,
-  TheCardChartLayout,
-  SwitcherDate,
-  RiskLevelCard,
-} from "@/shared/components";
+import { TheSectionLayout, RiskLevelCard } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,
@@ -18,6 +13,14 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import {
+  SubSection,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
+import { getDateRange } from "@/shared/utils";
+import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
@@ -45,44 +48,45 @@ export const AttackProfitabilitySection = ({
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.attackProfitability.title}
-      subtitle={"Cost of Attack vs Profit"}
+      title={PAGES_CONSTANTS.attackProfitability.title}
       icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.attackProfitability.description}
-      infoText={"Treasury values above supply costs indicate high risk."}
-      switchDate={
-        <SwitcherDate
-          defaultValue={defaultDays}
-          setTimeInterval={setDays}
-          disableRecentData={true}
-        />
-      }
-      days={days}
-      anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+      description={PAGES_CONSTANTS.attackProfitability.description}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
-      <TheCardChartLayout
-        headerComponent={
-          <div className="flex w-full pt-3">
-            <AttackProfitabilityToggleHeader
-              treasuryMetric={treasuryMetric}
-              setTreasuryMetric={setTreasuryMetric}
-              costMetric={costMetric}
-              setCostMetric={setCostMetric}
+      <SubSectionsContainer>
+        <SubSection
+          subsectionTitle={"Cost of Attack vs Profit"}
+          dateRange={getDateRange(days ?? "")}
+          switcherComponent={
+            <SwitcherDateMobile
+              defaultValue={defaultDays}
+              setTimeInterval={setDays}
+              disableRecentData={true}
             />
-          </div>
-        }
-      >
-        <MultilineChartAttackProfitability
-          days={days}
-          filterData={[treasuryMetric, costMetric]}
-        />
-      </TheCardChartLayout>
-      <div className="border-light-dark w-full border-t" />
-      <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
-        <TheCardChartLayout
-          title="Cost Comparison"
-          subtitle="All values reflect current data."
+          }
+        >
+          <InlineAlert
+            variant="info"
+            label="Treasury values above supply costs indicate high risk."
+          />
+          <MultilineChartAttackProfitability
+            days={days}
+            filterData={[treasuryMetric, costMetric]}
+          />
+
+          <AttackProfitabilityToggleHeader
+            treasuryMetric={treasuryMetric}
+            setTreasuryMetric={setTreasuryMetric}
+            costMetric={costMetric}
+            setCostMetric={setCostMetric}
+          />
+        </SubSection>
+        <DividerDefault isHorizontal />
+        <SubSection
+          subsectionTitle={"Cost Comparison"}
+          subsectionDescription={"All values reflect current data."}
+          className="w-1/2"
+          dateRange=""
           switcherComponent={
             <Dropdown
               value={dropdownValue}
@@ -94,14 +98,16 @@ export const AttackProfitabilitySection = ({
             />
           }
         >
-          <AttackCostBarChart
-            valueMode={dropdownValue.value as "usd" | "token"}
-          />
-        </TheCardChartLayout>
-        <div className="flex flex-col gap-2">
-          <AttackProfitabilityAccordion />
-        </div>
-      </div>
+          <div className="flex flex-col gap-5 sm:flex-row">
+            <AttackCostBarChart
+              valueMode={dropdownValue.value as "usd" | "token"}
+            />
+            <div className="flex w-full flex-col gap-2">
+              <AttackProfitabilityAccordion />
+            </div>
+          </div>
+        </SubSection>
+      </SubSectionsContainer>
     </TheSectionLayout>
   );
 };
