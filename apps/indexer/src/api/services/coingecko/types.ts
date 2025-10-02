@@ -1,3 +1,4 @@
+import { DaoIdEnum } from "@/lib/enums";
 import { z } from "zod";
 
 export const CoingeckoTokenIdEnum = {
@@ -8,6 +9,18 @@ export const CoingeckoTokenIdEnum = {
   GTC: "gitcoin",
 } as const;
 
+export const CoingeckoIdToDaoId: Record<
+  (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum],
+  DaoIdEnum
+> = {
+  // Verify necessity of this construct
+  [CoingeckoTokenIdEnum.ENS]: DaoIdEnum.ENS,
+  [CoingeckoTokenIdEnum.UNI]: DaoIdEnum.UNI,
+  [CoingeckoTokenIdEnum.ARB]: DaoIdEnum.ARB,
+  [CoingeckoTokenIdEnum.OP]: DaoIdEnum.OP,
+  [CoingeckoTokenIdEnum.GTC]: DaoIdEnum.GTC,
+};
+
 export type CoingeckoTokenId =
   (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum];
 
@@ -17,7 +30,7 @@ export interface CoingeckoHistoricalMarketData {
   total_volumes: [number, number][];
 }
 
-export interface CoingeckoTokenPropertyData {
+export interface CoingeckoTokenPriceCompareData {
   value: number /* TODO */;
 }
 
@@ -27,6 +40,6 @@ export const CoingeckoHistoricalMarketDataSchema = z.object({
   total_volumes: z.array(z.tuple([z.number(), z.number()])),
 });
 
-export const CoingeckoTokenPropertyDataSchema = z.object({
+export const CoingeckoTokenPriceCompareDataSchema = z.object({
   value: z.number() /* TODO */,
 });

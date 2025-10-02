@@ -2,15 +2,15 @@ import { DaoIdEnum } from "@/lib/enums";
 import {
   CoingeckoTokenId,
   CoingeckoTokenIdEnum,
-  CoingeckoTokenPropertyData,
+  CoingeckoTokenPriceCompareData,
 } from "../services/coingecko/types";
 import z from "zod";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 interface TokenPropertiesClient {
-  getTokenProperties(
+  getTokenPriceCompare(
     tokenId: CoingeckoTokenId,
-  ): Promise<CoingeckoTokenPropertyData>; // TODO
+  ): Promise<CoingeckoTokenPriceCompareData>; // TODO
 }
 
 export function tokenProperties(
@@ -42,9 +42,10 @@ export function tokenProperties(
     async (context) => {
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
-      const data = await client.getTokenProperties(tokenId);
+      const priceData = await client.getTokenPriceCompare(tokenId);
+      // TODO: fetch remaining token properties
 
-      return context.json(data, 200);
+      return context.json(priceData, 200);
     },
   );
 }
