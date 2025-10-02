@@ -17,8 +17,16 @@ export interface CoingeckoHistoricalMarketData {
   total_volumes: [number, number][];
 }
 
+export interface CoingeckoTokenPropertyData {
+  value: number /* TODO */;
+}
+
 export const CoingeckoHistoricalMarketDataSchema = z.object({
   prices: z.array(z.tuple([z.number(), z.number()])),
   market_caps: z.array(z.tuple([z.number(), z.number()])),
   total_volumes: z.array(z.tuple([z.number(), z.number()])),
+});
+
+export const CoingeckoTokenPropertyDataSchema = z.object({
+  value: z.number() /* TODO */,
 });

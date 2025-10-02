@@ -3,6 +3,8 @@ import {
   CoingeckoHistoricalMarketData,
   CoingeckoHistoricalMarketDataSchema,
   CoingeckoTokenId,
+  CoingeckoTokenPropertyData,
+  CoingeckoTokenPropertyDataSchema,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
 
@@ -33,6 +35,33 @@ export class CoingeckoService {
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch historical token data",
+        cause: error,
+      });
+    }
+  }
+
+  async getTokenProperties(
+    tokenId: CoingeckoTokenId,
+  ): Promise<CoingeckoTokenPropertyData> {
+    try {
+      const response = await fetch(
+        `${this.coingeckoApiUrl}/simple/token-price/${tokenId}?contract_addresses=${""}&vs_currencies=${""}` /* TODO */,
+        {
+          headers: {
+            "x-cg-demo-api-key": this.coingeckoApiKey,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return CoingeckoTokenPropertyDataSchema.parse(data);
+    } catch (error) {
+      throw new HTTPException(503, {
+        message: "Failed to fetch token property data",
         cause: error,
       });
     }
