@@ -41,7 +41,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData: historicalTokenData_200_response
+  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -1319,6 +1319,14 @@ type historicalTokenData_200_response {
   total_volumes: [[Float]]!
 }
 
+enum queryInput_historicalTokenData_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
@@ -1560,6 +1568,9 @@ type query_proposals_items_items {
   startTimestamp: String!
   endTimestamp: String!
   quorum: String!
+  calldatas: [String]!
+  values: [String]!
+  targets: [String]!
 }
 
 enum queryInput_proposals_orderDirection {
@@ -1584,6 +1595,9 @@ type proposal_200_response {
   startTimestamp: String!
   endTimestamp: String!
   quorum: String!
+  calldatas: [String]!
+  values: [String]!
+  targets: [String]!
 }
 
 type query_historicalBalances_items {
