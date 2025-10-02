@@ -125,7 +125,7 @@ export const TokenDistributionTable = ({
           );
         }
         return (
-          <div className="flex items-center justify-end px-4 py-3 text-end">
+          <div className="flex w-full items-center justify-end px-4 py-3 text-end">
             {currentValue && formatNumberUserReadable(currentValue)}
           </div>
         );
@@ -160,7 +160,7 @@ export const TokenDistributionTable = ({
         const variation: string = row.getValue("variation");
         if (!mounted) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex w-full items-center justify-end">
               <SkeletonRow
                 className="h-5 w-32"
                 parentClassName="justify-end flex animate-pulse space-x-2"
@@ -177,7 +177,7 @@ export const TokenDistributionTable = ({
         }
         return (
           <p
-            className={`flex items-center justify-end gap-1 px-4 py-3 text-end ${
+            className={`flex w-full items-center justify-end gap-1 px-4 py-3 text-end ${
               Number(variation) > 0
                 ? "text-success"
                 : Number(variation) < 0

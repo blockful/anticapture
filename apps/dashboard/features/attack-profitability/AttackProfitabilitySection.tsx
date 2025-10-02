@@ -21,6 +21,7 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
 import { getDateRange } from "@/shared/utils";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
+import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -33,9 +34,17 @@ export const AttackProfitabilitySection = ({
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
+  const [dropdownValue, setDropdownValue] = useState<Option>({
+    value: "usd",
+    label: "USD",
+  });
   if (!attackProfitability) {
     return null;
   }
+
+  const handleDropdownClick = (option: Option) => {
+    setDropdownValue(option);
+  };
 
   return (
     <TheSectionLayout
@@ -48,7 +57,7 @@ export const AttackProfitabilitySection = ({
         <SubSection
           subsectionTitle={"Cost of Attack vs Profit"}
           dateRange={getDateRange(days ?? "")}
-          switchDate={
+          switcherComponent={
             <SwitcherDateMobile
               defaultValue={defaultDays}
               setTimeInterval={setDays}
@@ -76,10 +85,23 @@ export const AttackProfitabilitySection = ({
         <SubSection
           subsectionTitle={"Cost Comparison"}
           subsectionDescription={"All values reflect current data."}
+          className="w-1/2"
           dateRange=""
+          switcherComponent={
+            <Dropdown
+              value={dropdownValue}
+              options={[
+                { value: "usd", label: "USD" },
+                { value: "token", label: "Token" },
+              ]}
+              onClick={handleDropdownClick}
+            />
+          }
         >
           <div className="flex flex-col gap-5 sm:flex-row">
-            <AttackCostBarChart />
+            <AttackCostBarChart
+              valueMode={dropdownValue.value as "usd" | "token"}
+            />
             <div className="flex w-full flex-col gap-2">
               <AttackProfitabilityAccordion />
             </div>

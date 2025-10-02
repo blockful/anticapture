@@ -1457,6 +1457,14 @@ export enum QueryInput_HistoricalTokenData_Days {
   '365d' = '_365d'
 }
 
+export enum QueryInput_HistoricalTokenData_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
 export enum QueryInput_HistoricalVotingPower_Days {
   '1d' = '_1d',
   '7d' = '_7d',
