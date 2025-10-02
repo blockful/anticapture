@@ -15,6 +15,7 @@ import {
 } from "@/features/token-distribution/components";
 import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
 import { ArrowRightLeft } from "lucide-react";
+import { getDateRange } from "@/shared/utils";
 
 const chartConfig: Record<string, { label: string; color: string }> = {
   delegatedSupply: {
@@ -44,7 +45,7 @@ const ChartLegend = ({
     {items.map((item) => (
       <div key={item.label} className="flex items-center gap-2">
         <span
-          className="size-2 rounded-xs"
+          className="rounded-xs size-2"
           style={{ backgroundColor: item.color }}
         />
         <span className="text-secondary text-sm font-medium">{item.label}</span>
@@ -52,6 +53,38 @@ const ChartLegend = ({
     ))}
   </div>
 );
+
+type CsvRow = Record<string, number | string | null>;
+
+const buildCsvData = (
+  datasets: Record<string, DaoMetricsDayBucket[] | undefined>,
+): CsvRow[] => {
+  const rows: CsvRow[] = [];
+
+  Object.entries(datasets).forEach(([key, data]) => {
+    data?.forEach((point) => {
+      const { date, high } = point;
+      if (!date) return;
+      const row = rows.find((r) => r.date === date);
+
+      if (!row) {
+        rows.push({
+          date,
+          [key]: high,
+        });
+        return;
+      }
+
+      row[key] = high;
+    });
+  });
+
+  return rows.sort(
+    (a, b) =>
+      new Date(a.date as string).getTime() -
+      new Date(b.date as string).getTime(),
+  );
+};
 
 export const TokenDistributionSection = () => {
   const {
@@ -69,23 +102,18 @@ export const TokenDistributionSection = () => {
     dexSupply: dexSupplyChart,
     lendingSupply: lendingSupplyChart,
   };
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
-      subtitle="Token Supply Distribution"
       icon={<ArrowRightLeft className="section-layout-icon" />}
-      switchDate={
-        <SwitcherDate
-          defaultValue={TimeInterval.ONE_YEAR}
-          setTimeInterval={setDays}
-          isSmall
-        />
-      }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
       days={days}
     >
       <TheCardChartLayout
+        title="Token Supply Distribution"
+        subtitle={getDateRange(days ?? "")}
         headerComponent={
           <div className="flex w-full items-center pt-3 sm:flex-row">
             <ChartLegend
@@ -96,6 +124,14 @@ export const TokenDistributionSection = () => {
             />
           </div>
         }
+        switcherComponent={
+          <SwitcherDate
+            defaultValue={TimeInterval.ONE_YEAR}
+            setTimeInterval={setDays}
+            isSmall
+          />
+        }
+        csvData={buildCsvData(datasets)}
       >
         {Object.values(datasets).some((value) => value!.length > 0) ? (
           <MultilineChartTokenDistribution
