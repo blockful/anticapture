@@ -100,14 +100,30 @@ export const HoldersAndDelegatesDrawer = ({
                   {entities[entityType].title}
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <EnsAvatar
-                    address={address as `0x${string}`}
-                    size="sm"
-                    variant="rounded"
-                    nameClassName="text-lg leading-[18px]"
-                    containerClassName="gap-2"
-                    showFullAddress={true}
-                  />
+                  {/* Desktop */}
+                  <div className="hidden sm:block">
+                    <EnsAvatar
+                      address={address as `0x${string}`}
+                      size="sm"
+                      variant="rounded"
+                      nameClassName="text-lg leading-[18px]"
+                      containerClassName="gap-2"
+                      showFullAddress={true}
+                    />
+                  </div>
+
+                  {/* Mobile */}
+                  <div className="block sm:hidden">
+                    <EnsAvatar
+                      address={address as `0x${string}`}
+                      size="sm"
+                      variant="rounded"
+                      nameClassName="text-lg leading-[18px]"
+                      containerClassName="gap-2"
+                      showFullAddress={false}
+                    />
+                  </div>
+
                   <CopyAndPasteButton textToCopy={address as `0x${string}`} />
                 </div>
               </div>
