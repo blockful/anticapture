@@ -38,10 +38,10 @@ export const AttackProfitabilitySection = ({
     value: "usd",
     label: "USD",
   });
-  
+
   const attackUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
   const costUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
-  
+
   if (!attackProfitability) {
     return null;
   }
@@ -70,12 +70,13 @@ export const AttackProfitabilitySection = ({
     >
       <TheCardChartLayout
         headerComponent={
-          <div className="flex w-full items-center gap-3 pt-3">
+          <div className="flex w-full flex-col-reverse gap-3 pt-3 sm:flex-row sm:items-center">
             <BadgeStatus
               variant="outline"
               iconVariant={attackUpdate.hasData ? "success" : "warning"}
               isLoading={attackUpdate.isLoading}
               icon={attackUpdate.icon}
+              className="w-fit"
             >
               Last updated: {attackUpdate.label}
             </BadgeStatus>
@@ -109,7 +110,8 @@ export const AttackProfitabilitySection = ({
               className="w-fit"
             >
               Last updated: {costUpdate.label}
-            </BadgeStatus>}
+            </BadgeStatus>
+          }
           switcherComponent={
             <Dropdown
               value={dropdownValue}
