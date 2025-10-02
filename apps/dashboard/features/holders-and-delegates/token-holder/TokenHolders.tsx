@@ -208,6 +208,7 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "balance",
+      size: 160,
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
@@ -267,6 +268,7 @@ export const TokenHolders = ({
           Variation ({daoId})
         </div>
       ),
+      size: 250,
       cell: ({ row }) => {
         const variation = row.getValue("variation") as {
           percentageChange: number;
@@ -297,6 +299,7 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "delegate",
+      size: 160,
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start">
           Delegate
@@ -367,7 +370,7 @@ export const TokenHolders = ({
       <div className="w-full text-white">
         <div className="flex flex-col gap-2">
           <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
               <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
                 <tr className="border-light-dark">
                   {tokenHoldersColumns.map((column, index) => (
@@ -375,7 +378,7 @@ export const TokenHolders = ({
                       key={index}
                       className="text-left [&:has([role=checkbox])]:pr-0"
                       style={{
-                        width: column.size !== 150 ? column.size : "auto",
+                        width: column.size ? column.size : "auto",
                       }}
                     >
                       {typeof column.header === "function"

@@ -167,7 +167,7 @@ export const TokenDistributionTable = () => {
         const variation: string = row.getValue("variation");
         if (!mounted) {
           return (
-            <div className="flex items-center justify-end">
+            <div className="flex w-full items-center justify-end">
               <SkeletonRow
                 className="h-5 w-32"
                 parentClassName="justify-end flex animate-pulse space-x-2"

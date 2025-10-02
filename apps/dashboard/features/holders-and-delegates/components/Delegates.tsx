@@ -245,7 +245,7 @@ export const Delegates = ({
         if (loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse justify-end pr-4"
+              parentClassName="flex animate-pulse justify-end w-full pr-4"
               className="h-5 w-full max-w-20"
             />
           );
@@ -421,7 +421,7 @@ export const Delegates = ({
     return (
       <div className="flex flex-col gap-2">
         <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
             <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r md:[&_th]:border-none [&_tr]:border-b">
               <tr className="border-light-dark">
                 {delegateColumns.map((column, index) => (
@@ -429,7 +429,7 @@ export const Delegates = ({
                     key={index}
                     className="h-8 text-left [&:has([role=checkbox])]:pr-0"
                     style={{
-                      width: column.size !== 150 ? column.size : "auto",
+                      width: column.size ? column.size : "auto",
                     }}
                   >
                     {typeof column.header === "function"
