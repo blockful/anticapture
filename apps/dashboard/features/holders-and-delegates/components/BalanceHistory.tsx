@@ -369,7 +369,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           }))}
           withDownloadCSV={true}
           size="sm"
-          wrapperClassName="h-[475px]"
+          wrapperClassName="h-[450px]"
           className="h-[400px]"
         />
       </div>
@@ -385,7 +385,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
-        wrapperClassName="h-[475px]"
+        wrapperClassName="h-[450px]"
         className="h-[400px]"
         withDownloadCSV={true}
       />

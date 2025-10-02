@@ -212,7 +212,7 @@ export const VotingPowerTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[475px]"
+        wrapperClassName="h-[450px]"
         className="h-[400px]"
       />
     </div>

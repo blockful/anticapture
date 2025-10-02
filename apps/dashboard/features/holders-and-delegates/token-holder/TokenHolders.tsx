@@ -358,7 +358,7 @@ export const TokenHolders = ({
             withDownloadCSV={true}
             onRowClick={() => {}}
             className="h-[400px]"
-            wrapperClassName="h-[475px]"
+            wrapperClassName="h-[450px]"
           />
         </div>
       </div>
@@ -427,7 +427,7 @@ export const TokenHolders = ({
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             size="sm"
             withDownloadCSV={true}
-            wrapperClassName="h-[475px]"
+            wrapperClassName="h-[450px]"
             className="h-[400px]"
           />
         </div>

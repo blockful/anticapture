@@ -384,7 +384,7 @@ export const DelegateDelegationHistoryTable = ({
               delegate: "0x1234567890",
             }))}
             className="h-[400px]"
-            wrapperClassName="h-[475px]"
+            wrapperClassName="h-[450px]"
             withDownloadCSV={true}
             size="sm"
           />
@@ -416,7 +416,7 @@ export const DelegateDelegationHistoryTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[475px]"
+        wrapperClassName="h-[450px]"
         className="h-[400px]"
       />
     </div>
