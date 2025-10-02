@@ -27,7 +27,9 @@ type DelegationItem =
   GetDelegationsTimestampQuery["delegations"]["items"][number];
 type AccountBalanceBase =
   GetDelegatorVotingPowerDetailsQuery["accountBalances"]["items"][number];
-type BalanceWithTimestamp = AccountBalanceBase & { timestamp?: any };
+type BalanceWithTimestamp = AccountBalanceBase & {
+  timestamp?: string | number;
+};
 
 type TopFiveDelegatorsWithBalance =
   GetTopFiveDelegatorsQuery["accountBalances"]["items"][number] & {
@@ -61,11 +63,12 @@ export const useVotingPower = ({
   orderBy = "balance",
   orderDirection = "desc",
 }: UseVotingPowerParams): UseVotingPowerResult => {
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
+  const [allDelegations, setAllDelegations] = useState<DelegationItem[]>([]);
 
   // Reset to page 1 when sorting changes (new query)
   useEffect(() => {
@@ -75,7 +78,6 @@ export const useVotingPower = ({
   // Main data query
   const {
     data: delegatorsVotingPowerDetails,
-    loading,
     error,
     refetch,
     fetchMore,
@@ -154,13 +156,27 @@ export const useVotingPower = ({
   // ------------------------------------------------------------------
   // Build timestamp lookup <delegatorAccountId> -> timestamp
   // ------------------------------------------------------------------
-  const timestampMap: Record<string, string | number | undefined> =
-    Object.fromEntries(
-      (delegationsTimestampData?.delegations.items || []).map((delegation) => [
-        delegation.delegatorAccountId?.toLowerCase(),
-        delegation.timestamp,
-      ]),
-    );
+  useEffect(() => {
+    if (delegationsTimestampData?.delegations.items) {
+      setAllDelegations((prev) => {
+        const merged = [
+          ...prev,
+          ...delegationsTimestampData.delegations.items.filter(
+            (d) =>
+              !prev.some((p) => p.delegatorAccountId === d.delegatorAccountId),
+          ),
+        ];
+        return merged;
+      });
+    }
+  }, [delegationsTimestampData]);
+
+  const timestampMap = Object.fromEntries(
+    allDelegations.map((d) => [
+      d.delegatorAccountId?.toLowerCase(),
+      d.timestamp,
+    ]),
+  );
 
   // ------------------------------------------------------------------
   // Enrich balances with timestamp (fallback to undefined)
@@ -234,15 +250,23 @@ export const useVotingPower = ({
           orderBy,
           orderDirection,
           limit: itemsPerPage,
-        } as any,
+        },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.accountBalances.items ?? [];
+          const newItems = fetchMoreResult.accountBalances.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+            ),
+          ];
 
           return {
             ...fetchMoreResult,
             accountBalances: {
               ...fetchMoreResult.accountBalances,
-              items: fetchMoreResult.accountBalances.items,
+              items: merged,
             },
           };
         },
@@ -285,7 +309,7 @@ export const useVotingPower = ({
           orderBy,
           orderDirection,
           limit: itemsPerPage,
-        } as any,
+        },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return previousResult;
 
@@ -329,12 +353,20 @@ export const useVotingPower = ({
     }),
   );
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     topFiveDelegators: topDelegatorsItems || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
     votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
     balances: balancesWithTimestamp,
-    loading: loading || tsLoading,
+    loading: isLoading,
     error: error || tsError || null,
     refetch: handleRefetch,
     pagination,

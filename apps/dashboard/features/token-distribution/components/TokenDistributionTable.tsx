@@ -125,7 +125,7 @@ export const TokenDistributionTable = () => {
           const randomNumber = Math.floor(Math.random() * 999);
           const randomValues = ["K", "M"];
           return (
-            <div className="blur-xs flex w-full items-center justify-end px-4 py-3 text-end">
+            <div className="blur-xs flex items-center justify-end px-4 py-3 text-end">
               {randomNumber}
               {randomValues[randomNumber % 2]}
             </div>
@@ -177,7 +177,7 @@ export const TokenDistributionTable = () => {
         }
         if (variation === null) {
           return (
-            <div className="text-success blur-xs flex w-full items-center justify-end">
+            <div className="text-success blur-xs flex items-center justify-end">
               {(Math.random() * 100).toFixed(2)}%
             </div>
           );
@@ -238,7 +238,7 @@ export const TokenDistributionTable = () => {
         }
         if (chartLastDays.length === 0) {
           return (
-            <div className="blur-xs flex w-full justify-end py-2.5">
+            <div className="blur-xs flex w-full justify-center py-2.5">
               <Sparkline
                 data={mockedTableChartMetrics.map((item) => Number(item.high))}
                 strokeColor={"#4ADE80"}
