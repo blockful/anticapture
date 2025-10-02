@@ -2,20 +2,12 @@ import { CoingeckoTokenId } from "../services/coingecko/types";
 import { eq } from "drizzle-orm";
 import { db } from "ponder:api";
 import { token } from "ponder:schema";
+import { DBToken } from "../mappers";
 
 export class TokensRepository {
-  async getTokenPropertiesById(tokenId: CoingeckoTokenId): Promise<{
-    id: string;
-    name: string | null;
-    decimals: number;
-    totalSupply: bigint;
-    delegatedSupply: bigint;
-    cexSupply: bigint;
-    dexSupply: bigint;
-    lendingSupply: bigint;
-    circulatingSupply: bigint;
-    treasury: bigint;
-  } | null> {
+  async getTokenPropertiesById(
+    tokenId: CoingeckoTokenId,
+  ): Promise<DBToken | null> {
     const result = await db
       .select({
         id: token.id,

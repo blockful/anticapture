@@ -38,6 +38,9 @@ export function tokenProperties(
             },
           },
         },
+        404: {
+          description: "Token not found",
+        },
       },
     }),
     async (context) => {
@@ -45,6 +48,10 @@ export function tokenProperties(
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
       const priceData = await client.getTokenPriceCompare(tokenId);
       const tokenProps = await service.getTokenPropertiesById(tokenId);
+
+      if (!tokenProps) {
+        return context.json({ error: "Token not found" }, 404);
+      }
 
       return context.json(TokensMapper.toApi(tokenProps, priceData), 200);
     },
