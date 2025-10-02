@@ -3,6 +3,7 @@ import { z } from "zod";
 export const CoingeckoTokenIdEnum = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
+  ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
 } as const;

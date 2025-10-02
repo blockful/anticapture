@@ -19,6 +19,7 @@ import {
   GovernorIndexer as OPGovernorIndexer,
   OPTokenIndexer,
 } from "@/indexer/op";
+import { ARBTokenIndexer } from "@/indexer/arb";
 import { GTCClient } from "@/indexer/gtc/client";
 import { GTCTokenIndexer } from "@/indexer/gtc/erc20";
 import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
@@ -49,6 +50,11 @@ switch (daoId) {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     UNITokenIndexer(token.address, token.decimals);
     UNIGovernorIndexer(new UNIClient(client, governor.address), blockTime);
+    break;
+  }
+  case DaoIdEnum.ARB: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    ARBTokenIndexer(token.address, token.decimals);
     break;
   }
   case DaoIdEnum.OP: {
