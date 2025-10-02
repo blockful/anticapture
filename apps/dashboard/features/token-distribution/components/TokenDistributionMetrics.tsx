@@ -68,12 +68,12 @@ export const TokenDistributionMetrics = ({
   const metricsSchemaFormatted = formatMetricsByCategory(metricsSchema);
 
   return (
-    <div className="flex h-full w-full flex-col justify-between gap-2 sm:gap-4">
-      <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
-        <div className="scrollbar-none hover:scrollbar-thin gap-2 overflow-y-auto sm:flex sm:max-h-[310px] sm:flex-col">
+    <div className="flex h-full w-full flex-col justify-between gap-2 xl:gap-4">
+      <div className="flex h-full w-full flex-col gap-4 xl:gap-6">
+        <div className="scrollbar-none hover:scrollbar-thin gap-2 overflow-y-auto overflow-x-hidden xl:flex xl:max-h-[310px] xl:flex-col">
           {Object.keys(appliedMetricsFormatted).length === 0 ? (
             <>
-              <div className="hidden w-full flex-col items-center justify-center sm:flex sm:min-h-[300px]">
+              <div className="hidden w-full flex-col items-center justify-center xl:flex xl:min-h-[300px]">
                 <BlankSlate
                   variant="small"
                   icon={Inbox}
@@ -81,7 +81,7 @@ export const TokenDistributionMetrics = ({
                   className="h-full flex-1"
                 />
               </div>
-              <div className="flex w-full flex-col items-center justify-center sm:hidden">
+              <div className="flex w-full flex-col items-center justify-center xl:hidden">
                 <BlankSlate
                   variant="small"
                   icon={Inbox}
@@ -129,7 +129,7 @@ export const TokenDistributionMetrics = ({
                         />
                       )}
                     </CardTitle>
-                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
+                    <div className="grid grid-cols-2 gap-2 xl:flex xl:flex-col">
                       {metrics.map((metric: MetricWithKey) => {
                         const metricData = dataToUse
                           .map(

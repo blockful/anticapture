@@ -24,22 +24,22 @@ export const Metric = ({
   return (
     <button
       className={cn(
-        "border-light-dark bg-surface-default hover:bg-surface-contrast flex h-full w-full flex-col justify-between rounded-sm border px-2 py-1 sm:h-7 sm:flex-row sm:items-center",
+        "border-light-dark bg-surface-default hover:bg-surface-contrast flex h-full w-full flex-col justify-between rounded-sm border px-2 py-1 xl:h-7 xl:flex-row xl:items-center xl:gap-2",
         className,
       )}
       {...props}
     >
-      <div className="flex items-center justify-between gap-2 sm:items-start sm:justify-start">
-        <div className="flex items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-2 xl:items-start xl:justify-start">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <span
-            className="rounded-xs size-2"
+            className="rounded-xs size-2 shrink-0"
             style={{ backgroundColor: color }}
           />
-          <p className="text-primary text-sm font-normal">{label}</p>
+          <p className="text-primary truncate text-sm font-normal">{label}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <X
-            className="text-secondary hover:text-primary block size-4 cursor-pointer sm:hidden"
+            className="text-secondary hover:text-primary block size-4 cursor-pointer xl:hidden"
             onClick={(e) => {
               e.stopPropagation();
               onRemove?.();
@@ -48,20 +48,27 @@ export const Metric = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-end sm:justify-end">
-        {value && <div className="text-secondary text-sm">{value}</div>}
+      <div className="flex shrink-0 items-center gap-2 text-end xl:justify-end">
+        {value && (
+          <div className="text-secondary whitespace-nowrap text-sm">
+            {value}
+          </div>
+        )}
         {percentage && (
           <p
-            className={cn("flex items-center justify-end text-end text-sm", {
-              "text-success": Number(percentage) > 0,
-              "text-error": Number(percentage) < 0,
-            })}
+            className={cn(
+              "flex items-center justify-end whitespace-nowrap text-end text-sm",
+              {
+                "text-success": Number(percentage) > 0,
+                "text-error": Number(percentage) < 0,
+              },
+            )}
           >
             {percentage}%
           </p>
         )}
         <X
-          className="text-secondary hover:text-primary hidden size-3 cursor-pointer sm:block"
+          className="text-secondary hover:text-primary hidden size-3 cursor-pointer xl:block"
           onClick={(e) => {
             e.stopPropagation();
             onRemove?.();
