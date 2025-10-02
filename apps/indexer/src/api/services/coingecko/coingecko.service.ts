@@ -2,6 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import {
   CoingeckoHistoricalMarketData,
   CoingeckoHistoricalMarketDataSchema,
+  CoingeckoIdToAssetPlatformId,
   CoingeckoIdToDaoId,
   CoingeckoTokenId,
   CoingeckoTokenPriceCompareData,
@@ -43,14 +44,14 @@ export class CoingeckoService {
 
   async getTokenPriceCompare(
     tokenId: CoingeckoTokenId,
-    vsCurrency: string = "eth", // TODO
+    vsCurrency: string | undefined = "eth",
   ): Promise<CoingeckoTokenPriceCompareData> {
     try {
       const tokenContractAddress =
         CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address;
+      const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
       const response = await fetch(
-        `${this.coingeckoApiUrl}/simple/token-price/${tokenId}?contract_addresses=${tokenContractAddress}&vs_currencies=${vsCurrency}`,
-        // tokenId is being used incorrectly here, verify which tokens live on which chains and inject coingecko asset-platform id with research team
+        `${this.coingeckoApiUrl}/simple/token-price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${vsCurrency}`,
         {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,

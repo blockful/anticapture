@@ -4,18 +4,21 @@ import {
   CoingeckoTokenIdEnum,
   CoingeckoTokenPriceCompareData,
 } from "../services/coingecko/types";
-import z from "zod";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { TokensService } from "../services/tokens/tokens";
+import { TokenPropertiesResponseSchema, TokensMapper } from "../mappers";
 
-interface TokenPropertiesClient {
+interface TokenPriceClient {
   getTokenPriceCompare(
     tokenId: CoingeckoTokenId,
-  ): Promise<CoingeckoTokenPriceCompareData>; // TODO
+    vsCurrency?: string,
+  ): Promise<CoingeckoTokenPriceCompareData>;
 }
 
 export function tokenProperties(
   app: Hono,
-  client: TokenPropertiesClient,
+  client: TokenPriceClient,
+  service: TokensService,
   daoId: DaoIdEnum,
 ) {
   app.openapi(
@@ -31,9 +34,7 @@ export function tokenProperties(
           description: "Returns the historical market data for the token",
           content: {
             "application/json": {
-              schema: z.object({
-                value: z.number() /* TODO */,
-              }),
+              schema: TokenPropertiesResponseSchema,
             },
           },
         },
@@ -43,9 +44,9 @@ export function tokenProperties(
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
       const priceData = await client.getTokenPriceCompare(tokenId);
-      // TODO: fetch remaining token properties
+      const tokenProps = await service.getTokenPropertiesById(tokenId);
 
-      return context.json(priceData, 200);
+      return context.json(TokensMapper.toApi(tokenProps, priceData), 200);
     },
   );
 }

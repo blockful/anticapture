@@ -1,6 +1,13 @@
 import { DaoIdEnum } from "@/lib/enums";
 import { z } from "zod";
 
+enum AssetPlatformEnum {
+  // From https://docs.coingecko.com/v3.0.1/reference/token-lists
+  ETHEREUM = "ethereum",
+  ARBITRUM = "arbitrum-one",
+  OPTIMISM = "optimistic-ethereum",
+}
+
 export const CoingeckoTokenIdEnum = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
@@ -21,6 +28,17 @@ export const CoingeckoIdToDaoId: Record<
   [CoingeckoTokenIdEnum.GTC]: DaoIdEnum.GTC,
 };
 
+export const CoingeckoIdToAssetPlatformId: Record<
+  (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum],
+  AssetPlatformEnum
+> = {
+  [CoingeckoTokenIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.ENS]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
+  [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
+  [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
+};
+
 export type CoingeckoTokenId =
   (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum];
 
@@ -31,7 +49,7 @@ export interface CoingeckoHistoricalMarketData {
 }
 
 export interface CoingeckoTokenPriceCompareData {
-  value: number /* TODO */;
+  [symbol: string]: number;
 }
 
 export const CoingeckoHistoricalMarketDataSchema = z.object({
@@ -40,6 +58,4 @@ export const CoingeckoHistoricalMarketDataSchema = z.object({
   total_volumes: z.array(z.tuple([z.number(), z.number()])),
 });
 
-export const CoingeckoTokenPriceCompareDataSchema = z.object({
-  value: z.number() /* TODO */,
-});
+export const CoingeckoTokenPriceCompareDataSchema = z.record(z.number());
