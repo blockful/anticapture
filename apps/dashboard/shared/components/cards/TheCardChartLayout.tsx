@@ -30,7 +30,6 @@ export const TheCardChartLayout = ({
   csvData,
   switcherComponent,
   infoText,
-  switcherComponent,
 }: TheCardChartLayoutProps) => {
   return (
     <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border">

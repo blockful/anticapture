@@ -37,7 +37,7 @@ export const AttackProfitabilitySection = ({
     value: "usd",
     label: "USD",
   });
-  
+
   const [costProfitabilityCsvData, setCostProfitabilityCsvData] =
     useState<Data>([]);
   const [attackProfitabilityCsvData, setAttackProfitabilityCsvData] =
@@ -94,8 +94,6 @@ export const AttackProfitabilitySection = ({
           title="Cost Comparison"
           subtitle="All values reflect current data."
           csvData={costProfitabilityCsvData}
-        >
-          <AttackCostBarChart setCsvData={setCostProfitabilityCsvData} />
           switcherComponent={
             <Dropdown
               value={dropdownValue}
@@ -108,6 +106,7 @@ export const AttackProfitabilitySection = ({
           }
         >
           <AttackCostBarChart
+            setCsvData={setCostProfitabilityCsvData}
             valueMode={dropdownValue.value as "usd" | "token"}
           />
         </TheCardChartLayout>

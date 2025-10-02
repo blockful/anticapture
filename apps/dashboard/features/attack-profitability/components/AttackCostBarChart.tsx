@@ -102,23 +102,6 @@ export const AttackCostBarChart = ({
 
   const { isMobile } = useScreenSize();
 
-  const lastPrice = useMemo(() => {
-    const prices = daoTokenPriceHistoricalData.prices;
-    return prices.length > 0 ? prices[prices.length - 1][1] : 0;
-  }, [daoTokenPriceHistoricalData]);
-
-  const formatValue = (value: number): number => {
-    if (value == null) return 0;
-
-    const formattedValue = Number(formatEther(BigInt(value || 0)));
-
-    if (valueMode === "usd") {
-      return formattedValue * lastPrice;
-    }
-
-    return formattedValue;
-  };
-
   useEffect(() => {
     if (
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
@@ -154,6 +137,21 @@ export const AttackCostBarChart = ({
     if (mocked) {
       return mockedAttackCostBarData as ChartDataItem[];
     }
+
+    const prices = daoTokenPriceHistoricalData.prices;
+    const lastPrice = prices.length > 0 ? prices[prices.length - 1][1] : 0;
+
+    const formatValue = (value: number): number => {
+      if (value == null) return 0;
+
+      const formattedValue = Number(formatEther(BigInt(value || 0)));
+
+      if (valueMode === "usd") {
+        return formattedValue * lastPrice;
+      }
+
+      return formattedValue;
+    };
 
     return [
       {
@@ -206,7 +204,8 @@ export const AttackCostBarChart = ({
     activeSupply.data,
     averageTurnout.data,
     daoTopTokenHolderExcludingTheDao?.balance,
-    lastPrice,
+    daoTokenPriceHistoricalData.prices,
+    valueMode,
   ]);
 
   useEffect(() => {
