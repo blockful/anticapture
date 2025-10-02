@@ -83,7 +83,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     );
 
     return (
-      <div className="text-secondary flex w-full items-center justify-end px-4 py-3 text-end text-sm font-normal">
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
         {formattedSupply}
       </div>
     );
@@ -146,7 +146,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4">
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div
               className={cn("flex w-full gap-3", {
                 "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
@@ -181,7 +181,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">DAO</h4>,
+      header: () => <h4 className="text-table-header">DAO</h4>,
       meta: {
         columnClassName: "w-auto",
       },

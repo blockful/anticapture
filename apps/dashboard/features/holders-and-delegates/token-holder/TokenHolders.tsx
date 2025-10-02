@@ -287,7 +287,7 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 px-4 text-sm">
+          <div className="flex w-full items-center justify-start gap-2 text-sm">
             {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
             <Percentage value={variation.percentageChange} />
           </div>

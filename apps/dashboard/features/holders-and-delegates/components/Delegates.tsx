@@ -307,7 +307,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 px-4 text-sm">
+          <div className="flex w-full items-center justify-start gap-2 text-sm">
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
