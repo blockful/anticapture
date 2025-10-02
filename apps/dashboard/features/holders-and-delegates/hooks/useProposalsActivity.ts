@@ -81,7 +81,6 @@ export const useProposalsActivity = ({
 
   useEffect(() => {
     setCurrentPage(1);
-    setAccumulatedProposals([]);
   }, [address, daoId, fromDate, orderBy, orderDirection, userVoteFilter]);
 
   useEffect(() => {
