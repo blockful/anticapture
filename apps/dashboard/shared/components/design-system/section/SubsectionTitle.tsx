@@ -7,19 +7,19 @@ type SubsectionTitleProps = {
   subsectionTitle: string;
   subsectionDescription: string;
   dateRange: string;
-  switchDate: ReactNode;
+  switcherComponent: ReactNode;
 };
 
 export const SubsectionTitle = ({
   subsectionTitle,
   subsectionDescription,
   dateRange,
-  switchDate,
+  switcherComponent,
 }: SubsectionTitleProps) => {
   return (
     <div
       className={cn("flex h-full w-full flex-col justify-between", {
-        "flex-row": switchDate,
+        "flex-row": switcherComponent,
       })}
     >
       <div className="flex flex-col items-start">
@@ -32,7 +32,7 @@ export const SubsectionTitle = ({
         </p>
       </div>
       <div className="text-secondary flex items-center text-sm font-normal">
-        {switchDate}
+        {switcherComponent}
       </div>
     </div>
   );
