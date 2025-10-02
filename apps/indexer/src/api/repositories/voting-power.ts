@@ -71,12 +71,12 @@ export class VotingPowerRepository {
           ? asc(
               orderBy === "timestamp"
                 ? votingPowerHistory.timestamp
-                : votingPowerHistory.delta,
+                : votingPowerHistory.deltaMod,
             )
           : desc(
               orderBy === "timestamp"
                 ? votingPowerHistory.timestamp
-                : votingPowerHistory.delta,
+                : votingPowerHistory.deltaMod,
             ),
       )
       .limit(limit)

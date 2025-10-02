@@ -10,7 +10,7 @@ import {
   BlankSlate,
 } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ArrowUpDown } from "@/shared/components/icons";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -42,7 +42,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const [sortBy, setSortBy] = useState<"timestamp" | "deltaMod">("timestamp");
+  const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [, setFilterVariables] = useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -62,14 +62,14 @@ export const DelegateDelegationHistoryTable = ({
   } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
 
   // Handle sorting
-  // const handleSort = (field: "timestamp" | "delta") => {
-  //   if (sortBy === field) {
-  //     setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-  //   } else {
-  //     setSortBy(field);
-  //     setSortDirection("desc"); // Always start with desc for new sort field
-  //   }
-  // };
+  const handleSort = (field: "timestamp" | "delta") => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortDirection("desc"); // Always start with desc for new sort field
+    }
+  };
 
   // Format timestamp to relative time
   const formatRelativeTime = (timestamp: string) => {
@@ -141,18 +141,18 @@ export const DelegateDelegationHistoryTable = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-start"
-          // onClick={() => handleSort("timestamp")}
+          onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
-            // activeState={
-            //   sortBy === "timestamp"
-            //     ? sortDirection === "asc"
-            //       ? ArrowState.UP
-            //       : ArrowState.DOWN
-            //     : ArrowState.DEFAULT
-            // }
+            activeState={
+              sortBy === "timestamp"
+                ? sortDirection === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
           />
         </Button>
       ),
@@ -221,15 +221,13 @@ export const DelegateDelegationHistoryTable = ({
                 !!(variables.deltaMod_gte || variables.deltaMod_lte),
               );
               // Update sort to delta when filter is applied
-              setSortBy("deltaMod");
+              setSortBy("delta");
               setSortDirection(variables.orderDirection || "desc");
             }}
             onReset={() => {
-              // setFilterVariables(undefined);
               setIsFilterActive(false);
               // Reset to default sorting
               setSortBy("timestamp");
-              // setSortDirection("desc");
             }}
             isActive={isFilterActive}
             sortOptions={sortOptions}

@@ -51,7 +51,7 @@ export interface UseDelegateDelegationHistoryResult {
 export function useDelegateDelegationHistory(
   account: string,
   daoId: string,
-  orderBy: "timestamp" | "deltaMod" = "timestamp",
+  orderBy: "timestamp" | "delta" = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
   // filterVariables?: AmountFilterVariables,
 ): UseDelegateDelegationHistoryResult {

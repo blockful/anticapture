@@ -92,7 +92,7 @@ export const FilterMaxMinInput = ({
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
             className={cn(
-              "bg-surface-default border-border-default text-dimmed placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
+              "bg-surface-default border-border-default text-primary placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
             )}
           />
         </div>
@@ -104,11 +104,11 @@ export const FilterMaxMinInput = ({
             type={inputType}
             placeholder={placeholderMax}
             value={maxValue}
-            onChange={(e) => setMaxValue(e.target.value)}
+            onChange={(e) => setMaxValue(e.currentTarget.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
             className={cn(
-              "bg-surface-default border-border-default text-dimmed placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
+              "bg-surface-default border-border-default text-primary placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
             )}
           />
         </div>
