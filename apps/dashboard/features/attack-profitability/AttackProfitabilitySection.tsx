@@ -20,6 +20,7 @@ import {
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { Data } from "react-csv/lib/core";
 import { getDateRange } from "@/shared/utils";
+import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -32,6 +33,11 @@ export const AttackProfitabilitySection = ({
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
+  const [dropdownValue, setDropdownValue] = useState<Option>({
+    value: "usd",
+    label: "USD",
+  });
+  
   const [costProfitabilityCsvData, setCostProfitabilityCsvData] =
     useState<Data>([]);
   const [attackProfitabilityCsvData, setAttackProfitabilityCsvData] =
@@ -40,6 +46,10 @@ export const AttackProfitabilitySection = ({
   if (!attackProfitability) {
     return null;
   }
+
+  const handleDropdownClick = (option: Option) => {
+    setDropdownValue(option);
+  };
 
   return (
     <TheSectionLayout
@@ -86,6 +96,20 @@ export const AttackProfitabilitySection = ({
           csvData={costProfitabilityCsvData}
         >
           <AttackCostBarChart setCsvData={setCostProfitabilityCsvData} />
+          switcherComponent={
+            <Dropdown
+              value={dropdownValue}
+              options={[
+                { value: "usd", label: "USD" },
+                { value: "token", label: "Token" },
+              ]}
+              onClick={handleDropdownClick}
+            />
+          }
+        >
+          <AttackCostBarChart
+            valueMode={dropdownValue.value as "usd" | "token"}
+          />
         </TheCardChartLayout>
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />

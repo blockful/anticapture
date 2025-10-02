@@ -30,6 +30,7 @@ export const TheCardChartLayout = ({
   csvData,
   switcherComponent,
   infoText,
+  switcherComponent,
 }: TheCardChartLayoutProps) => {
   return (
     <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border">
@@ -60,7 +61,7 @@ export const TheCardChartLayout = ({
               <p className="text-secondary text-sm font-normal">{subtitle}</p>
             </div>
             {switcherComponent && (
-              <div className="flex w-full items-center justify-end">
+              <div className="mt-2 flex w-full justify-end">
                 {switcherComponent}
               </div>
             )}

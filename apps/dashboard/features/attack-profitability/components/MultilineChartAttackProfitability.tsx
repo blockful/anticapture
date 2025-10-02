@@ -60,7 +60,7 @@ export const MultilineChartAttackProfitability = ({
   );
 
   const { data: daoTokenPriceHistoricalData = { prices: [] } } =
-    useDaoTokenHistoricalData(daoId.toUpperCase() as DaoIdEnum);
+    useDaoTokenHistoricalData({ daoId: daoId.toUpperCase() as DaoIdEnum });
 
   const { data: timeSeriesData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
