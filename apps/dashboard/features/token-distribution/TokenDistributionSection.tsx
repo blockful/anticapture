@@ -215,7 +215,7 @@ export const TokenDistributionSection = () => {
         <SubSection
           subsectionTitle={PAGES_CONSTANTS.tokenDistribution.title}
           dateRange={getDateRange(days ?? "")}
-          switchDate={
+          switcherComponent={
             <SwitcherDateMobile
               defaultValue={TimeInterval.ONE_YEAR}
               setTimeInterval={setDays}
