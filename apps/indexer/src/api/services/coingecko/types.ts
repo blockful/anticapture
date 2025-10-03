@@ -20,7 +20,6 @@ export const CoingeckoIdToDaoId: Record<
   (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum],
   DaoIdEnum
 > = {
-  // Verify necessity of this construct
   [CoingeckoTokenIdEnum.ENS]: DaoIdEnum.ENS,
   [CoingeckoTokenIdEnum.UNI]: DaoIdEnum.UNI,
   [CoingeckoTokenIdEnum.ARB]: DaoIdEnum.ARB,

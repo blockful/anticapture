@@ -35,7 +35,7 @@ export const TokenMapper = {
     const priceValue = priceData[tokenContractAddress]?.[currency];
 
     if (!priceValue) {
-      throw new Error("Unable to extract dataset"); // TODO: figure out definitive message
+      throw new Error("Unable to extract dataset");
     }
 
     return {
