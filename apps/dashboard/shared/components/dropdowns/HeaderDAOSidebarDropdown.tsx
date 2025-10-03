@@ -77,22 +77,6 @@ export const HeaderDAOSidebarDropdown = () => {
       },
       {
         id: 2,
-        label: "Arbitrum",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.ARBITRUM}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
-        name: DaoIdEnum.ARBITRUM,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.ARBITRUM].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 3,
         label: "Optimism",
         icon: (
           <DaoAvatarIcon
@@ -108,7 +92,7 @@ export const HeaderDAOSidebarDropdown = () => {
           SupportStageEnum.ANALYSIS,
       },
       {
-        id: 4,
+        id: 3,
         label: "Gitcoin",
         icon: (
           <DaoAvatarIcon
