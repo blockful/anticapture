@@ -431,6 +431,8 @@ export type QueryVotingPowerHistorysArgs = {
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2458,6 +2460,8 @@ export type VotingPowersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 

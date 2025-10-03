@@ -120,7 +120,7 @@ type Query {
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
   """Returns a list of voting power changes"""
-  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 }
 
 """

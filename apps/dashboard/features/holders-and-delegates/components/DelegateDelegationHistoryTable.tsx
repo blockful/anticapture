@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
-import { GetDelegateDelegationHistoryDeltaRangeQueryVariables } from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   TheTable,
@@ -14,13 +13,14 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits, parseEther } from "viem";
 import { ArrowRight, ExternalLink, Inbox } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
 import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
+  AmountFilterVariables,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -31,20 +31,14 @@ interface DelegateDelegationHistoryTableProps {
   daoId: DaoIdEnum;
 }
 
-export type AmountFilterVariables = Pick<
-  GetDelegateDelegationHistoryDeltaRangeQueryVariables,
-  "deltaMod_gte" | "deltaMod_lte"
-> & {
-  orderDirection?: "asc" | "desc";
-};
-
 export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
   const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [, setFilterVariables] = useState<AmountFilterVariables>();
+  const [filterVariables, setFilterVariables] =
+    useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
 
   const sortOptions: SortOption[] = [
@@ -59,7 +53,13 @@ export const DelegateDelegationHistoryTable = ({
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-  } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
+  } = useDelegateDelegationHistory(
+    accountId,
+    daoId,
+    sortBy,
+    sortDirection,
+    filterVariables,
+  );
 
   // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
@@ -122,13 +122,12 @@ export const DelegateDelegationHistoryTable = ({
         color: "text-success",
         symbol: "↑",
       };
-    } else {
-      return {
-        type: statusText,
-        color: "text-error",
-        symbol: "↓",
-      };
     }
+    return {
+      type: statusText,
+      color: "text-error",
+      symbol: "↓",
+    };
   };
 
   // Table columns configuration
@@ -184,50 +183,33 @@ export const DelegateDelegationHistoryTable = ({
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
             onApply={(filterState: AmountFilterState) => {
-              // Mapear o estado do filtro para as variáveis específicas
-              const variables: AmountFilterVariables = {
-                orderDirection:
-                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              };
+              setSortDirection(
+                filterState.sortOrder === "largest-first" ? "desc" : "asc",
+              );
 
-              // Add range filters if values are provided
-              if (filterState.minAmount) {
-                try {
-                  // Use parseUnits for safe conversion to wei (18 decimals)
-                  variables.deltaMod_gte = parseUnits(
-                    filterState.minAmount,
-                    18,
-                  ).toString();
-                } catch (error) {
-                  console.error("Error parsing minAmount:", error);
-                  // Skip invalid values
-                }
-              }
-              if (filterState.maxAmount) {
-                try {
-                  // Use parseUnits for safe conversion to wei (18 decimals)
-                  variables.deltaMod_lte = parseUnits(
-                    filterState.maxAmount,
-                    18,
-                  ).toString();
-                } catch (error) {
-                  console.error("Error parsing maxAmount:", error);
-                  // Skip invalid values
-                }
-              }
+              setFilterVariables(() => ({
+                minDelta: filterState.minAmount
+                  ? parseEther(filterState.minAmount).toString()
+                  : undefined,
+                maxDelta: filterState.maxAmount
+                  ? parseEther(filterState.maxAmount).toString()
+                  : undefined,
+              }));
 
-              setFilterVariables(variables);
               setIsFilterActive(
-                !!(variables.deltaMod_gte || variables.deltaMod_lte),
+                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
               );
               // Update sort to delta when filter is applied
               setSortBy("delta");
-              setSortDirection(variables.orderDirection || "desc");
             }}
             onReset={() => {
               setIsFilterActive(false);
               // Reset to default sorting
               setSortBy("timestamp");
+              setFilterVariables(() => ({
+                minDelta: undefined,
+                maxDelta: undefined,
+              }));
             }}
             isActive={isFilterActive}
             sortOptions={sortOptions}

@@ -434,6 +434,8 @@ export type QueryVotingPowerHistorysArgs = {
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2461,6 +2463,8 @@ export type VotingPowersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -3914,13 +3918,15 @@ export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsL
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
 export type TransactionsQueryResult = Apollo.QueryResult<TransactionsQuery, TransactionsQueryVariables>;
 export const VotingPowersDocument = gql`
-    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy) {
+    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String) {
   votingPowers(
     account: $account
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
     orderBy: $orderBy
+    maxDelta: $maxDelta
+    minDelta: $minDelta
   ) {
     items {
       accountId
@@ -3963,6 +3969,8 @@ export const VotingPowersDocument = gql`
  *      limit: // value for 'limit'
  *      orderDirection: // value for 'orderDirection'
  *      orderBy: // value for 'orderBy'
+ *      maxDelta: // value for 'maxDelta'
+ *      minDelta: // value for 'minDelta'
  *   },
  * });
  */
