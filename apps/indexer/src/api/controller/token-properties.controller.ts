@@ -1,24 +1,27 @@
-import { DaoIdEnum } from "@/lib/enums";
+import { CurrencyEnum, CurrencyOptions, DaoIdEnum } from "@/lib/enums";
 import {
+  CoingeckoIdToDaoId,
   CoingeckoTokenId,
   CoingeckoTokenIdEnum,
   CoingeckoTokenPriceCompareData,
 } from "../services/coingecko/types";
-import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
-import { TokensService } from "../services/tokens/tokens";
-import { TokenPropertiesResponseSchema, TokensMapper } from "../mappers";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { TokenService } from "../services/token/token";
+import { TokenPropertiesResponseSchema, TokenMapper } from "../mappers";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 interface TokenPriceClient {
-  getTokenPriceCompare(
+  getTokenPrice(
     tokenId: CoingeckoTokenId,
-    vsCurrency?: string,
+    tokenContractAddress: string,
+    targetCurrency: string,
   ): Promise<CoingeckoTokenPriceCompareData>;
 }
 
 export function tokenProperties(
   app: Hono,
   client: TokenPriceClient,
-  service: TokensService,
+  service: TokenService,
   daoId: DaoIdEnum,
 ) {
   app.openapi(
@@ -29,6 +32,11 @@ export function tokenProperties(
       summary: "Get token properties",
       description: "Get property data for a specific token",
       tags: ["tokens"],
+      request: {
+        query: z.object({
+          currency: z.enum(CurrencyOptions).default(CurrencyEnum.USD),
+        }),
+      },
       responses: {
         200: {
           description: "Returns the historical market data for the token",
@@ -44,17 +52,31 @@ export function tokenProperties(
       },
     }),
     async (context) => {
+      const { currency } = context.req.valid("query");
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
-      // const tokenContractAddress = CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address; // TODO: use to index result and pass to service calls
-      const priceData = await client.getTokenPriceCompare(tokenId);
-      const tokenProps = await service.getTokenPropertiesById(tokenId);
+      const tokenContractAddress =
+        CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address;
+      const tokenProps = await service.getTokenProperties(tokenId);
+      const priceData = await client.getTokenPrice(
+        tokenId,
+        tokenContractAddress,
+        currency,
+      );
 
       if (!tokenProps) {
         return context.json({ error: "Token not found" }, 404);
       }
 
-      return context.json(TokensMapper.toApi(tokenProps, priceData), 200);
+      return context.json(
+        TokenMapper.toApi(
+          tokenProps,
+          priceData,
+          tokenContractAddress.toLowerCase(),
+          currency,
+        ),
+        200,
+      );
     },
   );
 }

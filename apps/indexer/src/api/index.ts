@@ -25,7 +25,7 @@ import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
   DrizzleRepository,
-  TokensRepository,
+  TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
 } from "./repositories";
@@ -37,7 +37,7 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { TokensService } from "./services/tokens";
+import { TokenService } from "./services/token";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -83,7 +83,7 @@ if (env.COINGECKO_API_KEY) {
   tokenProperties(
     app,
     coingeckoClient,
-    new TokensService(new TokensRepository()),
+    new TokenService(new TokenRepository()),
     env.DAO_ID,
   );
 }

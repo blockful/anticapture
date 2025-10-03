@@ -2,16 +2,14 @@ import { DBToken } from "@/api/mappers";
 import { CoingeckoIdToDaoId, CoingeckoTokenId } from "../coingecko/types";
 import { DaoIdEnum } from "@/lib/enums";
 
-interface TokensRepository {
+interface TokenRepository {
   getTokenPropertiesByName(tokenId: DaoIdEnum): Promise<DBToken | null>;
 }
 
-export class TokensService {
-  constructor(private readonly repo: TokensRepository) {}
+export class TokenService {
+  constructor(private readonly repo: TokenRepository) {}
 
-  async getTokenPropertiesById(
-    tokenId: CoingeckoTokenId,
-  ): Promise<DBToken | null> {
+  async getTokenProperties(tokenId: CoingeckoTokenId): Promise<DBToken | null> {
     return await this.repo.getTokenPropertiesByName(
       CoingeckoIdToDaoId[tokenId],
     );

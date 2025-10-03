@@ -22,3 +22,13 @@ export enum DaysEnum {
 }
 
 export const DaysOpts = ["7d", "30d", "90d", "180d", "365d"] as const;
+
+export enum CurrencyEnum {
+  ETH = "eth",
+  USD = "usd",
+}
+
+export const CurrencyOptions = Object.values(CurrencyEnum) as [
+  string,
+  ...string[],
+];

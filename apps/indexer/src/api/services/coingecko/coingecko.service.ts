@@ -3,12 +3,11 @@ import {
   CoingeckoHistoricalMarketData,
   CoingeckoHistoricalMarketDataSchema,
   CoingeckoIdToAssetPlatformId,
-  CoingeckoIdToDaoId,
   CoingeckoTokenId,
   CoingeckoTokenPriceCompareData,
   CoingeckoTokenPriceCompareDataSchema,
 } from "./types";
-import { CONTRACT_ADDRESSES, DAYS_IN_YEAR } from "@/lib/constants";
+import { DAYS_IN_YEAR } from "@/lib/constants";
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
@@ -42,16 +41,15 @@ export class CoingeckoService {
     }
   }
 
-  async getTokenPriceCompare(
+  async getTokenPrice(
     tokenId: CoingeckoTokenId,
-    vsCurrency: string | undefined = "eth",
+    tokenContractAddress: string,
+    targetCurrency: string,
   ): Promise<CoingeckoTokenPriceCompareData> {
     try {
-      const tokenContractAddress =
-        CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address;
       const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
       const response = await fetch(
-        `${this.coingeckoApiUrl}/simple/token_price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${vsCurrency}`,
+        `${this.coingeckoApiUrl}/simple/token_price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${targetCurrency}`,
         {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,

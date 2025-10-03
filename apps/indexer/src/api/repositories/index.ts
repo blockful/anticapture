@@ -4,4 +4,4 @@ export * from "./transactions.repository";
 export * from "./transfers.repository";
 export * from "./delegations.repository";
 export * from "./voting-power";
-export * from "./tokens.repository";
+export * from "./token.repository";

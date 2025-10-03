@@ -4,7 +4,7 @@ import { token } from "ponder:schema";
 import { DBToken } from "../mappers";
 import { DaoIdEnum } from "@/lib/enums";
 
-export class TokensRepository {
+export class TokenRepository {
   async getTokenPropertiesByName(
     tokenName: DaoIdEnum,
   ): Promise<DBToken | null> {
@@ -24,7 +24,6 @@ export class TokensRepository {
       .from(token)
       .where(eq(token.name, tokenName));
 
-    console.log("result", result);
     return result[0] ?? null;
   }
 }
