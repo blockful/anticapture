@@ -4,6 +4,8 @@ query VotingPowers(
   $limit: PositiveInt = 10
   $orderDirection: queryInput_votingPowers_orderDirection = desc
   $orderBy: queryInput_votingPowers_orderBy
+  $maxDelta: String
+  $minDelta: String
 ) {
   votingPowers(
     account: $account
@@ -11,6 +13,8 @@ query VotingPowers(
     orderDirection: $orderDirection
     limit: $limit
     orderBy: $orderBy
+    maxDelta: $maxDelta
+    minDelta: $minDelta
   ) {
     items {
       accountId

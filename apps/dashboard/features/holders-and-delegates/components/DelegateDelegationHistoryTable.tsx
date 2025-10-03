@@ -1,21 +1,30 @@
 import { useState } from "react";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";
-import { TheTable, SkeletonRow } from "@/shared/components";
+import {
+  TheTable,
+  SkeletonRow,
+  Button,
+  IconButton,
+  BlankSlate,
+} from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { formatUnits } from "viem";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { formatUnits, parseEther } from "viem";
+import { ArrowRight, ExternalLink, Inbox } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
 import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
+  AmountFilterVariables,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -28,6 +37,14 @@ export const DelegateDelegationHistoryTable = ({
 }: DelegateDelegationHistoryTableProps) => {
   const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [filterVariables, setFilterVariables] =
+    useState<AmountFilterVariables>();
+  const [isFilterActive, setIsFilterActive] = useState(false);
+
+  const sortOptions: SortOption[] = [
+    { value: "largest-first", label: "Largest first" },
+    { value: "smallest-first", label: "Smallest first" },
+  ];
 
   const {
     delegationHistory,
@@ -36,7 +53,13 @@ export const DelegateDelegationHistoryTable = ({
     paginationInfo,
     fetchNextPage,
     fetchPreviousPage,
-  } = useDelegateDelegationHistory(accountId, daoId, sortBy, sortDirection);
+  } = useDelegateDelegationHistory(
+    accountId,
+    daoId,
+    sortBy,
+    sortDirection,
+    filterVariables,
+  );
 
   // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
@@ -99,13 +122,12 @@ export const DelegateDelegationHistoryTable = ({
         color: "text-success",
         symbol: "↑",
       };
-    } else {
-      return {
-        type: statusText,
-        color: "text-error",
-        symbol: "↓",
-      };
     }
+    return {
+      type: statusText,
+      color: "text-error",
+      symbol: "↓",
+    };
   };
 
   // Table columns configuration
@@ -116,12 +138,13 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => handleSort("timestamp")}
         >
           <h4 className="text-table-header">Date</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "timestamp"
                 ? sortDirection === "asc"
@@ -137,7 +160,7 @@ export const DelegateDelegationHistoryTable = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-2">
+            <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-20" />
             </div>
           );
@@ -156,23 +179,42 @@ export const DelegateDelegationHistoryTable = ({
       accessorKey: "amount",
       size: 200,
       header: () => (
-        <Button
-          variant="ghost"
-          className="flex h-8 w-full justify-start rounded-b-none px-4"
-          onClick={() => handleSort("delta")}
-        >
+        <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
-          <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
-            activeState={
-              sortBy === "delta"
-                ? sortDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+          <AmountFilter
+            onApply={(filterState: AmountFilterState) => {
+              setSortDirection(
+                filterState.sortOrder === "largest-first" ? "desc" : "asc",
+              );
+
+              setFilterVariables(() => ({
+                minDelta: filterState.minAmount
+                  ? parseEther(filterState.minAmount).toString()
+                  : undefined,
+                maxDelta: filterState.maxAmount
+                  ? parseEther(filterState.maxAmount).toString()
+                  : undefined,
+              }));
+
+              setIsFilterActive(
+                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
+              );
+              // Update sort to delta when filter is applied
+              setSortBy("delta");
+            }}
+            onReset={() => {
+              setIsFilterActive(false);
+              // Reset to default sorting
+              setSortBy("timestamp");
+              setFilterVariables(() => ({
+                minDelta: undefined,
+                maxDelta: undefined,
+              }));
+            }}
+            isActive={isFilterActive}
+            sortOptions={sortOptions}
           />
-        </Button>
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -346,7 +388,7 @@ export const DelegateDelegationHistoryTable = ({
               rel="noopener noreferrer"
               className="cursor-pointer"
             >
-              <ExternalLink className="text-secondary hover:text-primary size-4 transition-colors" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );
@@ -415,6 +457,15 @@ export const DelegateDelegationHistoryTable = ({
           withPagination={false}
           withSorting={true}
           isTableSmall={true}
+          showWhenEmpty={
+            <BlankSlate
+              variant="default"
+              icon={Inbox}
+              title=""
+              className="h-full rounded-none"
+              description="No results found"
+            />
+          }
         />
 
         <Pagination

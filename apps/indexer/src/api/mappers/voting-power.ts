@@ -27,6 +27,8 @@ export const VotingPowerRequestSchema = z.object({
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  minDelta: z.string().optional(),
+  maxDelta: z.string().optional(),
 });
 
 export type VotingPowerRequest = z.infer<typeof VotingPowerRequestSchema>;

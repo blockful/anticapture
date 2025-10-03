@@ -10,6 +10,7 @@ import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { Stage } from "@/shared/types/enums/Stage";
+import { Button } from "@/shared/components";
 interface StagesDaoOverviewProps {
   currentStage?: Stage;
   itemsToNextStage?: number;
@@ -98,44 +99,47 @@ export const StagesDaoOverview = ({
           <BulletPoint className="text-middle-dark mb-1 hidden text-sm sm:block" />
           {/* Items to next stage */}
           <div className="flex justify-start">
-            <button
-              className="border-foreground text-primary group border-b border-dashed font-mono text-sm font-medium duration-300 hover:border-white"
+            <Button
+              variant="ghost"
+              className="group px-0 py-0 font-mono"
               onClick={handleButtonClick}
               onMouseEnter={() => !isMobile && setShowTooltip(true)}
             >
-              {currentStage === Stage.NONE ? (
-                <span className="text-secondary group-hover:text-primary text-alternative-sm font-medium uppercase duration-300">
-                  Does not qualify
-                </span>
-              ) : (
-                <>
-                  <span className="text-primary text-alternative-sm font-medium uppercase duration-300">
-                    {currentStage !== Stage.UNKNOWN
-                      ? formatPlural(
-                          highRiskItems.length ||
-                            mediumRiskItems.length ||
-                            lowRiskItems.length,
-                          "ITEM",
-                        )
-                      : "? ITEMS"}
+              <span className="border-foreground text-alternative-sm border-b border-dashed font-medium duration-300 hover:border-white">
+                {currentStage === Stage.NONE ? (
+                  <span className="text-secondary group-hover:text-primary uppercase duration-300">
+                    Does not qualify
                   </span>
-                  <span
-                    className={cn([
-                      "text-alternative-sm text-secondary duration-300",
-                      {
-                        "group-hover:text-primary":
-                          currentStage !== Stage.UNKNOWN,
-                      },
-                    ])}
-                  >
-                    {" "}
-                    {currentStage !== Stage.UNKNOWN
-                      ? `TO STAGE ${Number(currentStage) + 1}`
-                      : "TO NEXT"}
-                  </span>
-                </>
-              )}
-            </button>
+                ) : (
+                  <>
+                    <span className="text-primary uppercase duration-300">
+                      {currentStage !== Stage.UNKNOWN
+                        ? formatPlural(
+                            highRiskItems.length ||
+                              mediumRiskItems.length ||
+                              lowRiskItems.length,
+                            "ITEM",
+                          )
+                        : "? ITEMS"}
+                    </span>
+                    <span
+                      className={cn([
+                        "text-secondary duration-300",
+                        {
+                          "group-hover:text-primary":
+                            currentStage !== Stage.UNKNOWN,
+                        },
+                      ])}
+                    >
+                      {" "}
+                      {currentStage !== Stage.UNKNOWN
+                        ? `TO STAGE ${Number(currentStage) + 1}`
+                        : "TO NEXT"}
+                    </span>
+                  </>
+                )}
+              </span>
+            </Button>
           </div>
         </div>
         <div className="flex gap-1 p-2 pr-0 sm:gap-2">

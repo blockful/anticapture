@@ -41,7 +41,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData: historicalTokenData_200_response
+  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -82,7 +82,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): [query_proposals_items]
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -120,7 +120,7 @@ type Query {
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
   """Returns a list of voting power changes"""
-  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 }
 
 """
@@ -1023,6 +1023,7 @@ type votingPowerHistory {
   accountId: String!
   votingPower: BigInt!
   delta: BigInt!
+  deltaMod: BigInt!
   timestamp: BigInt!
   logIndex: Int!
   transfer: transfer
@@ -1085,6 +1086,14 @@ input votingPowerHistoryFilter {
   delta_lt: BigInt
   delta_gte: BigInt
   delta_lte: BigInt
+  deltaMod: BigInt
+  deltaMod_not: BigInt
+  deltaMod_in: [BigInt]
+  deltaMod_not_in: [BigInt]
+  deltaMod_gt: BigInt
+  deltaMod_lt: BigInt
+  deltaMod_gte: BigInt
+  deltaMod_lte: BigInt
   timestamp: BigInt
   timestamp_not: BigInt
   timestamp_in: [BigInt]
@@ -1319,6 +1328,14 @@ type historicalTokenData_200_response {
   total_volumes: [[Float]]!
 }
 
+enum queryInput_historicalTokenData_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
@@ -1538,7 +1555,12 @@ enum queryInput_proposalsActivity_userVoteFilter {
   no_vote
 }
 
-type query_proposals_items {
+type proposals_200_response {
+  items: [query_proposals_items_items]!
+  totalCount: Float!
+}
+
+type query_proposals_items_items {
   id: String!
   daoId: String!
   txHash: String!
@@ -1555,6 +1577,9 @@ type query_proposals_items {
   startTimestamp: String!
   endTimestamp: String!
   quorum: String!
+  calldatas: [String]!
+  values: [String]!
+  targets: [String]!
 }
 
 enum queryInput_proposals_orderDirection {
@@ -1579,6 +1604,9 @@ type proposal_200_response {
   startTimestamp: String!
   endTimestamp: String!
   quorum: String!
+  calldatas: [String]!
+  values: [String]!
+  targets: [String]!
 }
 
 type query_historicalBalances_items {
@@ -1706,7 +1734,7 @@ type query_votingPowers_items_items_transfer {
 
 enum queryInput_votingPowers_orderBy {
   timestamp
-  amount
+  delta
 }
 
 enum queryInput_votingPowers_orderDirection {

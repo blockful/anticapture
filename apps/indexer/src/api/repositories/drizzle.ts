@@ -156,10 +156,6 @@ export class DrizzleRepository {
     return db.$count(proposalsOnchain);
   }
 
-  async getProposalsCount(): Promise<number> {
-    return db.$count(proposalsOnchain);
-  }
-
   now() {
     return Math.floor(Date.now() / 1000);
   }

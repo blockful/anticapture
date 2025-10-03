@@ -80,10 +80,7 @@ export const CardDaoSignature = ({
           </div>
           {!isConnected && (
             <div className="flex">
-              <ConnectWallet
-                label="Connect Wallet"
-                className="text-inverted! w-fit! border-transparent! bg-[#FAFAFA]! transition-all! duration-1000! ease-in-out! hover:bg-white/70! py-1"
-              />
+              <ConnectWallet label="Connect Wallet" />
             </div>
           )}
           {isConnected && !signatures?.userSigned && (

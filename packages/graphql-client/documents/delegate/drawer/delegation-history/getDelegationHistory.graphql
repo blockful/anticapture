@@ -1,0 +1,49 @@
+query GetDelegateDelegationHistoryDeltaRange(
+  $accountId: String!
+  $deltaMod_gte: BigInt
+  $deltaMod_lte: BigInt
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
+  $limit: Int = 10
+  $after: String
+  $before: String
+) {
+  votingPowerHistorys(
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    where: {
+      accountId: $accountId
+      deltaMod_gte: $deltaMod_gte
+      deltaMod_lte: $deltaMod_lte
+    }
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      delta
+      deltaMod
+      transactionHash
+      timestamp
+      delegation {
+        delegatorAccountId
+        delegatedValue
+        previousDelegate
+        delegateAccountId
+      }
+      transfer {
+        amount
+        fromAccountId
+        toAccountId
+      }
+      votingPower
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+  }
+}

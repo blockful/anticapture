@@ -4,6 +4,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import axios from "axios";
+import { TimeInterval } from "@/shared/types/enums";
 
 export type PriceEntry = [timestamp: number, value: number];
 
@@ -13,17 +14,21 @@ export interface DaoTokenHistoricalDataResponse {
   total_volumes: PriceEntry[];
 }
 
+const DEFAULT_INTERVAL = TimeInterval.ONE_YEAR;
+
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
+  days = DEFAULT_INTERVAL,
 }: {
   daoId: DaoIdEnum;
+  days?: TimeInterval;
 }): Promise<DaoTokenHistoricalDataResponse | null> => {
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
+
   const query = `query GetHistoricalTokenData {
-  historicalTokenData {
-    total_volumes
+  historicalTokenData(days: _${days}) {
     market_caps
     prices
   }
@@ -47,18 +52,25 @@ export const fetchDaoTokenHistoricalData = async ({
   return historicalTokenData as DaoTokenHistoricalDataResponse;
 };
 
-export const useDaoTokenHistoricalData = (
-  daoId: DaoIdEnum,
+export const useDaoTokenHistoricalData = ({
+  daoId,
+  days,
+  config,
+}: {
+  daoId: DaoIdEnum;
+  days?: TimeInterval;
   config?: Partial<
     SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>
-  >,
-) => {
-  const key = daoId ? [`daoTokenHistoricalData`, daoId] : null;
-
+  >;
+}) => {
   const { data, error, isValidating, mutate } =
     useSWR<DaoTokenHistoricalDataResponse | null>(
-      key,
-      () => fetchDaoTokenHistoricalData({ daoId }),
+      ["daoTokenHistoricalData", daoId, days],
+      () =>
+        fetchDaoTokenHistoricalData({
+          daoId,
+          days,
+        }),
       { revalidateOnFocus: false, ...config },
     );
 

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components";
+import { Button } from "@/shared/components";
 import { DonationCardProps } from "@/features/donation/types";
 import { ExternalLink, Eye, BookOpen, Shield } from "lucide-react";
 import Link from "next/link";
@@ -80,13 +80,10 @@ export const DonationCard = ({
                             rel="noopener noreferrer"
                             className={`inline-block ${index === 0 ? "col-span-2 sm:col-span-1" : ""}`}
                           >
-                            <Badge
-                              variant="outline"
-                              className="bg-surface-default border-middle-dark hover:bg-middle-dark sm:hover:bg-light-dark text-primary w-full items-center justify-center gap-2 px-2 py-1 text-sm font-normal transition-colors sm:w-max sm:bg-transparent"
-                            >
+                            <Button variant="outline" size="sm">
                               <ExternalLink className="size-4" />
                               {chain}
-                            </Badge>
+                            </Button>
                           </Link>
                         );
                       })}

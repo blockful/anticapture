@@ -9,11 +9,6 @@ import {
 } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
 
-// Existing types
-export enum ChainNameEnum {
-  Ethereum = "ethereum",
-}
-
 export type DaoMetricsDayBucket = {
   date: string;
   daoId: DaoIdEnum;
@@ -39,6 +34,11 @@ export interface TokenHistoricalDataMetrics {
 export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number;
+}
+
+export interface ChartDataSetPoint {
+  date: number;
+  [key: string]: number | string | undefined;
 }
 
 export type GovernanceImplementation = {

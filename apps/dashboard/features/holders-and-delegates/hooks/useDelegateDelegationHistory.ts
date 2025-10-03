@@ -6,6 +6,7 @@ import {
   useVotingPowersQuery,
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
+  QueryVotingPowersArgs,
 } from "@anticapture/graphql-client/hooks";
 
 // Interface for a single delegation history item
@@ -47,11 +48,17 @@ export interface UseDelegateDelegationHistoryResult {
   fetchPreviousPage: () => Promise<void>;
 }
 
+export type AmountFilterVariables = Pick<
+  QueryVotingPowersArgs,
+  "maxDelta" | "minDelta"
+>;
+
 export function useDelegateDelegationHistory(
   account: string,
   daoId: string,
   orderBy: "timestamp" | "delta" = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
+  filterVariables?: AmountFilterVariables,
 ): UseDelegateDelegationHistoryResult {
   const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -69,8 +76,9 @@ export function useDelegateDelegationHistory(
       limit: itemsPerPage,
       orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
       orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
+      ...filterVariables,
     }),
-    [account, itemsPerPage, orderBy, orderDirection],
+    [account, itemsPerPage, orderBy, orderDirection, filterVariables],
   );
 
   const queryOptions = {
@@ -203,7 +211,9 @@ export function useDelegateDelegationHistory(
     loading,
     paginationInfo: {
       currentPage,
-      totalPages: Math.ceil(data?.votingPowers?.totalCount || 0 / itemsPerPage),
+      totalPages: Math.ceil(
+        (data?.votingPowers?.totalCount || 0) / itemsPerPage,
+      ),
       hasNextPage:
         currentPage * itemsPerPage < (data?.votingPowers?.totalCount || 0),
       hasPreviousPage: currentPage > 1,
