@@ -201,7 +201,7 @@ export const TokenDistributionMetrics = ({
                           );
                         } else if (metricKey === "TREASURY") {
                           const numericValue = Number(currentValue);
-                          formattedMetricsValue = `$${formatNumberUserReadable(
+                          formattedMetricsValue = `${formatNumberUserReadable(
                             Number.isFinite(numericValue)
                               ? Math.floor(numericValue)
                               : 0,

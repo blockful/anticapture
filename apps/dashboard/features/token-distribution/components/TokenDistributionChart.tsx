@@ -252,7 +252,7 @@ export const TokenDistributionChart = ({
             yAxisId="primary"
             domain={["auto", "auto"]}
             tickFormatter={(value) =>
-              `$${formatNumberUserReadable(Number(value))} ${daoId}`
+              `${formatNumberUserReadable(Number(value))} ${daoId}`
             }
             tick={{ fontSize: 10 }}
             width={50}
@@ -280,7 +280,7 @@ export const TokenDistributionChart = ({
               orientation="right"
               domain={[0, "dataMax"]}
               tickFormatter={(value) =>
-                `$${formatNumberUserReadable(Number(value))} ${daoId}`
+                `${formatNumberUserReadable(Number(value))} ${daoId}`
               }
               stroke="#ffffff"
               tick={(props) => {
@@ -294,7 +294,7 @@ export const TokenDistributionChart = ({
                     textAnchor="start"
                     dominantBaseline="middle"
                   >
-                    {`$${formatNumberUserReadable(Number(payload.value))} ${daoId}`}
+                    {`${formatNumberUserReadable(Number(payload.value))} ${daoId}`}
                   </text>
                 );
               }}
