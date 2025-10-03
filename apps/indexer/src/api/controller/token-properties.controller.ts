@@ -39,7 +39,8 @@ export function tokenProperties(
       },
       responses: {
         200: {
-          description: "Returns the historical market data for the token",
+          description:
+            "Returns data concerning token-specific values and attributes",
           content: {
             "application/json": {
               schema: TokenPropertiesResponseSchema,
