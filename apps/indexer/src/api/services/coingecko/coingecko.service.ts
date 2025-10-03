@@ -2,7 +2,10 @@ import { HTTPException } from "hono/http-exception";
 import {
   CoingeckoHistoricalMarketData,
   CoingeckoHistoricalMarketDataSchema,
+  CoingeckoIdToAssetPlatformId,
   CoingeckoTokenId,
+  CoingeckoTokenPriceCompareData,
+  CoingeckoTokenPriceCompareDataSchema,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
 
@@ -33,6 +36,36 @@ export class CoingeckoService {
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch historical token data",
+        cause: error,
+      });
+    }
+  }
+
+  async getTokenPrice(
+    tokenId: CoingeckoTokenId,
+    tokenContractAddress: string,
+    targetCurrency: string,
+  ): Promise<CoingeckoTokenPriceCompareData> {
+    try {
+      const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
+      const response = await fetch(
+        `${this.coingeckoApiUrl}/simple/token_price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${targetCurrency}`,
+        {
+          headers: {
+            "x-cg-demo-api-key": this.coingeckoApiKey,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return CoingeckoTokenPriceCompareDataSchema.parse(data);
+    } catch (error) {
+      throw new HTTPException(503, {
+        message: "Failed to fetch token property data",
         cause: error,
       });
     }
