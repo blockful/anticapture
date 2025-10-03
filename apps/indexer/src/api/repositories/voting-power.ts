@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
+import { gte, and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
 import { votingPowerHistory, delegation, transfer } from "ponder:schema";
 
@@ -28,10 +28,22 @@ export class VotingPowerRepository {
       );
   }
 
-  async getVotingPowerCount(accountId: Address): Promise<number> {
+  async getVotingPowerCount(
+    accountId: Address,
+    minDelta?: string,
+    maxDelta?: string,
+  ): Promise<number> {
     return await db.$count(
       votingPowerHistory,
-      eq(votingPowerHistory.accountId, accountId),
+      and(
+        eq(votingPowerHistory.accountId, accountId),
+        minDelta
+          ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
+          : undefined,
+        maxDelta
+          ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+          : undefined,
+      ),
     );
   }
 
@@ -41,11 +53,23 @@ export class VotingPowerRepository {
     limit: number,
     orderDirection: "asc" | "desc",
     orderBy: "timestamp" | "delta",
+    minDelta?: string,
+    maxDelta?: string,
   ): Promise<DBVotingPowerWithRelations[]> {
     const result = await db
       .select()
       .from(votingPowerHistory)
-      .where(eq(votingPowerHistory.accountId, accountId))
+      .where(
+        and(
+          eq(votingPowerHistory.accountId, accountId),
+          minDelta
+            ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
+            : undefined,
+          maxDelta
+            ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+            : undefined,
+        ),
+      )
       .leftJoin(
         delegation,
         sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
@@ -71,12 +95,12 @@ export class VotingPowerRepository {
           ? asc(
               orderBy === "timestamp"
                 ? votingPowerHistory.timestamp
-                : votingPowerHistory.delta,
+                : votingPowerHistory.deltaMod,
             )
           : desc(
               orderBy === "timestamp"
                 ? votingPowerHistory.timestamp
-                : votingPowerHistory.delta,
+                : votingPowerHistory.deltaMod,
             ),
       )
       .limit(limit)

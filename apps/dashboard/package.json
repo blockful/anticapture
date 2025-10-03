@@ -45,8 +45,9 @@
     "swr": "^2.3.2",
     "tailwind-merge": "^2.5.4",
     "vaul": "^1.1.2",
-    "viem": "^2.21.34",
-    "wagmi": "^2.12.25"
+    "viem": "^2.37.11",
+    "wagmi": "^2.12.25",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.6",

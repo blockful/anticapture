@@ -431,6 +431,8 @@ export type QueryVotingPowerHistorysArgs = {
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2108,6 +2110,7 @@ export type VotingPowerHistory = {
   daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
   delta: Scalars['BigInt']['output'];
+  deltaMod: Scalars['BigInt']['output'];
   logIndex: Scalars['Int']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
@@ -2139,6 +2142,14 @@ export type VotingPowerHistoryFilter = {
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
   delta?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  deltaMod_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
   delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
   delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
@@ -2258,6 +2269,20 @@ export type GetDaoDataQueryVariables = Exact<{
 
 
 export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao', id: string, quorum: any, proposalThreshold: any, votingDelay: any, votingPeriod: any, timelockDelay: any } | null };
+
+export type GetDelegateDelegationHistoryDeltaRangeQueryVariables = Exact<{
+  accountId: Scalars['String']['input'];
+  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegateDelegationHistoryDeltaRangeQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, deltaMod: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -2435,6 +2460,8 @@ export type VotingPowersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
