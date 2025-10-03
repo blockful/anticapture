@@ -46,6 +46,7 @@ export function tokenProperties(
     async (context) => {
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
+      // const tokenContractAddress = CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address; // TODO: use to index result and pass to service calls
       const priceData = await client.getTokenPriceCompare(tokenId);
       const tokenProps = await service.getTokenPropertiesById(tokenId);
 

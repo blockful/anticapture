@@ -49,7 +49,9 @@ export interface CoingeckoHistoricalMarketData {
 }
 
 export interface CoingeckoTokenPriceCompareData {
-  [symbol: string]: number;
+  [symbol: string]: {
+    [symbol: string]: number;
+  };
 }
 
 export const CoingeckoHistoricalMarketDataSchema = z.object({
@@ -58,4 +60,6 @@ export const CoingeckoHistoricalMarketDataSchema = z.object({
   total_volumes: z.array(z.tuple([z.number(), z.number()])),
 });
 
-export const CoingeckoTokenPriceCompareDataSchema = z.record(z.number());
+export const CoingeckoTokenPriceCompareDataSchema = z.record(
+  z.record(z.number()),
+);

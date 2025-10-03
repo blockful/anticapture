@@ -1,12 +1,12 @@
-import { CoingeckoTokenId } from "../services/coingecko/types";
 import { eq } from "drizzle-orm";
 import { db } from "ponder:api";
 import { token } from "ponder:schema";
 import { DBToken } from "../mappers";
+import { DaoIdEnum } from "@/lib/enums";
 
 export class TokensRepository {
-  async getTokenPropertiesById(
-    tokenId: CoingeckoTokenId,
+  async getTokenPropertiesByName(
+    tokenName: DaoIdEnum,
   ): Promise<DBToken | null> {
     const result = await db
       .select({
@@ -22,8 +22,9 @@ export class TokensRepository {
         treasury: token.treasury,
       })
       .from(token)
-      .where(eq(token.id, tokenId));
+      .where(eq(token.name, tokenName));
 
+    console.log("result", result);
     return result[0] ?? null;
   }
 }

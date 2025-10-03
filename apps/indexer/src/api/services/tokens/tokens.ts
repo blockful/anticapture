@@ -1,8 +1,9 @@
 import { DBToken } from "@/api/mappers";
-import { CoingeckoTokenId } from "../coingecko/types";
+import { CoingeckoIdToDaoId, CoingeckoTokenId } from "../coingecko/types";
+import { DaoIdEnum } from "@/lib/enums";
 
 interface TokensRepository {
-  getTokenPropertiesById(tokenId: CoingeckoTokenId): Promise<DBToken | null>;
+  getTokenPropertiesByName(tokenId: DaoIdEnum): Promise<DBToken | null>;
 }
 
 export class TokensService {
@@ -11,6 +12,8 @@ export class TokensService {
   async getTokenPropertiesById(
     tokenId: CoingeckoTokenId,
   ): Promise<DBToken | null> {
-    return await this.repo.getTokenPropertiesById(tokenId);
+    return await this.repo.getTokenPropertiesByName(
+      CoingeckoIdToDaoId[tokenId],
+    );
   }
 }

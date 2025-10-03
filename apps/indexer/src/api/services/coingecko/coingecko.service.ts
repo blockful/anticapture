@@ -51,7 +51,7 @@ export class CoingeckoService {
         CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address;
       const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
       const response = await fetch(
-        `${this.coingeckoApiUrl}/simple/token-price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${vsCurrency}`,
+        `${this.coingeckoApiUrl}/simple/token_price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${vsCurrency}`,
         {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,
