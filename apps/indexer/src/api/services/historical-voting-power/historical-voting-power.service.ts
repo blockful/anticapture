@@ -20,10 +20,11 @@ export class HistoricalVotingPowerService {
   async getHistoricalVotingPower(
     addresses: Address[],
     daysInSeconds: DaysEnum,
+    fromDate: number,
   ): Promise<HistoricalVotingPower[]> {
     return await this.repository.getHistoricalVotingPower(
       addresses,
-      BigInt(Math.floor(Date.now() / 1000) - daysInSeconds),
+      BigInt(fromDate - daysInSeconds),
     );
   }
 }
