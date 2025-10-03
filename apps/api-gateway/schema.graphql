@@ -98,7 +98,7 @@ type Query {
   """
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
-  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
   """
   Get transactions with their associated transfers and delegations, with optional filtering and sorting

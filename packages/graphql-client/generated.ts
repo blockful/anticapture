@@ -296,6 +296,7 @@ export type QueryHistoricalTokenDataArgs = {
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -2004,14 +2005,14 @@ export type VotesOnchain = {
   __typename?: 'votesOnchain';
   daoId: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
-  proposalId?: Maybe<Scalars['String']['output']>;
-  reason?: Maybe<Scalars['String']['output']>;
-  support?: Maybe<Scalars['String']['output']>;
-  timestamp?: Maybe<Scalars['BigInt']['output']>;
-  txHash?: Maybe<Scalars['String']['output']>;
+  proposalId: Scalars['String']['output'];
+  reason: Scalars['String']['output'];
+  support: Scalars['String']['output'];
+  timestamp: Scalars['BigInt']['output'];
+  txHash: Scalars['String']['output'];
   voter?: Maybe<Account>;
   voterAccountId: Scalars['String']['output'];
-  votingPower?: Maybe<Scalars['String']['output']>;
+  votingPower: Scalars['BigInt']['output'];
 };
 
 export type VotesOnchainFilter = {
@@ -2085,16 +2086,14 @@ export type VotesOnchainFilter = {
   voterAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower?: InputMaybe<Scalars['String']['input']>;
-  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  votingPower_not?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
+  votingPower?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
 };
 
 export type VotesOnchainPage = {
