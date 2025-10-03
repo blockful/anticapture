@@ -1307,7 +1307,6 @@ type query_totalAssets_items {
 }
 
 enum queryInput_totalAssets_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1322,7 +1321,6 @@ type historicalTokenData_200_response {
 }
 
 enum queryInput_historicalTokenData_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1337,7 +1335,6 @@ type compareTotalSupply_200_response {
 }
 
 enum queryInput_compareTotalSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1352,7 +1349,6 @@ type compareDelegatedSupply_200_response {
 }
 
 enum queryInput_compareDelegatedSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1367,7 +1363,6 @@ type compareCirculatingSupply_200_response {
 }
 
 enum queryInput_compareCirculatingSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1382,7 +1377,6 @@ type compareTreasury_200_response {
 }
 
 enum queryInput_compareTreasury_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1397,7 +1391,6 @@ type compareCexSupply_200_response {
 }
 
 enum queryInput_compareCexSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1412,7 +1405,6 @@ type compareDexSupply_200_response {
 }
 
 enum queryInput_compareDexSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1427,7 +1419,6 @@ type compareLendingSupply_200_response {
 }
 
 enum queryInput_compareLendingSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1440,7 +1431,6 @@ type compareActiveSupply_200_response {
 }
 
 enum queryInput_compareActiveSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1455,7 +1445,6 @@ type compareProposals_200_response {
 }
 
 enum queryInput_compareProposals_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1470,7 +1459,6 @@ type compareVotes_200_response {
 }
 
 enum queryInput_compareVotes_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1485,7 +1473,6 @@ type compareAverageTurnout_200_response {
 }
 
 enum queryInput_compareAverageTurnout_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1639,7 +1626,6 @@ type query_historicalBalances_items {
 }
 
 enum queryInput_historicalBalances_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1653,7 +1639,6 @@ type query_historicalVotingPower_items {
 }
 
 enum queryInput_historicalVotingPower_days {
-  _1d
   _7d
   _30d
   _90d
