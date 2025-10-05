@@ -93,7 +93,7 @@ export const VotingPower = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 p-4">
+    <div className="flex w-full flex-col gap-4 p-4">
       <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 md:flex-row">

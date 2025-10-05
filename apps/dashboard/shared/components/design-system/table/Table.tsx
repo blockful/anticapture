@@ -28,6 +28,7 @@ import {
 } from "@/shared/components/design-system/table/styles";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { CSVLink } from "react-csv";
+import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -242,24 +243,25 @@ export const Table = <TData, TValue>({
               )}
             </>
           ) : (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className={cn("text-center", className)}
-              >
-                {customEmptyState || <EmptyState />}
-              </TableCell>
-            </TableRow>
+            <TableCell
+              colSpan={columns.length}
+              className={cn("text-center", className)}
+            >
+              {customEmptyState || <EmptyState />}
+            </TableCell>
           )}
         </TableBody>
       </TableContainer>
       {withDownloadCSV && (
-        <p className="text-secondary mt-2 flex font-mono text-xs tracking-wider">
+        <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
           [DOWNLOAD AS{" "}
           <CSVLink
             data={formatCsvData(data)}
             filename={"table-data.csv"}
-            className="text-link hover:text-link-hover ml-2 flex cursor-pointer items-center gap-1"
+            className={cn(
+              defaultLinkVariants({ variant: "highlight" }),
+              "pl-2",
+            )}
             separator=";"
           >
             CSV <DownloadIcon className="size-3.5" />

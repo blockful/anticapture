@@ -203,7 +203,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex flex-col items-start justify-center">
+          <div className="flex h-[52px] flex-col items-start justify-center">
             <div className="flex items-center gap-1">
               <span className={cn("text-sm font-medium", delegationType.color)}>
                 {delegationType.symbol}

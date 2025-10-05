@@ -144,8 +144,8 @@ const TableWithInfiniteScroll = () => {
       onLoadMore={loadMore}
       hasMore={!!hasNextPage}
       isLoadingMore={isFetchingNextPage}
-      className="h-[500px] w-full"
-      wrapperClassName="p-4"
+      className="w-full"
+      wrapperClassName="max-h-[475px] p-4"
       showWhenEmpty={<div className="p-6 text-center">No results</div>}
       isTableSmall
     />

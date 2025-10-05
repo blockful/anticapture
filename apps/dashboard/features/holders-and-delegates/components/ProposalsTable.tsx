@@ -229,7 +229,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "votingPower",
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "min-w-32",
       },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
@@ -282,7 +282,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "voteTiming",
       meta: {
-        columnClassName: "w-40",
+        columnClassName: "min-w-40",
       },
       cell: ({ row }) => {
         const voteTiming = row.getValue("voteTiming") as {
