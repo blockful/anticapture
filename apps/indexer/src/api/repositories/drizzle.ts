@@ -9,7 +9,6 @@ import {
   sql,
   isNull,
   count,
-  lte,
 } from "ponder";
 import { db } from "ponder:api";
 import {
@@ -207,7 +206,7 @@ export class DrizzleRepository {
 
   async getProposalNonVotersCount(proposalId: string): Promise<number> {
     const countResult = await db
-      .select({ count: count(votesOnchain.proposalId) })
+      .select({ count: count(accountPower.accountId) })
       .from(accountPower)
       .leftJoin(
         votesOnchain,
@@ -245,27 +244,30 @@ export class DrizzleRepository {
 
   async getVotingPowerVariation(
     voters: Address[],
-    days: number,
-  ): Promise<Record<Address, string>> {
+    comparisonTimestamp: number,
+  ): Promise<Record<Address, bigint>> {
     const result = await db
       .select({
         voterAccountId: votingPowerHistory.accountId,
-        oldVotes: count(
-          // case(
-          lte(votingPowerHistory.timestamp, BigInt(this.now() - days)),
-          // literal(1)
-          // )
-        ),
-        currentVotes: count(),
+        oldVotingPower: sql<string>`
+          MAX(CASE 
+            WHEN ${votingPowerHistory.timestamp} <= ${comparisonTimestamp} 
+            THEN ${votingPowerHistory.votingPower}
+          END)
+        `.as("oldVotingPower"),
+        currentVotingPower: sql<string>`
+         MAX(${votingPowerHistory.votingPower})
+       `.as("currentVotingPower"),
       })
       .from(votingPowerHistory)
       .where(inArray(votingPowerHistory.accountId, voters))
       .groupBy(votingPowerHistory.accountId);
 
     return result.reduce(
-      (acc, { voterAccountId, oldVotes, currentVotes }) => ({
+      (acc, { voterAccountId, oldVotingPower, currentVotingPower }) => ({
         ...acc,
-        [voterAccountId]: (currentVotes - oldVotes).toString(),
+        [voterAccountId]:
+          BigInt(currentVotingPower || 0) - BigInt(oldVotingPower || 0),
       }),
       {},
     );

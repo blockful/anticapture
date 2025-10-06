@@ -1,6 +1,7 @@
 import { DBProposal, ProposalsRequest, VotersResponse } from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
+import { DaysEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface ProposalsRepository {
@@ -24,8 +25,8 @@ interface ProposalsRepository {
   getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
   getVotingPowerVariation(
     voters: Address[],
-    days: number,
-  ): Promise<Record<Address, string>>;
+    comparisonTimestamp: number,
+  ): Promise<Record<Address, bigint>>;
 }
 
 export class ProposalsService {
@@ -137,9 +138,17 @@ export class ProposalsService {
       this.proposalsRepo.getProposalNonVotersCount(proposalId),
     ]);
     const addresses = nonVoters.map((v) => v.voter);
+
+    const comparisonTimestamp = Math.floor(
+      Date.now() / 1000 - 30 * DaysEnum["30d"],
+    );
+
     const [lastVotersTimestamp, votingPowerVariation] = await Promise.all([
       this.proposalsRepo.getLastVotersTimestamp(addresses),
-      this.proposalsRepo.getVotingPowerVariation(addresses, 30),
+      this.proposalsRepo.getVotingPowerVariation(
+        addresses,
+        comparisonTimestamp,
+      ),
     ]);
     return {
       totalCount,
@@ -147,7 +156,7 @@ export class ProposalsService {
         voter: v.voter,
         votingPower: v.votingPower.toString(),
         lastVoteTimestamp: Number(lastVotersTimestamp[v.voter] || 0),
-        votingPowerVariation: votingPowerVariation[v.voter] || "0",
+        votingPowerVariation: votingPowerVariation[v.voter]?.toString() || "0",
       })),
     };
   }
