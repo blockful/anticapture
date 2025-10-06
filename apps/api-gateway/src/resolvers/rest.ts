@@ -21,6 +21,7 @@ const daoItemQueries = [
   "lastUpdate",
   "proposal",
   "votingPowers",
+  "token",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {

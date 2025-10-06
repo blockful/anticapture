@@ -1,9 +1,7 @@
 import { CurrencyEnum, CurrencyOptions, DaoIdEnum } from "@/lib/enums";
 import {
-  CoingeckoIdToDaoId,
   CoingeckoTokenId,
   CoingeckoTokenIdEnum,
-  CoingeckoTokenPriceCompareData,
 } from "../services/coingecko/types";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { TokenService } from "../services/token/token";
@@ -15,10 +13,10 @@ interface TokenPriceClient {
     tokenId: CoingeckoTokenId,
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<CoingeckoTokenPriceCompareData>;
+  ): Promise<number>;
 }
 
-export function tokenProperties(
+export function token(
   app: Hono,
   client: TokenPriceClient,
   service: TokenService,
@@ -27,8 +25,8 @@ export function tokenProperties(
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "tokenProperties",
-      path: "/token/properties",
+      operationId: "token",
+      path: "/token",
       summary: "Get token properties",
       description: "Get property data for a specific token",
       tags: ["tokens"],
@@ -56,9 +54,8 @@ export function tokenProperties(
       const { currency } = context.req.valid("query");
       const tokenId =
         CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
-      const tokenContractAddress =
-        CONTRACT_ADDRESSES[CoingeckoIdToDaoId[tokenId]].token.address;
-      const tokenProps = await service.getTokenProperties(tokenId);
+      const tokenContractAddress = CONTRACT_ADDRESSES[daoId].token.address;
+      const tokenProps = await service.getTokenProperties(daoId);
       const priceData = await client.getTokenPrice(
         tokenId,
         tokenContractAddress,
@@ -69,15 +66,7 @@ export function tokenProperties(
         return context.json({ error: "Token not found" }, 404);
       }
 
-      return context.json(
-        TokenMapper.toApi(
-          tokenProps,
-          priceData,
-          tokenContractAddress.toLowerCase(),
-          currency,
-        ),
-        200,
-      );
+      return context.json(TokenMapper.toApi(tokenProps, priceData), 200);
     },
   );
 }

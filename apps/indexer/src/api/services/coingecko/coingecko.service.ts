@@ -4,15 +4,15 @@ import {
   CoingeckoHistoricalMarketDataSchema,
   CoingeckoIdToAssetPlatformId,
   CoingeckoTokenId,
-  CoingeckoTokenPriceCompareData,
-  CoingeckoTokenPriceCompareDataSchema,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
+import z from "zod";
+
+const CoingeckoTokenPriceDataSchema = z.record(z.record(z.number()));
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
   constructor(private readonly coingeckoApiKey: string) {}
-
   async getHistoricalTokenData(
     tokenId: CoingeckoTokenId,
     days: number = DAYS_IN_YEAR,
@@ -45,7 +45,7 @@ export class CoingeckoService {
     tokenId: CoingeckoTokenId,
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<CoingeckoTokenPriceCompareData> {
+  ): Promise<number> {
     try {
       const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
       const response = await fetch(
@@ -62,7 +62,14 @@ export class CoingeckoService {
       }
 
       const data = await response.json();
-      return CoingeckoTokenPriceCompareDataSchema.parse(data);
+      const price = CoingeckoTokenPriceDataSchema.parse(data);
+      const priceValue = price[tokenContractAddress]?.[targetCurrency];
+
+      if (!priceValue) {
+        throw new Error("Unable to extract dataset");
+      }
+
+      return priceValue;
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch token property data",

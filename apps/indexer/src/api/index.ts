@@ -10,7 +10,7 @@ import {
   governanceActivity,
   tokenHistoricalData,
   tokenDistribution,
-  tokenProperties,
+  token,
   proposalsActivity,
   historicalOnchain,
   transactions,
@@ -80,7 +80,7 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
 if (env.COINGECKO_API_KEY) {
   const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
   tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
-  tokenProperties(
+  token(
     app,
     coingeckoClient,
     new TokenService(new TokenRepository()),
