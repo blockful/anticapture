@@ -35,29 +35,49 @@ const resolveQuorum = (
   quorumCalculation: string | null | undefined,
   delegatedSupply: string | null | undefined,
 ): { value: string; percentage: string } => {
-  const isDelSupplyBased =
-    quorumCalculation === QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY;
+  const noQuorum = { value: "No Quorum", percentage: NOT_APPLICABLE };
+  const calculable = quorum && totalSupply;
 
-  if (isDelSupplyBased && delegatedSupply) {
-    const delSupplyTokens = toTokenAmount(delegatedSupply);
-    const quorumTokens = delSupplyTokens * 0.3;
-    return {
-      value: `${formatNumberUserReadable(quorumTokens)} `,
-      percentage: `(30% ${quorumCalculation})`,
-    };
-  } else if (quorum && totalSupply) {
-    const quorumTokens = toTokenAmount(quorum);
-    const percentage = calculatePercentage(quorum, totalSupply);
-    return {
-      value: `${formatNumberUserReadable(quorumTokens)} `,
-      percentage: `(${percentage.toFixed(1)}% ${quorumCalculation})`,
-    };
-  } else {
-    return {
-      value: "No Quorum",
-      percentage: NOT_APPLICABLE,
-    };
+  switch (quorumCalculation) {
+    case QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY: {
+      // Optimism: 30% of delegate supply
+      if (delegatedSupply) {
+        const delSupplyTokens = toTokenAmount(delegatedSupply);
+        const quorumTokens = delSupplyTokens * 0.3;
+        return {
+          value: `${formatNumberUserReadable(quorumTokens)} `,
+          percentage: `(30% ${quorumCalculation})`,
+        };
+      }
+      break;
+    }
+    case QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY: {
+      // ETH: Simple total supply percentage
+      if (calculable) {
+        const quorumTokens = toTokenAmount(quorum);
+        const percentage = calculatePercentage(quorum, totalSupply);
+        return {
+          value: `${formatNumberUserReadable(quorumTokens)} `,
+          percentage: `(${percentage.toFixed(1)}% ${quorumCalculation})`,
+        };
+      }
+      break;
+    }
+    case QUORUM_CALCULATION_TYPES.SCROLL: {
+      // SCROLL: Quorum fixed at 0.21% total $SCR
+      if (calculable) {
+        return {
+          value: `${formatNumberUserReadable(toTokenAmount(quorum))} `,
+          percentage: `(${quorumCalculation})`,
+        };
+      }
+      break;
+    }
+    default:
+      return noQuorum;
   }
+
+  return noQuorum;
 };
 
 const resolveThreshhold = (
@@ -105,21 +125,19 @@ export const QuorumCard = () => {
     ),
   };
 
-  // Calculate quorum
   const { value: quorumValue, percentage: quorumPercentage } = resolveQuorum(
     daoData?.quorum,
     totalSupply.value,
     daoConfig.daoOverview.rules?.quorumCalculation,
     delegatedSupply.value,
   );
-
-  // Calculate proposal threshold
   const {
     value: proposalThresholdValue,
     percentage: proposalThresholdPercentageFormatted,
   } = resolveThreshhold(daoData?.proposalThreshold, totalSupply.value);
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
+
   const textCardDaoInfo =
     daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
 
