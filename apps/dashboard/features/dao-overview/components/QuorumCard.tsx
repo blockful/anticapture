@@ -8,10 +8,7 @@ import {
 } from "@/shared/components";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
-import {
-  calculateChangeRate,
-  useTokenDistributionContext,
-} from "@/features/token-distribution/contexts";
+import { calculateChangeRate } from "@/features/token-distribution/utils";
 import { Clock, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
@@ -104,7 +101,6 @@ export const QuorumCard = () => {
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { data: daoData, loading: isDaoDataLoading } = useDaoData(daoIdEnum);
   const daoConfig = daoConfigByDaoId[daoIdEnum];
-  const { delegatedSupply } = useTokenDistributionContext();
 
   const { data: timeSeriesData, isLoading: isTimeSeriesDataLoading } =
     useTimeSeriesData(

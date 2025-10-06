@@ -11,8 +11,8 @@ import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
 import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
-import { AmountFilter } from "@/shared/components/design-system/filters/AmountFilter";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/AmountFilter";
 import { useParams } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/shared/components/ui/button";
@@ -85,7 +85,8 @@ export const TransactionsTable = () => {
         <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
           <span className="mr-2">Amount ({daoId?.toUpperCase()})</span>
           <AmountFilter
-            onApply={({ min, max }) => {
+            onApply={(params) => {
+              const { min, max } = params;
               setMinAmount(min);
               setMaxAmount(max);
             }}

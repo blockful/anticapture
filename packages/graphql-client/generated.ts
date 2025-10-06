@@ -16,12 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -427,6 +424,8 @@ export type QueryVotingPowerHistorysArgs = {
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1456,6 +1455,14 @@ export enum QueryInput_HistoricalTokenData_Days {
   '365d' = '_365d'
 }
 
+export enum QueryInput_HistoricalTokenData_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
 export enum QueryInput_HistoricalVotingPower_Days {
   '1d' = '_1d',
   '7d' = '_7d',
@@ -2104,6 +2111,7 @@ export type VotingPowerHistory = {
   daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
   delta: Scalars['BigInt']['output'];
+  deltaMod: Scalars['BigInt']['output'];
   logIndex: Scalars['Int']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
@@ -2135,6 +2143,14 @@ export type VotingPowerHistoryFilter = {
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
   delta?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  deltaMod_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
   delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
   delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
@@ -2254,6 +2270,20 @@ export type GetDaoDataQueryVariables = Exact<{
 
 
 export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao', id: string, quorum: any, proposalThreshold: any, votingDelay: any, votingPeriod: any, timelockDelay: any } | null };
+
+export type GetDelegateDelegationHistoryDeltaRangeQueryVariables = Exact<{
+  accountId: Scalars['String']['input'];
+  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegateDelegationHistoryDeltaRangeQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, deltaMod: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -2388,6 +2418,13 @@ export type GetProposalsActivityQueryVariables = Exact<{
 
 export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
+export type GetProposalsQueryVariables = Exact<{
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', items: Array<{ __typename?: 'query_proposals_items_items', id: string, title?: string | null, timestamp: string } | null> } | null };
+
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
   tokenAddresses: Scalars['String']['input'];
   daoAddresses: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -2431,6 +2468,8 @@ export type VotingPowersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2794,6 +2833,84 @@ export type GetDaoDataQueryHookResult = ReturnType<typeof useGetDaoDataQuery>;
 export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQuery>;
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
 export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
+export const GetDelegateDelegationHistoryDeltaRangeDocument = gql`
+    query GetDelegateDelegationHistoryDeltaRange($accountId: String!, $deltaMod_gte: BigInt, $deltaMod_lte: BigInt, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $after: String, $before: String) {
+  votingPowerHistorys(
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    where: {accountId: $accountId, deltaMod_gte: $deltaMod_gte, deltaMod_lte: $deltaMod_lte}
+    limit: $limit
+    after: $after
+    before: $before
+  ) {
+    items {
+      delta
+      deltaMod
+      transactionHash
+      timestamp
+      delegation {
+        delegatorAccountId
+        delegatedValue
+        previousDelegate
+        delegateAccountId
+      }
+      transfer {
+        amount
+        fromAccountId
+        toAccountId
+      }
+      votingPower
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetDelegateDelegationHistoryDeltaRangeQuery__
+ *
+ * To run a query within a React component, call `useGetDelegateDelegationHistoryDeltaRangeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegateDelegationHistoryDeltaRangeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegateDelegationHistoryDeltaRangeQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *      deltaMod_gte: // value for 'deltaMod_gte'
+ *      deltaMod_lte: // value for 'deltaMod_lte'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      limit: // value for 'limit'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useGetDelegateDelegationHistoryDeltaRangeQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables> & ({ variables: GetDelegateDelegationHistoryDeltaRangeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
+      }
+export function useGetDelegateDelegationHistoryDeltaRangeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
+        }
+export function useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
+        }
+export type GetDelegateDelegationHistoryDeltaRangeQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeQuery>;
+export type GetDelegateDelegationHistoryDeltaRangeLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeLazyQuery>;
+export type GetDelegateDelegationHistoryDeltaRangeSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery>;
+export type GetDelegateDelegationHistoryDeltaRangeQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>;
 export const GetDelegatorVotingPowerDetailsDocument = gql`
     query GetDelegatorVotingPowerDetails($address: String!, $after: String, $before: String, $orderBy: String, $orderDirection: String, $limit: Int) {
   accountPower(accountId: $address) {
@@ -3564,6 +3681,50 @@ export type GetProposalsActivityQueryHookResult = ReturnType<typeof useGetPropos
 export type GetProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetProposalsActivityLazyQuery>;
 export type GetProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetProposalsActivitySuspenseQuery>;
 export type GetProposalsActivityQueryResult = Apollo.QueryResult<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>;
+export const GetProposalsDocument = gql`
+    query GetProposals($fromDate: Float) {
+  proposals(limit: 100, orderDirection: asc, fromDate: $fromDate) {
+    items {
+      id
+      title
+      timestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetProposalsQuery__
+ *
+ * To run a query within a React component, call `useGetProposalsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProposalsQuery({
+ *   variables: {
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
+export function useGetProposalsQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+      }
+export function useGetProposalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+        }
+export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+        }
+export type GetProposalsQueryHookResult = ReturnType<typeof useGetProposalsQuery>;
+export type GetProposalsLazyQueryHookResult = ReturnType<typeof useGetProposalsLazyQuery>;
+export type GetProposalsSuspenseQueryHookResult = ReturnType<typeof useGetProposalsSuspenseQuery>;
+export type GetProposalsQueryResult = Apollo.QueryResult<GetProposalsQuery, GetProposalsQueryVariables>;
 export const GetDaoAddressesAccountBalancesDocument = gql`
     query GetDaoAddressesAccountBalances($tokenAddresses: String!, $daoAddresses: [String]!) {
   accountBalances(
@@ -3806,13 +3967,15 @@ export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsL
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
 export type TransactionsQueryResult = Apollo.QueryResult<TransactionsQuery, TransactionsQueryVariables>;
 export const VotingPowersDocument = gql`
-    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy) {
+    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String) {
   votingPowers(
     account: $account
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
     orderBy: $orderBy
+    maxDelta: $maxDelta
+    minDelta: $minDelta
   ) {
     items {
       accountId
@@ -3855,6 +4018,8 @@ export const VotingPowersDocument = gql`
  *      limit: // value for 'limit'
  *      orderDirection: // value for 'orderDirection'
  *      orderBy: // value for 'orderBy'
+ *      maxDelta: // value for 'maxDelta'
+ *      minDelta: // value for 'minDelta'
  *   },
  * });
  */

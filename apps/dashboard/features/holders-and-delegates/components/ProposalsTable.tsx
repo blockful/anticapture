@@ -110,14 +110,14 @@ export const ProposalsTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center px-4 py-2">
+            <div className="flex h-10 w-full items-center px-2 py-2">
               <SkeletonRow className="h-5 w-48" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center px-4 py-2">
+          <div className="flex h-10 w-full items-center px-2 py-2">
             <span className="text-primary font-regular truncate text-sm">
               {proposalName}
             </span>
@@ -411,8 +411,8 @@ export const ProposalsTable = ({
         withPagination={false}
         withSorting={true}
         stickyFirstColumn={true}
-        mobileTableFixed={true}
         isTableSmall={true}
+        mobileTableFixed={true}
         showWhenEmpty={
           <BlankSlate
             variant="default"
