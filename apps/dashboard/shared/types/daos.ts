@@ -2,7 +2,6 @@ export enum DaoIdEnum {
   UNISWAP = "UNI",
   ENS = "ENS",
   OPTIMISM = "OP",
-  ARBITRUM = "ARB",
   GITCOIN = "GTC",
 }
 
