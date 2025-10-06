@@ -7,8 +7,9 @@ import {
   SkeletonRow,
   TextIconLeft,
   SimpleProgressBar,
+  Button,
+  IconButton,
 } from "@/shared/components";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
@@ -109,14 +110,14 @@ export const ProposalsTable = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center px-4 py-2">
+            <div className="flex h-10 w-full items-center px-2 py-2">
               <SkeletonRow className="h-5 w-48" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center px-4 py-2">
+          <div className="flex h-10 w-full items-center px-2 py-2">
             <span className="text-primary font-regular truncate text-sm">
               {proposalName}
             </span>
@@ -126,7 +127,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -238,7 +240,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end gap-1 px-2 text-xs"
+          size="sm"
+          className="text-secondary w-full justify-end"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -298,7 +301,8 @@ export const ProposalsTable = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-start gap-1 px-2"
+          size="sm"
+          className="text-secondary w-full justify-start"
           onClick={() => {
             if (onSortChange) {
               const newDirection =
@@ -345,7 +349,7 @@ export const ProposalsTable = ({
               className="hover:text-secondary cursor-pointer text-white transition-colors"
               title="View on Tally"
             >
-              <ExternalLink className="size-4" />
+              <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
           </div>
         );
@@ -407,8 +411,8 @@ export const ProposalsTable = ({
         withPagination={false}
         withSorting={true}
         stickyFirstColumn={true}
-        mobileTableFixed={true}
         isTableSmall={true}
+        mobileTableFixed={true}
         showWhenEmpty={
           <BlankSlate
             variant="default"

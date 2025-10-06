@@ -6,9 +6,8 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { TheTable, SkeletonRow, BlankSlate } from "@/shared/components";
+import { TheTable, SkeletonRow, BlankSlate, Button } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { Pagination } from "@/shared/components/design-system/table/Pagination";
@@ -18,7 +17,7 @@ import { ProgressCircle } from "@/features/holders-and-delegates/components/Prog
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
-import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 
 interface DelegateTableData {
   address: string;
@@ -210,10 +209,14 @@ export const Delegates = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <Button
+                variant="outline"
+                size="sm"
+                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              >
                 <Plus className="size-3.5" />
                 <p className="text-sm font-medium">Details</p>
-              </div>
+              </Button>
             )}
           </div>
         );
@@ -231,21 +234,21 @@ export const Delegates = ({
     },
     {
       accessorKey: "votingPower",
-      size: 150,
+      size: 160,
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
         if (loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse justify-end pr-4"
+              parentClassName="flex animate-pulse justify-end w-full pr-4"
               className="h-5 w-full max-w-20"
             />
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-end px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary h-10 w-full items-center justify-end px-4 py-2 text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -253,14 +256,15 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-end"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Voting Power ({daoId})
           </h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "votingPower"
                 ? sortDirection === "asc"
@@ -309,7 +313,7 @@ export const Delegates = ({
     },
     {
       accessorKey: "activity",
-      size: 150,
+      size: 160,
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string;
         const activityPercentage = row.original.activityPercentage;
@@ -344,14 +348,14 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex w-full items-center justify-end px-4">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 items-center justify-start px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex h-10 w-full items-center justify-end px-4 py-2 text-end text-sm font-normal">
             {delegators}
           </div>
         );
@@ -359,12 +363,13 @@ export const Delegates = ({
       header: () => (
         <Button
           variant="ghost"
-          className="flex h-8 w-full justify-end rounded-b-none px-4"
+          size="sm"
+          className="text-secondary w-full justify-end"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
           <ArrowUpDown
-            props={{ className: "ml-2 size-4" }}
+            props={{ className: "size-4" }}
             activeState={
               sortBy === "delegationsCount"
                 ? sortDirection === "asc"
@@ -415,7 +420,7 @@ export const Delegates = ({
     return (
       <div className="flex flex-col gap-2">
         <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
             <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r md:[&_th]:border-none [&_tr]:border-b">
               <tr className="border-light-dark">
                 {delegateColumns.map((column, index) => (
@@ -423,7 +428,7 @@ export const Delegates = ({
                     key={index}
                     className="h-8 text-left [&:has([role=checkbox])]:pr-0"
                     style={{
-                      width: column.size !== 150 ? column.size : "auto",
+                      width: column.size ? column.size : "auto",
                     }}
                   >
                     {typeof column.header === "function"

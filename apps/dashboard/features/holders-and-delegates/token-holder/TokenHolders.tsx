@@ -17,8 +17,8 @@ import { Pagination } from "@/shared/components/design-system/table/Pagination";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
-import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
-import { BlankSlate } from "@/shared/components";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { BlankSlate, Button } from "@/shared/components";
 
 interface TokenHolderTableData {
   address: Address;
@@ -169,7 +169,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="group flex h-10 w-full items-center gap-2 px-2 py-2">
+          <div className="flex h-10 items-center gap-2 px-2 py-2">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -178,10 +178,14 @@ export const TokenHolders = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <div className="bg-surface-default text-primary flex items-center gap-1.5 rounded-md border border-[#3F3F46] px-2 py-1 opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <Button
+                variant="outline"
+                size="sm"
+                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
+              >
                 <Plus className="size-3.5" />
                 <span className="text-sm font-medium">Details</span>
-              </div>
+              </Button>
             )}
           </div>
         );
@@ -189,6 +193,7 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "balance",
+      size: 160,
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
@@ -199,13 +204,15 @@ export const TokenHolders = ({
         return (
           <div className="text-table-header flex h-8 w-full items-center justify-end whitespace-nowrap px-2">
             Balance ({daoId})
-            <button
-              className="!text-table-header cursor-pointer justify-end text-end"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end"
               onClick={handleSortToggle}
             >
               <ArrowUpDown
                 props={{
-                  className: "ml-2 size-4",
+                  className: "size-4",
                 }}
                 activeState={
                   sortOrder === "asc"
@@ -215,14 +222,14 @@ export const TokenHolders = ({
                       : ArrowState.DEFAULT
                 }
               />
-            </button>
+            </Button>
           </div>
         );
       },
       cell: ({ row }) => {
         if (loading) {
           return (
-            <div className="flex h-10 items-center justify-end px-4 py-2">
+            <div className="font-nomal flex h-10 w-full items-center justify-end px-4 py-2 text-sm">
               <SkeletonRow className="h-4 w-20" />
             </div>
           );
@@ -243,10 +250,11 @@ export const TokenHolders = ({
           Variation ({daoId})
         </div>
       ),
+      size: 250,
       cell: ({ row }) => {
         if (historicalDataLoading || loading) {
           return (
-            <div className="flex h-10 items-center justify-start px-4 py-2">
+            <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -270,6 +278,7 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "delegate",
+      size: 160,
       header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
           Delegate
@@ -346,7 +355,7 @@ export const TokenHolders = ({
       <div className="w-full text-white">
         <div className="flex flex-col gap-2">
           <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm md:table-fixed">
+            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
               <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
                 <tr className="border-light-dark">
                   {tokenHoldersColumns.map((column, index) => (
@@ -354,7 +363,7 @@ export const TokenHolders = ({
                       key={index}
                       className="h-8 text-left [&:has([role=checkbox])]:pr-0"
                       style={{
-                        width: column.size !== 150 ? column.size : "auto",
+                        width: column.size ? column.size : "auto",
                       }}
                     >
                       {typeof column.header === "function"
@@ -410,6 +419,7 @@ export const TokenHolders = ({
             withSorting={true}
             onRowClick={(row) => handleOpenDrawer(row.address as Address)}
             isTableSmall={true}
+            className="md:table-fixed"
             showWhenEmpty={
               <BlankSlate
                 variant="default"
