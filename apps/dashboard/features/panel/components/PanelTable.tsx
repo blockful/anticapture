@@ -32,7 +32,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
-export const PanelTable = ({ days }: { days: TimeInterval }) => {
+export const PanelTable = () => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create a ref to store the actual delegated supply values
@@ -52,13 +52,15 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const DelegatedSupplyCell = ({
     daoId,
     rowIndex,
-    days,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
-    days: TimeInterval;
   }) => {
-    const { data: supplyData } = useDelegatedSupply(daoId, String(days));
+    const { data: supplyData } = useDelegatedSupply(
+      daoId,
+      String(TimeInterval.SEVEN_DAYS),
+      // Smallest time interval available as `changeRate` is not used, only the current supply
+    );
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (supplyData) {
@@ -251,9 +253,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             </div>
           );
         }
-        return (
-          <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
-        );
+        return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
         <Button
