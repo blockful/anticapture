@@ -1,6 +1,6 @@
 import { accountBalance, accountPower, delegation, token } from "ponder:schema";
 import { ponder } from "ponder:registry";
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { delegatedVotesChanged, tokenTransfer } from "@/eventHandlers";
@@ -51,6 +51,20 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     // TODO: Adjust delegation data model to allow for partial delegation natively
     // Process the delegation change
 
+    // Pre-compute address lists for flag determination
+    const lendingAddressList = Object.values(
+      LendingAddresses[daoId as DaoIdEnum] || {},
+    );
+    const cexAddressList = Object.values(
+      CEXAddresses[daoId as DaoIdEnum] || {},
+    );
+    const dexAddressList = Object.values(
+      DEXAddresses[daoId as DaoIdEnum] || {},
+    );
+    const burningAddressList = Object.values(
+      BurningAddresses[daoId as DaoIdEnum] || {},
+    );
+
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
       const { delegator } = event.args;
@@ -67,19 +81,13 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         tokenId,
       });
 
-      // Pre-compute address lists for flag determination
-      const lendingAddressList = Object.values(
-        LendingAddresses[daoId as DaoIdEnum] || {},
-      );
-      const cexAddressList = Object.values(
-        CEXAddresses[daoId as DaoIdEnum] || {},
-      );
-      const dexAddressList = Object.values(
-        DEXAddresses[daoId as DaoIdEnum] || {},
-      );
-      const burningAddressList = Object.values(
-        BurningAddresses[daoId as DaoIdEnum] || {},
-      );
+      if (!delegatorBalance && delegator !== zeroAddress /* token coinbase */) {
+        return;
+      }
+
+      const delegatorBalanceValue = delegatorBalance
+        ? delegatorBalance.balance
+        : 0n;
 
       // Determine flags for the delegation
       const isCex =
@@ -101,9 +109,7 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           daoId,
           delegateAccountId: delegate,
           delegatorAccountId: delegator,
-          delegatedValue: delegatorBalance
-            ? (delegatorBalance.balance * BigInt(percentage)) / 10000n
-            : 0n,
+          delegatedValue: (delegatorBalanceValue * BigInt(percentage)) / 10000n, // `percentage` is informed in basis points, wherein 100% (percentage) = 1 (decimal) = 10000 (basis)
           timestamp,
           logIndex,
           isCex,
@@ -113,7 +119,7 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         })
         .onConflictDoUpdate((current) => ({
           delegatedValue:
-            current.delegatedValue + (delegatorBalance?.balance ?? 0n),
+            current.delegatedValue + delegatorBalanceValue,
         }));
 
       // Transaction flag updates moved to DAO-specific indexer
@@ -125,7 +131,7 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           accountId: delegator,
           tokenId,
           delegate: delegate,
-          balance: BigInt(0),
+          balance: delegatorBalanceValue,
         })
         .onConflictDoUpdate({
           delegate: delegate,

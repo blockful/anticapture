@@ -20,7 +20,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { QuorumTypeEnum } from "@/shared/dao-config/types";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const QuorumCard = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -69,6 +69,8 @@ export const QuorumCard = () => {
         BigInt(totalSupply.value ?? ("1" as string)),
     );
 
+  // debugger;
+
   const quorumMinPercentageDelSupply =
     delegatedSupplyValueOp &&
     delSupply.value !== undefined &&
@@ -103,13 +105,13 @@ export const QuorumCard = () => {
 
   const quorumPercentage =
     daoConfig.daoOverview.rules?.quorumCalculation ===
-    QuorumTypeEnum.DELEGATED_SUPPLY
+    QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY
       ? quorumPercentageDelSupply
       : quorumPercentageTotalSupply;
 
   const quorumValue =
     daoConfig.daoOverview.rules?.quorumCalculation ===
-    QuorumTypeEnum.DELEGATED_SUPPLY
+    QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY
       ? quorumValueDelSupply
       : quorumValueTotalSupply;
 

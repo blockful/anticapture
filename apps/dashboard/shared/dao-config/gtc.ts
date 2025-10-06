@@ -1,4 +1,4 @@
-import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -7,6 +7,7 @@ import {
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { GitcoinIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
@@ -29,7 +30,7 @@ export const GTC: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For + Abstain",
-      quorumCalculation: QuorumTypeEnum.TOTAL_SUPPLY,
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
       proposalThreshold: "150k GTC",
     },
   },

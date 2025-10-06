@@ -1,4 +1,4 @@
-import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -8,6 +8,7 @@ import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { EnsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
@@ -28,7 +29,7 @@ export const ENS: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain",
-      quorumCalculation: QuorumTypeEnum.TOTAL_SUPPLY,
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {

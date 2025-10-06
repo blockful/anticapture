@@ -1,4 +1,4 @@
-import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -7,6 +7,7 @@ import {
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { ScrollIcon } from "@/shared/components/icons";
 import { scroll } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const SCR: DaoConfiguration = {
   name: "Scroll",
@@ -26,7 +27,7 @@ export const SCR: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain + Against",
-      quorumCalculation: QuorumTypeEnum.SCR,
+      quorumCalculation: QUORUM_CALCULATION_TYPES.SCROLL,
       proposalThreshold: "50M $SCR",
     },
   },
@@ -222,4 +223,5 @@ export const SCR: DaoConfiguration = {
   },
   resilienceStages: true,
   tokenDistribution: true,
+  dataTables: true,
 };

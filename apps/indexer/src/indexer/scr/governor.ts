@@ -12,7 +12,6 @@ import { ProposalStatus } from "@/lib/constants";
 import { env } from "@/env";
 
 export function SCRGovernorIndexer(client: DAOClient, blockTime: number) {
-  // TODO: Current model won't work for quorum indexing as it requires $proposalId
   const daoId = DaoIdEnum.SCR;
 
   ponder.on(`SCRGovernor:setup`, async ({ context }) => {

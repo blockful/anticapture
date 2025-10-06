@@ -1,4 +1,4 @@
-import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   RiskLevel,
   SupportStageEnum,
@@ -7,6 +7,7 @@ import {
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { OptimismIcon } from "@/shared/components/icons";
 import { optimism } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
@@ -29,7 +30,7 @@ export const OP: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "All Votes Cast",
-      quorumCalculation: QuorumTypeEnum.DELEGATED_SUPPLY,
+      quorumCalculation: QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY,
       proposalThreshold: "Only Foundation Proposes",
     },
   },

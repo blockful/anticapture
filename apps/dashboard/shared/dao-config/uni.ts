@@ -1,9 +1,10 @@
 import { RiskLevel, SupportStageEnum } from "@/shared/types/enums";
-import { DaoConfiguration, QuorumTypeEnum } from "@/shared/dao-config/types";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
@@ -26,7 +27,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
-      quorumCalculation: QuorumTypeEnum.TOTAL_SUPPLY,
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
   },
   governanceImplementation: {
