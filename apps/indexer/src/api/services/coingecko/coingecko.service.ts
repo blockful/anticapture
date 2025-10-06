@@ -63,7 +63,8 @@ export class CoingeckoService {
 
       const data = await response.json();
       const price = CoingeckoTokenPriceDataSchema.parse(data);
-      const priceValue = price[tokenContractAddress]?.[targetCurrency];
+      const priceValue =
+        price[tokenContractAddress.toLowerCase()]?.[targetCurrency];
 
       if (!priceValue) {
         throw new Error("Unable to extract dataset");
