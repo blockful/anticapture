@@ -7,7 +7,6 @@ import {
   SkeletonDaoInfoCards,
 } from "@/shared/components";
 import { formatNumberUserReadable } from "@/shared/utils/";
-import { formatEther } from "viem";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
 import {
   calculateChangeRate,
@@ -21,6 +20,12 @@ import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+
+const toTokenAmount = (wei: string | bigint) => Number(wei) / 1e18;
+
+const calculatePercentage = (n: string | bigint, d: string | bigint) => {
+  return (Number(n) * 100) / Number(d);
+};
 
 export const QuorumCard = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -38,10 +43,6 @@ export const QuorumCard = () => {
 
   const loading = isDaoDataLoading || isTimeSeriesDataLoading;
 
-  const delegatedSupplyValueOp = delegatedSupply.value
-    ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
-    : delegatedSupply.value;
-
   const totalSupply = {
     value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
     changeRate: calculateChangeRate(
@@ -49,79 +50,52 @@ export const QuorumCard = () => {
     ),
   };
 
-  const delSupply = {
-    value:
-      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high ?? null,
-    changeRate: calculateChangeRate(
-      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
-    ),
-  };
-
   if (loading) {
     return <SkeletonDaoInfoCards />;
   }
 
-  const quorumMinPercentage =
-    daoData?.quorum &&
-    totalSupply.value !== undefined &&
-    formatEther(
-      (BigInt(daoData.quorum) * BigInt(1e20)) /
-        BigInt(totalSupply.value ?? ("1" as string)),
-    );
+  // Helper functions
 
-  // debugger;
-
-  const quorumMinPercentageDelSupply =
-    delegatedSupplyValueOp &&
-    delSupply.value !== undefined &&
-    formatEther(
-      (BigInt(delegatedSupplyValueOp) * BigInt(30) * BigInt(1e18)) /
-        BigInt(100),
-    );
-
-  const proposalThresholdPercentage =
-    daoData?.proposalThreshold &&
-    totalSupply.value !== undefined &&
-    formatEther(
-      (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
-        BigInt(totalSupply.value ?? ("1" as string)),
-    );
-
-  const quorumValueTotalSupply = daoData?.quorum
-    ? `${formatNumberUserReadable(Number(daoData.quorum) / 10 ** 18)} `
-    : "No Quorum";
-
-  const quorumValueDelSupply = quorumMinPercentageDelSupply
-    ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
-    : "No Quorum";
-
-  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
-    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
-    : "(N/A)";
-
-  const quorumPercentageTotalSupply = quorumMinPercentage
-    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
-    : "(N/A)";
-
-  const quorumPercentage =
+  // Determine calculation type
+  const isDelSupplyBased =
     daoConfig.daoOverview.rules?.quorumCalculation ===
-    QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY
-      ? quorumPercentageDelSupply
-      : quorumPercentageTotalSupply;
+    QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY;
 
-  const quorumValue =
-    daoConfig.daoOverview.rules?.quorumCalculation ===
-    QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY
-      ? quorumValueDelSupply
-      : quorumValueTotalSupply;
+  // Calculate quorum values and percentages
+  let quorumValue: string;
+  let quorumPercentage: string;
 
-  const proposalThresholdValue = daoData?.proposalThreshold
-    ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
-    : "No Threshold";
+  if (isDelSupplyBased && delegatedSupply.value) {
+    const delSupplyTokens = toTokenAmount(delegatedSupply.value);
+    const quorumTokens = delSupplyTokens * 0.3;
+    quorumValue = `${formatNumberUserReadable(quorumTokens)} `;
+    quorumPercentage = `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`;
+  } else if (daoData?.quorum && totalSupply.value) {
+    const quorumTokens = toTokenAmount(daoData.quorum);
+    const percentage = calculatePercentage(daoData.quorum, totalSupply.value);
+    quorumValue = `${formatNumberUserReadable(quorumTokens)} `;
+    quorumPercentage = `(${percentage.toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`;
+  } else {
+    quorumValue = "No Quorum";
+    quorumPercentage = "(N/A)";
+  }
 
-  const proposalThresholdPercentageFormatted = proposalThresholdPercentage
-    ? `(${parseFloat(proposalThresholdPercentage).toFixed(1)}%)`
-    : "(N/A)";
+  // Calculate proposal threshold
+  let proposalThresholdValue: string;
+  let proposalThresholdPercentageFormatted: string;
+
+  if (daoData?.proposalThreshold && totalSupply.value) {
+    const thresholdTokens = toTokenAmount(daoData.proposalThreshold);
+    const percentage = calculatePercentage(
+      daoData.proposalThreshold,
+      totalSupply.value,
+    );
+    proposalThresholdValue = formatNumberUserReadable(thresholdTokens);
+    proposalThresholdPercentageFormatted = `(${percentage.toFixed(1)}%)`;
+  } else {
+    proposalThresholdValue = "No Threshold";
+    proposalThresholdPercentageFormatted = "(N/A)";
+  }
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
 
