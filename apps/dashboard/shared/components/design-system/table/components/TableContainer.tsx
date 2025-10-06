@@ -9,9 +9,7 @@ export const TableContainer = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "md:border-light-dark relative w-full md:rounded-lg md:border",
-        "overflow-y-auto",
-        "scrollbar-none hover:scrollbar-thin",
+        "md:border-light-dark scrollbar-thin relative w-full overflow-y-auto md:rounded-lg md:border",
         className,
       )}
     >

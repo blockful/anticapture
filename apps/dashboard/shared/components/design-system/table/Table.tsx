@@ -159,7 +159,7 @@ export const Table = <TData, TValue>({
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
         )}
       >
-        <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-semibold sm:font-medium">
+        <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className={"border-light-dark"}>
               {headerGroup.headers.map((header) => {
