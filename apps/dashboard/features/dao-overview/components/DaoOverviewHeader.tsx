@@ -20,25 +20,27 @@ export const DaoOverviewHeader = ({
   const baseLinkRoute = `${daoOverview.chain.blockExplorers?.default.url}/address`;
 
   return (
-    <div className="bg-border-default flex items-center gap-3 px-4 py-2.5">
-      <h3 className="text-primary text-lg font-medium uppercase leading-6">
-        {daoConfig.name}
-      </h3>
-      <BadgeStatus
-        icon={EthereumIcon}
-        className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
-      >
-        Ethereum
-      </BadgeStatus>
-      <BadgeStatus
-        icon={DollarSign}
-        iconVariant="secondary"
-        className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
-      >
-        1 {daoId} = ${lastPrice.toFixed(2)}
-      </BadgeStatus>
+    <div className="md:bg-border-default flex flex-col gap-3 py-2.5 md:flex-row md:items-center md:justify-between md:px-4">
+      <div className="flex items-center gap-3">
+        <h3 className="text-primary text-lg font-medium uppercase leading-6">
+          {daoConfig.name}
+        </h3>
+        <BadgeStatus
+          icon={EthereumIcon}
+          className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
+        >
+          Ethereum
+        </BadgeStatus>
+        <BadgeStatus
+          icon={DollarSign}
+          iconVariant="secondary"
+          className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
+        >
+          1 {daoId} = ${lastPrice.toFixed(2)}
+        </BadgeStatus>
+      </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <DefaultLink
           href={`${baseLinkRoute}/${daoOverview.contracts?.governor}`}
           openInNewTab

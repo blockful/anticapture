@@ -57,10 +57,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div className="relative">
         <DaoOverviewHeaderBackground color={daoColorsSchema[daoId]} />
         <div className="relative z-10 flex flex-col gap-4 px-5 pt-5">
-          <div className="border-inverted bg-inverted flex gap-1 border-2">
-            <div className="flex max-w-32 items-center justify-center">
-              <DaoAvatarIcon daoId={daoId} className="w-full rounded-none" />
-            </div>
+          <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
+            <DaoAvatarIcon
+              daoId={daoId}
+              className="border-inverted size-32 flex-shrink-0 rounded-none border-2 md:border-none"
+            />
             <div className="flex flex-1 flex-col">
               <DaoOverviewHeader
                 daoId={daoId}

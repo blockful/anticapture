@@ -41,7 +41,7 @@ export const DaoOverviewMetrics = ({
   liquidTreasuryNonDaoValue,
   topDelegatesToPass,
 }: DaoOverviewMetricsProps) => (
-  <div className="bg-surface-default flex justify-between px-4 py-3">
+  <div className="border-t-1 border-t-border-default md:bg-surface-default grid grid-cols-2 gap-4 border-dashed py-3 md:flex md:grid-cols-4 md:justify-between md:border-none md:px-4">
     <DaoOverviewMetricCard
       title="Votable Supply"
       text={`${delegatedSupplyValue} ${daoId} delegated`}
