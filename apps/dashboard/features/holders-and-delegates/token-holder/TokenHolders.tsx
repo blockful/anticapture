@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -11,7 +11,6 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
@@ -51,50 +50,15 @@ export const TokenHolders = ({
     pagination,
     fetchNextPage,
     fetchingMore,
+    isHistoricalLoadingFor,
+    historicalBalancesCache,
   } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
     orderDirection: sortOrder,
     address: currentAddressFilter,
+    days: days,
   });
-
-  const [historicalBalancesCache, setHistoricalBalancesCache] = useState<
-    Map<string, string>
-  >(new Map());
-
-  const newAddressesToFetch = useMemo(
-    () =>
-      tokenHoldersData
-        ?.map((h) => h.accountId.toLowerCase())
-        .filter((addr) => !historicalBalancesCache.has(addr)) || [],
-    [tokenHoldersData, historicalBalancesCache],
-  );
-
-  const { data: newHistoricalBalances, loading: historicalLoading } =
-    useHistoricalBalances(daoId, newAddressesToFetch, days);
-
-  const isHistoricalLoadingFor = useCallback(
-    (addr: string) => historicalLoading && !historicalBalancesCache.has(addr),
-    [historicalBalancesCache, historicalLoading],
-  );
-
-  useEffect(() => {
-    if (newHistoricalBalances && newHistoricalBalances.length > 0) {
-      setHistoricalBalancesCache((prevCache) => {
-        const newCache = new Map(prevCache);
-        newHistoricalBalances.forEach((h) => {
-          if (h) {
-            newCache.set(h.address.toLowerCase(), h.balance);
-          }
-        });
-        return newCache;
-      });
-    }
-  }, [newHistoricalBalances]);
-
-  useEffect(() => {
-    setHistoricalBalancesCache(new Map());
-  }, [sortOrder, currentAddressFilter, days]);
 
   const handleOpenDrawer = (address: string) => {
     setSelectedTokenHolder(address);
@@ -134,9 +98,7 @@ export const TokenHolders = ({
   const tableData: TokenHolderTableData[] = useMemo(
     () =>
       tokenHoldersData?.map((holder) => {
-        const historicalBalance = historicalBalancesCache.get(
-          holder.accountId.toLowerCase(),
-        );
+        const historicalBalance = historicalBalancesCache.get(holder.accountId);
 
         const variation = calculateVariation(holder.balance, historicalBalance);
 
