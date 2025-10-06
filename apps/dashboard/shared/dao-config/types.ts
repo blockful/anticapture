@@ -120,11 +120,6 @@ export interface DaoAddresses {
     OptimismTokenDistributor: string;
     OptimismUniv3Uni: string;
   };
-  [DaoIdEnum.ARBITRUM]: {
-    ArbitrumTimelock: string;
-    ArbitrumTokenDistributor: string;
-    ArbitrumDaoWallet: string;
-  };
   [DaoIdEnum.GITCOIN]: {
     GTCWallet: string;
     GTCTimelock: string;
@@ -151,10 +146,6 @@ export interface DaoConfiguration extends BaseInfo {
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
   dataTables?: boolean;
-  showSupport?: {
-    snapshotProposal: string;
-    snapshotSpace: string;
-  };
   riskAnalysis?: boolean;
   noStage?: boolean;
 }
