@@ -7,6 +7,7 @@ import { mainnet } from "viem/chains";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
+  color: "#fc72ff",
   supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {

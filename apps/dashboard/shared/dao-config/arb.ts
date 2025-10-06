@@ -5,6 +5,7 @@ import { arbitrum } from "viem/chains";
 
 export const ARB: DaoConfiguration = {
   name: "Arbitrum",
+  color: "#2d384b",
   daoOverview: {
     chain: arbitrum,
     contracts: {

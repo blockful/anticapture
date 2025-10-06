@@ -12,14 +12,6 @@ import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/
 import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
 
-const daoColorsSchema = {
-  [DaoIdEnum.UNISWAP]: "#fc72ff",
-  [DaoIdEnum.ENS]: "#0080bc",
-  [DaoIdEnum.ARBITRUM]: "#2d384b",
-  [DaoIdEnum.OPTIMISM]: "#ff0420",
-  [DaoIdEnum.GITCOIN]: "#1e443f",
-};
-
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
@@ -55,7 +47,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <Suspense fallback={<DaoOverviewSkeleton />}>
       <div className="relative">
-        <DaoOverviewHeaderBackground color={daoColorsSchema[daoId]} />
+        <DaoOverviewHeaderBackground color={daoConfig.color} />
         <div className="relative z-10 flex flex-col gap-4 px-5 pt-5">
           <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
             <DaoAvatarIcon
