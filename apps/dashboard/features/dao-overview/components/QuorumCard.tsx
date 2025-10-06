@@ -21,10 +21,62 @@ import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
+const NOT_APPLICABLE = "(N/A)";
+
 const toTokenAmount = (wei: string | bigint) => Number(wei) / 1e18;
 
 const calculatePercentage = (n: string | bigint, d: string | bigint) => {
   return (Number(n) * 100) / Number(d);
+};
+
+const resolveQuorum = (
+  quorum: string | bigint,
+  totalSupply: string | null | undefined,
+  quorumCalculation: string | null | undefined,
+  delegatedSupply: string | null | undefined,
+): { value: string; percentage: string } => {
+  const isDelSupplyBased =
+    quorumCalculation === QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY;
+
+  if (isDelSupplyBased && delegatedSupply) {
+    const delSupplyTokens = toTokenAmount(delegatedSupply);
+    const quorumTokens = delSupplyTokens * 0.3;
+    return {
+      value: `${formatNumberUserReadable(quorumTokens)} `,
+      percentage: `(30% ${quorumCalculation})`,
+    };
+  } else if (quorum && totalSupply) {
+    const quorumTokens = toTokenAmount(quorum);
+    const percentage = calculatePercentage(quorum, totalSupply);
+    return {
+      value: `${formatNumberUserReadable(quorumTokens)} `,
+      percentage: `(${percentage.toFixed(1)}% ${quorumCalculation})`,
+    };
+  } else {
+    return {
+      value: "No Quorum",
+      percentage: NOT_APPLICABLE,
+    };
+  }
+};
+
+const resolveThreshhold = (
+  proposalThreshold: string | bigint,
+  totalSupply: string | null | undefined,
+): { value: string; percentage: string } => {
+  if (proposalThreshold && totalSupply) {
+    const thresholdTokens = toTokenAmount(proposalThreshold);
+    const percentage = calculatePercentage(proposalThreshold, totalSupply);
+    return {
+      value: formatNumberUserReadable(thresholdTokens),
+      percentage: `(${percentage.toFixed(1)}%)`,
+    };
+  } else {
+    return {
+      value: "No Threshold",
+      percentage: NOT_APPLICABLE,
+    };
+  }
 };
 
 export const QuorumCard = () => {
@@ -40,8 +92,11 @@ export const QuorumCard = () => {
       [MetricTypesEnum.TOTAL_SUPPLY],
       TimeInterval.ONE_YEAR,
     );
-
   const loading = isDaoDataLoading || isTimeSeriesDataLoading;
+
+  if (loading) {
+    return <SkeletonDaoInfoCards />;
+  }
 
   const totalSupply = {
     value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
@@ -50,55 +105,21 @@ export const QuorumCard = () => {
     ),
   };
 
-  if (loading) {
-    return <SkeletonDaoInfoCards />;
-  }
-
-  // Helper functions
-
-  // Determine calculation type
-  const isDelSupplyBased =
-    daoConfig.daoOverview.rules?.quorumCalculation ===
-    QUORUM_CALCULATION_TYPES.DELEGATE_SUPPLY;
-
-  // Calculate quorum values and percentages
-  let quorumValue: string;
-  let quorumPercentage: string;
-
-  if (isDelSupplyBased && delegatedSupply.value) {
-    const delSupplyTokens = toTokenAmount(delegatedSupply.value);
-    const quorumTokens = delSupplyTokens * 0.3;
-    quorumValue = `${formatNumberUserReadable(quorumTokens)} `;
-    quorumPercentage = `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`;
-  } else if (daoData?.quorum && totalSupply.value) {
-    const quorumTokens = toTokenAmount(daoData.quorum);
-    const percentage = calculatePercentage(daoData.quorum, totalSupply.value);
-    quorumValue = `${formatNumberUserReadable(quorumTokens)} `;
-    quorumPercentage = `(${percentage.toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`;
-  } else {
-    quorumValue = "No Quorum";
-    quorumPercentage = "(N/A)";
-  }
+  // Calculate quorum
+  const { value: quorumValue, percentage: quorumPercentage } = resolveQuorum(
+    daoData?.quorum,
+    totalSupply.value,
+    daoConfig.daoOverview.rules?.quorumCalculation,
+    delegatedSupply.value,
+  );
 
   // Calculate proposal threshold
-  let proposalThresholdValue: string;
-  let proposalThresholdPercentageFormatted: string;
-
-  if (daoData?.proposalThreshold && totalSupply.value) {
-    const thresholdTokens = toTokenAmount(daoData.proposalThreshold);
-    const percentage = calculatePercentage(
-      daoData.proposalThreshold,
-      totalSupply.value,
-    );
-    proposalThresholdValue = formatNumberUserReadable(thresholdTokens);
-    proposalThresholdPercentageFormatted = `(${percentage.toFixed(1)}%)`;
-  } else {
-    proposalThresholdValue = "No Threshold";
-    proposalThresholdPercentageFormatted = "(N/A)";
-  }
+  const {
+    value: proposalThresholdValue,
+    percentage: proposalThresholdPercentageFormatted,
+  } = resolveThreshhold(daoData?.proposalThreshold, totalSupply.value);
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
-
   const textCardDaoInfo =
     daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
 
