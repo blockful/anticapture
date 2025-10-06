@@ -13,6 +13,7 @@ import { useTokenHolders } from "@/features/holders-and-delegates";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatEther } from "viem";
+import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTreasury";
 
 export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const { data: daoData } = useDaoData(daoId);
@@ -23,7 +24,12 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     daoId,
     days: TimeInterval.SEVEN_DAYS,
   });
-  const treasury = useTreasuryAssetNonDaoToken(daoId, TimeInterval.NINETY_DAYS);
+  const treasuryNonDao = useTreasuryAssetNonDaoToken(
+    daoId,
+    TimeInterval.NINETY_DAYS,
+  );
+
+  const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
   const holders = useTokenHolders({
     daoId,
     limit: 10,
@@ -36,28 +42,26 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     : null;
 
   const liquidTreasuryNonDaoValue = Number(
-    treasury.data?.[0]?.totalAssets || 0,
+    treasuryNonDao.data?.[0]?.totalAssets || 0,
   );
 
-  const daoTreasuryTokens = Number(activeSupply.data?.activeSupply || 0);
-  const daoTreasuryValue =
+  const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
+  const liquidTreasuryAllValue =
     Number(formatEther(BigInt(daoTreasuryTokens))) * lastPrice;
 
-  const liquidTreasuryAllValue = daoTreasuryValue + liquidTreasuryNonDaoValue;
-
   const liquidTreasuryAllPercent = liquidTreasuryAllValue
-    ? (
+    ? Math.round(
         ((liquidTreasuryAllValue - liquidTreasuryNonDaoValue) /
           liquidTreasuryAllValue) *
-        100
-      ).toFixed(2)
+          100,
+      ).toString()
     : "0";
 
   const averageTurnoutPercentAboveQuorum = useMemo(() => {
-    if (!averageTurnout.data || !quorumValue) return null;
+    if (!averageTurnout.data || !quorumValue) return 0;
     const turnoutTokens =
       Number(averageTurnout.data.currentAverageTurnout) / 10 ** 18;
-    return ((turnoutTokens / quorumValue - 1) * 100).toFixed(2);
+    return (turnoutTokens / quorumValue - 1) * 100;
   }, [averageTurnout.data, quorumValue]);
 
   const topDelegatesToPass = useMemo(() => {
@@ -82,7 +86,8 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     activeSupply.isLoading,
     delegatedSupply.isLoading,
     averageTurnout.isLoading,
-    treasury.loading,
+    treasuryNonDao.loading,
+    treasuryAll.loading,
     tokenPrice.loading,
     holders.loading,
   ].some(Boolean);
@@ -92,7 +97,7 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     activeSupply,
     delegatedSupply,
     averageTurnout,
-    treasury,
+    treasuryNonDao,
     holders,
     lastPrice,
     quorumValue,

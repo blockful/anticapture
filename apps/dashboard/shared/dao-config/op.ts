@@ -11,6 +11,7 @@ import { optimism } from "viem/chains";
 export const OP: DaoConfiguration = {
   name: "Optimism",
   color: "#ff0420",
+  forumLink: "https://gov.optimism.io/",
   supportStage: SupportStageEnum.FULL,
   noStage: true,
   icon: OptimismIcon,

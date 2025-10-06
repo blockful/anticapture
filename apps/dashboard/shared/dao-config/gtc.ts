@@ -11,6 +11,7 @@ import { mainnet } from "viem/chains";
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
   color: "#1e443f",
+  forumLink: "https://gov.gitcoin.co/",
   supportStage: SupportStageEnum.FULL,
   icon: GitcoinIcon,
   daoOverview: {

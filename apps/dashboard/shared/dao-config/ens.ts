@@ -12,6 +12,7 @@ import { mainnet } from "viem/chains";
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
   color: "#0080bc",
+  forumLink: "https://discuss.ens.domains/",
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {

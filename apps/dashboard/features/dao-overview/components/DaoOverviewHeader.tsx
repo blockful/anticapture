@@ -3,6 +3,8 @@ import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatu
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { DollarSign } from "lucide-react";
 import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
+import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
+import { ArbitrumIcon } from "@/shared/components/icons";
 
 interface DaoOverviewHeaderProps {
   daoId: string;
@@ -11,6 +13,15 @@ interface DaoOverviewHeaderProps {
   lastPrice: number;
 }
 
+const chainIconsSchema: Record<
+  string,
+  React.FC<React.SVGProps<SVGSVGElement>>
+> = {
+  Ethereum: EthereumIcon,
+  "OP Mainnet": OPMainnetIcon,
+  "Arbitrum One": () => <ArbitrumIcon showBackground={false} className="w-4" />,
+};
+
 export const DaoOverviewHeader = ({
   daoId,
   daoConfig,
@@ -18,6 +29,7 @@ export const DaoOverviewHeader = ({
   lastPrice,
 }: DaoOverviewHeaderProps) => {
   const baseLinkRoute = `${daoOverview.chain.blockExplorers?.default.url}/address`;
+  const chainName = daoOverview.chain.name;
 
   return (
     <div className="md:bg-border-default flex flex-col gap-3 py-2.5 md:flex-row md:items-center md:justify-between md:px-4">
@@ -26,10 +38,10 @@ export const DaoOverviewHeader = ({
           {daoConfig.name}
         </h3>
         <BadgeStatus
-          icon={EthereumIcon}
+          icon={chainIconsSchema[chainName]}
           className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
         >
-          Ethereum
+          {chainName}
         </BadgeStatus>
         <BadgeStatus
           icon={DollarSign}
@@ -63,7 +75,7 @@ export const DaoOverviewHeader = ({
           Token
         </DefaultLink>
         <DefaultLink
-          href={`${baseLinkRoute}/${daoOverview.contracts?.governor}`}
+          href={daoConfig.forumLink || "#"}
           openInNewTab
           className="text-xs uppercase"
         >

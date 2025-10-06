@@ -58,6 +58,7 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
+  forumLink?: string;
   color: string;
   supportStage: SupportStageEnum;
   icon?: (props: DaoIconProps) => ReactNode;

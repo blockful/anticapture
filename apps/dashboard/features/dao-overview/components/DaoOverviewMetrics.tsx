@@ -5,7 +5,7 @@ interface DaoOverviewMetricsProps {
   delegatedSupplyValue: string;
   activeSupplyValue: string;
   averageTurnoutValue: string;
-  averageTurnoutPercentAboveQuorum: string | null;
+  averageTurnoutPercentAboveQuorum: number;
   liquidTreasuryAllValue: number;
   liquidTreasuryAllPercent: string;
   liquidTreasuryNonDaoValue: number;
@@ -57,7 +57,7 @@ export const DaoOverviewMetrics = ({
     <DaoOverviewMetricCard
       title="Average Turnout"
       text={`${averageTurnoutValue} ${daoId}`}
-      subText={`${averageTurnoutPercentAboveQuorum ?? "--"}% above quorum`}
+      subText={`${Math.abs(averageTurnoutPercentAboveQuorum).toFixed(2)}% ${averageTurnoutPercentAboveQuorum < 0 ? "below" : "above"} quorum`}
     />
 
     <DaoOverviewMetricCard
