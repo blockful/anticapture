@@ -206,14 +206,13 @@ export const MultilineChartAttackProfitability = ({
     timeSeriesData,
   ]);
 
-  const prevHashRef = useRef<string>("");
+  const prevCsvRef = useRef<string>("");
+
   useEffect(() => {
     if (mocked || !chartData.length) return;
-    const last = chartData[chartData.length - 1];
-    const keys = Object.keys(last).sort().join("|");
-    const hash = `${chartData.length}:${last.date}:${keys}`;
-    if (hash !== prevHashRef.current) {
-      prevHashRef.current = hash;
+    const serialized = JSON.stringify(chartData);
+    if (serialized !== prevCsvRef.current) {
+      prevCsvRef.current = serialized;
       setCsvData(chartData as Data);
     }
   }, [chartData, mocked, setCsvData]);
