@@ -58,7 +58,6 @@ export const useDelegationHistory = ({
 
   const {
     data: delegationHistoryData,
-    loading: itemsLoading,
     error: itemsError,
     refetch,
     fetchMore,
@@ -107,15 +106,14 @@ export const useDelegationHistory = ({
   }, [delegationHistoryData]);
 
   // Fetch totalCount with separate lightweight query
-  const { data: countData, loading: countLoading } =
-    useGetDelegationHistoryCountQuery({
-      variables: { delegator: delegatorAccountId },
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
+  const { data: countData } = useGetDelegationHistoryCountQuery({
+    variables: { delegator: delegatorAccountId },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
       },
-    });
+    },
+  });
 
   const pagination = useMemo<PaginationInfo>(() => {
     const pageInfo = delegationHistoryData?.delegations?.pageInfo;
@@ -173,13 +171,20 @@ export const useDelegationHistory = ({
           }: { fetchMoreResult?: GetDelegationHistoryItemsQuery },
         ) => {
           if (!fetchMoreResult) return previousResult;
-
+          const prevItems = previousResult.delegations.items ?? [];
+          const newItems = fetchMoreResult.delegations.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) => !prevItems.some((p) => p.timestamp === n.timestamp),
+            ),
+          ];
           // Replace the current data with the new page data
           return {
             ...fetchMoreResult,
             delegations: {
               ...fetchMoreResult.delegations,
-              items: fetchMoreResult.delegations.items,
+              items: merged,
             },
           };
         },
@@ -264,9 +269,17 @@ export const useDelegationHistory = ({
     refetch();
   }, [refetch]);
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     data: processedData,
-    loading: itemsLoading || countLoading,
+    loading: isLoading,
     error: itemsError || null,
     refetch: handleRefetch,
     pagination,

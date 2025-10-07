@@ -1,11 +1,9 @@
 "use client";
 
-import { ShowYourSupportStickyBar } from "@/features/show-support/components";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoPageInteractionProvider } from "@/shared/contexts/DaoPageInteractionContext";
-import { ShowSupportSection } from "@/features/show-support";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
@@ -60,8 +58,6 @@ export const DaoTemplate = () => {
 
         {daoConstants.daoOverview && <DaoOverviewSection daoId={daoIdEnum} />}
 
-        {daoConstants.showSupport && <ShowSupportSection daoId={daoIdEnum} />}
-
         {daoConstants.attackProfitability && (
           <AttackProfitabilitySection
             daoId={daoIdEnum}
@@ -76,7 +72,9 @@ export const DaoTemplate = () => {
           <ResilienceStagesSection daoId={daoIdEnum} />
         )}
 
-        {daoConstants.tokenDistribution && <TokenDistributionSection />}
+        {daoConstants.tokenDistribution && (
+          <TokenDistributionSection daoId={daoIdEnum} />
+        )}
         {daoConstants.dataTables && (
           <HoldersAndDelegatesSection daoId={daoIdEnum} />
         )}
@@ -84,7 +82,6 @@ export const DaoTemplate = () => {
         {/* Demo section for expandable table - remove this in production */}
         {/* <TransactionsTable /> */}
       </div>
-      <ShowYourSupportStickyBar />
     </DaoPageInteractionProvider>
   );
 };

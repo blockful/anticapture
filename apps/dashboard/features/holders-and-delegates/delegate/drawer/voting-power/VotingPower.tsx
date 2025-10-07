@@ -19,7 +19,7 @@ const ChartLegend = ({
   if (loading) {
     return (
       <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
-        {Array.from({ length: 5 }, (_, i) => (
+        {Array.from({ length: 10 }, (_, i) => (
           <div key={i} className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"
@@ -93,7 +93,7 @@ export const VotingPower = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 p-4">
+    <div className="flex w-full flex-col gap-4 p-4">
       <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 md:flex-row">

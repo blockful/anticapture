@@ -9,9 +9,15 @@ interface VotingPowerRepository {
     limit: number,
     orderDirection: "asc" | "desc",
     orderBy: "timestamp" | "delta",
+    minDelta?: string,
+    maxDelta?: string,
   ): Promise<DBVotingPowerWithRelations[]>;
 
-  getVotingPowerCount(account: Address): Promise<number>;
+  getVotingPowerCount(
+    account: Address,
+    minDelta?: string,
+    maxDelta?: string,
+  ): Promise<number>;
 }
 
 export class VotingPowerService {
@@ -23,6 +29,8 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc" = "desc",
     orderBy: "timestamp" | "delta" = "timestamp",
+    minDelta?: string,
+    maxDelta?: string,
   ): Promise<{ items: DBVotingPowerWithRelations[]; totalCount: number }> {
     const items = await this.repository.getVotingPowers(
       account,
@@ -30,9 +38,15 @@ export class VotingPowerService {
       limit,
       orderDirection,
       orderBy,
+      minDelta,
+      maxDelta,
     );
 
-    const totalCount = await this.repository.getVotingPowerCount(account);
+    const totalCount = await this.repository.getVotingPowerCount(
+      account,
+      minDelta,
+      maxDelta,
+    );
     return { items, totalCount };
   }
 }

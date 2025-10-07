@@ -82,6 +82,7 @@ export const votingPowerHistory = onchainTable(
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
     votingPower: drizzle.bigint("voting_power").notNull(),
     delta: drizzle.bigint("delta").notNull(),
+    deltaMod: drizzle.bigint("delta_mod").notNull(),
     timestamp: drizzle.bigint().notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
   }),

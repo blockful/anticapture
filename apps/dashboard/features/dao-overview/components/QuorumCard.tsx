@@ -8,11 +8,8 @@ import {
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { formatEther } from "viem";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
-import {
-  calculateChangeRate,
-  useTokenDistributionContext,
-} from "@/features/token-distribution/contexts";
 import { Badge, Clock, Users } from "lucide-react";
+import { calculateChangeRate } from "@/features/token-distribution/utils";
 import { useParams } from "next/navigation";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -25,7 +22,6 @@ export const QuorumCard = () => {
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { data: daoData, loading: isDaoDataLoading } = useDaoData(daoIdEnum);
   const daoConfig = daoConfigByDaoId[daoIdEnum];
-  const { delegatedSupply } = useTokenDistributionContext();
 
   const { data: timeSeriesData, isLoading: isTimeSeriesDataLoading } =
     useTimeSeriesData(
@@ -73,9 +69,6 @@ export const QuorumCard = () => {
     );
   }
 
-  const delegatedSupplyValueOp =
-    delegatedSupply.value && formatEther(BigInt(delegatedSupply.value));
-
   const totalSupply = {
     value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high,
     changeRate: calculateChangeRate(
@@ -90,6 +83,9 @@ export const QuorumCard = () => {
     ),
   };
 
+  const delegatedSupply =
+    delSupply.value && formatEther(BigInt(delSupply.value));
+
   const quorumMinPercentage =
     daoData.quorum &&
     totalSupply.value !== undefined &&
@@ -99,11 +95,10 @@ export const QuorumCard = () => {
     );
 
   const quorumMinPercentageDelSupply =
-    delegatedSupplyValueOp &&
+    delegatedSupply &&
     delSupply.value !== undefined &&
     formatEther(
-      (BigInt(delegatedSupplyValueOp) * BigInt(30) * BigInt(1e18)) /
-        BigInt(100),
+      (BigInt(delegatedSupply) * BigInt(30) * BigInt(1e18)) / BigInt(100),
     );
 
   const quorumValueTotalSupply = daoData.quorum

@@ -152,6 +152,8 @@ export const delegatedVotesChanged = async (
     throw new Error(`Invalid daoId: ${daoId}`);
   }
 
+  const deltaMod = newBalance - oldBalance;
+
   // Transaction handling moved to DAO-specific indexer
   await context.db
     .insert(votingPowerHistory)
@@ -161,6 +163,7 @@ export const delegatedVotesChanged = async (
       accountId: delegate,
       votingPower: newBalance,
       delta: newBalance - oldBalance,
+      deltaMod: deltaMod > 0n ? deltaMod : -deltaMod,
       timestamp,
       logIndex,
     })

@@ -59,8 +59,6 @@
   --color-error: var(--base-error);
   --color-link: var(--base-brand);
   --color-link-hover: var(--base-brand);
-
-  /* Icon Colors*/
   --color-highlight: var(--base-brand);
 
   /* Surface Colors */
@@ -69,7 +67,7 @@
   --color-surface-contrast: var(--base-muted);
   --color-surface-hover: var(--base-border);
   --color-surface-action: var(--base-primary);
-  --color-surface-action-hover: var(--base-primary-opacity);
+  --color-surface-action-hover: var(--base-primary-opacity-darker);
   --color-surface-destructive: var(--base-destructive);
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);
@@ -165,7 +163,7 @@
 
   /* Custom Colors */
   --base-primary-opacity: #fafafa1f;
-  --base-primary-opacity-darker: #fafafab3;
+  --base-primary-opacity-darker: #fafafab2;
   --base-brand: #ec762e;
   --base-brand-lighter: #fb8f4d;
   --base-brand-opacity: #fb8f4d1f;
@@ -216,6 +214,51 @@
     scrollbar-width: none; /* Firefox */
   }
 
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #a1a1aa transparent; /* Firefox */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px; /* Chrome, Safari, Opera */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent; /* Chrome, Safari, Opera */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #a1a1aa; /* Chrome, Safari, Opera */
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #71717a; /* Chrome, Safari, Opera */
+  }
+
+  /* Thin scrollbar on hover */
+  .hover\:scrollbar-thin:hover {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #a1a1aa transparent; /* Firefox */
+  }
+
+  .hover\:scrollbar-thin:hover::-webkit-scrollbar {
+    width: 6px; /* Chrome, Safari, Opera */
+  }
+
+  .hover\:scrollbar-thin:hover::-webkit-scrollbar-track {
+    background: transparent; /* Chrome, Safari, Opera */
+  }
+
+  .hover\:scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: #a1a1aa; /* Chrome, Safari, Opera */
+    border-radius: 3px;
+  }
+
+  .hover\:scrollbar-thin:hover::-webkit-scrollbar-thumb:hover {
+    background: #71717a; /* Chrome, Safari, Opera */
+  }
+
   .no-scroll {
     overflow: hidden;
   }
@@ -229,7 +272,7 @@
   }
 
   .card-header-about-text {
-    @apply text-base leading-normal font-normal;
+    @apply text-base font-normal leading-normal;
   }
 
   .card-body-about {
@@ -257,7 +300,7 @@
   }
 
   .card-text-accordion {
-    @apply text-secondary text-sm leading-normal font-normal;
+    @apply text-secondary text-sm font-normal leading-normal;
   }
 
   .section-title-gap {
@@ -265,7 +308,7 @@
   }
 
   .link-tangerine {
-    @apply hover:text-tangerine/80 text-tangerine font-mono text-[13px] leading-none font-medium tracking-wider uppercase;
+    @apply hover:text-tangerine/80 text-tangerine font-mono text-[13px] font-medium uppercase leading-none tracking-wider;
   }
 
   .text-table-header {
@@ -280,6 +323,12 @@
 
   .section-layout-icon {
     @apply text-secondary size-5;
+  }
+
+  /* Recharts Brush tick formatting */
+  .recharts-brush-texts text {
+    fill: #fafafa !important;
+    font-size: 10px;
   }
 }
 
@@ -352,7 +401,7 @@
 
     /* Custom Colors */
     --base-primary-opacity: #fafafa1f;
-    --base-primary-opacity-darker: #fafafab3;
+    --base-primary-opacity-darker: #fafafab2;
     --base-brand: #ec762e;
     --base-brand-lighter: #fb8f4d;
     --base-brand-opacity: #fb8f4d1f;
