@@ -214,6 +214,28 @@
     scrollbar-width: none; /* Firefox */
   }
 
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #a1a1aa transparent; /* Firefox */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px; /* Chrome, Safari, Opera */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent; /* Chrome, Safari, Opera */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #a1a1aa; /* Chrome, Safari, Opera */
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #71717a; /* Chrome, Safari, Opera */
+  }
+
   /* Thin scrollbar on hover */
   .hover\:scrollbar-thin:hover {
     scrollbar-width: thin; /* Firefox */
