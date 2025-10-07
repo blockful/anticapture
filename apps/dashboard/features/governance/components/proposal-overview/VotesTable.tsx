@@ -45,6 +45,7 @@ interface DataTableProps<TData, TValue> {
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
   defaultExpanded?: ExpandedState;
   showParentDividers?: boolean;
+  hideExpandButtons?: boolean;
 }
 
 export const VotesTable = <TData, TValue>({
@@ -64,6 +65,7 @@ export const VotesTable = <TData, TValue>({
   getSubRows,
   defaultExpanded = {},
   showParentDividers = false,
+  hideExpandButtons = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -158,77 +160,113 @@ export const VotesTable = <TData, TValue>({
           ))}
         </TableHeader>
         <TableBody className="h-max min-h-[400px]">
-          {(table.getRowModel()?.rows?.length ?? 0 > 0) ? (
-            table.getRowModel().rows.map((row, rowIndex) => {
-              // Check if we need a divider before this row
-              const needsDivider =
-                showParentDividers && row.depth === 0 && rowIndex > 0;
+          {(() => {
+            // Use expanded row model if expanding is enabled, otherwise use regular row model
+            const rows =
+              enableExpanding && getSubRows
+                ? table.getExpandedRowModel().rows
+                : table.getRowModel().rows;
 
-              return (
-                <TableRow
-                  key={row.id}
-                  className={cn(
-                    "border-transparent transition-colors duration-300", // Highlight sub-rows
-                    onRowClick && !disableRowClick?.(row.original)
-                      ? "hover:bg-surface-contrast cursor-pointer"
-                      : "cursor-default",
-                    isTableSmall ? "h-10" : "h-13",
-                    needsDivider && "border-border-default border-b",
-                  )}
-                  onClick={() =>
-                    !disableRowClick?.(row.original) &&
-                    onRowClick?.(row.original)
-                  }
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        cell.column.getIndex() === 0 &&
-                          stickyFirstColumn &&
-                          "bg-surface-default z-1 sticky left-0",
-                      )}
-                      style={{
-                        width: cell.column.getSize(),
-                      }}
-                    >
-                      <div className="flex items-center">
-                        {/* Tree lines for hierarchical visualization */}
-                        {index === 0 && enableExpanding && (
-                          <TreeLines row={row} />
-                        )}
+            return rows.length > 0 ? (
+              rows.map((row, rowIndex) => {
+                // Check if we need a divider before this row
+                const needsDivider =
+                  showParentDividers && row.depth === 0 && rowIndex > 0;
 
-                        {/* Expand/Collapse button */}
-                        {index === 0 && (
-                          <div className="flex items-center px-1">
-                            <ExpandButton
-                              row={row}
-                              enableExpanding={enableExpanding}
-                            />
+                return (
+                  <TableRow
+                    key={row.id}
+                    className={cn(
+                      "border-transparent transition-colors duration-300", // Highlight sub-rows
+                      onRowClick && !disableRowClick?.(row.original)
+                        ? "hover:bg-surface-contrast cursor-pointer"
+                        : "cursor-default",
+                      // Use dynamic height for description rows, fixed height for others
+                      (row.original as { isSubRow?: boolean })?.isSubRow
+                        ? "h-auto min-h-10"
+                        : isTableSmall
+                          ? "h-10"
+                          : "h-13",
+                      needsDivider && "border-border-default border-b",
+                    )}
+                    onClick={() =>
+                      !disableRowClick?.(row.original) &&
+                      onRowClick?.(row.original)
+                    }
+                  >
+                    {(() => {
+                      const rowData = row.original as {
+                        isSubRow?: boolean;
+                        reason?: string;
+                      };
+
+                      // Handle description sub-rows - render as single cell spanning all columns
+                      if (rowData.isSubRow && rowData.reason) {
+                        return (
+                          <TableCell colSpan={columns.length} className="p-0">
+                            <div className="bg-surface-contrast/20 flex h-auto min-h-10 items-start gap-3 p-2 pl-8">
+                              <div className="w-full flex-col">
+                                <span className="text-secondary whitespace-pre-wrap break-words font-sans text-[14px] font-normal leading-[20px]">
+                                  {rowData.reason}
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+                        );
+                      }
+
+                      // Regular row rendering
+                      return row.getVisibleCells().map((cell, index) => (
+                        <TableCell
+                          key={cell.id}
+                          className={cn(
+                            cell.column.getIndex() === 0 &&
+                              stickyFirstColumn &&
+                              "bg-surface-default z-1 sticky left-0",
+                          )}
+                          style={{
+                            width: cell.column.getSize(),
+                          }}
+                        >
+                          <div className="flex items-center">
+                            {/* Tree lines for hierarchical visualization */}
+                            {index === 0 && enableExpanding && (
+                              <TreeLines row={row} />
+                            )}
+
+                            {/* Expand/Collapse button */}
+                            {index === 0 && !hideExpandButtons && (
+                              <div className="flex items-center px-1">
+                                <ExpandButton
+                                  row={row}
+                                  enableExpanding={enableExpanding}
+                                />
+                              </div>
+                            )}
+
+                            {/* Cell content */}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
                           </div>
-                        )}
-
-                        {/* Cell content */}
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-full text-center"
-              >
-                {showWhenEmpty || "No results."}
-              </TableCell>
-            </TableRow>
-          )}
+                        </TableCell>
+                      ));
+                    })()}
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-full text-center"
+                >
+                  {showWhenEmpty || "No results."}
+                </TableCell>
+              </TableRow>
+            );
+          })()}
         </TableBody>
       </Table>
     </div>

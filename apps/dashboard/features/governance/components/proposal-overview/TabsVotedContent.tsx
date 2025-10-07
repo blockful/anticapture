@@ -50,8 +50,6 @@ export const TabsVotedContent = ({
       orderDirection: sortDirection,
     });
 
-  console.log(votes);
-
   // Intersection observer on the loading row
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -78,6 +76,7 @@ export const TabsVotedContent = ({
         size: 200,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voterAccountId") as string;
+          const vote = row.original;
 
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
@@ -114,8 +113,13 @@ export const TabsVotedContent = ({
             );
           }
 
+          // Handle description sub-row - this will be handled in the table row rendering
+          if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
+            return null; // This cell will be empty, the description will span all columns
+          }
+
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex h-10 w-full items-center gap-3 p-2">
               <EnsAvatar
                 address={voterAddress as `0x${string}`}
                 size="sm"
@@ -138,6 +142,7 @@ export const TabsVotedContent = ({
         cell: ({ row }) => {
           const support = row.getValue("support") as string;
           const voterAddress = row.getValue("voterAccountId") as string;
+          const vote = row.original;
 
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
@@ -161,6 +166,11 @@ export const TabsVotedContent = ({
                 />
               </div>
             );
+          }
+
+          // Handle description sub-row - show empty for other columns
+          if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
+            return <div className="flex h-10 items-center p-2" />;
           }
 
           const getChoiceInfo = (support: string) => {
@@ -215,6 +225,7 @@ export const TabsVotedContent = ({
         cell: ({ row }) => {
           const timestamp = row.getValue("timestamp") as string;
           const voterAddress = row.getValue("voterAccountId") as string;
+          const vote = row.original;
 
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
@@ -238,6 +249,11 @@ export const TabsVotedContent = ({
                 />
               </div>
             );
+          }
+
+          // Handle description sub-row - show empty for other columns
+          if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
+            return <div className="flex h-10 items-center p-2" />;
           }
 
           const date = timestamp ? new Date(Number(timestamp) * 1000) : null;
@@ -282,6 +298,7 @@ export const TabsVotedContent = ({
         cell: ({ row }) => {
           const votingPower = row.getValue("votingPower") as string;
           const voterAddress = row.getValue("voterAccountId") as string;
+          const vote = row.original;
 
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
@@ -305,6 +322,11 @@ export const TabsVotedContent = ({
                 />
               </div>
             );
+          }
+
+          // Handle description sub-row - show empty for other columns
+          if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
+            return <div className="flex h-10 items-center p-2" />;
           }
 
           const votingPowerNum = votingPower ? Number(votingPower) / 1e18 : 0;
@@ -362,6 +384,7 @@ export const TabsVotedContent = ({
             "historicalVotingPower",
           ) as string | undefined;
           const currentVotingPower = row.original.votingPower;
+          const vote = row.original;
 
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
@@ -385,6 +408,11 @@ export const TabsVotedContent = ({
                 />
               </div>
             );
+          }
+
+          // Handle description sub-row - show empty for other columns
+          if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
+            return <div className="flex h-10 items-center p-2" />;
           }
 
           // If no historical voting power data yet, show loading state
@@ -449,9 +477,31 @@ export const TabsVotedContent = ({
     [proposal, handleSort, sortBy, sortDirection],
   );
 
-  // Prepare table data with loading row if needed
+  // Prepare table data with description rows and loading row if needed
   const tableData = useMemo(() => {
-    const data = [...votes];
+    const data: VoteWithHistoricalPower[] = [];
+
+    // Add votes with their description rows
+    votes.forEach((vote) => {
+      // Add the main vote row
+      data.push(vote);
+
+      // Add description row if the vote has a reason
+      if (vote.reason && vote.reason.trim() !== "") {
+        data.push({
+          voterAccountId: `__DESCRIPTION_${vote.voterAccountId}__`,
+          txHash: null,
+          daoId: vote.daoId,
+          proposalId: vote.proposalId,
+          support: null,
+          votingPower: null,
+          reason: vote.reason,
+          timestamp: null,
+          historicalVotingPower: undefined,
+          isSubRow: true,
+        } as VoteWithHistoricalPower);
+      }
+    });
 
     // Add loading row if there are more pages or currently loading
     if (hasNextPage || isLoadingMore) {
@@ -465,6 +515,7 @@ export const TabsVotedContent = ({
         reason: null,
         timestamp: null,
         historicalVotingPower: undefined,
+        isSubRow: false,
       } as VoteWithHistoricalPower);
     }
 

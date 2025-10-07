@@ -12,6 +12,7 @@ import { QueryInput_HistoricalVotingPower_Days } from "@anticapture/graphql-clie
 export type VoteWithHistoricalPower =
   GetVotesOnchainsQuery["votesOnchains"]["items"][0] & {
     historicalVotingPower?: string;
+    isSubRow?: boolean;
   };
 
 export interface UseVotesResult {
