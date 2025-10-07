@@ -95,8 +95,15 @@ query GetVotesOnchains(
   }
 }
 
+#  Get proposal votes
+query GetVotesOnchainsTotalCount($proposalId: String) {
+  votesOnchains(where: { proposalId: $proposalId }) {
+    totalCount
+  }
+}
+
 # Get voting power change
-query GetVotingPower(
+query GetVotingPowerChange(
   $addresses: JSON!
   $days: queryInput_historicalVotingPower_days!
 ) {

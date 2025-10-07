@@ -92,6 +92,8 @@ export type Query = {
   lastUpdate?: Maybe<LastUpdate_200_Response>;
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
+  /** Returns the active delegates that did not vote on a given proposal */
+  proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
   /** Returns a list of proposal */
   proposals?: Maybe<Proposals_200_Response>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
@@ -303,6 +305,14 @@ export type QueryProposalArgs = {
 };
 
 
+export type QueryProposalNonVotersArgs = {
+  id: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_ProposalNonVoters_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+};
+
+
 export type QueryProposalsArgs = {
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -428,6 +438,8 @@ export type QueryVotingPowerHistorysArgs = {
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1138,6 +1150,12 @@ export enum MetricType {
   Treasury = 'TREASURY'
 }
 
+export type ProposalNonVoters_200_Response = {
+  __typename?: 'proposalNonVoters_200_response';
+  items: Array<Maybe<Query_ProposalNonVoters_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type Proposal_200_Response = {
   __typename?: 'proposal_200_response';
   abstainVotes: Scalars['String']['output'];
@@ -1472,6 +1490,11 @@ export enum QueryInput_LastUpdate_Chart {
   TokenDistribution = 'token_distribution'
 }
 
+export enum QueryInput_ProposalNonVoters_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_ProposalsActivity_OrderBy {
   Timestamp = 'timestamp',
   VoteTiming = 'voteTiming',
@@ -1497,7 +1520,6 @@ export enum QueryInput_Proposals_OrderDirection {
 }
 
 export enum QueryInput_TotalAssets_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1532,6 +1554,14 @@ export type Query_HistoricalVotingPower_Items = {
   __typename?: 'query_historicalVotingPower_items';
   address: Scalars['String']['output'];
   votingPower: Scalars['String']['output'];
+};
+
+export type Query_ProposalNonVoters_Items_Items = {
+  __typename?: 'query_proposalNonVoters_items_items';
+  lastVoteTimestamp: Scalars['Float']['output'];
+  voter: Scalars['String']['output'];
+  votingPower: Scalars['String']['output'];
+  votingPowerVariation: Scalars['String']['output'];
 };
 
 export type Query_ProposalsActivity_Proposals_Items = {
@@ -2426,13 +2456,20 @@ export type GetVotesOnchainsQueryVariables = Exact<{
 
 export type GetVotesOnchainsQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, items: Array<{ __typename?: 'votesOnchain', voterAccountId: string, txHash?: string | null, daoId: string, proposalId?: string | null, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp?: any | null }> } };
 
-export type GetVotingPowerQueryVariables = Exact<{
+export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
+  proposalId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
+
+export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   days: QueryInput_HistoricalVotingPower_Days;
 }>;
 
 
-export type GetVotingPowerQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null };
+export type GetVotingPowerChangeQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];

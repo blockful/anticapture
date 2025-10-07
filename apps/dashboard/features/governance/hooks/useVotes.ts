@@ -4,10 +4,18 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetVotesOnchainsQuery,
   useGetVotesOnchainsQuery,
+  useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
+import { QueryInput_HistoricalVotingPower_Days } from "@anticapture/graphql-client";
+
+// Enhanced vote type with historical voting power
+export type VoteWithHistoricalPower =
+  GetVotesOnchainsQuery["votesOnchains"]["items"][0] & {
+    historicalVotingPower?: string;
+  };
 
 export interface UseVotesResult {
-  votes: GetVotesOnchainsQuery["votesOnchains"]["items"];
+  votes: VoteWithHistoricalPower[];
   totalCount: number;
   loading: boolean;
   error: ApolloError | undefined;
@@ -33,9 +41,7 @@ export const useVotes = ({
   orderDirection = "desc",
 }: UseVotesParams = {}): UseVotesResult => {
   // State for infinite scroll
-  const [allVotes, setAllVotes] = useState<
-    GetVotesOnchainsQuery["votesOnchains"]["items"]
-  >([]);
+  const [allVotes, setAllVotes] = useState<VoteWithHistoricalPower[]>([]);
   const [currentCursor, setCurrentCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -71,6 +77,72 @@ export const useVotes = ({
     notifyOnNetworkStatusChange: true,
   });
 
+  // Lazy query for fetching voting power changes
+  const [getVotingPowerChange] = useGetVotingPowerChangeLazyQuery();
+
+  // Function to fetch voting power for specific votes
+  const fetchVotingPowerForVotes = useCallback(
+    async (votes: VoteWithHistoricalPower[]) => {
+      if (!votes.length || !daoId) return;
+
+      // Filter out votes that already have historical voting power
+      const votesNeedingData = votes.filter(
+        (vote) => !vote.historicalVotingPower,
+      );
+
+      if (!votesNeedingData.length) return;
+
+      try {
+        const addresses = votesNeedingData.map((vote) => vote.voterAccountId);
+
+        const result = await getVotingPowerChange({
+          variables: {
+            addresses,
+            days: QueryInput_HistoricalVotingPower_Days["30d"],
+          },
+          context: {
+            headers: {
+              "anticapture-dao-id": daoId,
+            },
+          },
+        });
+
+        // Update votes with historical voting power
+        if (result.data?.historicalVotingPower) {
+          const powerChanges: Record<string, string> = {};
+          result.data.historicalVotingPower.forEach((item) => {
+            if (item?.address && item?.votingPower) {
+              powerChanges[item.address] = item.votingPower;
+            }
+          });
+
+          // Update only the votes that were fetched and don't already have historical voting power
+          setAllVotes((prevVotes) =>
+            prevVotes.map((vote) => {
+              // Only update if this vote was in the fetch list
+              const wasFetched = votesNeedingData.some(
+                (v) => v.voterAccountId === vote.voterAccountId,
+              );
+              if (wasFetched) {
+                // Set historical voting power to the returned value or "0" if not found
+                const historicalVP = powerChanges[vote.voterAccountId] || "0";
+                return {
+                  ...vote,
+                  historicalVotingPower: historicalVP,
+                };
+              }
+              // Return the vote unchanged
+              return vote;
+            }),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching voting power changes:", error);
+      }
+    },
+    [getVotingPowerChange, daoId],
+  );
+
   // Reset accumulated votes when sorting parameters change
   useEffect(() => {
     setAllVotes([]);
@@ -81,9 +153,18 @@ export const useVotes = ({
   // Initialize allVotes on first load or when data changes after reset
   useEffect(() => {
     if (data?.votesOnchains?.items && allVotes.length === 0 && !currentCursor) {
-      setAllVotes(data.votesOnchains.items);
+      const initialVotes = data.votesOnchains
+        .items as VoteWithHistoricalPower[];
+      setAllVotes(initialVotes);
+      // Fetch voting power for initial votes
+      fetchVotingPowerForVotes(initialVotes);
     }
-  }, [data?.votesOnchains?.items, allVotes.length, currentCursor]);
+  }, [
+    data?.votesOnchains?.items,
+    allVotes.length,
+    currentCursor,
+    fetchVotingPowerForVotes,
+  ]);
 
   // Use accumulated votes for infinite scroll
   const votes = allVotes;
@@ -122,8 +203,12 @@ export const useVotes = ({
           if (!fetchMoreResult) return previousResult;
 
           // Append new votes to existing ones in the GraphQL cache
-          const newVotes = fetchMoreResult.votesOnchains?.items || [];
+          const newVotes = (fetchMoreResult.votesOnchains?.items ||
+            []) as VoteWithHistoricalPower[];
           setAllVotes((prev) => [...prev, ...newVotes]);
+
+          // Fetch voting power for new votes
+          fetchVotingPowerForVotes(newVotes);
 
           // Return the new result for the cache
           return {
@@ -152,6 +237,7 @@ export const useVotes = ({
     fetchMore,
     proposalId,
     limit,
+    fetchVotingPowerForVotes,
   ]);
 
   return {

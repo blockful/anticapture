@@ -5,6 +5,9 @@ import { GetProposalQuery } from "@anticapture/graphql-client";
 import { useState } from "react";
 
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { useParams } from "next/navigation";
+import { useGetVotesOnchainsTotalCountQuery } from "@anticapture/graphql-client/hooks";
 
 export const VotesTabContent = ({
   proposal,
@@ -13,9 +16,21 @@ export const VotesTabContent = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
 
+  const { daoId } = useParams();
+
   const TabsContent = TabsContentMapping[activeTab];
 
-  console.log(proposal);
+  // Get votes for this proposal
+  const { data } = useGetVotesOnchainsTotalCountQuery({
+    variables: {
+      proposalId: proposal.id,
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": (daoId as string)?.toUpperCase() as DaoIdEnum,
+      },
+    },
+  });
 
   return (
     <div className="text-primary flex w-full flex-col gap-3 p-4">
@@ -29,7 +44,7 @@ export const VotesTabContent = ({
         >
           Voted
           <div className="text-secondary font-inter text-[12px] font-medium not-italic leading-[16px]">
-            32 voters / 1.2M VP (76%)
+            {data?.votesOnchains?.totalCount} voters / 1.2M VP (76%)
           </div>
         </div>
         <div

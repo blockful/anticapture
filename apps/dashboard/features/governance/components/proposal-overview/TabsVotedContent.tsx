@@ -1,8 +1,11 @@
 import { DaoIdEnum } from "@/shared/types/daos";
-import { GetProposalQuery, VotesOnchain } from "@anticapture/graphql-client";
+import { GetProposalQuery } from "@anticapture/graphql-client";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useVotes } from "@/features/governance/hooks/useVotes";
+import {
+  useVotes,
+  VoteWithHistoricalPower,
+} from "@/features/governance/hooks/useVotes";
 import { SkeletonRow, Button } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -38,21 +41,14 @@ export const TabsVotedContent = ({
   );
 
   // Get votes for this proposal
-  const {
-    votes,
-    loading,
-    error,
-    totalCount,
-    loadMore,
-    hasNextPage,
-    isLoadingMore,
-  } = useVotes({
-    proposalId: proposal.id,
-    daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
-    limit: 10, // Load 10 items at a time
-    orderBy: sortBy,
-    orderDirection: sortDirection,
-  });
+  const { votes, loading, error, loadMore, hasNextPage, isLoadingMore } =
+    useVotes({
+      proposalId: proposal.id,
+      daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
+      limit: 10, // Load 10 items at a time
+      orderBy: sortBy,
+      orderDirection: sortDirection,
+    });
 
   console.log(votes);
 
@@ -75,7 +71,7 @@ export const TabsVotedContent = ({
     return () => observer.disconnect();
   }, [hasNextPage, isLoadingMore, loadMore]);
 
-  const columns: ColumnDef<VotesOnchain>[] = useMemo(
+  const columns: ColumnDef<VoteWithHistoricalPower>[] = useMemo(
     () => [
       {
         accessorKey: "voterAccountId",
@@ -358,10 +354,14 @@ export const TabsVotedContent = ({
         ),
       },
       {
-        accessorKey: "vpChange",
+        accessorKey: "historicalVotingPower",
         size: 150,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voterAccountId") as string;
+          const historicalVotingPower = row.getValue(
+            "historicalVotingPower",
+          ) as string | undefined;
+          const currentVotingPower = row.original.votingPower;
 
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
@@ -387,11 +387,55 @@ export const TabsVotedContent = ({
             );
           }
 
+          // If no historical voting power data yet, show loading state
+          if (!historicalVotingPower) {
+            return (
+              <div className="flex h-10 items-center p-2">
+                <span className="text-secondary text-sm">Loading...</span>
+              </div>
+            );
+          }
+
+          // Calculate the change
+          const currentVP = currentVotingPower
+            ? Number(currentVotingPower) / 1e18
+            : 0;
+          const historicalVP = Number(historicalVotingPower) / 1e18;
+          const change = currentVP - historicalVP;
+          const changePercentage =
+            historicalVP > 0 ? (change / historicalVP) * 100 : 0;
+
+          // Format the change
+          const formattedChange = formatNumberUserReadable(Math.abs(change));
+          const isPositive = change > 0;
+          const isNegative = change < 0;
+
           return (
             <div className="flex h-10 items-center p-2">
-              <span className={cn("text-sm font-medium")}>
-                not showing for now
-              </span>
+              <div className="flex flex-col">
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    isPositive && "text-success",
+                    isNegative && "text-error",
+                    !isPositive && !isNegative && "text-secondary",
+                  )}
+                >
+                  {isPositive ? "+" : isNegative ? "-" : ""}
+                  {formattedChange}
+                </span>
+                <span
+                  className={cn(
+                    "text-xs",
+                    isPositive && "text-success",
+                    isNegative && "text-error",
+                    !isPositive && !isNegative && "text-secondary",
+                  )}
+                >
+                  ({isPositive ? "+" : isNegative ? "-" : ""}
+                  {Math.abs(changePercentage).toFixed(1)}%)
+                </span>
+              </div>
             </div>
           );
         },
@@ -420,7 +464,8 @@ export const TabsVotedContent = ({
         votingPower: null,
         reason: null,
         timestamp: null,
-      } as VotesOnchain);
+        historicalVotingPower: undefined,
+      } as VoteWithHistoricalPower);
     }
 
     return data;
@@ -443,7 +488,10 @@ export const TabsVotedContent = ({
       <div className="w-full">
         <VotesTable
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({}) as VotesOnchain)}
+          data={Array.from(
+            { length: 7 },
+            () => ({}) as VoteWithHistoricalPower,
+          )}
         />
       </div>
     );
@@ -452,15 +500,6 @@ export const TabsVotedContent = ({
   return (
     <div className="w-full">
       <VotesTable columns={columns} data={tableData} />
-
-      {/* End state */}
-      {!hasNextPage && votes.length > 0 && (
-        <div className="flex items-center justify-center p-4">
-          <div className="text-secondary text-sm">
-            Showing all {totalCount} votes
-          </div>
-        </div>
-      )}
     </div>
   );
 };
