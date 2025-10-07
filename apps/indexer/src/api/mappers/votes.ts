@@ -16,6 +16,15 @@ export const VotersRequestSchema = z.object({
     .optional()
     .default(10),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  addresses: z
+    .union([
+      z
+        .string()
+        .refine((val) => isAddress(val))
+        .transform((val) => [val]),
+      z.array(z.string().refine((val) => isAddress(val))),
+    ])
+    .optional(),
 });
 
 export type VotersRequest = z.infer<typeof VotersRequestSchema>;
