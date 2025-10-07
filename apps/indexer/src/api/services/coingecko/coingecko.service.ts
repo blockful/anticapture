@@ -8,7 +8,20 @@ import {
 import { DAYS_IN_YEAR } from "@/lib/constants";
 import z from "zod";
 
-const CoingeckoTokenPriceDataSchema = z.record(z.record(z.number()));
+const createCoingeckoTokenPriceDataSchema = (
+  tokenContractAddress: string,
+  targetCurrency: string,
+) =>
+  z
+    .object({})
+    .catchall(z.object({}).catchall(z.number()))
+    .refine(
+      (data) => data[tokenContractAddress]?.[targetCurrency] !== undefined,
+      {
+        message: `Unable to extract dataset`,
+      },
+    )
+    .transform((data) => data[tokenContractAddress]![targetCurrency]!);
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
@@ -62,15 +75,10 @@ export class CoingeckoService {
       }
 
       const data = await response.json();
-      const price = CoingeckoTokenPriceDataSchema.parse(data);
-      const priceValue =
-        price[tokenContractAddress.toLowerCase()]?.[targetCurrency];
-
-      if (!priceValue) {
-        throw new Error("Unable to extract dataset");
-      }
-
-      return priceValue;
+      return createCoingeckoTokenPriceDataSchema(
+        tokenContractAddress.toLowerCase(),
+        targetCurrency,
+      ).parse(data);
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch token property data",
