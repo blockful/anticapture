@@ -173,11 +173,17 @@ export const VotesTable = <TData, TValue>({
                 const needsDivider =
                   showParentDividers && row.depth === 0 && rowIndex > 0;
 
+                // Check if the next row is a subrow (to remove border between parent and subrow)
+                const nextRow = rows[rowIndex + 1];
+                const nextRowIsSubRow = nextRow
+                  ? (nextRow.original as { isSubRow?: boolean })?.isSubRow
+                  : false;
+
                 return (
                   <TableRow
                     key={row.id}
                     className={cn(
-                      "border-transparent transition-colors duration-300", // Highlight sub-rows
+                      "transition-colors duration-300", // Highlight sub-rows
                       onRowClick && !disableRowClick?.(row.original)
                         ? "hover:bg-surface-contrast cursor-pointer"
                         : "cursor-default",
@@ -188,6 +194,8 @@ export const VotesTable = <TData, TValue>({
                           ? "h-10"
                           : "h-13",
                       needsDivider && "border-border-default border-b",
+                      // Remove border if next row is a subrow (to connect parent with subrow)
+                      nextRowIsSubRow && "[&_td]:!border-b-0",
                     )}
                     onClick={() =>
                       !disableRowClick?.(row.original) &&
@@ -204,7 +212,7 @@ export const VotesTable = <TData, TValue>({
                       if (rowData.isSubRow && rowData.reason) {
                         return (
                           <TableCell colSpan={columns.length} className="p-0">
-                            <div className="bg-surface-contrast/20 flex h-auto min-h-10 items-start gap-3 p-2 pl-7">
+                            <div className="flex h-auto min-h-10 items-start gap-3 p-2 pl-7">
                               <div className="flex w-full flex-row">
                                 <div className="border-secondary mr-2 h-6 w-4 -translate-y-3 border-b border-l"></div>
                                 <span className="text-secondary whitespace-pre-wrap break-words font-sans text-[14px] font-normal leading-[20px]">
