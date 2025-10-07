@@ -116,7 +116,7 @@ export const VotesTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <div className="h-[500px] overflow-scroll">
+    <div className="scrollbar-custom h-[500px] overflow-auto">
       <Table
         className={cn(
           "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
