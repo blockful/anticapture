@@ -151,7 +151,7 @@ export class ProposalsService {
     ]);
 
     return {
-      totalCount: _addresses
+      totalCount: addresses
         ? _addresses.length
         : await this.proposalsRepo.getProposalNonVotersCount(proposalId),
       items: nonVoters.map((v) => ({
