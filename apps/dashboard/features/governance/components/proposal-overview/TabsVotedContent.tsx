@@ -10,7 +10,14 @@ import { SkeletonRow, Button } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { CheckCircle2, CircleMinus, ThumbsDown, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleMinus,
+  ThumbsDown,
+  XCircle,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 
@@ -433,35 +440,35 @@ export const TabsVotedContent = ({
           const changePercentage =
             historicalVP > 0 ? (change / historicalVP) * 100 : 0;
 
-          // Format the change
-          const formattedChange = formatNumberUserReadable(Math.abs(change));
+          // Determine the direction and color
           const isPositive = change > 0;
           const isNegative = change < 0;
+          const isNeutral = change === 0;
+
+          // Get the appropriate arrow icon
+          const getArrowIcon = () => {
+            if (isPositive) {
+              return <ArrowUp className="text-success h-4 w-4" />;
+            } else if (isNegative) {
+              return <ArrowDown className="text-error h-4 w-4" />;
+            } else {
+              return null;
+            }
+          };
 
           return (
             <div className="flex h-10 items-center p-2">
-              <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                {getArrowIcon()}
                 <span
                   className={cn(
                     "text-sm font-medium",
                     isPositive && "text-success",
                     isNegative && "text-error",
-                    !isPositive && !isNegative && "text-secondary",
+                    isNeutral && "text-secondary",
                   )}
                 >
-                  {isPositive ? "+" : isNegative ? "-" : ""}
-                  {formattedChange}
-                </span>
-                <span
-                  className={cn(
-                    "text-xs",
-                    isPositive && "text-success",
-                    isNegative && "text-error",
-                    !isPositive && !isNegative && "text-secondary",
-                  )}
-                >
-                  ({isPositive ? "+" : isNegative ? "-" : ""}
-                  {Math.abs(changePercentage).toFixed(1)}%)
+                  {Math.abs(changePercentage).toFixed(1)}%
                 </span>
               </div>
             </div>
