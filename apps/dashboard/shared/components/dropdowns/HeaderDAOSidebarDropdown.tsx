@@ -123,6 +123,22 @@ export const HeaderDAOSidebarDropdown = () => {
           daoConfigByDaoId[DaoIdEnum.GITCOIN].supportStage ===
           SupportStageEnum.ANALYSIS,
       },
+      {
+        id: 5,
+        label: "Nouns",
+        icon: (
+          <DaoAvatarIcon
+            daoId={DaoIdEnum.NOUNS}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
+        href: `/${DaoIdEnum.NOUNS.toLowerCase()}`,
+        name: DaoIdEnum.NOUNS,
+        isDisabled:
+          daoConfigByDaoId[DaoIdEnum.NOUNS].supportStage ===
+          SupportStageEnum.ANALYSIS,
+      },
     ],
     [],
   );

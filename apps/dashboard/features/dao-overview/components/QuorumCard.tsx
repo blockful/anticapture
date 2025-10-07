@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Badge,
   BaseCardDaoInfo,
   CardData,
   SkeletonDaoInfoCards,
@@ -13,7 +12,7 @@ import {
   calculateChangeRate,
   useTokenDistributionContext,
 } from "@/features/token-distribution/contexts";
-import { Clock, Users } from "lucide-react";
+import { Badge, Clock, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -32,36 +31,67 @@ export const QuorumCard = () => {
     useTimeSeriesData(
       daoIdEnum,
       [MetricTypesEnum.TOTAL_SUPPLY],
-      TimeInterval.ONE_YEAR,
+      TimeInterval.SEVEN_DAYS,
     );
 
-  const loading = isDaoDataLoading || isTimeSeriesDataLoading;
+  if (isDaoDataLoading || isTimeSeriesDataLoading) {
+    return <SkeletonDaoInfoCards />;
+  }
 
-  const delegatedSupplyValueOp = delegatedSupply.value
-    ? String(BigInt(delegatedSupply.value) / BigInt(10 ** 18))
-    : delegatedSupply.value;
+  if (!daoData) {
+    return (
+      <BaseCardDaoInfo
+        data={{
+          title: "Quorum",
+          icon: <Users className="text-secondary size-4" />,
+          sections: [
+            {
+              title: "Logic",
+              tooltip:
+                'Specifies whether quorum is calculated based on "For" votes, "For + Abstain" votes, or all votes cast',
+              items: [
+                <Badge className="text-secondary" key={"hello2"}>
+                  <Clock className="text-secondary size-3.5" />
+                  Research pending
+                </Badge>,
+              ],
+            },
+            {
+              title: "Proposal Threshold",
+              tooltip:
+                "The minimum voting power required to submit an on-chain proposal.",
+              items: [
+                <Badge className="text-secondary" key={"hello2"}>
+                  <Clock className="text-secondary size-3.5" />
+                  Research pending
+                </Badge>,
+              ],
+            },
+          ],
+        }}
+      />
+    );
+  }
+
+  const delegatedSupplyValueOp =
+    delegatedSupply.value && formatEther(BigInt(delegatedSupply.value));
 
   const totalSupply = {
-    value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
+    value: timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high,
     changeRate: calculateChangeRate(
       timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY],
     ),
   };
 
   const delSupply = {
-    value:
-      timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high ?? null,
+    value: timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY]?.at(-1)?.high,
     changeRate: calculateChangeRate(
       timeSeriesData?.[MetricTypesEnum.DELEGATED_SUPPLY],
     ),
   };
 
-  if (loading) {
-    return <SkeletonDaoInfoCards />;
-  }
-
   const quorumMinPercentage =
-    daoData?.quorum &&
+    daoData.quorum &&
     totalSupply.value !== undefined &&
     formatEther(
       (BigInt(daoData.quorum) * BigInt(1e20)) /
@@ -76,15 +106,7 @@ export const QuorumCard = () => {
         BigInt(100),
     );
 
-  const proposalThresholdPercentage =
-    daoData?.proposalThreshold &&
-    totalSupply.value !== undefined &&
-    formatEther(
-      (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
-        BigInt(totalSupply.value ?? ("1" as string)),
-    );
-
-  const quorumValueTotalSupply = daoData?.quorum
+  const quorumValueTotalSupply = daoData.quorum
     ? `${formatNumberUserReadable(Number(daoData.quorum) / 10 ** 18)} `
     : "No Quorum";
 
@@ -101,34 +123,21 @@ export const QuorumCard = () => {
     : "(N/A)";
 
   const quorumPercentage =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+    daoConfig.daoOverview.rules.quorumCalculation === "Del. Supply"
       ? quorumPercentageDelSupply
       : quorumPercentageTotalSupply;
 
   const quorumValue =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+    daoConfig.daoOverview.rules.quorumCalculation === "Del. Supply"
       ? quorumValueDelSupply
       : quorumValueTotalSupply;
-
-  const proposalThresholdValue = daoData?.proposalThreshold
-    ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
-    : "No Threshold";
-
-  const proposalThresholdPercentageFormatted = proposalThresholdPercentage
-    ? `(${parseFloat(proposalThresholdPercentage).toFixed(1)}%)`
-    : "(N/A)";
-
-  const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
-
-  const textCardDaoInfo =
-    daoConfig.daoOverview.rules?.proposalThreshold ?? proposalThresholdText;
 
   const quorumData: CardData = {
     title: "Quorum",
     icon: <Users className="text-secondary size-4" />,
-    optionalHeaderValue: daoData && (
+    optionalHeaderValue: (
       <p className="text-link flex text-xs font-medium">
-        {quorumValue} {daoData?.id || "Unknown ID"} {quorumPercentage}
+        {quorumValue} {daoData.id} {quorumPercentage}
       </p>
     ),
     sections: [
@@ -136,44 +145,29 @@ export const QuorumCard = () => {
         title: "Logic",
         tooltip:
           'Specifies whether quorum is calculated based on "For" votes, "For + Abstain" votes, or all votes cast',
-        items:
-          daoData && daoConfig.daoOverview.rules?.logic
-            ? [
-                <TextCardDaoInfoItem
-                  className="items-center"
-                  key="text-logic"
-                  item={{
-                    label: daoConfig.daoOverview.rules.logic,
-                  }}
-                />,
-              ]
-            : [
-                <Badge className="text-secondary" key={"hello2"}>
-                  <Clock className="text-secondary size-3.5" />
-                  Research pending
-                </Badge>,
-              ],
+        items: [
+          <TextCardDaoInfoItem
+            className="items-center"
+            key="text-logic"
+            item={{
+              label: daoConfig.daoOverview.rules.logic,
+            }}
+          />,
+        ],
       },
       {
         title: "Proposal Threshold",
         tooltip:
           "The minimum voting power required to submit an on-chain proposal.",
-        items: daoData
-          ? [
-              <TextCardDaoInfoItem
-                key="text-proposal-threshold"
-                item={{
-                  value: textCardDaoInfo,
-                  daoId: daoData.id as DaoIdEnum,
-                }}
-              />,
-            ]
-          : [
-              <Badge className="text-secondary" key={"hello2"}>
-                <Clock className="text-secondary size-3.5" />
-                Research pending
-              </Badge>,
-            ],
+        items: [
+          <TextCardDaoInfoItem
+            key="text-proposal-threshold"
+            item={{
+              value: daoConfig.daoOverview.rules.proposalThreshold,
+              daoId: daoData.id as DaoIdEnum,
+            }}
+          />,
+        ],
       },
     ],
   };
