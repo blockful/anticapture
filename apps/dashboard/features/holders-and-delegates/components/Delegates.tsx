@@ -15,9 +15,9 @@ import { ProgressCircle } from "@/features/holders-and-delegates/components/Prog
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
-import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 
 interface DelegateTableData {
   address: string;

@@ -35,6 +35,7 @@
     "clsx": "^2.1.1",
     "ethers": "^6.13.5",
     "graphql": "^16.11.0",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
     "react": "19.1.0",
@@ -46,8 +47,9 @@
     "swr": "^2.3.2",
     "tailwind-merge": "^2.5.4",
     "vaul": "^1.1.2",
-    "viem": "^2.21.34",
-    "wagmi": "^2.12.25"
+    "viem": "^2.37.11",
+    "wagmi": "^2.12.25",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.6",

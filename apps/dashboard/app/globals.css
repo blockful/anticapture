@@ -236,6 +236,7 @@
     background: #71717a; /* Chrome, Safari, Opera */
   }
 
+  /* Thin scrollbar on hover */
   .hover\:scrollbar-thin:hover {
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #a1a1aa transparent; /* Firefox */
@@ -322,6 +323,12 @@
 
   .section-layout-icon {
     @apply text-secondary size-5;
+  }
+
+  /* Recharts Brush tick formatting */
+  .recharts-brush-texts text {
+    fill: #fafafa !important;
+    font-size: 10px;
   }
 }
 

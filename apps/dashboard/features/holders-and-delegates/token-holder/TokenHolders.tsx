@@ -14,9 +14,9 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
-import { AddressFilter } from "@/shared/components/design-system/filters/AddressFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Button } from "@/shared/components";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 
 interface TokenHolderTableData {
   address: Address;
