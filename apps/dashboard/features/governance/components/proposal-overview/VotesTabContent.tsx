@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { useState } from "react";
 
@@ -8,6 +8,7 @@ import { TabsVotedContent } from "@/features/governance/components/proposal-over
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 import { useGetVotesOnchainsTotalCountQuery } from "@anticapture/graphql-client/hooks";
+import { formatEther } from "viem";
 
 export const VotesTabContent = ({
   proposal,
@@ -32,6 +33,16 @@ export const VotesTabContent = ({
     },
   });
 
+  const totalVotes = formatNumberUserReadable(
+    Number(
+      formatEther(
+        BigInt(proposal.forVotes) +
+          BigInt(proposal.againstVotes) +
+          BigInt(proposal.abstainVotes),
+      ),
+    ),
+  );
+
   return (
     <div className="text-primary flex w-full flex-col gap-3 p-4">
       <div className="grid grid-cols-2 gap-4">
@@ -44,7 +55,7 @@ export const VotesTabContent = ({
         >
           Voted
           <div className="text-secondary font-inter text-[12px] font-medium not-italic leading-[16px]">
-            {data?.votesOnchains?.totalCount} voters / 1.2M VP (76%)
+            {data?.votesOnchains?.totalCount} voters / {totalVotes} VP
           </div>
         </div>
         <div
