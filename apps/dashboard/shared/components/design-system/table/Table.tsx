@@ -235,7 +235,7 @@ export const Table = <TData, TValue>({
               {isLoadingMore && (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="p-0">
-                    <div className="text-link flex h-12 items-center justify-center text-xs tracking-wider">
+                    <div className="text-link flex h-12 items-center justify-center font-mono text-xs tracking-wider">
                       LOADING...
                     </div>
                   </TableCell>
