@@ -1,5 +1,6 @@
 import {
   and,
+  lte,
   asc,
   desc,
   eq,
@@ -9,6 +10,7 @@ import {
   sql,
   isNull,
   count,
+  max,
 } from "ponder";
 import { db } from "ponder:api";
 import {
@@ -17,7 +19,7 @@ import {
   votesOnchain,
   votingPowerHistory,
 } from "ponder:schema";
-import { max, SQL } from "drizzle-orm";
+import { SQL } from "drizzle-orm";
 import { Address } from "viem";
 
 import {
@@ -193,7 +195,10 @@ export class DrizzleRepository {
         ),
       )
       .where(
-        and(gt(accountPower.votingPower, 0n), isNull(votesOnchain.proposalId)),
+        and(
+          gt(accountPower.votingPower, 0n),
+          isNull(votesOnchain.proposalId), // NULL means they didn't vote on this proposal
+        ),
       )
       .orderBy(
         orderDirection === "asc"
@@ -246,28 +251,53 @@ export class DrizzleRepository {
     voters: Address[],
     comparisonTimestamp: number,
   ): Promise<Record<Address, bigint>> {
+    const currentPower = db.$with("current_power").as(
+      db
+        .selectDistinctOn([votingPowerHistory.accountId], {
+          accountId: votingPowerHistory.accountId,
+          votingPower: votingPowerHistory.votingPower,
+        })
+        .from(votingPowerHistory)
+        .where(inArray(votingPowerHistory.accountId, voters))
+        .orderBy(
+          votingPowerHistory.accountId,
+          desc(votingPowerHistory.timestamp),
+        ),
+    );
+
+    const oldPower = db.$with("old_power").as(
+      db
+        .selectDistinctOn([votingPowerHistory.accountId], {
+          accountId: votingPowerHistory.accountId,
+          votingPower: votingPowerHistory.votingPower,
+        })
+        .from(votingPowerHistory)
+        .where(
+          and(
+            inArray(votingPowerHistory.accountId, voters),
+            lte(votingPowerHistory.timestamp, BigInt(comparisonTimestamp)),
+          ),
+        )
+        .orderBy(
+          votingPowerHistory.accountId,
+          desc(votingPowerHistory.timestamp),
+        ),
+    );
+
     const result = await db
+      .with(currentPower, oldPower)
       .select({
-        voterAccountId: votingPowerHistory.accountId,
-        oldVotingPower: sql<string>`
-          MAX(CASE 
-            WHEN ${votingPowerHistory.timestamp} <= ${comparisonTimestamp} 
-            THEN ${votingPowerHistory.votingPower}
-          END)
-        `.as("oldVotingPower"),
-        currentVotingPower: sql<string>`
-         MAX(${votingPowerHistory.votingPower})
-       `.as("currentVotingPower"),
+        voterAccountId: currentPower.accountId,
+        currentVotingPower: currentPower.votingPower,
+        oldVotingPower: oldPower.votingPower,
       })
-      .from(votingPowerHistory)
-      .where(inArray(votingPowerHistory.accountId, voters))
-      .groupBy(votingPowerHistory.accountId);
+      .from(currentPower)
+      .leftJoin(oldPower, eq(currentPower.accountId, oldPower.accountId));
 
     return result.reduce(
       (acc, { voterAccountId, oldVotingPower, currentVotingPower }) => ({
         ...acc,
-        [voterAccountId]:
-          BigInt(currentVotingPower || 0) - BigInt(oldVotingPower || 0),
+        [voterAccountId]: currentVotingPower - (oldVotingPower || 0n),
       }),
       {},
     );

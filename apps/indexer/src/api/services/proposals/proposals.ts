@@ -139,9 +139,7 @@ export class ProposalsService {
     ]);
     const addresses = nonVoters.map((v) => v.voter);
 
-    const comparisonTimestamp = Math.floor(
-      Date.now() / 1000 - 30 * DaysEnum["30d"],
-    );
+    const comparisonTimestamp = Math.floor(Date.now() / 1000 - DaysEnum["30d"]);
 
     const [lastVotersTimestamp, votingPowerVariation] = await Promise.all([
       this.proposalsRepo.getLastVotersTimestamp(addresses),
