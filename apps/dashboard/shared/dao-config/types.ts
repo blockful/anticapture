@@ -59,7 +59,10 @@ export type GovernanceImplementationField = {
 interface BaseInfo {
   name: string;
   forumLink?: string;
-  color: string;
+  color: {
+    svgColor: string;
+    svgBgColor: string;
+  };
   supportStage: SupportStageEnum;
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;

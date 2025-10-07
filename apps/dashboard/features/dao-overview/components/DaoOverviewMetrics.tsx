@@ -22,7 +22,7 @@ const DaoOverviewMetricCard = ({
   subText: string;
 }) => (
   <div>
-    <p className="text-secondary mb-2 text-xs font-medium uppercase tracking-wider">
+    <p className="text-secondary mb-2 font-mono text-xs font-medium uppercase tracking-wider">
       {title}
     </p>
     <p className="text-primary text-sm leading-5">{text}</p>

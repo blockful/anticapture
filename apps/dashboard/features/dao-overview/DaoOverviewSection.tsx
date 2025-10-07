@@ -47,7 +47,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <Suspense fallback={<DaoOverviewSkeleton />}>
       <div className="relative">
-        <DaoOverviewHeaderBackground color={daoConfig.color} />
+        <DaoOverviewHeaderBackground
+          color={daoConfig.color.svgColor}
+          bgColor={daoConfig.color.svgBgColor}
+        />
         <div className="relative z-10 flex flex-col gap-4 px-5 pt-5">
           <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
             <DaoAvatarIcon

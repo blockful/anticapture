@@ -34,7 +34,7 @@ export const DaoOverviewHeader = ({
   return (
     <div className="md:bg-border-default flex flex-col gap-3 py-2.5 md:flex-row md:items-center md:justify-between md:px-4">
       <div className="flex items-center gap-3">
-        <h3 className="text-primary text-lg font-medium uppercase leading-6">
+        <h3 className="text-primary font-mono text-lg font-medium uppercase leading-6">
           {daoConfig.name}
         </h3>
         <BadgeStatus
