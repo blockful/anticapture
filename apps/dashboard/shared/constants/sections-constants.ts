@@ -14,11 +14,6 @@ export const SECTIONS_CONSTANTS = {
     description: undefined,
     anchorId: "daoOverviewSection",
   },
-  showSupport: {
-    title: "Show Support",
-    description: undefined,
-    anchorId: "showSupportSection",
-  },
   attackProfitability: {
     title: "Attack Profitability",
     description:
@@ -42,11 +37,6 @@ export const SECTIONS_CONSTANTS = {
     titleAbbreviation: "Gov Implementation",
     description: undefined,
     anchorId: "governanceImplementationSection",
-  },
-  supportDaos: {
-    title: "Support DAOs",
-    description: "",
-    anchorId: "supportDaosSection",
   },
   riskAnalysis: {
     title: "Risk Analysis",
@@ -77,5 +67,9 @@ export const SECTIONS_CONSTANTS = {
     description:
       "Find answers to common questions about DAO security and how Anticapture works.",
     anchorId: "faqSection",
+  },
+  terms: {
+    title: "Terms of Service",
+    anchorId: "termsSection",
   },
 };
