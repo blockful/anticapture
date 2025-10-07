@@ -94,3 +94,14 @@ query GetVotesOnchains(
     }
   }
 }
+
+# Get voting power change
+query GetVotingPower(
+  $addresses: JSON!
+  $days: queryInput_historicalVotingPower_days!
+) {
+  historicalVotingPower(addresses: $addresses, days: $days) {
+    address
+    votingPower
+  }
+}

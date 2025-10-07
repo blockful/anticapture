@@ -2097,7 +2097,11 @@ export type VotesOnchainFilter = {
   votingPower?: InputMaybe<Scalars['String']['input']>;
   votingPower_contains?: InputMaybe<Scalars['String']['input']>;
   votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
+  votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_not?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
@@ -2120,6 +2124,7 @@ export type VotingPowerHistory = {
   daoId: Scalars['String']['output'];
   delegation?: Maybe<Delegation>;
   delta: Scalars['BigInt']['output'];
+  deltaMod: Scalars['BigInt']['output'];
   logIndex: Scalars['Int']['output'];
   timestamp: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
@@ -2151,6 +2156,14 @@ export type VotingPowerHistoryFilter = {
   daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
   delta?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  deltaMod_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not?: InputMaybe<Scalars['BigInt']['input']>;
+  deltaMod_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
   delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
   delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
@@ -2412,6 +2425,14 @@ export type GetVotesOnchainsQueryVariables = Exact<{
 
 
 export type GetVotesOnchainsQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, items: Array<{ __typename?: 'votesOnchain', voterAccountId: string, txHash?: string | null, daoId: string, proposalId?: string | null, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp?: any | null }> } };
+
+export type GetVotingPowerQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+  days: QueryInput_HistoricalVotingPower_Days;
+}>;
+
+
+export type GetVotingPowerQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
