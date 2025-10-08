@@ -252,7 +252,7 @@ export const TokenDistributionChart = ({
             yAxisId="primary"
             domain={["auto", "auto"]}
             tickFormatter={(value) =>
-              `${formatNumberUserReadable(Number(value))} ${daoId}`
+              `${formatNumberUserReadable(Number(value))}\n${daoId}`
             }
             tick={{ fontSize: 10 }}
             width={50}
