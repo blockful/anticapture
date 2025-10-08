@@ -95,10 +95,15 @@ export const CONTRACT_ADDRESSES = {
       decimals: 18,
       startBlock: 12985438,
     },
-    // https://etherscan.io/address/0x6f3e6272a167e8accb32072d08e0957f9c79223d
     governor: {
+      // https://etherscan.io/address/0x6f3e6272a167e8accb32072d08e0957f9c79223d
       address: "0x6f3e6272a167e8accb32072d08e0957f9c79223d",
       startBlock: 12985453,
+    },
+    auction: {
+      // https://etherscan.io/address/0x830BD73E4184ceF73443C15111a1DF14e495C706
+      address: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+      startBlock: 12985451,
     },
   },
 } as const;
@@ -121,6 +126,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.OP]: {},
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
+    auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
   },
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {

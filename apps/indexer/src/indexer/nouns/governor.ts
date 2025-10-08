@@ -1,4 +1,6 @@
 import { ponder } from "ponder:registry";
+import { Address, zeroAddress } from "viem";
+import { dao } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -7,11 +9,19 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
-import { dao } from "ponder:schema";
-import { ProposalStatus } from "@/lib/constants";
+import {
+  MetricTypesEnum,
+  ProposalStatus,
+  TreasuryAddresses,
+} from "@/lib/constants";
 import { env } from "@/env";
+import { updateSupplyMetric } from "@/eventHandlers/metrics";
 
-export function GovernorIndexer(client: DAOClient, blockTime: number) {
+export function GovernorIndexer(
+  client: DAOClient,
+  blockTime: number,
+  tokenAddress: Address,
+) {
   const daoId = DaoIdEnum.NOUNS;
 
   ponder.on(`NounsGovernor:setup`, async ({ context }) => {
@@ -92,15 +102,18 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
     );
   });
 
-  // ponder.on(`NounsGovernor:AuctionSettled`, async ({ event, context }) => {
-  // await delegatedVotesChanged(context, daoId, {
-  //   tokenId: event.log.address,
-  //   delegate: event.args.delegate,
-  //   txHash: event.transaction.hash,
-  //   newBalance: event.args.newBalance,
-  //   oldBalance: event.args.previousBalance,
-  //   timestamp: event.block.timestamp,
-  //   logIndex: event.log.logIndex,
-  // });
-  // });
+  ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
+    await updateSupplyMetric(
+      context,
+      "treasury",
+      Object.values(TreasuryAddresses[daoId]),
+      MetricTypesEnum.TREASURY,
+      zeroAddress,
+      event.args.winner,
+      event.args.amount,
+      daoId,
+      tokenAddress,
+      event.block.timestamp,
+    );
+  });
 }
