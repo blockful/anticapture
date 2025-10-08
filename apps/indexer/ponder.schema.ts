@@ -163,7 +163,7 @@ export const votesOnchain = onchainTable(
     proposalId: drizzle.text("proposal_id").notNull(),
     support: drizzle.text().notNull(),
     votingPower: drizzle.bigint().notNull(),
-    reason: drizzle.text().notNull(),
+    reason: drizzle.text(),
     timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
