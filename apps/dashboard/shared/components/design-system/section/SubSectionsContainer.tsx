@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/shared/utils";
 import { ReactNode } from "react";
 
 type SubSectionsContainerProps = {
@@ -13,7 +14,10 @@ export const SubSectionsContainer = ({
 }: SubSectionsContainerProps) => {
   return (
     <div
-      className={`sm:bg-surface-default sm:p-5 ${className} flex h-full flex-col gap-6`}
+      className={cn(
+        "sm:bg-surface-default flex h-full flex-col gap-6 sm:p-5",
+        className,
+      )}
     >
       {children}
     </div>

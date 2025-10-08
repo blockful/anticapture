@@ -124,7 +124,7 @@ export const StagesContainer = ({
   }, [isMobile]);
 
   return (
-    <SubSectionsContainer>
+    <SubSectionsContainer className="sm:p-4">
       <SubSection
         dateRange=""
         subsectionTitle={
