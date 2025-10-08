@@ -77,7 +77,6 @@ export function ENSTokenIndexer(
 
     await updateSupplyMetric(
       context,
-      tokenData,
       "lendingSupply",
       lendingAddressList,
       MetricTypesEnum.LENDING_SUPPLY,
@@ -91,7 +90,6 @@ export function ENSTokenIndexer(
 
     await updateSupplyMetric(
       context,
-      tokenData,
       "cexSupply",
       cexAddressList,
       MetricTypesEnum.CEX_SUPPLY,
@@ -105,7 +103,6 @@ export function ENSTokenIndexer(
 
     await updateSupplyMetric(
       context,
-      tokenData,
       "dexSupply",
       dexAddressList,
       MetricTypesEnum.DEX_SUPPLY,
@@ -119,7 +116,6 @@ export function ENSTokenIndexer(
 
     await updateSupplyMetric(
       context,
-      tokenData,
       "treasury",
       treasuryAddressList,
       MetricTypesEnum.TREASURY,
