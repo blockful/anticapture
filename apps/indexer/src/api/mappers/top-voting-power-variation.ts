@@ -1,0 +1,87 @@
+import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { z } from "@hono/zod-openapi";
+
+export const TopVotingPowerVariationsRequestSchema = z.object({
+  days: z
+    .enum(DaysOpts)
+    .optional()
+    .default("90d")
+    .transform((val) => parseInt(val.replace("d", ""))),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, "Limit must be a positive integer")
+    .max(100, "Limit cannot exceed 100")
+    .optional()
+    .default(20),
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+});
+
+export const TopVotingPowerVariationsResponseSchema = z.object({
+  period: z.object({
+    days: z.enum(DaysOpts).transform((val) => parseInt(val.replace("d", ""))),
+    startTimestamp: z.string(),
+    endTimestamp: z.string(),
+  }),
+  items: z.array(
+    z.object({
+      accountId: z.string(),
+      previousVotingPower: z.string(),
+      currentVotingPower: z.string(),
+      absoluteChange: z.string(),
+      percentageChange: z.number(),
+    }),
+  ),
+});
+
+export type TopVotingPowerVariationsResponse = z.infer<
+  typeof TopVotingPowerVariationsResponseSchema
+>;
+
+export type DBVotingPowerVariation = {
+  accountId: `0x${string}`;
+  previousVotingPower: bigint | null;
+  currentVotingPower: bigint;
+  absoluteChange: bigint;
+  percentageChange: number;
+};
+
+export const TopVotingPowerVariationsMapper = (
+  variations: DBVotingPowerVariation[],
+  endTimestamp: number,
+  days: DaysEnum,
+): TopVotingPowerVariationsResponse => {
+  return {
+    period: {
+      days: days,
+      startTimestamp: new Date(endTimestamp - days).toLocaleDateString(
+        "en-US",
+        { year: "2-digit" },
+      ),
+      endTimestamp: new Date(endTimestamp).toLocaleDateString("en-US", {
+        year: "2-digit",
+      }),
+    },
+    items: variations.map(
+      ({
+        accountId,
+        previousVotingPower,
+        currentVotingPower,
+        absoluteChange,
+        percentageChange,
+      }) => ({
+        accountId: accountId,
+        previousVotingPower: (previousVotingPower ?? 0n).toString(),
+        currentVotingPower: currentVotingPower.toString(),
+        absoluteChange: absoluteChange.toString(),
+        percentageChange: percentageChange,
+      }),
+    ),
+  };
+};

@@ -30,6 +30,7 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
+import { DBVotingPowerVariation } from "../mappers/top-voting-power-variation";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -301,6 +302,72 @@ export class DrizzleRepository {
       }),
       {},
     );
+  }
+
+  async getTopVotingPowerChanges(
+    startTimestamp: number,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]> {
+    const currentPower = db.$with("current_power").as(
+      db
+        .selectDistinctOn([votingPowerHistory.accountId], {
+          accountId: votingPowerHistory.accountId,
+          votingPower: votingPowerHistory.votingPower,
+        })
+        .from(votingPowerHistory)
+        .where(lte(votingPowerHistory.timestamp, BigInt(this.now())))
+        .orderBy(
+          votingPowerHistory.accountId,
+          desc(votingPowerHistory.timestamp),
+        ),
+    );
+
+    const oldPower = db.$with("old_power").as(
+      db
+        .selectDistinctOn([votingPowerHistory.accountId], {
+          accountId: votingPowerHistory.accountId,
+          votingPower: votingPowerHistory.votingPower,
+        })
+        .from(votingPowerHistory)
+        .where(lte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
+        .orderBy(
+          votingPowerHistory.accountId,
+          desc(votingPowerHistory.timestamp),
+        ),
+    );
+
+    const result = await db
+      .with(oldPower, currentPower)
+      .select({
+        accountId: currentPower.accountId,
+        oldVotingPower: oldPower.votingPower,
+        currentVotingPower: currentPower.votingPower,
+      })
+      .from(currentPower)
+      .leftJoin(oldPower, eq(currentPower.accountId, oldPower.accountId))
+      .orderBy(
+        sql`ABS(${currentPower.votingPower} - COALESCE(${oldPower.votingPower}, 0)) ${orderDirection}`,
+      )
+      .limit(limit)
+      .offset(skip);
+
+    return result.map(({ accountId, oldVotingPower, currentVotingPower }) => {
+      const absoluteChange = BigInt(
+        currentVotingPower - (oldVotingPower || 0n),
+      );
+
+      return {
+        accountId: accountId,
+        previousVotingPower: oldVotingPower,
+        currentVotingPower: currentVotingPower,
+        absoluteChange: absoluteChange,
+        percentageChange: oldVotingPower
+          ? Number((absoluteChange / oldVotingPower) * 100n)
+          : 0,
+      };
+    });
   }
 
   now() {
