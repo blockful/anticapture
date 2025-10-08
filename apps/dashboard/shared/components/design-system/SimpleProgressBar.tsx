@@ -16,7 +16,7 @@ export const SimpleProgressBar = ({
   return (
     <div
       className={cn(
-        "bg-middle-dark relative h-2 w-full overflow-hidden rounded-full",
+        "bg-middle-dark relative h-1 w-full overflow-hidden rounded-full",
         className,
       )}
     >
