@@ -1,15 +1,24 @@
 import { Context, Event, ponder } from "ponder:registry";
-import { accountBalance, token, transfer } from "ponder:schema";
-import { Address, zeroAddress } from "viem";
+import { token } from "ponder:schema";
+import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
-import { delegateChanged, delegatedVotesChanged } from "@/eventHandlers";
 import {
-  ensureAccountExists,
-  handleTransaction,
-  storeDailyBucket,
-} from "@/eventHandlers/shared";
-import { MetricTypesEnum } from "@/lib/constants";
+  delegateChanged,
+  delegatedVotesChanged,
+  tokenTransfer,
+} from "@/eventHandlers";
+import { handleTransaction, storeDailyBucket } from "@/eventHandlers/shared";
+import {
+  BurningAddresses,
+  MetricTypesEnum,
+  TreasuryAddresses,
+} from "@/lib/constants";
+import {
+  updateDelegatedSupply,
+  updateSupplyMetric,
+  updateTotalSupply,
+} from "@/eventHandlers/metrics";
 
 export function NounsTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.NOUNS;
@@ -31,56 +40,65 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event: Event<"NounsToken:Transfer">;
       context: Context;
     }) => {
-      const { to, from, tokenId: _tokenId } = event.args;
-      const tokenId = _tokenId.toString();
+      const { from, to } = event.args;
+      const { timestamp } = event.block;
 
-      await ensureAccountExists(context, to);
-      await ensureAccountExists(context, from);
+      const tokenData = await context.db.find(token, {
+        id: address,
+      });
 
-      await context.db
-        .insert(accountBalance)
-        .values({
-          accountId: to,
-          tokenId,
-          balance: 1n,
-          delegate: zeroAddress,
-        })
-        .onConflictDoUpdate((current) => ({
-          balance: current.balance + 1n,
-        }));
-
-      // Update the from account's balance (skip if minting from zero address)
-      if (from !== zeroAddress) {
-        await context.db
-          .update(accountBalance, {
-            tokenId,
-            accountId: from,
-          })
-          .set({
-            balance: -1n,
-          });
+      if (!tokenData) {
+        return;
       }
-      await context.db
-        .insert(transfer)
-        .values({
+
+      const burningAddressList = Object.values(BurningAddresses[daoId]);
+
+      await tokenTransfer(
+        context,
+        daoId,
+        {
+          from,
+          to,
+          value: 1n,
+          token: address,
           transactionHash: event.transaction.hash,
-          daoId,
-          tokenId,
-          amount: 1n,
-          fromAccountId: from,
-          toAccountId: to,
           timestamp: event.block.timestamp,
           logIndex: event.log.logIndex,
-          isCex: false,
-          isDex: false,
-          isLending: false,
-          isTotal: false,
-        })
-        .onConflictDoUpdate((current) => ({
-          amount: current.amount + 1n,
-        }));
+        },
+        {
+          burning: burningAddressList,
+        },
+      );
 
-      // Handle transaction creation/update with flag calculation
+      await updateSupplyMetric(
+        context,
+        tokenData,
+        "treasury",
+        Object.values(TreasuryAddresses[daoId]),
+        MetricTypesEnum.TREASURY,
+        from,
+        to,
+        1n,
+        daoId,
+        address,
+        timestamp,
+      );
+
+      await updateTotalSupply(
+        context,
+        tokenData.totalSupply,
+        burningAddressList,
+        MetricTypesEnum.TOTAL_SUPPLY,
+        from,
+        to,
+        1n,
+        daoId,
+        address,
+        timestamp,
+      );
+
+      if (!event.transaction.to) return;
+
       await handleTransaction(
         context,
         daoId,
@@ -88,7 +106,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         event.transaction.from,
         event.transaction.to,
         event.block.timestamp,
-        [event.args.from, event.args.to], // Addresses to check
+        [event.args.from, event.args.to],
       );
     },
   );
@@ -131,6 +149,8 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event.block.timestamp,
       address,
     );
+
+    // TODO should this be removed from the delegated supply?
   });
 
   ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
@@ -144,7 +164,8 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    // Handle transaction creation/update with flag calculation
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
       daoId,
@@ -158,7 +179,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
   ponder.on(`NounsToken:DelegateVotesChanged`, async ({ event, context }) => {
     await delegatedVotesChanged(context, daoId, {
-      tokenId: event.log.address,
       delegate: event.args.delegate,
       txHash: event.transaction.hash,
       newBalance: event.args.newBalance,
@@ -167,7 +187,17 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    // Handle transaction creation/update with flag calculation
+    if (event.transaction.to !== TreasuryAddresses[daoId].timelock) {
+      await updateDelegatedSupply(context, daoId, {
+        tokenId: event.log.address,
+        newBalance: event.args.newBalance,
+        oldBalance: event.args.previousBalance,
+        timestamp: event.block.timestamp,
+      });
+    }
+
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
       daoId,

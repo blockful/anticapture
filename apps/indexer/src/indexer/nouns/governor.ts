@@ -91,4 +91,16 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
       ProposalStatus.QUEUED,
     );
   });
+
+  // ponder.on(`NounsGovernor:AuctionSettled`, async ({ event, context }) => {
+  // await delegatedVotesChanged(context, daoId, {
+  //   tokenId: event.log.address,
+  //   delegate: event.args.delegate,
+  //   txHash: event.transaction.hash,
+  //   newBalance: event.args.newBalance,
+  //   oldBalance: event.args.previousBalance,
+  //   timestamp: event.block.timestamp,
+  //   logIndex: event.log.logIndex,
+  // });
+  // });
 }
