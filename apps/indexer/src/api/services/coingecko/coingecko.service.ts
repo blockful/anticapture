@@ -12,16 +12,11 @@ const createCoingeckoTokenPriceDataSchema = (
   tokenContractAddress: string,
   targetCurrency: string,
 ) =>
-  z
-    .object({})
-    .catchall(z.object({}).catchall(z.number()))
-    .refine(
-      (data) => data[tokenContractAddress]?.[targetCurrency] !== undefined,
-      {
-        message: `Unable to extract dataset`,
-      },
-    )
-    .transform((data) => data[tokenContractAddress]![targetCurrency]!);
+  z.object({
+    [tokenContractAddress]: z.object({
+      [targetCurrency]: z.number(),
+    }),
+  });
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
@@ -61,8 +56,9 @@ export class CoingeckoService {
   ): Promise<number> {
     try {
       const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
+      const formattedAddress = tokenContractAddress.toLowerCase();
       const response = await fetch(
-        `${this.coingeckoApiUrl}/simple/token_price/${assetPlatform}?contract_addresses=${tokenContractAddress}&vs_currencies=${targetCurrency}`,
+        `${this.coingeckoApiUrl}/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
         {
           headers: {
             "x-cg-demo-api-key": this.coingeckoApiKey,
@@ -75,10 +71,12 @@ export class CoingeckoService {
       }
 
       const data = await response.json();
-      return createCoingeckoTokenPriceDataSchema(
-        tokenContractAddress.toLowerCase(),
+      const price = createCoingeckoTokenPriceDataSchema(
+        formattedAddress,
         targetCurrency,
       ).parse(data);
+
+      return price[formattedAddress]![targetCurrency]!;
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch token property data",
