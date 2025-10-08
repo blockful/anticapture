@@ -72,13 +72,12 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
       await updateSupplyMetric(
         context,
-        tokenData,
         "treasury",
         Object.values(TreasuryAddresses[daoId]),
         MetricTypesEnum.TREASURY,
         from,
         to,
-        1n,
+        event.transaction.value,
         daoId,
         address,
         timestamp,
@@ -187,7 +186,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    if (event.transaction.to !== TreasuryAddresses[daoId].timelock) {
+    if (event.args.delegate !== TreasuryAddresses[daoId].timelock) {
       await updateDelegatedSupply(context, daoId, {
         tokenId: event.log.address,
         newBalance: event.args.newBalance,
