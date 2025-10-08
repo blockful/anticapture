@@ -35,8 +35,8 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
-  [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-px",
-  [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-px",
+  [Stage.ZERO]: "left-[calc(25%+8px)] translate-y-px",
+  [Stage.ONE]: "left-[calc(75%+8px)] translate-y-px",
   [Stage.TWO]: "hidden",
   [Stage.NONE]: "",
   [Stage.UNKNOWN]: "",
@@ -46,14 +46,14 @@ interface StagesCardRequirementsProps {
   daoStage: Stage;
   issues?: Array<string>;
   className?: string;
-  context?: "dao-overview" | "resilience-stages";
+  context?: "overview" | "section";
 }
 
 export const StagesCardRequirements = ({
   daoStage,
   issues = ["Security Council", "Voting Period", "Proposal Threshold"],
   className = "",
-  context = "resilience-stages",
+  context,
 }: StagesCardRequirementsProps) => {
   const stageStyles =
     STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
@@ -64,7 +64,7 @@ export const StagesCardRequirements = ({
         <div className="relative w-full">
           <PointerIcon
             className={cn(
-              "absolute bottom-0 -translate-x-1/2 translate-y-px",
+              "absolute bottom-0 translate-y-px",
               STAGE_POINTER_POSITIONS[daoStage],
             )}
           />
@@ -84,14 +84,14 @@ export const StagesCardRequirements = ({
           />
         ) : (
           <div>
-            {context !== "dao-overview" && (
+            {context !== "overview" && (
               <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
             )}
-            <Description className={context !== "dao-overview" ? "mb-4" : ""}>
+            <Description className={context !== "overview" ? "mb-4" : ""}>
               {STAGE_DESCRIPTIONS[daoStage]}
             </Description>
 
-            {issues.length > 0 && context !== "dao-overview" && (
+            {issues.length > 0 && context !== "overview" && (
               <>
                 <Title daoStage={daoStage}>Issues that need to be fixed</Title>
                 <div className="flex flex-wrap gap-4">

@@ -7,4 +7,3 @@ export * from "@/features/dao-overview/components/BadgeCardDaoInfoItem";
 export * from "@/features/dao-overview/components/CountdownDaoInfo";
 export * from "@/features/dao-overview/components/DaoInfoDropdown";
 export * from "@/features/dao-overview/components/ProgressBar";
-export * from "@/features/dao-overview/components/DaoOverviewResilienceStage";
