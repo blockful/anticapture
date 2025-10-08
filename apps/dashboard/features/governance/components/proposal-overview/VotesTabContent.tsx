@@ -7,8 +7,12 @@ import { useState } from "react";
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
-import { useGetVotesOnchainsTotalCountQuery } from "@anticapture/graphql-client/hooks";
+import {
+  useGetVotesOnchainsTotalCountQuery,
+  useGetProposalNonVotersQuery,
+} from "@anticapture/graphql-client/hooks";
 import { formatEther } from "viem";
+import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 
 export const VotesTabContent = ({
   proposal,
@@ -25,6 +29,19 @@ export const VotesTabContent = ({
   const { data } = useGetVotesOnchainsTotalCountQuery({
     variables: {
       proposalId: proposal.id,
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": (daoId as string)?.toUpperCase() as DaoIdEnum,
+      },
+    },
+  });
+
+  // Get non-voters count for this proposal
+  const { data: nonVotersData } = useGetProposalNonVotersQuery({
+    variables: {
+      id: proposal.id,
+      limit: 1, // We only need the count
     },
     context: {
       headers: {
@@ -67,7 +84,7 @@ export const VotesTabContent = ({
         >
           Didn&apos;t vote
           <div className="text-secondary font-inter text-[12px] font-medium not-italic leading-[16px]">
-            32 voters / 1.2M VP (76%)
+            {nonVotersData?.proposalNonVoters?.totalCount || 0} voters
           </div>
         </div>
       </div>
@@ -77,15 +94,6 @@ export const VotesTabContent = ({
       </div>
     </div>
   );
-};
-
-const TabsDidntVoteContent = ({
-  proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
-  console.log(proposal);
-  return <div>Didn&apos;t vote</div>;
 };
 
 interface TabContentProps {

@@ -112,3 +112,26 @@ query GetVotingPowerChange(
     votingPower
   }
 }
+
+# Get proposal non-voters
+query GetProposalNonVoters(
+  $id: String!
+  $limit: PositiveInt
+  $skip: NonNegativeInt
+  $orderDirection: queryInput_proposalNonVoters_orderDirection = desc
+) {
+  proposalNonVoters(
+    id: $id
+    limit: $limit
+    skip: $skip
+    orderDirection: $orderDirection
+  ) {
+    items {
+      lastVoteTimestamp
+      voter
+      votingPower
+      votingPowerVariation
+    }
+    totalCount
+  }
+}
