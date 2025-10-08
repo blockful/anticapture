@@ -87,6 +87,9 @@ type Query {
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
 
+  """Returns the active delegates that did not vote on a given proposal"""
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc): proposalNonVoters_200_response
+
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
   """
@@ -95,7 +98,7 @@ type Query {
   """
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
-  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
   """
   Get transactions with their associated transfers and delegations, with optional filtering and sorting
@@ -780,14 +783,14 @@ type votesOnchainPage {
 }
 
 type votesOnchain {
-  txHash: String
+  txHash: String!
   daoId: String!
   voterAccountId: String!
-  proposalId: String
-  support: String
-  votingPower: String
-  reason: String
-  timestamp: BigInt
+  proposalId: String!
+  support: String!
+  votingPower: BigInt!
+  reason: String!
+  timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
 }
@@ -845,16 +848,14 @@ input votesOnchainFilter {
   support_ends_with: String
   support_not_starts_with: String
   support_not_ends_with: String
-  votingPower: String
-  votingPower_not: String
-  votingPower_in: [String]
-  votingPower_not_in: [String]
-  votingPower_contains: String
-  votingPower_not_contains: String
-  votingPower_starts_with: String
-  votingPower_ends_with: String
-  votingPower_not_starts_with: String
-  votingPower_not_ends_with: String
+  votingPower: BigInt
+  votingPower_not: BigInt
+  votingPower_in: [BigInt]
+  votingPower_not_in: [BigInt]
+  votingPower_gt: BigInt
+  votingPower_lt: BigInt
+  votingPower_gte: BigInt
+  votingPower_lte: BigInt
   reason: String
   reason_not: String
   reason_in: [String]
@@ -1607,6 +1608,23 @@ type proposal_200_response {
   calldatas: [String]!
   values: [String]!
   targets: [String]!
+}
+
+type proposalNonVoters_200_response {
+  items: [query_proposalNonVoters_items_items]!
+  totalCount: Float!
+}
+
+type query_proposalNonVoters_items_items {
+  voter: String!
+  votingPower: String!
+  lastVoteTimestamp: Float!
+  votingPowerVariation: String!
+}
+
+enum queryInput_proposalNonVoters_orderDirection {
+  asc
+  desc
 }
 
 type query_historicalBalances_items {
