@@ -104,7 +104,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-x-1 border-inverted flex flex-col gap-5 md:mx-5 md:flex-row md:gap-2">
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
           <div className="w-full px-5 md:px-0">
             <StagesContainer
               daoId={daoId}
@@ -116,15 +116,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
           </div>
-          <div className="w-full px-5 md:px-0">
-            <RiskAreaCardWrapper
-              title={riskAreas.title}
-              riskAreas={riskAreas.risks}
-              onRiskClick={() => {}}
-              variant={RiskAreaCardEnum.DAO_OVERVIEW}
-              className="grid grid-cols-2 gap-1"
-            />
-          </div>
+          <RiskAreaCardWrapper
+            title={riskAreas.title}
+            riskAreas={riskAreas.risks}
+            onRiskClick={() => {}}
+            variant={RiskAreaCardEnum.DAO_OVERVIEW}
+            className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
+          />
         </div>
       </div>
     </Suspense>

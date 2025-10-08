@@ -353,7 +353,7 @@ export const RiskAreaCardWrapper = ({
             {title}
           </h3>
         ) : (
-          <div className="flex h-full items-center gap-2">
+          <div className="flex h-full items-center gap-2 px-5 sm:px-0">
             <p className="text-primary border-foreground border-b border-dashed font-mono text-[13px] font-medium tracking-wider">
               RISK AREAS
             </p>
