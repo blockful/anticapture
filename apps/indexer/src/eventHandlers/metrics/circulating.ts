@@ -17,7 +17,7 @@ export const updateCirculatingSupply = async (
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const currentCirculatingSupply = tokenData.circulatingSupply ?? BigInt(0);
+  const currentCirculatingSupply = tokenData.circulatingSupply;
 
   // Calculate circulating supply as total supply minus treasury
   const newCirculatingSupply = tokenData.totalSupply - tokenData.treasury;
