@@ -134,6 +134,25 @@ const updateCirculatingSupplyMetric = async (
   }
 };
 
+/**
+ * ### Creates:
+ * - New `Account` records (for sender and receiver if they don't exist)
+ * - New `accountBalance` record (for receiver if it doesn't exist)
+ * - New `accountBalance` record (for sender if it doesn't exist and not minting)
+ * - New `transfer` record with transaction details and classification flags
+ * - New daily metric records for supply tracking (via `updateSupplyMetric` calls)
+ *
+ * ### Updates:
+ * - `accountBalance`: Increments receiver's token balance by transfer value
+ * - `accountBalance`: Decrements sender's token balance by transfer value (if not minting from zero address)
+ * - `Token`: Adjusts lending supply based on transfers involving lending addresses
+ * - `Token`: Adjusts CEX supply based on transfers involving centralized exchange addresses
+ * - `Token`: Adjusts DEX supply based on transfers involving decentralized exchange addresses
+ * - `Token`: Adjusts treasury balance based on transfers involving treasury addresses
+ * - `Token`: Adjusts total supply based on transfers involving burning addresses
+ * - `Token`: Recalculates circulating supply after all supply changes
+ * - Daily bucket metrics for all supply types (lending, CEX, DEX, treasury, total, circulating)
+ */
 export const tokenTransfer = async (
   context: Context,
   daoId: DaoIdEnum,

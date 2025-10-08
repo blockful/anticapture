@@ -22,6 +22,20 @@ import {
   LendingAddresses,
 } from "@/lib/constants";
 
+/**
+ * ### Creates:
+ * - New `Account` records (for delegator and delegate if they don't exist)
+ * - New `Delegation` record with calculated delegated value and flags
+ * - New `AccountBalance` record (if delegator doesn't have one for this token)
+ * - New `AccountPower` record (if delegate doesn't have one for this DAO)
+ * - New `Transaction` record (if this transaction hasn't been processed)
+ *
+ * ### Updates:
+ * - `Delegation`: Adds to existing delegated value if record already exists
+ * - `AccountBalance`: Changes the delegate assignment for the delegator
+ * - `AccountPower`: Increments the delegate's delegation count
+ * - `Transaction`: Updates transaction flags if record already exists
+ */
 export const delegateChanged = async (
   context: Context,
   daoId: string,
@@ -122,6 +136,18 @@ export const delegateChanged = async (
     .onConflictDoNothing();
 };
 
+/**
+ * ### Creates:
+ * - New `Account` record (for delegate if it doesn't exist)
+ * - New `VotingPowerHistory` record with voting power change details
+ * - New `AccountPower` record (if delegate doesn't have one for this DAO)
+ * - New daily metric records (via `storeDailyBucket`)
+ *
+ * ### Updates:
+ * - `AccountPower`: Sets the delegate's current voting power to new balance
+ * - `Token`: Adjusts delegated supply by the balance delta
+ * - Daily bucket metrics for delegated supply tracking
+ */
 export const delegatedVotesChanged = async (
   context: Context,
   daoId: string,
