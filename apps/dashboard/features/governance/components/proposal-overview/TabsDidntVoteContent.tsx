@@ -13,6 +13,7 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import { formatEther } from "viem";
 
 export const TabsDidntVoteContent = ({
   proposal,
@@ -317,7 +318,10 @@ export const TabsDidntVoteContent = ({
                     isNeutral && "text-secondary",
                   )}
                 >
-                  {Math.abs(changePercentage).toFixed(1)}%
+                  {formatNumberUserReadable(
+                    Number(formatEther(BigInt(changePercentage))),
+                  )}{" "}
+                  %
                 </span>
               </div>
             </div>
