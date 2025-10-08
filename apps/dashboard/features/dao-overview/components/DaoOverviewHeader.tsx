@@ -5,6 +5,7 @@ import { DollarSign } from "lucide-react";
 import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
 import { ArbitrumIcon } from "@/shared/components/icons";
+import { useScreenSize } from "@/shared/hooks";
 
 interface DaoOverviewHeaderProps {
   daoId: string;
@@ -31,11 +32,19 @@ export const DaoOverviewHeader = ({
   const baseLinkRoute = `${daoOverview.chain.blockExplorers?.default.url}/address`;
   const chainName = daoOverview.chain.name;
 
+  const { isMobile } = useScreenSize();
+
+  const title = isMobile
+    ? daoId === "ENS"
+      ? "ENS"
+      : daoConfig.name
+    : daoConfig.name;
+
   return (
-    <div className="md:bg-border-default flex flex-col gap-3 py-2.5 md:flex-row md:items-center md:justify-between md:px-4">
+    <div className="md:bg-border-default flex flex-col gap-3 pb-4 pt-2.5 md:flex-row md:items-center md:justify-between md:px-4 md:py-2.5">
       <div className="flex items-center gap-3">
         <h3 className="text-primary font-mono text-lg font-medium uppercase leading-6">
-          {daoConfig.name}
+          {title}
         </h3>
         <BadgeStatus
           icon={chainIconsSchema[chainName]}

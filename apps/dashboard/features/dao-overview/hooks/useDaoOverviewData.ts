@@ -32,7 +32,7 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
   const holders = useTokenHolders({
     daoId,
-    limit: 10,
+    limit: 20,
     orderDirection: "desc",
   });
 
@@ -82,15 +82,14 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     return count;
   }, [holders.data, quorumValue]);
 
-  const isLoading = [
-    activeSupply.isLoading,
-    delegatedSupply.isLoading,
-    averageTurnout.isLoading,
-    treasuryNonDao.loading,
-    treasuryAll.loading,
-    tokenPrice.loading,
-    holders.loading,
-  ].some(Boolean);
+  const isLoading =
+    activeSupply.isLoading ||
+    delegatedSupply.isLoading ||
+    averageTurnout.isLoading ||
+    treasuryNonDao.loading ||
+    treasuryAll.loading ||
+    tokenPrice.loading ||
+    holders.loading;
 
   return {
     daoData,
