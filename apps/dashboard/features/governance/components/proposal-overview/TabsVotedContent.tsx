@@ -497,13 +497,13 @@ export const TabsVotedContent = ({
       if (vote.reason && vote.reason.trim() !== "") {
         data.push({
           voterAccountId: `__DESCRIPTION_${vote.voterAccountId}__`,
-          txHash: null,
+          txHash: "",
           daoId: vote.daoId,
           proposalId: vote.proposalId,
-          support: null,
-          votingPower: null,
+          support: "",
+          votingPower: "",
           reason: vote.reason,
-          timestamp: null,
+          timestamp: "",
           historicalVotingPower: undefined,
           isSubRow: true,
         } as VoteWithHistoricalPower);
@@ -514,13 +514,13 @@ export const TabsVotedContent = ({
     if (hasNextPage || isLoadingMore) {
       data.push({
         voterAccountId: "__LOADING_ROW__",
-        txHash: null,
+        txHash: "",
         daoId: "",
-        proposalId: null,
-        support: null,
-        votingPower: null,
-        reason: null,
-        timestamp: null,
+        proposalId: "",
+        support: "",
+        votingPower: "",
+        reason: "",
+        timestamp: "",
         historicalVotingPower: undefined,
         isSubRow: false,
       } as VoteWithHistoricalPower);
