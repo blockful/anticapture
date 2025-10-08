@@ -117,21 +117,27 @@ export const handleTransaction = async (
   context: Context,
   daoId: DaoIdEnum,
   transactionHash: string,
-  from: Address | null,
-  to: Address | null,
+  from: Address,
+  to: Address,
   timestamp: bigint,
   addresses: Address[], // The addresses involved in this event
+  {
+    cex = [],
+    dex = [],
+    lending = [],
+    burning = [],
+  }: {
+    cex?: Address[];
+    dex?: Address[];
+    lending?: Address[];
+    burning?: Address[];
+  } = {
+    cex: [],
+    dex: [],
+    lending: [],
+    burning: [],
+  },
 ) => {
-  // Early return if we can't create a transaction record
-  if (!from || !to) {
-    return;
-  }
-
-  // Import address constants
-  const { CEXAddresses, DEXAddresses, LendingAddresses, BurningAddresses } =
-    await import("@/lib/constants");
-
-  // First, create or update the transaction record
   await createOrUpdateTransaction(
     context,
     daoId,
@@ -141,26 +147,14 @@ export const handleTransaction = async (
     timestamp,
   );
 
-  // Calculate transaction flags based on addresses
-  const cexAddresses = Object.values(CEXAddresses[daoId] || {});
-  const dexAddresses = Object.values(DEXAddresses[daoId] || {});
-  const lendingAddresses = Object.values(LendingAddresses[daoId] || {});
-  const burningAddresses = Object.values(BurningAddresses[daoId] || {});
-
-  const isCex = addresses.some((addr) => cexAddresses.includes(addr));
-  const isDex = addresses.some((addr) => dexAddresses.includes(addr));
-  const isLending = addresses.some((addr) => lendingAddresses.includes(addr));
-  const isTotal = addresses.some((addr) => burningAddresses.includes(addr));
-
-  // Then, update the transaction flags
   await updateTransactionFlags(
     context,
     daoId,
     transactionHash,
-    isCex,
-    isDex,
-    isLending,
-    isTotal,
+    addresses.some((addr) => cex.includes(addr)),
+    addresses.some((addr) => dex.includes(addr)),
+    addresses.some((addr) => lending.includes(addr)),
+    addresses.some((addr) => burning.includes(addr)),
   );
 };
 

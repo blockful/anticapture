@@ -4,16 +4,10 @@ import {
   accountPower,
   delegation,
   votingPowerHistory,
-  token,
 } from "ponder:schema";
 import { Address, Hex } from "viem";
 
-import { MetricTypesEnum } from "@/lib/constants";
-import {
-  ensureAccountExists,
-  ensureAccountsExist,
-  storeDailyBucket,
-} from "./shared";
+import { ensureAccountExists, ensureAccountsExist } from "./shared";
 import { DaoIdEnum } from "@/lib/enums";
 import {
   BurningAddresses,
@@ -38,7 +32,7 @@ import {
  */
 export const delegateChanged = async (
   context: Context,
-  daoId: string,
+  daoId: DaoIdEnum,
   args: {
     delegator: Address;
     toDelegate: Address;
@@ -69,14 +63,10 @@ export const delegateChanged = async (
   });
 
   // Pre-compute address lists for flag determination
-  const lendingAddressList = Object.values(
-    LendingAddresses[daoId as DaoIdEnum] || {},
-  );
-  const cexAddressList = Object.values(CEXAddresses[daoId as DaoIdEnum] || {});
-  const dexAddressList = Object.values(DEXAddresses[daoId as DaoIdEnum] || {});
-  const burningAddressList = Object.values(
-    BurningAddresses[daoId as DaoIdEnum] || {},
-  );
+  const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
+  const cexAddressList = Object.values(CEXAddresses[daoId] || {});
+  const dexAddressList = Object.values(DEXAddresses[daoId] || {});
+  const burningAddressList = Object.values(BurningAddresses[daoId] || {});
 
   // Determine flags for the delegation
   const isCex =
@@ -150,9 +140,8 @@ export const delegateChanged = async (
  */
 export const delegatedVotesChanged = async (
   context: Context,
-  daoId: string,
+  daoId: DaoIdEnum,
   args: {
-    tokenId: Address;
     delegate: Address;
     txHash: Hex;
     newBalance: bigint;
@@ -161,22 +150,10 @@ export const delegatedVotesChanged = async (
     logIndex: number;
   },
 ) => {
-  const {
-    delegate,
-    txHash,
-    newBalance,
-    oldBalance,
-    timestamp,
-    tokenId,
-    logIndex,
-  } = args;
+  const { delegate, txHash, newBalance, oldBalance, timestamp, logIndex } =
+    args;
 
   await ensureAccountExists(context, delegate);
-
-  // Validate daoId is a valid DaoIdEnum value
-  if (!Object.values(DaoIdEnum).includes(daoId as DaoIdEnum)) {
-    throw new Error(`Invalid daoId: ${daoId}`);
-  }
 
   const deltaMod = newBalance - oldBalance;
 
@@ -206,26 +183,4 @@ export const delegatedVotesChanged = async (
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
     }));
-
-  const currentDelegatedSupply = (await context.db.find(token, {
-    id: tokenId,
-  }))!.delegatedSupply;
-
-  // Update the delegated supply
-  const newDelegatedSupply = (
-    await context.db.update(token, { id: tokenId }).set((row) => ({
-      delegatedSupply: row.delegatedSupply + (newBalance - oldBalance),
-    }))
-  ).delegatedSupply;
-
-  // Store delegated supply on daily bucket
-  await storeDailyBucket(
-    context,
-    MetricTypesEnum.DELEGATED_SUPPLY,
-    currentDelegatedSupply,
-    newDelegatedSupply,
-    daoId,
-    timestamp,
-    tokenId,
-  );
 };
