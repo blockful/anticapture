@@ -1,6 +1,7 @@
 "use client";
 
 import { Stage } from "@/shared/types/enums/Stage";
+import { cn } from "@/shared/utils";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "border-error text-error bg-surface-opacity-error",
@@ -33,7 +34,11 @@ export const StageTag = ({
 
   return (
     <div
-      className={`bg-surface-contrast inline-flex h-7 border px-2 py-1 ${stageStyles} ${className}`}
+      className={cn(
+        "bg-surface-contrast inline-flex h-7 border px-2 py-1",
+        stageStyles,
+        className,
+      )}
     >
       <span className="text-alternative-sm whitespace-nowrap font-mono text-[13px] font-medium leading-[20px]">
         {showNoTag && "NO "}

@@ -44,25 +44,26 @@ export const stageToRiskMapping: Record<Stage, RiskLevel> = {
   [Stage.UNKNOWN]: RiskLevel.NONE,
 };
 
-export const StagesToDaoAvatarPosition: Record<Stage, string> = {
-  [Stage.ZERO]: "left-[25%]",
-  [Stage.ONE]: "left-[75%]",
-  [Stage.TWO]: "left-[100%]",
-  [Stage.NONE]: "",
-  [Stage.UNKNOWN]: "",
-};
-export const StagesToLineStyle: Record<Stage, string> = {
-  [Stage.ZERO]: "w-[25%] bg-error",
-  [Stage.ONE]: "w-[75%] bg-warning",
-  [Stage.TWO]: "w-full bg-success",
-  [Stage.NONE]: "",
-  [Stage.UNKNOWN]: "",
-};
-
 export const StagesToBorderColor: Record<Stage, string> = {
   [Stage.ZERO]: "border-error",
   [Stage.ONE]: "border-warning",
   [Stage.TWO]: "border-success",
+  [Stage.NONE]: "",
+  [Stage.UNKNOWN]: "",
+};
+
+export const StagesToLineWidth: Record<Stage, string> = {
+  [Stage.ZERO]: "27%",
+  [Stage.ONE]: "72%",
+  [Stage.TWO]: "100%",
+  [Stage.NONE]: "0%",
+  [Stage.UNKNOWN]: "0%",
+};
+
+export const StagesToLineColor: Record<Stage, string> = {
+  [Stage.ZERO]: "bg-error",
+  [Stage.ONE]: "bg-warning",
+  [Stage.TWO]: "bg-success",
   [Stage.NONE]: "",
   [Stage.UNKNOWN]: "",
 };
@@ -144,19 +145,30 @@ export const StagesContainer = ({
               "gap-3": context !== "overview",
             })}
           >
-            <div className="flex h-7 w-full flex-col items-center justify-start">
-              {/* Timeline Component */}
-              <div className="bg-middle-dark relative flex h-0.5 w-full items-center">
-                {/* Horizontal Line */}
-                <div
-                  className={cn(
-                    "absolute left-0 h-0.5",
-                    StagesToLineStyle[currentDaoStage],
-                  )}
-                />
+            {/* Timeline Component */}
+            <div
+              className={cn(
+                "relative flex h-7 w-full flex-col items-center justify-start",
+                {
+                  "mb-4": context === "overview",
+                },
+              )}
+            >
+              {/* Background Line */}
+              <div className="bg-middle-dark absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2" />
 
+              {/* Horizontal Line */}
+              <div
+                className={cn(
+                  "absolute left-0 top-1/2 z-0 h-0.5 -translate-y-1/2 transition-all duration-500",
+                  StagesToLineColor[currentDaoStage],
+                )}
+                style={{ width: StagesToLineWidth[currentDaoStage] }}
+              />
+
+              <div className="relative z-10 flex h-full w-full items-center justify-between">
                 {/* Stage 0 */}
-                <div className="bg-surface-default absolute left-0 top-1/2 -translate-y-1/2">
+                <div className="bg-surface-default">
                   <StageTag
                     tagStage={Stage.ZERO}
                     daoStage={currentDaoStage}
@@ -164,8 +176,22 @@ export const StagesContainer = ({
                   />
                 </div>
 
+                {/* Space between Stage 0 and 1 */}
+                <div className="flex flex-1 items-center justify-center">
+                  {currentDaoStage === Stage.ZERO && (
+                    <div
+                      className={cn(
+                        "flex size-7 items-center justify-center overflow-hidden border-2 bg-white transition-all duration-300",
+                        StagesToBorderColor[currentDaoStage],
+                      )}
+                    >
+                      <DaoAvatarIcon daoId={daoId} className="rounded-none" />
+                    </div>
+                  )}
+                </div>
+
                 {/* Stage 1 */}
-                <div className="bg-surface-default absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="bg-surface-default">
                   <StageTag
                     tagStage={Stage.ONE}
                     daoStage={currentDaoStage}
@@ -173,34 +199,38 @@ export const StagesContainer = ({
                   />
                 </div>
 
-                {/* Current Position Indicator */}
-                {currentDaoStage !== Stage.NONE && (
-                  <div
-                    className={cn(
-                      "absolute top-1/2 -translate-y-1/2",
-                      StagesToDaoAvatarPosition[currentDaoStage],
-                    )}
-                  >
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={cn(
-                          "flex size-7 items-center justify-center overflow-hidden border-2 bg-white",
-                          StagesToBorderColor[currentDaoStage],
-                        )}
-                      >
-                        <DaoAvatarIcon daoId={daoId} className="rounded-none" />
-                      </div>
+                {/* Space between Stage 1 and 2 */}
+                <div className="flex flex-1 items-center justify-center">
+                  {currentDaoStage === Stage.ONE && (
+                    <div
+                      className={cn(
+                        "flex size-7 items-center justify-center overflow-hidden border-2 bg-white transition-all duration-300",
+                        StagesToBorderColor[currentDaoStage],
+                      )}
+                    >
+                      <DaoAvatarIcon daoId={daoId} className="rounded-none" />
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+
                 {/* Stage 2 */}
-                <div className="bg-surface-default absolute right-0 top-1/2 -translate-y-1/2">
+                <div className="bg-surface-default">
                   <StageTag
                     tagStage={Stage.TWO}
                     daoStage={currentDaoStage}
                     showStageText
                   />
                 </div>
+                {currentDaoStage === Stage.TWO && (
+                  <div
+                    className={cn(
+                      "absolute -right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center overflow-hidden border-2 bg-white transition-all duration-300",
+                      StagesToBorderColor[currentDaoStage],
+                    )}
+                  >
+                    <DaoAvatarIcon daoId={daoId} className="rounded-none" />
+                  </div>
+                )}
               </div>
             </div>
             <StagesCardRequirements

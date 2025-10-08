@@ -35,8 +35,8 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
 };
 
 const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
-  [Stage.ZERO]: "left-[calc(25%+8px)] translate-y-px",
-  [Stage.ONE]: "left-[calc(75%+8px)] translate-y-px",
+  [Stage.ZERO]: "left-[calc(25%+12px)] translate-y-px",
+  [Stage.ONE]: "left-[calc(70%+12px)] translate-y-px",
   [Stage.TWO]: "hidden",
   [Stage.NONE]: "",
   [Stage.UNKNOWN]: "",
