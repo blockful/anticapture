@@ -11,6 +11,8 @@ import { DaoOverviewMetrics } from "@/features/dao-overview/components/DaoOvervi
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { DaoOverviewResilienceStage } from "@/features/dao-overview/components/DaoOverviewResilienceStage";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -27,7 +29,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
   } = useDaoOverviewData(daoId);
-
   if (isLoading) return <DaoOverviewSkeleton />;
 
   const delegatedSupplyValue = formatNumberUserReadable(
@@ -46,12 +47,12 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <Suspense fallback={<DaoOverviewSkeleton />}>
-      <div className="relative">
+      <div className="relative flex flex-col gap-5 md:gap-2">
         <DaoOverviewHeaderBackground
           color={daoConfig.color.svgColor}
           bgColor={daoConfig.color.svgBgColor}
         />
-        <div className="relative z-10 flex flex-col gap-4 px-5 pt-5">
+        <div className="relative z-10 mx-5 flex flex-col gap-4 pt-5">
           <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
             <DaoAvatarIcon
               daoId={daoId}
@@ -79,6 +80,12 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               />
             </div>
           </div>
+        </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted relative z-10 mx-5 flex gap-2">
+          <DaoOverviewResilienceStage daoId={daoId} />
         </div>
       </div>
     </Suspense>

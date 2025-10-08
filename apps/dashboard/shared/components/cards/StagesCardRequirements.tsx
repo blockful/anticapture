@@ -46,12 +46,14 @@ interface StagesCardRequirementsProps {
   daoStage: Stage;
   issues?: Array<string>;
   className?: string;
+  context?: "dao-overview" | "resilience-stages";
 }
 
 export const StagesCardRequirements = ({
   daoStage,
   issues = ["Security Council", "Voting Period", "Proposal Threshold"],
   className = "",
+  context = "resilience-stages",
 }: StagesCardRequirementsProps) => {
   const stageStyles =
     STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
@@ -68,33 +70,42 @@ export const StagesCardRequirements = ({
           />
         </div>
       )}
+      <div
+        className={cn(
+          "bg-surface-contrast rounded-md p-4",
+          stageStyles,
+          className,
+        )}
+      >
+        {daoStage === Stage.NONE ? (
+          <InlineAlert
+            text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
+            variant="info"
+          />
+        ) : (
+          <div>
+            {context !== "dao-overview" && (
+              <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
+            )}
+            <Description className={context !== "dao-overview" ? "mb-4" : ""}>
+              {STAGE_DESCRIPTIONS[daoStage]}
+            </Description>
 
-      {daoStage === Stage.NONE ? (
-        <InlineAlert
-          text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
-          variant="info"
-        />
-      ) : (
-        <div
-          className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
-        >
-          <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
-          <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
-
-          {issues.length > 0 && (
-            <>
-              <Title daoStage={daoStage}>Issues that need to be fixed</Title>
-              <div className="flex flex-wrap gap-4">
-                {issues.map((issue, index) => (
-                  <Issue key={index} daoStage={daoStage}>
-                    {issue}
-                  </Issue>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+            {issues.length > 0 && context !== "dao-overview" && (
+              <>
+                <Title daoStage={daoStage}>Issues that need to be fixed</Title>
+                <div className="flex flex-wrap gap-4">
+                  {issues.map((issue, index) => (
+                    <Issue key={index} daoStage={daoStage}>
+                      {issue}
+                    </Issue>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -118,9 +129,20 @@ const Title = ({
   );
 };
 
-const Description = ({ children }: { children: ReactNode }) => {
+const Description = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
   return (
-    <p className="font-inter text-primary mb-4 text-sm font-normal leading-5">
+    <p
+      className={cn(
+        `font-inter text-primary text-[13px] text-sm font-normal leading-5`,
+        className,
+      )}
+    >
       {children}
     </p>
   );
