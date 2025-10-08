@@ -32,6 +32,7 @@ import {
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { Data } from "react-csv/lib/core";
 
 interface StackedValue {
   value: number;
@@ -55,12 +56,14 @@ interface ChartDataItem {
 }
 
 interface AttackCostBarChartProps {
+  setCsvData: (data: Data) => void;
   className?: string;
   valueMode?: "usd" | "token";
 }
 
 export const AttackCostBarChart = ({
   className,
+  setCsvData,
   valueMode,
 }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
@@ -99,23 +102,6 @@ export const AttackCostBarChart = ({
 
   const { isMobile } = useScreenSize();
 
-  const lastPrice = useMemo(() => {
-    const prices = daoTokenPriceHistoricalData.prices;
-    return prices.length > 0 ? prices[prices.length - 1][1] : 0;
-  }, [daoTokenPriceHistoricalData]);
-
-  const formatValue = (value: number): number => {
-    if (value == null) return 0;
-
-    const formattedValue = Number(formatEther(BigInt(value || 0)));
-
-    if (valueMode === "usd") {
-      return formattedValue * lastPrice;
-    }
-
-    return formattedValue;
-  };
-
   useEffect(() => {
     if (
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
@@ -145,17 +131,29 @@ export const AttackCostBarChart = ({
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
 
-  if (isLoading) {
-    return (
-      <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow className="h-70 w-full" />
-      </div>
-    );
-  }
+  const chartData: ChartDataItem[] = useMemo(() => {
+    if (isLoading) return [];
 
-  let chartData: ChartDataItem[] = [];
-  if (!mocked) {
-    chartData = [
+    if (mocked) {
+      return mockedAttackCostBarData as ChartDataItem[];
+    }
+
+    const prices = daoTokenPriceHistoricalData.prices;
+    const lastPrice = prices.length > 0 ? prices[prices.length - 1][1] : 0;
+
+    const formatValue = (value: number): number => {
+      if (value == null) return 0;
+
+      const formattedValue = Number(formatEther(BigInt(value || 0)));
+
+      if (valueMode === "usd") {
+        return formattedValue * lastPrice;
+      }
+
+      return formattedValue;
+    };
+
+    return [
       {
         id: "liquidTreasury",
         name: "Liquid Treasury",
@@ -198,8 +196,30 @@ export const AttackCostBarChart = ({
         value: formatValue(Number(daoTopTokenHolderExcludingTheDao?.balance)),
       },
     ];
-  } else {
-    chartData = mockedAttackCostBarData as ChartDataItem[];
+  }, [
+    isLoading,
+    mocked,
+    liquidTreasury.data,
+    delegatedSupply.data,
+    activeSupply.data,
+    averageTurnout.data,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    daoTokenPriceHistoricalData.prices,
+    valueMode,
+  ]);
+
+  useEffect(() => {
+    if (!mocked && chartData.length) {
+      setCsvData(chartData as Data);
+    }
+  }, [chartData, mocked, setCsvData]);
+
+  if (isLoading) {
+    return (
+      <div className={`h-80 w-full ${className || ""}`}>
+        <SkeletonRow className="h-70 w-full" />
+      </div>
+    );
   }
 
   return (
