@@ -348,7 +348,13 @@ export class DrizzleRepository {
       .from(currentPower)
       .leftJoin(oldPower, eq(currentPower.accountId, oldPower.accountId))
       .orderBy(
-        sql`ABS(${currentPower.votingPower} - COALESCE(${oldPower.votingPower}, 0)) ${orderDirection}`,
+        orderDirection == "desc"
+          ? desc(
+              sql`ABS(${currentPower.votingPower} - COALESCE(${oldPower.votingPower}, 0))`,
+            )
+          : asc(
+              sql`ABS(${currentPower.votingPower} - COALESCE(${oldPower.votingPower}, 0))`,
+            ),
       )
       .limit(limit)
       .offset(skip);
