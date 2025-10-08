@@ -1,4 +1,4 @@
-import { CurrencyEnum, CurrencyOptions, DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 import {
   CoingeckoTokenId,
   CoingeckoTokenIdEnum,
@@ -7,6 +7,13 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { TokenService } from "../services/token/token";
 import { TokenPropertiesResponseSchema, TokenMapper } from "../mappers";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+
+enum CurrencyEnum {
+  ETH = "eth",
+  USD = "usd",
+}
+
+const CurrencyOptions = Object.values(CurrencyEnum) as [string, ...string[]];
 
 interface TokenPriceClient {
   getTokenPrice(
