@@ -65,12 +65,13 @@ export class VotingPowerService {
   }
 
   async getTopVotingPowerVariations(
+    now: number,
     days: DaysEnum,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    const startTimestamp = Math.floor(Date.now() / 1000) - days;
+    const startTimestamp = now - days;
 
     return this.drizzleRepository.getTopVotingPowerChanges(
       startTimestamp,

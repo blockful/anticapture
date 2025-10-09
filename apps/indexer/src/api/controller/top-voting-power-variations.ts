@@ -14,7 +14,7 @@ export function topVotingPowerVariations(
     createRoute({
       method: "get",
       operationId: "topVotingPowerVariations",
-      path: "/voting-power/variations", // TODO: voting-powerS?
+      path: "/voting-power/variations",
       summary: "Get voting power changes of the for the top delegates",
       description: "Returns a list of voting power changes",
       tags: ["proposals"],
@@ -34,21 +34,17 @@ export function topVotingPowerVariations(
     }),
     async (context) => {
       const { days, limit, skip, orderDirection } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getTopVotingPowerVariations(
+        now,
         days,
         skip,
         limit,
         orderDirection,
       );
 
-      return context.json(
-        TopVotingPowerVariationsMapper(
-          result,
-          Date.now(), // TODO: temp
-          days,
-        ),
-      );
+      return context.json(TopVotingPowerVariationsMapper(result, now, days));
     },
   );
 }

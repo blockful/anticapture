@@ -60,13 +60,8 @@ export const TopVotingPowerVariationsMapper = (
   return {
     period: {
       days: days,
-      startTimestamp: new Date(endTimestamp - days).toLocaleDateString(
-        "en-US",
-        { year: "2-digit" },
-      ),
-      endTimestamp: new Date(endTimestamp).toLocaleDateString("en-US", {
-        year: "2-digit",
-      }),
+      startTimestamp: new Date(endTimestamp - days).toISOString(),
+      endTimestamp: new Date(endTimestamp).toISOString(),
     },
     items: variations.map(
       ({
