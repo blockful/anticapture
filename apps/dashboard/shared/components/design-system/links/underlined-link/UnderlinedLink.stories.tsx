@@ -4,7 +4,7 @@ import { UnderlinedLink } from "@/shared/components/design-system/links/underlin
 import { ExternalLinkIcon } from "lucide-react";
 import { Key } from "lucide-react";
 
-const meta = {
+const meta: Meta<typeof UnderlinedLink> = {
   title: "Design System/Links/UnderlinedLink",
   component: UnderlinedLink,
   parameters: {
@@ -16,7 +16,7 @@ const meta = {
     openInNewTab: { control: "boolean" },
     children: { control: "text" },
   },
-} satisfies Meta<typeof UnderlinedLink>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
