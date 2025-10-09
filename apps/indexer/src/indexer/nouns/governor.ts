@@ -103,13 +103,14 @@ export function GovernorIndexer(
   });
 
   ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
+    if (!event.transaction.to) return;
     await updateSupplyMetric(
       context,
       "treasury",
       Object.values(TreasuryAddresses[daoId]),
       MetricTypesEnum.TREASURY,
       zeroAddress,
-      event.args.winner,
+      event.transaction.to,
       event.args.amount,
       daoId,
       tokenAddress,
