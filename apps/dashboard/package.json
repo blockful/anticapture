@@ -54,7 +54,9 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.1",
     "@storybook/addon-onboarding": "^9.1.10",
+    "@storybook/addon-vitest": "9.1.10",
     "@storybook/nextjs": "^9.1.10",
+    "@storybook/react": "^9.1.10",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
@@ -75,7 +77,6 @@
     "ts-jest": "^29.2.6",
     "tw-animate-css": "^1.3.0",
     "typescript": "^5",
-    "vitest": "^3.2.1",
-    "@storybook/addon-vitest": "9.1.10"
+    "vitest": "^3.2.1"
   }
 }

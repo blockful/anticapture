@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Design System/Buttons/IconButton",

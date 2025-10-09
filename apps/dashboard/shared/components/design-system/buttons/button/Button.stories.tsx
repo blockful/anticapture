@@ -5,7 +5,7 @@ import {
 } from "@/shared/components/design-system/buttons/button/Button";
 import { ButtonProps } from "@/shared/components/design-system/buttons/types";
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 // Extended type for stories that includes the custom showIcon property
 type ButtonStoryArgs = ButtonProps & {
