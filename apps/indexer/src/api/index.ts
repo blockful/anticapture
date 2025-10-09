@@ -35,6 +35,7 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { topVotingPowerVariations } from "./controller/top-voting-power-variations";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -92,6 +93,7 @@ const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
+const votingPowerService = new VotingPowerService(votingPowerRepo, repo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
@@ -104,7 +106,8 @@ historicalOnchain(
 );
 transactions(app, transactionsService);
 lastUpdate(app);
-votingPower(app, new VotingPowerService(votingPowerRepo));
+votingPower(app, votingPowerService);
+topVotingPowerVariations(app, votingPowerService);
 docs(app);
 
 export default app;
