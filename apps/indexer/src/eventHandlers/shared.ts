@@ -144,7 +144,7 @@ export const handleTransaction = async (
   );
 };
 
-const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
+export const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
   const SECONDS_IN_DAY = BigInt(86400); // 24 * 60 * 60
   return (timestampSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;
 };

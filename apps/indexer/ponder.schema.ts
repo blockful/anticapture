@@ -240,6 +240,20 @@ export const transaction = onchainTable("transaction", (drizzle) => ({
   timestamp: drizzle.bigint().notNull(),
 }));
 
+export const tokenPrice = onchainTable(
+  "token_price",
+  (drizzle) => ({
+    tokenId: drizzle.text("token_id").notNull(),
+    price: drizzle.bigint().notNull(), // price in USD
+    timestamp: drizzle.bigint().notNull(),
+  }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.tokenId, table.timestamp],
+    }),
+  }),
+);
+
 // Account Power and Balance relations
 export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
   // Relation to the delegate's power
@@ -403,5 +417,13 @@ export const accountRelations = relations(account, ({ many }) => ({
   }),
   delegatedFromBalances: many(accountBalance, {
     relationName: "delegatedBalances",
+  }),
+}));
+
+export const tokenPriceRelations = relations(tokenPrice, ({ one }) => ({
+  token: one(token, {
+    fields: [tokenPrice.tokenId],
+    references: [token.id],
+    relationName: "token",
   }),
 }));

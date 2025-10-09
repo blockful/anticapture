@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import { Address, zeroAddress } from "viem";
-import { dao } from "ponder:schema";
+import { dao, tokenPrice } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -16,6 +16,7 @@ import {
 } from "@/lib/constants";
 import { env } from "@/env";
 import { updateSupplyMetric } from "@/eventHandlers/metrics";
+import { truncateTimestampTime } from "@/eventHandlers/shared";
 
 export function GovernorIndexer(
   client: DAOClient,
@@ -103,6 +104,12 @@ export function GovernorIndexer(
   });
 
   ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
+    await context.db.insert(tokenPrice).values({
+      tokenId: tokenAddress,
+      price: event.args.amount,
+      timestamp: truncateTimestampTime(event.block.timestamp),
+    });
+
     if (!event.transaction.to) return;
     await updateSupplyMetric(
       context,

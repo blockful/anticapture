@@ -35,6 +35,8 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
+  tokenPrice(tokenId: String!, timestamp: BigInt!): tokenPrice
+  tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
   """Get total assets"""
@@ -1299,6 +1301,50 @@ input transactionFilter {
   isTotal_not: Boolean
   isTotal_in: [Boolean]
   isTotal_not_in: [Boolean]
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+type tokenPrice {
+  tokenId: String!
+  price: BigInt!
+  timestamp: BigInt!
+  token: token
+}
+
+type tokenPricePage {
+  items: [tokenPrice!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input tokenPriceFilter {
+  AND: [tokenPriceFilter]
+  OR: [tokenPriceFilter]
+  tokenId: String
+  tokenId_not: String
+  tokenId_in: [String]
+  tokenId_not_in: [String]
+  tokenId_contains: String
+  tokenId_not_contains: String
+  tokenId_starts_with: String
+  tokenId_ends_with: String
+  tokenId_not_starts_with: String
+  tokenId_not_ends_with: String
+  price: BigInt
+  price_not: BigInt
+  price_in: [BigInt]
+  price_not_in: [BigInt]
+  price_gt: BigInt
+  price_lt: BigInt
+  price_gte: BigInt
+  price_lte: BigInt
   timestamp: BigInt
   timestamp_not: BigInt
   timestamp_in: [BigInt]
