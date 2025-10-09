@@ -1,24 +1,20 @@
 import { z } from "zod";
 
-export const CoingeckoTokenIdEnum = {
+import { DaoIdEnum } from "@/lib/enums";
+
+export const CoingeckoTokenIdEnum: Partial<Record<DaoIdEnum, string>> = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
-} as const;
-
-export type CoingeckoTokenId =
-  (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum];
+  TEST: "ethereum-name-service",
+};
 
 export interface CoingeckoHistoricalMarketData {
   prices: [number, number][];
-  market_caps: [number, number][];
-  total_volumes: [number, number][];
 }
 
 export const CoingeckoHistoricalMarketDataSchema = z.object({
   prices: z.array(z.tuple([z.number(), z.number()])),
-  market_caps: z.array(z.tuple([z.number(), z.number()])),
-  total_volumes: z.array(z.tuple([z.number(), z.number()])),
 });

@@ -1,16 +1,15 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DaoIdEnum, DaysOpts } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 import {
-  CoingeckoTokenId,
-  CoingeckoTokenIdEnum,
-  CoingeckoHistoricalMarketData,
-} from "../services/coingecko/types";
+  TokenHistoricalPriceRequest,
+  TokenHistoricalPriceResponse,
+} from "../mappers";
 interface TokenHistoricalDataClient {
   getHistoricalTokenData(
-    tokenId: CoingeckoTokenId,
+    daoId: DaoIdEnum,
     days: number,
-  ): Promise<CoingeckoHistoricalMarketData>;
+  ): Promise<TokenHistoricalPriceResponse>;
 }
 
 export function tokenHistoricalData(
@@ -27,24 +26,14 @@ export function tokenHistoricalData(
       description: "Get historical market data for a specific token",
       tags: ["tokens"],
       request: {
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .optional()
-            .default("365d")
-            .transform((val) => parseInt(val.replace("d", ""))),
-        }),
+        query: TokenHistoricalPriceRequest,
       },
       responses: {
         200: {
           description: "Returns the historical market data for the token",
           content: {
             "application/json": {
-              schema: z.object({
-                prices: z.array(z.tuple([z.number(), z.number()])),
-                market_caps: z.array(z.tuple([z.number(), z.number()])),
-                total_volumes: z.array(z.tuple([z.number(), z.number()])),
-              }),
+              schema: TokenHistoricalPriceResponse,
             },
           },
         },
@@ -52,11 +41,7 @@ export function tokenHistoricalData(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-
-      const tokenId =
-        CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
-      const data = await client.getHistoricalTokenData(tokenId, days);
-
+      const data = await client.getHistoricalTokenData(daoId, days);
       return context.json(data, 200);
     },
   );

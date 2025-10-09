@@ -43,7 +43,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
+  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): [query_historicalTokenData_items]
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -1368,10 +1368,9 @@ enum queryInput_totalAssets_days {
   _365d
 }
 
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
+type query_historicalTokenData_items {
+  price: String!
+  timestamp: String!
 }
 
 enum queryInput_historicalTokenData_days {
