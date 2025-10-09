@@ -20,6 +20,7 @@ interface ProposalsRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<{ voter: Address; votingPower: bigint }[]>;
   getProposalNonVotersCount(proposalId: string): Promise<number>;
   getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
@@ -127,29 +128,32 @@ export class ProposalsService {
     skip: number = 0,
     limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<VotersResponse> {
-    const [nonVoters, totalCount] = await Promise.all([
-      this.proposalsRepo.getProposalNonVoters(
-        proposalId,
-        skip,
-        limit,
-        orderDirection,
-      ),
-      this.proposalsRepo.getProposalNonVotersCount(proposalId),
-    ]);
-    const addresses = nonVoters.map((v) => v.voter);
+    const nonVoters = await this.proposalsRepo.getProposalNonVoters(
+      proposalId,
+      skip,
+      limit,
+      orderDirection,
+      addresses,
+    );
+
+    const _addresses = addresses ? addresses : nonVoters.map((v) => v.voter);
 
     const comparisonTimestamp = Math.floor(Date.now() / 1000 - DaysEnum["30d"]);
 
     const [lastVotersTimestamp, votingPowerVariation] = await Promise.all([
-      this.proposalsRepo.getLastVotersTimestamp(addresses),
+      this.proposalsRepo.getLastVotersTimestamp(_addresses),
       this.proposalsRepo.getVotingPowerVariation(
-        addresses,
+        _addresses,
         comparisonTimestamp,
       ),
     ]);
+
     return {
-      totalCount,
+      totalCount: addresses
+        ? _addresses.length
+        : await this.proposalsRepo.getProposalNonVotersCount(proposalId),
       items: nonVoters.map((v) => ({
         voter: v.voter,
         votingPower: v.votingPower.toString(),

@@ -138,13 +138,15 @@ export function proposals(
     }),
     async (context) => {
       const { id } = context.req.valid("param");
-      const { skip, limit, orderDirection } = context.req.valid("query");
+      const { skip, limit, orderDirection, addresses } =
+        context.req.valid("query");
 
       const { totalCount, items } = await service.getProposalNonVoters(
         id,
         skip,
         limit,
         orderDirection,
+        addresses,
       );
       return context.json({ totalCount, items });
     },

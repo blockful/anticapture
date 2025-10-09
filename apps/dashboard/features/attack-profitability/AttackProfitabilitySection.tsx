@@ -18,6 +18,8 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { Data } from "react-csv/lib/core";
+import { getDateRange } from "@/shared/utils";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 import { ChartType } from "@/shared/hooks/useLastUpdate";
@@ -39,6 +41,10 @@ export const AttackProfitabilitySection = ({
     label: "USD",
   });
 
+  const [costProfitabilityCsvData, setCostProfitabilityCsvData] =
+    useState<Data>([]);
+  const [attackProfitabilityCsvData, setAttackProfitabilityCsvData] =
+    useState<Data>([]);
   const attackUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
   const costUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
 
@@ -53,22 +59,14 @@ export const AttackProfitabilitySection = ({
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
-      subtitle={"Cost of Attack vs Profit"}
       icon={<Crosshair2Icon className="section-layout-icon" />}
       description={SECTIONS_CONSTANTS.attackProfitability.description}
-      infoText={"Treasury values above supply costs indicate high risk."}
-      switchDate={
-        <SwitcherDate
-          defaultValue={defaultDays}
-          setTimeInterval={setDays}
-          disableRecentData={true}
-        />
-      }
-      days={days}
       anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <TheCardChartLayout
+        title="Cost of Attack vs Profit"
+        subtitle={getDateRange(days ?? "")}
         headerComponent={
           <div className="flex w-full flex-col-reverse gap-3 pt-3 sm:flex-row sm:items-center">
             <BadgeStatus
@@ -90,10 +88,20 @@ export const AttackProfitabilitySection = ({
             />
           </div>
         }
+        switcherComponent={
+          <SwitcherDate
+            defaultValue={defaultDays}
+            setTimeInterval={setDays}
+            disableRecentData={true}
+          />
+        }
+        infoText={"Treasury values above supply costs indicate high risk."}
+        csvData={attackProfitabilityCsvData}
       >
         <MultilineChartAttackProfitability
           days={days}
           filterData={[treasuryMetric, costMetric]}
+          setCsvData={setAttackProfitabilityCsvData}
         />
       </TheCardChartLayout>
       <div className="border-light-dark w-full border-t" />
@@ -101,6 +109,7 @@ export const AttackProfitabilitySection = ({
         <TheCardChartLayout
           title="Cost Comparison"
           subtitle="All values reflect current data."
+          csvData={costProfitabilityCsvData}
           headerComponent={
             <BadgeStatus
               variant="outline"
@@ -124,6 +133,7 @@ export const AttackProfitabilitySection = ({
           }
         >
           <AttackCostBarChart
+            setCsvData={setCostProfitabilityCsvData}
             valueMode={dropdownValue.value as "usd" | "token"}
           />
         </TheCardChartLayout>

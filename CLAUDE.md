@@ -20,15 +20,15 @@ The project follows a **microservices architecture** organized as a **pnpm monor
 
 ```md
 anticapture/
-├── apps/                         # Main applications
-│   ├── dashboard/                # Next.js frontend application
-│   ├── api-gateway/              # GraphQL Mesh unified API
-│   ├── indexer/                  # Ponder blockchain event indexer
-│   ├── graphql-client/           # Generated GraphQL client library
-│   ├── indexer-metrics/          # Grafana/Prometheus monitoring
-│   └── local-node/               # Local Ethereum development node
-├── infra/                        # Infrastructure and deployment configs
-├── packages/                     # Shared packages (if any)
+├── apps/ # Main applications
+│ ├── dashboard/ # Next.js frontend application
+│ ├── api-gateway/ # GraphQL Mesh unified API
+│ ├── indexer/ # Ponder blockchain event indexer
+│ ├── graphql-client/ # Generated GraphQL client library
+│ ├── indexer-metrics/ # Grafana/Prometheus monitoring
+│ └── local-node/ # Local Ethereum development node
+├── infra/ # Infrastructure and deployment configs
+├── packages/ # Shared packages (if any)
 └── [root config files]
 ```
 
