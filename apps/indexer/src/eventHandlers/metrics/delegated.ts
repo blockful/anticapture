@@ -9,27 +9,31 @@ import { storeDailyBucket } from "@/eventHandlers/shared";
 export const updateDelegatedSupply = async (
   context: Context,
   daoId: DaoIdEnum,
-  args: {
+  {
+    tokenId,
+    newBalance,
+    oldBalance,
+    timestamp,
+  }: {
     tokenId: Address;
     newBalance: bigint;
     oldBalance: bigint;
     timestamp: bigint;
   },
 ) => {
-  const { tokenId, newBalance, oldBalance, timestamp } = args;
+  let currentDelegatedSupply = 0n;
 
-  const currentDelegatedSupply = (await context.db.find(token, {
-    id: tokenId,
-  }))!.delegatedSupply;
+  // TODO is token.delegatedSupply the same as the last dailyMetric.delegatedSupply?
 
-  // Update the delegated supply
-  const newDelegatedSupply = (
-    await context.db.update(token, { id: tokenId }).set((row) => ({
-      delegatedSupply: row.delegatedSupply + (newBalance - oldBalance),
-    }))
-  ).delegatedSupply;
+  const { delegatedSupply: newDelegatedSupply } = await context.db
+    .update(token, { id: tokenId })
+    .set((current) => {
+      currentDelegatedSupply = current.delegatedSupply;
+      return {
+        delegatedSupply: current.delegatedSupply + (newBalance - oldBalance),
+      };
+    });
 
-  // Store delegated supply on daily bucket
   await storeDailyBucket(
     context,
     MetricTypesEnum.DELEGATED_SUPPLY,
