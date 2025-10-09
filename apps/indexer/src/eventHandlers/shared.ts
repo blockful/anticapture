@@ -4,7 +4,6 @@ import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
-import { DaoIdEnum } from "@/lib/enums";
 
 export const ensureAccountExists = async (
   context: Context,
@@ -70,26 +69,17 @@ export const storeDailyBucket = async (
 
 export const createOrUpdateTransaction = async (
   context: Context,
-  daoId: DaoIdEnum,
   transactionHash: string,
-  from: Address | null,
-  to: Address | null,
+  from: Address,
+  to: Address,
   timestamp: bigint,
 ) => {
-  if (!from || !to) {
-    return;
-  }
-
   await context.db
     .insert(transaction)
     .values({
       transactionHash,
       fromAddress: from,
       toAddress: to,
-      isCex: false, // Will be updated by individual events
-      isDex: false, // Will be updated by individual events
-      isLending: false, // Will be updated by individual events
-      isTotal: false, // Will be updated by individual events
       timestamp,
     })
     .onConflictDoNothing(); // Only create if doesn't exist
@@ -97,7 +87,6 @@ export const createOrUpdateTransaction = async (
 
 export const updateTransactionFlags = async (
   context: Context,
-  daoId: DaoIdEnum,
   transactionHash: string,
   isCex: boolean,
   isDex: boolean,
@@ -115,7 +104,6 @@ export const updateTransactionFlags = async (
 
 export const handleTransaction = async (
   context: Context,
-  daoId: DaoIdEnum,
   transactionHash: string,
   from: Address,
   to: Address,
@@ -140,7 +128,6 @@ export const handleTransaction = async (
 ) => {
   await createOrUpdateTransaction(
     context,
-    daoId,
     transactionHash,
     from,
     to,
@@ -149,7 +136,6 @@ export const handleTransaction = async (
 
   await updateTransactionFlags(
     context,
-    daoId,
     transactionHash,
     addresses.some((addr) => cex.includes(addr)),
     addresses.some((addr) => dex.includes(addr)),

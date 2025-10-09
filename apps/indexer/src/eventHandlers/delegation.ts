@@ -102,9 +102,6 @@ export const delegateChanged = async (
         current.delegatedValue + (delegatorBalance?.balance ?? 0n),
     }));
 
-  // Transaction flag updates moved to DAO-specific indexer
-
-  // Update the delegator's delegate
   await context.db
     .insert(accountBalance)
     .values({
@@ -157,7 +154,6 @@ export const delegatedVotesChanged = async (
 
   const deltaMod = newBalance - oldBalance;
 
-  // Transaction handling moved to DAO-specific indexer
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -172,7 +168,6 @@ export const delegatedVotesChanged = async (
     })
     .onConflictDoNothing();
 
-  // Update the delegate's voting power
   await context.db
     .insert(accountPower)
     .values({

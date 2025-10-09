@@ -146,7 +146,6 @@ export function ARBTokenIndexer(address: Address, decimals: number) {
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,

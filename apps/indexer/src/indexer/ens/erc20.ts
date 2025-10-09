@@ -153,7 +153,6 @@ export function ENSTokenIndexer(
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -184,7 +183,6 @@ export function ENSTokenIndexer(
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -214,7 +212,6 @@ export function ENSTokenIndexer(
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,

@@ -100,7 +100,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
       await handleTransaction(
         context,
-        daoId,
         event.transaction.hash,
         event.transaction.from,
         event.transaction.to,
@@ -167,7 +166,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -199,7 +197,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,

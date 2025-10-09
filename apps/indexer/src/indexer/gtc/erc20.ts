@@ -159,7 +159,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
 
       await handleTransaction(
         context,
-        daoId,
         event.transaction.hash,
         event.transaction.from,
         event.transaction.to,
@@ -190,7 +189,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -220,7 +218,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
 
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
