@@ -16,12 +16,24 @@ const config: StorybookConfig = {
     "../shared/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
-    getAbsolutePath("@storybook/addon-essentials"),
     getAbsolutePath("@storybook/addon-onboarding"),
     getAbsolutePath("@chromatic-com/storybook"),
-    getAbsolutePath("@storybook/experimental-addon-test"),
+    getAbsolutePath("@storybook/addon-vitest"),
   ],
-  framework: "@storybook/nextjs",
+  framework: getAbsolutePath("@storybook/nextjs"),
   staticDirs: ["../public"],
+
+  webpackFinal: async (config) => {
+    // Fix for Next.js 15 compatibility with Storybook
+    // Disable persistent caching to avoid webpack hook issues
+    config.cache = false;
+
+    // Disable infrastructureLogging errors
+    if (config.infrastructureLogging) {
+      config.infrastructureLogging.level = "error";
+    }
+
+    return config;
+  },
 };
 export default config;
