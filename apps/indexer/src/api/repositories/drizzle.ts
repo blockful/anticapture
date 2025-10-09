@@ -310,68 +310,34 @@ export class DrizzleRepository {
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    const currentPower = db.$with("current_power").as(
-      db
-        .selectDistinctOn([votingPowerHistory.accountId], {
-          accountId: votingPowerHistory.accountId,
-          votingPower: votingPowerHistory.votingPower,
-        })
-        .from(votingPowerHistory)
-        .where(lte(votingPowerHistory.timestamp, BigInt(this.now())))
-        .orderBy(
-          votingPowerHistory.accountId,
-          desc(votingPowerHistory.timestamp),
-        ),
-    );
-
-    const oldPower = db.$with("old_power").as(
-      db
-        .selectDistinctOn([votingPowerHistory.accountId], {
-          accountId: votingPowerHistory.accountId,
-          votingPower: votingPowerHistory.votingPower,
-        })
-        .from(votingPowerHistory)
-        .where(lte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
-        .orderBy(
-          votingPowerHistory.accountId,
-          desc(votingPowerHistory.timestamp),
-        ),
-    );
-
     const result = await db
-      .with(oldPower, currentPower)
       .select({
-        accountId: currentPower.accountId,
-        oldVotingPower: oldPower.votingPower,
-        currentVotingPower: currentPower.votingPower,
+        accountId: votingPowerHistory.accountId,
+        delta: votingPowerHistory.delta,
+        currentVotingPower: votingPowerHistory.votingPower,
       })
-      .from(currentPower)
-      .leftJoin(oldPower, eq(currentPower.accountId, oldPower.accountId))
+      .from(votingPowerHistory)
+      .where(lte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
       .orderBy(
         orderDirection == "desc"
-          ? desc(
-              sql`ABS(${currentPower.votingPower} - COALESCE(${oldPower.votingPower}, 0))`,
-            )
-          : asc(
-              sql`ABS(${currentPower.votingPower} - COALESCE(${oldPower.votingPower}, 0))`,
-            ),
+          ? desc(votingPowerHistory.delta)
+          : asc(votingPowerHistory.delta),
       )
       .limit(limit)
       .offset(skip);
 
-    return result.map(({ accountId, oldVotingPower, currentVotingPower }) => {
-      const absoluteChange = BigInt(
-        currentVotingPower - (oldVotingPower || 0n),
-      );
+    return result.map(({ accountId, currentVotingPower, delta }) => {
+      const oldVotingPower = currentVotingPower - delta;
+      const percentageChange = oldVotingPower
+        ? Number((delta * 10000n) / oldVotingPower) / 100
+        : 0;
 
       return {
         accountId: accountId,
-        previousVotingPower: oldVotingPower,
+        previousVotingPower: currentVotingPower - delta,
         currentVotingPower: currentVotingPower,
-        absoluteChange: absoluteChange,
-        percentageChange: oldVotingPower
-          ? Number((absoluteChange / oldVotingPower) * 100n)
-          : 0,
+        absoluteChange: delta,
+        percentageChange: percentageChange,
       };
     });
   }
