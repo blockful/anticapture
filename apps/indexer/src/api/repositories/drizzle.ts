@@ -181,6 +181,7 @@ export class DrizzleRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<{ voter: Address; votingPower: bigint }[]> {
     return await db
       .select({
@@ -197,6 +198,7 @@ export class DrizzleRepository {
       )
       .where(
         and(
+          ...(addresses ? [inArray(accountPower.accountId, addresses)] : []),
           gt(accountPower.votingPower, 0n),
           isNull(votesOnchain.proposalId), // NULL means they didn't vote on this proposal
         ),
