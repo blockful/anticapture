@@ -15,8 +15,9 @@ export function topVotingPowerVariations(
       method: "get",
       operationId: "topVotingPowerVariations",
       path: "/voting-power/variations",
-      summary: "Get voting power changes of the for the top delegates",
-      description: "Returns a list of voting power changes",
+      summary: "Get top changes in voting power for a given period",
+      description:
+        "Returns a mapping of the biggest changes to voting power associated by delegate address",
       tags: ["proposals"],
       request: {
         query: TopVotingPowerVariationsRequestSchema,
