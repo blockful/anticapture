@@ -1,21 +1,17 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DaoIdEnum } from "@/lib/enums";
 import {
   TokenHistoricalPriceRequest,
   TokenHistoricalPriceResponse,
 } from "../mappers";
-interface TokenHistoricalDataClient {
-  getHistoricalTokenData(
-    daoId: DaoIdEnum,
-    days: number,
-  ): Promise<TokenHistoricalPriceResponse>;
+
+export interface TokenHistoricalDataClient {
+  getHistoricalTokenData(days: number): Promise<TokenHistoricalPriceResponse>;
 }
 
 export function tokenHistoricalData(
   app: Hono,
   client: TokenHistoricalDataClient,
-  daoId: DaoIdEnum,
 ) {
   app.openapi(
     createRoute({
@@ -41,7 +37,7 @@ export function tokenHistoricalData(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-      const data = await client.getHistoricalTokenData(daoId, days);
+      const data = await client.getHistoricalTokenData(days);
       return context.json(data, 200);
     },
   );

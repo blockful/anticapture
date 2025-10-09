@@ -5,8 +5,8 @@ import { DaoIdEnum, DaysOpts, DaysEnum } from "@/lib/enums";
 import {
   HistoricalBalancesService,
   HistoricalBalancesRequest,
-} from "../services/historical-balances";
-import { HistoricalVotingPowerService } from "../services/historical-voting-power";
+  HistoricalVotingPowerService,
+} from "../services";
 
 export function historicalOnchain(
   app: Hono,

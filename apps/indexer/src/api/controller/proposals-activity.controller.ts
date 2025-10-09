@@ -2,7 +2,7 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
-import { ProposalsActivityService } from "@/api/services/proposals-activity/proposals-activity.service";
+import { ProposalsActivityService } from "@/api/services";
 import { ProposalsActivityRepository } from "@/api/repositories/proposals-activity.repository";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { VoteFilter } from "@/api/repositories/proposals-activity.repository";

@@ -14,7 +14,10 @@ export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
   private readonly client: AxiosInstance;
 
-  constructor(private readonly coingeckoApiKey: string) {
+  constructor(
+    private readonly coingeckoApiKey: string,
+    private readonly daoId: DaoIdEnum,
+  ) {
     this.client = axios.create({
       baseURL: this.coingeckoApiUrl,
       headers: {
@@ -24,10 +27,9 @@ export class CoingeckoService {
   }
 
   async getHistoricalTokenData(
-    daoId: DaoIdEnum,
     days: number = DAYS_IN_YEAR,
   ): Promise<TokenHistoricalPriceResponse> {
-    const tokenId = CoingeckoTokenIdEnum[daoId];
+    const tokenId = CoingeckoTokenIdEnum[this.daoId];
 
     if (!tokenId) {
       throw new HTTPException(404, {
