@@ -92,8 +92,6 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-console.log("Table stories");
-
 export const DefaultTable: Story = {
   args: {
     columns,
