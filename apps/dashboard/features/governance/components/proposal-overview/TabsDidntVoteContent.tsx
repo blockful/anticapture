@@ -285,10 +285,17 @@ export const TabsDidntVoteContent = ({
             );
           }
 
-          // Parse the variation percentage directly from the API
-          const changePercentage = votingPowerVariation
-            ? Number(votingPowerVariation)
+          // Calculate percentage change from absolute variation
+          const currentVotingPower = row.original.votingPower;
+          const currentVP = currentVotingPower
+            ? Number(formatEther(BigInt(currentVotingPower)))
             : 0;
+          const variation = votingPowerVariation
+            ? Number(formatEther(BigInt(votingPowerVariation)))
+            : 0;
+          const historicalVP = currentVP - variation;
+          const changePercentage =
+            historicalVP !== 0 ? (variation / historicalVP) * 100 : 0;
 
           // Determine the direction and color
           const isPositive = changePercentage > 0;
@@ -318,10 +325,7 @@ export const TabsDidntVoteContent = ({
                     isNeutral && "text-secondary",
                   )}
                 >
-                  {formatNumberUserReadable(
-                    Number(formatEther(BigInt(changePercentage))),
-                  )}{" "}
-                  %
+                  {Math.abs(changePercentage).toFixed(1)}%
                 </span>
               </div>
             </div>
