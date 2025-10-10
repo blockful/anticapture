@@ -5,47 +5,39 @@ import {
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { GitcoinIcon } from "@/shared/components/icons";
-import { mainnet } from "viem/chains";
+import { ScrollIcon } from "@/shared/components/icons";
+import { scroll } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
-export const GTC: DaoConfiguration = {
-  name: "Gitcoin",
+export const SCR: DaoConfiguration = {
+  name: "Scroll",
   supportStage: SupportStageEnum.FULL,
-  icon: GitcoinIcon,
+  icon: ScrollIcon,
   daoOverview: {
-    chain: mainnet,
-    snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
+    chain: scroll,
+    snapshot: "",
     contracts: {
-      governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
-      token: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
-      timelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
+      governor: "0x2f3f2054776bd3c2fc30d750734a8f539bb214f0",
+      token: "0xd29687c813D741E2F938F4aC377128810E217b1b",
+      timelock: "0x79D83D1518e2eAA64cdc0631df01b06e2762CC14",
     },
-    tally: "https://tally.xyz/gov/gitcoin",
-    cancelFunction:
-      "https://etherscan.io/address/0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518#writeContract#F2",
     rules: {
       delay: true,
       changeVote: false,
       timelock: true,
-      cancelFunction: true,
-      logic: "For + Abstain",
-      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
-      proposalThreshold: "150k GTC",
+      cancelFunction: false,
+      logic: "For + Abstain + Against",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.SCROLL,
+      proposalThreshold: "50M $SCR",
     },
   },
-  // attackProfitability: {
-  //   riskLevel: RiskLevel.HIGH,
-  //   supportsLiquidTreasuryCall: false,
-  //   attackCostBarChart: {
-  //     OptimismTimelock: "",
-  //     OptimismTokenDistributor: "",
-  //     OptimismUniv3Uni: "",
-  //   },
-  // },
+  attackProfitability: {
+    riskLevel: RiskLevel.LOW,
+    supportsLiquidTreasuryCall: false,
+    attackCostBarChart: {},
+  },
   riskAnalysis: true,
   governanceImplementation: {
-    // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
         value: "Yes",
@@ -54,37 +46,31 @@ export const GTC: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
-        riskExplanation:
-          "The contracts have been audited for smart contract security.",
+        riskExplanation: "Governance contracts are audited.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
-          "Currently, the DAO’s domains have no publicly verifiable DNS-level protections (High Risk).",
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
         riskExplanation:
-          "The DAO's domains have no publicly verifiable DNS-level protections we are aware of.",
+          "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "~$500k",
-        riskLevel: RiskLevel.HIGH,
+        value: "No Treasury Control",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
-        requirements: [
-          "Increase the deegation supply and active voter set to lower the profitability of an attacker.",
-          "Get the delegated supply above the value directly available for proposal execution.",
-        ],
         riskExplanation:
-          "The liquid treasury of the DAO is ~$500k bigger than its current delegated supply..",
+          "The DAO has no treasury directly controllable by governance, so there is no risk of attack profitability.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -94,17 +80,17 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ].description,
         riskExplanation:
-          "The DAO is not vulnerable to proposal flashloan attacks.",
+          "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "150k GTC",
-        riskLevel: RiskLevel.HIGH,
+        value: "5.0% Total Supply",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         riskExplanation:
-          "The proposal threshold is 150k GTC, which is the minimum amount of GTC required to propose a new proposal. The level of risk of this depends on the liquidity on markets.",
+          "The proposal threshold is greater than 1% of the active market supply of $SCR.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
         value: "No",
@@ -114,61 +100,62 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ].description,
         requirements: [
-          "Stablish a defense system that allows the DAO to cancel proposals if the original proposer doesn't have the required amount of GTC to meet threshold any longer.",
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
         ],
         riskExplanation:
-          "Currently an attacker can propose by holding enough tokens, dump them on the market and the proposal would stay valid.",
+          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         value: "No",
-        riskLevel: RiskLevel.NONE,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
-        riskExplanation: "The DAO has no security council.",
+        riskExplanation:
+          "Although it does not have a Security Council, the DAO has no control over Scroll's' capital. Therefore, there is no risk, because the DAO does not control anything.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
+        value: "NO",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
           ].description,
         requirements: [
-          "The DAO should establish a system to stop proposers from having multiple proposals at the same time.",
+          "Scroll has no limit on active proposals or proposals submitted per address. With a low proposal threshold, it is susceptible to spam in its governance.",
         ],
-        riskExplanation:
-          "Currently, an attacker can submit multiple proposals and cause a war of attrition against defending delegates.",
+        riskExplanation: "Scroll governance is vulnerable to spam.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "No",
+        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
           ].description,
         riskExplanation:
-          "There's no external entity with control to the timelock roles.",
+          "Governance powers fully enforced via Timelock, not upgradeable by EOA or central party",
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "2 days",
+        value: "3 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        riskExplanation:
-          "The timelock delay of two days gives time for the DAO to respond before execution.",
+        riskExplanation: "The timelock delay is bigger than 1 day",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "No",
-        riskLevel: RiskLevel.LOW,
+        value: "Yes",
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
-        riskExplanation: "The DAO has no veto strategy.",
+        requirements: [""],
+        riskExplanation:
+          "The DAO has no treasury directly controllable by governance.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -178,25 +165,23 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
         requirements: [
-          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
-          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through an adapted castVoteWithReasonAndParams call or equivalent.",
+          "Without the ability to change votes and with a vulnerable DNS, Scroll governance can be replaced by another, and deceive governance participants. However, since the DAO does not control Scroll's money, there is no economic risk.",
         ],
         riskExplanation:
-          "In case of an exploit that affects the voting platforms, immutable votes can leave delegates stuck with a incorrect vote made in a compromised interface.",
+          "The mutability of the vote is fundamental, but without the DAO controlling the project, an attack poses no real risk to the project.",
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "44 hours",
-        riskLevel: RiskLevel.MEDIUM,
+        value: "1 hour",
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
         requirements: [
-          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 44 hours delay is the time to redelegate and activate delegates before voting starts.",
-          "Our standard for low risk is of at least 2 days, to give time for a coordinated response with holders that need to redelegate in case of an attacker",
+          "A minimum of 2 days of Voting Delay is required for a DAO to be considered secure in this parameter.",
         ],
         riskExplanation:
-          "With less than 2 days of voting delay, token holders might miss the chance to delegate in support of the DAOs defense",
+          "With such a low voting delay, the DAO does not have time to mobilize to protect itself from an attack.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -206,21 +191,20 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         riskExplanation:
-          "Delegates voting power are based on its delegation on block previous to when they could first cast a vote, making flashloan votes impossible.",
+          "Voting power is based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "5 days and 14 hours",
+        value: "5 days",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
         requirements: [
-          "The voting period is 5 days and 14 hours, with the recommended safety being of 7 or more for a low level of risk.",
-          "Increase the voting period to allow for more delegates to participate in the voting process. and increase attack costs.",
+          "The voting period is 5 days, with the recommended safety being of 7 or more for a low level of risk.",
         ],
         riskExplanation:
-          "The voting period is 5 days and 14 hours, with the recommended safety being of 7 or more for a low level of risk.",
+          "The voting period is 5 days, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         value: "No",
@@ -230,12 +214,10 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
         requirements: [
-          "The voting subsidy is not applied, requiring delegates to pay gas on the proposals they vote on.",
           "With no voting subsidy, the structure is more vulnerable to spam attacks, as it's more costly for the defense than the attacker",
-          "The Foundation is the only allowed proposer, so the risk of spam attacks are low. Still, the DAO should consider applying a voting subsidy to make its structure more resilient.",
         ],
         riskExplanation:
-          "The voting subsidy is not applied, requiring delegates to pay gas on the proposals they vote on.",
+          "The voting subsidy is not applied, requiring voters to pay gas on the proposals they vote on.",
       },
     },
   },

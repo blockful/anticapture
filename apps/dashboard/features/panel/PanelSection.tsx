@@ -17,7 +17,7 @@ export const PanelSection = () => {
       title={SECTIONS_CONSTANTS.panel.title}
       icon={<BarChart3 className="section-layout-icon" />}
       switchDate={
-        <SwitcherDate
+        <SwitcherDate // TODO: Remove switcher in separate PR
           defaultValue={TimeInterval.ONE_YEAR}
           setTimeInterval={setTimeIntervalPanel}
         />

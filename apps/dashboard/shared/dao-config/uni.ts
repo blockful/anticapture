@@ -4,6 +4,7 @@ import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImp
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
@@ -26,7 +27,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
   },
   governanceImplementation: {

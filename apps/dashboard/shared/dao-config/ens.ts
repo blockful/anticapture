@@ -8,6 +8,7 @@ import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { EnsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
@@ -28,7 +29,7 @@ export const ENS: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {

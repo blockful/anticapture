@@ -133,9 +133,9 @@ export function tokenDistribution(
 
         /* eslint-disable */
         const changeRate =
-          oldValue &&
+          parseInt(oldValue) &&
           (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
-            parseEther("1");
+          parseEther("1");
         /* eslint-enable */
 
         return ctx.json(

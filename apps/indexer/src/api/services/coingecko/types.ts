@@ -13,6 +13,7 @@ export const CoingeckoTokenIdEnum = {
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
+  SCR: "scroll",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
