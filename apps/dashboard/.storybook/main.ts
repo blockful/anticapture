@@ -33,6 +33,14 @@ const config: StorybookConfig = {
       config.infrastructureLogging.level = "error";
     }
 
+    // Fix circular dependency issues in production builds
+    config.optimization = {
+      ...config.optimization,
+      usedExports: false,
+      sideEffects: false,
+      concatenateModules: false,
+    };
+
     return config;
   },
 };
