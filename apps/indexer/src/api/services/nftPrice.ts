@@ -17,12 +17,12 @@ export class NFTPriceService {
 
   constructor(
     private readonly repo: Repository,
-    private readonly coingeckoApiKey: string,
+    coingeckoApiKey: string,
   ) {
     this.client = axios.create({
       baseURL: this.coingeckoApiUrl,
       headers: {
-        "x-cg-demo-api-key": this.coingeckoApiKey,
+        "x-cg-demo-api-key": coingeckoApiKey,
       },
     });
   }
@@ -53,12 +53,20 @@ export class NFTPriceService {
     return auctionPrices.map(({ price, timestamp }, index) => ({
       price: (
         Number(formatEther(BigInt(price))) * ethPriceResponse[index]![1]
-      ).toString(),
+      ).toFixed(2),
       timestamp,
     }));
   }
 
   async getTokenPrice(_: string, __: string): Promise<string> {
-    return this.repo.getTokenPrice();
+    const price = await this.repo.getTokenPrice();
+    const nftEthValue = Number(formatEther(BigInt(price)));
+
+    const ethCurrentPrice = await this.client.get<{
+      prices: [number, number][];
+    }>(`/coins/ethereum/market_chart?vs_currency=usd&days=1`);
+
+    const ethPriceResponse = ethCurrentPrice.data.prices.reverse().slice(0, 1);
+    return (nftEthValue * ethPriceResponse[0]![1]).toFixed(2);
   }
 }
