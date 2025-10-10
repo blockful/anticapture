@@ -16,7 +16,6 @@ import {
   getExpandedRowModel,
 } from "@tanstack/react-table";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -116,15 +115,15 @@ export const VotesTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <div className="scrollbar-custom h-[500px] overflow-auto">
-      <Table
+    <div className="scrollbar-custom border-border-default relative h-[500px] overflow-auto rounded-md border">
+      <table
         className={cn(
-          "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
+          "text-secondary md:bg-surface-default w-full caption-bottom border-separate border-spacing-0 bg-transparent text-sm",
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
           className,
         )}
       >
-        <TableHeader className="bg-surface-contrast text-secondary text-xs font-normal">
+        <TableHeader className="bg-surface-contrast text-secondary sticky top-0 z-10 text-xs font-normal">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}
@@ -277,7 +276,7 @@ export const VotesTable = <TData, TValue>({
             );
           })()}
         </TableBody>
-      </Table>
+      </table>
     </div>
   );
 };
