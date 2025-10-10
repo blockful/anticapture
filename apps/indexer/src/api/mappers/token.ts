@@ -40,7 +40,7 @@ export const TokenPropertiesSchema = z.object({
 });
 
 export const TokenPropertiesResponseSchema = TokenPropertiesSchema.extend({
-  price: z.number(),
+  price: z.string(),
 });
 
 export type TokenPropertiesResponse = z.infer<
@@ -50,7 +50,7 @@ export type TokenPropertiesResponse = z.infer<
 export type DBToken = typeof token.$inferSelect;
 
 export const TokenMapper = {
-  toApi: (dbToken: DBToken, tokenPrice: number): TokenPropertiesResponse => {
+  toApi: (dbToken: DBToken, tokenPrice: string): TokenPropertiesResponse => {
     return {
       ...dbToken,
       totalSupply: dbToken.totalSupply.toString(),

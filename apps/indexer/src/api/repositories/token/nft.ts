@@ -26,4 +26,10 @@ export class NFTPriceRepository {
       .limit(limit)
       .offset(offset);
   }
+
+  async getTokenPrice(): Promise<string> {
+    return (await db.query.tokenPrice.findFirst({
+      orderBy: desc(tokenPrice.timestamp),
+    }))!.price.toString();
+  }
 }

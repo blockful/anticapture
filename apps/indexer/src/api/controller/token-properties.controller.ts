@@ -7,10 +7,9 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 interface TokenPriceClient {
   getTokenPrice(
-    daoId: DaoIdEnum,
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<number>;
+  ): Promise<string>;
 }
 
 export function token(
@@ -53,7 +52,6 @@ export function token(
       const tokenContractAddress = CONTRACT_ADDRESSES[daoId].token.address;
       const tokenProps = await service.getTokenProperties(daoId);
       const priceData = await client.getTokenPrice(
-        daoId,
         tokenContractAddress,
         currency,
       );

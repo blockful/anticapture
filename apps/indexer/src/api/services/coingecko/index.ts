@@ -71,11 +71,10 @@ export class CoingeckoService {
   }
 
   async getTokenPrice(
-    daoId: DaoIdEnum,
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<number> {
-    const tokenId = CoingeckoTokenIdEnum[daoId];
+  ): Promise<string> {
+    const tokenId = CoingeckoTokenIdEnum[this.daoId];
     const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
     const formattedAddress = tokenContractAddress.toLowerCase();
     const response = await this.client.get(
@@ -95,6 +94,6 @@ export class CoingeckoService {
       });
     }
 
-    return price[formattedAddress]![targetCurrency]!;
+    return price[formattedAddress]![targetCurrency]!.toString();
   }
 }

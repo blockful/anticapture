@@ -5,6 +5,7 @@ interface Repository {
     limit: number,
     offset: number,
   ): Promise<TokenHistoricalPriceResponse>;
+  getTokenPrice(): Promise<string>;
 }
 
 export class NFTPriceService {
@@ -15,5 +16,9 @@ export class NFTPriceService {
     offset: number,
   ): Promise<TokenHistoricalPriceResponse> {
     return this.repo.getHistoricalNFTPrice(limit, offset);
+  }
+
+  async getTokenPrice(_: string, __: string): Promise<string> {
+    return this.repo.getTokenPrice();
   }
 }
