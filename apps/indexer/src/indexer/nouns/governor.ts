@@ -105,7 +105,6 @@ export function GovernorIndexer(
 
   ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
     await context.db.insert(tokenPrice).values({
-      tokenId: tokenAddress,
       price: event.args.amount,
       timestamp: truncateTimestampTime(event.block.timestamp),
     });

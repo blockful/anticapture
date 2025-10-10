@@ -6,7 +6,10 @@ import {
 } from "../mappers";
 
 export interface TokenHistoricalDataClient {
-  getHistoricalTokenData(days: number): Promise<TokenHistoricalPriceResponse>;
+  getHistoricalTokenData(
+    limit: number,
+    offset: number,
+  ): Promise<TokenHistoricalPriceResponse>;
 }
 
 export function tokenHistoricalData(
@@ -36,8 +39,8 @@ export function tokenHistoricalData(
       },
     }),
     async (context) => {
-      const { days } = context.req.valid("query");
-      const data = await client.getHistoricalTokenData(days);
+      const { skip, limit } = context.req.valid("query");
+      const data = await client.getHistoricalTokenData(limit, skip);
       return context.json(data, 200);
     },
   );

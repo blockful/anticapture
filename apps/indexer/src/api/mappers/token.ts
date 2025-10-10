@@ -1,13 +1,13 @@
 import { z } from "@hono/zod-openapi";
 
-import { DaysOpts } from "@/lib/enums";
-
 export const TokenHistoricalPriceRequest = z.object({
-  days: z
-    .enum(DaysOpts)
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
     .optional()
-    .default("365d")
-    .transform((val) => parseInt(val.replace("d", ""))),
+    .default(0),
+  limit: z.coerce.number().max(365).optional().default(365),
 });
 
 export type TokenHistoricalPriceRequest = z.infer<

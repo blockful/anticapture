@@ -1,16 +1,19 @@
-import { DAYS_IN_YEAR } from "@/lib/constants";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 
 interface Repository {
-  getHistoricalNFTPrice(days: number): Promise<TokenHistoricalPriceResponse>;
+  getHistoricalNFTPrice(
+    limit: number,
+    offset: number,
+  ): Promise<TokenHistoricalPriceResponse>;
 }
 
 export class NFTPriceService {
   constructor(private readonly repo: Repository) {}
 
   async getHistoricalTokenData(
-    days: number = DAYS_IN_YEAR,
+    limit: number,
+    offset: number,
   ): Promise<TokenHistoricalPriceResponse> {
-    return this.repo.getHistoricalNFTPrice(days);
+    return this.repo.getHistoricalNFTPrice(limit, offset);
   }
 }
