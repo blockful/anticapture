@@ -2,7 +2,7 @@ import { DBAccountBalanceVariation } from "@/api/mappers/top-account-balance-var
 import { DaysEnum } from "@/lib/enums";
 
 interface AccountBalanceRepository {
-  getTopAccountBalanceChanges(
+  getTopAccountBalanceVariations(
     startTimestamp: number,
     limit: number,
     skip: number,
@@ -10,7 +10,7 @@ interface AccountBalanceRepository {
   ): Promise<DBAccountBalanceVariation[]>;
 }
 
-export class TopAccountBalancesService {
+export class TopBalanceVariationsService {
   constructor(private readonly repository: AccountBalanceRepository) {}
 
   async getTopAccountBalanceVariations(
@@ -22,7 +22,7 @@ export class TopAccountBalancesService {
   ): Promise<DBAccountBalanceVariation[]> {
     const startTimestamp = now - days;
 
-    return this.repository.getTopAccountBalanceChanges(
+    return this.repository.getTopAccountBalanceVariations(
       startTimestamp,
       limit,
       skip,

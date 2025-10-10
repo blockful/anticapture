@@ -4,27 +4,27 @@ import {
   TopAccountBalanceVariationsRequestSchema,
   TopAccountBalanceVariationsResponseSchema,
 } from "../mappers/top-account-balance-variations";
-import { TopAccountBalancesService } from "../services/historical-balances";
+import { TopBalanceVariationsService } from "../services/historical-balances";
 
 export function topAccountBalanceVariations(
   app: Hono,
-  service: TopAccountBalancesService,
+  service: TopBalanceVariationsService,
 ) {
   app.openapi(
     createRoute({
       method: "get",
       operationId: "topAccountBalanceVariations",
       path: "/account-balance/variations",
-      summary: "Get top changes in account balances for a given period",
+      summary: "Get top variations in account balances for a given period",
       description:
-        "Returns a mapping of the biggest changes to account balances associated by delegate address",
+        "Returns a mapping of the biggest variations to account balances associated by account address",
       tags: ["transactions"],
       request: {
         query: TopAccountBalanceVariationsRequestSchema,
       },
       responses: {
         200: {
-          description: "Successfully retrieved account balance changes",
+          description: "Successfully retrieved account balance variations",
           content: {
             "application/json": {
               schema: TopAccountBalanceVariationsResponseSchema,
