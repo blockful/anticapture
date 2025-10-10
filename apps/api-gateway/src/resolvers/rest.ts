@@ -22,6 +22,7 @@ const daoItemQueries = [
   "proposal",
   "votingPowers",
   "proposalNonVoters",
+  "token",
   "topAccountBalanceVariations",
 ];
 
