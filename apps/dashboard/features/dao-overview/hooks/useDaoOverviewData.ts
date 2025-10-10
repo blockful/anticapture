@@ -67,19 +67,22 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const topDelegatesToPass = useMemo(() => {
     if (!holders.data || !quorumValue) return null;
     const topHolders = holders.data
-      .map((h) => ({
-        balance: Number(h.balance) / 10 ** 18,
+      .map((holder) => ({
+        balance: Number(holder.balance) / 10 ** 18,
       }))
       .sort((a, b) => b.balance - a.balance);
 
-    let acc = 0;
-    let count = 0;
+    let topDelegatesBalance = 0;
+    let topDelegatesCount = 0;
     for (const holder of topHolders) {
-      acc += holder.balance;
-      count++;
-      if (acc >= quorumValue) break;
+      topDelegatesBalance += holder.balance;
+      topDelegatesCount++;
+      if (topDelegatesBalance >= quorumValue) break;
     }
-    return count;
+
+    if (topDelegatesBalance < quorumValue) return "20+";
+
+    return topDelegatesCount;
   }, [holders.data, quorumValue]);
 
   const isLoading =
