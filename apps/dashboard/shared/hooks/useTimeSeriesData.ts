@@ -278,17 +278,13 @@ export const useTimeSeriesData = (
   // For backward compatibility, fall back to bulk fetch if needed
   // But with optimized cache key that doesn't change on metric removal
   const stableMetricTypes = metricTypes.sort(); // Stable sort for consistent cache key
-  const fetchKey =
-    daoId && stableMetricTypes.length > 0
-      ? [`timeSeriesData-bulk`, daoId, stableMetricTypes.join(",")]
-      : null;
 
   const {
     data: fullData,
     error,
     isLoading,
   } = useSWR(
-    fetchKey,
+    [`timeSeriesData-bulk`, daoId, days, stableMetricTypes.join(",")],
     () => fetchTimeSeriesDataFromGraphQL(daoId, stableMetricTypes),
     {
       refreshInterval: options?.refreshInterval ?? 0,

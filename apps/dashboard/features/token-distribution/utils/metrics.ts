@@ -60,7 +60,7 @@ export const metricsSchema = {
     type: "BAR",
   },
   CEX_TRANSFERS: {
-    label: "CEX Transfers",
+    label: "Onchain CEX transfers",
     color: "#FDE047",
     category: "VOLUME",
     type: "BAR",
@@ -78,7 +78,7 @@ export const metricsSchema = {
     type: "BAR",
   },
   PROPOSALS_GOVERNANCE: {
-    label: "Proposals",
+    label: "Onchain Proposals",
     color: "#fff",
     category: "GOVERNANCE",
     type: "SPORADIC_LINE",

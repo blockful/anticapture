@@ -4,31 +4,34 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import axios from "axios";
-import { TimeInterval } from "@/shared/types/enums";
 import { PriceEntry } from "@/shared/dao-config/types";
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
+  limit,
 }: {
   daoId: DaoIdEnum;
-  days?: TimeInterval;
+  limit?: number;
 }): Promise<PriceEntry[] | null> => {
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
 
-  const query = `query GetHistoricalTokenData {
-  historicalTokenData {
-    price
-    timestamp
-  }
-}`;
+  const query = `query GetHistoricalTokenData($limit: Float) {
+    historicalTokenData(limit: $limit) {
+      price
+      timestamp
+    }
+  }`;
   const response = await axios.post<{
     data: { historicalTokenData: PriceEntry[] };
   }>(
     `${BACKEND_ENDPOINT}`,
     {
       query,
+      variables: {
+        limit,
+      },
     },
     {
       headers: {
@@ -42,13 +45,14 @@ export const fetchDaoTokenHistoricalData = async ({
 export const useDaoTokenHistoricalData = ({
   daoId,
   config,
+  limit,
 }: {
   daoId: DaoIdEnum;
-  days?: TimeInterval;
+  limit?: number;
   config?: Partial<SWRConfiguration<PriceEntry[] | null, Error>>;
 }) => {
   const { data, error, isValidating, mutate } = useSWR<PriceEntry[] | null>(
-    ["daoTokenHistoricalData", daoId],
+    ["daoTokenHistoricalData", daoId, limit],
     () =>
       fetchDaoTokenHistoricalData({
         daoId,

@@ -19,7 +19,6 @@ import {
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
-import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useMemo, useRef } from "react";
@@ -61,6 +60,7 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoId.toUpperCase() as DaoIdEnum,
+    limit: Number(days.split("d")[0]),
   });
 
   const { data: timeSeriesData } = useTimeSeriesData(
@@ -97,17 +97,6 @@ export const MultilineChartAttackProfitability = ({
     [daoId],
   ) satisfies ChartConfig;
 
-  const selectedPriceHistory = useMemo(() => {
-    const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
-      daoTokenPriceHistoricalData,
-    );
-    return (
-      priceHistoryByTimeInterval[days as TimeInterval] ??
-      priceHistoryByTimeInterval.full ??
-      priceHistoryByTimeInterval
-    );
-  }, [daoTokenPriceHistoricalData, days]);
-
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
     let treasurySupplyChart: DaoMetricsDayBucket[] = [];
@@ -125,43 +114,37 @@ export const MultilineChartAttackProfitability = ({
       treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
         treasuryAssetNonDAOToken,
         "treasuryNonDAO",
-      )
-        .reverse()
-        .slice(365 - Number(days.split("d")[0])),
+      ).reverse(),
       all: normalizeDatasetAllTreasury(
-        selectedPriceHistory,
+        daoTokenPriceHistoricalData,
         "all",
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
-      ).slice(365 - Number(days.split("d")[0])),
+      ),
       quorum: daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
         ?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
-            selectedPriceHistory,
+            daoTokenPriceHistoricalData,
             "quorum",
             null,
             delegatedSupplyChart,
-          )
-            .slice(365 - Number(days.split("d")[0]))
-            .map((datasetpoint) => ({
-              ...datasetpoint,
-              quorum:
-                datasetpoint.quorum *
-                (daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
-                  ?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
-            }))
+          ).map((datasetpoint) => ({
+            ...datasetpoint,
+            quorum:
+              datasetpoint.quorum *
+              (daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
+                ?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
+          }))
         : quorumValue
-          ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue).slice(
-              365 - Number(days.split("d")[0]),
-            )
+          ? normalizeDataset(daoTokenPriceHistoricalData, "quorum", quorumValue)
           : [],
       delegated: delegatedSupplyChart
         ? normalizeDataset(
-            selectedPriceHistory,
+            daoTokenPriceHistoricalData,
             "delegated",
             null,
             delegatedSupplyChart,
-          ).slice(365 - Number(days.split("d")[0]))
+          )
         : [],
     };
 
@@ -198,11 +181,10 @@ export const MultilineChartAttackProfitability = ({
   }, [
     filterData,
     chartConfig,
-    days,
     daoId,
     mocked,
     quorumValue,
-    selectedPriceHistory,
+    daoTokenPriceHistoricalData,
     treasuryAssetNonDAOToken,
     timeSeriesData,
   ]);

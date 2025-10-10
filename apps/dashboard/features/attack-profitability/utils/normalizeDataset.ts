@@ -9,7 +9,7 @@ import { findMostRecentValue } from "@/features/attack-profitability/utils";
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
   key: string,
-  multiplier?: number | null,
+  multiplier: number | null,
   multiplierDataSet?: DaoMetricsDayBucket[],
 ): MultilineChartDataSetPoint[] {
   // If there's no multiplier data, use the fixed value or 1 as default
