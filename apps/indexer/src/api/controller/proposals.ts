@@ -1,4 +1,4 @@
-import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { ProposalsService } from "@/api/services/proposals/proposals";
 import {
@@ -7,6 +7,8 @@ import {
   ProposalRequestSchema,
   ProposalResponseSchema,
   ProposalMapper,
+  VotersRequestSchema,
+  VotersResponseSchema,
 } from "../mappers";
 import { DAOClient } from "@/interfaces";
 
@@ -105,6 +107,48 @@ export function proposals(
         ProposalMapper.toApi(proposal, quorum, blockTime, votingDelay),
         200,
       );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "proposalNonVoters",
+      path: "/proposals/{id}/non-voters",
+      summary: "Get a proposal non-voters",
+      description:
+        "Returns the active delegates that did not vote on a given proposal",
+      tags: ["proposals"],
+      request: {
+        params: z.object({
+          id: z.string(),
+        }),
+        query: VotersRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved proposal",
+          content: {
+            "application/json": {
+              schema: VotersResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { id } = context.req.valid("param");
+      const { skip, limit, orderDirection, addresses } =
+        context.req.valid("query");
+
+      const { totalCount, items } = await service.getProposalNonVoters(
+        id,
+        skip,
+        limit,
+        orderDirection,
+        addresses,
+      );
+      return context.json({ totalCount, items });
     },
   );
 }

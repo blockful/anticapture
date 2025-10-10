@@ -6,25 +6,25 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
-import { TheTable, SkeletonRow, BlankSlate, Button } from "@/shared/components";
+import { SkeletonRow, Button } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { Pagination } from "@/shared/components/design-system/table/Pagination";
-import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { Inbox, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address } from "viem";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation: { percentageChange: number; absoluteChange: number };
-  activity: string;
-  activityPercentage: number;
+  variation?: { percentageChange: number; absoluteChange: number } | null;
+  activity?: string | null;
+  activityPercentage?: number | null;
   delegators: number;
 }
 
@@ -86,9 +86,9 @@ export const Delegates = ({
     error,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore,
-    historicalDataLoading,
+    isHistoricalLoadingFor,
+    isActivityLoadingFor,
   } = useDelegates({
     fromDate,
     orderBy: sortBy,
@@ -128,19 +128,22 @@ export const Delegates = ({
       const votingPowerBigInt = BigInt(delegate.votingPower || "0");
       const votingPowerFormatted = Number(votingPowerBigInt / BigInt(10 ** 18));
 
-      // Get activity from real proposals data
       const activity = delegate.proposalsActivity
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
-        : "0/0";
+        : null;
 
-      const activityPercentage =
-        ((delegate.proposalsActivity?.votedProposals || 0) /
-          (delegate.proposalsActivity?.totalProposals || 1)) *
-        100;
+      const activityPercentage = delegate.proposalsActivity
+        ? (delegate.proposalsActivity.votedProposals /
+            delegate.proposalsActivity.totalProposals) *
+          100
+        : null;
 
-      // Calculate variation using real historical voting power
-      let variation = { percentageChange: 0, absoluteChange: 0 };
-      if (delegate.historicalVotingPower && votingPowerFormatted > 0) {
+      let variation: {
+        percentageChange: number;
+        absoluteChange: number;
+      } | null = null;
+
+      if (delegate.historicalVotingPower !== undefined) {
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
         );
@@ -148,28 +151,25 @@ export const Delegates = ({
           historicalVotingPowerBigInt / BigInt(10 ** 18),
         );
 
-        if (historicalVotingPowerFormatted === 0) {
-          variation = { percentageChange: 0, absoluteChange: 0 };
-        } else {
-          // Calculate absolute change and percentage
-          const absoluteChange =
-            votingPowerFormatted - historicalVotingPowerFormatted;
-          const percentageChange =
-            ((votingPowerFormatted - historicalVotingPowerFormatted) /
-              historicalVotingPowerFormatted) *
-            100;
+        const absoluteChange =
+          votingPowerFormatted - historicalVotingPowerFormatted;
+        const percentageChange =
+          historicalVotingPowerFormatted === 0
+            ? 0
+            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
+                historicalVotingPowerFormatted) *
+              100;
 
-          variation = {
-            percentageChange: Number(percentageChange.toFixed(2)),
-            absoluteChange: Number(absoluteChange.toFixed(2)),
-          };
-        }
+        variation = {
+          percentageChange: Number(percentageChange.toFixed(2)),
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
       }
 
       return {
         address: delegate.accountId || "",
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation: variation,
+        variation,
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,
@@ -180,12 +180,11 @@ export const Delegates = ({
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
       accessorKey: "address",
-      size: 280,
       cell: ({ row }) => {
         const address = row.getValue("address") as string;
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -199,7 +198,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 p-2">
+          <div className="flex items-center gap-3">
             <EnsAvatar
               address={address as `0x${string}`}
               size="sm"
@@ -222,7 +221,7 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+        <div className="text-table-header flex w-full items-center justify-start">
           <p>Address</p>
           <AddressFilter
             onApply={handleAddressFilterApply}
@@ -231,10 +230,15 @@ export const Delegates = ({
           />
         </div>
       ),
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "votingPower",
-      size: 160,
+      meta: {
+        columnClassName: "w-80",
+      },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
@@ -248,7 +252,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary h-10 w-full items-center justify-end px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex items-center justify-end text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -257,7 +261,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -279,16 +283,21 @@ export const Delegates = ({
     },
     {
       accessorKey: "variation",
-      size: 250,
+      meta: {
+        columnClassName: "w-64",
+      },
       cell: ({ row }) => {
-        const variation = row.getValue("variation") as {
-          percentageChange: number;
-          absoluteChange: number;
-        };
+        const addr = row.original.address;
+        const variation = row.getValue("variation") as
+          | {
+              percentageChange: number;
+              absoluteChange: number;
+            }
+          | undefined;
 
-        if (historicalDataLoading || loading) {
+        if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow
                 className="h-5 w-16"
                 parentClassName="justify-start flex animate-pulse"
@@ -298,14 +307,14 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex h-10 w-full items-center justify-start gap-2 px-4 py-2 text-sm">
-            {formatNumberUserReadable(Math.abs(variation.absoluteChange))}
-            <Percentage value={variation.percentageChange} />
+          <div className="flex w-full items-center justify-start gap-2 text-sm">
+            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+            <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <h4 className="text-table-header flex w-full items-center justify-start">
           Variation
         </h4>
       ),
@@ -313,28 +322,27 @@ export const Delegates = ({
     },
     {
       accessorKey: "activity",
-      size: 160,
       cell: ({ row }) => {
-        const activity = row.getValue("activity") as string;
+        const activity = row.getValue("activity") as string | undefined;
         const activityPercentage = row.original.activityPercentage;
-
-        if (historicalDataLoading || loading) {
+        const addr = row.original.address;
+        if (isActivityLoadingFor(addr) || loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-10" />
             </div>
           );
         }
 
         return (
-          <div className="flex h-10 items-center justify-start gap-2 px-4 py-2">
-            <ProgressCircle percentage={activityPercentage} />
-            {activity}
+          <div className="flex items-center justify-start gap-2">
+            <ProgressCircle percentage={activityPercentage || 0} />
+            {activity || "0/0"}
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <h4 className="text-table-header flex w-full items-center justify-start">
           Activity
         </h4>
       ),
@@ -342,20 +350,22 @@ export const Delegates = ({
     },
     {
       accessorKey: "delegators",
-      size: 120,
+      meta: {
+        columnClassName: "w-20",
+      },
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
 
         if (loading) {
           return (
-            <div className="flex w-full items-center justify-end px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-12" />
             </div>
           );
         }
 
         return (
-          <div className="text-secondary flex h-10 w-full items-center justify-end px-4 py-2 text-end text-sm font-normal">
+          <div className="text-secondary flex items-center justify-start text-end text-sm font-normal">
             {delegators}
           </div>
         );
@@ -364,7 +374,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
@@ -387,9 +397,9 @@ export const Delegates = ({
   if (loading) {
     return (
       <div className="flex flex-col gap-2">
-        <TheTable
+        <Table
           columns={delegateColumns}
-          data={Array.from({ length: 10 }, () => ({
+          data={Array.from({ length: 12 }, () => ({
             address: `0x${"0".repeat(40)}`,
             type: "",
             votingPower: "0",
@@ -398,19 +408,10 @@ export const Delegates = ({
             activityPercentage: 0,
             delegators: 0,
           }))}
-          withPagination={true}
-          withSorting={true}
-          isTableSmall={true}
-        />
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
+          withDownloadCSV={true}
+          size="sm"
+          wrapperClassName="h-[450px]"
+          className="h-[400px]"
         />
       </div>
     );
@@ -459,16 +460,6 @@ export const Delegates = ({
             </tbody>
           </table>
         </div>
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
-        />
       </div>
     );
   }
@@ -476,32 +467,17 @@ export const Delegates = ({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <TheTable
+        <Table
           columns={delegateColumns}
           data={tableData}
-          withPagination={true}
-          withSorting={true}
           onRowClick={(row) => handleOpenDrawer(row.address as Address)}
-          isTableSmall={true}
-          showWhenEmpty={
-            <BlankSlate
-              variant="default"
-              icon={Inbox}
-              title=""
-              className="h-full rounded-none"
-              description="No addresses found"
-            />
-          }
-        />
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPrevious={fetchPreviousPage}
-          onNext={fetchNextPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          isLoading={fetchingMore}
+          size="sm"
+          hasMore={pagination.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          withDownloadCSV={true}
+          wrapperClassName="h-[450px]"
+          className="h-[400px]"
         />
       </div>
       <HoldersAndDelegatesDrawer
