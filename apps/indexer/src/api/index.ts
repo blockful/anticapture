@@ -36,8 +36,8 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { topAccountBalanceVariations } from "./controller/top-account-balance-variations";
-import { TopBalanceVariationsService } from "./services/historical-balances";
+import { topAccountBalanceVariations } from "./controller";
+import { TopBalanceVariationsService } from "./services";
 
 const app = new Hono({
   defaultHook: (result, c) => {

@@ -2,7 +2,7 @@ import { asc, desc, gte, sql } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
 
-import { DBAccountBalanceVariation } from "../mappers/top-account-balance-variations";
+import { DBAccountBalanceVariation } from "../mappers";
 
 export class AccountBalanceRepository {
   async getTopAccountBalanceVariations(

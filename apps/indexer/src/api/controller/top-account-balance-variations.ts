@@ -3,8 +3,8 @@ import {
   TopAccountBalanceVariationsMapper,
   TopAccountBalanceVariationsRequestSchema,
   TopAccountBalanceVariationsResponseSchema,
-} from "../mappers/top-account-balance-variations";
-import { TopBalanceVariationsService } from "../services/historical-balances";
+} from "../mappers";
+import { TopBalanceVariationsService } from "../services";
 
 export function topAccountBalanceVariations(
   app: Hono,

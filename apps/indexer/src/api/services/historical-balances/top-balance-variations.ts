@@ -1,4 +1,4 @@
-import { DBAccountBalanceVariation } from "@/api/mappers/top-account-balance-variations";
+import { DBAccountBalanceVariation } from "@/api/mappers";
 import { DaysEnum } from "@/lib/enums";
 
 interface AccountBalanceRepository {
