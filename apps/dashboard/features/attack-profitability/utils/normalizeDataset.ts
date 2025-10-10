@@ -15,10 +15,10 @@ export function normalizeDataset(
   // If there's no multiplier data, use the fixed value or 1 as default
   if (!multiplierDataSet?.length) {
     return tokenPrices
-      .sort((a, b) => a[0] - b[0])
-      .map(([timestamp, price]) => ({
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map(({ timestamp, price }) => ({
         date: timestamp,
-        [key]: price * (multiplier ?? 1),
+        [key]: Number(price) * (multiplier ?? 1),
       }));
   }
 
@@ -31,14 +31,16 @@ export function normalizeDataset(
     .sort((a, b) => a.timestamp - b.timestamp);
 
   // Sort token prices by timestamp
-  const sortedTokenPrices = [...tokenPrices].sort((a, b) => a[0] - b[0]);
+  const sortedTokenPrices = [...tokenPrices].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   // Transform price data with appropriate multipliers
-  return sortedTokenPrices.map(([timestamp, price]) => {
+  return sortedTokenPrices.map(({ timestamp, price }) => {
     return {
       date: timestamp,
       [key]:
-        price *
+        Number(price) *
         findMostRecentValue(
           sortedMultipliers,
           timestamp,

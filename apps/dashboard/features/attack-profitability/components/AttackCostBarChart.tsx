@@ -83,7 +83,6 @@ export const AttackCostBarChart = ({
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData({
     daoId: selectedDaoId,
-    days: TimeInterval.SEVEN_DAYS,
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
@@ -103,17 +102,13 @@ export const AttackCostBarChart = ({
   const { isMobile } = useScreenSize();
 
   useEffect(() => {
-    if (
+    setMocked(
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
-      activeSupply.data?.activeSupply === undefined &&
-      averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === undefined
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        activeSupply.data?.activeSupply === undefined &&
+        averageTurnout.data?.currentAverageTurnout === undefined &&
+        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+        vetoCouncilVotingPower === undefined,
+    );
   }, [
     delegatedSupply,
     activeSupply,
@@ -138,18 +133,14 @@ export const AttackCostBarChart = ({
       return mockedAttackCostBarData as ChartDataItem[];
     }
 
-    const prices = daoTokenPriceHistoricalData.prices;
-    const lastPrice = prices.length > 0 ? prices[prices.length - 1][1] : 0;
+    const prices = daoTokenPriceHistoricalData;
+    const lastPrice =
+      prices.length > 0 ? Number(prices[prices.length - 1].price) : 0;
 
     const formatValue = (value: number): number => {
-      if (value == null) return 0;
+      const formattedValue = Number(formatEther(BigInt(Math.floor(value))));
 
-      const formattedValue = Number(formatEther(BigInt(value || 0)));
-
-      if (valueMode === "usd") {
-        return formattedValue * lastPrice;
-      }
-
+      if (valueMode === "usd") return formattedValue * lastPrice;
       return formattedValue;
     };
 
@@ -204,7 +195,7 @@ export const AttackCostBarChart = ({
     activeSupply.data,
     averageTurnout.data,
     daoTopTokenHolderExcludingTheDao?.balance,
-    daoTokenPriceHistoricalData.prices,
+    daoTokenPriceHistoricalData,
     valueMode,
   ]);
 

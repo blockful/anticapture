@@ -5,37 +5,27 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import axios from "axios";
 import { TimeInterval } from "@/shared/types/enums";
-
-export type PriceEntry = [timestamp: number, value: number];
-
-export interface DaoTokenHistoricalDataResponse {
-  prices: PriceEntry[];
-  market_caps: PriceEntry[];
-  total_volumes: PriceEntry[];
-}
-
-const DEFAULT_INTERVAL = TimeInterval.ONE_YEAR;
+import { PriceEntry } from "@/shared/dao-config/types";
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
-  days = DEFAULT_INTERVAL,
 }: {
   daoId: DaoIdEnum;
   days?: TimeInterval;
-}): Promise<DaoTokenHistoricalDataResponse | null> => {
+}): Promise<PriceEntry[] | null> => {
   if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
     return null;
   }
 
   const query = `query GetHistoricalTokenData {
-  historicalTokenData(days: _${days}) {
-    market_caps
-    prices
+  historicalTokenData {
+    price
+    timestamp
   }
 }`;
-  const response: {
-    data: { data: { historicalTokenData: DaoTokenHistoricalDataResponse } };
-  } = await axios.post(
+  const response = await axios.post<{
+    data: { historicalTokenData: PriceEntry[] };
+  }>(
     `${BACKEND_ENDPOINT}`,
     {
       query,
@@ -46,36 +36,28 @@ export const fetchDaoTokenHistoricalData = async ({
       },
     },
   );
-  const { historicalTokenData } = response.data.data as {
-    historicalTokenData: DaoTokenHistoricalDataResponse;
-  };
-  return historicalTokenData as DaoTokenHistoricalDataResponse;
+  return response.data.data.historicalTokenData;
 };
 
 export const useDaoTokenHistoricalData = ({
   daoId,
-  days,
   config,
 }: {
   daoId: DaoIdEnum;
   days?: TimeInterval;
-  config?: Partial<
-    SWRConfiguration<DaoTokenHistoricalDataResponse | null, Error>
-  >;
+  config?: Partial<SWRConfiguration<PriceEntry[] | null, Error>>;
 }) => {
-  const { data, error, isValidating, mutate } =
-    useSWR<DaoTokenHistoricalDataResponse | null>(
-      ["daoTokenHistoricalData", daoId, days],
-      () =>
-        fetchDaoTokenHistoricalData({
-          daoId,
-          days,
-        }),
-      { revalidateOnFocus: false, ...config },
-    );
+  const { data, error, isValidating, mutate } = useSWR<PriceEntry[] | null>(
+    ["daoTokenHistoricalData", daoId],
+    () =>
+      fetchDaoTokenHistoricalData({
+        daoId,
+      }),
+    { revalidateOnFocus: false, ...config },
+  );
 
   return {
-    data: data ?? { prices: [] },
+    data: data ?? [],
     loading: isValidating,
     error,
     refetch: mutate,

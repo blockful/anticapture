@@ -59,8 +59,9 @@ export const MultilineChartAttackProfitability = ({
     TimeInterval.ONE_YEAR,
   );
 
-  const { data: daoTokenPriceHistoricalData = { prices: [] } } =
-    useDaoTokenHistoricalData({ daoId: daoId.toUpperCase() as DaoIdEnum });
+  const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
+    daoId: daoId.toUpperCase() as DaoIdEnum,
+  });
 
   const { data: timeSeriesData } = useTimeSeriesData(
     daoId.toUpperCase() as DaoIdEnum,
@@ -98,14 +99,14 @@ export const MultilineChartAttackProfitability = ({
 
   const selectedPriceHistory = useMemo(() => {
     const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
-      daoTokenPriceHistoricalData.prices,
+      daoTokenPriceHistoricalData,
     );
     return (
       priceHistoryByTimeInterval[days as TimeInterval] ??
       priceHistoryByTimeInterval.full ??
       priceHistoryByTimeInterval
     );
-  }, [daoTokenPriceHistoricalData.prices, days]);
+  }, [daoTokenPriceHistoricalData, days]);
 
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];

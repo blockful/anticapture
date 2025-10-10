@@ -23,13 +23,7 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-export type PriceEntry = [timestamp: number, value: number];
-
-export interface TokenHistoricalDataMetrics {
-  prices: PriceEntry[];
-  market_caps: PriceEntry[];
-  total_volumes: PriceEntry[];
-}
+export type PriceEntry = { timestamp: number; price: string };
 
 export interface MultilineChartDataSetPoint {
   date: number;

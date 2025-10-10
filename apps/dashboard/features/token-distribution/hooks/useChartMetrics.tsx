@@ -5,7 +5,7 @@ import { useProposals } from "@/features/token-distribution/hooks/useProposals";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
+import { DaoMetricsDayBucket, PriceEntry } from "@/shared/dao-config/types";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
@@ -173,10 +173,10 @@ export const useChartMetrics = ({
 
     if (
       stableAppliedMetrics.includes("TOKEN_PRICE") &&
-      filteredHistoricalTokenData?.prices
+      filteredHistoricalTokenData
     ) {
-      filteredHistoricalTokenData.prices.forEach(
-        ([timestamp, price]: [number, number]) => {
+      filteredHistoricalTokenData.forEach(
+        ({ timestamp, price }: PriceEntry) => {
           result[normalizeTimestamp(timestamp)] = {
             ...result[normalizeTimestamp(timestamp)],
             date: normalizeTimestamp(timestamp),

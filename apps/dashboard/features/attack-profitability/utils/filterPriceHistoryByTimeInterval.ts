@@ -19,7 +19,9 @@ export const filterPriceHistoryByTimeInterval = (
     };
   }
 
-  const lastTimestamp = Math.floor(dataset[dataset.length - 1][0] / 1000);
+  const lastTimestamp = Math.floor(
+    dataset[dataset.length - 1].timestamp / 1000,
+  );
 
   const cutoffTimestamps = Object.values(TimeInterval).reduce(
     (acc, interval) => {
@@ -34,7 +36,7 @@ export const filterPriceHistoryByTimeInterval = (
     ...Object.values(TimeInterval).reduce(
       (acc, interval) => {
         acc[interval] = dataset.filter(
-          ([timestamp]) => timestamp >= cutoffTimestamps[interval],
+          ({ timestamp }) => timestamp >= cutoffTimestamps[interval],
         );
         return acc;
       },
