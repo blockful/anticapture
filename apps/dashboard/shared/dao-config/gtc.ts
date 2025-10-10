@@ -13,6 +13,7 @@ export const GTC: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: GitcoinIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {

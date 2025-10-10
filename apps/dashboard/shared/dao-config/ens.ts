@@ -14,6 +14,7 @@ export const ENS: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {

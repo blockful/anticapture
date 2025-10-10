@@ -13,6 +13,7 @@ export const NOUNS: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
+    token: "ERC721",
     chain: mainnet,
     snapshot: "",
     contracts: {

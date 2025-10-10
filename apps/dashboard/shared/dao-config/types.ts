@@ -65,6 +65,7 @@ export interface DaoOverviewConfig {
     governor?: Address;
     timelock?: Address;
   };
+  token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
   tally?: string;
