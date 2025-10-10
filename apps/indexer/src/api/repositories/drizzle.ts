@@ -351,33 +351,29 @@ export class DrizzleRepository {
           sql<string>`${aggregated.txsTo} - ${aggregated.txsFrom}`.as(
             "absoluteChange",
           ),
-        percentageChange:
-          sql<string>`case when ${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}) = 0 then 0 else ((${aggregated.txsTo} - ${aggregated.txsFrom})::numeric / (${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}))::numeric) * 100 end`.as(
-            "relativeChange",
-          ),
       })
       .from(aggregated)
       .orderBy(
         orderDirection == "desc"
-          ? desc(
-              sql`case when ${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}) = 0 then 0 else ((${aggregated.txsTo} - ${aggregated.txsFrom})::numeric / (${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}))::numeric) * 100 end`,
-            )
-          : asc(
-              sql`case when ${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}) = 0 then 0 else ((${aggregated.txsTo} - ${aggregated.txsFrom})::numeric / (${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}))::numeric) * 100 end`,
-            ),
+          ? desc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`)
+          : asc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`),
       )
       .offset(skip)
       .limit(limit);
 
-    return result.map(
-      ({ accountId, currentBalance, absoluteChange, percentageChange }) => ({
-        accountId: accountId,
-        previousBalance: currentBalance - BigInt(absoluteChange),
-        currentBalance: currentBalance,
-        absoluteChange: BigInt(absoluteChange),
-        percentageChange: parseInt(percentageChange),
-      }),
-    );
+    return result.map(({ accountId, currentBalance, absoluteChange }) => ({
+      accountId: accountId,
+      previousBalance: currentBalance - BigInt(absoluteChange),
+      currentBalance: currentBalance,
+      absoluteChange: BigInt(absoluteChange),
+      percentageChange:
+        currentBalance - BigInt(absoluteChange)
+          ? Number(
+              (BigInt(absoluteChange) * 10000n) /
+                (currentBalance - BigInt(absoluteChange)),
+            ) / 100
+          : 0,
+    }));
   }
 
   now() {
