@@ -4,11 +4,11 @@ import {
   TopAccountBalanceVariationsRequestSchema,
   TopAccountBalanceVariationsResponseSchema,
 } from "../mappers/top-account-balance-variations";
-import { AccountBalanceService } from "../services/account-balance";
+import { TopAccountBalancesService } from "../services/historical-balances";
 
 export function topAccountBalanceVariations(
   app: Hono,
-  service: AccountBalanceService,
+  service: TopAccountBalancesService,
 ) {
   app.openapi(
     createRoute({

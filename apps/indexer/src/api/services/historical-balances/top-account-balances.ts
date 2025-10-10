@@ -1,7 +1,7 @@
+import { DBAccountBalanceVariation } from "@/api/mappers/top-account-balance-variations";
 import { DaysEnum } from "@/lib/enums";
-import { DBAccountBalanceVariation } from "../mappers/top-account-balance-variations";
 
-interface DrizzleRepository {
+interface AccountBalanceRepository {
   getTopAccountBalanceChanges(
     startTimestamp: number,
     limit: number,
@@ -10,8 +10,8 @@ interface DrizzleRepository {
   ): Promise<DBAccountBalanceVariation[]>;
 }
 
-export class AccountBalanceService {
-  constructor(private readonly drizzleRepository: DrizzleRepository) { }
+export class TopAccountBalancesService {
+  constructor(private readonly repository: AccountBalanceRepository) {}
 
   async getTopAccountBalanceVariations(
     now: number,
@@ -22,7 +22,7 @@ export class AccountBalanceService {
   ): Promise<DBAccountBalanceVariation[]> {
     const startTimestamp = now - days;
 
-    return this.drizzleRepository.getTopAccountBalanceChanges(
+    return this.repository.getTopAccountBalanceChanges(
       startTimestamp,
       limit,
       skip,

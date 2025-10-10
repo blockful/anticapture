@@ -73,7 +73,7 @@ export const TopAccountBalanceVariationsMapper = (
         percentageChange,
       }) => ({
         accountId: accountId,
-        previousBalance: (previousBalance ?? 0n).toString(),
+        previousBalance: previousBalance.toString(),
         currentBalance: currentBalance.toString(),
         absoluteChange: absoluteChange.toString(),
         percentageChange: percentageChange,
