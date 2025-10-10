@@ -13,8 +13,6 @@ import {
   Button,
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { useDelegatedSupply } from "@/shared/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
@@ -31,6 +29,7 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+import { useGetTokenQuery } from "@anticapture/graphql-client/hooks";
 
 export const PanelTable = () => {
   const router = useRouter();
@@ -49,29 +48,19 @@ export const PanelTable = () => {
   }));
 
   // Create a cell component that stores its value in the ref
-  const DelegatedSupplyCell = ({
-    daoId,
-    rowIndex,
-  }: {
-    daoId: DaoIdEnum;
-    rowIndex: number;
-  }) => {
-    const { data: supplyData } = useDelegatedSupply(
-      daoId,
-      String(TimeInterval.SEVEN_DAYS),
-      // Smallest time interval available as `changeRate` is not used, only the current supply
-    );
+  const DelegatedSupplyCell = ({ rowIndex }: { rowIndex: number }) => {
+    const { data: tokenData } = useGetTokenQuery();
+    const delegatedSupply = tokenData?.token?.delegatedSupply;
+
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (supplyData) {
-        const numericValue = Number(
-          BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18),
-        );
+      if (delegatedSupply) {
+        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
         delegatedSupplyValues.current[rowIndex] = numericValue;
       }
-    }, [supplyData, rowIndex]);
+    }, [delegatedSupply, rowIndex]);
 
-    if (!supplyData) {
+    if (!delegatedSupply) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -81,7 +70,7 @@ export const PanelTable = () => {
     }
 
     const formattedSupply = formatNumberUserReadable(
-      Number(BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18)),
+      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
     );
 
     return (
@@ -253,7 +242,7 @@ export const PanelTable = () => {
             </div>
           );
         }
-        return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
+        return <DelegatedSupplyCell rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
         <Button

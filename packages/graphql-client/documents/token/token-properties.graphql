@@ -1,0 +1,15 @@
+query GetToken($currency: queryInput_token_currency = eth) {
+  token(currency: $currency) {
+    cexSupply
+    circulatingSupply
+    decimals
+    delegatedSupply
+    dexSupply
+    id
+    lendingSupply
+    name
+    price
+    totalSupply
+    treasury
+  }
+}
