@@ -14,7 +14,7 @@ import {
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize, useTokenData } from "@/shared/hooks";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import {
   ArrowUpDown,
@@ -29,7 +29,6 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { useGetTokenQuery } from "@anticapture/graphql-client/hooks";
 
 export const PanelTable = () => {
   const router = useRouter();
@@ -48,9 +47,15 @@ export const PanelTable = () => {
   }));
 
   // Create a cell component that stores its value in the ref
-  const DelegatedSupplyCell = ({ rowIndex }: { rowIndex: number }) => {
-    const { data: tokenData } = useGetTokenQuery();
-    const delegatedSupply = tokenData?.token?.delegatedSupply;
+  const DelegatedSupplyCell = ({
+    daoId,
+    rowIndex,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+  }) => {
+    const { data: tokenData } = useTokenData(daoId);
+    const delegatedSupply = tokenData?.delegatedSupply;
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
@@ -242,7 +247,7 @@ export const PanelTable = () => {
             </div>
           );
         }
-        return <DelegatedSupplyCell rowIndex={rowIndex} />;
+        return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
         <Button
