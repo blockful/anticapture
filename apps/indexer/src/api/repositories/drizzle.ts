@@ -18,6 +18,8 @@ import {
   proposalsOnchain,
   votesOnchain,
   votingPowerHistory,
+  transfer,
+  accountBalance,
 } from "ponder:schema";
 import { SQL } from "drizzle-orm";
 import { Address } from "viem";
@@ -30,6 +32,7 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
+import { DBAccountBalanceVariation } from "../mappers/top-account-balance-variations";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -303,6 +306,76 @@ export class DrizzleRepository {
       }),
       {},
     );
+  }
+
+  async getTopAccountBalanceChanges(
+    startTimestamp: number,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBAccountBalanceVariation[]> {
+    const recentTxs = db
+      .select()
+      .from(transfer)
+      .where(gte(transfer.timestamp, BigInt(startTimestamp)))
+      .orderBy(desc(transfer.timestamp))
+      .as("recent_txs");
+
+    const aggregated = db
+      .select({
+        address: accountBalance.accountId,
+        balance: accountBalance.balance,
+        txsFrom:
+          sql<string>`coalesce(sum(${recentTxs.amount}) filter (where ${recentTxs.fromAccountId} is not null), 0)`.as(
+            "txsFrom",
+          ),
+        txsTo:
+          sql<string>`coalesce(sum(${recentTxs.amount}) filter (where ${recentTxs.toAccountId} is not null), 0)`.as(
+            "txsTo",
+          ),
+      })
+      .from(accountBalance)
+      .leftJoin(
+        recentTxs,
+        sql`${accountBalance.accountId} = ${recentTxs.fromAccountId}`,
+      )
+      .leftJoin(
+        recentTxs,
+        sql`${accountBalance.accountId} = ${recentTxs.toAccountId}`,
+      )
+      .where(sql`${recentTxs.transactionHash} is not null`)
+      .groupBy(accountBalance.accountId, accountBalance.balance)
+      .as("aggregated");
+
+    const result = await db
+      .select({
+        accountId: aggregated.address,
+        currentBalance: aggregated.balance,
+        absoluteChange:
+          sql<string>`${aggregated.txsTo} - ${aggregated.txsFrom}`.as(
+            "absoluteChange",
+          ),
+      })
+      .from(aggregated)
+      .orderBy(
+        orderDirection == "desc"
+          ? desc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`)
+          : asc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`),
+      )
+      .offset(skip)
+      .limit(limit);
+
+    return result.map(({ accountId, currentBalance, absoluteChange }) => ({
+      accountId: accountId,
+      previousBalance: currentBalance - BigInt(absoluteChange),
+      currentBalance: currentBalance,
+      absoluteChange: BigInt(absoluteChange),
+      percentageChange: Number(
+        BigInt(absoluteChange) /
+          (currentBalance - BigInt(absoluteChange)) /
+          100n,
+      ),
+    }));
   }
 
   now() {

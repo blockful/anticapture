@@ -22,6 +22,7 @@ const daoItemQueries = [
   "proposal",
   "votingPowers",
   "proposalNonVoters",
+  "topAccountBalanceVariations",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {

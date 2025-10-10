@@ -1,0 +1,83 @@
+import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { z } from "@hono/zod-openapi";
+import { Address } from "viem";
+
+export const TopAccountBalanceVariationsRequestSchema = z.object({
+  days: z
+    .enum(DaysOpts)
+    .optional()
+    .default("90d")
+    .transform((val) => parseInt(val.replace("d", ""))),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, "Limit must be a positive integer")
+    .max(100, "Limit cannot exceed 100")
+    .optional()
+    .default(20),
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+});
+
+export const TopAccountBalanceVariationsResponseSchema = z.object({
+  period: z.object({
+    days: z.enum(DaysOpts).transform((val) => parseInt(val.replace("d", ""))),
+    startTimestamp: z.string(),
+    endTimestamp: z.string(),
+  }),
+  items: z.array(
+    z.object({
+      accountId: z.string(),
+      previousBalance: z.string(),
+      currentBalance: z.string(),
+      absoluteChange: z.string(),
+      percentageChange: z.number(),
+    }),
+  ),
+});
+
+export type TopAccountBalanceVariationsResponse = z.infer<
+  typeof TopAccountBalanceVariationsResponseSchema
+>;
+
+export type DBAccountBalanceVariation = {
+  accountId: Address;
+  previousBalance: bigint;
+  currentBalance: bigint;
+  absoluteChange: bigint;
+  percentageChange: number;
+};
+
+export const TopAccountBalanceVariationsMapper = (
+  variations: DBAccountBalanceVariation[],
+  endTimestamp: number,
+  days: DaysEnum,
+): TopAccountBalanceVariationsResponse => {
+  return {
+    period: {
+      days: days,
+      startTimestamp: new Date(endTimestamp - days).toISOString(),
+      endTimestamp: new Date(endTimestamp).toISOString(),
+    },
+    items: variations.map(
+      ({
+        accountId,
+        previousBalance,
+        currentBalance,
+        absoluteChange,
+        percentageChange,
+      }) => ({
+        accountId: accountId,
+        previousBalance: (previousBalance ?? 0n).toString(),
+        currentBalance: currentBalance.toString(),
+        absoluteChange: absoluteChange.toString(),
+        percentageChange: percentageChange,
+      }),
+    ),
+  };
+};
