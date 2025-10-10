@@ -1,14 +1,26 @@
 import { HTTPException } from "hono/http-exception";
 import axios, { AxiosInstance } from "axios";
+import { z } from "zod";
 
 import {
   CoingeckoHistoricalMarketData,
   CoingeckoHistoricalMarketDataSchema,
+  CoingeckoIdToAssetPlatformId,
   CoingeckoTokenIdEnum,
 } from "./types";
 import { DAYS_IN_YEAR } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
+
+const createCoingeckoTokenPriceDataSchema = (
+  tokenContractAddress: string,
+  targetCurrency: string,
+) =>
+  z.object({
+    [tokenContractAddress]: z.object({
+      [targetCurrency]: z.number(),
+    }),
+  });
 
 export class CoingeckoService {
   private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
@@ -56,5 +68,33 @@ export class CoingeckoService {
       price: price.toString(),
       timestamp: timestamp.toString(),
     }));
+  }
+
+  async getTokenPrice(
+    daoId: DaoIdEnum,
+    tokenContractAddress: string,
+    targetCurrency: string,
+  ): Promise<number> {
+    const tokenId = CoingeckoTokenIdEnum[daoId];
+    const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
+    const formattedAddress = tokenContractAddress.toLowerCase();
+    const response = await this.client.get(
+      `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
+    );
+
+    const data = await response.data();
+    const { success, data: price } = createCoingeckoTokenPriceDataSchema(
+      formattedAddress,
+      targetCurrency,
+    ).safeParse(data);
+
+    if (!success) {
+      throw new HTTPException(503, {
+        message: "Failed to fetch token property data",
+        cause: data,
+      });
+    }
+
+    return price[formattedAddress]![targetCurrency]!;
   }
 }

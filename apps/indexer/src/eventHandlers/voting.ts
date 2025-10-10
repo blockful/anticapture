@@ -61,7 +61,7 @@ export const voteCast = async (
     proposalId,
     voterAccountId: voter,
     support: support.toString(),
-    votingPower: votingPower.toString(),
+    votingPower,
     reason,
     timestamp,
   });

@@ -10,6 +10,7 @@ import {
   governanceActivity,
   tokenHistoricalData,
   tokenDistribution,
+  token,
   proposalsActivity,
   historicalOnchain,
   transactions,
@@ -24,6 +25,7 @@ import { env } from "@/env";
 import {
   DrizzleRepository,
   NFTPriceRepository,
+  TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
 } from "./repositories";
@@ -38,6 +40,7 @@ import {
   DuneService,
   CoingeckoService,
   NFTPriceService,
+  TokenService,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -101,6 +104,12 @@ if (env.COINGECKO_API_KEY) {
       : new CoingeckoService(env.COINGECKO_API_KEY, env.DAO_ID);
 
   tokenHistoricalData(app, tokenPriceClient);
+  token(
+    app,
+    tokenPriceClient,
+    new TokenService(new TokenRepository()),
+    env.DAO_ID,
+  );
 }
 
 tokenDistribution(app, repo);

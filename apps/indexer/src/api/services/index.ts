@@ -9,3 +9,4 @@ export * from "./proposals-activity";
 export * from "./last-update";
 export * from "./historical-balances";
 export * from "./nftPrice";
+export * from "./token";

@@ -2,14 +2,30 @@ import { z } from "zod";
 
 import { DaoIdEnum } from "@/lib/enums";
 
-export const CoingeckoTokenIdEnum: Partial<Record<DaoIdEnum, string>> = {
+enum AssetPlatformEnum {
+  // From https://docs.coingecko.com/v3.0.1/reference/token-lists
+  ETHEREUM = "ethereum",
+  ARBITRUM = "arbitrum-one",
+  OPTIMISM = "optimistic-ethereum",
+}
+
+export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
   TEST: "ethereum-name-service",
+  NOUNS: "nouns",
 };
+
+export const CoingeckoIdToAssetPlatformId = {
+  [CoingeckoTokenIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.ENS]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
+  [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
+  [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
+} as const;
 
 export interface CoingeckoHistoricalMarketData {
   prices: [number, number][];
