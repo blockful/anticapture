@@ -9,6 +9,20 @@ import {
   tokenTransfer,
 } from "@/eventHandlers";
 import { handleTransaction } from "@/eventHandlers/shared";
+import { updateDelegatedSupply } from "@/eventHandlers/metrics";
+import {
+  MetricTypesEnum,
+  BurningAddresses,
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+  TreasuryAddresses,
+} from "@/lib/constants";
+import {
+  updateCirculatingSupply,
+  updateSupplyMetric,
+  updateTotalSupply,
+} from "@/eventHandlers/metrics";
 
 export function OPTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.OP;
@@ -22,26 +36,132 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`OPToken:Transfer`, async ({ event, context }) => {
-    // Process the transfer
-    await tokenTransfer(context, daoId, {
-      from: event.args.from,
-      to: event.args.to,
-      token: address,
-      transactionHash: event.transaction.hash,
-      value: event.args.value,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
+    const { from, to, value } = event.args;
+    const { timestamp } = event.block;
+
+    const tokenData = await context.db.find(token, {
+      id: address,
     });
 
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
+    if (!tokenData) {
+      return;
+    }
+
+    const cexAddressList = Object.values(CEXAddresses[daoId]);
+    const dexAddressList = Object.values(DEXAddresses[daoId]);
+    const lendingAddressList = Object.values(LendingAddresses[daoId]);
+    const burningAddressList = Object.values(BurningAddresses[daoId]);
+    const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+
+    await tokenTransfer(
       context,
       daoId,
+      {
+        from,
+        to,
+        value,
+        token: address,
+        transactionHash: event.transaction.hash,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      },
+      {
+        cex: cexAddressList,
+        dex: dexAddressList,
+        lending: lendingAddressList,
+        burning: burningAddressList,
+      },
+    );
+
+    await updateSupplyMetric(
+      context,
+      "lendingSupply",
+      lendingAddressList,
+      MetricTypesEnum.LENDING_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "cexSupply",
+      cexAddressList,
+      MetricTypesEnum.CEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "dexSupply",
+      dexAddressList,
+      MetricTypesEnum.DEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "treasury",
+      treasuryAddressList,
+      MetricTypesEnum.TREASURY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateTotalSupply(
+      context,
+      tokenData.totalSupply,
+      burningAddressList,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateCirculatingSupply(
+      context,
+      tokenData,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    if (!event.transaction.to) return;
+
+    await handleTransaction(
+      context,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.from, event.args.to], // Addresses to check
+      [event.args.from, event.args.to],
+      {
+        cex: cexAddressList,
+        dex: dexAddressList,
+        lending: lendingAddressList,
+        burning: burningAddressList,
+      },
     );
   });
 
@@ -57,10 +177,10 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    // Handle transaction creation/update with flag calculation
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -70,9 +190,7 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`OPToken:DelegateVotesChanged`, async ({ event, context }) => {
-    // Process the delegate votes change
     await delegatedVotesChanged(context, daoId, {
-      tokenId: event.log.address,
       delegate: event.args.delegate,
       txHash: event.transaction.hash,
       newBalance: event.args.newBalance,
@@ -81,10 +199,17 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    // Handle transaction creation/update with flag calculation
+    await updateDelegatedSupply(context, daoId, {
+      tokenId: event.log.address,
+      newBalance: event.args.newBalance,
+      oldBalance: event.args.previousBalance,
+      timestamp: event.block.timestamp,
+    });
+
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,

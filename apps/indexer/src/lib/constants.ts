@@ -90,18 +90,25 @@ export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.NOUNS]: {
     blockTime: 12,
     token: {
+      // https://etherscan.io/token/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03
       address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
       decimals: 18,
       startBlock: 12985438,
     },
     governor: {
+      // https://etherscan.io/address/0x6f3e6272a167e8accb32072d08e0957f9c79223d
       address: "0x6f3e6272a167e8accb32072d08e0957f9c79223d",
       startBlock: 12985453,
+    },
+    auction: {
+      // https://etherscan.io/address/0x830BD73E4184ceF73443C15111a1DF14e495C706
+      address: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+      startBlock: 12985451,
     },
   },
 } as const;
 
-export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
+export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.UNI]: {
     timelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
     treasuryVester1: "0x4750c43867EF5F89869132ecCF19B9b6C4286E1a",
@@ -117,7 +124,10 @@ export const TREASURY_ADDRESSES: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
-  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.NOUNS]: {
+    timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
+    auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+  },
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {
     "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",

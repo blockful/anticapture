@@ -89,7 +89,11 @@ switch (daoId) {
   case DaoIdEnum.NOUNS: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     NounsTokenIndexer(token.address, token.decimals);
-    NounsGovernorIndexer(new NounsClient(client, governor.address), blockTime);
+    NounsGovernorIndexer(
+      new NounsClient(client, governor.address),
+      blockTime,
+      token.address,
+    );
     break;
   }
   default:

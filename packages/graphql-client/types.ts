@@ -92,6 +92,8 @@ export type Query = {
   lastUpdate?: Maybe<LastUpdate_200_Response>;
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
+  /** Returns the active delegates that did not vote on a given proposal */
+  proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
   /** Returns a list of proposal */
   proposals?: Maybe<Proposals_200_Response>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
@@ -290,6 +292,7 @@ export type QueryHistoricalTokenDataArgs = {
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -300,6 +303,14 @@ export type QueryLastUpdateArgs = {
 
 export type QueryProposalArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QueryProposalNonVotersArgs = {
+  id: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_ProposalNonVoters_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -1140,6 +1151,12 @@ export enum MetricType {
   Treasury = 'TREASURY'
 }
 
+export type ProposalNonVoters_200_Response = {
+  __typename?: 'proposalNonVoters_200_response';
+  items: Array<Maybe<Query_ProposalNonVoters_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type Proposal_200_Response = {
   __typename?: 'proposal_200_response';
   abstainVotes: Scalars['String']['output'];
@@ -1460,6 +1477,11 @@ export enum QueryInput_LastUpdate_Chart {
   TokenDistribution = 'token_distribution'
 }
 
+export enum QueryInput_ProposalNonVoters_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_ProposalsActivity_OrderBy {
   Timestamp = 'timestamp',
   VoteTiming = 'voteTiming',
@@ -1519,6 +1541,14 @@ export type Query_HistoricalVotingPower_Items = {
   __typename?: 'query_historicalVotingPower_items';
   address: Scalars['String']['output'];
   votingPower: Scalars['String']['output'];
+};
+
+export type Query_ProposalNonVoters_Items_Items = {
+  __typename?: 'query_proposalNonVoters_items_items';
+  lastVoteTimestamp: Scalars['Float']['output'];
+  voter: Scalars['String']['output'];
+  votingPower: Scalars['String']['output'];
+  votingPowerVariation: Scalars['String']['output'];
 };
 
 export type Query_ProposalsActivity_Proposals_Items = {
@@ -2000,14 +2030,14 @@ export type VotesOnchain = {
   __typename?: 'votesOnchain';
   daoId: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
-  proposalId?: Maybe<Scalars['String']['output']>;
-  reason?: Maybe<Scalars['String']['output']>;
-  support?: Maybe<Scalars['String']['output']>;
-  timestamp?: Maybe<Scalars['BigInt']['output']>;
-  txHash?: Maybe<Scalars['String']['output']>;
+  proposalId: Scalars['String']['output'];
+  reason: Scalars['String']['output'];
+  support: Scalars['String']['output'];
+  timestamp: Scalars['BigInt']['output'];
+  txHash: Scalars['String']['output'];
   voter?: Maybe<Account>;
   voterAccountId: Scalars['String']['output'];
-  votingPower?: Maybe<Scalars['String']['output']>;
+  votingPower: Scalars['BigInt']['output'];
 };
 
 export type VotesOnchainFilter = {
@@ -2081,16 +2111,14 @@ export type VotesOnchainFilter = {
   voterAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower?: InputMaybe<Scalars['String']['input']>;
-  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  votingPower_not?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
+  votingPower?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
 };
 
 export type VotesOnchainPage = {

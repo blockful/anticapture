@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { ChartType } from "../mappers/last-update";
-import { LastUpdateService } from "../services/last-update/last-update.service";
+import { LastUpdateService } from "../services";
 import { LastUpdateRepositoryImpl } from "../repositories/last-update.repository";
 
 export function lastUpdate(app: Hono) {

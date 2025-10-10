@@ -1,4 +1,6 @@
 import { ponder } from "ponder:registry";
+import { Address, zeroAddress } from "viem";
+import { dao, tokenPrice } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -7,11 +9,20 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
-import { dao } from "ponder:schema";
-import { ProposalStatus } from "@/lib/constants";
+import {
+  MetricTypesEnum,
+  ProposalStatus,
+  TreasuryAddresses,
+} from "@/lib/constants";
 import { env } from "@/env";
+import { updateSupplyMetric } from "@/eventHandlers/metrics";
+import { truncateTimestampTime } from "@/eventHandlers/shared";
 
-export function GovernorIndexer(client: DAOClient, blockTime: number) {
+export function GovernorIndexer(
+  client: DAOClient,
+  blockTime: number,
+  tokenAddress: Address,
+) {
   const daoId = DaoIdEnum.NOUNS;
 
   ponder.on(`NounsGovernor:setup`, async ({ context }) => {
@@ -89,6 +100,27 @@ export function GovernorIndexer(client: DAOClient, blockTime: number) {
       context,
       event.args.id.toString(),
       ProposalStatus.QUEUED,
+    );
+  });
+
+  ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
+    await context.db.insert(tokenPrice).values({
+      price: event.args.amount,
+      timestamp: truncateTimestampTime(event.block.timestamp),
+    });
+
+    if (!event.transaction.to) return;
+    await updateSupplyMetric(
+      context,
+      "treasury",
+      Object.values(TreasuryAddresses[daoId]),
+      MetricTypesEnum.TREASURY,
+      zeroAddress,
+      event.transaction.to,
+      event.args.amount,
+      daoId,
+      tokenAddress,
+      event.block.timestamp,
     );
   });
 }

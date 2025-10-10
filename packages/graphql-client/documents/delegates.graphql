@@ -16,6 +16,7 @@ query GetDelegates(
     items {
       votingPower
       accountId
+      delegationsCount
     }
     pageInfo {
       endCursor

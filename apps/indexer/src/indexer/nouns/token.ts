@@ -8,26 +8,22 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { handleTransaction } from "@/eventHandlers/shared";
+import { handleTransaction, storeDailyBucket } from "@/eventHandlers/shared";
 import {
-  MetricTypesEnum,
   BurningAddresses,
-  CEXAddresses,
-  DEXAddresses,
-  LendingAddresses,
+  MetricTypesEnum,
   TreasuryAddresses,
 } from "@/lib/constants";
 import {
   updateDelegatedSupply,
-  updateCirculatingSupply,
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
 
-export function GTCTokenIndexer(address: Address, decimals: number) {
-  const daoId = DaoIdEnum.GTC;
+export function NounsTokenIndexer(address: Address, decimals: number) {
+  const daoId = DaoIdEnum.NOUNS;
 
-  ponder.on("GTCToken:setup", async ({ context }) => {
+  ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
       id: address,
       name: daoId,
@@ -36,15 +32,15 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(
-    "GTCToken:Transfer",
+    "NounsToken:Transfer",
     async ({
       event,
       context,
     }: {
-      event: Event<"GTCToken:Transfer">;
+      event: Event<"NounsToken:Transfer">;
       context: Context;
     }) => {
-      const { from, to, amount } = event.args;
+      const { from, to } = event.args;
       const { timestamp } = event.block;
 
       const tokenData = await context.db.find(token, {
@@ -55,11 +51,7 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         return;
       }
 
-      const cexAddressList = Object.values(CEXAddresses[daoId]);
-      const dexAddressList = Object.values(DEXAddresses[daoId]);
-      const lendingAddressList = Object.values(LendingAddresses[daoId]);
       const burningAddressList = Object.values(BurningAddresses[daoId]);
-      const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
 
       await tokenTransfer(
         context,
@@ -67,67 +59,25 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         {
           from,
           to,
-          value: amount,
+          value: 1n,
           token: address,
           transactionHash: event.transaction.hash,
           timestamp: event.block.timestamp,
           logIndex: event.log.logIndex,
         },
         {
-          cex: cexAddressList,
-          dex: dexAddressList,
-          lending: lendingAddressList,
           burning: burningAddressList,
         },
       );
 
       await updateSupplyMetric(
         context,
-        "lendingSupply",
-        lendingAddressList,
-        MetricTypesEnum.LENDING_SUPPLY,
-        from,
-        to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateSupplyMetric(
-        context,
-        "cexSupply",
-        cexAddressList,
-        MetricTypesEnum.CEX_SUPPLY,
-        from,
-        to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateSupplyMetric(
-        context,
-        "dexSupply",
-        dexAddressList,
-        MetricTypesEnum.DEX_SUPPLY,
-        from,
-        to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateSupplyMetric(
-        context,
         "treasury",
-        treasuryAddressList,
+        Object.values(TreasuryAddresses[daoId]),
         MetricTypesEnum.TREASURY,
         from,
         to,
-        amount,
+        event.transaction.value,
         daoId,
         address,
         timestamp,
@@ -140,16 +90,7 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         MetricTypesEnum.TOTAL_SUPPLY,
         from,
         to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateCirculatingSupply(
-        context,
-        tokenData,
-        MetricTypesEnum.CIRCULATING_SUPPLY,
+        1n,
         daoId,
         address,
         timestamp,
@@ -164,17 +105,53 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         event.transaction.to,
         event.block.timestamp,
         [event.args.from, event.args.to],
-        {
-          cex: cexAddressList,
-          dex: dexAddressList,
-          lending: lendingAddressList,
-          burning: burningAddressList,
-        },
       );
     },
   );
 
-  ponder.on(`GTCToken:DelegateChanged`, async ({ event, context }) => {
+  ponder.on(`NounsToken:NounCreated`, async ({ event, context }) => {
+    const tokenData = await context.db.find(token, {
+      id: event.args.tokenId.toString(),
+    });
+
+    if (!tokenData) {
+      return;
+    }
+
+    await storeDailyBucket(
+      context,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      tokenData.totalSupply,
+      tokenData.totalSupply + 1n,
+      daoId,
+      event.block.timestamp,
+      address,
+    );
+  });
+
+  ponder.on(`NounsToken:NounBurned`, async ({ event, context }) => {
+    const tokenData = await context.db.find(token, {
+      id: event.args.tokenId.toString(),
+    });
+
+    if (!tokenData) {
+      return;
+    }
+
+    await storeDailyBucket(
+      context,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      tokenData.totalSupply,
+      tokenData.totalSupply - 1n,
+      daoId,
+      event.block.timestamp,
+      address,
+    );
+
+    // TODO should this be removed from the delegated supply?
+  });
+
+  ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -197,7 +174,7 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
     );
   });
 
-  ponder.on(`GTCToken:DelegateVotesChanged`, async ({ event, context }) => {
+  ponder.on(`NounsToken:DelegateVotesChanged`, async ({ event, context }) => {
     await delegatedVotesChanged(context, daoId, {
       delegate: event.args.delegate,
       txHash: event.transaction.hash,
@@ -207,12 +184,14 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    await updateDelegatedSupply(context, daoId, {
-      tokenId: event.log.address,
-      newBalance: event.args.newBalance,
-      oldBalance: event.args.previousBalance,
-      timestamp: event.block.timestamp,
-    });
+    if (event.args.delegate !== TreasuryAddresses[daoId].timelock) {
+      await updateDelegatedSupply(context, daoId, {
+        tokenId: event.log.address,
+        newBalance: event.args.newBalance,
+        oldBalance: event.args.previousBalance,
+        timestamp: event.block.timestamp,
+      });
+    }
 
     if (!event.transaction.to) return;
 

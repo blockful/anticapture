@@ -60,6 +60,7 @@ export const accountPower = onchainTable(
     votingPower: drizzle.bigint("voting_power").default(BigInt(0)).notNull(),
     votesCount: drizzle.integer("votes_count").default(0).notNull(),
     proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
+    delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
     lastVoteTimestamp: drizzle
       .bigint("last_vote_timestamp")
       .default(BigInt(0))
@@ -156,14 +157,14 @@ export const transfer = onchainTable(
 export const votesOnchain = onchainTable(
   "votes_onchain",
   (drizzle) => ({
-    txHash: drizzle.text("tx_hash"),
+    txHash: drizzle.text("tx_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     voterAccountId: drizzle.text("voter_account_id").$type<Address>().notNull(),
-    proposalId: drizzle.text("proposal_id"),
-    support: drizzle.text(),
-    votingPower: drizzle.text(),
+    proposalId: drizzle.text("proposal_id").notNull(),
+    support: drizzle.text().notNull(),
+    votingPower: drizzle.bigint().notNull(),
     reason: drizzle.text(),
-    timestamp: drizzle.bigint(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -238,6 +239,11 @@ export const transaction = onchainTable("transaction", (drizzle) => ({
   isLending: drizzle.boolean().notNull().default(false),
   isTotal: drizzle.boolean().notNull().default(false),
   timestamp: drizzle.bigint().notNull(),
+}));
+
+export const tokenPrice = onchainTable("token_price", (drizzle) => ({
+  price: drizzle.bigint().notNull(), // price in USD
+  timestamp: drizzle.bigint().primaryKey(),
 }));
 
 // Account Power and Balance relations

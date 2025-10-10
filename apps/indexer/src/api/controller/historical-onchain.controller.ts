@@ -5,8 +5,8 @@ import { DaoIdEnum, DaysOpts, DaysEnum } from "@/lib/enums";
 import {
   HistoricalBalancesService,
   HistoricalBalancesRequest,
-} from "../services/historical-balances";
-import { HistoricalVotingPowerService } from "../services/historical-voting-power";
+  HistoricalVotingPowerService,
+} from "../services";
 
 export function historicalOnchain(
   app: Hono,
@@ -106,6 +106,7 @@ export function historicalOnchain(
             .enum(DaysOpts)
             .default("7d")
             .transform((val) => DaysEnum[val]),
+          fromDate: z.coerce.number().optional(),
         }),
       },
       responses: {
@@ -125,11 +126,12 @@ export function historicalOnchain(
       },
     }),
     async (context) => {
-      const { addresses, days } = context.req.valid("query");
+      const { addresses, days, fromDate } = context.req.valid("query");
 
       const votingPowers = await votingPowerService.getHistoricalVotingPower(
         addresses,
         days,
+        fromDate || Math.floor(Date.now() / 1000),
       );
 
       return context.json(votingPowers);
