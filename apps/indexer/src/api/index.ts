@@ -24,6 +24,7 @@ import { docs } from "./docs";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
+  AccountBalanceRepository,
   DrizzleRepository,
   TokenRepository,
   TransactionsRepository,
@@ -38,6 +39,8 @@ import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { TokenService } from "./services/token";
+import { topAccountBalanceVariations } from "./controller";
+import { TopBalanceVariationsService } from "./services";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -100,6 +103,7 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
+const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 
 tokenDistribution(app, repo);
@@ -114,6 +118,10 @@ historicalOnchain(
 transactions(app, transactionsService);
 lastUpdate(app);
 votingPower(app, new VotingPowerService(votingPowerRepo));
+topAccountBalanceVariations(
+  app,
+  new TopBalanceVariationsService(accountBalanceRepo),
+);
 docs(app);
 
 export default app;

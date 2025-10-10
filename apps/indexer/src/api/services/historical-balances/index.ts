@@ -1,3 +1,4 @@
+export { TopBalanceVariationsService } from "./top-balance-variations";
 export {
   HistoricalBalancesService,
   type HistoricalBalance,
