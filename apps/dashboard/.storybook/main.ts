@@ -36,9 +36,10 @@ const config: StorybookConfig = {
     // Fix circular dependency issues in production builds
     config.optimization = {
       ...config.optimization,
-      usedExports: false,
-      sideEffects: false,
-      concatenateModules: false,
+      moduleIds: "named",
+      chunkIds: "named",
+      mangleExports: false,
+      minimize: false,
     };
 
     return config;
