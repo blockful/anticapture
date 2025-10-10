@@ -1,25 +1,25 @@
 const daoItemQueries = [
-  'account',
-  'accountBalance',
-  'accountPower',
-  'dao',
-  'daoMetricsDayBucket',
-  'delegation',
-  'proposalsOnchain',
-  'token',
-  'transfer',
-  'votesOnchain',
-  'votingPowerHistory',
+  "account",
+  "accountBalance",
+  "accountPower",
+  "dao",
+  "daoMetricsDayBucket",
+  "delegation",
+  "proposalsOnchain",
+  "transfer",
+  "votesOnchain",
+  "votingPowerHistory",
 ];
 
 export const itemResolvers = daoItemQueries.reduce((acc, fieldName) => {
   acc[fieldName] = {
     selectionSet: /* GraphQL */ `
       {
-        id 
+        id
       }
     `,
-    resolve: async (root: any, args: any, context: any, info) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolve: async (root: any, args: any, context: any, info: any) => {
       const daoId = args.id || context.headers["anticapture-dao-id"];
 
       if (!daoId) {
@@ -28,8 +28,8 @@ export const itemResolvers = daoItemQueries.reduce((acc, fieldName) => {
 
       const targetClient = context[`graphql_${daoId.toUpperCase()}`]?.Query;
 
-      if (!targetClient || typeof targetClient[fieldName] !== 'function') {
-        return {}
+      if (!targetClient || typeof targetClient[fieldName] !== "function") {
+        return {};
       }
 
       return targetClient[fieldName]({

@@ -10,6 +10,7 @@ import {
   governanceActivity,
   tokenHistoricalData,
   tokenDistribution,
+  token,
   proposalsActivity,
   historicalOnchain,
   transactions,
@@ -24,6 +25,7 @@ import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
   DrizzleRepository,
+  TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
 } from "./repositories";
@@ -35,6 +37,7 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { TokenService } from "./services/token";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -77,6 +80,12 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
 if (env.COINGECKO_API_KEY) {
   const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
   tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
+  token(
+    app,
+    coingeckoClient,
+    new TokenService(new TokenRepository()),
+    env.DAO_ID,
+  );
 }
 
 const daoClient = getClient(env.DAO_ID, client);
