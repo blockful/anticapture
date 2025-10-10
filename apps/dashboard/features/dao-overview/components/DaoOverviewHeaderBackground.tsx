@@ -12,7 +12,7 @@ const PixelPattern = ({
       height="100%"
       fill="none"
     >
-      <g clip-path="url(#a)">
+      <g clipPath="url(#a)">
         <path fill={bgColor} d="M0 0h972v100H0z" />
         <path
           fill={color}
