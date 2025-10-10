@@ -326,22 +326,18 @@ export class DrizzleRepository {
         address: accountBalance.accountId,
         balance: accountBalance.balance,
         txsFrom:
-          sql<string>`coalesce(sum(${recentTxs.amount}) filter (where ${recentTxs.fromAccountId} is not null), 0)`.as(
+          sql<string>`coalesce(sum(case when ${accountBalance.accountId} = ${recentTxs.fromAccountId} then ${recentTxs.amount} else 0 end), 0)`.as(
             "txsFrom",
           ),
         txsTo:
-          sql<string>`coalesce(sum(${recentTxs.amount}) filter (where ${recentTxs.toAccountId} is not null), 0)`.as(
+          sql<string>`coalesce(sum(case when ${accountBalance.accountId} = ${recentTxs.toAccountId} then ${recentTxs.amount} else 0 end), 0)`.as(
             "txsTo",
           ),
       })
       .from(accountBalance)
       .leftJoin(
         recentTxs,
-        sql`${accountBalance.accountId} = ${recentTxs.fromAccountId}`,
-      )
-      .leftJoin(
-        recentTxs,
-        sql`${accountBalance.accountId} = ${recentTxs.toAccountId}`,
+        sql`${accountBalance.accountId} = ${recentTxs.fromAccountId} OR ${accountBalance.accountId} = ${recentTxs.toAccountId}`,
       )
       .where(sql`${recentTxs.transactionHash} is not null`)
       .groupBy(accountBalance.accountId, accountBalance.balance)
@@ -355,27 +351,33 @@ export class DrizzleRepository {
           sql<string>`${aggregated.txsTo} - ${aggregated.txsFrom}`.as(
             "absoluteChange",
           ),
+        percentageChange:
+          sql<string>`case when ${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}) = 0 then 0 else ((${aggregated.txsTo} - ${aggregated.txsFrom})::numeric / (${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}))::numeric) * 100 end`.as(
+            "relativeChange",
+          ),
       })
       .from(aggregated)
       .orderBy(
         orderDirection == "desc"
-          ? desc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`)
-          : asc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`),
+          ? desc(
+              sql`case when ${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}) = 0 then 0 else ((${aggregated.txsTo} - ${aggregated.txsFrom})::numeric / (${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}))::numeric) * 100 end`,
+            )
+          : asc(
+              sql`case when ${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}) = 0 then 0 else ((${aggregated.txsTo} - ${aggregated.txsFrom})::numeric / (${aggregated.balance} - (${aggregated.txsTo} - ${aggregated.txsFrom}))::numeric) * 100 end`,
+            ),
       )
       .offset(skip)
       .limit(limit);
 
-    return result.map(({ accountId, currentBalance, absoluteChange }) => ({
-      accountId: accountId,
-      previousBalance: currentBalance - BigInt(absoluteChange),
-      currentBalance: currentBalance,
-      absoluteChange: BigInt(absoluteChange),
-      percentageChange: Number(
-        BigInt(absoluteChange) /
-          (currentBalance - BigInt(absoluteChange)) /
-          100n,
-      ),
-    }));
+    return result.map(
+      ({ accountId, currentBalance, absoluteChange, percentageChange }) => ({
+        accountId: accountId,
+        previousBalance: currentBalance - BigInt(absoluteChange),
+        currentBalance: currentBalance,
+        absoluteChange: BigInt(absoluteChange),
+        percentageChange: parseInt(percentageChange),
+      }),
+    );
   }
 
   now() {

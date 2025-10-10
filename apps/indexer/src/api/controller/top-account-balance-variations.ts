@@ -14,7 +14,7 @@ export function topAccountBalanceVariations(
     createRoute({
       method: "get",
       operationId: "topAccountBalanceVariations",
-      path: "/voting-power/variations",
+      path: "/account-balance/variations",
       summary: "Get top changes in account balances for a given period",
       description:
         "Returns a mapping of the biggest changes to account balances associated by delegate address",
