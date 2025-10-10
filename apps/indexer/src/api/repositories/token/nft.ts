@@ -19,7 +19,7 @@ export class NFTPriceRepository {
         ) AS TEXT
       )
     `,
-        timestamp: sql<string>`CAST(${tokenPrice.timestamp} AS TEXT)`,
+        timestamp: sql<number>`CAST(${tokenPrice.timestamp} AS TEXT)`,
       })
       .from(tokenPrice)
       .orderBy(desc(tokenPrice.timestamp))

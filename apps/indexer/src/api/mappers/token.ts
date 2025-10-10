@@ -18,7 +18,7 @@ export type TokenHistoricalPriceRequest = z.infer<
 export const TokenHistoricalPriceResponse = z.array(
   z.object({
     price: z.string(),
-    timestamp: z.string(),
+    timestamp: z.number(),
   }),
 );
 

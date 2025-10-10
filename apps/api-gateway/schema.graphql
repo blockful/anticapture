@@ -13,7 +13,9 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 type Query {
   dao(id: String!): dao
   daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
-  token(id: String!): token
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
@@ -35,7 +37,7 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
-  tokenPrice(tokenId: String!, timestamp: BigInt!): tokenPrice
+  tokenPrice(timestamp: BigInt!): tokenPrice
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
@@ -43,7 +45,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): [query_historicalTokenData_items]
+  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -90,7 +92,7 @@ type Query {
   proposal(id: String!): proposal_200_response
 
   """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc): proposalNonVoters_200_response
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
@@ -791,7 +793,7 @@ type votesOnchain {
   proposalId: String!
   support: String!
   votingPower: BigInt!
-  reason: String!
+  reason: String
   timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
@@ -1313,10 +1315,8 @@ input transactionFilter {
 }
 
 type tokenPrice {
-  tokenId: String!
   price: BigInt!
   timestamp: BigInt!
-  token: token
 }
 
 type tokenPricePage {
@@ -1328,16 +1328,6 @@ type tokenPricePage {
 input tokenPriceFilter {
   AND: [tokenPriceFilter]
   OR: [tokenPriceFilter]
-  tokenId: String
-  tokenId_not: String
-  tokenId_in: [String]
-  tokenId_not_in: [String]
-  tokenId_contains: String
-  tokenId_not_contains: String
-  tokenId_starts_with: String
-  tokenId_ends_with: String
-  tokenId_not_starts_with: String
-  tokenId_not_ends_with: String
   price: BigInt
   price_not: BigInt
   price_in: [BigInt]
@@ -1374,12 +1364,26 @@ type query_historicalTokenData_items {
   timestamp: String!
 }
 
-enum queryInput_historicalTokenData_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
+"""Integers that will have a value of 0 or more."""
+scalar NonNegativeInt
+
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: String!
+}
+
+enum queryInput_token_currency {
+  eth
+  usd
 }
 
 type compareTotalSupply_200_response {
@@ -1573,9 +1577,6 @@ type query_proposalsActivity_proposals_items_userVote {
   reason: String
   timestamp: String!
 }
-
-"""Integers that will have a value of 0 or more."""
-scalar NonNegativeInt
 
 """Integers that will have a value greater than 0."""
 scalar PositiveInt
