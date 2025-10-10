@@ -73,7 +73,7 @@ const mockFetchPage = async ({
   };
 };
 
-const meta = {
+const meta: Meta<typeof ExampleDataTable> = {
   title: "Data Display/Table",
   component: ExampleDataTable,
   parameters: {
@@ -86,7 +86,7 @@ const meta = {
     },
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof ExampleDataTable>;
+};
 
 export default meta;
 

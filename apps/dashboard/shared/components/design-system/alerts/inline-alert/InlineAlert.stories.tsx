@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 
-const meta = {
+const meta: Meta<typeof InlineAlert> = {
   title: "Design System/Alerts/InlineAlert",
   component: InlineAlert,
   parameters: {
@@ -16,7 +16,7 @@ const meta = {
       options: ["info", "warning", "error"],
     },
   },
-} satisfies Meta<typeof InlineAlert>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

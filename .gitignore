@@ -145,3 +145,4 @@ dist
 **/storybook-static/*
 
 .sst/
+.vercel

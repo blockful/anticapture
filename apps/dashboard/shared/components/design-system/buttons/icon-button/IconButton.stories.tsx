@@ -3,7 +3,7 @@ import { IconButton } from "@/shared/components/design-system/buttons/icon-butto
 
 import type { Meta, StoryObj } from "@storybook/react";
 
-const meta = {
+const meta: Meta<typeof IconButton> = {
   title: "Design System/Buttons/IconButton",
   component: IconButton,
   parameters: {
@@ -27,7 +27,7 @@ const meta = {
       description: "Additional CSS classes",
     },
   },
-} satisfies Meta<typeof IconButton>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

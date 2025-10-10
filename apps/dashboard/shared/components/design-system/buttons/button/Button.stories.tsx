@@ -12,7 +12,7 @@ type ButtonStoryArgs = ButtonProps & {
   showIcon?: boolean;
 };
 
-const meta = {
+const meta: Meta<ButtonStoryArgs> = {
   title: "Design System/Buttons/Button",
   component: Button,
   parameters: {
@@ -43,7 +43,7 @@ const meta = {
       description: "Additional CSS classes",
     },
   },
-} satisfies Meta<ButtonStoryArgs>;
+};
 
 export default meta;
 type Story = StoryObj<ButtonStoryArgs>;
