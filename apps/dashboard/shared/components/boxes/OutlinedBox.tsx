@@ -5,7 +5,6 @@ import { ComponentProps, ReactNode } from "react";
 type OutlinedBoxProps = ComponentProps<"div"> & {
   variant?: "success" | "warning" | "error" | "lightDark";
   customIcon?: ReactNode;
-  hideIcon?: boolean;
   iconPosition?: "left" | "right";
   disabled?: boolean;
 };
@@ -13,7 +12,6 @@ type OutlinedBoxProps = ComponentProps<"div"> & {
 export const OutlinedBox = ({
   variant = "lightDark",
   iconPosition = "left",
-  hideIcon = false,
   customIcon,
   children,
   disabled = false,
@@ -43,7 +41,7 @@ export const OutlinedBox = ({
     <div
       {...props}
       className={cn(
-        "flex items-center gap-2 rounded-md border",
+        "flex items-center gap-2 border",
         props.className,
         variantClasses[variant],
         disabled && disabledVariantClasses,

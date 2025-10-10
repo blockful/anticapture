@@ -1,6 +1,5 @@
 export * from "@/features/dao-overview/components/VoteCard";
 export * from "@/features/dao-overview/components/TimelockCard";
-export * from "@/features/dao-overview/components/StagesDaoOverview";
 export * from "@/features/dao-overview/components/SecurityCouncilCard";
 export * from "@/features/dao-overview/components/QuorumCard";
 export * from "@/features/dao-overview/components/TextCardDaoInfoItem";
