@@ -1,4 +1,4 @@
-import type { Preview } from "@storybook/react";
+import type { Preview } from "@storybook/nextjs";
 import React, { useEffect } from "react";
 
 import "../app/globals.css";
@@ -6,11 +6,10 @@ import "../app/globals.css";
 const preview: Preview = {
   parameters: {
     backgrounds: {
-      values: [
-        { name: "Dark", value: "#09090B" },
-        { name: "Light", value: "#FFFFFF" },
-      ],
-      default: "Dark",
+      options: {
+        dark: { name: "Dark", value: "#09090B" },
+        light: { name: "Light", value: "#FFFFFF" }
+      }
     },
     controls: {
       matchers: {
@@ -19,6 +18,7 @@ const preview: Preview = {
       },
     },
   },
+
   decorators: [
     (Story) => {
       useEffect(() => {
@@ -39,6 +39,12 @@ const preview: Preview = {
       );
     },
   ],
+
+  initialGlobals: {
+    backgrounds: {
+      value: "dark"
+    }
+  }
 };
 
 export default preview;
