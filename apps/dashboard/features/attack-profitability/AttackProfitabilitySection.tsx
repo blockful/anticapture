@@ -3,13 +3,13 @@
 import { useState } from "react";
 import {
   TheSectionLayout,
+  RiskLevelCard,
   TheCardChartLayout,
   SwitcherDate,
-  RiskLevelCard,
 } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,
@@ -19,10 +19,10 @@ import {
 } from "@/features/attack-profitability/components";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { Data } from "react-csv/lib/core";
-import { getDateRange } from "@/shared/utils";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 import { ChartType } from "@/shared/hooks/useLastUpdate";
+import { getDateRange } from "@/shared/utils";
 import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
@@ -58,10 +58,9 @@ export const AttackProfitabilitySection = ({
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.attackProfitability.title}
+      title={PAGES_CONSTANTS.attackProfitability.title}
       icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.attackProfitability.description}
-      anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+      description={PAGES_CONSTANTS.attackProfitability.description}
       riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
     >
       <TheCardChartLayout
