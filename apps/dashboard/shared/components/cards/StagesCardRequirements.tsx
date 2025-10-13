@@ -2,7 +2,6 @@
 
 import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
-import { PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
 import { ReactNode } from "react";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
@@ -34,14 +33,6 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
   [Stage.UNKNOWN]: "",
 };
 
-const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
-  [Stage.ZERO]: "left-[calc(25%+12px)] translate-y-px",
-  [Stage.ONE]: "left-[calc(70%+12px)] translate-y-px",
-  [Stage.TWO]: "hidden",
-  [Stage.NONE]: "",
-  [Stage.UNKNOWN]: "",
-};
-
 interface StagesCardRequirementsProps {
   daoStage: Stage;
   issues?: Array<string>;
@@ -59,53 +50,41 @@ export const StagesCardRequirements = ({
     STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
 
   return (
-    <div>
-      {daoStage !== Stage.NONE && (
-        <div className="relative w-full">
-          <PointerIcon
-            className={cn(
-              "absolute bottom-0 translate-y-px",
-              STAGE_POINTER_POSITIONS[daoStage],
-            )}
-          />
+    <div
+      className={cn(
+        "bg-surface-contrast rounded-md p-4",
+        stageStyles,
+        className,
+      )}
+    >
+      {daoStage === Stage.NONE ? (
+        <InlineAlert
+          text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
+          variant="info"
+        />
+      ) : (
+        <div>
+          {context !== "overview" && (
+            <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
+          )}
+          <Description className={context !== "overview" ? "mb-4" : ""}>
+            {STAGE_DESCRIPTIONS[daoStage]}
+          </Description>
+
+          {issues.length > 0 && context !== "overview" && (
+            <>
+              <Title daoStage={daoStage}>Issues that need to be fixed</Title>
+              <div className="flex flex-wrap gap-4">
+                {issues.map((issue, index) => (
+                  <Issue key={index} daoStage={daoStage}>
+                    {issue}
+                  </Issue>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
-      <div
-        className={cn(
-          "bg-surface-contrast rounded-md p-4",
-          stageStyles,
-          className,
-        )}
-      >
-        {daoStage === Stage.NONE ? (
-          <InlineAlert
-            text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
-            variant="info"
-          />
-        ) : (
-          <div>
-            {context !== "overview" && (
-              <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
-            )}
-            <Description className={context !== "overview" ? "mb-4" : ""}>
-              {STAGE_DESCRIPTIONS[daoStage]}
-            </Description>
-
-            {issues.length > 0 && context !== "overview" && (
-              <>
-                <Title daoStage={daoStage}>Issues that need to be fixed</Title>
-                <div className="flex flex-wrap gap-4">
-                  {issues.map((issue, index) => (
-                    <Issue key={index} daoStage={daoStage}>
-                      {issue}
-                    </Issue>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 };
