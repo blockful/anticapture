@@ -9,7 +9,7 @@ interface DaoOverviewMetricsProps {
   liquidTreasuryAllValue: number;
   liquidTreasuryAllPercent: string;
   liquidTreasuryNonDaoValue: number;
-  topDelegatesToPass: number | null;
+  topDelegatesToPass: number | string | null;
 }
 
 const DaoOverviewMetricCard = ({
@@ -62,7 +62,7 @@ export const DaoOverviewMetrics = ({
 
     <DaoOverviewMetricCard
       title="Delegate to Pass"
-      text={`Top ${topDelegatesToPass ?? "--"} delegates`}
+      text={`Top ${topDelegatesToPass || "N/A"} delegates`}
       subText="To reach quorum"
     />
   </div>

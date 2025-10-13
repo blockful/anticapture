@@ -11,6 +11,7 @@ import { mainnet } from "viem/chains";
 
 export const ENS: DaoConfiguration = {
   name: "Ethereum Name Service",
+  displayName: "ENS",
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",
