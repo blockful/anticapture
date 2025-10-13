@@ -17,6 +17,8 @@ import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -53,6 +55,15 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
     noStage: daoConfig.noStage,
   });
+
+  const daoRiskAreas = getDaoRiskAreas(daoId);
+  const riskAreas = {
+    title: "RISK AREAS",
+    risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
+      name,
+      level: info.riskLevel,
+    })),
+  };
 
   return (
     <Suspense fallback={<DaoOverviewSkeleton />}>
@@ -93,9 +104,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-x-1 border-inverted mx-5 flex gap-2">
-          {/* Max Width here just to simulate the design */}
-          <div className="md:max-w-1/2 flex-1">
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+          <div className="w-full px-5 md:px-0">
             <StagesContainer
               daoId={daoId}
               currentDaoStage={currentDaoStage}
@@ -103,6 +113,16 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               context="overview"
             />
           </div>
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <RiskAreaCardWrapper
+            title={riskAreas.title}
+            riskAreas={riskAreas.risks}
+            onRiskClick={() => {}}
+            variant={RiskAreaCardEnum.DAO_OVERVIEW}
+            className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
+          />
         </div>
       </div>
     </Suspense>
