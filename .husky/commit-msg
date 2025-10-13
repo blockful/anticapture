@@ -1,6 +1,1 @@
-# Source the shell profile to get npx in PATH
-if [ -f ~/.zshrc ]; then
-  . ~/.zshrc
-fi
-
 npx --no -- commitlint --edit $1
