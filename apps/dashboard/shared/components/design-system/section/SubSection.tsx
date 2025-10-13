@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { SubsectionTitle } from "@/shared/components/design-system/section/SubsectionTitle";
 
 type SubSectionProps = {
-  subsectionTitle: string;
+  subsectionTitle: string | ReactNode;
   subsectionDescription?: string;
   dateRange: string;
   switcherComponent?: ReactNode;
