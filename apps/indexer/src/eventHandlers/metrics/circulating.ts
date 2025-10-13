@@ -7,34 +7,28 @@ import { MetricTypesEnum } from "@/lib/constants";
 
 export const updateCirculatingSupply = async (
   context: Context,
-  tokenData: {
-    circulatingSupply: bigint;
-    totalSupply: bigint;
-    treasury: bigint;
-  },
   metricType: MetricTypesEnum,
   daoId: string,
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const currentCirculatingSupply = tokenData.circulatingSupply;
-
-  // Calculate circulating supply as total supply minus treasury
-  const newCirculatingSupply = tokenData.totalSupply - tokenData.treasury;
-
-  if (newCirculatingSupply !== currentCirculatingSupply) {
-    await context.db.update(token, { id: tokenAddress }).set({
+  let currentCirculatingSupply = 0n;
+  let newCirculatingSupply = 0n;
+  await context.db.update(token, { id: tokenAddress }).set((current) => {
+    currentCirculatingSupply = current.circulatingSupply;
+    newCirculatingSupply = current.totalSupply - current.treasury;
+    return {
       circulatingSupply: newCirculatingSupply,
-    });
+    };
+  });
 
-    await storeDailyBucket(
-      context,
-      metricType,
-      currentCirculatingSupply,
-      newCirculatingSupply,
-      daoId,
-      timestamp,
-      tokenAddress,
-    );
-  }
+  await storeDailyBucket(
+    context,
+    metricType,
+    currentCirculatingSupply,
+    newCirculatingSupply,
+    daoId,
+    timestamp,
+    tokenAddress,
+  );
 };

@@ -8,7 +8,6 @@ import { storeDailyBucket } from "@/eventHandlers/shared";
 
 export const updateTotalSupply = async (
   context: Context,
-  currentTotalSupply: bigint = 0n,
   addressList: Address[],
   metricType: MetricTypesEnum,
   from: Address,
@@ -26,12 +25,16 @@ export const updateTotalSupply = async (
 
   if (isTotalSupplyTransaction) {
     const isBurningTokens = addressList.includes(to);
+    let currentTotalSupply = 0n;
     const newTotalSupply = (
-      await context.db.update(token, { id: tokenAddress }).set((row) => ({
-        totalSupply: isBurningTokens
-          ? row.totalSupply - value
-          : row.totalSupply + value,
-      }))
+      await context.db.update(token, { id: tokenAddress }).set((row) => {
+        currentTotalSupply = row.totalSupply;
+        return {
+          totalSupply: isBurningTokens
+            ? row.totalSupply - value
+            : row.totalSupply + value,
+        };
+      })
     ).totalSupply;
 
     await storeDailyBucket(
