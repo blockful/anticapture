@@ -6,7 +6,7 @@ export const TopVotingPowerVariationsRequestSchema = z.object({
     .enum(DaysOpts)
     .optional()
     .default("90d")
-    .transform((val) => parseInt(val.replace("d", ""))),
+    .transform((val) => DaysEnum[val]),
   limit: z.coerce
     .number()
     .int()
@@ -60,8 +60,8 @@ export const TopVotingPowerVariationsMapper = (
   return {
     period: {
       days: days,
-      startTimestamp: new Date(endTimestamp - days).toISOString(),
-      endTimestamp: new Date(endTimestamp).toISOString(),
+      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
+      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },
     items: variations.map(
       ({

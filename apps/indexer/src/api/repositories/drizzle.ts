@@ -30,7 +30,6 @@ import {
 } from "../controller/governance-activity/types";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "../mappers";
-import { DBVotingPowerVariation } from "../mappers/top-voting-power-variation";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -304,44 +303,6 @@ export class DrizzleRepository {
       }),
       {},
     );
-  }
-
-  async getTopVotingPowerChanges(
-    startTimestamp: number,
-    limit: number,
-    skip: number,
-    orderDirection: "asc" | "desc",
-  ): Promise<DBVotingPowerVariation[]> {
-    const result = await db
-      .select({
-        accountId: votingPowerHistory.accountId,
-        delta: votingPowerHistory.delta,
-        currentVotingPower: votingPowerHistory.votingPower,
-      })
-      .from(votingPowerHistory)
-      .where(lte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
-      .orderBy(
-        orderDirection == "desc"
-          ? desc(votingPowerHistory.delta)
-          : asc(votingPowerHistory.delta),
-      )
-      .limit(limit)
-      .offset(skip);
-
-    return result.map(({ accountId, currentVotingPower, delta }) => {
-      const oldVotingPower = currentVotingPower - delta;
-      const percentageChange = oldVotingPower
-        ? Number((delta * 10000n) / oldVotingPower) / 100
-        : 0;
-
-      return {
-        accountId: accountId,
-        previousVotingPower: currentVotingPower - delta,
-        currentVotingPower: currentVotingPower,
-        absoluteChange: delta,
-        percentageChange: percentageChange,
-      };
-    });
   }
 
   now() {

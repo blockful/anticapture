@@ -4,7 +4,7 @@ import {
   TopVotingPowerVariationsMapper,
   TopVotingPowerVariationsRequestSchema,
   TopVotingPowerVariationsResponseSchema,
-} from "../mappers/top-voting-power-variation";
+} from "../mappers/top-voting-power-variations";
 
 export function topVotingPowerVariations(
   app: Hono,

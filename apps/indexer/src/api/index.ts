@@ -93,7 +93,7 @@ const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(votingPowerRepo, repo);
+const votingPowerService = new VotingPowerService(votingPowerRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
