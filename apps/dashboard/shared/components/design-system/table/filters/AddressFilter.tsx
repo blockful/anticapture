@@ -15,7 +15,7 @@ import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ResetIcon } from "@radix-ui/react-icons";
 import { publicClient } from "@/shared/services/wallet/wallet";
-import { IconButton } from "@/shared/components";
+import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
