@@ -25,7 +25,7 @@ export const TopVotingPowerVariationsRequestSchema = z.object({
 
 export const TopVotingPowerVariationsResponseSchema = z.object({
   period: z.object({
-    days: z.enum(DaysOpts).transform((val) => parseInt(val.replace("d", ""))),
+    days: z.number().transform((val) => DaysEnum[val]),
     startTimestamp: z.string(),
     endTimestamp: z.string(),
   }),
@@ -57,7 +57,7 @@ export const TopVotingPowerVariationsMapper = (
   endTimestamp: number,
   days: DaysEnum,
 ): TopVotingPowerVariationsResponse => {
-  return {
+  return TopVotingPowerVariationsResponseSchema.parse({
     period: {
       days: days,
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
@@ -78,5 +78,5 @@ export const TopVotingPowerVariationsMapper = (
         percentageChange: percentageChange,
       }),
     ),
-  };
+  });
 };
