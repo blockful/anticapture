@@ -154,17 +154,21 @@ export const AttackCostBarChart = ({
     };
 
     return [
-      {
-        id: "liquidTreasury",
-        name: "Liquid Treasury",
-        type: BarChartEnum.REGULAR,
-        value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
-        customColor: "#EC762EFF",
-        displayValue:
-          Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
-            ? undefined
-            : "<$10,000",
-      },
+      ...(valueMode === "token"
+        ? []
+        : [
+            {
+              id: "liquidTreasury",
+              name: "Liquid Treasury",
+              type: BarChartEnum.REGULAR,
+              value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+              customColor: "#EC762EFF",
+              displayValue:
+                Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+                  ? undefined
+                  : "<$10,000",
+            },
+          ]),
       {
         id: "delegatedSupply",
         name: "Delegated Supply",
