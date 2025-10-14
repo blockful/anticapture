@@ -7,6 +7,7 @@ import { ProposalInfoSection } from "@/features/governance/components/proposal-o
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
 import { ProposalHeader } from "@/features/governance/components/proposal-overview/ProposalHeader";
+import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams();
@@ -36,7 +37,10 @@ export const ProposalSection = () => {
 
   return (
     <div>
-      <ProposalHeader daoId={daoId as string} />
+      <ProposalHeader
+        proposal={proposal as Query_Proposals_Items_Items}
+        daoId={daoId as string}
+      />
       <div className="flex gap-6 p-5">
         <div className="flex w-[420px] flex-col gap-6">
           <TitleSection proposal={proposal} />
