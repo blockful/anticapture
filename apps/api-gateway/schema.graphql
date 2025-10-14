@@ -113,6 +113,9 @@ type Query {
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-power/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
   topVotingPowerVariations(days: queryInput_topVotingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc): topVotingPowerVariations_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
+  topAccountBalanceVariations(days: queryInput_topAccountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_topAccountBalanceVariations_orderDirection = desc): topAccountBalanceVariations_200_response
 }
 
 """
@@ -1750,6 +1753,38 @@ enum queryInput_topVotingPowerVariations_days {
 }
 
 enum queryInput_topVotingPowerVariations_orderDirection {
+  asc
+  desc
+}
+
+type topAccountBalanceVariations_200_response {
+  period: query_topAccountBalanceVariations_period!
+  items: [query_topAccountBalanceVariations_items_items]!
+}
+
+type query_topAccountBalanceVariations_period {
+  days: Float!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_topAccountBalanceVariations_items_items {
+  accountId: String!
+  previousBalance: String!
+  currentBalance: String!
+  absoluteChange: String!
+  percentageChange: Float!
+}
+
+enum queryInput_topAccountBalanceVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_topAccountBalanceVariations_orderDirection {
   asc
   desc
 }
