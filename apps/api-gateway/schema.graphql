@@ -1728,17 +1728,9 @@ type topVotingPowerVariations_200_response {
 }
 
 type query_topVotingPowerVariations_period {
-  days: query_topVotingPowerVariations_period_days!
+  days: Float!
   startTimestamp: String!
   endTimestamp: String!
-}
-
-enum query_topVotingPowerVariations_period_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
 }
 
 type query_topVotingPowerVariations_items_items {
