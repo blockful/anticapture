@@ -47,14 +47,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       const { from, to, amount } = event.args;
       const { timestamp } = event.block;
 
-      const tokenData = await context.db.find(token, {
-        id: address,
-      });
-
-      if (!tokenData) {
-        return;
-      }
-
       const cexAddressList = Object.values(CEXAddresses[daoId]);
       const dexAddressList = Object.values(DEXAddresses[daoId]);
       const lendingAddressList = Object.values(LendingAddresses[daoId]);
@@ -135,7 +127,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
 
       await updateTotalSupply(
         context,
-        tokenData.totalSupply,
         burningAddressList,
         MetricTypesEnum.TOTAL_SUPPLY,
         from,
@@ -148,7 +139,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
 
       await updateCirculatingSupply(
         context,
-        tokenData,
         MetricTypesEnum.CIRCULATING_SUPPLY,
         daoId,
         address,

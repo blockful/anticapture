@@ -43,14 +43,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       const { from, to } = event.args;
       const { timestamp } = event.block;
 
-      const tokenData = await context.db.find(token, {
-        id: address,
-      });
-
-      if (!tokenData) {
-        return;
-      }
-
       const burningAddressList = Object.values(BurningAddresses[daoId]);
 
       await tokenTransfer(
@@ -85,7 +77,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
       await updateTotalSupply(
         context,
-        tokenData.totalSupply,
         burningAddressList,
         MetricTypesEnum.TOTAL_SUPPLY,
         from,

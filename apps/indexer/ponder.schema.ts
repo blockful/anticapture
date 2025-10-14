@@ -242,7 +242,7 @@ export const transaction = onchainTable("transaction", (drizzle) => ({
 }));
 
 export const tokenPrice = onchainTable("token_price", (drizzle) => ({
-  price: drizzle.bigint().notNull(), // price in USD
+  price: drizzle.bigint().notNull(), // price in ETH
   timestamp: drizzle.bigint().primaryKey(),
 }));
 
