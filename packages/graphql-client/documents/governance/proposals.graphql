@@ -85,7 +85,6 @@ query GetVotesOnchains(
       voterAccountId
       txHash
       daoId
-      voterAccountId
       proposalId
       support
       votingPower

@@ -1,6 +1,1 @@
-# Source the shell profile to get pnpm in PATH
-if [ -f ~/.zshrc ]; then
-  . ~/.zshrc
-fi
-
 pnpm typecheck
