@@ -11,7 +11,6 @@ import {
   BarChart,
   Bar,
   XAxis,
-  YAxis,
   Tooltip,
   ResponsiveContainer,
   LabelList,
@@ -33,6 +32,7 @@ import {
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { Data } from "react-csv/lib/core";
 
 interface StackedValue {
   value: number;
@@ -56,10 +56,16 @@ interface ChartDataItem {
 }
 
 interface AttackCostBarChartProps {
+  setCsvData: (data: Data) => void;
   className?: string;
+  valueMode?: "usd" | "token";
 }
 
-export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
+export const AttackCostBarChart = ({
+  className,
+  setCsvData,
+  valueMode,
+}: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const [mocked, setMocked] = useState<boolean>(false);
@@ -75,7 +81,10 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
   const {
     data: daoTokenPriceHistoricalData,
     loading: daoTokenPriceHistoricalDataLoading,
-  } = useDaoTokenHistoricalData(selectedDaoId);
+  } = useDaoTokenHistoricalData({
+    daoId: selectedDaoId,
+    days: TimeInterval.SEVEN_DAYS,
+  });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
   const attackCostBarChart =
@@ -93,28 +102,19 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
 
   const { isMobile } = useScreenSize();
 
-  const lastPrice = useMemo(() => {
-    const prices = daoTokenPriceHistoricalData.prices;
-    return prices.length > 0 ? prices[prices.length - 1][1] : 0;
-  }, [daoTokenPriceHistoricalData]);
-
   useEffect(() => {
-    if (
+    setMocked(
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
-      activeSupply.data?.activeSupply === undefined &&
-      averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === undefined
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        activeSupply.data?.activeSupply === undefined &&
+        averageTurnout.data?.currentAverageTurnout === undefined &&
+        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+        vetoCouncilVotingPower === undefined,
+    );
   }, [
-    delegatedSupply,
-    activeSupply,
-    averageTurnout,
-    daoTopTokenHolderExcludingTheDao,
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
     vetoCouncilVotingPower,
   ]);
 
@@ -127,37 +127,50 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
 
-  if (isLoading) {
-    return (
-      <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow className="h-70 w-full" />
-      </div>
-    );
-  }
+  const chartData: ChartDataItem[] = useMemo(() => {
+    if (isLoading) return [];
 
-  let chartData: ChartDataItem[] = [];
-  if (!mocked) {
-    chartData = [
-      {
-        id: "liquidTreasury",
-        name: "Liquid Treasury",
-        type: BarChartEnum.REGULAR,
-        value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
-        customColor: "#EC762EFF",
-        displayValue:
-          Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
-            ? undefined
-            : "<$10,000",
-      },
+    if (mocked) {
+      return mockedAttackCostBarData as ChartDataItem[];
+    }
+
+    const prices = daoTokenPriceHistoricalData.prices;
+    const lastPrice = prices.length > 0 ? prices[prices.length - 1][1] : 0;
+
+    const formatValue = (value: number): number => {
+      if (value == null) return 0;
+
+      const formattedValue = Number(formatEther(BigInt(value || 0)));
+
+      if (valueMode === "usd") {
+        return formattedValue * lastPrice;
+      }
+
+      return formattedValue;
+    };
+
+    return [
+      ...(valueMode === "token"
+        ? []
+        : [
+            {
+              id: "liquidTreasury",
+              name: "Liquid Treasury",
+              type: BarChartEnum.REGULAR,
+              value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+              customColor: "#EC762EFF",
+              displayValue:
+                Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+                  ? undefined
+                  : "<$10,000",
+            },
+          ]),
       {
         id: "delegatedSupply",
         name: "Delegated Supply",
-        value:
-          Number(
-            formatEther(
-              BigInt(delegatedSupply.data?.currentDelegatedSupply || "0"),
-            ),
-          ) * lastPrice,
+        value: formatValue(
+          Number(delegatedSupply.data?.currentDelegatedSupply),
+        ),
         type: BarChartEnum.REGULAR,
         customColor: "#EC762ECC",
       },
@@ -166,37 +179,49 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
         name: "Active Supply (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
-        value:
-          Number(formatEther(BigInt(activeSupply.data?.activeSupply || "0"))) *
-          lastPrice,
+        value: formatValue(Number(activeSupply.data?.activeSupply)),
       },
       {
         id: "averageTurnout",
         name: "Average Turnout (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
-        value:
-          Number(
-            formatEther(
-              BigInt(averageTurnout.data?.currentAverageTurnout || "0"),
-            ),
-          ) * lastPrice,
+        value: formatValue(Number(averageTurnout.data?.currentAverageTurnout)),
       },
       {
         id: "topTokenHolder",
         name: "Top Holder",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762E80",
-        value:
-          Number(
-            formatEther(
-              BigInt(daoTopTokenHolderExcludingTheDao?.balance || "0"),
-            ),
-          ) * lastPrice,
+        value: formatValue(Number(daoTopTokenHolderExcludingTheDao?.balance)),
       },
     ];
-  } else {
-    chartData = mockedAttackCostBarData as ChartDataItem[];
+  }, [
+    // fixing this causes an exahaustive-deps re-render for OP and UNI
+    isLoading,
+    mocked,
+    liquidTreasury.data,
+    delegatedSupply?.data?.currentDelegatedSupply,
+    activeSupply?.data?.activeSupply,
+    averageTurnout?.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    daoTokenPriceHistoricalData.prices,
+    valueMode,
+  ]);
+
+  useEffect(() => {
+    if (!mocked && chartData.length) {
+      setCsvData(chartData as Data);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData, mocked]);
+
+  if (isLoading) {
+    return (
+      <div className={`h-80 w-full ${className || ""}`}>
+        <SkeletonRow className="h-70 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -218,15 +243,23 @@ export const AttackCostBarChart = ({ className }: AttackCostBarChartProps) => {
             axisLine={false}
             tickLine={false}
           />
-          <YAxis tick={(props) => <CustomYAxisTick {...props} />} hide />
-          <Tooltip content={<CustomTooltip />} cursor={false} />
+          <Tooltip
+            content={<CustomTooltip valueMode={valueMode} />}
+            cursor={false}
+          />
 
           <Bar dataKey="value" stackId="stack" radius={[4, 4, 4, 4]}>
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.customColor} />
             ))}
             <LabelList
-              content={(props) => <RegularLabel {...props} data={chartData} />}
+              content={(props) => (
+                <RegularLabel
+                  {...props}
+                  data={chartData}
+                  valueMode={valueMode}
+                />
+              )}
             />
           </Bar>
 
@@ -307,15 +340,20 @@ const getStackedTotal = (item: ChartDataItem) => {
 
 type CustomBarLabelConfig = Omit<LabelProps, "ref"> & {
   data: ChartDataItem[];
+  valueMode?: "usd" | "token";
 };
 
 const RegularLabel = (props: CustomBarLabelConfig) => {
-  const { x, y, value, data, index = 0, width } = props;
+  const { x, y, value, data, index = 0, width, valueMode } = props;
   const item = data[index];
-
   if (item.type === BarChartEnum.STACKED) return null;
-
   const centerX = Number(x) + Number(width) / 2;
+
+  const displayed =
+    item?.displayValue ||
+    (valueMode === "usd"
+      ? `$${formatNumberUserReadable(Number(value))}`
+      : formatNumberUserReadable(Number(value)));
 
   return (
     <text
@@ -328,20 +366,22 @@ const RegularLabel = (props: CustomBarLabelConfig) => {
       textAnchor="middle"
       className="text-xs font-medium"
     >
-      {item?.displayValue || `$${formatNumberUserReadable(Number(value))}`}
+      {displayed}
     </text>
   );
 };
 
 const StackedLabel = (props: CustomBarLabelConfig) => {
-  const { x, y, data, index = 0, width } = props;
+  const { x, y, data, index = 0, width, valueMode } = props;
   const item = data[index];
-
   if (item.type !== BarChartEnum.STACKED || !item.stackedValues?.length)
     return null;
-
   const centerX = Number(x) + Number(width) / 2;
   const total = getStackedTotal(item);
+  const displayed =
+    valueMode === "usd"
+      ? `$${formatNumberUserReadable(total)}`
+      : formatNumberUserReadable(total);
 
   return (
     <text
@@ -354,7 +394,7 @@ const StackedLabel = (props: CustomBarLabelConfig) => {
       textAnchor="middle"
       className="text-xs font-medium"
     >
-      ${formatNumberUserReadable(total)}
+      {displayed}
     </text>
   );
 };
@@ -368,12 +408,24 @@ interface CustomTooltipProps {
     payload: ChartDataItem;
   }>;
   label?: string;
+  valueMode?: "usd" | "token";
 }
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  valueMode,
+}: CustomTooltipProps) => {
   if (!(active && payload && payload.length)) return null;
-
   const item = payload[0].payload as ChartDataItem;
+
+  const formatValue = (value?: number) => {
+    if (value == null) return "-";
+    return valueMode === "usd"
+      ? `$${Math.round(value).toLocaleString()}`
+      : Math.round(value).toLocaleString();
+  };
 
   return (
     <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
@@ -387,18 +439,14 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
             .map((barStacked, index) => (
               <p key={index} className="flex gap-1.5 text-sm text-neutral-50">
                 <strong>
-                  {barStacked.label}: $
-                  {Math.round(barStacked.value).toLocaleString()}
+                  {barStacked.label}: {formatValue(barStacked.value)}
                 </strong>
               </p>
             ))}
         </>
       ) : (
         <p className="flex gap-1.5 text-sm text-neutral-50">
-          <strong>
-            {item.displayValue ||
-              `$${item.value && Math.round(item.value).toLocaleString()}`}
-          </strong>
+          <strong>{item.displayValue || formatValue(item.value)}</strong>
         </p>
       )}
     </div>
@@ -412,25 +460,6 @@ interface AxisTickProps {
     value: string | number;
   };
 }
-
-const CustomYAxisTick = (props: AxisTickProps) => {
-  const { x, y, payload } = props;
-  return (
-    <g transform={`translate(${x},${y})`}>
-      <text
-        x={0}
-        y={0}
-        dx={-10}
-        textAnchor="end"
-        fill="#777"
-        fontSize={10}
-        className="font-medium"
-      >
-        ${formatNumberUserReadable(Number(payload.value))}
-      </text>
-    </g>
-  );
-};
 
 const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
   const words = String(payload.value).split(" ");

@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 
-const meta = {
+const meta: Meta<typeof EnsAvatar> = {
   title: "Design System/Avatars/EnsAvatar",
   component: EnsAvatar,
   parameters: {
@@ -41,7 +41,7 @@ const meta = {
       description: "Alt text for accessibility",
     },
   },
-} satisfies Meta<typeof EnsAvatar>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

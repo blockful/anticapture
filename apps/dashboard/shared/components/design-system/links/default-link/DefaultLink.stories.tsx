@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
 
-const meta = {
+const meta: Meta<typeof DefaultLink> = {
   title: "Design System/Links/DefaultLink",
   component: DefaultLink,
   parameters: {
@@ -18,7 +18,7 @@ const meta = {
     },
     children: { control: "text" },
   },
-} satisfies Meta<typeof DefaultLink>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

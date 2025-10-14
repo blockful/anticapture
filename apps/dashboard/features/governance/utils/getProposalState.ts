@@ -1,6 +1,8 @@
 import { ProposalState } from "@/features/governance/types";
 
 export const getProposalState = (status: string): ProposalState => {
+  if (!status) return ProposalState.WAITING_TO_START;
+
   switch (status.toLowerCase()) {
     case "active":
       return ProposalState.ACTIVE;
