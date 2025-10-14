@@ -50,21 +50,23 @@ export const MultilineChartAttackProfitability = ({
   days,
   setCsvData,
 }: MultilineChartAttackProfitabilityProps) => {
-  const { daoId }: { daoId: string } = useParams();
-  const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
+  const { daoId } = useParams<{ daoId: string }>();
+  const daoEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { data: daoData } = useDaoData(daoEnum);
+  const daoConfig = daoConfigByDaoId[daoEnum];
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
-    daoId.toUpperCase() as DaoIdEnum,
+    daoEnum,
     TimeInterval.ONE_YEAR,
   );
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
-    daoId: daoId.toUpperCase() as DaoIdEnum,
+    daoId: daoEnum,
     limit: Number(days.split("d")[0]),
   });
 
   const { data: timeSeriesData } = useTimeSeriesData(
-    daoId.toUpperCase() as DaoIdEnum,
+    daoEnum,
     [MetricTypesEnum.TREASURY, MetricTypesEnum.DELEGATED_SUPPLY],
     days as TimeInterval,
     {
@@ -87,7 +89,7 @@ export const MultilineChartAttackProfitability = ({
   const chartConfig = useMemo(
     () => ({
       treasuryNonDAO: {
-        label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
+        label: `Non-${daoEnum}`,
         color: "#4ade80",
       },
       all: { label: "All", color: "#4ade80" },
@@ -121,19 +123,17 @@ export const MultilineChartAttackProfitability = ({
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
       ),
-      quorum: daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
-        ?.attackProfitability?.dynamicQuorum?.percentage
+      quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
             "quorum",
-            null,
+            1,
             delegatedSupplyChart,
           ).map((datasetpoint) => ({
             ...datasetpoint,
             quorum:
               datasetpoint.quorum *
-              (daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
-                ?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
+              (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
           }))
         : quorumValue
           ? normalizeDataset(daoTokenPriceHistoricalData, "quorum", quorumValue)
@@ -142,8 +142,9 @@ export const MultilineChartAttackProfitability = ({
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
             "delegated",
-            null,
+            1,
             delegatedSupplyChart,
+            daoConfig?.daoOverview.token,
           )
         : [],
     };

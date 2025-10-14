@@ -9,8 +9,9 @@ import { findMostRecentValue } from "@/features/attack-profitability/utils";
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
   key: string,
-  multiplier: number | null,
+  multiplier: number,
   multiplierDataSet?: DaoMetricsDayBucket[],
+  tokenType: "ERC20" | "ERC721" = "ERC20",
 ): MultilineChartDataSetPoint[] {
   // If there's no multiplier data, use the fixed value or 1 as default
   if (!multiplierDataSet?.length) {
@@ -22,13 +23,10 @@ export function normalizeDataset(
       }));
   }
 
-  // Prepare multipliers sorted by timestamp
-  const sortedMultipliers = multiplierDataSet
-    .map((item) => ({
-      timestamp: Number(item.date) * 1000,
-      high: Number(item.high) / 1e18,
-    }))
-    .sort((a, b) => a.timestamp - b.timestamp);
+  const parsedMultipliers = multiplierDataSet.map((item) => ({
+    timestamp: Number(item.date) * 1000,
+    high: tokenType === "ERC721" ? Number(item.high) : Number(item.high) / 1e18,
+  }));
 
   // Sort token prices by timestamp
   const sortedTokenPrices = [...tokenPrices].sort(
@@ -42,14 +40,10 @@ export function normalizeDataset(
       [key]:
         Number(price) *
         findMostRecentValue(
-          sortedMultipliers,
+          parsedMultipliers,
           timestamp,
           "high",
-          multiplier != null
-            ? multiplier
-            : sortedMultipliers.length > 0
-              ? sortedMultipliers[0].high
-              : 1,
+          parsedMultipliers.length > 0 ? parsedMultipliers[0].high : multiplier,
         ),
     };
   });
