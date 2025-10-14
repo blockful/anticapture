@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { ApolloError } from "@apollo/client";
+import { ApolloError, NetworkStatus } from "@apollo/client";
 import { formatUnits } from "viem";
 
 import {
   useVotingPowersQuery,
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
+  VotingPowersQuery,
   QueryVotingPowersArgs,
 } from "@anticapture/graphql-client/hooks";
 
@@ -46,6 +47,7 @@ export interface UseDelegateDelegationHistoryResult {
   paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
+  fetchingMore: boolean;
 }
 
 export type AmountFilterVariables = Pick<
@@ -60,7 +62,7 @@ export function useDelegateDelegationHistory(
   orderDirection: "asc" | "desc" = "desc",
   filterVariables?: AmountFilterVariables,
 ): UseDelegateDelegationHistoryResult {
-  const itemsPerPage = 7;
+  const itemsPerPage = 15;
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
@@ -68,7 +70,7 @@ export function useDelegateDelegationHistory(
   // Reset page to 1 when sorting changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection]);
+  }, [orderBy, orderDirection, account]);
 
   const queryVariables = useMemo(
     () => ({
@@ -87,12 +89,11 @@ export function useDelegateDelegationHistory(
         "anticapture-dao-id": daoId,
       },
     },
-    skip: !account,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, loading, error, fetchMore } = useVotingPowersQuery({
+  const { data, error, fetchMore, networkStatus } = useVotingPowersQuery({
     variables: queryVariables,
     ...queryOptions,
   });
@@ -150,18 +151,47 @@ export function useDelegateDelegationHistory(
       });
   }, [data, account]);
 
+  const totalCount = data?.votingPowers?.totalCount ?? 0;
+  const currentItemsCount = transformedData.length;
+  const hasNextPage = currentItemsCount < totalCount;
+
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (isPaginationLoading) return;
+    if (isPaginationLoading || !hasNextPage) return;
     setIsPaginationLoading(true);
 
     try {
       await fetchMore({
         variables: {
           ...queryVariables,
-          skip: currentPage * itemsPerPage,
+          skip: currentItemsCount,
         },
-        updateQuery: (_, { fetchMoreResult }) => fetchMoreResult,
+        updateQuery: (
+          previousResult: VotingPowersQuery,
+          { fetchMoreResult },
+        ): VotingPowersQuery => {
+          if (!fetchMoreResult) return previousResult;
+          const prevItems = previousResult.votingPowers?.items ?? [];
+          const newItems = fetchMoreResult.votingPowers?.items ?? [];
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) =>
+                !prevItems.some(
+                  (p) => p?.transactionHash === n?.transactionHash,
+                ),
+            ),
+          ];
+
+          return {
+            ...fetchMoreResult,
+            votingPowers: {
+              ...fetchMoreResult.votingPowers,
+              items: merged,
+              totalCount: fetchMoreResult.votingPowers?.totalCount ?? 0,
+            },
+          };
+        },
       });
 
       setCurrentPage((prev) => prev + 1);
@@ -174,8 +204,8 @@ export function useDelegateDelegationHistory(
     fetchMore,
     isPaginationLoading,
     queryVariables,
-    currentPage,
-    itemsPerPage,
+    currentItemsCount,
+    hasNextPage,
   ]);
 
   // Fetch previous page function
@@ -206,9 +236,17 @@ export function useDelegateDelegationHistory(
     itemsPerPage,
   ]);
 
+  const isLoading = useMemo(() => {
+    return (
+      networkStatus === NetworkStatus.loading ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus]);
+
   return {
     delegationHistory: transformedData,
-    loading,
+    loading: isLoading,
     paginationInfo: {
       currentPage,
       totalPages: Math.ceil(
@@ -221,5 +259,7 @@ export function useDelegateDelegationHistory(
     error,
     fetchNextPage,
     fetchPreviousPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
   };
 }

@@ -13,7 +13,7 @@ import { TimeInterval } from "@/shared/types/enums";
 interface ProposalsActivity {
   totalProposals: number;
   votedProposals: number;
-  neverVoted: number;
+  neverVoted: boolean;
 }
 
 interface Delegate {
@@ -45,7 +45,8 @@ interface UseDelegatesResult {
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
-  historicalDataLoading: boolean;
+  isHistoricalLoadingFor: (addr: string) => boolean;
+  isActivityLoadingFor: (addr: string) => boolean;
 }
 
 interface UseDelegatesParams {
@@ -74,19 +75,26 @@ export const useDelegates = ({
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
   // Track proposals activity data for each delegate
+  const [historicalVPCache, setHistoricalVPCache] = useState<
+    Map<string, string>
+  >(new Map());
   const [delegateActivities, setDelegateActivities] = useState<
-    Record<string, ProposalsActivity>
-  >({});
-  const [activitiesLoading, setActivitiesLoading] = useState(false);
+    Map<string, ProposalsActivity>
+  >(new Map());
+  const [loadingActivityAddresses, setLoadingActivityAddresses] = useState<
+    Set<string>
+  >(new Set());
 
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection, address]);
+    setHistoricalVPCache(new Map());
+    setDelegateActivities(new Map());
+    setLoadingActivityAddresses(new Set());
+  }, [orderBy, orderDirection, address, days]);
 
   const {
     data: delegatesData,
-    loading: delegatesLoading,
     error: delegatesError,
     refetch,
     fetchMore,
@@ -99,21 +107,13 @@ export const useDelegates = ({
       orderDirection,
       ...(address && { addresses: [address] }),
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
+    context: { headers: { "anticapture-dao-id": daoId } },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
   const { data: countingData } = useGetDelegatesCountQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
+    context: { headers: { "anticapture-dao-id": daoId } },
   });
 
   // Refetch data when sorting changes to ensure we start from page 1
@@ -127,136 +127,130 @@ export const useDelegates = ({
     });
   }, [orderBy, orderDirection, address, refetch]);
 
-  const delegateAddresses = useMemo(() => {
-    return (
+  const delegateAddresses = useMemo(
+    () =>
       delegatesData?.accountPowers?.items
-        ?.map((delegate) => delegate?.accountId)
-        .filter(Boolean) || []
-    );
-  }, [delegatesData]);
+        ?.map((delegate) => delegate.accountId)
+        .filter(Boolean) || [],
+    [delegatesData],
+  );
+
+  const newAddressesForHistoricalVP = useMemo(
+    () => delegateAddresses.filter((addr) => !historicalVPCache.has(addr)),
+    [delegateAddresses, historicalVPCache],
+  );
 
   // Get historical voting power data
-  const {
-    data: historicalData,
-    loading: historicalLoading,
-    error: historicalError,
-  } = useGetHistoricalVotingAndActivityQuery({
-    variables: {
-      addresses: delegateAddresses,
-      address: delegateAddresses[0] || "", // This is still needed for the query structure
-      fromDate,
-      days: QueryInput_HistoricalVotingPower_Days[days],
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
+  const { data: newHistoricalData, loading: historicalLoading } =
+    useGetHistoricalVotingAndActivityQuery({
+      variables: {
+        addresses: newAddressesForHistoricalVP,
+        address: newAddressesForHistoricalVP[0] || "", // This is still needed for the query structure
+        fromDate,
+        days: QueryInput_HistoricalVotingPower_Days[days],
       },
-    },
-    skip: delegateAddresses.length === 0,
-  });
+      context: { headers: { "anticapture-dao-id": daoId } },
+      skip: newAddressesForHistoricalVP.length === 0,
+    });
 
-  // Lazy query for individual delegate proposals activity
+  useEffect(() => {
+    if (newHistoricalData?.historicalVotingPower) {
+      setHistoricalVPCache((prevCache) => {
+        const newCache = new Map(prevCache);
+        newHistoricalData.historicalVotingPower?.forEach((h) => {
+          if (h?.address && h.votingPower) {
+            newCache.set(h.address, h.votingPower);
+          }
+        });
+        return newCache;
+      });
+    }
+  }, [newHistoricalData]);
+
   const [getDelegateProposalsActivity] =
     useGetDelegateProposalsActivityLazyQuery({
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
+      context: { headers: { "anticapture-dao-id": daoId } },
     });
 
   // Fetch proposals activity for all delegates using Promise.all
   useEffect(() => {
-    if (delegateAddresses.length === 0) return;
+    const newAddresses = delegateAddresses.filter(
+      (addr) =>
+        !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
+    );
+
+    if (newAddresses.length === 0) return;
 
     const fetchDelegateActivities = async () => {
-      setActivitiesLoading(true);
+      setLoadingActivityAddresses(
+        (prev) => new Set([...prev, ...newAddresses]),
+      );
       try {
-        const activityPromises = delegateAddresses.map(async (address) => {
-          if (!address) return { address: "", activity: null };
-
+        const activityPromises = newAddresses.map(async (addr) => {
           const result = await getDelegateProposalsActivity({
-            variables: {
-              address,
-              fromDate,
-            },
+            variables: { address: addr, fromDate },
           });
           return {
-            address,
-            activity: result.data?.proposalsActivity,
+            address: addr,
+            activity: result.data?.proposalsActivity ?? null,
           };
         });
-
         const activities = await Promise.all(activityPromises);
-
-        const activitiesMap: Record<string, ProposalsActivity> = {};
-        activities.forEach(({ address, activity }) => {
-          if (activity && address) {
-            activitiesMap[address] = {
-              totalProposals: activity.totalProposals,
-              votedProposals: activity.votedProposals,
-              neverVoted: activity.neverVoted ? 1 : 0,
-            };
-          }
+        setDelegateActivities((prev) => {
+          const next = new Map(prev);
+          activities.forEach(({ address, activity }) => {
+            if (activity) next.set(address, activity);
+          });
+          return next;
         });
-
-        setDelegateActivities(activitiesMap);
-      } catch (error) {
-        console.error("Error fetching delegate activities:", error);
+      } catch (err) {
+        console.error("Error fetching delegate activities:", err);
       } finally {
-        setActivitiesLoading(false);
+        setLoadingActivityAddresses((prev) => {
+          const next = new Set(prev);
+          newAddresses.forEach((a) => next.delete(a));
+          return next;
+        });
       }
     };
-
     fetchDelegateActivities();
-  }, [delegateAddresses, getDelegateProposalsActivity, daoId, fromDate]);
+  }, [
+    delegateAddresses,
+    delegateActivities,
+    getDelegateProposalsActivity,
+    fromDate,
+    loadingActivityAddresses,
+  ]);
 
-  // Create base data first (without historical data)
-  const baseData = useMemo(() => {
+  const finalData = useMemo(() => {
     if (!delegatesData?.accountPowers?.items) return null;
 
-    return delegatesData.accountPowers.items.map((delegate) => ({
-      ...delegate,
-      proposalsActivity: undefined, // Will be populated when activityData loads
-      historicalVotingPower: undefined, // Will be populated when activityData loads
-    }));
-  }, [delegatesData]);
-
-  // Enrich data with historical information when available
-  const enrichedData = useMemo(() => {
-    if (!baseData) return null;
-
-    return baseData.map((delegate) => {
-      const address = delegate.accountId;
-
-      // Get proposals activity for this specific delegate
-      const proposalsActivity =
-        address && delegateActivities[address]
-          ? delegateActivities[address]
-          : undefined;
-
-      // Find historical voting power for this delegate
-      const historicalVotingPowerData =
-        historicalData?.historicalVotingPower?.find(
-          (historical) => historical?.address === delegate.accountId,
-        );
-
+    return delegatesData.accountPowers.items.map((delegate) => {
+      const historicalVotingPower = historicalVPCache.get(delegate.accountId);
+      const proposalsActivity = delegateActivities.get(delegate.accountId);
       return {
         ...delegate,
+        historicalVotingPower,
         proposalsActivity,
-        historicalVotingPower: historicalVotingPowerData?.votingPower,
       };
     });
-  }, [baseData, delegateActivities, historicalData]);
+  }, [delegatesData, historicalVPCache, delegateActivities]);
 
-  // Use enriched data if available, otherwise use base data
-  const finalData = historicalData ? enrichedData : baseData;
+  const isHistoricalLoadingFor = useCallback(
+    (addr: string) => historicalLoading && !historicalVPCache.has(addr),
+    [historicalVPCache, historicalLoading],
+  );
+
+  const isActivityLoadingFor = useCallback(
+    (addr: string) => loadingActivityAddresses.has(addr),
+    [loadingActivityAddresses],
+  );
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
     const pageInfo = delegatesData?.accountPowers?.pageInfo;
     const totalCount = countingData?.accountPowers?.totalCount || 0;
-    const currentItemsCount = delegatesData?.accountPowers?.items?.length || 0;
+    const currentItemsCount = finalData?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return {
@@ -273,7 +267,7 @@ export const useDelegates = ({
   }, [
     delegatesData?.accountPowers?.pageInfo,
     countingData?.accountPowers?.totalCount,
-    delegatesData?.accountPowers?.items?.length,
+    finalData,
     currentPage,
     itemsPerPage,
   ]);
@@ -301,20 +295,18 @@ export const useDelegates = ({
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
-
-          // Replace the current data with the new page data
+          if (!fetchMoreResult?.accountPowers?.items) return previousResult;
+          const prevItems = previousResult.accountPowers.items ?? [];
+          const newItems = fetchMoreResult.accountPowers.items ?? [];
           return {
             ...fetchMoreResult,
             accountPowers: {
               ...fetchMoreResult.accountPowers,
-              items: fetchMoreResult.accountPowers.items,
+              items: [...prevItems, ...newItems],
             },
           };
         },
       });
-
-      // Update page number after successful fetch
       setCurrentPage((prev) => prev + 1);
     } catch (error) {
       console.error("Error fetching next page:", error);
@@ -323,68 +315,34 @@ export const useDelegates = ({
     }
   }, [
     fetchMore,
-    pagination.hasNextPage,
-    pagination.endCursor,
+    pagination,
+    isPaginationLoading,
+    address,
     orderBy,
     orderDirection,
-    address,
-    isPaginationLoading,
   ]);
 
-  // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
     if (
       !pagination.hasPreviousPage ||
       !pagination.startCursor ||
       isPaginationLoading
-    ) {
-      console.warn("No previous page available or already loading");
+    )
       return;
-    }
-
     setIsPaginationLoading(true);
-
     try {
       await fetchMore({
-        variables: {
-          after: undefined,
-          before: pagination.startCursor,
-          orderBy,
-          orderDirection,
-          ...(address && { addresses: [address] }),
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
-
-          // Replace the current data with the new page data
-          return {
-            ...fetchMoreResult,
-            accountPowers: {
-              ...fetchMoreResult.accountPowers,
-              items: fetchMoreResult.accountPowers.items,
-            },
-          };
-        },
+        variables: { after: undefined, before: pagination.startCursor },
+        updateQuery: (prev, { fetchMoreResult }) => fetchMoreResult || prev,
       });
-
-      // Update page number after successful fetch
       setCurrentPage((prev) => prev - 1);
     } catch (error) {
       console.error("Error fetching previous page:", error);
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [
-    fetchMore,
-    pagination.hasPreviousPage,
-    pagination.startCursor,
-    orderBy,
-    orderDirection,
-    address,
-    isPaginationLoading,
-  ]);
+  }, [fetchMore, pagination, isPaginationLoading]);
 
-  // Enhanced refetch that resets pagination
   const handleRefetch = useCallback(() => {
     setCurrentPage(1);
     refetch({
@@ -396,16 +354,25 @@ export const useDelegates = ({
     });
   }, [refetch, orderBy, orderDirection, address]);
 
+  const isLoading = useMemo(() => {
+    return (
+      (networkStatus === NetworkStatus.loading && !finalData?.length) ||
+      networkStatus === NetworkStatus.setVariables ||
+      networkStatus === NetworkStatus.refetch
+    );
+  }, [networkStatus, finalData]);
+
   return {
     data: finalData,
-    loading: delegatesLoading,
-    error: delegatesError || historicalError || null,
+    loading: isLoading,
+    error: delegatesError || null,
     refetch: handleRefetch,
     pagination,
     fetchNextPage,
     fetchPreviousPage,
     fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
-    historicalDataLoading: historicalLoading || activitiesLoading,
+      isPaginationLoading || networkStatus === NetworkStatus.fetchMore,
+    isHistoricalLoadingFor,
+    isActivityLoadingFor,
   };
 };
