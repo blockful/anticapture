@@ -2,12 +2,10 @@
 
 import { useParams } from "next/navigation";
 import { useProposal } from "@/features/governance/hooks/useProposal";
-
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
-
 import { ProposalHeader } from "@/features/governance/components/proposal-overview/ProposalHeader";
 
 export const ProposalSection = () => {
