@@ -19,7 +19,7 @@ import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { timestampToReadableDate } from "@/shared/utils";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
@@ -40,6 +40,7 @@ interface TokenDistributionChartProps {
   isLoading?: boolean;
   error?: Error | null;
   daoId: DaoIdEnum;
+  context?: "overview" | "section";
 }
 
 export const TokenDistributionChart = ({
@@ -50,6 +51,7 @@ export const TokenDistributionChart = ({
   isLoading = false,
   error = null,
   daoId,
+  context = "section",
 }: TokenDistributionChartProps) => {
   const { brushRange, setBrushRange } = useBrushStore();
   const hasInitialized = useRef(false);
@@ -189,19 +191,28 @@ export const TokenDistributionChart = ({
   }
 
   return (
-    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center sm:rounded-lg">
+    <div
+      className={cn(
+        "sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full flex-col items-center justify-center sm:rounded-lg",
+        { "-mb-1 h-32": context === "overview" },
+      )}
+    >
       <ChartContainer
         className="h-full w-full justify-start"
         config={chartConfig}
       >
         <ComposedChart
           data={chartData}
-          margin={{
-            right: isMobile ? 5 : 20,
-            left: isMobile ? -35 : 0,
-            top: isMobile ? 5 : 10,
-            bottom: isMobile ? 5 : 10,
-          }}
+          margin={
+            context === "overview"
+              ? { top: 0, right: 0, left: 0, bottom: 0 }
+              : {
+                  right: isMobile ? 5 : 20,
+                  left: isMobile ? -35 : 0,
+                  top: isMobile ? 5 : 10,
+                  bottom: isMobile ? 5 : 10,
+                }
+          }
         >
           <defs>
             {/* Generate gradients for each AREA metric */}
@@ -242,7 +253,11 @@ export const TokenDistributionChart = ({
             tickMargin={8}
             tickFormatter={formatTick}
             allowDuplicatedCategory={false}
-            padding={{ left: 20, right: 20 }}
+            padding={
+              context === "overview"
+                ? { left: 0, right: 20 }
+                : { left: 20, right: 20 }
+            }
           />
           {/* DEFAULT AXIS - Required for Recharts compatibility */}
           <YAxis yAxisId={0} hide domain={["auto", "auto"]} />
@@ -255,7 +270,7 @@ export const TokenDistributionChart = ({
               `${formatNumberUserReadable(Number(value))}\n${daoId}`
             }
             tick={{ fontSize: 10 }}
-            width={50}
+            width={context === "overview" ? 35 : 50}
           />
 
           {/* SECONDARY AXIS - For metrics configured with axis: "secondary" (TOKEN_PRICE) */}
@@ -464,42 +479,44 @@ export const TokenDistributionChart = ({
             }
           />
 
-          <Brush
-            dataKey="date"
-            height={32}
-            stroke="#333"
-            fill="#1f1f1f"
-            tickFormatter={(timestamp) =>
-              timestampToReadableDate(timestamp, "abbreviated")
-            }
-            travellerWidth={10}
-            startIndex={brushRange.startIndex}
-            endIndex={brushRange.endIndex}
-            onChange={(brushArea) => {
-              if (brushArea && chartData) {
-                const { startIndex = 0, endIndex = chartData.length - 1 } =
-                  brushArea;
-
-                // Update brush range in store
-                setBrushRange({ startIndex, endIndex });
+          {context === "section" && (
+            <Brush
+              dataKey="date"
+              height={32}
+              stroke="#333"
+              fill="#1f1f1f"
+              tickFormatter={(timestamp) =>
+                timestampToReadableDate(timestamp, "abbreviated")
               }
-            }}
-          >
-            <AreaChart height={32} width={1128} data={chartData}>
-              <XAxis dataKey="date" hide />
-              <YAxis yAxisId="brushAxis" hide />
-              <Area
-                type="monotone"
-                dataKey={appliedMetrics[0]}
-                stroke="#333"
-                fill="#1f1f1f"
-                fillOpacity={0.3}
-                strokeWidth={1}
-                dot={false}
-                yAxisId="brushAxis"
-              />
-            </AreaChart>
-          </Brush>
+              travellerWidth={10}
+              startIndex={brushRange.startIndex}
+              endIndex={brushRange.endIndex}
+              onChange={(brushArea) => {
+                if (brushArea && chartData) {
+                  const { startIndex = 0, endIndex = chartData.length - 1 } =
+                    brushArea;
+
+                  // Update brush range in store
+                  setBrushRange({ startIndex, endIndex });
+                }
+              }}
+            >
+              <AreaChart height={32} width={1128} data={chartData}>
+                <XAxis dataKey="date" hide />
+                <YAxis yAxisId="brushAxis" hide />
+                <Area
+                  type="monotone"
+                  dataKey={appliedMetrics[0]}
+                  stroke="#333"
+                  fill="#1f1f1f"
+                  fillOpacity={0.3}
+                  strokeWidth={1}
+                  dot={false}
+                  yAxisId="brushAxis"
+                />
+              </AreaChart>
+            </Brush>
+          )}
         </ComposedChart>
       </ChartContainer>
       <AnticaptureWatermark />
