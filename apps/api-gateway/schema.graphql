@@ -1773,7 +1773,7 @@ type query_topAccountBalanceVariations_items_items {
   previousBalance: String!
   currentBalance: String!
   absoluteChange: String!
-  percentageChange: Float!
+  percentageChange: String!
 }
 
 enum queryInput_topAccountBalanceVariations_days {
