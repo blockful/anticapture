@@ -1,7 +1,6 @@
 "use client";
 
 import { TokenDistributionChart } from "@/features/token-distribution/components";
-import { Metric } from "@/features/token-distribution/components/Metric";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import {
   MetricSchema,
@@ -12,27 +11,45 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
+const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = [
+  MetricTypesEnum.DELEGATED_SUPPLY,
+  MetricTypesEnum.CEX_SUPPLY,
+  MetricTypesEnum.DEX_SUPPLY,
+  MetricTypesEnum.LENDING_SUPPLY,
+];
+
+const OverviewMetric = ({ label, color }: { label: string; color: string }) => {
+  return (
+    <div className="flex h-full w-min flex-col justify-between rounded-sm xl:flex-row xl:items-center xl:gap-2">
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-2 xl:items-start xl:justify-start">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span
+            className="rounded-xs size-2 shrink-0"
+            style={{ backgroundColor: color }}
+          />
+          <p className="text-primary truncate text-sm font-normal">{label}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const overviewTokenDistributionMetrics = [
-    MetricTypesEnum.DELEGATED_SUPPLY,
-    MetricTypesEnum.CEX_SUPPLY,
-    MetricTypesEnum.DEX_SUPPLY,
-    MetricTypesEnum.LENDING_SUPPLY,
-  ];
   const {
     chartData: tokenDistributionChartData,
     chartConfig: tokenDistributionChartConfig,
     isLoading: isLoadingTokenDistributionChart,
   } = useChartMetrics({
-    appliedMetrics: overviewTokenDistributionMetrics,
+    appliedMetrics: OVERVIEW_TOKEN_DISTRIBUTION_METRICS,
     daoId,
     metricsSchema,
   });
 
   const overviewTokenDistributionMetricsSchema = Object.fromEntries(
-    overviewTokenDistributionMetrics
-      .map((key) => [key, metricsSchema[key as keyof typeof metricsSchema]])
-      .filter(([, metric]) => !!metric),
+    OVERVIEW_TOKEN_DISTRIBUTION_METRICS.map((key) => [
+      key,
+      metricsSchema[key as keyof typeof metricsSchema],
+    ]).filter(([, metric]) => !!metric),
   ) as Record<string, MetricSchema>;
 
   return (
@@ -50,7 +67,7 @@ export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
       <TokenDistributionChart
         daoId={daoId}
         isLoading={isLoadingTokenDistributionChart}
-        appliedMetrics={overviewTokenDistributionMetrics}
+        appliedMetrics={OVERVIEW_TOKEN_DISTRIBUTION_METRICS}
         chartConfig={tokenDistributionChartConfig}
         chartData={tokenDistributionChartData}
         context="overview"
@@ -58,11 +75,10 @@ export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
       <div className="flex h-min gap-3">
         {Object.values(overviewTokenDistributionMetricsSchema).map(
           (metric: MetricSchema) => (
-            <Metric
+            <OverviewMetric
               key={metric.label}
               label={metric.label}
               color={metric.color}
-              context="overview"
             />
           ),
         )}
