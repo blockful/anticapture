@@ -103,7 +103,8 @@ export type Query = {
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
   proposalsOnchains: ProposalsOnchainPage;
-  token?: Maybe<Token>;
+  /** Get property data for a specific token */
+  token?: Maybe<Token_200_Response>;
   tokens: TokenPage;
   /** Get total assets */
   totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
@@ -354,7 +355,7 @@ export type QueryProposalsOnchainsArgs = {
 
 
 export type QueryTokenArgs = {
-  id: Scalars['String']['input'];
+  currency?: InputMaybe<QueryInput_Token_Currency>;
 };
 
 
@@ -1524,6 +1525,11 @@ export enum QueryInput_Proposals_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_Token_Currency {
+  Eth = 'eth',
+  Usd = 'usd'
+}
+
 export enum QueryInput_TotalAssets_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1815,6 +1821,21 @@ export type TokenPage = {
   items: Array<Token>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type Token_200_Response = {
+  __typename?: 'token_200_response';
+  cexSupply: Scalars['String']['output'];
+  circulatingSupply: Scalars['String']['output'];
+  decimals: Scalars['Float']['output'];
+  delegatedSupply: Scalars['String']['output'];
+  dexSupply: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  lendingSupply: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  price: Scalars['Float']['output'];
+  totalSupply: Scalars['String']['output'];
+  treasury: Scalars['String']['output'];
 };
 
 export type Transaction = {
@@ -3702,7 +3723,6 @@ export const GetVotesOnchainsDocument = gql`
       voterAccountId
       txHash
       daoId
-      voterAccountId
       proposalId
       support
       votingPower
