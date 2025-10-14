@@ -103,22 +103,18 @@ export const AttackCostBarChart = ({
   const { isMobile } = useScreenSize();
 
   useEffect(() => {
-    if (
+    setMocked(
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
-      activeSupply.data?.activeSupply === undefined &&
-      averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === undefined
-    ) {
-      setMocked(true);
-    } else {
-      setMocked(false);
-    }
+        activeSupply.data?.activeSupply === undefined &&
+        averageTurnout.data?.currentAverageTurnout === undefined &&
+        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+        vetoCouncilVotingPower === undefined,
+    );
   }, [
-    delegatedSupply,
-    activeSupply,
-    averageTurnout,
-    daoTopTokenHolderExcludingTheDao,
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
     vetoCouncilVotingPower,
   ]);
 
@@ -154,17 +150,21 @@ export const AttackCostBarChart = ({
     };
 
     return [
-      {
-        id: "liquidTreasury",
-        name: "Liquid Treasury",
-        type: BarChartEnum.REGULAR,
-        value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
-        customColor: "#EC762EFF",
-        displayValue:
-          Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
-            ? undefined
-            : "<$10,000",
-      },
+      ...(valueMode === "token"
+        ? []
+        : [
+            {
+              id: "liquidTreasury",
+              name: "Liquid Treasury",
+              type: BarChartEnum.REGULAR,
+              value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+              customColor: "#EC762EFF",
+              displayValue:
+                Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+                  ? undefined
+                  : "<$10,000",
+            },
+          ]),
       {
         id: "delegatedSupply",
         name: "Delegated Supply",
@@ -197,12 +197,13 @@ export const AttackCostBarChart = ({
       },
     ];
   }, [
+    // fixing this causes an exahaustive-deps re-render for OP and UNI
     isLoading,
     mocked,
-    liquidTreasury.data,
-    delegatedSupply.data,
-    activeSupply.data,
-    averageTurnout.data,
+    liquidTreasury.data?.[0]?.totalAssets,
+    delegatedSupply?.data?.currentDelegatedSupply,
+    activeSupply?.data?.activeSupply,
+    averageTurnout?.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
     daoTokenPriceHistoricalData.prices,
     valueMode,
@@ -212,7 +213,8 @@ export const AttackCostBarChart = ({
     if (!mocked && chartData.length) {
       setCsvData(chartData as Data);
     }
-  }, [chartData, mocked, setCsvData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData, mocked]);
 
   if (isLoading) {
     return (
