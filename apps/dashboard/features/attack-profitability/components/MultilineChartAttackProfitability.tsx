@@ -157,26 +157,23 @@ export const MultilineChartAttackProfitability = ({
       ),
     );
 
-    const data = Array.from(allDates)
-      .sort((a, b) => a - b)
-      .map((date) => {
-        const dataPoint: Record<string, number | null> = { date };
+    const data = Array.from(allDates).map((date) => {
+      const dataPoint: Record<string, number | null> = { date };
 
-        Object.entries(datasets).forEach(([key, dataset]) => {
-          const chartLabel =
-            chartConfig[key as keyof typeof chartConfig]?.label;
-          const isKeySelected = filterData?.includes(key);
-          const isLabelSelected = filterData?.includes(chartLabel);
+      Object.entries(datasets).forEach(([key, dataset]) => {
+        const chartLabel = chartConfig[key as keyof typeof chartConfig]?.label;
+        const isKeySelected = filterData?.includes(key);
+        const isLabelSelected = filterData?.includes(chartLabel);
 
-          if (isKeySelected || isLabelSelected) {
-            const value = dataset.find((d) => d.date === date)?.[key] ?? null;
-            if (value !== null) lastKnownValues[key] = value;
-            dataPoint[key] = lastKnownValues[key] ?? null;
-          }
-        });
-
-        return dataPoint;
+        if (isKeySelected || isLabelSelected) {
+          const value = dataset.find((d) => d.date === date)?.[key] ?? null;
+          if (value !== null) lastKnownValues[key] = value;
+          dataPoint[key] = lastKnownValues[key] ?? null;
+        }
       });
+
+      return dataPoint;
+    });
 
     return data;
   }, [
