@@ -12,7 +12,7 @@ import {
 import { Metric } from "@/features/token-distribution/components/Metric";
 import { MetricWithKey } from "@/features/token-distribution/types";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { Inbox } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -23,7 +23,6 @@ interface TokenDistributionMetricsProps {
   setAppliedMetrics: (metrics: string[]) => void;
   setHoveredMetricKey: (metricKey: string | null) => void;
   chartData?: ChartDataSetPoint[];
-  context?: "overview" | "section";
 }
 
 export const TokenDistributionMetrics = ({
@@ -32,7 +31,6 @@ export const TokenDistributionMetrics = ({
   setAppliedMetrics,
   setHoveredMetricKey,
   chartData,
-  context = "section",
 }: TokenDistributionMetricsProps) => {
   // Get brush range from Zustand store
   const { brushRange } = useBrushStore();
@@ -114,37 +112,24 @@ export const TokenDistributionMetrics = ({
                 const tooltipText = getTooltipText(category);
 
                 return (
-                  <div
-                    key={category}
-                    className={cn("flex flex-col gap-2", {
-                      "mb-4": context === "section",
-                    })}
-                  >
-                    {context !== "overview" && (
-                      <CardTitle className="flex items-center gap-2">
+                  <div key={category} className="mb-4 flex flex-col gap-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
+                        {category}
+                      </p>
+                      {category !== "GOVERNANCE" && category !== "MARKET" && (
                         <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
-                          {category}
+                          ({daoId})
                         </p>
-                        {category !== "GOVERNANCE" && category !== "MARKET" && (
-                          <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
-                            ({daoId})
-                          </p>
-                        )}
-                        {tooltipText && (
-                          <TooltipInfo
-                            text={tooltipText}
-                            className="text-secondary"
-                          />
-                        )}
-                      </CardTitle>
-                    )}
-                    <div
-                      className={cn("gap-3", {
-                        "grid grid-cols-2 xl:flex xl:flex-col":
-                          context === "section",
-                        "flex h-min": context === "overview",
-                      })}
-                    >
+                      )}
+                      {tooltipText && (
+                        <TooltipInfo
+                          text={tooltipText}
+                          className="text-secondary"
+                        />
+                      )}
+                    </CardTitle>
+                    <div className="grid grid-cols-2 gap-2 xl:flex xl:flex-col">
                       {metrics.map((metric: MetricWithKey) => {
                         const metricData = dataToUse
                           .map(
@@ -266,7 +251,6 @@ export const TokenDistributionMetrics = ({
                             onRemove={handleClick}
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}
-                            context={context}
                           />
                         );
                       })}
@@ -278,13 +262,11 @@ export const TokenDistributionMetrics = ({
           )}
         </div>
       </div>
-      {context === "section" && (
-        <TokenDistributionDialog
-          appliedMetrics={appliedMetricsFormatted}
-          metricsSchema={metricsSchemaFormatted}
-          onApply={handleApplyMetric}
-        />
-      )}
+      <TokenDistributionDialog
+        appliedMetrics={appliedMetricsFormatted}
+        metricsSchema={metricsSchemaFormatted}
+        onApply={handleApplyMetric}
+      />
     </div>
   );
 };

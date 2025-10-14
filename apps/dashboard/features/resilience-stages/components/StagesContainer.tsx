@@ -149,7 +149,7 @@ export const StagesContainer = ({
     >
       <div className="flex h-5 items-center gap-2 px-5 sm:px-0">
         <DefaultLink
-          href={`${daoId?.toLowerCase()}/resilience-stages`}
+          href={`${daoId.toLowerCase()}/resilience-stages`}
           openInNewTab={false}
           className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
         >

@@ -109,6 +109,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             chartConfig={chartConfig}
             chartData={chartData}
             hoveredMetricKey={hoveredMetricKey}
+            context="section"
           />
         </CardContent>
         <div className="border-light-dark mx-4 w-px border border-dashed xl:order-2" />
