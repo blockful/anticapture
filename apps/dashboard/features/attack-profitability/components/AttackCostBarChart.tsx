@@ -112,10 +112,10 @@ export const AttackCostBarChart = ({
         vetoCouncilVotingPower === undefined,
     );
   }, [
-    delegatedSupply,
-    activeSupply,
-    averageTurnout,
-    daoTopTokenHolderExcludingTheDao,
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
     vetoCouncilVotingPower,
   ]);
 
@@ -207,15 +207,15 @@ export const AttackCostBarChart = ({
       },
     ];
   }, [
+    // fixing this causes an exahaustive-deps re-render for OP and UNI
     isLoading,
     mocked,
+    liquidTreasury.data?.[0]?.totalAssets,
+    delegatedSupply?.data?.currentDelegatedSupply,
+    activeSupply?.data?.activeSupply,
+    averageTurnout?.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
     daoTokenPriceHistoricalData,
-    liquidTreasury,
-    delegatedSupply,
-    activeSupply,
-    averageTurnout,
-    daoTopTokenHolderExcludingTheDao,
-    daoConfig.daoOverview.token,
     valueMode,
   ]);
 
@@ -223,7 +223,8 @@ export const AttackCostBarChart = ({
     if (!mocked && chartData.length) {
       setCsvData(chartData as Data);
     }
-  }, [chartData, mocked, setCsvData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData, mocked]);
 
   if (isLoading) {
     return (

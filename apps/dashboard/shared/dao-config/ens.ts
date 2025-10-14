@@ -10,7 +10,7 @@ import { EnsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 
 export const ENS: DaoConfiguration = {
-  name: "Ethereum Name Service",
+  name: "ENS",
   supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
