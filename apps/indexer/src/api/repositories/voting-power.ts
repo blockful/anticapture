@@ -177,7 +177,7 @@ export class VotingPowerRepository {
       const oldVotingPower = numericCurrentVotingPower - numericAbsoluteChange;
       const percentageChange = oldVotingPower
         ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
-        : 100;
+        : 0;
 
       return {
         accountId: accountId,

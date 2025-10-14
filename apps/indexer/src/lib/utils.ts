@@ -33,6 +33,5 @@ export function getChain(chainId: number): chains.Chain | undefined {
 }
 
 export const secondsToDays = (seconds: number | DaysEnum): number => {
-  const result = Math.floor(seconds / (60 * 60 * 24));
-  return result;
+  return Math.floor(seconds / (60 * 60 * 24));
 };
