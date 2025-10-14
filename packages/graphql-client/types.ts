@@ -2291,6 +2291,13 @@ export type BalanceHistorySellTotalCountQueryVariables = Exact<{
 
 export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
+export type CompareTreasuryQueryVariables = Exact<{
+  days: QueryInput_CompareTreasury_Days;
+}>;
+
+
+export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
+
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
 }>;

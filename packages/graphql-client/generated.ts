@@ -2294,6 +2294,13 @@ export type BalanceHistorySellTotalCountQueryVariables = Exact<{
 
 export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
+export type CompareTreasuryQueryVariables = Exact<{
+  days: QueryInput_CompareTreasury_Days;
+}>;
+
+
+export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
+
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
 }>;
@@ -2819,6 +2826,48 @@ export type BalanceHistorySellTotalCountQueryHookResult = ReturnType<typeof useB
 export type BalanceHistorySellTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountLazyQuery>;
 export type BalanceHistorySellTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountSuspenseQuery>;
 export type BalanceHistorySellTotalCountQueryResult = Apollo.QueryResult<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>;
+export const CompareTreasuryDocument = gql`
+    query CompareTreasury($days: queryInput_compareTreasury_days!) {
+  compareTreasury(days: $days) {
+    changeRate
+    currentTreasury
+    oldTreasury
+  }
+}
+    `;
+
+/**
+ * __useCompareTreasuryQuery__
+ *
+ * To run a query within a React component, call `useCompareTreasuryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCompareTreasuryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCompareTreasuryQuery({
+ *   variables: {
+ *      days: // value for 'days'
+ *   },
+ * });
+ */
+export function useCompareTreasuryQuery(baseOptions: Apollo.QueryHookOptions<CompareTreasuryQuery, CompareTreasuryQueryVariables> & ({ variables: CompareTreasuryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CompareTreasuryQuery, CompareTreasuryQueryVariables>(CompareTreasuryDocument, options);
+      }
+export function useCompareTreasuryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CompareTreasuryQuery, CompareTreasuryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CompareTreasuryQuery, CompareTreasuryQueryVariables>(CompareTreasuryDocument, options);
+        }
+export function useCompareTreasurySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CompareTreasuryQuery, CompareTreasuryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CompareTreasuryQuery, CompareTreasuryQueryVariables>(CompareTreasuryDocument, options);
+        }
+export type CompareTreasuryQueryHookResult = ReturnType<typeof useCompareTreasuryQuery>;
+export type CompareTreasuryLazyQueryHookResult = ReturnType<typeof useCompareTreasuryLazyQuery>;
+export type CompareTreasurySuspenseQueryHookResult = ReturnType<typeof useCompareTreasurySuspenseQuery>;
+export type CompareTreasuryQueryResult = Apollo.QueryResult<CompareTreasuryQuery, CompareTreasuryQueryVariables>;
 export const GetDaoDataDocument = gql`
     query GetDaoData($daoId: String!) {
   dao(id: $daoId) {
