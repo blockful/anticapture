@@ -38,6 +38,7 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { topVotingPowerVariations } from "./controller/top-voting-power-variations";
 import { TokenService } from "./services/token";
 import { topAccountBalanceVariations } from "./controller";
 import { TopBalanceVariationsService } from "./services";
@@ -105,6 +106,7 @@ const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
+const votingPowerService = new VotingPowerService(votingPowerRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
@@ -117,7 +119,8 @@ historicalOnchain(
 );
 transactions(app, transactionsService);
 lastUpdate(app);
-votingPower(app, new VotingPowerService(votingPowerRepo));
+votingPower(app, votingPowerService);
+topVotingPowerVariations(app, votingPowerService);
 topAccountBalanceVariations(
   app,
   new TopBalanceVariationsService(accountBalanceRepo),

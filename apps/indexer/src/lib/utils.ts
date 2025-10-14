@@ -1,4 +1,5 @@
 import * as chains from "viem/chains";
+import { DaysEnum } from "./enums";
 
 /**
  * Calculates the absolute difference between two numbers
@@ -30,3 +31,7 @@ export function max(...values: bigint[]): bigint {
 export function getChain(chainId: number): chains.Chain | undefined {
   return Object.values(chains).find((chain) => chain.id === chainId);
 }
+
+export const secondsToDays = (seconds: number | DaysEnum): number => {
+  return Math.floor(seconds / (60 * 60 * 24));
+};

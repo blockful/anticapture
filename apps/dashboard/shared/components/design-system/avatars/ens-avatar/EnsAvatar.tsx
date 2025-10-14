@@ -7,7 +7,7 @@ import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { UserIcon } from "@/shared/components/icons";
-import { SkeletonRow } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
