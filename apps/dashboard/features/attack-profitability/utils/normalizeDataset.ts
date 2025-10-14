@@ -24,17 +24,11 @@ export function normalizeDataset(
   }
 
   const parsedMultipliers = multiplierDataSet.map((item) => ({
-    timestamp: Number(item.date) * 1000,
+    timestamp: Number(item.date),
     high: tokenType === "ERC721" ? Number(item.high) : Number(item.high) / 1e18,
   }));
 
-  // Sort token prices by timestamp
-  const sortedTokenPrices = [...tokenPrices].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
-
-  // Transform price data with appropriate multipliers
-  return sortedTokenPrices.map(({ timestamp, price }) => {
+  return tokenPrices.map(({ timestamp, price }) => {
     return {
       date: timestamp,
       [key]:
