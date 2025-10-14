@@ -9,6 +9,7 @@ import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverview
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 import { DaoOverviewMetrics } from "@/features/dao-overview/components/DaoOverviewMetrics";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
+import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
 import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
@@ -123,6 +124,15 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
             className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
           />
+        </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted mx-5">
+          <SecurityCouncilCard daoOverview={daoOverview} />
+        </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
         </div>
       </div>
     </Suspense>
