@@ -17,7 +17,7 @@ export const HeaderDAOSidebarDropdown = () => {
     useState<number>(0);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { daoId }: { daoId: string } = useParams();
+  const { daoId } = useParams<{ daoId: string }>();
 
   useEffect(() => {
     const savedItem = sessionStorage.getItem("selectedHeaderSidebarItem");
@@ -43,86 +43,22 @@ export const HeaderDAOSidebarDropdown = () => {
 
   const dropdownItems = useMemo(
     () => [
-      {
-        id: 0,
-        label: "Uniswap",
+      ...Object.values(DaoIdEnum).map((daoIdValue, index) => ({
+        id: index,
+        label: daoConfigByDaoId[daoIdValue].name,
         icon: (
           <DaoAvatarIcon
-            daoId={DaoIdEnum.UNISWAP}
+            daoId={daoIdValue}
             className="size-icon-md"
             isRounded
           />
         ),
-        href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
-        name: DaoIdEnum.UNISWAP,
+        href: `/${daoIdValue.toLowerCase()}`,
+        name: daoIdValue,
         isDisabled:
-          daoConfigByDaoId[DaoIdEnum.UNISWAP].supportStage ===
+          daoConfigByDaoId[daoIdValue].supportStage ===
           SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 1,
-        label: "ENS",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.ENS}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.ENS.toLowerCase()}`,
-        name: DaoIdEnum.ENS,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.ENS].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 2,
-        label: "Optimism",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.OPTIMISM}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.OPTIMISM.toLowerCase()}`,
-        name: DaoIdEnum.OPTIMISM,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.OPTIMISM].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 3,
-        label: "Gitcoin",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.GITCOIN}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.GITCOIN.toLowerCase()}`,
-        name: DaoIdEnum.GITCOIN,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.GITCOIN].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 5,
-        label: "Scroll",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.SCR}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.SCR.toLowerCase()}`,
-        name: DaoIdEnum.SCR,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.SCR].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
+      })),
     ],
     [],
   );
