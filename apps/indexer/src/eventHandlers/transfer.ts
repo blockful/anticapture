@@ -75,11 +75,14 @@ export const tokenTransfer = async (
 
   if (from !== zeroAddress) {
     await context.db
-      .update(accountBalance, {
+      .insert(accountBalance)
+      .values({
         accountId: from,
         tokenId,
+        balance: -value,
+        delegate: zeroAddress,
       })
-      .set((current) => ({
+      .onConflictDoUpdate((current) => ({
         balance: current.balance - value,
       }));
   }
