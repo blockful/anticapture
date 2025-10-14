@@ -1,117 +1,128 @@
 "use client";
 
-import {
-  TheSectionLayout,
-  SwitcherDate,
-  TheCardChartLayout,
-} from "@/shared/components";
-import { TimeInterval } from "@/shared/types/enums";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
+import { useState } from "react";
+import { TheSectionLayout } from "@/shared/components";
 import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { mockedTokenMultineDatasets } from "@/shared/constants/mocked-data/mocked-token-dist-datasets";
 import {
-  MultilineChartTokenDistribution,
-  TokenDistributionTable,
+  TokenDistributionChart,
+  TokenDistributionMetrics,
 } from "@/features/token-distribution/components";
-import { useTokenDistributionContext } from "@/features/token-distribution/contexts";
-import { ArrowRightLeft } from "lucide-react";
+import { ArrowRightLeft, DownloadIcon } from "lucide-react";
+import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { metricsSchema } from "@/features/token-distribution/utils";
+import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
+import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
+import { CSVLink } from "react-csv";
+import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
+import { ChartDataSetPoint } from "@/shared/dao-config/types";
 
-const chartConfig: Record<string, { label: string; color: string }> = {
-  delegatedSupply: {
-    label: "Delegated Supply",
-    color: "#3B82F6",
-  },
-  cexSupply: {
-    label: "CEX Supply",
-    color: "#FB923C",
-  },
-  dexSupply: {
-    label: "DEX Supply",
-    color: "#22C55E",
-  },
-  lendingSupply: {
-    label: "Lending Supply",
-    color: "#A855F7",
-  },
-};
+type CsvRow = Record<string, number | string | null>;
 
-const ChartLegend = ({
-  items,
-}: {
-  items: { color: string; label: string }[];
-}) => (
-  <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
-    {items.map((item) => (
-      <div key={item.label} className="flex items-center gap-2">
-        <span
-          className="size-2 rounded-xs"
-          style={{ backgroundColor: item.color }}
-        />
-        <span className="text-secondary text-sm font-medium">{item.label}</span>
-      </div>
-    ))}
-  </div>
-);
+export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
+  const { metrics, setMetrics } = useTokenDistributionStore();
 
-export const TokenDistributionSection = () => {
-  const {
-    delegatedSupplyChart,
-    cexSupplyChart,
-    dexSupplyChart,
-    lendingSupplyChart,
-    days,
-    setDays,
-  } = useTokenDistributionContext();
+  const { chartData, chartConfig, isLoading } = useChartMetrics({
+    appliedMetrics: metrics,
+    daoId,
+    metricsSchema,
+  });
 
-  const datasets: Record<string, DaoMetricsDayBucket[] | undefined> = {
-    delegatedSupply: delegatedSupplyChart,
-    cexSupply: cexSupplyChart,
-    dexSupply: dexSupplyChart,
-    lendingSupply: lendingSupplyChart,
+  const buildCsvData = (
+    points: ChartDataSetPoint[] | undefined,
+    appliedMetrics: string[],
+  ): CsvRow[] => {
+    if (!points || points.length === 0) return [];
+
+    const ordered = [...points].sort((a, b) => a.date - b.date);
+
+    return ordered.map((p) => {
+      const row: CsvRow = {
+        timestamp: p.date,
+        date: new Date(p.date * 1000).toISOString(),
+      };
+
+      appliedMetrics.forEach((metricKey) => {
+        const schema = chartConfig[metricKey];
+        if (!schema) {
+          row[metricKey] = null;
+          return;
+        }
+
+        const rawValue = p[metricKey as keyof ChartDataSetPoint];
+
+        if (schema.type === "SPORADIC_LINE") {
+          if (typeof rawValue === "string") {
+            row[metricKey] = rawValue || "";
+          } else if (rawValue == null) {
+            row[metricKey] = "";
+          } else {
+            row[metricKey] = Number(rawValue);
+          }
+        } else {
+          if (rawValue == null || rawValue === "") {
+            row[metricKey] = null;
+          } else {
+            const n = Number(rawValue);
+            row[metricKey] = Number.isFinite(n) ? n : null;
+          }
+        }
+      });
+
+      return row;
+    });
   };
+
+  const csvData = buildCsvData(chartData, metrics);
+
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.tokenDistribution.title}
-      subtitle="Token Supply Distribution"
       icon={<ArrowRightLeft className="section-layout-icon" />}
-      switchDate={
-        <SwitcherDate
-          defaultValue={TimeInterval.ONE_YEAR}
-          setTimeInterval={setDays}
-          isSmall
-        />
-      }
       description={SECTIONS_CONSTANTS.tokenDistribution.description}
       anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
-      days={days}
     >
-      <TheCardChartLayout
-        headerComponent={
-          <div className="flex w-full items-center pt-3 sm:flex-row">
-            <ChartLegend
-              items={Object.values(chartConfig).map(({ label, color }) => ({
-                label,
-                color,
-              }))}
-            />
+      <Card className="xl:border-light-dark xl:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none shadow-none xl:max-w-full xl:flex-row xl:gap-0 xl:border">
+        <CardContent className="order-2 flex h-full w-full flex-col gap-6 p-0 xl:order-1">
+          <div className="flex h-full w-full gap-1.5">
+            <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide xl:gap-2.5">
+              GOVERNANCE SUPPLY TRENDS
+            </CardTitle>
+            {csvData && (
+              <CSVLink
+                filename={"governance_supply_trends.csv"}
+                data={csvData}
+                className="!text-alternative-sm text-secondary mb-0.5 flex items-center font-mono font-medium"
+              >
+                [
+                <p className={defaultLinkVariants({ variant: "highlight" })}>
+                  CSV <DownloadIcon className="size-3.5" />
+                </p>
+                ]
+              </CSVLink>
+            )}
           </div>
-        }
-      >
-        {Object.values(datasets).some((value) => value!.length > 0) ? (
-          <MultilineChartTokenDistribution
-            datasets={datasets}
+          <TokenDistributionChart
+            daoId={daoId}
+            isLoading={isLoading}
+            appliedMetrics={metrics}
             chartConfig={chartConfig}
+            chartData={chartData}
+            hoveredMetricKey={hoveredMetricKey}
           />
-        ) : (
-          <MultilineChartTokenDistribution
-            datasets={mockedTokenMultineDatasets}
-            chartConfig={chartConfig}
-            mocked={true}
+        </CardContent>
+        <div className="border-light-dark mx-4 w-px border border-dashed xl:order-2" />
+        <div className="order-1 w-full items-start xl:order-3 xl:w-[300px] xl:min-w-[300px] xl:max-w-[300px]">
+          <TokenDistributionMetrics
+            daoId={daoId}
+            appliedMetrics={metrics}
+            setAppliedMetrics={setMetrics}
+            setHoveredMetricKey={setHoveredMetricKey}
+            chartData={chartData}
           />
-        )}
-      </TheCardChartLayout>
-      <div className="border-light-dark w-full border-t" />
-      <TokenDistributionTable />
+        </div>
+      </Card>
     </TheSectionLayout>
   );
 };

@@ -1,4 +1,4 @@
-query GetProposals(
+query GetProposalsFromDao(
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
   $orderDirection: queryInput_proposals_orderDirection = desc

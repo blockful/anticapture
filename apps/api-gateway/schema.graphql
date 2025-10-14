@@ -13,7 +13,9 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 type Query {
   dao(id: String!): dao
   daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
-  token(id: String!): token
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
@@ -87,6 +89,9 @@ type Query {
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
 
+  """Returns the active delegates that did not vote on a given proposal"""
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
+
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
   """
@@ -95,7 +100,7 @@ type Query {
   """
   Fetch historical voting power for multiple addresses at a specific time period using multicall
   """
-  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d): [query_historicalVotingPower_items]
+  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
   """
   Get transactions with their associated transfers and delegations, with optional filtering and sorting
@@ -120,7 +125,7 @@ type Query {
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
   """Returns a list of voting power changes"""
-  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc): votingPowers_200_response
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 }
 
 """
@@ -780,14 +785,14 @@ type votesOnchainPage {
 }
 
 type votesOnchain {
-  txHash: String
+  txHash: String!
   daoId: String!
   voterAccountId: String!
-  proposalId: String
-  support: String
-  votingPower: String
+  proposalId: String!
+  support: String!
+  votingPower: BigInt!
   reason: String
-  timestamp: BigInt
+  timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
 }
@@ -845,16 +850,14 @@ input votesOnchainFilter {
   support_ends_with: String
   support_not_starts_with: String
   support_not_ends_with: String
-  votingPower: String
-  votingPower_not: String
-  votingPower_in: [String]
-  votingPower_not_in: [String]
-  votingPower_contains: String
-  votingPower_not_contains: String
-  votingPower_starts_with: String
-  votingPower_ends_with: String
-  votingPower_not_starts_with: String
-  votingPower_not_ends_with: String
+  votingPower: BigInt
+  votingPower_not: BigInt
+  votingPower_in: [BigInt]
+  votingPower_not_in: [BigInt]
+  votingPower_gt: BigInt
+  votingPower_lt: BigInt
+  votingPower_gte: BigInt
+  votingPower_lte: BigInt
   reason: String
   reason_not: String
   reason_in: [String]
@@ -1023,6 +1026,7 @@ type votingPowerHistory {
   accountId: String!
   votingPower: BigInt!
   delta: BigInt!
+  deltaMod: BigInt!
   timestamp: BigInt!
   logIndex: Int!
   transfer: transfer
@@ -1085,6 +1089,14 @@ input votingPowerHistoryFilter {
   delta_lt: BigInt
   delta_gte: BigInt
   delta_lte: BigInt
+  deltaMod: BigInt
+  deltaMod_not: BigInt
+  deltaMod_in: [BigInt]
+  deltaMod_not_in: [BigInt]
+  deltaMod_gt: BigInt
+  deltaMod_lt: BigInt
+  deltaMod_gte: BigInt
+  deltaMod_lte: BigInt
   timestamp: BigInt
   timestamp_not: BigInt
   timestamp_in: [BigInt]
@@ -1306,7 +1318,6 @@ type query_totalAssets_items {
 }
 
 enum queryInput_totalAssets_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1321,12 +1332,30 @@ type historicalTokenData_200_response {
 }
 
 enum queryInput_historicalTokenData_days {
-  _1d
   _7d
   _30d
   _90d
   _180d
   _365d
+}
+
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: Float!
+}
+
+enum queryInput_token_currency {
+  eth
+  usd
 }
 
 type compareTotalSupply_200_response {
@@ -1336,7 +1365,6 @@ type compareTotalSupply_200_response {
 }
 
 enum queryInput_compareTotalSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1351,7 +1379,6 @@ type compareDelegatedSupply_200_response {
 }
 
 enum queryInput_compareDelegatedSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1366,7 +1393,6 @@ type compareCirculatingSupply_200_response {
 }
 
 enum queryInput_compareCirculatingSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1381,7 +1407,6 @@ type compareTreasury_200_response {
 }
 
 enum queryInput_compareTreasury_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1396,7 +1421,6 @@ type compareCexSupply_200_response {
 }
 
 enum queryInput_compareCexSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1411,7 +1435,6 @@ type compareDexSupply_200_response {
 }
 
 enum queryInput_compareDexSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1426,7 +1449,6 @@ type compareLendingSupply_200_response {
 }
 
 enum queryInput_compareLendingSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1439,7 +1461,6 @@ type compareActiveSupply_200_response {
 }
 
 enum queryInput_compareActiveSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1454,7 +1475,6 @@ type compareProposals_200_response {
 }
 
 enum queryInput_compareProposals_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1469,7 +1489,6 @@ type compareVotes_200_response {
 }
 
 enum queryInput_compareVotes_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1484,7 +1503,6 @@ type compareAverageTurnout_200_response {
 }
 
 enum queryInput_compareAverageTurnout_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1613,6 +1631,23 @@ type proposal_200_response {
   targets: [String]!
 }
 
+type proposalNonVoters_200_response {
+  items: [query_proposalNonVoters_items_items]!
+  totalCount: Float!
+}
+
+type query_proposalNonVoters_items_items {
+  voter: String!
+  votingPower: String!
+  lastVoteTimestamp: Float!
+  votingPowerVariation: String!
+}
+
+enum queryInput_proposalNonVoters_orderDirection {
+  asc
+  desc
+}
+
 type query_historicalBalances_items {
   address: String!
   balance: String!
@@ -1621,7 +1656,6 @@ type query_historicalBalances_items {
 }
 
 enum queryInput_historicalBalances_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1635,7 +1669,6 @@ type query_historicalVotingPower_items {
 }
 
 enum queryInput_historicalVotingPower_days {
-  _1d
   _7d
   _30d
   _90d

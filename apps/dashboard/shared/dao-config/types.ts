@@ -9,11 +9,6 @@ import {
 } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
 
-// Existing types
-export enum ChainNameEnum {
-  Ethereum = "ethereum",
-}
-
 export type DaoMetricsDayBucket = {
   date: string;
   daoId: DaoIdEnum;
@@ -39,6 +34,11 @@ export interface TokenHistoricalDataMetrics {
 export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number;
+}
+
+export interface ChartDataSetPoint {
+  date: number;
+  [key: string]: number | string | undefined;
 }
 
 export type GovernanceImplementation = {
@@ -120,11 +120,6 @@ export interface DaoAddresses {
     OptimismTokenDistributor: string;
     OptimismUniv3Uni: string;
   };
-  [DaoIdEnum.ARBITRUM]: {
-    ArbitrumTimelock: string;
-    ArbitrumTokenDistributor: string;
-    ArbitrumDaoWallet: string;
-  };
   [DaoIdEnum.GITCOIN]: {
     GTCWallet: string;
     GTCTimelock: string;
@@ -151,10 +146,6 @@ export interface DaoConfiguration extends BaseInfo {
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
   dataTables?: boolean;
-  showSupport?: {
-    snapshotProposal: string;
-    snapshotSpace: string;
-  };
   riskAnalysis?: boolean;
   noStage?: boolean;
   governancePage?: boolean;

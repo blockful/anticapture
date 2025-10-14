@@ -2,7 +2,9 @@ import { ProposalStatus } from "@/features/governance/types";
 
 // Map GraphQL status to our enum
 export const getProposalStatus = (status: string): ProposalStatus => {
-  switch (status.toLowerCase()) {
+  if (!status) return ProposalStatus.PENDING;
+
+  switch (status?.toLowerCase()) {
     case "active":
       return ProposalStatus.ONGOING;
     case "succeeded":

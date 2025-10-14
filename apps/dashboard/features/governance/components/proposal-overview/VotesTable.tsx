@@ -24,7 +24,6 @@ import {
 } from "@/shared/components/ui/table";
 import { cn } from "@/shared/utils";
 import { TreeLines } from "@/shared/components/tables/TreeLines";
-import { ExpandButton } from "@/shared/components/tables/ExpandButton";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;
@@ -64,7 +63,6 @@ export const VotesTable = <TData, TValue>({
   getSubRows,
   defaultExpanded = {},
   showParentDividers = false,
-  hideExpandButtons = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -240,16 +238,6 @@ export const VotesTable = <TData, TValue>({
                             {/* Tree lines for hierarchical visualization */}
                             {index === 0 && enableExpanding && (
                               <TreeLines row={row} />
-                            )}
-
-                            {/* Expand/Collapse button */}
-                            {index === 0 && !hideExpandButtons && (
-                              <div className="flex items-center px-1">
-                                <ExpandButton
-                                  row={row}
-                                  enableExpanding={enableExpanding}
-                                />
-                              </div>
                             )}
 
                             {/* Cell content */}

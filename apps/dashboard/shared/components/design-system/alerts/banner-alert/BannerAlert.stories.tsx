@@ -1,15 +1,9 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import {
-  AlertCircle,
-  Info,
-  CheckCircle2,
-  AlertTriangle,
-  HeartIcon,
-} from "lucide-react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AlertCircle, Info, CheckCircle2, AlertTriangle } from "lucide-react";
 
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 
-const meta = {
+const meta: Meta<typeof BannerAlert> = {
   title: "Design System/Alerts/BannerAlert",
   component: BannerAlert,
   parameters: {
@@ -26,7 +20,7 @@ const meta = {
       options: ["default", "highlight"],
     },
   },
-} satisfies Meta<typeof BannerAlert>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -72,19 +66,6 @@ export const HighlightWithLink: Story = {
     },
     storageKey: "security-banner",
     variant: "highlight",
-  },
-};
-
-export const SupportMessage: Story = {
-  args: {
-    icon: <HeartIcon className="size-4" />,
-    text: "Support our mission to improve DAO governance.",
-    link: {
-      url: "https://example.com/support",
-      text: "Show support",
-    },
-    storageKey: "support-banner",
-    variant: "default",
   },
 };
 

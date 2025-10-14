@@ -17,7 +17,7 @@ export const HeaderDAOSidebarDropdown = () => {
     useState<number>(0);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { daoId }: { daoId: string } = useParams();
+  const { daoId } = useParams<{ daoId: string }>();
 
   useEffect(() => {
     const savedItem = sessionStorage.getItem("selectedHeaderSidebarItem");
@@ -43,86 +43,22 @@ export const HeaderDAOSidebarDropdown = () => {
 
   const dropdownItems = useMemo(
     () => [
-      {
-        id: 0,
-        label: "Uniswap",
+      ...Object.values(DaoIdEnum).map((daoIdValue, index) => ({
+        id: index,
+        label: daoConfigByDaoId[daoIdValue].name,
         icon: (
           <DaoAvatarIcon
-            daoId={DaoIdEnum.UNISWAP}
+            daoId={daoIdValue}
             className="size-icon-md"
             isRounded
           />
         ),
-        href: `/${DaoIdEnum.UNISWAP.toLowerCase()}`,
-        name: DaoIdEnum.UNISWAP,
+        href: `/${daoIdValue.toLowerCase()}`,
+        name: daoIdValue,
         isDisabled:
-          daoConfigByDaoId[DaoIdEnum.UNISWAP].supportStage ===
+          daoConfigByDaoId[daoIdValue].supportStage ===
           SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 1,
-        label: "ENS",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.ENS}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.ENS.toLowerCase()}`,
-        name: DaoIdEnum.ENS,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.ENS].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 2,
-        label: "Arbitrum",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.ARBITRUM}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.ARBITRUM.toLowerCase()}`,
-        name: DaoIdEnum.ARBITRUM,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.ARBITRUM].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 3,
-        label: "Optimism",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.OPTIMISM}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.OPTIMISM.toLowerCase()}`,
-        name: DaoIdEnum.OPTIMISM,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.OPTIMISM].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
-      {
-        id: 4,
-        label: "Gitcoin",
-        icon: (
-          <DaoAvatarIcon
-            daoId={DaoIdEnum.GITCOIN}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${DaoIdEnum.GITCOIN.toLowerCase()}`,
-        name: DaoIdEnum.GITCOIN,
-        isDisabled:
-          daoConfigByDaoId[DaoIdEnum.GITCOIN].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      },
+      })),
     ],
     [],
   );
@@ -142,7 +78,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="border-light-dark relative z-50 inline-block h-[57px] w-full border-b sm:h-[65px]"
+      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b sm:h-[65px]"
       ref={dropdownRef}
     >
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
@@ -176,7 +112,10 @@ export const HeaderDAOSidebarDropdown = () => {
               variant="ghost"
               size="lg"
               key={item.id}
-              className={cn("w-full", !item.isDisabled && "hover:bg-muted")}
+              className={cn(
+                "w-full",
+                !item.isDisabled && "hover:bg-middle-dark",
+              )}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}

@@ -1,0 +1,154 @@
+"use client";
+
+import {
+  Close,
+  Content,
+  Overlay,
+  Portal,
+  Root,
+  Title,
+  Trigger,
+} from "@radix-ui/react-dialog";
+import { CardTitle } from "@/shared/components/ui/card";
+import { X, Plus, PlusIcon, Check } from "lucide-react";
+import React, { useState } from "react";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { cn } from "@/shared/utils/cn";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { MetricWithKey } from "@/features/token-distribution/types";
+
+export const TokenDistributionDialog = ({
+  appliedMetrics,
+  metricsSchema,
+  onApply,
+}: {
+  appliedMetrics: Record<string, MetricWithKey[]>;
+  metricsSchema: Record<string, MetricWithKey[]>;
+  onApply: (metric: (MetricTypesEnum | string)[]) => void;
+}) => {
+  const [selectedMetrics, setSelectedMetrics] = useState<
+    (MetricTypesEnum | string)[]
+  >([]);
+
+  const handleSelectMetric = (metricKey: MetricTypesEnum | string) => {
+    setSelectedMetrics((prev) =>
+      prev.includes(metricKey)
+        ? prev.filter((m) => m !== metricKey)
+        : [...prev, metricKey],
+    );
+  };
+
+  const handleApplyMetric = () => {
+    onApply(selectedMetrics);
+    setSelectedMetrics([]);
+  };
+
+  const isAllMetricsApplied =
+    appliedMetrics &&
+    Object.entries(metricsSchema).every(
+      ([category, metrics]) =>
+        appliedMetrics[category]?.length === metrics.length,
+    );
+
+  return (
+    <Root>
+      <Trigger asChild>
+        <Button variant="outline" disabled={isAllMetricsApplied} size="sm">
+          {isAllMetricsApplied ? (
+            <>
+              <Check className="text-dimmed size-3.5" />
+              <p className="text-dimmed text-sm font-medium">
+                All metrics added
+              </p>
+            </>
+          ) : (
+            <>
+              <PlusIcon className="text-primary size-3.5" />
+              <p className="text-primary text-sm font-medium">Add metric</p>
+            </>
+          )}
+        </Button>
+      </Trigger>
+      <Portal>
+        <Overlay className="fixed inset-0 z-50 bg-black/80" />
+        <Content className="z-60 fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-[#18181b] shadow-lg">
+          <Title className="text-primary px-4 py-3.5 text-[16px] font-medium leading-6">
+            Add metrics to chart
+          </Title>
+          <div className="border-light-dark h-px w-full border-t" />
+          <div className="flex flex-col p-4">
+            {Object.entries(metricsSchema)
+              .filter(
+                ([category, metrics]) =>
+                  appliedMetrics[category]?.length !== metrics.length,
+              )
+              .map(([category, metrics], index, visibleEntries) => {
+                return (
+                  <div key={category}>
+                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                      {category}
+                    </CardTitle>
+                    <div className="flex w-full flex-wrap gap-2 sm:gap-3">
+                      {metrics.map((metric) => {
+                        const isMetricAlreadyApplied = appliedMetrics[
+                          category
+                        ]?.some((i) => i.key === metric.key);
+
+                        const isSelected = selectedMetrics.includes(metric.key);
+
+                        if (isMetricAlreadyApplied) return null;
+
+                        return (
+                          <Button
+                            key={metric.label}
+                            onClick={() => handleSelectMetric(metric.key)}
+                            className={cn(
+                              "bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm",
+                              isSelected
+                                ? "border-tangerine"
+                                : "border-transparent",
+                            )}
+                          >
+                            {isSelected ? (
+                              <Check className="size-3" />
+                            ) : (
+                              <Plus className="size-3" />
+                            )}
+                            {metric.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    {visibleEntries.length > 1 &&
+                      index !== visibleEntries.length - 1 && (
+                        <div className="border-light-dark my-4 h-px w-full border-t border-dashed" />
+                      )}
+                  </div>
+                );
+              })}
+          </div>
+          <div className="border-light-dark h-px w-full border-t" />
+          <div className="flex justify-end gap-2 px-4 py-3">
+            <Close asChild>
+              <Button variant="outline">Cancel</Button>
+            </Close>
+            <Close asChild>
+              <Button variant="primary" onClick={handleApplyMetric}>
+                Apply metrics
+              </Button>
+            </Close>
+          </div>
+
+          <Close asChild>
+            <button
+              className="text-primary focus:ring-primary absolute right-4 top-3.5 inline-flex size-[25px] cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-1"
+              aria-label="Close"
+            >
+              <X className="size-4" />
+            </button>
+          </Close>
+        </Content>
+      </Portal>
+    </Root>
+  );
+};

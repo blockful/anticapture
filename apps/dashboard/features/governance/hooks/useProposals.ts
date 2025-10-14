@@ -2,10 +2,10 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
-  useGetProposalsQuery,
-  GetProposalsQuery,
+  GetProposalsFromDaoQuery,
   QueryInput_Proposals_OrderDirection,
   QueryProposalsArgs,
+  useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
@@ -57,7 +57,7 @@ export const useProposals = ({
   );
 
   // Main proposals query
-  const { data, loading, error, fetchMore } = useGetProposalsQuery({
+  const { data, loading, error, fetchMore } = useGetProposalsFromDaoQuery({
     variables: queryVariables,
     notifyOnNetworkStatusChange: true,
     context: {
@@ -121,8 +121,8 @@ export const useProposals = ({
           skip: nextSkip,
         },
         updateQuery: (
-          previousResult: GetProposalsQuery,
-          { fetchMoreResult }: { fetchMoreResult: GetProposalsQuery },
+          previousResult: GetProposalsFromDaoQuery,
+          { fetchMoreResult }: { fetchMoreResult: GetProposalsFromDaoQuery },
         ) => {
           if (!fetchMoreResult || !fetchMoreResult.proposals?.items?.length) {
             return previousResult;
@@ -145,7 +145,7 @@ export const useProposals = ({
           return {
             ...fetchMoreResult,
             proposals: {
-              totalCount: fetchMoreResult.proposals.totalCount,
+              ...fetchMoreResult.proposals,
               items: [
                 ...(previousResult.proposals?.items || []),
                 ...(fetchMoreResult.proposals?.items || []),

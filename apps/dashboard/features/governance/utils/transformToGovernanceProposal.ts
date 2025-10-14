@@ -17,10 +17,10 @@ type GraphQLProposal = Omit<
 export const transformToGovernanceProposal = (
   graphqlProposal: GraphQLProposal,
 ): GovernanceProposal => {
-  const forVotes = parseInt(graphqlProposal.forVotes);
-  const againstVotes = parseInt(graphqlProposal.againstVotes);
-  const abstainVotes = parseInt(graphqlProposal.abstainVotes);
-  const quorum = formatEther(BigInt(graphqlProposal.quorum));
+  const forVotes = parseInt(graphqlProposal?.forVotes || "0");
+  const againstVotes = parseInt(graphqlProposal?.againstVotes || "0");
+  const abstainVotes = parseInt(graphqlProposal?.abstainVotes || "0");
+  const quorum = formatEther(BigInt(graphqlProposal?.quorum || "0"));
 
   const total = forVotes + againstVotes + abstainVotes;
 

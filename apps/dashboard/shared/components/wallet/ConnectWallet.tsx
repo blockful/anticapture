@@ -5,6 +5,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
 import { Button } from "@/shared/components";
+import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
   () => import("react-jazzicon").then((mod) => mod.default),
@@ -56,7 +57,7 @@ export const ConnectWallet = ({
                     onClick={openConnectModal}
                     type="button"
                     variant="outline"
-                    className={className}
+                    className={cn(className, "text-primary!")}
                     size="md"
                   >
                     <Wallet className="size-3.5" />
