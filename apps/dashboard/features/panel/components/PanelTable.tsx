@@ -6,7 +6,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
 import {
   BadgeInAnalysis,
-  TheTable,
   SkeletonRow,
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
@@ -29,6 +28,7 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+import { Table } from "@/shared/components/design-system/table/Table";
 
 export const PanelTable = () => {
   const router = useRouter();
@@ -79,7 +79,7 @@ export const PanelTable = () => {
     );
 
     return (
-      <div className="text-secondary flex w-full items-center justify-end px-4 py-3 text-end text-sm font-normal">
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
         {formattedSupply}
       </div>
     );
@@ -88,7 +88,6 @@ export const PanelTable = () => {
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
       accessorKey: "#",
-      size: 60,
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
         const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
@@ -108,7 +107,7 @@ export const PanelTable = () => {
         );
       },
       header: ({ column }) => (
-        <div className="flex w-full items-center justify-center">
+        <div className="flex items-center justify-center">
           <Button
             variant="ghost"
             className="text-secondary"
@@ -131,6 +130,9 @@ export const PanelTable = () => {
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => rowA.index - rowB.index,
+      meta: {
+        columnClassName: "w-10",
+      },
     },
     {
       accessorKey: "dao",
@@ -140,7 +142,7 @@ export const PanelTable = () => {
         const isInAnalysis =
           details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div
               className={cn("flex w-full gap-3", {
                 "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
@@ -175,17 +177,19 @@ export const PanelTable = () => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">DAO</h4>,
+      header: () => <h4 className="text-table-header">DAO</h4>,
+      meta: {
+        columnClassName: "w-auto",
+      },
     },
     {
       accessorKey: "stage",
-      size: 155,
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const daoConfig = daoConfigByDaoId[daoId];
         if (!daoConfig.governanceImplementation) {
           return (
-            <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
+            <div className="scrollbar-none text-primary flex items-center gap-3 space-x-1 overflow-auto">
               <StageTag
                 daoStage={Stage.UNKNOWN}
                 tagStage={Stage.UNKNOWN}
@@ -200,16 +204,18 @@ export const PanelTable = () => {
         });
 
         return (
-          <div className="scrollbar-none text-primary flex w-full items-center gap-3 space-x-1 overflow-auto px-4 py-3 sm:py-3.5">
+          <div className="scrollbar-none text-primary flex items-center gap-3 space-x-1 overflow-auto">
             <StageTag daoStage={stage} tagStage={stage} showStageText />
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Stage</h4>,
+      header: () => <h4 className="text-table-header">Stage</h4>,
+      meta: {
+        columnClassName: "w-40",
+      },
     },
     {
       accessorKey: "riskareas",
-      size: 220,
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const daoRiskAreas = getDaoRiskAreas(daoId);
@@ -221,7 +227,7 @@ export const PanelTable = () => {
         };
 
         return (
-          <div className="scrollbar-none text-primary flex w-full items-center overflow-auto px-4 py-3">
+          <div className="scrollbar-none text-primary flex w-full items-center overflow-auto">
             <RiskAreaCardWrapper
               riskAreas={riskAreas.risks}
               variant={RiskAreaCardEnum.PANEL_TABLE}
@@ -231,7 +237,10 @@ export const PanelTable = () => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header pl-4">Risk Areas</h4>,
+      header: () => <h4 className="text-table-header w">Risk Areas</h4>,
+      meta: {
+        columnClassName: "w-56",
+      },
     },
     {
       accessorKey: "delegatedSupply",
@@ -242,9 +251,7 @@ export const PanelTable = () => {
           daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ANALYSIS;
         if (isInAnalysis) {
           return (
-            <div className="flex items-center justify-end px-4 py-3 text-end">
-              {"-"}
-            </div>
+            <div className="justify-endtext-end flex items-center">{"-"}</div>
           );
         }
         return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
@@ -286,10 +293,9 @@ export const PanelTable = () => {
   };
 
   return (
-    <TheTable
+    <Table
       columns={panelColumns}
       data={data}
-      withPagination={true}
       withSorting={true}
       onRowClick={handleRowClick}
       disableRowClick={(row: PanelDao) =>

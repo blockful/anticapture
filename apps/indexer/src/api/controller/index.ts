@@ -1,5 +1,6 @@
 export * from "./governance-activity/controller";
 export * from "./token-distribution/controller";
+export * from "./token-properties.controller.ts";
 export * from "./token-historical-data.controller";
 export * from "./proposals-activity.controller";
 export * from "./assets.controller";

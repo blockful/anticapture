@@ -2580,18 +2580,18 @@ export const BalanceHistoryDocument = gql`
  *   },
  * });
  */
-export function useBalanceHistoryQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables> & ({ variables: BalanceHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
-      }
+export function useBalanceHistoryQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables> & ({ variables: BalanceHistoryQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
+}
 export function useBalanceHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
+}
 export function useBalanceHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
+}
 export type BalanceHistoryQueryHookResult = ReturnType<typeof useBalanceHistoryQuery>;
 export type BalanceHistoryLazyQueryHookResult = ReturnType<typeof useBalanceHistoryLazyQuery>;
 export type BalanceHistorySuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySuspenseQuery>;
@@ -2620,18 +2620,18 @@ export const BalanceHistoryTotalCountDocument = gql`
  *   },
  * });
  */
-export function useBalanceHistoryTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables> & ({ variables: BalanceHistoryTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>(BalanceHistoryTotalCountDocument, options);
-      }
+export function useBalanceHistoryTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables> & ({ variables: BalanceHistoryTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>(BalanceHistoryTotalCountDocument, options);
+}
 export function useBalanceHistoryTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>(BalanceHistoryTotalCountDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>(BalanceHistoryTotalCountDocument, options);
+}
 export function useBalanceHistoryTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>(BalanceHistoryTotalCountDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>(BalanceHistoryTotalCountDocument, options);
+}
 export type BalanceHistoryTotalCountQueryHookResult = ReturnType<typeof useBalanceHistoryTotalCountQuery>;
 export type BalanceHistoryTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistoryTotalCountLazyQuery>;
 export type BalanceHistoryTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryTotalCountSuspenseQuery>;
@@ -2684,18 +2684,18 @@ export const BalanceHistoryBuyDocument = gql`
  *   },
  * });
  */
-export function useBalanceHistoryBuyQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables> & ({ variables: BalanceHistoryBuyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
-      }
+export function useBalanceHistoryBuyQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables> & ({ variables: BalanceHistoryBuyQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
+}
 export function useBalanceHistoryBuyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
+}
 export function useBalanceHistoryBuySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
+}
 export type BalanceHistoryBuyQueryHookResult = ReturnType<typeof useBalanceHistoryBuyQuery>;
 export type BalanceHistoryBuyLazyQueryHookResult = ReturnType<typeof useBalanceHistoryBuyLazyQuery>;
 export type BalanceHistoryBuySuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryBuySuspenseQuery>;
@@ -2724,18 +2724,18 @@ export const BalanceHistoryBuyTotalCountDocument = gql`
  *   },
  * });
  */
-export function useBalanceHistoryBuyTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables> & ({ variables: BalanceHistoryBuyTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
-      }
+export function useBalanceHistoryBuyTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables> & ({ variables: BalanceHistoryBuyTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
+}
 export function useBalanceHistoryBuyTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
+}
 export function useBalanceHistoryBuyTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
+}
 export type BalanceHistoryBuyTotalCountQueryHookResult = ReturnType<typeof useBalanceHistoryBuyTotalCountQuery>;
 export type BalanceHistoryBuyTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistoryBuyTotalCountLazyQuery>;
 export type BalanceHistoryBuyTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryBuyTotalCountSuspenseQuery>;
@@ -2788,18 +2788,18 @@ export const BalanceHistorySellDocument = gql`
  *   },
  * });
  */
-export function useBalanceHistorySellQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables> & ({ variables: BalanceHistorySellQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
-      }
+export function useBalanceHistorySellQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables> & ({ variables: BalanceHistorySellQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
+}
 export function useBalanceHistorySellLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
+}
 export function useBalanceHistorySellSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
+}
 export type BalanceHistorySellQueryHookResult = ReturnType<typeof useBalanceHistorySellQuery>;
 export type BalanceHistorySellLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellLazyQuery>;
 export type BalanceHistorySellSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellSuspenseQuery>;
@@ -2828,18 +2828,18 @@ export const BalanceHistorySellTotalCountDocument = gql`
  *   },
  * });
  */
-export function useBalanceHistorySellTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables> & ({ variables: BalanceHistorySellTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
-      }
+export function useBalanceHistorySellTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables> & ({ variables: BalanceHistorySellTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
+}
 export function useBalanceHistorySellTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
+}
 export function useBalanceHistorySellTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
+}
 export type BalanceHistorySellTotalCountQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountQuery>;
 export type BalanceHistorySellTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountLazyQuery>;
 export type BalanceHistorySellTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountSuspenseQuery>;
@@ -2873,18 +2873,18 @@ export const GetDaoDataDocument = gql`
  *   },
  * });
  */
-export function useGetDaoDataQuery(baseOptions: Apollo.QueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables> & ({ variables: GetDaoDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
-      }
+export function useGetDaoDataQuery(baseOptions: Apollo.QueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables> & ({ variables: GetDaoDataQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
+}
 export function useGetDaoDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
+}
 export function useGetDaoDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
+}
 export type GetDaoDataQueryHookResult = ReturnType<typeof useGetDaoDataQuery>;
 export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQuery>;
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
@@ -2951,18 +2951,18 @@ export const GetDelegateDelegationHistoryDeltaRangeDocument = gql`
  *   },
  * });
  */
-export function useGetDelegateDelegationHistoryDeltaRangeQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables> & ({ variables: GetDelegateDelegationHistoryDeltaRangeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
-      }
+export function useGetDelegateDelegationHistoryDeltaRangeQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables> & ({ variables: GetDelegateDelegationHistoryDeltaRangeQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
+}
 export function useGetDelegateDelegationHistoryDeltaRangeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
+}
 export function useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
+}
 export type GetDelegateDelegationHistoryDeltaRangeQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeQuery>;
 export type GetDelegateDelegationHistoryDeltaRangeLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeLazyQuery>;
 export type GetDelegateDelegationHistoryDeltaRangeSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery>;
@@ -3016,18 +3016,18 @@ export const GetDelegatorVotingPowerDetailsDocument = gql`
  *   },
  * });
  */
-export function useGetDelegatorVotingPowerDetailsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables> & ({ variables: GetDelegatorVotingPowerDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
-      }
+export function useGetDelegatorVotingPowerDetailsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables> & ({ variables: GetDelegatorVotingPowerDetailsQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
+}
 export function useGetDelegatorVotingPowerDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
+}
 export function useGetDelegatorVotingPowerDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
+}
 export type GetDelegatorVotingPowerDetailsQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsQuery>;
 export type GetDelegatorVotingPowerDetailsLazyQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsLazyQuery>;
 export type GetDelegatorVotingPowerDetailsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsSuspenseQuery>;
@@ -3063,18 +3063,18 @@ export const GetDelegationsTimestampDocument = gql`
  *   },
  * });
  */
-export function useGetDelegationsTimestampQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables> & ({ variables: GetDelegationsTimestampQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
-      }
+export function useGetDelegationsTimestampQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables> & ({ variables: GetDelegationsTimestampQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
+}
 export function useGetDelegationsTimestampLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
+}
 export function useGetDelegationsTimestampSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
+}
 export type GetDelegationsTimestampQueryHookResult = ReturnType<typeof useGetDelegationsTimestampQuery>;
 export type GetDelegationsTimestampLazyQueryHookResult = ReturnType<typeof useGetDelegationsTimestampLazyQuery>;
 export type GetDelegationsTimestampSuspenseQueryHookResult = ReturnType<typeof useGetDelegationsTimestampSuspenseQuery>;
@@ -3112,18 +3112,18 @@ export const GetTopFiveDelegatorsDocument = gql`
  *   },
  * });
  */
-export function useGetTopFiveDelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables> & ({ variables: GetTopFiveDelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
-      }
+export function useGetTopFiveDelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables> & ({ variables: GetTopFiveDelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
+}
 export function useGetTopFiveDelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
+}
 export function useGetTopFiveDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
+}
 export type GetTopFiveDelegatorsQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsQuery>;
 export type GetTopFiveDelegatorsLazyQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsLazyQuery>;
 export type GetTopFiveDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsSuspenseQuery>;
@@ -3152,18 +3152,18 @@ export const GetVotingPowerCountingDocument = gql`
  *   },
  * });
  */
-export function useGetVotingPowerCountingQuery(baseOptions: Apollo.QueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables> & ({ variables: GetVotingPowerCountingQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
-      }
+export function useGetVotingPowerCountingQuery(baseOptions: Apollo.QueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables> & ({ variables: GetVotingPowerCountingQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
+}
 export function useGetVotingPowerCountingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
+}
 export function useGetVotingPowerCountingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
+}
 export type GetVotingPowerCountingQueryHookResult = ReturnType<typeof useGetVotingPowerCountingQuery>;
 export type GetVotingPowerCountingLazyQueryHookResult = ReturnType<typeof useGetVotingPowerCountingLazyQuery>;
 export type GetVotingPowerCountingSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerCountingSuspenseQuery>;
@@ -3227,18 +3227,18 @@ export const GetDelegateDelegationHistoryDocument = gql`
  *   },
  * });
  */
-export function useGetDelegateDelegationHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables> & ({ variables: GetDelegateDelegationHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
-      }
+export function useGetDelegateDelegationHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables> & ({ variables: GetDelegateDelegationHistoryQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
+}
 export function useGetDelegateDelegationHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
+}
 export function useGetDelegateDelegationHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
+}
 export type GetDelegateDelegationHistoryQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryQuery>;
 export type GetDelegateDelegationHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryLazyQuery>;
 export type GetDelegateDelegationHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistorySuspenseQuery>;
@@ -3293,18 +3293,18 @@ export const GetDelegateDelegationHistoryGraphDocument = gql`
  *   },
  * });
  */
-export function useGetDelegateDelegationHistoryGraphQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables> & ({ variables: GetDelegateDelegationHistoryGraphQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
-      }
+export function useGetDelegateDelegationHistoryGraphQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables> & ({ variables: GetDelegateDelegationHistoryGraphQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
+}
 export function useGetDelegateDelegationHistoryGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
+}
 export function useGetDelegateDelegationHistoryGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
+}
 export type GetDelegateDelegationHistoryGraphQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphQuery>;
 export type GetDelegateDelegationHistoryGraphLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphLazyQuery>;
 export type GetDelegateDelegationHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphSuspenseQuery>;
@@ -3355,17 +3355,17 @@ export const GetDelegatesDocument = gql`
  * });
  */
 export function useGetDelegatesQuery(baseOptions?: Apollo.QueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
+}
 export function useGetDelegatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
+}
 export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
+}
 export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery>;
 export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
 export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
@@ -3394,17 +3394,17 @@ export const GetDelegatesCountDocument = gql`
  * });
  */
 export function useGetDelegatesCountQuery(baseOptions?: Apollo.QueryHookOptions<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
+}
 export function useGetDelegatesCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
+}
 export function useGetDelegatesCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
+}
 export type GetDelegatesCountQueryHookResult = ReturnType<typeof useGetDelegatesCountQuery>;
 export type GetDelegatesCountLazyQueryHookResult = ReturnType<typeof useGetDelegatesCountLazyQuery>;
 export type GetDelegatesCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesCountSuspenseQuery>;
@@ -3433,18 +3433,18 @@ export const GetDelegationHistoryCountDocument = gql`
  *   },
  * });
  */
-export function useGetDelegationHistoryCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables> & ({ variables: GetDelegationHistoryCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-      }
+export function useGetDelegationHistoryCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables> & ({ variables: GetDelegationHistoryCountQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
+}
 export function useGetDelegationHistoryCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
+}
 export function useGetDelegationHistoryCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
+}
 export type GetDelegationHistoryCountQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountQuery>;
 export type GetDelegationHistoryCountLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountLazyQuery>;
 export type GetDelegationHistoryCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountSuspenseQuery>;
@@ -3501,18 +3501,18 @@ export const GetDelegationHistoryItemsDocument = gql`
  *   },
  * });
  */
-export function useGetDelegationHistoryItemsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables> & ({ variables: GetDelegationHistoryItemsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
-      }
+export function useGetDelegationHistoryItemsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables> & ({ variables: GetDelegationHistoryItemsQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
+}
 export function useGetDelegationHistoryItemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
+}
 export function useGetDelegationHistoryItemsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
+}
 export type GetDelegationHistoryItemsQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsQuery>;
 export type GetDelegationHistoryItemsLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsLazyQuery>;
 export type GetDelegationHistoryItemsSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsSuspenseQuery>;
@@ -3550,18 +3550,18 @@ export const GetHistoricalVotingAndActivityDocument = gql`
  *   },
  * });
  */
-export function useGetHistoricalVotingAndActivityQuery(baseOptions: Apollo.QueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables> & ({ variables: GetHistoricalVotingAndActivityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
-      }
+export function useGetHistoricalVotingAndActivityQuery(baseOptions: Apollo.QueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables> & ({ variables: GetHistoricalVotingAndActivityQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
+}
 export function useGetHistoricalVotingAndActivityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
+}
 export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
+}
 export type GetHistoricalVotingAndActivityQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivityQuery>;
 export type GetHistoricalVotingAndActivityLazyQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivityLazyQuery>;
 export type GetHistoricalVotingAndActivitySuspenseQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivitySuspenseQuery>;
@@ -3594,18 +3594,18 @@ export const GetDelegateProposalsActivityDocument = gql`
  *   },
  * });
  */
-export function useGetDelegateProposalsActivityQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables> & ({ variables: GetDelegateProposalsActivityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
-      }
+export function useGetDelegateProposalsActivityQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables> & ({ variables: GetDelegateProposalsActivityQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
+}
 export function useGetDelegateProposalsActivityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
+}
 export function useGetDelegateProposalsActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
+}
 export type GetDelegateProposalsActivityQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivityQuery>;
 export type GetDelegateProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivityLazyQuery>;
 export type GetDelegateProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivitySuspenseQuery>;
@@ -3638,18 +3638,18 @@ export const GetHistoricalBalancesDocument = gql`
  *   },
  * });
  */
-export function useGetHistoricalBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables> & ({ variables: GetHistoricalBalancesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
-      }
+export function useGetHistoricalBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables> & ({ variables: GetHistoricalBalancesQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
+}
 export function useGetHistoricalBalancesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
+}
 export function useGetHistoricalBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
+}
 export type GetHistoricalBalancesQueryHookResult = ReturnType<typeof useGetHistoricalBalancesQuery>;
 export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetHistoricalBalancesLazyQuery>;
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
@@ -3721,18 +3721,18 @@ export const GetProposalsActivityDocument = gql`
  *   },
  * });
  */
-export function useGetProposalsActivityQuery(baseOptions: Apollo.QueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables> & ({ variables: GetProposalsActivityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
-      }
+export function useGetProposalsActivityQuery(baseOptions: Apollo.QueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables> & ({ variables: GetProposalsActivityQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
+}
 export function useGetProposalsActivityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
+}
 export function useGetProposalsActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
+}
 export type GetProposalsActivityQueryHookResult = ReturnType<typeof useGetProposalsActivityQuery>;
 export type GetProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetProposalsActivityLazyQuery>;
 export type GetProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetProposalsActivitySuspenseQuery>;
@@ -3766,17 +3766,17 @@ export const GetProposalsDocument = gql`
  * });
  */
 export function useGetProposalsQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+}
 export function useGetProposalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+}
 export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
+}
 export type GetProposalsQueryHookResult = ReturnType<typeof useGetProposalsQuery>;
 export type GetProposalsLazyQueryHookResult = ReturnType<typeof useGetProposalsLazyQuery>;
 export type GetProposalsSuspenseQueryHookResult = ReturnType<typeof useGetProposalsSuspenseQuery>;
@@ -3814,18 +3814,18 @@ export const GetDaoAddressesAccountBalancesDocument = gql`
  *   },
  * });
  */
-export function useGetDaoAddressesAccountBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables> & ({ variables: GetDaoAddressesAccountBalancesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
-      }
+export function useGetDaoAddressesAccountBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables> & ({ variables: GetDaoAddressesAccountBalancesQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
+}
 export function useGetDaoAddressesAccountBalancesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
+}
 export function useGetDaoAddressesAccountBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
+}
 export type GetDaoAddressesAccountBalancesQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesQuery>;
 export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesLazyQuery>;
 export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
@@ -3877,17 +3877,17 @@ export const GetTopTokenHoldersDocument = gql`
  * });
  */
 export function useGetTopTokenHoldersQuery(baseOptions?: Apollo.QueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
+}
 export function useGetTopTokenHoldersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
+}
 export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
+}
 export type GetTopTokenHoldersQueryHookResult = ReturnType<typeof useGetTopTokenHoldersQuery>;
 export type GetTopTokenHoldersLazyQueryHookResult = ReturnType<typeof useGetTopTokenHoldersLazyQuery>;
 export type GetTopTokenHoldersSuspenseQueryHookResult = ReturnType<typeof useGetTopTokenHoldersSuspenseQuery>;
@@ -3916,17 +3916,17 @@ export const GetTokenHoldersCoutingDocument = gql`
  * });
  */
 export function useGetTokenHoldersCoutingQuery(baseOptions?: Apollo.QueryHookOptions<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>(GetTokenHoldersCoutingDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>(GetTokenHoldersCoutingDocument, options);
+}
 export function useGetTokenHoldersCoutingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>(GetTokenHoldersCoutingDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>(GetTokenHoldersCoutingDocument, options);
+}
 export function useGetTokenHoldersCoutingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>(GetTokenHoldersCoutingDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>(GetTokenHoldersCoutingDocument, options);
+}
 export type GetTokenHoldersCoutingQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingQuery>;
 export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingLazyQuery>;
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
@@ -3966,17 +3966,17 @@ export const GetTokenDocument = gql`
  * });
  */
 export function useGetTokenQuery(baseOptions?: Apollo.QueryHookOptions<GetTokenQuery, GetTokenQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
+}
 export function useGetTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTokenQuery, GetTokenQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
+}
 export function useGetTokenSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTokenQuery, GetTokenQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
+}
 export type GetTokenQueryHookResult = ReturnType<typeof useGetTokenQuery>;
 export type GetTokenLazyQueryHookResult = ReturnType<typeof useGetTokenLazyQuery>;
 export type GetTokenSuspenseQueryHookResult = ReturnType<typeof useGetTokenSuspenseQuery>;
@@ -4057,17 +4057,17 @@ export const TransactionsDocument = gql`
  * });
  */
 export function useTransactionsQuery(baseOptions?: Apollo.QueryHookOptions<TransactionsQuery, TransactionsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
+}
 export function useTransactionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TransactionsQuery, TransactionsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
+}
 export function useTransactionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TransactionsQuery, TransactionsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
+}
 export type TransactionsQueryHookResult = ReturnType<typeof useTransactionsQuery>;
 export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsLazyQuery>;
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
@@ -4129,18 +4129,18 @@ export const VotingPowersDocument = gql`
  *   },
  * });
  */
-export function useVotingPowersQuery(baseOptions: Apollo.QueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables> & ({ variables: VotingPowersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
-      }
+export function useVotingPowersQuery(baseOptions: Apollo.QueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables> & ({ variables: VotingPowersQueryVariables; skip?: boolean; } | { skip: boolean; })) {
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
+}
 export function useVotingPowersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions }
+  return Apollo.useLazyQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
+}
 export function useVotingPowersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
-        }
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions }
+  return Apollo.useSuspenseQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
+}
 export type VotingPowersQueryHookResult = ReturnType<typeof useVotingPowersQuery>;
 export type VotingPowersLazyQueryHookResult = ReturnType<typeof useVotingPowersLazyQuery>;
 export type VotingPowersSuspenseQueryHookResult = ReturnType<typeof useVotingPowersSuspenseQuery>;
