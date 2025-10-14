@@ -35,7 +35,7 @@ export const StageTag = ({
   return (
     <div
       className={cn(
-        "bg-surface-contrast inline-flex h-7 border px-2 py-1",
+        "bg-surface-contrast inline-flex h-7 items-center border px-2 py-1",
         stageStyles,
         className,
       )}

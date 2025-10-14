@@ -9,6 +9,8 @@ import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { useScreenSize } from "@/shared/hooks";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { useParams } from "next/navigation";
 
 export type RiskArea = {
   name: string;
@@ -124,7 +126,7 @@ const RiskAreaCardInternal = ({
       >
         <div
           className={cn(
-            "flex items-center",
+            "flex items-center text-left",
             isPanelTable && "w-full justify-center",
           )}
         >
@@ -339,6 +341,7 @@ export const RiskAreaCardWrapper = ({
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
 }: RiskAreaCardWrapperProps) => {
+  const { daoId }: { daoId?: string } = useParams();
   return (
     <div
       className={cn("flex w-full flex-col gap-1", {
@@ -353,10 +356,14 @@ export const RiskAreaCardWrapper = ({
             {title}
           </h3>
         ) : (
-          <div className="flex h-full items-center gap-2 px-5 sm:px-0">
-            <p className="text-primary border-foreground border-b border-dashed font-mono text-[13px] font-medium tracking-wider">
+          <div className="flex h-5 items-center gap-2 px-5 sm:px-0">
+            <DefaultLink
+              href={`${daoId?.toLowerCase()}/risk-analysis`}
+              openInNewTab={false}
+              className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+            >
               RISK AREAS
-            </p>
+            </DefaultLink>
             <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats." />
           </div>
         ))}
