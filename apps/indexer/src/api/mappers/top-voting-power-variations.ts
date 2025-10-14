@@ -33,10 +33,10 @@ export const TopVotingPowerVariationsResponseSchema = z.object({
   items: z.array(
     z.object({
       accountId: z.string(),
-      previousVotingPower: z.string(),
+      previousVotingPower: z.string().nullish(),
       currentVotingPower: z.string(),
       absoluteChange: z.string(),
-      percentageChange: z.number(),
+      percentageChange: z.string(),
     }),
   ),
 });
@@ -73,10 +73,12 @@ export const TopVotingPowerVariationsMapper = (
         percentageChange,
       }) => ({
         accountId: accountId,
-        previousVotingPower: (previousVotingPower ?? 0n).toString(),
+        previousVotingPower: previousVotingPower?.toString(),
         currentVotingPower: currentVotingPower.toString(),
         absoluteChange: absoluteChange.toString(),
-        percentageChange: percentageChange,
+        percentageChange: previousVotingPower
+          ? percentageChange.toString()
+          : "NEW",
       }),
     ),
   });

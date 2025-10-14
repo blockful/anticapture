@@ -1735,10 +1735,10 @@ type query_topVotingPowerVariations_period {
 
 type query_topVotingPowerVariations_items_items {
   accountId: String!
-  previousVotingPower: String!
+  previousVotingPower: String
   currentVotingPower: String!
   absoluteChange: String!
-  percentageChange: Float!
+  percentageChange: String!
 }
 
 enum queryInput_topVotingPowerVariations_days {
