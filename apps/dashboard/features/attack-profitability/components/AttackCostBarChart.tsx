@@ -197,6 +197,7 @@ export const AttackCostBarChart = ({
       },
     ];
   }, [
+    // fixing this causes an exahaustive-deps re-render for OP and UNI
     isLoading,
     mocked,
     liquidTreasury.data?.[0]?.totalAssets,
