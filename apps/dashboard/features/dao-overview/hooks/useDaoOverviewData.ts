@@ -4,6 +4,7 @@ import {
   useActiveSupply,
   useDelegatedSupply,
   useAverageTurnout,
+  useTimeSeriesData,
 } from "@/shared/hooks";
 import {
   useDaoTokenHistoricalData,
@@ -14,6 +15,9 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatEther } from "viem";
 import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTreasury";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { calculateChangeRate } from "@/features/token-distribution/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const { data: daoData } = useDaoData(daoId);
@@ -28,7 +32,6 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     daoId,
     TimeInterval.NINETY_DAYS,
   );
-
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
   const holders = useTokenHolders({
     daoId,
@@ -36,6 +39,31 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     orderDirection: "desc",
     days: TimeInterval.NINETY_DAYS,
   });
+  const totalSupply = useTimeSeriesData(
+    daoId,
+    [MetricTypesEnum.TOTAL_SUPPLY],
+    TimeInterval.SEVEN_DAYS,
+  );
+
+  const totalSupplyValue = {
+    value:
+      totalSupply.data?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
+    changeRate: calculateChangeRate(
+      totalSupply.data?.[MetricTypesEnum.TOTAL_SUPPLY],
+    ),
+  };
+
+  const proposalThresholdPercentage =
+    daoData?.proposalThreshold &&
+    totalSupplyValue.value !== undefined &&
+    formatEther(
+      (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
+        BigInt(totalSupplyValue.value ?? ("1" as string)),
+    );
+
+  const proposalThresholdValue = daoData?.proposalThreshold
+    ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
+    : "No Threshold";
 
   const lastPrice = tokenPrice.data?.prices?.at(-1)?.[1] ?? 0;
   const quorumValue = daoData?.quorum
@@ -93,7 +121,8 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     treasuryNonDao.loading ||
     treasuryAll.loading ||
     tokenPrice.loading ||
-    holders.loading;
+    holders.loading ||
+    totalSupply.isLoading;
 
   return {
     daoData,
@@ -110,5 +139,7 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     isLoading,
+    proposalThresholdValue,
+    proposalThresholdPercentage,
   };
 };
