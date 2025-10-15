@@ -16,6 +16,7 @@ export const OP: DaoConfiguration = {
   icon: OptimismIcon,
   daoOverview: {
     chain: optimism,
+    blockTime: 2,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
