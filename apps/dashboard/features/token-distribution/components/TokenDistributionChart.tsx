@@ -1,6 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-"use client";
-
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
