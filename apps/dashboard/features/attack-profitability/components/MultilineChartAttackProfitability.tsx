@@ -248,7 +248,9 @@ export const MultilineChartAttackProfitability = ({
             type="number"
             domain={["auto", "auto"]}
             tickMargin={8}
-            tickFormatter={(timestamp) => timestampToReadableDate(timestamp)}
+            tickFormatter={(timestamp) =>
+              timestampToReadableDate(timestamp, "abbreviated")
+            }
             allowDuplicatedCategory={false}
             padding={{ left: 0, right: 20 }}
           />
