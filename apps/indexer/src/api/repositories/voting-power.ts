@@ -1,17 +1,12 @@
 import { Address } from "viem";
-import {
-  gte,
-  and,
-  inArray,
-  lte,
-  desc,
-  eq,
-  asc,
-  sql,
-  isNotNull,
-} from "drizzle-orm";
+import { gte, and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
-import { votingPowerHistory, delegation, transfer } from "ponder:schema";
+import {
+  votingPowerHistory,
+  delegation,
+  transfer,
+  accountPower,
+} from "ponder:schema";
 
 import {
   DBVotingPowerVariation,
@@ -140,49 +135,49 @@ export class VotingPowerRepository {
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    const deltas = db
-      .select()
+    const history = db
+      .select({
+        delta: votingPowerHistory.delta,
+        accountId: votingPowerHistory.accountId,
+      })
       .from(votingPowerHistory)
       .orderBy(desc(votingPowerHistory.timestamp))
-      .where(lte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
-      .as("deltas");
+      .where(gte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
+      .as("history");
 
-    const aggregated = db
+    const aggregate = db
       .select({
-        accountId: deltas.accountId,
-        absoluteChange: sql<string>`SUM(${deltas.delta})`.as("agg_delta"),
-        currentVotingPower: sql<string>`MAX(${deltas.votingPower})`.as(
-          "current_voting_power",
-        ),
+        accountId: history.accountId,
+        absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
+        currentVotingPower: accountPower.votingPower,
       })
-      .from(deltas)
-      .where(isNotNull(deltas.accountId))
-      .groupBy(deltas.accountId)
-      .as("aggregated");
+      .from(history)
+      .innerJoin(accountPower, eq(accountPower.accountId, history.accountId))
+      .groupBy(history.accountId, accountPower.votingPower)
+      .as("aggregate");
 
     const result = await db
       .select()
-      .from(aggregated)
+      .from(aggregate)
       .orderBy(
         orderDirection === "desc"
-          ? desc(sql`ABS(${aggregated.absoluteChange})`)
-          : asc(sql`ABS(${aggregated.absoluteChange})`),
+          ? desc(sql`ABS(${aggregate.absoluteChange})`)
+          : asc(sql`ABS(${aggregate.absoluteChange})`),
       )
       .limit(limit)
       .offset(skip);
 
     return result.map(({ accountId, currentVotingPower, absoluteChange }) => {
-      const numericCurrentVotingPower = BigInt(currentVotingPower);
       const numericAbsoluteChange = BigInt(absoluteChange);
-      const oldVotingPower = numericCurrentVotingPower - numericAbsoluteChange;
+      const oldVotingPower = currentVotingPower - numericAbsoluteChange;
       const percentageChange = oldVotingPower
         ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
         : 0;
 
       return {
         accountId: accountId,
-        previousVotingPower: numericCurrentVotingPower - numericAbsoluteChange,
-        currentVotingPower: numericCurrentVotingPower,
+        previousVotingPower: currentVotingPower - numericAbsoluteChange,
+        currentVotingPower: currentVotingPower,
         absoluteChange: numericAbsoluteChange,
         percentageChange: percentageChange,
       };

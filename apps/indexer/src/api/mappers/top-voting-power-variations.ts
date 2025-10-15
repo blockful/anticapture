@@ -1,6 +1,6 @@
 import { DaysEnum, DaysOpts } from "@/lib/enums";
-import { secondsToDays } from "@/lib/utils";
 import { z } from "@hono/zod-openapi";
+import { secondsToDays } from "./utils";
 
 export const TopVotingPowerVariationsRequestSchema = z.object({
   days: z
