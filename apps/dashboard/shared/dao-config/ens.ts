@@ -16,6 +16,7 @@ export const ENS: DaoConfiguration = {
   icon: EnsIcon,
   daoOverview: {
     chain: mainnet,
+    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
