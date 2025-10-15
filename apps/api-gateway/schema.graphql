@@ -13,9 +13,7 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 type Query {
   dao(id: String!): dao
   daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
-
-  """Get property data for a specific token"""
-  token(currency: queryInput_token_currency = usd): token_200_response
+  token(id: String!): token
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
@@ -90,7 +88,7 @@ type Query {
   proposal(id: String!): proposal_200_response
 
   """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc): proposalNonVoters_200_response
 
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
@@ -791,7 +789,7 @@ type votesOnchain {
   proposalId: String!
   support: String!
   votingPower: BigInt!
-  reason: String
+  reason: String!
   timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
@@ -1337,25 +1335,6 @@ enum queryInput_historicalTokenData_days {
   _90d
   _180d
   _365d
-}
-
-type token_200_response {
-  id: String!
-  name: String
-  decimals: Float!
-  totalSupply: String!
-  delegatedSupply: String!
-  cexSupply: String!
-  dexSupply: String!
-  lendingSupply: String!
-  circulatingSupply: String!
-  treasury: String!
-  price: Float!
-}
-
-enum queryInput_token_currency {
-  eth
-  usd
 }
 
 type compareTotalSupply_200_response {
