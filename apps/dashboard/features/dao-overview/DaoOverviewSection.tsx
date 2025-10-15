@@ -40,7 +40,12 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     topDelegatesToPass,
     proposalThresholdValue,
     proposalThresholdPercentage,
-  } = useDaoOverviewData(daoId);
+    quorumValueFormatted,
+    quorumPercentage,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
+  } = useDaoOverviewData({ daoId, daoConfig });
 
   if (isLoading) return <DaoOverviewSkeleton />;
 
@@ -138,8 +143,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <MetricsCard
             proposalThresholdValue={proposalThresholdValue}
             proposalThresholdPercentage={proposalThresholdPercentage}
+            quorumValueFormatted={quorumValueFormatted}
+            quorumPercentage={quorumPercentage}
             daoId={daoId}
-            {...daoOverview}
+            daoConfig={daoConfig}
+            votingPeriod={votingPeriod}
+            votingDelay={votingDelay}
+            timelockDelay={timelockDelay}
           />
         </div>
         <div className="block md:hidden">

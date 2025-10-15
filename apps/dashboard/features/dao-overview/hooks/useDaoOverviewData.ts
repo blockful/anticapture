@@ -18,8 +18,15 @@ import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTrea
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { calculateChangeRate } from "@/features/token-distribution/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 
-export const useDaoOverviewData = (daoId: DaoIdEnum) => {
+export const useDaoOverviewData = ({
+  daoId,
+  daoConfig,
+}: {
+  daoId: DaoIdEnum;
+  daoConfig: DaoConfiguration;
+}) => {
   const { data: daoData } = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
@@ -66,9 +73,51 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     : "No Threshold";
 
   const lastPrice = tokenPrice.data?.prices?.at(-1)?.[1] ?? 0;
-  const quorumValue = daoData?.quorum
-    ? Number(daoData.quorum) / 10 ** 18
-    : null;
+
+  const quorumMinPercentage =
+    daoData?.quorum &&
+    totalSupplyValue.value !== undefined &&
+    formatEther(
+      (BigInt(daoData.quorum) * BigInt(1e20)) /
+        BigInt(totalSupplyValue.value ?? ("1" as string)),
+    );
+
+  const quorumMinPercentageDelSupply =
+    delegatedSupply.data?.currentDelegatedSupply &&
+    formatEther(
+      (BigInt(delegatedSupply.data.currentDelegatedSupply) *
+        BigInt(30) *
+        BigInt(1e18)) /
+        BigInt(100),
+    );
+
+  const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 10 ** 18 : 0;
+
+  const quorumValueTotalSupply = quorumValue
+    ? `${formatNumberUserReadable(quorumValue)} `
+    : "No Quorum";
+
+  const quorumValueDelSupply = quorumMinPercentageDelSupply
+    ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
+    : "No Quorum";
+
+  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
+    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
+    : "(N/A)";
+
+  const quorumPercentageTotalSupply = quorumMinPercentage
+    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
+    : "(N/A)";
+
+  const quorumPercentage =
+    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+      ? quorumPercentageDelSupply
+      : quorumPercentageTotalSupply;
+
+  const quorumValueFormatted =
+    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
+      ? quorumValueDelSupply
+      : quorumValueTotalSupply;
 
   const liquidTreasuryNonDaoValue = Number(
     treasuryNonDao.data?.[0]?.totalAssets || 0,
@@ -114,6 +163,10 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     return topDelegatesCount;
   }, [holders.data, quorumValue]);
 
+  const votingPeriod = daoData?.votingPeriod;
+  const votingDelay = daoData?.votingDelay;
+  const timelockDelay = daoData?.timelockDelay;
+
   const isLoading =
     activeSupply.isLoading ||
     delegatedSupply.isLoading ||
@@ -141,5 +194,10 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     isLoading,
     proposalThresholdValue,
     proposalThresholdPercentage,
+    quorumValueFormatted,
+    quorumPercentage,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
   };
 };
