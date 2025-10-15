@@ -83,7 +83,7 @@ export const SCR: DaoConfiguration = {
           "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "5.0% Total Supply",
+        value: "5% Total Supply",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -116,7 +116,7 @@ export const SCR: DaoConfiguration = {
           "Although it does not have a Security Council, the DAO has no control over Scroll's' capital. Therefore, there is no risk, because the DAO does not control anything.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "NO",
+        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -125,7 +125,7 @@ export const SCR: DaoConfiguration = {
         requirements: [
           "Scroll has no limit on active proposals or proposals submitted per address. With a low proposal threshold, it is susceptible to spam in its governance.",
         ],
-        riskExplanation: "Scroll governance is vulnerable to spam.",
+        riskExplanation: "Scroll governance is vulnerable to spam proposals.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         value: "Yes",
@@ -144,7 +144,7 @@ export const SCR: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        riskExplanation: "The timelock delay is bigger than 1 day",
+        riskExplanation: "The timelock delay is higher than 1 day.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
         value: "Yes",
@@ -153,9 +153,11 @@ export const SCR: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
-        requirements: [""],
+        requirements: [
+          "Veto strategy should be fully controlled by the DAO in order to have a low risk level.",
+        ],
         riskExplanation:
-          "The DAO has no treasury directly controllable by governance.",
+          "There is a veto strategy controlled by the Timelock itself and Security Council multisig.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -165,23 +167,18 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
         requirements: [
-          "Without the ability to change votes and with a vulnerable DNS, Scroll governance can be replaced by another, and deceive governance participants. However, since the DAO does not control Scroll's money, there is no economic risk.",
+          "Without the ability to change votes after they are cast, voters cannot respond to new information or changes in sentiment.",
         ],
         riskExplanation:
-          "The mutability of the vote is fundamental, but without the DAO controlling the project, an attack poses no real risk to the project.",
+          "The mutability of the vote is fundamental to allow voters to change their vote in response to new information or changes in sentiment.",
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "1 hour",
-        riskLevel: RiskLevel.HIGH,
+        value: "3 days",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        requirements: [
-          "A minimum of 2 days of Voting Delay is required for a DAO to be considered secure in this parameter.",
-        ],
-        riskExplanation:
-          "With such a low voting delay, the DAO does not have time to mobilize to protect itself from an attack.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -194,17 +191,12 @@ export const SCR: DaoConfiguration = {
           "Voting power is based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "5 days",
-        riskLevel: RiskLevel.MEDIUM,
+        value: "7 days",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        requirements: [
-          "The voting period is 5 days, with the recommended safety being of 7 or more for a low level of risk.",
-        ],
-        riskExplanation:
-          "The voting period is 5 days, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         value: "No",
@@ -214,7 +206,7 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
         requirements: [
-          "With no voting subsidy, the structure is more vulnerable to spam attacks, as it's more costly for the defense than the attacker",
+          "Introduce a voting subsidy mechanism to encourage higher voter turnout and reduce voter attrition in times of need.",
         ],
         riskExplanation:
           "The voting subsidy is not applied, requiring voters to pay gas on the proposals they vote on.",
