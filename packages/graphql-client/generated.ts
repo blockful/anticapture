@@ -16,9 +16,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -103,8 +106,7 @@ export type Query = {
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
   proposalsOnchains: ProposalsOnchainPage;
-  /** Get property data for a specific token */
-  token?: Maybe<Token_200_Response>;
+  token?: Maybe<Token>;
   tokens: TokenPage;
   /** Get total assets */
   totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
@@ -311,7 +313,6 @@ export type QueryProposalArgs = {
 
 
 export type QueryProposalNonVotersArgs = {
-  addresses?: InputMaybe<Scalars['JSON']['input']>;
   id: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_ProposalNonVoters_OrderDirection>;
@@ -355,7 +356,7 @@ export type QueryProposalsOnchainsArgs = {
 
 
 export type QueryTokenArgs = {
-  currency?: InputMaybe<QueryInput_Token_Currency>;
+  id: Scalars['String']['input'];
 };
 
 
@@ -1365,7 +1366,6 @@ export type Proposals_200_Response = {
 };
 
 export enum QueryInput_CompareActiveSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1374,7 +1374,6 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1383,7 +1382,6 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1392,7 +1390,6 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1401,7 +1398,6 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1410,7 +1406,6 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1419,7 +1414,6 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1428,7 +1422,6 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1437,7 +1430,6 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1446,7 +1438,6 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1455,7 +1446,6 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1464,7 +1454,6 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1473,7 +1462,6 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalTokenData_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1482,7 +1470,6 @@ export enum QueryInput_HistoricalTokenData_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1523,11 +1510,6 @@ export enum QueryInput_ProposalsActivity_UserVoteFilter {
 export enum QueryInput_Proposals_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
-}
-
-export enum QueryInput_Token_Currency {
-  Eth = 'eth',
-  Usd = 'usd'
 }
 
 export enum QueryInput_TotalAssets_Days {
@@ -1823,21 +1805,6 @@ export type TokenPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type Token_200_Response = {
-  __typename?: 'token_200_response';
-  cexSupply: Scalars['String']['output'];
-  circulatingSupply: Scalars['String']['output'];
-  decimals: Scalars['Float']['output'];
-  delegatedSupply: Scalars['String']['output'];
-  dexSupply: Scalars['String']['output'];
-  id: Scalars['String']['output'];
-  lendingSupply: Scalars['String']['output'];
-  name?: Maybe<Scalars['String']['output']>;
-  price: Scalars['Float']['output'];
-  totalSupply: Scalars['String']['output'];
-  treasury: Scalars['String']['output'];
-};
-
 export type Transaction = {
   __typename?: 'transaction';
   delegations?: Maybe<DelegationPage>;
@@ -2070,7 +2037,7 @@ export type VotesOnchain = {
   daoId: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
   proposalId: Scalars['String']['output'];
-  reason?: Maybe<Scalars['String']['output']>;
+  reason: Scalars['String']['output'];
   support: Scalars['String']['output'];
   timestamp: Scalars['BigInt']['output'];
   txHash: Scalars['String']['output'];
@@ -2151,19 +2118,13 @@ export type VotesOnchainFilter = {
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
   votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type VotesOnchainPage = {
@@ -2517,13 +2478,6 @@ export type GetTokenHoldersCoutingQueryVariables = Exact<{ [key: string]: never;
 
 
 export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
-
-export type GetTokenQueryVariables = Exact<{
-  currency?: InputMaybe<QueryInput_Token_Currency>;
-}>;
-
-
-export type GetTokenQuery = { __typename?: 'Query', token?: { __typename?: 'token_200_response', cexSupply: string, circulatingSupply: string, decimals: number, delegatedSupply: string, dexSupply: string, id: string, lendingSupply: string, name?: string | null, price: number, totalSupply: string, treasury: string } | null };
 
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -3951,56 +3905,6 @@ export type GetTokenHoldersCoutingQueryHookResult = ReturnType<typeof useGetToke
 export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingLazyQuery>;
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
-export const GetTokenDocument = gql`
-    query GetToken($currency: queryInput_token_currency = eth) {
-  token(currency: $currency) {
-    cexSupply
-    circulatingSupply
-    decimals
-    delegatedSupply
-    dexSupply
-    id
-    lendingSupply
-    name
-    price
-    totalSupply
-    treasury
-  }
-}
-    `;
-
-/**
- * __useGetTokenQuery__
- *
- * To run a query within a React component, call `useGetTokenQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetTokenQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetTokenQuery({
- *   variables: {
- *      currency: // value for 'currency'
- *   },
- * });
- */
-export function useGetTokenQuery(baseOptions?: Apollo.QueryHookOptions<GetTokenQuery, GetTokenQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
-      }
-export function useGetTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTokenQuery, GetTokenQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
-        }
-export function useGetTokenSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTokenQuery, GetTokenQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTokenQuery, GetTokenQueryVariables>(GetTokenDocument, options);
-        }
-export type GetTokenQueryHookResult = ReturnType<typeof useGetTokenQuery>;
-export type GetTokenLazyQueryHookResult = ReturnType<typeof useGetTokenLazyQuery>;
-export type GetTokenSuspenseQueryHookResult = ReturnType<typeof useGetTokenSuspenseQuery>;
-export type GetTokenQueryResult = Apollo.QueryResult<GetTokenQuery, GetTokenQueryVariables>;
 export const TransactionsDocument = gql`
     query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder) {
   transactions(
