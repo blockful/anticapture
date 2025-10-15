@@ -66,6 +66,7 @@ interface BaseInfo {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: Chain;
+  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;
@@ -80,10 +81,10 @@ export interface DaoOverviewConfig {
     timelock?: boolean;
     cancelFunction?: boolean;
     logic:
-    | "For"
-    | "For + Abstain"
-    | "For + Abstain + Against"
-    | "All Votes Cast";
+      | "For"
+      | "For + Abstain"
+      | "For + Abstain + Against"
+      | "All Votes Cast";
     quorumCalculation: string;
     proposalThreshold?: string;
   };
@@ -137,7 +138,7 @@ export interface AttackProfitabilityConfig {
   };
 }
 export interface GovernanceImplementationConfig
-  extends GovernanceImplementation { }
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {

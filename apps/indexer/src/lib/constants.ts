@@ -88,7 +88,7 @@ export const CONTRACT_ADDRESSES = {
     },
   },
   [DaoIdEnum.SCR]: {
-    blockTime: 3,
+    blockTime: 1.5,
     // https://scrollscan.com/address/0xd29687c813D741E2F938F4aC377128810E217b1b
     token: {
       address: "0xd29687c813D741E2F938F4aC377128810E217b1b",
