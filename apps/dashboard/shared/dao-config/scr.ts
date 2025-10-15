@@ -7,7 +7,7 @@ import {
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { ScrollIcon } from "@/shared/components/icons";
 import { scroll } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels"
 
 export const SCR: DaoConfiguration = {
   name: "Scroll",
@@ -180,6 +180,8 @@ export const SCR: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
+        riskExplanation:
+          "With three days, Scroll has enough time to gather votes and delegates with the goal of blocking a malicious proposal in the DAO.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -198,6 +200,8 @@ export const SCR: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
+        riskExplanation:
+          "Seven days is enough time for the DAO to organize itself against an attack during the voting period.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         value: "No",
