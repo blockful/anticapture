@@ -10,6 +10,7 @@ import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOvervie
 import { DaoOverviewMetrics } from "@/features/dao-overview/components/DaoOverviewMetrics";
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
+import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
 import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
@@ -130,6 +131,15 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DividerDefault isHorizontal />
           </div>
           <TokenDistributionChartCard daoId={daoId} />
+        </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted mx-5">
+          <SecurityCouncilCard daoOverview={daoOverview} />
+        </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
         </div>
       </div>
     </Suspense>
