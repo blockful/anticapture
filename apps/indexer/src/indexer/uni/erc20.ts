@@ -189,12 +189,13 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    await updateDelegatedSupply(context, daoId, {
-      tokenId: event.log.address,
-      newBalance: event.args.newBalance,
-      oldBalance: event.args.previousBalance,
-      timestamp: event.block.timestamp,
-    });
+    await updateDelegatedSupply(
+      context,
+      daoId,
+      event.log.address,
+      event.args.newBalance - event.args.previousBalance,
+      event.block.timestamp,
+    );
 
     if (!event.transaction.to) return;
 
