@@ -55,7 +55,7 @@ export const PanelTable = () => {
     rowIndex: number;
   }) => {
     const { data: tokenData } = useTokenData(daoId);
-    const delegatedSupply = tokenData?.delegatedSupply;
+    const delegatedSupply = tokenData?.token?.delegatedSupply;
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
