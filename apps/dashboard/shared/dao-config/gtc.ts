@@ -79,11 +79,11 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
         requirements: [
-          "Increase the deegation supply and active voter set to lower the profitability of an attacker.",
+          "Increase the delegation supply and active voter set to lower the profitability of an attacker.",
           "Get the delegated supply above the value directly available for proposal execution.",
         ],
         riskExplanation:
-          "The liquid treasury of the DAO is ~$500k bigger than its current delegated supply..",
+          "The liquid treasury of the DAO is ~$500k bigger than its current delegated supply.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
