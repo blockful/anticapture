@@ -1,15 +1,5 @@
 import { Address } from "viem";
-import {
-  gte,
-  and,
-  inArray,
-  lte,
-  desc,
-  eq,
-  asc,
-  sql,
-  isNotNull,
-} from "drizzle-orm";
+import { gte, and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
 import {
   votingPowerHistory,
@@ -145,24 +135,26 @@ export class VotingPowerRepository {
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    const deltas = db
-      .select()
+    const history = db
+      .select({
+        delta: votingPowerHistory.delta,
+        accountId: votingPowerHistory.accountId,
+      })
       .from(votingPowerHistory)
       .orderBy(desc(votingPowerHistory.timestamp))
       .where(gte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
-      .as("deltas");
+      .as("history");
 
     const aggregate = db
       .select({
-        accountId: deltas.accountId,
-        absoluteChange: sql<string>`SUM(${deltas.delta})`.as("agg_delta"),
+        accountId: history.accountId,
+        absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
         currentVotingPower: accountPower.votingPower,
       })
-      .from(deltas)
-      .where(isNotNull(accountPower.votingPower))
-      .leftJoin(accountPower, eq(accountPower.accountId, deltas.accountId))
-      .groupBy(deltas.accountId, accountPower.votingPower)
-      .as("aggregated");
+      .from(history)
+      .innerJoin(accountPower, eq(accountPower.accountId, history.accountId))
+      .groupBy(history.accountId, accountPower.votingPower)
+      .as("aggregate");
 
     const result = await db
       .select()
@@ -176,17 +168,16 @@ export class VotingPowerRepository {
       .offset(skip);
 
     return result.map(({ accountId, currentVotingPower, absoluteChange }) => {
-      const numericCurrentVotingPower = BigInt(currentVotingPower);
       const numericAbsoluteChange = BigInt(absoluteChange);
-      const oldVotingPower = numericCurrentVotingPower - numericAbsoluteChange;
+      const oldVotingPower = currentVotingPower - numericAbsoluteChange;
       const percentageChange = oldVotingPower
         ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
         : 0;
 
       return {
         accountId: accountId,
-        previousVotingPower: numericCurrentVotingPower - numericAbsoluteChange,
-        currentVotingPower: numericCurrentVotingPower,
+        previousVotingPower: currentVotingPower - numericAbsoluteChange,
+        currentVotingPower: currentVotingPower,
         absoluteChange: numericAbsoluteChange,
         percentageChange: percentageChange,
       };
