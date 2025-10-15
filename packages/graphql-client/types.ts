@@ -1362,7 +1362,6 @@ export type Proposals_200_Response = {
 };
 
 export enum QueryInput_CompareActiveSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1371,7 +1370,6 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1380,7 +1378,6 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1389,7 +1386,6 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1398,7 +1394,6 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1407,7 +1402,6 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1416,7 +1410,6 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1425,7 +1418,6 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1434,7 +1426,6 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1443,7 +1434,6 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1452,7 +1442,6 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1461,7 +1450,6 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1470,7 +1458,6 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalTokenData_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1479,7 +1466,6 @@ export enum QueryInput_HistoricalTokenData_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -2148,19 +2134,13 @@ export type VotesOnchainFilter = {
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
   votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type VotesOnchainPage = {
