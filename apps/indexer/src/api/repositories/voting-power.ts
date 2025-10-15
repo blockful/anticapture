@@ -11,7 +11,12 @@ import {
   isNotNull,
 } from "drizzle-orm";
 import { db } from "ponder:api";
-import { votingPowerHistory, delegation, transfer } from "ponder:schema";
+import {
+  votingPowerHistory,
+  delegation,
+  transfer,
+  accountPower,
+} from "ponder:schema";
 
 import {
   DBVotingPowerVariation,
@@ -144,29 +149,28 @@ export class VotingPowerRepository {
       .select()
       .from(votingPowerHistory)
       .orderBy(desc(votingPowerHistory.timestamp))
-      .where(lte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
+      .where(gte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
       .as("deltas");
 
-    const aggregated = db
+    const aggregate = db
       .select({
         accountId: deltas.accountId,
         absoluteChange: sql<string>`SUM(${deltas.delta})`.as("agg_delta"),
-        currentVotingPower: sql<string>`MAX(${deltas.votingPower})`.as(
-          "current_voting_power",
-        ),
+        currentVotingPower: accountPower.votingPower,
       })
       .from(deltas)
-      .where(isNotNull(deltas.accountId))
-      .groupBy(deltas.accountId)
+      .where(isNotNull(accountPower.votingPower))
+      .leftJoin(accountPower, eq(accountPower.accountId, deltas.accountId))
+      .groupBy(deltas.accountId, accountPower.votingPower)
       .as("aggregated");
 
     const result = await db
       .select()
-      .from(aggregated)
+      .from(aggregate)
       .orderBy(
         orderDirection === "desc"
-          ? desc(sql`ABS(${aggregated.absoluteChange})`)
-          : asc(sql`ABS(${aggregated.absoluteChange})`),
+          ? desc(sql`ABS(${aggregate.absoluteChange})`)
+          : asc(sql`ABS(${aggregate.absoluteChange})`),
       )
       .limit(limit)
       .offset(skip);
