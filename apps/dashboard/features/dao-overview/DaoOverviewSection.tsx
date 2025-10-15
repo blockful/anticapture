@@ -8,6 +8,7 @@ import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOvervie
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 import { DaoOverviewMetrics } from "@/features/dao-overview/components/DaoOverviewMetrics";
+import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -23,6 +24,7 @@ import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
+
   const {
     isLoading,
     lastPrice,
@@ -35,6 +37,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
   } = useDaoOverviewData(daoId);
+
   if (isLoading) return <DaoOverviewSkeleton />;
 
   const delegatedSupplyValue = formatNumberUserReadable(
@@ -123,6 +126,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
             className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
           />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <TokenDistributionChartCard daoId={daoId} />
         </div>
       </div>
     </Suspense>

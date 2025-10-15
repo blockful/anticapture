@@ -341,7 +341,7 @@ export const RiskAreaCardWrapper = ({
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
 }: RiskAreaCardWrapperProps) => {
-  const { daoId }: { daoId?: string } = useParams();
+  const { daoId }: { daoId: string } = useParams();
   return (
     <div
       className={cn("flex w-full flex-col gap-1", {
@@ -358,7 +358,7 @@ export const RiskAreaCardWrapper = ({
         ) : (
           <div className="flex h-5 items-center gap-2 px-5 sm:px-0">
             <DefaultLink
-              href={`${daoId?.toLowerCase()}/risk-analysis`}
+              href={`${daoId.toLowerCase()}/risk-analysis`}
               openInNewTab={false}
               className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
             >
