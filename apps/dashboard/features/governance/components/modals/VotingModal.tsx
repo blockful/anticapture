@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/shared/components";
-import { X } from "lucide-react";
-import { useEffect } from "react";
+import { User2Icon, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
 interface VotingModalProps {
@@ -16,6 +16,9 @@ export const VotingModal = ({
   onClose,
   proposal,
 }: VotingModalProps) => {
+  const [vote, setVote] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -101,6 +104,136 @@ export const VotingModal = ({
               </p>
             </div>
           </div>
+        </div>
+
+        {/* your vote  */}
+        <div className="flex flex-col gap-[6px] p-4">
+          <p>Your vote</p>
+
+          {/* For vote  */}
+          <div className="flex flex-col">
+            <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+              <div className="flex items-center gap-2">
+                <div className="flex w-[100px] items-center gap-2">
+                  <input
+                    className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+                    type="radio"
+                    name="vote"
+                    id="for"
+                    checked={vote === "for"}
+                    onChange={() => setVote("for")}
+                  />
+                  <p className="font-inter text-success text-[14px] font-normal not-italic leading-[20px]">
+                    For
+                  </p>
+                </div>
+
+                <div className="bg-surface-hover relative h-1 w-[270px]">
+                  <div className="bg-success h-1 w-[30%]" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  1.2M
+                </p>
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  86.3%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Against vote  */}
+          <div className="flex flex-col">
+            <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+              <div className="flex items-center gap-2">
+                <div className="flex w-[100px] items-center gap-2">
+                  <input
+                    className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+                    type="radio"
+                    name="vote"
+                    id="for"
+                    checked={vote === "against"}
+                    onChange={() => setVote("against")}
+                  />
+                  <p className="font-inter text-error text-[14px] font-normal not-italic leading-[20px]">
+                    Against
+                  </p>
+                </div>
+
+                <div className="bg-surface-hover relative h-1 w-[270px]">
+                  <div className="bg-error h-1 w-[60%]" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  1.2M
+                </p>
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  86.3%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Abstain vote  */}
+          <div className="flex flex-col">
+            <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+              <div className="flex items-center gap-2">
+                <div className="flex w-[100px] items-center gap-2">
+                  <input
+                    className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+                    type="radio"
+                    name="vote"
+                    id="for"
+                    checked={vote === "abstain"}
+                    onChange={() => setVote("abstain")}
+                  />
+                  <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+                    Abstain
+                  </p>
+                </div>
+
+                <div className="bg-surface-hover relative h-1 w-[270px]">
+                  <div className="bg-primary h-1 w-[30%]" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  1.2M
+                </p>
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  86.3%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
+            <User2Icon className="text-secondary size-3.5" />
+            <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+              Quorum
+            </p>
+            <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
+              1.2M / 1M
+            </p>
+          </div>
+        </div>
+
+        {/* Comment  */}
+        <div className="flex flex-col gap-[6px] p-4">
+          <p className="font-inter text-[12px] font-medium not-italic leading-4">
+            Comment <span className="text-secondary">(optional)</span>
+          </p>
+          <textarea
+            className="border-border-default flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
+            placeholder="Enter your comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
         </div>
 
         <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
