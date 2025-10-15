@@ -8,6 +8,7 @@ import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { EnsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
@@ -15,6 +16,7 @@ export const ENS: DaoConfiguration = {
   icon: EnsIcon,
   daoOverview: {
     chain: mainnet,
+    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
@@ -28,7 +30,7 @@ export const ENS: DaoConfiguration = {
       timelock: true,
       cancelFunction: false,
       logic: "For + Abstain",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
     tally: "https://tally.xyz/gov/ens",
     securityCouncil: {

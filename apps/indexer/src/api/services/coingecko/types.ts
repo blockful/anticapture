@@ -5,6 +5,7 @@ enum AssetPlatformEnum {
   ETHEREUM = "ethereum",
   ARBITRUM = "arbitrum-one",
   OPTIMISM = "optimistic-ethereum",
+  SCROLL = "scroll",
 }
 
 export const CoingeckoTokenIdEnum = {
@@ -13,6 +14,7 @@ export const CoingeckoTokenIdEnum = {
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
+  SCR: "scroll",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -21,6 +23,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
   [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
   [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
 } as const;
 
 export type CoingeckoTokenId =
