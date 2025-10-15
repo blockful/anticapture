@@ -96,7 +96,7 @@ export const MultilineChartAttackProfitability = ({
       quorum: { label: "Quorum", color: "#f87171" },
       delegated: { label: "Delegated", color: "#f87171" },
     }),
-    [daoId],
+    [daoEnum],
   ) satisfies ChartConfig;
 
   const chartData = useMemo(() => {
@@ -128,6 +128,7 @@ export const MultilineChartAttackProfitability = ({
             daoTokenPriceHistoricalData,
             "quorum",
             1,
+            daoConfig?.daoOverview.token,
             delegatedSupplyChart,
           ).map((datasetpoint) => ({
             ...datasetpoint,
@@ -136,15 +137,20 @@ export const MultilineChartAttackProfitability = ({
               (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
           }))
         : quorumValue
-          ? normalizeDataset(daoTokenPriceHistoricalData, "quorum", quorumValue)
+          ? normalizeDataset(
+              daoTokenPriceHistoricalData,
+              "quorum",
+              quorumValue,
+              daoConfig?.daoOverview.token,
+            )
           : [],
       delegated: delegatedSupplyChart
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
             "delegated",
             1,
-            delegatedSupplyChart,
             daoConfig?.daoOverview.token,
+            delegatedSupplyChart,
           )
         : [],
     };
