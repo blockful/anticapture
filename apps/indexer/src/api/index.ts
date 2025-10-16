@@ -18,12 +18,14 @@ import {
   lastUpdate,
   assets,
   votingPower,
+  delegationPercentage,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
+  DelegationPercentageRepository,
   DrizzleRepository,
   TokenRepository,
   TransactionsRepository,
@@ -34,7 +36,11 @@ import { errorHandler } from "./middlewares";
 import { ProposalsService } from "./services/proposals";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
-import { HistoricalVotingPowerService, VotingPowerService } from "./services";
+import {
+  DelegationPercentageService,
+  HistoricalVotingPowerService,
+  VotingPowerService,
+} from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { TokenService } from "./services/token";
@@ -100,7 +106,11 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
+const delegationPercentageRepo = new DelegationPercentageRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
+const delegationPercentageService = new DelegationPercentageService(
+  delegationPercentageRepo,
+);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
@@ -114,6 +124,7 @@ historicalOnchain(
 transactions(app, transactionsService);
 lastUpdate(app);
 votingPower(app, new VotingPowerService(votingPowerRepo));
+delegationPercentage(app, delegationPercentageService);
 docs(app);
 
 export default app;
