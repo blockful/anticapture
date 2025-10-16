@@ -1,14 +1,22 @@
-import { z } from "@hono/zod-openapi";
-import { transaction, transfer, delegation } from "ponder:schema";
+import { transfer, delegation } from "ponder:schema";
 import { isAddress } from "viem";
-
-export type DBTransaction = typeof transaction.$inferSelect & {
-  transfers: DBTransfer[];
-  delegations: DBDelegation[];
-};
+import z from "zod";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 export type DBDelegation = typeof delegation.$inferSelect;
+
+export type DBTransaction = {
+  transactionHash: string;
+  from: string | null;
+  to: string | null;
+  isCex: boolean;
+  isDex: boolean;
+  isLending: boolean;
+  isTotal: boolean;
+  timestamp: bigint;
+  transfers: DBTransfer[];
+  delegations: DBDelegation[];
+};
 
 export enum AffectedSupply {
   CEX = "CEX",
@@ -162,8 +170,8 @@ export const TransactionMapper = {
   toApi: (t: DBTransaction): TransactionResponse => {
     return {
       transactionHash: t.transactionHash,
-      from: t.fromAddress,
-      to: t.toAddress,
+      from: t.from,
+      to: t.to,
       isCex: t.isCex,
       isDex: t.isDex,
       isLending: t.isLending,
