@@ -10,9 +10,9 @@ import {
 export class TransactionsService {
   constructor(
     private transactionsRepository: TransactionsRepository,
-    private transfersRepository = new TransfersRepository(),
-    private delegationsRepository = new DelegationsRepository(),
-  ) {}
+    private transfersRepository: TransfersRepository,
+    private delegationsRepository: DelegationsRepository,
+  ) { }
 
   async getTransactions(
     params: TransactionsRequest,
@@ -71,6 +71,8 @@ export class TransactionsService {
         limit,
         sortOrder,
       );
+
+    await this.transactionsRepository.getAggregateTransactions(params);
 
     return {
       transactions: transactions.map(TransactionMapper.toApi),
