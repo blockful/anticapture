@@ -147,6 +147,10 @@ export class DelegationPercentageService {
       ? BigInt(endDate)
       : datesFromDb[datesFromDb.length - 1];
 
+    if (!firstDate || !lastDate) {
+      return allDates;
+    }
+
     // Generate all days in range (86400 seconds = 1 day)
     const ONE_DAY = 86400n;
     for (let date = firstDate; date <= lastDate; date += ONE_DAY) {
@@ -238,8 +242,9 @@ export class DelegationPercentageService {
     return {
       hasNextPage,
       hasPreviousPage: !!after || !!before,
-      endCursor: items.length > 0 ? items[items.length - 1].date : null,
-      startCursor: items.length > 0 ? items[0].date : null,
+      endCursor:
+        items.length > 0 ? (items[items.length - 1]?.date ?? null) : null,
+      startCursor: items.length > 0 ? (items[0]?.date ?? null) : null,
     };
   }
 }

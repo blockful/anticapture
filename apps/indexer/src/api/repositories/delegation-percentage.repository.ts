@@ -1,7 +1,8 @@
 import { db } from "ponder:api";
 import { daoMetricsDayBucket } from "ponder:schema";
-import { and, gte, lte, inArray, SQL } from "ponder";
+import { and, gte, lte, inArray, desc, asc } from "ponder";
 import { MetricTypesEnum } from "@/lib/constants";
+import type { SQL } from "drizzle-orm";
 
 export interface DaoMetricRow {
   date: bigint;
@@ -47,8 +48,9 @@ export class DelegationPercentageRepository {
       .from(daoMetricsDayBucket)
       .where(and(...queryFilters.filter(Boolean)))
       .orderBy(
-        daoMetricsDayBucket.date,
-        orderDirection === "desc" ? "desc" : "asc",
+        orderDirection === "desc"
+          ? desc(daoMetricsDayBucket.date)
+          : asc(daoMetricsDayBucket.date),
       );
 
     return rows as DaoMetricRow[];
