@@ -76,13 +76,44 @@ export default processConfig(
         pageInfo: PageInfo!
       }
 
+      """
+      Aggregated delegation supply across all supported DAOs.
+      Returns the mean delegation percentage for each day in the specified range.
+      Only includes dates where ALL DAOs have data available.
+      """
       extend type Query {
         aggregatedDelegatedSupply(
-          after: String
-          before: String
-          startDate: String
+          """
+          Start date (Unix timestamp in seconds). Required.
+          All DAOs will return data starting from this date.
+          The aggregation will begin from the latest start date among all DAOs.
+          """
+          startDate: String!
+
+          """
+          End date (Unix timestamp in seconds). Optional.
+          If not provided, returns data up to the latest available date.
+          """
           endDate: String
+
+          """
+          Cursor for pagination. Returns items after this date.
+          """
+          after: String
+
+          """
+          Cursor for pagination. Returns items before this date.
+          """
+          before: String
+
+          """
+          Sort direction: "asc" or "desc". Default: "asc"
+          """
           orderDirection: String
+
+          """
+          Maximum number of items to return. Default: 100
+          """
           limit: Int
         ): AggregatedDelegatedSupplyPage!
       }

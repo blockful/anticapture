@@ -14,6 +14,61 @@ export type DelegationPercentageResponse = {
 // === HELPERS ===
 
 /**
+ * Helper to get the first (oldest) date from items based on order direction
+ */
+function getFirstDate(
+  items: { date: string; high: string }[],
+  orderDirection?: string
+): bigint {
+  if (items.length === 0) throw new Error('No items to get first date from');
+  const firstItem =
+    orderDirection === 'desc' ? items[items.length - 1] : items[0];
+  return BigInt(firstItem.date);
+}
+
+/**
+ * Aligns DAO responses to ensure all DAOs have data in the same date range
+ * Returns filtered responses where all DAOs have overlapping data
+ */
+export function alignDaoResponses(
+  daoResponses: Map<string, DelegationPercentageResponse>,
+  orderDirection?: string
+): Map<string, DelegationPercentageResponse> {
+  // Filter out DAOs with no data
+  const daoResponsesWithData = Array.from(daoResponses.entries()).filter(
+    ([_, response]) => response.items.length > 0
+  );
+
+  if (daoResponsesWithData.length === 0) {
+    return new Map();
+  }
+
+  // Find the effective start date (maximum of all first dates)
+  // This ensures all DAOs have data from this point forward
+  const firstDates = daoResponsesWithData.map(([_, response]) =>
+    getFirstDate(response.items, orderDirection)
+  );
+  const effectiveStartDate = firstDates.reduce((max, date) =>
+    date > max ? date : max
+  );
+
+  // Filter items from each DAO to start at effectiveStartDate
+  const alignedResponses = new Map(
+    daoResponsesWithData.map(([dao, response]) => [
+      dao,
+      {
+        ...response,
+        items: response.items.filter(
+          (item) => BigInt(item.date) >= effectiveStartDate
+        ),
+      },
+    ])
+  );
+
+  return alignedResponses;
+}
+
+/**
  * Aggregates delegation percentages across DAOs using mean calculation
  * Returns high as the mean percentage in bigint format (18 decimals)
  * Complexity: O(n x d) where n is the number of dates and d is the number of DAOs
@@ -163,7 +218,6 @@ export function buildPaginatedResponse(
  */
 export const aggregatedDelegatedSupplyResolver = {
   resolve: async (root: any, args: any, context: any, info: any) => {
-    // Validate date range
     if (
       args.startDate &&
       args.endDate &&
@@ -177,9 +231,17 @@ export const aggregatedDelegatedSupplyResolver = {
     const queryArgs = { ...args, limit: userLimit + 1 };
     const daoResponses = await fetchAndExtractDaoData(context, queryArgs, root);
 
+    // Align DAO responses to ensure all DAOs have data in the same range
+    const alignedResponses = alignDaoResponses(
+      daoResponses,
+      args.orderDirection
+    );
+
     // Aggregate and return paginated result
     const aggregated =
-      daoResponses.size === 0 ? [] : aggregateMeanPercentage(daoResponses);
+      alignedResponses.size === 0
+        ? []
+        : aggregateMeanPercentage(alignedResponses);
 
     return buildPaginatedResponse(aggregated, args);
   },
