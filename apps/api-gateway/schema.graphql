@@ -112,7 +112,7 @@ type Query {
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-power/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
-  topVotingPowerVariations(days: queryInput_topVotingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc): topVotingPowerVariations_200_response
+  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
 }
 
 """
@@ -1722,18 +1722,18 @@ enum queryInput_votingPowers_orderDirection {
   desc
 }
 
-type topVotingPowerVariations_200_response {
-  period: query_topVotingPowerVariations_period!
-  items: [query_topVotingPowerVariations_items_items]!
+type votingPowerVariations_200_response {
+  period: query_votingPowerVariations_period!
+  items: [query_votingPowerVariations_items_items]!
 }
 
-type query_topVotingPowerVariations_period {
+type query_votingPowerVariations_period {
   days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
 
-type query_topVotingPowerVariations_items_items {
+type query_votingPowerVariations_items_items {
   accountId: String!
   previousVotingPower: String
   currentVotingPower: String!
@@ -1741,7 +1741,7 @@ type query_topVotingPowerVariations_items_items {
   percentageChange: String!
 }
 
-enum queryInput_topVotingPowerVariations_days {
+enum queryInput_votingPowerVariations_days {
   _7d
   _30d
   _90d
@@ -1749,7 +1749,7 @@ enum queryInput_topVotingPowerVariations_days {
   _365d
 }
 
-enum queryInput_topVotingPowerVariations_orderDirection {
+enum queryInput_votingPowerVariations_orderDirection {
   asc
   desc
 }

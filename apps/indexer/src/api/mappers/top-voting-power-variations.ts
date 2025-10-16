@@ -1,5 +1,6 @@
 import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
+import { PERCENTAGE_NO_BASELINE } from "./constants";
 
 export const TopVotingPowerVariationsRequestSchema = z.object({
   days: z
@@ -77,7 +78,7 @@ export const TopVotingPowerVariationsMapper = (
         absoluteChange: absoluteChange.toString(),
         percentageChange: previousVotingPower
           ? percentageChange.toString()
-          : "NEW",
+          : PERCENTAGE_NO_BASELINE,
       }),
     ),
   });
