@@ -24,11 +24,9 @@ import { docs } from "./docs";
 import { env } from "@/env";
 import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
-  DelegationsRepository,
   DrizzleRepository,
   TokenRepository,
   TransactionsRepository,
-  TransfersRepository,
   VotingPowerRepository,
 } from "./repositories";
 import { TransactionsService } from "./services/transactions";
@@ -102,11 +100,7 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
-const transactionsService = new TransactionsService(
-  transactionsRepo,
-  new TransfersRepository(),
-  new DelegationsRepository(),
-);
+const transactionsService = new TransactionsService(transactionsRepo);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
