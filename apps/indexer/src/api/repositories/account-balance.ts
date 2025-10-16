@@ -23,11 +23,11 @@ export class AccountBalanceRepository {
         address: accountBalance.accountId,
         balance: accountBalance.balance,
         txsFrom:
-          sql<string>`coalesce(sum(case when ${accountBalance.accountId} = ${recentTxs.fromAccountId} then ${recentTxs.amount} else 0 end), 0)`.as(
+          sql<string>`COALESCE(SUM(CASE WHEN ${accountBalance.accountId} = ${recentTxs.fromAccountId} THEN ${recentTxs.amount} ELSE 0 END), 0)`.as(
             "txsFrom",
           ),
         txsTo:
-          sql<string>`coalesce(sum(case when ${accountBalance.accountId} = ${recentTxs.toAccountId} then ${recentTxs.amount} else 0 end), 0)`.as(
+          sql<string>`COALESCE(SUM(CASE WHEN ${accountBalance.accountId} = ${recentTxs.toAccountId} then ${recentTxs.amount} ELSE 0 END), 0)`.as(
             "txsTo",
           ),
       })
