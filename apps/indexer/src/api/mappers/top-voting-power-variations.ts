@@ -1,6 +1,5 @@
 import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
-import { secondsToDays } from "./utils";
 
 export const TopVotingPowerVariationsRequestSchema = z.object({
   days: z
@@ -26,7 +25,7 @@ export const TopVotingPowerVariationsRequestSchema = z.object({
 
 export const TopVotingPowerVariationsResponseSchema = z.object({
   period: z.object({
-    days: z.number().transform((val) => secondsToDays(val)),
+    days: z.string(),
     startTimestamp: z.string(),
     endTimestamp: z.string(),
   }),
@@ -60,7 +59,7 @@ export const TopVotingPowerVariationsMapper = (
 ): TopVotingPowerVariationsResponse => {
   return TopVotingPowerVariationsResponseSchema.parse({
     period: {
-      days: days,
+      days: DaysEnum[days] as string,
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
       endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },
