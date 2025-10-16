@@ -503,12 +503,12 @@ describe("DelegationPercentageService", () => {
       expect(result.items[0]?.high).toBe("50000000000000000000");
     });
 
-    it("should not fetch previous values when startDate is not provided", async () => {
+    it("should not fetch previous values when neither startDate nor after is provided", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
       await service.getDelegationPercentage({});
 
-      // Should not call getLastMetricValueBefore
+      // Should not call getLastMetricValueBefore when no reference date
       expect(mockRepository.getLastMetricValueBefore).not.toHaveBeenCalled();
     });
 
@@ -641,6 +641,104 @@ describe("DelegationPercentageService", () => {
       expect(result.items).toHaveLength(0);
       expect(result.totalCount).toBe(0);
       expect(result.pageInfo.hasNextPage).toBe(false);
+    });
+
+    it("should fetch previous values and optimize query when only after is provided", async () => {
+      const ONE_DAY = 86400;
+      const day1 = 1600000000n;
+      const day50 = day1 + BigInt(ONE_DAY * 50);
+      const day100 = day50 + BigInt(ONE_DAY * 50);
+
+      // Mock: values before day50
+      mockRepository.getLastMetricValueBefore
+        .mockResolvedValueOnce({
+          date: day1,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 30000000000000000000n, // 30%
+        })
+        .mockResolvedValueOnce({
+          date: day1,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        });
+
+      // Mock: data from day50 onwards (query should be optimized)
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 50000000000000000000n,
+        },
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        after: day50.toString(),
+      });
+
+      // Verify query was optimized (used after as startDate)
+      expect(mockRepository.getDaoMetricsByDateRange).toHaveBeenCalledWith({
+        startDate: day50.toString(),
+        endDate: undefined,
+        orderDirection: "asc",
+      });
+
+      // Verify previous values were fetched
+      expect(mockRepository.getLastMetricValueBefore).toHaveBeenCalledTimes(2);
+
+      // Results should have correct forward-fill from previous values
+      expect(result.items.length).toBeGreaterThan(0);
+    });
+
+    it("should optimize query when only before is provided", async () => {
+      const day1 = 1600000000n;
+      const day50 = day1 + BigInt(86400 * 50);
+
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day1,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 30000000000000000000n,
+        },
+        {
+          date: day1,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        before: day50.toString(),
+      });
+
+      // Verify query was optimized (used before as endDate)
+      expect(mockRepository.getDaoMetricsByDateRange).toHaveBeenCalledWith({
+        startDate: undefined,
+        endDate: day50.toString(),
+        orderDirection: "asc",
+      });
+
+      // Should not fetch previous values (no startDate or after)
+      expect(mockRepository.getLastMetricValueBefore).not.toHaveBeenCalled();
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]?.high).toBe("30000000000000000000");
     });
   });
 });

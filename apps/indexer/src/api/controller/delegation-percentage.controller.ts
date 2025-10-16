@@ -1,23 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { DelegationPercentageService } from "@/api/services/delegation-percentage";
-
-const DelegationPercentageItemSchema = z.object({
-  date: z.string(),
-  high: z.string(),
-});
-
-const PageInfoSchema = z.object({
-  hasNextPage: z.boolean(),
-  hasPreviousPage: z.boolean(),
-  endCursor: z.string().nullable(),
-  startCursor: z.string().nullable(),
-});
-
-const DelegationPercentageResponseSchema = z.object({
-  items: z.array(DelegationPercentageItemSchema),
-  totalCount: z.number(),
-  pageInfo: PageInfoSchema,
-});
+import { DelegationPercentageResponseSchema } from "@/api/mappers/delegation-percentage";
 
 export function delegationPercentage(
   app: Hono,

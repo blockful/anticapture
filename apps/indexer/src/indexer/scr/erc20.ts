@@ -118,8 +118,7 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           isTotal,
         })
         .onConflictDoUpdate((current) => ({
-          delegatedValue:
-            current.delegatedValue + delegatorBalanceValue,
+          delegatedValue: current.delegatedValue + delegatorBalanceValue,
         }));
 
       // Transaction flag updates moved to DAO-specific indexer

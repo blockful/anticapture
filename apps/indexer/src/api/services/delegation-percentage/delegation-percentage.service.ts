@@ -3,24 +3,11 @@ import {
   DelegationPercentageRepository,
   DaoMetricRow,
 } from "@/api/repositories/delegation-percentage.repository";
-
-export interface DelegationPercentageItem {
-  date: string;
-  high: string;
-}
-
-export interface PageInfo {
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  endCursor: string | null;
-  startCursor: string | null;
-}
-
-export interface DelegationPercentageResponse {
-  items: DelegationPercentageItem[];
-  totalCount: number;
-  pageInfo: PageInfo;
-}
+import type {
+  DelegationPercentageItem,
+  PageInfo,
+  DelegationPercentageResponse,
+} from "@/api/mappers/delegation-percentage";
 
 export interface DelegationPercentageFilters {
   after?: string;
@@ -56,15 +43,16 @@ export class DelegationPercentageService {
       limit = 100,
     } = filters;
 
-    // 1. Get initial values before startDate (for proper forward-fill)
-    const initialValues = startDate
-      ? await this.getInitialValuesBeforeDate(startDate)
+    // 1. Get initial values for proper forward-fill
+    const referenceDate = startDate || after;
+    const initialValues = referenceDate
+      ? await this.getInitialValuesBeforeDate(referenceDate)
       : { delegated: 0n, total: 0n };
 
     // 2. Fetch data from repository
     const rows = await this.repository.getDaoMetricsByDateRange({
-      startDate,
-      endDate,
+      startDate: referenceDate,
+      endDate: endDate || before,
       orderDirection,
     });
 
@@ -92,9 +80,12 @@ export class DelegationPercentageService {
 
     // 5. Adjust startDate if no previous values and startDate is before first data
     // This prevents returning 0% for dates before first real data
-    const effectiveStartDate = startDate
-      ? this.adjustStartDateToFirstRealData(startDate, dateMap, initialValues)
-      : startDate;
+    const effectiveStartDate = this.adjustStartDateToFirstRealData(
+      startDate,
+      after,
+      dateMap,
+      initialValues,
+    );
 
     // 6. Generate complete date range
     const allDates = this.generateDateRange(
@@ -161,17 +152,20 @@ export class DelegationPercentageService {
    * Returns the original startDate if it's within or after available data range
    */
   private adjustStartDateToFirstRealData(
-    startDate: string,
+    startDate: string | undefined,
+    after: string | undefined,
     dateMap: Map<string, DateData>,
     initialValues: { delegated: bigint; total: bigint },
-  ): string {
-    // Only adjust if no previous values exist and we have data
+  ): string | undefined {
+    const referenceDate = startDate || after;
+    if (!referenceDate) return undefined;
+
     if (
       initialValues.delegated !== 0n ||
       initialValues.total !== 0n ||
       dateMap.size === 0
     ) {
-      return startDate;
+      return referenceDate;
     }
 
     const datesFromDb = Array.from(dateMap.keys())
@@ -179,12 +173,11 @@ export class DelegationPercentageService {
       .sort((a, b) => Number(a - b));
     const firstRealDate = datesFromDb[0];
 
-    // Only adjust if requested startDate is before first real data
-    if (firstRealDate && BigInt(startDate) < firstRealDate) {
+    if (firstRealDate && BigInt(referenceDate) < firstRealDate) {
       return firstRealDate.toString();
     }
 
-    return startDate;
+    return referenceDate;
   }
 
   /**
