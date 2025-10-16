@@ -16,6 +16,7 @@ export interface DaoMetricsFilters {
   startDate?: string;
   endDate?: string;
   orderDirection?: "asc" | "desc";
+  limit?: number;
 }
 
 export class DelegationPercentageRepository {
@@ -27,7 +28,7 @@ export class DelegationPercentageRepository {
   async getDaoMetricsByDateRange(
     filters: DaoMetricsFilters,
   ): Promise<DaoMetricRow[]> {
-    const { startDate, endDate, orderDirection = "asc" } = filters;
+    const { startDate, endDate, orderDirection = "asc", limit } = filters;
 
     const queryFilters: (SQL | undefined)[] = [
       inArray(daoMetricsDayBucket.metricType, [
@@ -43,7 +44,7 @@ export class DelegationPercentageRepository {
       queryFilters.push(lte(daoMetricsDayBucket.date, BigInt(endDate)));
     }
 
-    const rows = await db
+    const baseQuery = db
       .select()
       .from(daoMetricsDayBucket)
       .where(and(...queryFilters.filter(Boolean)))
@@ -53,6 +54,34 @@ export class DelegationPercentageRepository {
           : asc(daoMetricsDayBucket.date),
       );
 
+    const rows =
+      limit !== undefined ? await baseQuery.limit(limit) : await baseQuery;
+
     return rows as DaoMetricRow[];
+  }
+
+  /**
+   * Fetches the last value of a specific metric type before a given date
+   * @param metricType - The metric type to search for
+   * @param beforeDate - The date to search before
+   * @returns The most recent metric row or null if not found
+   */
+  async getLastMetricValueBefore(
+    metricType: string,
+    beforeDate: string,
+  ): Promise<DaoMetricRow | null> {
+    const rows = await db
+      .select()
+      .from(daoMetricsDayBucket)
+      .where(
+        and(
+          lte(daoMetricsDayBucket.date, BigInt(beforeDate)),
+          inArray(daoMetricsDayBucket.metricType, [metricType]),
+        ),
+      )
+      .orderBy(desc(daoMetricsDayBucket.date))
+      .limit(1);
+
+    return rows[0] ? (rows[0] as DaoMetricRow) : null;
   }
 }

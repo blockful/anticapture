@@ -56,28 +56,58 @@ export class DelegationPercentageService {
       limit = 100,
     } = filters;
 
-    // 1. Fetch data from repository
+    // 1. Get initial values before startDate (for proper forward-fill)
+    const initialValues = startDate
+      ? await this.getInitialValuesBeforeDate(startDate)
+      : { delegated: 0n, total: 0n };
+
+    // 2. Fetch data from repository
     const rows = await this.repository.getDaoMetricsByDateRange({
       startDate,
       endDate,
       orderDirection,
     });
 
-    // 2. Organize data by date
+    // 3. Organize data by date
     const dateMap = this.organizeDateMap(rows);
 
-    // 3. Generate complete date range
+    // 4. If no data found and no initial values, return empty
+    // This happens when startDate is before any available data
+    if (
+      dateMap.size === 0 &&
+      initialValues.delegated === 0n &&
+      initialValues.total === 0n
+    ) {
+      return {
+        items: [],
+        totalCount: 0,
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          endCursor: null,
+          startCursor: null,
+        },
+      };
+    }
+
+    // 5. Adjust startDate if no previous values and startDate is before first data
+    // This prevents returning 0% for dates before first real data
+    const effectiveStartDate = startDate
+      ? this.adjustStartDateToFirstRealData(startDate, dateMap, initialValues)
+      : startDate;
+
+    // 6. Generate complete date range
     const allDates = this.generateDateRange(
       dateMap,
-      startDate,
+      effectiveStartDate,
       endDate,
       orderDirection,
     );
 
-    // 4. Apply forward-fill and calculate percentage
-    const allItems = this.applyForwardFill(allDates, dateMap);
+    // 7. Apply forward-fill and calculate percentage
+    const allItems = this.applyForwardFill(allDates, dateMap, initialValues);
 
-    // 5. Apply cursor-based pagination
+    // 8. Apply cursor-based pagination
     const { items, hasNextPage } = this.applyCursorPagination(
       allItems,
       after,
@@ -85,7 +115,7 @@ export class DelegationPercentageService {
       limit,
     );
 
-    // 6. Build page info
+    // 9. Build page info
     const pageInfo = this.buildPageInfo(items, hasNextPage, after, before);
 
     return {
@@ -93,6 +123,68 @@ export class DelegationPercentageService {
       totalCount: items.length,
       pageInfo,
     };
+  }
+
+  /**
+   * Gets the last known values before a given date for proper forward-fill
+   * Returns { delegated: 0n, total: 0n } if no previous values exist
+   */
+  private async getInitialValuesBeforeDate(
+    beforeDate: string,
+  ): Promise<{ delegated: bigint; total: bigint }> {
+    try {
+      const beforeTimestamp = (BigInt(beforeDate) - 86400n).toString();
+
+      const [delegatedRow, totalRow] = await Promise.all([
+        this.repository.getLastMetricValueBefore(
+          MetricTypesEnum.DELEGATED_SUPPLY,
+          beforeTimestamp,
+        ),
+        this.repository.getLastMetricValueBefore(
+          MetricTypesEnum.TOTAL_SUPPLY,
+          beforeTimestamp,
+        ),
+      ]);
+
+      return {
+        delegated: delegatedRow?.high ?? 0n,
+        total: totalRow?.high ?? 0n,
+      };
+    } catch (error) {
+      console.error("Error fetching initial values:", error);
+      return { delegated: 0n, total: 0n };
+    }
+  }
+
+  /**
+   * Adjusts startDate to the first real data date if requested startDate is before any data
+   * Returns the original startDate if it's within or after available data range
+   */
+  private adjustStartDateToFirstRealData(
+    startDate: string,
+    dateMap: Map<string, DateData>,
+    initialValues: { delegated: bigint; total: bigint },
+  ): string {
+    // Only adjust if no previous values exist and we have data
+    if (
+      initialValues.delegated !== 0n ||
+      initialValues.total !== 0n ||
+      dateMap.size === 0
+    ) {
+      return startDate;
+    }
+
+    const datesFromDb = Array.from(dateMap.keys())
+      .map((d) => BigInt(d))
+      .sort((a, b) => Number(a - b));
+    const firstRealDate = datesFromDb[0];
+
+    // Only adjust if requested startDate is before first real data
+    if (firstRealDate && BigInt(startDate) < firstRealDate) {
+      return firstRealDate.toString();
+    }
+
+    return startDate;
   }
 
   /**
@@ -171,9 +263,13 @@ export class DelegationPercentageService {
   private applyForwardFill(
     allDates: bigint[],
     dateMap: Map<string, DateData>,
+    initialValues: { delegated: bigint; total: bigint } = {
+      delegated: 0n,
+      total: 0n,
+    },
   ): DelegationPercentageItem[] {
-    let lastDelegated = 0n;
-    let lastTotal = 0n;
+    let lastDelegated = initialValues.delegated;
+    let lastTotal = initialValues.total;
 
     return allDates.map((date) => {
       const dateStr = date.toString();

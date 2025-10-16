@@ -12,6 +12,7 @@ describe("DelegationPercentageService", () => {
   beforeEach(() => {
     mockRepository = {
       getDaoMetricsByDateRange: jest.fn(),
+      getLastMetricValueBefore: jest.fn(),
     } as jest.Mocked<DelegationPercentageRepository>;
 
     service = new DelegationPercentageService(mockRepository);
@@ -377,6 +378,269 @@ describe("DelegationPercentageService", () => {
       expect(result.items[2]?.high).toBe("25000000000000000000");
       // Day 4: 25% (forward-filled)
       expect(result.items[3]?.high).toBe("25000000000000000000");
+    });
+
+    it("should use last known values before startDate for forward-fill", async () => {
+      const ONE_DAY = 86400;
+      const day1 = 1600000000n;
+      const day100 = day1 + BigInt(ONE_DAY * 100);
+      const day105 = day100 + BigInt(ONE_DAY * 5);
+
+      mockRepository.getLastMetricValueBefore
+        .mockResolvedValueOnce({
+          date: day1,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 40000000000000000000n,
+        })
+        .mockResolvedValueOnce({
+          date: day1,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        });
+
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day105,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 60000000000000000000n,
+        },
+        {
+          date: day105,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        startDate: day100.toString(),
+        endDate: day105.toString(),
+      });
+
+      expect(result.items).toHaveLength(6);
+      // Days 100-104: should use values from day 1 (40/100 = 40%)
+      expect(result.items[0]?.high).toBe("40000000000000000000"); // day 100
+      expect(result.items[4]?.high).toBe("40000000000000000000"); // day 104
+      // Day 105: new value (60/100 = 60%)
+      expect(result.items[5]?.high).toBe("60000000000000000000");
+    });
+
+    it("should handle when only one metric has previous value", async () => {
+      const ONE_DAY = 86400;
+      const day50 = 1600000000n;
+      const day100 = day50 + BigInt(ONE_DAY * 50);
+
+      // Mock: only DELEGATED has previous value
+      mockRepository.getLastMetricValueBefore
+        .mockResolvedValueOnce({
+          date: day50,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 30000000000000000000n,
+        })
+        .mockResolvedValueOnce(null); // TOTAL_SUPPLY has no previous value
+
+      // Main data: TOTAL_SUPPLY appears on day 100
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        startDate: day100.toString(),
+        endDate: day100.toString(),
+      });
+
+      // With total = 100 and delegated = 30 (from past) = 30%
+      expect(result.items[0]?.high).toBe("30000000000000000000");
+    });
+
+    it("should start with 0% when no previous values exist", async () => {
+      const day100 = 1600000000n;
+
+      // Mock: no previous values
+      mockRepository.getLastMetricValueBefore
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+
+      // Main data: appears only on day 100
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 50000000000000000000n,
+        },
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        startDate: day100.toString(),
+        endDate: day100.toString(),
+      });
+
+      // Should use values from day 100 directly (50/100 = 50%)
+      expect(result.items[0]?.high).toBe("50000000000000000000");
+    });
+
+    it("should not fetch previous values when startDate is not provided", async () => {
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
+
+      await service.getDelegationPercentage({});
+
+      // Should not call getLastMetricValueBefore
+      expect(mockRepository.getLastMetricValueBefore).not.toHaveBeenCalled();
+    });
+
+    it("should fallback to 0 when fetching previous values fails", async () => {
+      const day100 = 1600000000n;
+
+      // Mock console.error to suppress test output
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      // Mock: error fetching previous values
+      mockRepository.getLastMetricValueBefore.mockRejectedValue(
+        new Error("Database error"),
+      );
+
+      // Main data
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 50000000000000000000n,
+        },
+        {
+          date: day100,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        startDate: day100.toString(),
+        endDate: day100.toString(),
+      });
+
+      // Should work normally with fallback to 0 (50/100 = 50%)
+      expect(result.items[0]?.high).toBe("50000000000000000000");
+      expect(result.items).toHaveLength(1);
+
+      // Verify error was logged
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error fetching initial values:",
+        expect.any(Error),
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should adjust startDate when requested startDate is before first real data", async () => {
+      const ONE_DAY = 86400;
+      const day5 = 1600000000n;
+      const day10 = day5 + BigInt(ONE_DAY * 5);
+      const day15 = day10 + BigInt(ONE_DAY * 5);
+
+      // Mock: no values before day 5
+      mockRepository.getLastMetricValueBefore
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+
+      // Real data starts on day 10
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+        {
+          date: day10,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 40000000000000000000n,
+        },
+        {
+          date: day10,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+        {
+          date: day15,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 50000000000000000000n,
+        },
+        {
+          date: day15,
+          daoId: "uniswap",
+          tokenId: "uni",
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 100000000000000000000n,
+        },
+      ]);
+
+      const result = await service.getDelegationPercentage({
+        startDate: day5.toString(),
+        endDate: day15.toString(),
+      });
+
+      // Should start from day 10 (first real data), not day 5
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.items[0]?.date).toBe(day10.toString());
+      expect(result.items[0]?.high).toBe("40000000000000000000");
+
+      // Should not have data from day 5-9 (before first real data)
+      const hasDayBefore10 = result.items.some(
+        (item) => BigInt(item.date) < day10,
+      );
+      expect(hasDayBefore10).toBe(false);
+    });
+
+    it("should return empty when startDate is after all available data", async () => {
+      const day5 = 1600000000n;
+      const day100 = day5 + BigInt(86400 * 100);
+
+      // Mock: no values before day 100
+      mockRepository.getLastMetricValueBefore
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+
+      // Mock: no data >= day 100
+      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
+
+      const result = await service.getDelegationPercentage({
+        startDate: day100.toString(),
+      });
+
+      // Should return empty
+      expect(result.items).toHaveLength(0);
+      expect(result.totalCount).toBe(0);
+      expect(result.pageInfo.hasNextPage).toBe(false);
     });
   });
 });
