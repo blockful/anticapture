@@ -38,8 +38,7 @@ export function topAccountBalanceVariations(
       const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getTopAccountBalanceVariations(
-        now,
-        days,
+        now - days,
         skip,
         limit,
         orderDirection,

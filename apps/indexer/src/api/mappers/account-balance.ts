@@ -1,5 +1,4 @@
 import { DaysEnum, DaysOpts } from "@/lib/enums";
-import { secondsToDays } from "@/lib/utils";
 import { z } from "@hono/zod-openapi";
 import { Address } from "viem";
 
@@ -27,7 +26,7 @@ export const TopAccountBalanceVariationsRequestSchema = z.object({
 
 export const TopAccountBalanceVariationsResponseSchema = z.object({
   period: z.object({
-    days: z.number().transform((val) => secondsToDays(val)),
+    days: z.string(),
     startTimestamp: z.string(),
     endTimestamp: z.string(),
   }),
@@ -61,7 +60,7 @@ export const TopAccountBalanceVariationsMapper = (
 ): TopAccountBalanceVariationsResponse => {
   return TopAccountBalanceVariationsResponseSchema.parse({
     period: {
-      days: days,
+      days: DaysEnum[days] as string,
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
       endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },

@@ -1763,7 +1763,7 @@ type topAccountBalanceVariations_200_response {
 }
 
 type query_topAccountBalanceVariations_period {
-  days: Float!
+  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
