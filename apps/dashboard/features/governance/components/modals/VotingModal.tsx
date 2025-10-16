@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/components";
-import { User2Icon, X } from "lucide-react";
+import { User2Icon, X, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import EnsGovernorAbi from "@/abis/ens-governor.json";
@@ -10,11 +10,12 @@ import {
   Chain,
   createWalletClient,
   custom,
-  // publicActions,
+  publicActions,
 } from "viem";
 import { useAccount } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
+import toast from "react-hot-toast";
 
 interface VotingModalProps {
   isOpen: boolean;
@@ -24,6 +25,36 @@ interface VotingModalProps {
 
 const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
   return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;
+};
+
+const showCustomToast = (message: string) => {
+  toast.custom(
+    (t) => (
+      <div
+        className={`bg-error flex max-w-[500px] items-center justify-between gap-4 px-6 py-4 text-black shadow-lg transition-all ${
+          t.visible ? "animate-enter" : "animate-leave"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <CheckCircle2 className="size-6 flex-shrink-0" />
+          <span className="font-inter text-base font-normal leading-6">
+            {message}
+          </span>
+        </div>
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          className="flex-shrink-0 transition-opacity hover:opacity-70"
+          aria-label="Close notification"
+        >
+          <X className="size-5" />
+        </button>
+      </div>
+    ),
+    {
+      duration: 4000,
+      position: "bottom-left",
+    },
+  );
 };
 
 const handleVote = async (
@@ -53,36 +84,42 @@ const handleVote = async (
     transport: custom(window.ethereum),
   });
 
-  // const client = walletClient.extend(publicActions);
+  const client = walletClient.extend(publicActions);
 
-  // const { request } = await client.simulateContract({
-  //   abi: EnsGovernorAbi,
-  //   address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-  //   functionName: "castVote",
-  //   args: [proposalId, voteNumber],
-  // });
+  try {
+    let request;
 
-  // const hash = await client.writeContract(request);
-  // console.log(hash);
-  if (!comment) {
-    const tx = await walletClient.writeContract({
-      abi: EnsGovernorAbi,
-      address: daoGovernanceAddress,
-      functionName: "castVote",
-      args: [proposalId, voteNumber],
-    });
+    if (!comment) {
+      const simulatedRequest = await client.simulateContract({
+        abi: EnsGovernorAbi,
+        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+        functionName: "castVote",
+        args: [proposalId, voteNumber],
+      });
 
-    return tx;
+      request = simulatedRequest.request;
+    } else {
+      const simulatedRequest = await client.simulateContract({
+        abi: EnsGovernorAbi,
+        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+        functionName: "castVoteWithReason",
+        args: [proposalId, voteNumber, comment],
+      });
+
+      request = simulatedRequest.request;
+    }
+
+    if (!request) {
+      throw new Error("Request not found");
+    }
+
+    const hash = await client.writeContract(request);
+    return hash;
+  } catch (error) {
+    console.error(error);
+    showCustomToast("Failed to vote");
+    return null;
   }
-
-  const tx = await walletClient.writeContract({
-    abi: EnsGovernorAbi,
-    address: daoGovernanceAddress,
-    functionName: "castVoteWithReason",
-    args: [proposalId, voteNumber, comment],
-  });
-
-  return tx;
 };
 
 export const VotingModal = ({
@@ -318,10 +355,9 @@ export const VotingModal = ({
           </Button>
           <Button
             disabled={!address || !chain}
-            onClick={() => {
+            onClick={async () => {
               if (!address || !chain) return;
-
-              handleVote(
+              const hash = await handleVote(
                 vote as "for" | "against" | "abstain",
                 proposal?.id as string,
                 address as unknown as Account,
@@ -329,6 +365,10 @@ export const VotingModal = ({
                 DaoIdEnum.ENS as DaoIdEnum,
                 comment,
               );
+              if (hash) {
+                showCustomToast("Vote submitted successfully!");
+                onClose();
+              }
             }}
           >
             Submit
