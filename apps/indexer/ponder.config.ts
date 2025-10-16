@@ -3,6 +3,7 @@ import ensConfig from "./config/ens.config";
 import uniswapConfig from "./config/uniswap.config";
 import optimismConfig from "./config/optimism.config";
 import gitcoinConfig from "./config/gitcoin.config";
+import scrollConfig from "./config/scroll.config";
 
 export default {
   chains: {
@@ -11,6 +12,7 @@ export default {
     ...uniswapConfig.chains,
     ...optimismConfig.chains,
     ...gitcoinConfig.chains,
+    ...scrollConfig.chains,
   },
   contracts: {
     ...arbitrumConfig.contracts,
@@ -18,5 +20,6 @@ export default {
     ...uniswapConfig.contracts,
     ...optimismConfig.contracts,
     ...gitcoinConfig.contracts,
+    ...scrollConfig.contracts,
   },
 };
