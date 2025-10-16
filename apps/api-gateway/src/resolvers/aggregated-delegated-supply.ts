@@ -238,7 +238,7 @@ export const aggregatedDelegatedSupplyResolver = {
       throw new Error('startDate must be before endDate');
     }
 
-    // Fetch data from all DAOs (without +1, let indexers handle hasNextPage)
+    // Fetch data from all DAOs
     const daoResponses = await fetchAndExtractDaoData(context, args, root);
 
     // Check if any DAO has more data (hasNextPage)
