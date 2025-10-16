@@ -5,3 +5,4 @@ export * from "./transfers.repository";
 export * from "./delegations.repository";
 export * from "./voting-power";
 export * from "./token.repository";
+export * from "./account-balance";
