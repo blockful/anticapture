@@ -392,7 +392,7 @@ export const VotingModal = ({
             Cancel
           </Button>
           <Button
-            disabled={!address || !chain}
+            disabled={!address || !chain || !vote}
             onClick={async () => {
               if (!address || !chain) return;
               const hash = await handleVote(
