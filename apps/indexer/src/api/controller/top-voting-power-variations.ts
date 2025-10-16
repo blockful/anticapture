@@ -38,8 +38,7 @@ export function topVotingPowerVariations(
       const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getTopVotingPowerVariations(
-        now,
-        days,
+        now - days,
         skip,
         limit,
         orderDirection,

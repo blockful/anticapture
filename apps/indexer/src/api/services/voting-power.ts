@@ -1,7 +1,6 @@
 import { Address } from "viem";
 
 import { DBVotingPowerWithRelations } from "@/api/mappers";
-import { DaysEnum } from "@/lib/enums";
 import { DBVotingPowerVariation } from "../mappers/top-voting-power-variations";
 
 interface VotingPowerRepository {
@@ -60,14 +59,11 @@ export class VotingPowerService {
   }
 
   async getTopVotingPowerVariations(
-    now: number,
-    days: DaysEnum,
+    startTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    const startTimestamp = now - days;
-
     return this.votingRepository.getTopVotingPowerChanges(
       startTimestamp,
       limit,

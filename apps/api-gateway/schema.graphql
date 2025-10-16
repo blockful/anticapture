@@ -1731,7 +1731,7 @@ type topVotingPowerVariations_200_response {
 }
 
 type query_topVotingPowerVariations_period {
-  days: Float!
+  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
