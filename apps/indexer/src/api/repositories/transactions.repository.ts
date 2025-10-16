@@ -68,8 +68,8 @@ export class TransactionsRepository {
       .with(filteredTransfers, filteredDelegations, transferAgg, delegationAgg)
       .select({
         transactionHash: transaction.transactionHash,
-        from: transaction.fromAddress,
-        to: transaction.toAddress,
+        fromAddress: transaction.fromAddress,
+        toAddress: transaction.toAddress,
         isCex: transaction.isCex,
         isDex: transaction.isDex,
         isLending: transaction.isLending,

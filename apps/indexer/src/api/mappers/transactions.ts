@@ -1,22 +1,14 @@
-import { transfer, delegation } from "ponder:schema";
+import { transfer, delegation, transaction } from "ponder:schema";
 import { isAddress } from "viem";
 import z from "zod";
 
-export type DBTransfer = typeof transfer.$inferSelect;
-export type DBDelegation = typeof delegation.$inferSelect;
-
-export type DBTransaction = {
-  transactionHash: string;
-  from: string | null;
-  to: string | null;
-  isCex: boolean;
-  isDex: boolean;
-  isLending: boolean;
-  isTotal: boolean;
-  timestamp: bigint;
+export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
   delegations: DBDelegation[];
 };
+
+export type DBTransfer = typeof transfer.$inferSelect;
+export type DBDelegation = typeof delegation.$inferSelect;
 
 export enum AffectedSupply {
   CEX = "CEX",
@@ -170,8 +162,8 @@ export const TransactionMapper = {
   toApi: (t: DBTransaction): TransactionResponse => {
     return {
       transactionHash: t.transactionHash,
-      from: t.from,
-      to: t.to,
+      from: t.fromAddress,
+      to: t.toAddress,
       isCex: t.isCex,
       isDex: t.isDex,
       isLending: t.isLending,
