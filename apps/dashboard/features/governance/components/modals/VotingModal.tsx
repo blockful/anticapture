@@ -10,12 +10,14 @@ import {
   Chain,
   createWalletClient,
   custom,
+  formatEther,
   publicActions,
 } from "viem";
 import { useAccount } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import toast from "react-hot-toast";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface VotingModalProps {
   isOpen: boolean;
@@ -130,6 +132,33 @@ export const VotingModal = ({
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
 
+  const totalVotes =
+    Number(proposal?.forVotes) +
+    Number(proposal?.againstVotes) +
+    Number(proposal?.abstainVotes);
+
+  const userReadableForVotes = formatNumberUserReadable(
+    Number(formatEther(BigInt(proposal?.forVotes || "0"))),
+  );
+  const userReadableAgainstVotes = formatNumberUserReadable(
+    Number(formatEther(BigInt(proposal?.againstVotes || "0"))),
+  );
+  const userReadableAbstainVotes = formatNumberUserReadable(
+    Number(formatEther(BigInt(proposal?.abstainVotes || "0"))),
+  );
+
+  const userReadableTotalVotes = formatNumberUserReadable(
+    Number(formatEther(BigInt(Number(totalVotes || "0")))),
+  );
+  const userReadableQuorum = formatNumberUserReadable(
+    Number(formatEther(BigInt(Number(proposal?.quorum || "0")))),
+  );
+  const forPercentage = (Number(proposal?.forVotes) / Number(totalVotes)) * 100;
+  const againstPercentage =
+    (Number(proposal?.againstVotes) / Number(totalVotes)) * 100;
+  const abstainPercentage =
+    (Number(proposal?.abstainVotes) / Number(totalVotes)) * 100;
+
   const { address, chain } = useAccount();
 
   // Prevent body scroll when modal is open
@@ -242,16 +271,19 @@ export const VotingModal = ({
                 </div>
 
                 <div className="bg-surface-hover relative h-1 w-[270px]">
-                  <div className="bg-success h-1 w-[30%]" />
+                  <div
+                    className="bg-success h-1"
+                    style={{ width: `${forPercentage}%` }}
+                  />
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  1.2M
+                  {userReadableForVotes}
                 </p>
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  86.3%
+                  {forPercentage.toFixed(1)}%
                 </p>
               </div>
             </div>
@@ -276,16 +308,19 @@ export const VotingModal = ({
                 </div>
 
                 <div className="bg-surface-hover relative h-1 w-[270px]">
-                  <div className="bg-error h-1 w-[60%]" />
+                  <div
+                    className="bg-error h-1"
+                    style={{ width: `${againstPercentage}%` }}
+                  />
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  1.2M
+                  {userReadableAgainstVotes}
                 </p>
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  86.3%
+                  {againstPercentage.toFixed(1)}%
                 </p>
               </div>
             </div>
@@ -310,16 +345,19 @@ export const VotingModal = ({
                 </div>
 
                 <div className="bg-surface-hover relative h-1 w-[270px]">
-                  <div className="bg-primary h-1 w-[30%]" />
+                  <div
+                    className="bg-primary h-1"
+                    style={{ width: `${abstainPercentage}%` }}
+                  />
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  1.2M
+                  {userReadableAbstainVotes}
                 </p>
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  86.3%
+                  {abstainPercentage.toFixed(1)}%
                 </p>
               </div>
             </div>
@@ -331,7 +369,7 @@ export const VotingModal = ({
               Quorum
             </p>
             <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-              1.2M / 1M
+              {userReadableTotalVotes} / {userReadableQuorum}
             </p>
           </div>
         </div>
