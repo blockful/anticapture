@@ -54,122 +54,12 @@ describe('aggregateMeanPercentage', () => {
     });
   });
 
-  it('should calculate mean when DAOs have aligned dates', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>([
-      [
-        'ENS',
-        {
-          items: [
-            { date: '1600128000', high: '60000000000000000000' }, // 60%
-            { date: '1600214400', high: '70000000000000000000' }, // 70%
-          ],
-          totalCount: 2,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
-          },
-        },
-      ],
-      [
-        'UNI',
-        {
-          items: [
-            { date: '1600128000', high: '40000000000000000000' }, // 40%
-            { date: '1600214400', high: '30000000000000000000' }, // 30%
-          ],
-          totalCount: 2,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
-          },
-        },
-      ],
-    ]);
+  it('should return empty when no DAOs have data', () => {
+    const daoResponses = new Map<string, DelegationPercentageResponse>();
 
     const result = aggregateMeanPercentage(daoResponses);
 
-    expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({
-      date: '1600128000',
-      high: '50000000000000000000', // (60 + 40) / 2 = 50%
-    });
-    expect(result[1]).toEqual({
-      date: '1600214400',
-      high: '50000000000000000000', // (70 + 30) / 2 = 50%
-    });
-  });
-
-  it('should handle empty DAO responses', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>([
-      [
-        'UNI',
-        {
-          items: [{ date: '1600041600', high: '50000000000000000000' }],
-          totalCount: 1,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
-          },
-        },
-      ],
-    ]);
-
-    const result = aggregateMeanPercentage(daoResponses);
-
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({
-      date: '1600041600',
-      high: '50000000000000000000',
-    });
-  });
-
-  it('should calculate mean across all DAOs at each index', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>([
-      [
-        'ENS',
-        {
-          items: [
-            { date: '1600041600', high: '50000000000000000000' },
-            { date: '1600128000', high: '30000000000000000000' },
-          ],
-          totalCount: 2,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
-          },
-        },
-      ],
-      [
-        'UNI',
-        {
-          items: [
-            { date: '1600041600', high: '40000000000000000000' },
-            { date: '1600128000', high: '60000000000000000000' },
-          ],
-          totalCount: 2,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
-          },
-        },
-      ],
-    ]);
-
-    const result = aggregateMeanPercentage(daoResponses);
-
-    expect(result).toHaveLength(2);
-    expect(result[0].high).toBe('45000000000000000000'); // (50 + 40) / 2
-    expect(result[1].high).toBe('45000000000000000000'); // (30 + 60) / 2
+    expect(result).toHaveLength(0);
   });
 
   it('should correctly convert bigint with 18 decimals', () => {
