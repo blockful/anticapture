@@ -255,7 +255,7 @@ export const VotingModal = ({
           {/* For vote  */}
           <div className="flex flex-col">
             <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2">
                 <div className="flex w-[100px] items-center gap-2">
                   <input
                     className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
@@ -270,7 +270,7 @@ export const VotingModal = ({
                   </p>
                 </div>
 
-                <div className="bg-surface-hover relative h-1 w-[270px]">
+                <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
                   <div
                     className="bg-success h-1"
                     style={{ width: `${forPercentage}%` }}
@@ -278,7 +278,7 @@ export const VotingModal = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                   {userReadableForVotes}
                 </p>
@@ -292,7 +292,7 @@ export const VotingModal = ({
           {/* Against vote  */}
           <div className="flex flex-col">
             <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2">
                 <div className="flex w-[100px] items-center gap-2">
                   <input
                     className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
@@ -307,7 +307,7 @@ export const VotingModal = ({
                   </p>
                 </div>
 
-                <div className="bg-surface-hover relative h-1 w-[270px]">
+                <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
                   <div
                     className="bg-error h-1"
                     style={{ width: `${againstPercentage}%` }}
@@ -315,7 +315,7 @@ export const VotingModal = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                   {userReadableAgainstVotes}
                 </p>
@@ -329,7 +329,7 @@ export const VotingModal = ({
           {/* Abstain vote  */}
           <div className="flex flex-col">
             <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2">
                 <div className="flex w-[100px] items-center gap-2">
                   <input
                     className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
@@ -344,7 +344,7 @@ export const VotingModal = ({
                   </p>
                 </div>
 
-                <div className="bg-surface-hover relative h-1 w-[270px]">
+                <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
                   <div
                     className="bg-primary h-1"
                     style={{ width: `${abstainPercentage}%` }}
@@ -352,7 +352,7 @@ export const VotingModal = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                   {userReadableAbstainVotes}
                 </p>
