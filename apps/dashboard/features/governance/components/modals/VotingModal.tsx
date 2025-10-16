@@ -4,12 +4,86 @@ import { Button } from "@/shared/components";
 import { User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import EnsGovernorAbi from "@/abis/ens-governor.json";
+import {
+  Account,
+  Chain,
+  createWalletClient,
+  custom,
+  // publicActions,
+} from "viem";
+import { useAccount } from "wagmi";
+import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
   proposal: Query_Proposals_Items_Items;
 }
+
+const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
+  return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;
+};
+
+const handleVote = async (
+  vote: "for" | "against" | "abstain",
+  proposalId: string,
+  account: Account,
+  chain: Chain,
+  daoId: DaoIdEnum,
+
+  comment?: string,
+) => {
+  console.log(vote);
+  console.log(comment);
+  console.log(proposalId);
+
+  const daoGovernanceAddress = getDaoGovernanceAddress(daoId);
+
+  if (!daoGovernanceAddress) {
+    throw new Error("DAO governance address not found");
+  }
+
+  const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
+
+  const walletClient = createWalletClient({
+    account: account,
+    chain: chain,
+    transport: custom(window.ethereum),
+  });
+
+  // const client = walletClient.extend(publicActions);
+
+  // const { request } = await client.simulateContract({
+  //   abi: EnsGovernorAbi,
+  //   address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+  //   functionName: "castVote",
+  //   args: [proposalId, voteNumber],
+  // });
+
+  // const hash = await client.writeContract(request);
+  // console.log(hash);
+  if (!comment) {
+    const tx = await walletClient.writeContract({
+      abi: EnsGovernorAbi,
+      address: daoGovernanceAddress,
+      functionName: "castVote",
+      args: [proposalId, voteNumber],
+    });
+
+    return tx;
+  }
+
+  const tx = await walletClient.writeContract({
+    abi: EnsGovernorAbi,
+    address: daoGovernanceAddress,
+    functionName: "castVoteWithReason",
+    args: [proposalId, voteNumber, comment],
+  });
+
+  return tx;
+};
 
 export const VotingModal = ({
   isOpen,
@@ -18,6 +92,8 @@ export const VotingModal = ({
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
+
+  const { address, chain } = useAccount();
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -240,7 +316,23 @@ export const VotingModal = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button>Submit</Button>
+          <Button
+            disabled={!address || !chain}
+            onClick={() => {
+              if (!address || !chain) return;
+
+              handleVote(
+                vote as "for" | "against" | "abstain",
+                proposal?.id as string,
+                address as unknown as Account,
+                chain,
+                DaoIdEnum.ENS as DaoIdEnum,
+                comment,
+              );
+            }}
+          >
+            Submit
+          </Button>
         </div>
       </div>
     </div>
