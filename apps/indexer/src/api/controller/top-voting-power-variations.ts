@@ -6,14 +6,11 @@ import {
   TopVotingPowerVariationsResponseSchema,
 } from "../mappers/top-voting-power-variations";
 
-export function topVotingPowerVariations(
-  app: Hono,
-  service: VotingPowerService,
-) {
+export function votingPowerVariations(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "topVotingPowerVariations",
+      operationId: "votingPowerVariations",
       path: "/voting-power/variations",
       summary: "Get top changes in voting power for a given period",
       description:

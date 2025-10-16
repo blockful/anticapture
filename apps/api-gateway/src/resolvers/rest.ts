@@ -23,7 +23,7 @@ const daoItemQueries = [
   "votingPowers",
   "proposalNonVoters",
   "token",
-  "topVotingPowerVariations",
+  "votingPowerVariations",
   "topAccountBalanceVariations",
 ];
 

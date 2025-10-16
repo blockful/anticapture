@@ -38,7 +38,7 @@ import { getChain } from "@/lib/utils";
 import { HistoricalVotingPowerService, VotingPowerService } from "./services";
 import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { topVotingPowerVariations } from "./controller/top-voting-power-variations";
+import { votingPowerVariations } from "./controller/top-voting-power-variations";
 import { TokenService } from "./services/token";
 import { topAccountBalanceVariations } from "./controller";
 import { TopBalanceVariationsService } from "./services";
@@ -120,7 +120,7 @@ historicalOnchain(
 transactions(app, transactionsService);
 lastUpdate(app);
 votingPower(app, votingPowerService);
-topVotingPowerVariations(app, votingPowerService);
+votingPowerVariations(app, votingPowerService);
 topAccountBalanceVariations(
   app,
   new TopBalanceVariationsService(accountBalanceRepo),
