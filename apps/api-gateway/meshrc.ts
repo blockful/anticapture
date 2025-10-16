@@ -57,6 +57,36 @@ export default processConfig(
           ];
         }),
     ],
+    additionalTypeDefs:`
+      type AggregatedDelegatedSupplyItem {
+        date: String!
+        high: String!
+      }
+
+      type PageInfo {
+        hasNextPage: Boolean!
+        hasPreviousPage: Boolean!
+        endCursor: String
+        startCursor: String
+      }
+
+      type AggregatedDelegatedSupplyPage {
+        items: [AggregatedDelegatedSupplyItem!]!
+        totalCount: Int!
+        pageInfo: PageInfo!
+      }
+
+      extend type Query {
+        aggregatedDelegatedSupply(
+          after: String
+          before: String
+          startDate: String
+          endDate: String
+          orderDirection: String
+          limit: Int
+        ): AggregatedDelegatedSupplyPage!
+      }
+    `,
     additionalResolvers: ["src/resolvers/index"],
   },
   {

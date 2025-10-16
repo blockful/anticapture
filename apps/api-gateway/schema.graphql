@@ -88,7 +88,7 @@ type Query {
   proposal(id: String!): proposal_200_response
 
   """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc): proposalNonVoters_200_response
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
@@ -124,6 +124,10 @@ type Query {
 
   """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+
+  """Get delegation percentage day buckets with forward-fill"""
+  getDelegationPercentage(after: String, before: String, startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 100): getDelegationPercentage_200_response
+  aggregatedDelegatedSupply(after: String, before: String, startDate: String, endDate: String, orderDirection: String, limit: Int): AggregatedDelegatedSupplyPage!
 }
 
 """
@@ -789,7 +793,7 @@ type votesOnchain {
   proposalId: String!
   support: String!
   votingPower: BigInt!
-  reason: String!
+  reason: String
   timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
@@ -1337,6 +1341,25 @@ enum queryInput_historicalTokenData_days {
   _365d
 }
 
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: Float!
+}
+
+enum queryInput_token_currency {
+  eth
+  usd
+}
+
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
@@ -1772,4 +1795,48 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type getDelegationPercentage_200_response {
+  items: [query_getDelegationPercentage_items_items]!
+  totalCount: Float!
+  pageInfo: query_getDelegationPercentage_pageInfo!
+}
+
+type query_getDelegationPercentage_items_items {
+  date: String!
+  daoId: String!
+  tokenId: String!
+  metricType: String!
+  open: String!
+  close: String!
+  low: String!
+  high: String!
+  average: String!
+  volume: String!
+  count: Float!
+  lastUpdate: String!
+}
+
+type query_getDelegationPercentage_pageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endCursor: String
+  startCursor: String
+}
+
+enum queryInput_getDelegationPercentage_orderDirection {
+  asc
+  desc
+}
+
+type AggregatedDelegatedSupplyItem {
+  date: String!
+  high: String!
+}
+
+type AggregatedDelegatedSupplyPage {
+  items: [AggregatedDelegatedSupplyItem!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
 }
