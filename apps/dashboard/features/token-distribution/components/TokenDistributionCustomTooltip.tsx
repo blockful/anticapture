@@ -92,7 +92,7 @@ export const TokenDistributionCustomTooltip: React.FC<
                     {typeof value === "string"
                       ? value
                       : `${entry.name === "TOKEN_PRICE" ? "$" : ""}${formatNumberUserReadable(
-                          Number.isFinite(value) ? Math.floor(value) : 0,
+                          value,
                         )}${shouldSkipDaoId ? "" : ` ${daoId}`}`}
                   </strong>
                 </p>

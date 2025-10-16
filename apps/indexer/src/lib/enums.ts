@@ -5,6 +5,7 @@ export enum DaoIdEnum {
   OP = "OP",
   GTC = "GTC",
   TEST = "TEST",
+  SCR = "SCR",
 }
 
 const SECONDS_IN_DAY = 24 * 60 * 60;
