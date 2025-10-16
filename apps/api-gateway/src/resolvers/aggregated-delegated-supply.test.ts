@@ -54,14 +54,14 @@ describe('aggregateMeanPercentage', () => {
     });
   });
 
-  it('should perform outer join when DAOs have different dates', () => {
+  it('should calculate mean when DAOs have aligned dates', () => {
     const daoResponses = new Map<string, DelegationPercentageResponse>([
       [
         'ENS',
         {
           items: [
-            { date: '1600041600', high: '50000000000000000000' }, // 50%
             { date: '1600128000', high: '60000000000000000000' }, // 60%
+            { date: '1600214400', high: '70000000000000000000' }, // 70%
           ],
           totalCount: 2,
           pageInfo: {
@@ -92,36 +92,19 @@ describe('aggregateMeanPercentage', () => {
 
     const result = aggregateMeanPercentage(daoResponses);
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
-      date: '1600041600',
-      high: '50000000000000000000', // only ENS
-    });
-    expect(result[1]).toEqual({
       date: '1600128000',
       high: '50000000000000000000', // (60 + 40) / 2 = 50%
     });
-    expect(result[2]).toEqual({
+    expect(result[1]).toEqual({
       date: '1600214400',
-      high: '30000000000000000000', // only UNI
+      high: '50000000000000000000', // (70 + 30) / 2 = 50%
     });
   });
 
   it('should handle empty DAO responses', () => {
     const daoResponses = new Map<string, DelegationPercentageResponse>([
-      [
-        'ENS',
-        {
-          items: [],
-          totalCount: 0,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
-          },
-        },
-      ],
       [
         'UNI',
         {
@@ -146,14 +129,14 @@ describe('aggregateMeanPercentage', () => {
     });
   });
 
-  it('should ignore items with empty high value', () => {
+  it('should calculate mean across all DAOs at each index', () => {
     const daoResponses = new Map<string, DelegationPercentageResponse>([
       [
         'ENS',
         {
           items: [
             { date: '1600041600', high: '50000000000000000000' },
-            { date: '1600128000', high: '' }, // empty
+            { date: '1600128000', high: '30000000000000000000' },
           ],
           totalCount: 2,
           pageInfo: {
@@ -186,7 +169,7 @@ describe('aggregateMeanPercentage', () => {
 
     expect(result).toHaveLength(2);
     expect(result[0].high).toBe('45000000000000000000'); // (50 + 40) / 2
-    expect(result[1].high).toBe('60000000000000000000'); // only UNI counted
+    expect(result[1].high).toBe('45000000000000000000'); // (30 + 60) / 2
   });
 
   it('should correctly convert bigint with 18 decimals', () => {
@@ -229,15 +212,15 @@ describe('aggregateMeanPercentage', () => {
     expect(result[0].high).toBe('17901233956790122496');
   });
 
-  it('should sort results by date in ascending order', () => {
+  it('should preserve order from input (no sorting)', () => {
     const daoResponses = new Map<string, DelegationPercentageResponse>([
       [
         'ENS',
         {
           items: [
-            { date: '1600214400', high: '30000000000000000000' },
             { date: '1600041600', high: '10000000000000000000' },
             { date: '1600128000', high: '20000000000000000000' },
+            { date: '1600214400', high: '30000000000000000000' },
           ],
           totalCount: 3,
           pageInfo: {
@@ -261,7 +244,7 @@ describe('aggregateMeanPercentage', () => {
 
 describe('buildPaginatedResponse', () => {
   it('should return empty response when items is empty', () => {
-    const result = buildPaginatedResponse([], {});
+    const result = buildPaginatedResponse([], {}, false);
 
     expect(result.items).toHaveLength(0);
     expect(result.totalCount).toBe(0);
@@ -278,26 +261,26 @@ describe('buildPaginatedResponse', () => {
       { date: '3', high: '30' },
     ];
 
-    const result = buildPaginatedResponse(items, { orderDirection: 'desc' });
+    const result = buildPaginatedResponse(items, { orderDirection: 'desc' }, false);
 
     expect(result.items[0].date).toBe('3');
     expect(result.items[1].date).toBe('2');
     expect(result.items[2].date).toBe('1');
   });
 
-  it('should apply pagination and detect hasNextPage', () => {
+  it('should use hasNextPage from DAOs and apply limit', () => {
     const items = [
       { date: '1', high: '10' },
       { date: '2', high: '20' },
       { date: '3', high: '30' },
     ];
 
-    const result = buildPaginatedResponse(items, { limit: 2 });
+    const result = buildPaginatedResponse(items, { limit: 2 }, true);
 
     expect(result.items).toHaveLength(2);
-    expect(result.pageInfo.hasNextPage).toBe(true);
     expect(result.items[0].date).toBe('1');
     expect(result.items[1].date).toBe('2');
+    expect(result.pageInfo.hasNextPage).toBe(true);
   });
 
   it('should set correct cursors in pageInfo', () => {
@@ -307,7 +290,7 @@ describe('buildPaginatedResponse', () => {
       { date: '300', high: '30' },
     ];
 
-    const result = buildPaginatedResponse(items, {});
+    const result = buildPaginatedResponse(items, {}, false);
 
     expect(result.pageInfo.startCursor).toBe('100');
     expect(result.pageInfo.endCursor).toBe('300');
@@ -316,17 +299,17 @@ describe('buildPaginatedResponse', () => {
   it('should set hasPreviousPage when after or before is provided', () => {
     const items = [{ date: '1', high: '10' }];
 
-    const resultWithAfter = buildPaginatedResponse(items, { after: '0' });
+    const resultWithAfter = buildPaginatedResponse(items, { after: '0' }, false);
     expect(resultWithAfter.pageInfo.hasPreviousPage).toBe(true);
 
-    const resultWithBefore = buildPaginatedResponse(items, { before: '2' });
+    const resultWithBefore = buildPaginatedResponse(items, { before: '2' }, false);
     expect(resultWithBefore.pageInfo.hasPreviousPage).toBe(true);
 
-    const resultWithoutCursor = buildPaginatedResponse(items, {});
+    const resultWithoutCursor = buildPaginatedResponse(items, {}, false);
     expect(resultWithoutCursor.pageInfo.hasPreviousPage).toBe(false);
   });
 
-  it('should combine ordering and pagination', () => {
+  it('should combine ordering, limit and hasNextPage from DAOs', () => {
     const items = [
       { date: '1', high: '10' },
       { date: '2', high: '20' },
@@ -337,7 +320,7 @@ describe('buildPaginatedResponse', () => {
     const result = buildPaginatedResponse(items, {
       orderDirection: 'desc',
       limit: 2,
-    });
+    }, true);
 
     expect(result.items).toHaveLength(2);
     expect(result.items[0].date).toBe('4'); // desc order

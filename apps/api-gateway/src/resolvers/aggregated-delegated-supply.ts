@@ -71,37 +71,43 @@ export function alignDaoResponses(
 /**
  * Aggregates delegation percentages across DAOs using mean calculation
  * Returns high as the mean percentage in bigint format (18 decimals)
- * Complexity: O(n x d) where n is the number of dates and d is the number of DAOs
+ * Assumes all DAOs have the same dates after alignment (via alignDaoResponses)
+ * Complexity: O(m × n) where m is number of items and n is number of DAOs
  */
 export function aggregateMeanPercentage(
   daoResponses: Map<string, DelegationPercentageResponse>
 ): { date: string; high: string }[] {
-  // Build a map: date -> array of percentages from each DAO
-  const datePercentages = new Map<string, number[]>();
+  const daoResponsesArray = Array.from(daoResponses.values());
 
-  daoResponses.forEach((response) => {
-    response.items.forEach((item) => {
-      if (!datePercentages.has(item.date)) {
-        datePercentages.set(item.date, []);
-      }
-      if (item.high) {
-        // Convert from bigint with 18 decimals to percentage (0-100)
-        const percentage = Number(BigInt(item.high)) / Number(BigInt(1e18));
-        datePercentages.get(item.date)!.push(percentage);
-      }
+  // Handle empty case
+  if (daoResponsesArray.length === 0) {
+    return [];
+  }
+
+  // Use first DAO as reference (all DAOs have same dates after alignment)
+  const referenceDao = daoResponsesArray[0];
+
+  if (!referenceDao || referenceDao.items.length === 0) {
+    return [];
+  }
+
+  // For each index, calculate mean across all DAOs
+  return referenceDao.items.map((_, index) => {
+    const percentages = daoResponsesArray.map((response) => {
+      const item = response.items[index];
+      // Convert from bigint with 18 decimals to percentage (0-100)
+      return Number(BigInt(item.high)) / Number(BigInt(1e18));
     });
-  });
 
-  // Convert to array, calculate means, and sort by date
-  return Array.from(datePercentages.entries())
-    .map(([date, percentages]) => {
-      // If no percentages, return empty high
-      const high = percentages.length > 0
-        ? BigInt(Math.round((percentages.reduce((sum, p) => sum + p, 0) / percentages.length) * Number(BigInt(1e18)))).toString()
-        : "";
-      return { date, high };
-    })
-    .sort((a, b) => Number(BigInt(a.date) - BigInt(b.date)));
+    const mean =
+      percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
+    const highAsBigInt = BigInt(Math.round(mean * Number(BigInt(1e18))));
+
+    return {
+      date: referenceDao.items[index].date,
+      high: highAsBigInt.toString(),
+    };
+  });
 }
 
 /**
@@ -139,6 +145,12 @@ export async function fetchAndExtractDaoData(
                 date
                 high
               }
+              pageInfo {
+                hasNextPage
+                hasPreviousPage
+                endCursor
+                startCursor
+              }
             }
           `,
         })
@@ -171,7 +183,8 @@ export function buildPaginatedResponse(
     after?: string;
     before?: string;
     orderDirection?: string;
-  }
+  },
+  hasNextPageFromDaos: boolean
 ): DelegationPercentageResponse {
   // Handle empty case
   if (items.length === 0) {
@@ -191,16 +204,15 @@ export function buildPaginatedResponse(
   const ordered =
     args.orderDirection === 'desc' ? [...items].reverse() : items;
 
-  // Apply pagination
+  // Apply limit if specified
   const userLimit = args.limit || 100;
-  const hasNextPage = ordered.length > userLimit;
   const finalItems = ordered.slice(0, userLimit);
 
   return {
     items: finalItems,
     totalCount: finalItems.length,
     pageInfo: {
-      hasNextPage,
+      hasNextPage: hasNextPageFromDaos,
       hasPreviousPage: !!args.after || !!args.before,
       endCursor:
         finalItems.length > 0 ? finalItems[finalItems.length - 1].date : null,
@@ -226,10 +238,13 @@ export const aggregatedDelegatedSupplyResolver = {
       throw new Error('startDate must be before endDate');
     }
 
-    // Fetch data from all DAOs
-    const userLimit = args.limit || 100;
-    const queryArgs = { ...args, limit: userLimit + 1 };
-    const daoResponses = await fetchAndExtractDaoData(context, queryArgs, root);
+    // Fetch data from all DAOs (without +1, let indexers handle hasNextPage)
+    const daoResponses = await fetchAndExtractDaoData(context, args, root);
+
+    // Check if any DAO has more data (hasNextPage)
+    const hasNextPage = Array.from(daoResponses.values()).some(
+      (response) => response.pageInfo.hasNextPage
+    );
 
     // Align DAO responses to ensure all DAOs have data in the same range
     const alignedResponses = alignDaoResponses(
@@ -243,6 +258,6 @@ export const aggregatedDelegatedSupplyResolver = {
         ? []
         : aggregateMeanPercentage(alignedResponses);
 
-    return buildPaginatedResponse(aggregated, args);
+    return buildPaginatedResponse(aggregated, args, hasNextPage);
   },
 };
