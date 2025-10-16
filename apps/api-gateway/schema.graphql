@@ -115,7 +115,7 @@ type Query {
   votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
-  topAccountBalanceVariations(days: queryInput_topAccountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_topAccountBalanceVariations_orderDirection = desc): topAccountBalanceVariations_200_response
+  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 }
 
 """
@@ -1757,18 +1757,18 @@ enum queryInput_votingPowerVariations_orderDirection {
   desc
 }
 
-type topAccountBalanceVariations_200_response {
-  period: query_topAccountBalanceVariations_period!
-  items: [query_topAccountBalanceVariations_items_items]!
+type accountBalanceVariations_200_response {
+  period: query_accountBalanceVariations_period!
+  items: [query_accountBalanceVariations_items_items]!
 }
 
-type query_topAccountBalanceVariations_period {
+type query_accountBalanceVariations_period {
   days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
 
-type query_topAccountBalanceVariations_items_items {
+type query_accountBalanceVariations_items_items {
   accountId: String!
   previousBalance: String!
   currentBalance: String!
@@ -1776,7 +1776,7 @@ type query_topAccountBalanceVariations_items_items {
   percentageChange: String!
 }
 
-enum queryInput_topAccountBalanceVariations_days {
+enum queryInput_accountBalanceVariations_days {
   _7d
   _30d
   _90d
@@ -1784,7 +1784,7 @@ enum queryInput_topAccountBalanceVariations_days {
   _365d
 }
 
-enum queryInput_topAccountBalanceVariations_orderDirection {
+enum queryInput_accountBalanceVariations_orderDirection {
   asc
   desc
 }

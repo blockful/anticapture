@@ -40,7 +40,7 @@ import { DuneService } from "./services/dune/dune.service";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { votingPowerVariations } from "./controller/top-voting-power-variations";
 import { TokenService } from "./services/token";
-import { topAccountBalanceVariations } from "./controller";
+import { accountBalanceVariations } from "./controller";
 import { TopBalanceVariationsService } from "./services";
 
 const app = new Hono({
@@ -121,7 +121,7 @@ transactions(app, transactionsService);
 lastUpdate(app);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-topAccountBalanceVariations(
+accountBalanceVariations(
   app,
   new TopBalanceVariationsService(accountBalanceRepo),
 );

@@ -6,14 +6,14 @@ import {
 } from "../mappers";
 import { TopBalanceVariationsService } from "../services";
 
-export function topAccountBalanceVariations(
+export function accountBalanceVariations(
   app: Hono,
   service: TopBalanceVariationsService,
 ) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "topAccountBalanceVariations",
+      operationId: "accountBalanceVariations",
       path: "/account-balance/variations",
       summary: "Get top variations in account balances for a given period",
       description:
