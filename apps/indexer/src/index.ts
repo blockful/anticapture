@@ -24,6 +24,8 @@ import { GTCClient } from "@/indexer/gtc/client";
 import { GTCTokenIndexer } from "@/indexer/gtc/erc20";
 import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
 import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "./indexer/scr";
+import { COMPGovernorIndexer, COMPTokenIndexer } from "./indexer/comp";
+import { COMPClient } from "./indexer/comp/client";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -86,12 +88,18 @@ switch (daoId) {
     SCRGovernorIndexer(new SCRClient(client, governor.address), blockTime);
     break;
   }
+  case DaoIdEnum.COMP: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    COMPTokenIndexer(token.address, token.decimals);
+    COMPGovernorIndexer(new COMPClient(client, governor.address), blockTime);
+    break;
+  }
   default:
     throw new Error(`DAO ${daoId} not supported`);
 }
 
 //@ts-expect-error ignore linting error
 //This line is to avoid the error "Do not know how to serialize a BigInt"
-BigInt.prototype.toJSON = function () {
+BigInt.prototype.toJSON = function() {
   return this.toString();
 };
