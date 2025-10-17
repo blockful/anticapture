@@ -21,6 +21,7 @@ import { CubeIcon } from "@radix-ui/react-icons";
 import { Clock, Pointer } from "lucide-react";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 export const VoteCard = ({
   daoOverview,
@@ -31,6 +32,7 @@ export const VoteCard = ({
   const { data: daoData, loading } = useDaoData(
     daoId.toUpperCase() as DaoIdEnum,
   );
+  const daoConfig = daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum];
   const { isMobile } = useScreenSize();
 
   if (loading) {
@@ -58,8 +60,16 @@ export const VoteCard = ({
                     icon={<CubeIcon className="text-link size-3.5" />}
                     label={
                       isMobile
-                        ? formatBlocksToUserReadable(daoData.votingDelay, true)
-                        : formatBlocksToUserReadable(daoData.votingDelay, false)
+                        ? formatBlocksToUserReadable(
+                            daoData.votingDelay,
+                            daoConfig.daoOverview.blockTime,
+                            true,
+                          )
+                        : formatBlocksToUserReadable(
+                            daoData.votingDelay,
+                            daoConfig.daoOverview.blockTime,
+                            false,
+                          )
                     }
                   />
                 </TooltipTrigger>
