@@ -131,6 +131,7 @@ export const VotingModal = ({
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const totalVotes =
     Number(proposal?.forVotes) +
@@ -392,9 +393,11 @@ export const VotingModal = ({
             Cancel
           </Button>
           <Button
-            disabled={!address || !chain || !vote}
+            disabled={!address || !chain || !vote || isLoading}
+            loading={isLoading}
             onClick={async () => {
               if (!address || !chain) return;
+              setIsLoading(true);
               const hash = await handleVote(
                 vote as "for" | "against" | "abstain",
                 proposal?.id as string,
@@ -403,6 +406,7 @@ export const VotingModal = ({
                 DaoIdEnum.ENS as DaoIdEnum,
                 comment,
               );
+              setIsLoading(false);
               if (hash) {
                 showCustomToast("Vote submitted successfully!");
                 onClose();
