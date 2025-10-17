@@ -59,6 +59,7 @@ export const MetricsCard = ({
           </span>
         }
         className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        textClassName="mb-1"
       />
 
       <DaoOverviewMetricCard
@@ -74,6 +75,7 @@ export const MetricsCard = ({
           </span>
         }
         className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        textClassName="mb-1"
       />
 
       <DaoOverviewMetricCard
@@ -92,6 +94,7 @@ export const MetricsCard = ({
             "No delay required"
           )
         }
+        textClassName="mb-1"
       />
     </div>
   );
