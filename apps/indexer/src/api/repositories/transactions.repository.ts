@@ -16,6 +16,7 @@ import {
   desc,
   asc,
   SQL,
+  getTableColumns,
 } from "drizzle-orm";
 import { db } from "ponder:api";
 
@@ -67,14 +68,7 @@ export class TransactionsRepository {
     const result = await db
       .with(filteredTransfers, filteredDelegations, transferAgg, delegationAgg)
       .select({
-        transactionHash: transaction.transactionHash,
-        fromAddress: transaction.fromAddress,
-        toAddress: transaction.toAddress,
-        isCex: transaction.isCex,
-        isDex: transaction.isDex,
-        isLending: transaction.isLending,
-        isTotal: transaction.isTotal,
-        timestamp: transaction.timestamp,
+        ...getTableColumns(transaction),
         transfers: sql<DBTransfer[]>`COALESCE(
       (SELECT ARRAY_AGG(
         jsonb_build_object(
