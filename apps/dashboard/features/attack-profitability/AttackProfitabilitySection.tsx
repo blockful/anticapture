@@ -52,10 +52,6 @@ export const AttackProfitabilitySection = ({
     return null;
   }
 
-  const handleDropdownClick = (option: Option) => {
-    setDropdownValue(option);
-  };
-
   return (
     <TheSectionLayout
       title={SECTIONS_CONSTANTS.attackProfitability.title}
@@ -128,7 +124,7 @@ export const AttackProfitabilitySection = ({
                 { value: "usd", label: "USD" },
                 { value: "token", label: "Token" },
               ]}
-              onClick={handleDropdownClick}
+              onClick={setDropdownValue}
             />
           }
         >
