@@ -9,17 +9,9 @@ import { storeDailyBucket } from "@/eventHandlers/shared";
 export const updateDelegatedSupply = async (
   context: Context,
   daoId: DaoIdEnum,
-  {
-    tokenId,
-    newBalance,
-    oldBalance,
-    timestamp,
-  }: {
-    tokenId: Address;
-    newBalance: bigint;
-    oldBalance: bigint;
-    timestamp: bigint;
-  },
+  tokenId: Address,
+  amount: bigint,
+  timestamp: bigint,
 ) => {
   let currentDelegatedSupply = 0n;
 
@@ -30,7 +22,7 @@ export const updateDelegatedSupply = async (
     .set((current) => {
       currentDelegatedSupply = current.delegatedSupply;
       return {
-        delegatedSupply: current.delegatedSupply + (newBalance - oldBalance),
+        delegatedSupply: current.delegatedSupply + amount,
       };
     });
 

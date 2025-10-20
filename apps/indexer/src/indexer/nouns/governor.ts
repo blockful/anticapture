@@ -15,7 +15,10 @@ import {
   TreasuryAddresses,
 } from "@/lib/constants";
 import { env } from "@/env";
-import { updateSupplyMetric } from "@/eventHandlers/metrics";
+import {
+  // updateDelegatedSupply,
+  updateSupplyMetric,
+} from "@/eventHandlers/metrics";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
 
 export function GovernorIndexer(

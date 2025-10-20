@@ -102,7 +102,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
 
   ponder.on(`NounsToken:NounCreated`, async ({ event, context }) => {
     const tokenData = await context.db.find(token, {
-      id: event.args.tokenId.toString(),
+      id: address,
     });
 
     if (!tokenData) {
@@ -118,28 +118,18 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event.block.timestamp,
       address,
     );
-  });
 
-  ponder.on(`NounsToken:NounBurned`, async ({ event, context }) => {
-    const tokenData = await context.db.find(token, {
-      id: event.args.tokenId.toString(),
-    });
-
-    if (!tokenData) {
-      return;
+    // every 10th token is automatically delegated to the treasury
+    // which doesn't count towards the delegated supply
+    if (event.args.tokenId % 10n !== 0n) {
+      await updateDelegatedSupply(
+        context,
+        daoId,
+        address,
+        1n,
+        event.block.timestamp,
+      );
     }
-
-    await storeDailyBucket(
-      context,
-      MetricTypesEnum.TOTAL_SUPPLY,
-      tokenData.totalSupply,
-      tokenData.totalSupply - 1n,
-      daoId,
-      event.block.timestamp,
-      address,
-    );
-
-    // TODO should this be removed from the delegated supply?
   });
 
   ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
@@ -174,15 +164,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
-
-    if (event.args.delegate !== TreasuryAddresses[daoId].timelock) {
-      await updateDelegatedSupply(context, daoId, {
-        tokenId: event.log.address,
-        newBalance: event.args.newBalance,
-        oldBalance: event.args.previousBalance,
-        timestamp: event.block.timestamp,
-      });
-    }
 
     if (!event.transaction.to) return;
 
