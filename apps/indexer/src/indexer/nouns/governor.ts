@@ -15,7 +15,10 @@ import {
   TreasuryAddresses,
 } from "@/lib/constants";
 import { env } from "@/env";
-import { updateSupplyMetric } from "@/eventHandlers/metrics";
+import {
+  // updateDelegatedSupply,
+  updateSupplyMetric,
+} from "@/eventHandlers/metrics";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
 
 export function GovernorIndexer(
@@ -122,5 +125,18 @@ export function GovernorIndexer(
       tokenAddress,
       event.block.timestamp,
     );
+  });
+
+  ponder.on(`NounsGovernor:JoinFork`, async () => {
+    // await updateDelegatedSupply(
+    //   context,
+    //   daoId,
+    //   tokenAddress,
+    //   -1n,
+    //   event.block.timestamp,
+    // );
+    // for (const tokenId of event.args.tokenIds) {
+    //   if (!tokenId || !event.transaction.to) continue;
+    // }
   });
 }

@@ -87,15 +87,16 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         timestamp,
       );
 
-      if (event.args.to === TreasuryAddresses[daoId].timelock) {
-        await updateDelegatedSupply(
-          context,
-          daoId,
-          event.log.address,
-          -1n,
-          event.block.timestamp,
-        );
-      }
+      // if (event.args.to === TreasuryAddresses[daoId].timelock) {
+      //   console.log("transfer to timelock");
+      //   await updateDelegatedSupply(
+      //     context,
+      //     daoId,
+      //     event.log.address,
+      //     -1n,
+      //     event.block.timestamp,
+      //   );
+      // }
 
       if (!event.transaction.to) return;
 
@@ -185,15 +186,15 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    if (event.args.delegate !== TreasuryAddresses[daoId].timelock) {
-      await updateDelegatedSupply(
-        context,
-        daoId,
-        event.log.address,
-        event.args.newBalance - event.args.previousBalance,
-        event.block.timestamp,
-      );
-    }
+    // if (event.args.delegate !== TreasuryAddresses[daoId].timelock) {
+    await updateDelegatedSupply(
+      context,
+      daoId,
+      event.log.address,
+      1n,
+      event.block.timestamp,
+    );
+    // }
 
     if (!event.transaction.to) return;
 
