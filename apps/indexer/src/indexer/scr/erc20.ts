@@ -24,26 +24,35 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`SCRToken:Transfer`, async ({ event, context }) => {
-    // Process the transfer
-    await tokenTransfer(context, daoId, {
-      from: event.args.from,
-      to: event.args.to,
-      tokenAddress: address,
-      transactionHash: event.transaction.hash,
-      value: event.args.value,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
-    });
-
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
+    await tokenTransfer(
       context,
       daoId,
+      {
+        from: event.args.from,
+        to: event.args.to,
+        token: address,
+        transactionHash: event.transaction.hash,
+        value: event.args.value,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      },
+      {
+        cex: Object.values(CEXAddresses[daoId] || {}),
+        dex: Object.values(DEXAddresses[daoId] || {}),
+        lending: Object.values(LendingAddresses[daoId] || {}),
+        burning: Object.values(BurningAddresses[daoId] || {}),
+      },
+    );
+
+    if (!event.transaction.to) return;
+
+    await handleTransaction(
+      context,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.from, event.args.to], // Addresses to check
+      [event.args.from, event.args.to],
     );
   });
 
@@ -52,18 +61,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     // Process the delegation change
 
     // Pre-compute address lists for flag determination
-    const lendingAddressList = Object.values(
-      LendingAddresses[daoId as DaoIdEnum] || {},
-    );
-    const cexAddressList = Object.values(
-      CEXAddresses[daoId as DaoIdEnum] || {},
-    );
-    const dexAddressList = Object.values(
-      DEXAddresses[daoId as DaoIdEnum] || {},
-    );
-    const burningAddressList = Object.values(
-      BurningAddresses[daoId as DaoIdEnum] || {},
-    );
+    const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
+    const cexAddressList = Object.values(CEXAddresses[daoId] || {});
+    const dexAddressList = Object.values(DEXAddresses[daoId] || {});
+    const burningAddressList = Object.values(BurningAddresses[daoId] || {});
 
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
@@ -148,10 +149,11 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           delegationsCount: (current.delegationsCount ?? 0) + 1,
         }));
     }
-    // Handle transaction creation/update with flag calculation
+
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -159,14 +161,12 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       [
         ...event.args.newDelegatees.map(({ _delegatee }) => _delegatee),
         ...event.args.oldDelegatees.map(({ _delegatee }) => _delegatee),
-      ], // Addresses to check
+      ],
     );
   });
 
   ponder.on(`SCRToken:DelegateVotesChanged`, async ({ event, context }) => {
-    // Process the delegate votes change
     await delegatedVotesChanged(context, daoId, {
-      tokenId: event.log.address,
       delegate: event.args.delegate,
       txHash: event.transaction.hash,
       newBalance: event.args.newVotes,
@@ -175,10 +175,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    // Handle transaction creation/update with flag calculation
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
