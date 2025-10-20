@@ -7,6 +7,7 @@ enum AssetPlatformEnum {
   ETHEREUM = "ethereum",
   ARBITRUM = "arbitrum-one",
   OPTIMISM = "optimistic-ethereum",
+  SCROLL = "scroll",
 }
 
 export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
@@ -17,7 +18,8 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   GTC: "gitcoin",
   TEST: "ethereum-name-service",
   NOUNS: "nouns",
-};
+  SCR: "scroll",
+} as const;
 
 export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
@@ -25,6 +27,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
   [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
   [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {

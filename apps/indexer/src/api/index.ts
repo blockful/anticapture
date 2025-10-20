@@ -18,11 +18,14 @@ import {
   lastUpdate,
   assets,
   votingPower,
+  votingPowerVariations,
+  accountBalanceVariations,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
 import {
+  AccountBalanceRepository,
   DrizzleRepository,
   NFTPriceRepository,
   TokenRepository,
@@ -41,6 +44,7 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
+  TopBalanceVariationsService,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -90,7 +94,9 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
+const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
+const votingPowerService = new VotingPowerService(votingPowerRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -123,7 +129,12 @@ historicalOnchain(
 );
 transactions(app, transactionsService);
 lastUpdate(app);
-votingPower(app, new VotingPowerService(votingPowerRepo));
+votingPower(app, votingPowerService);
+votingPowerVariations(app, votingPowerService);
+accountBalanceVariations(
+  app,
+  new TopBalanceVariationsService(accountBalanceRepo),
+);
 docs(app);
 
 export default app;

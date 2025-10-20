@@ -25,6 +25,7 @@ import {
   GovernorIndexer as GTCGovernorIndexer,
   GTCTokenIndexer,
 } from "@/indexer/gtc";
+import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "@/indexer/scr";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,
@@ -94,6 +95,12 @@ switch (daoId) {
       blockTime,
       token.address,
     );
+    break;
+  }
+  case DaoIdEnum.SCR: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    SCRTokenIndexer(token.address, token.decimals);
+    SCRGovernorIndexer(new SCRClient(client, governor.address), blockTime);
     break;
   }
   default:
