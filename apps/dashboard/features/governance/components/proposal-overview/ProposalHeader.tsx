@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -32,9 +33,9 @@ export const ProposalHeader = ({
     address: address || "",
   });
 
-  // check if the address has already voted or not
+  console.log("votingPower ", votingPower);
 
-  console.log(votingPower);
+  // check if the address has already voted or not
 
   return (
     <div className="text-primary border-border-default flex h-[60px] w-full items-center justify-between gap-6 border-b px-5 py-2">
@@ -58,10 +59,15 @@ export const ProposalHeader = ({
 
       <div className="flex items-center gap-2">
         <div>{address}</div>
-        <Button onClick={() => setIsVotingModalOpen(true)}>
-          Cast your vote
-          <ArrowRight className="size-[14px]" />
-        </Button>
+
+        {address ? (
+          <Button onClick={() => setIsVotingModalOpen(true)}>
+            Cast your vote
+            <ArrowRight className="size-[14px]" />
+          </Button>
+        ) : (
+          <ConnectWalletCustom />
+        )}
       </div>
 
       <VotingModal
