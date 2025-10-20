@@ -13,7 +13,9 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 type Query {
   dao(id: String!): dao
   daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
-  token(id: String!): token
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
@@ -88,7 +90,7 @@ type Query {
   proposal(id: String!): proposal_200_response
 
   """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc): proposalNonVoters_200_response
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
@@ -124,6 +126,16 @@ type Query {
 
   """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+
+  """
+  Returns a mapping of the biggest changes to voting power associated by delegate address
+  """
+  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+
+  """
+  Returns a mapping of the biggest variations to account balances associated by account address
+  """
+  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 }
 
 """
@@ -789,7 +801,7 @@ type votesOnchain {
   proposalId: String!
   support: String!
   votingPower: BigInt!
-  reason: String!
+  reason: String
   timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
@@ -1337,6 +1349,25 @@ enum queryInput_historicalTokenData_days {
   _365d
 }
 
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: Float!
+}
+
+enum queryInput_token_currency {
+  eth
+  usd
+}
+
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
@@ -1756,6 +1787,70 @@ enum queryInput_votingPowers_orderBy {
 }
 
 enum queryInput_votingPowers_orderDirection {
+  asc
+  desc
+}
+
+type votingPowerVariations_200_response {
+  period: query_votingPowerVariations_period!
+  items: [query_votingPowerVariations_items_items]!
+}
+
+type query_votingPowerVariations_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_votingPowerVariations_items_items {
+  accountId: String!
+  previousVotingPower: String
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_votingPowerVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_votingPowerVariations_orderDirection {
+  asc
+  desc
+}
+
+type accountBalanceVariations_200_response {
+  period: query_accountBalanceVariations_period!
+  items: [query_accountBalanceVariations_items_items]!
+}
+
+type query_accountBalanceVariations_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_accountBalanceVariations_items_items {
+  accountId: String!
+  previousBalance: String!
+  currentBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_accountBalanceVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_accountBalanceVariations_orderDirection {
   asc
   desc
 }

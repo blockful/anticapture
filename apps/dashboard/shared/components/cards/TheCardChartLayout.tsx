@@ -38,7 +38,7 @@ export const TheCardChartLayout = ({
           <div className="flex h-full w-full items-center">
             <div className="flex h-full w-full flex-col">
               <div className="flex h-full w-full gap-1.5">
-                <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                <CardTitle className="!text-alternative-sm text-primary flex items-center text-nowrap font-mono font-medium uppercase tracking-wide sm:gap-2.5">
                   {title}
                 </CardTitle>
                 {csvData && (

@@ -72,6 +72,7 @@ interface BaseInfo {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: Chain;
+  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;
@@ -90,7 +91,7 @@ export interface DaoOverviewConfig {
       | "For + Abstain"
       | "For + Abstain + Against"
       | "All Votes Cast";
-    quorumCalculation: "Total Supply" | "Del. Supply";
+    quorumCalculation: string;
     proposalThreshold?: string;
   };
   securityCouncil?: {
@@ -131,6 +132,7 @@ export interface DaoAddresses {
     GTCTimelock: string;
     GTCUniv3Uni: string;
   };
+  [DaoIdEnum.SCR]: Record<string, never>;
 }
 
 export interface AttackProfitabilityConfig {

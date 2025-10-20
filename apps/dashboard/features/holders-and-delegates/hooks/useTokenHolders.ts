@@ -80,6 +80,11 @@ export const useTokenHolders = ({
     setHistoricalBalancesCache(new Map());
   }, [orderBy, orderDirection, address]);
 
+  // Clear historical balances cache when days changes to refetch it
+  useEffect(() => {
+    setHistoricalBalancesCache(new Map());
+  }, [days]);
+
   const {
     data: tokenHoldersData,
     error: tokenHoldersError,
