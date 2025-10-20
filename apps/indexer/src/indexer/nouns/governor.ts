@@ -126,17 +126,4 @@ export function GovernorIndexer(
       event.block.timestamp,
     );
   });
-
-  ponder.on(`NounsGovernor:JoinFork`, async () => {
-    // await updateDelegatedSupply(
-    //   context,
-    //   daoId,
-    //   tokenAddress,
-    //   -1n,
-    //   event.block.timestamp,
-    // );
-    // for (const tokenId of event.args.tokenIds) {
-    //   if (!tokenId || !event.transaction.to) continue;
-    // }
-  });
 }
