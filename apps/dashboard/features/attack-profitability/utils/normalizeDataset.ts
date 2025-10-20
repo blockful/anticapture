@@ -23,7 +23,7 @@ export function normalizeDataset(
   const parsedMultipliers = multiplierDataSet.reduce(
     (acc, item) => ({
       ...acc,
-      [Number(item.date) * 1000]:
+      [Number(item.date)]:
         tokenType === "ERC721" ? Number(item.high) : Number(item.high) / 1e18,
     }),
     {} as Record<number, number>,

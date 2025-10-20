@@ -143,25 +143,26 @@ export const useTimeSeriesData = (
 ) => {
   // For backward compatibility, fall back to bulk fetch if needed
   // But with optimized cache key that doesn't change on metric removal
-  const stableMetricTypes = metricTypes.sort(); // Stable sort for consistent cache key
+  const stableMetricTypes = [...metricTypes].sort(); // Stable sort for consistent cache key
+
+  const fetchKey =
+    daoId && stableMetricTypes.length > 0
+      ? [`timeSeriesData-bulk`, daoId, stableMetricTypes.join(",")]
+      : null;
 
   const {
     data: fullData,
     error,
     isLoading,
-  } = useSWR(
-    [`timeSeriesData-bulk`, daoId, days, stableMetricTypes.join(",")],
-    () => fetchTimeSeries(daoId, days, stableMetricTypes),
-    {
-      refreshInterval: options?.refreshInterval ?? 0,
-      revalidateOnFocus: options?.revalidateOnFocus ?? true,
-      revalidateOnMount: true,
-      revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
-      revalidateIfStale: true,
-      dedupingInterval: 5000, // Increased for better caching
-      keepPreviousData: true, // Keep previous data while loading new
-    },
-  );
+  } = useSWR(fetchKey, () => fetchTimeSeries(daoId, days, stableMetricTypes), {
+    refreshInterval: options?.refreshInterval ?? 0,
+    revalidateOnFocus: options?.revalidateOnFocus ?? true,
+    revalidateOnMount: true,
+    revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
+    revalidateIfStale: true,
+    dedupingInterval: 5000, // Increased for better caching
+    keepPreviousData: true, // Keep previous data while loading new
+  });
 
   const data = fullData
     ? applyMetricsContinuity(fullData, metricTypes)
