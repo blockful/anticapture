@@ -4,13 +4,14 @@ import {
   Chain,
   Client,
   fromHex,
-  parseEther,
   toHex,
   Transport,
 } from "viem";
 
 import { DAOClient } from "@/interfaces/client";
 import { GovernorBase } from "../governor.base";
+import { COMPGovernorAbi } from "./abi";
+import { getBlockNumber, readContract } from "viem/actions";
 
 export class COMPClient<
     TTransport extends Transport = Transport,
@@ -20,38 +21,75 @@ export class COMPClient<
   extends GovernorBase
   implements DAOClient
 {
-  // private abi: typeof COMPGovernorAbi;
-  // private address: Address;
+  private abi: typeof COMPGovernorAbi;
+  private address: Address;
 
-  constructor(client: Client<TTransport, TChain, TAccount>, _address: Address) {
+  constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
-    // this.address = address;
-    // this.abi = COMPGovernorAbi;
+    this.address = address;
+    this.abi = COMPGovernorAbi;
   }
 
   async getQuorum(): Promise<bigint> {
-    //etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0#readProxyContract#F26
-    return parseEther("400000"); // 400k $COMP
+    const blockNumber = await getBlockNumber(this.client);
+    const targetBlock = blockNumber - 10n;
+    return readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "quorum",
+      args: [targetBlock < 0n ? 0n : targetBlock],
+    });
   }
 
   async getProposalThreshold(): Promise<bigint> {
-    // https://etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0#readProxyContract#F24
-    return parseEther("25000"); // 25k $COMP
+    return readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "proposalThreshold",
+    });
   }
 
   async getVotingDelay(): Promise<bigint> {
-    // https://etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0#readProxyContract#F33
-    return BigInt(13140);
+    return readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "votingDelay",
+    });
   }
 
   async getVotingPeriod(): Promise<bigint> {
-    // https://etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0#readProxyContract#F34
-    return BigInt(19710);
+    return readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "votingPeriod",
+    });
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    //etherscan.io/address/0x6d903f6003cca6255D85CcA4D3B5E5146dC33925#readContract#F2
-    return BigInt(172800);
+    const timelockAddress = await readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "timelock",
+    });
+    return readContract(this.client, {
+      abi: [
+        {
+          inputs: [],
+          name: "delay",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      address: timelockAddress,
+      functionName: "delay",
+    });
   }
 
   async getCurrentBlockNumber(): Promise<number> {
