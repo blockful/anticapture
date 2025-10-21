@@ -1,7 +1,6 @@
 import { asc, desc, gte, sql } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
-
 import { DBAccountBalanceVariation } from "../mappers";
 
 export class AccountBalanceRepository {
@@ -11,49 +10,69 @@ export class AccountBalanceRepository {
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBAccountBalanceVariation[]> {
-    const recentTxs = db
-      .select()
+    // Aggregate outgoing transfers (negative amounts)
+    const transfersFrom = db
+      .select({
+        accountId: transfer.fromAccountId,
+        fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
+      })
       .from(transfer)
       .where(gte(transfer.timestamp, BigInt(startTimestamp)))
-      .orderBy(desc(transfer.timestamp))
-      .as("recent_txs");
+      .groupBy(transfer.fromAccountId)
+      .as("transfers_from");
 
-    const aggregated = db
+    // Aggregate incoming transfers (positive amounts)
+    const transfersTo = db
       .select({
-        address: accountBalance.accountId,
-        balance: accountBalance.balance,
-        txsFrom:
-          sql<string>`COALESCE(SUM(CASE WHEN ${accountBalance.accountId} = ${recentTxs.fromAccountId} THEN ${recentTxs.amount} ELSE 0 END), 0)`.as(
-            "txsFrom",
-          ),
-        txsTo:
-          sql<string>`COALESCE(SUM(CASE WHEN ${accountBalance.accountId} = ${recentTxs.toAccountId} then ${recentTxs.amount} ELSE 0 END), 0)`.as(
-            "txsTo",
-          ),
+        accountId: transfer.toAccountId,
+        toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
+      })
+      .from(transfer)
+      .where(gte(transfer.timestamp, BigInt(startTimestamp)))
+      .groupBy(transfer.toAccountId)
+      .as("transfers_to");
+
+    // Combine both aggregations
+    const combined = db
+      .select({
+        accountId: accountBalance.accountId,
+        currentBalance: accountBalance.balance,
+        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
+          "from_change",
+        ),
+        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
+          "to_change",
+        ),
       })
       .from(accountBalance)
       .leftJoin(
-        recentTxs,
-        sql`${accountBalance.accountId} = ${recentTxs.fromAccountId} OR ${accountBalance.accountId} = ${recentTxs.toAccountId}`,
+        transfersFrom,
+        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
       )
-      .where(sql`${recentTxs.transactionHash} is not null`)
-      .groupBy(accountBalance.accountId, accountBalance.balance)
-      .as("aggregated");
+      .leftJoin(
+        transfersTo,
+        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
+      )
+      .where(
+        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+      )
+      .as("combined");
 
     const result = await db
       .select({
-        accountId: aggregated.address,
-        currentBalance: aggregated.balance,
+        accountId: combined.accountId,
+        currentBalance: combined.currentBalance,
         absoluteChange:
-          sql<string>`${aggregated.txsTo} - ${aggregated.txsFrom}`.as(
-            "absoluteChange",
+          sql<string>`${combined.fromChange} + ${combined.toChange}`.as(
+            "absolute_change",
           ),
       })
-      .from(aggregated)
+      .from(combined)
+      .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`)
       .orderBy(
-        orderDirection == "desc"
-          ? desc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`)
-          : asc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`),
+        orderDirection === "desc"
+          ? desc(sql`ABS(${combined.fromChange} + ${combined.toChange})`)
+          : asc(sql`ABS(${combined.fromChange} + ${combined.toChange})`),
       )
       .offset(skip)
       .limit(limit);
