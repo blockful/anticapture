@@ -38,7 +38,8 @@ export const PanelTable = () => {
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) =>
-      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION &&
+      daoId !== DaoIdEnum.SCR, // TODO remove this when Scroll is fully indexed on prod
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({
