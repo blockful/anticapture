@@ -42,7 +42,7 @@ export const ProposalSection = () => {
         daoId={daoId as string}
       />
       <div className="flex gap-6 p-5">
-        <div className="flex w-[420px] flex-col gap-6">
+        <div className="sticky left-0 top-5 flex h-fit w-[420px] flex-col gap-6 self-start">
           <TitleSection proposal={proposal} />
           <ProposalInfoSection proposal={proposal} />
           <ProposalStatusSection proposal={proposal} />
