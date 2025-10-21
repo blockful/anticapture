@@ -53,6 +53,8 @@ export type Query = {
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
+  /** Returns a mapping of the biggest variations to account balances associated by account address */
+  accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
@@ -117,6 +119,8 @@ export type Query = {
   votesOnchains: VotesOnchainPage;
   votingPowerHistory?: Maybe<VotingPowerHistory>;
   votingPowerHistorys: VotingPowerHistoryPage;
+  /** Returns a mapping of the biggest changes to voting power associated by delegate address */
+  votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
@@ -140,6 +144,14 @@ export type QueryAccountArgs = {
 export type QueryAccountBalanceArgs = {
   accountId: Scalars['String']['input'];
   tokenId: Scalars['String']['input'];
+};
+
+
+export type QueryAccountBalanceVariationsArgs = {
+  days?: InputMaybe<QueryInput_AccountBalanceVariations_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountBalanceVariations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -441,6 +453,14 @@ export type QueryVotingPowerHistorysArgs = {
 };
 
 
+export type QueryVotingPowerVariationsArgs = {
+  days?: InputMaybe<QueryInput_VotingPowerVariations_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowerVariations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+};
+
+
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -616,6 +636,12 @@ export type AccountBalancePage = {
   items: Array<AccountBalance>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type AccountBalanceVariations_200_Response = {
+  __typename?: 'accountBalanceVariations_200_response';
+  items: Array<Maybe<Query_AccountBalanceVariations_Items_Items>>;
+  period: Query_AccountBalanceVariations_Period;
 };
 
 export type AccountFilter = {
@@ -1364,8 +1390,20 @@ export type Proposals_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export enum QueryInput_AccountBalanceVariations_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_AccountBalanceVariations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_CompareActiveSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1374,7 +1412,6 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1383,7 +1420,6 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1392,7 +1428,6 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1401,7 +1436,6 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1410,7 +1444,6 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1419,7 +1452,6 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1428,7 +1460,6 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1437,7 +1468,6 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1446,7 +1476,6 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1455,7 +1484,6 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1464,7 +1492,6 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1473,7 +1500,6 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalTokenData_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1482,7 +1508,6 @@ export enum QueryInput_HistoricalTokenData_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1543,6 +1568,19 @@ export enum QueryInput_Transactions_SortOrder {
   Desc = 'desc'
 }
 
+export enum QueryInput_VotingPowerVariations_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_VotingPowerVariations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_VotingPowers_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
@@ -1552,6 +1590,22 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
+
+export type Query_AccountBalanceVariations_Items_Items = {
+  __typename?: 'query_accountBalanceVariations_items_items';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentBalance: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceVariations_Period = {
+  __typename?: 'query_accountBalanceVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
 
 export type Query_HistoricalBalances_Items = {
   __typename?: 'query_historicalBalances_items';
@@ -1680,6 +1734,22 @@ export type Query_Transactions_Transactions_Items_Transfers_Items = {
   toAccountId: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_VotingPowerVariations_Items_Items = {
+  __typename?: 'query_votingPowerVariations_items_items';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentVotingPower: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousVotingPower?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_VotingPowerVariations_Period = {
+  __typename?: 'query_votingPowerVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_VotingPowers_Items_Items = {
@@ -2151,19 +2221,13 @@ export type VotesOnchainFilter = {
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
   votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type VotesOnchainPage = {
@@ -2268,6 +2332,12 @@ export type VotingPowerHistoryPage = {
   items: Array<VotingPowerHistory>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type VotingPowerVariations_200_Response = {
+  __typename?: 'votingPowerVariations_200_response';
+  items: Array<Maybe<Query_VotingPowerVariations_Items_Items>>;
+  period: Query_VotingPowerVariations_Period;
 };
 
 export type VotingPowers_200_Response = {
@@ -2520,6 +2590,13 @@ export type GetProposalNonVotersQueryVariables = Exact<{
 
 
 export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoters?: { __typename?: 'proposalNonVoters_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposalNonVoters_items_items', lastVoteTimestamp: number, voter: string, votingPower: string, votingPowerVariation: string } | null> } | null };
+
+export type GetAccountPowerQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAccountPowerQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -4007,6 +4084,47 @@ export type GetProposalNonVotersQueryHookResult = ReturnType<typeof useGetPropos
 export type GetProposalNonVotersLazyQueryHookResult = ReturnType<typeof useGetProposalNonVotersLazyQuery>;
 export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useGetProposalNonVotersSuspenseQuery>;
 export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
+export const GetAccountPowerDocument = gql`
+    query GetAccountPower($address: String!) {
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
+}
+    `;
+
+/**
+ * __useGetAccountPowerQuery__
+ *
+ * To run a query within a React component, call `useGetAccountPowerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAccountPowerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAccountPowerQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetAccountPowerQuery(baseOptions: Apollo.QueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables> & ({ variables: GetAccountPowerQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
+      }
+export function useGetAccountPowerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
+        }
+export function useGetAccountPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
+        }
+export type GetAccountPowerQueryHookResult = ReturnType<typeof useGetAccountPowerQuery>;
+export type GetAccountPowerLazyQueryHookResult = ReturnType<typeof useGetAccountPowerLazyQuery>;
+export type GetAccountPowerSuspenseQueryHookResult = ReturnType<typeof useGetAccountPowerSuspenseQuery>;
+export type GetAccountPowerQueryResult = Apollo.QueryResult<GetAccountPowerQuery, GetAccountPowerQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
   historicalBalances(addresses: $addresses, days: $days) {

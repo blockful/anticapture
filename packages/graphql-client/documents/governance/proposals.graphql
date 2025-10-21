@@ -134,3 +134,11 @@ query GetProposalNonVoters(
     totalCount
   }
 }
+
+# Get account power
+query GetAccountPower($address: String!) {
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
+}

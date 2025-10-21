@@ -2,15 +2,15 @@
 
 import { Button } from "@/shared/components";
 import { VotingModal } from "@/features/governance";
-import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import { type Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import { DaoAvatarIcon } from "@/shared/components/icons";
-import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
+import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -28,9 +28,14 @@ export const ProposalHeader = ({
   // check if the proposal is active or not
 
   // check how much voting power the address has
-  const votingPower = useVotingPower({
+  // const votingPower = useVotingPower({
+  //   daoId: daoId.toUpperCase() as DaoIdEnum,
+  //   address: address || "",
+  // });
+
+  const { votingPower } = useAccountPower({
+    address: address || "0x81b287c0992B110ADEB5903Bf7E2d9350C80581a",
     daoId: daoId.toUpperCase() as DaoIdEnum,
-    address: address || "",
   });
 
   console.log("votingPower ", votingPower);
@@ -58,7 +63,9 @@ export const ProposalHeader = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <div>{address}</div>
+        <p className="text-secondary flex items-center gap-2 text-[14px] font-normal leading-[20px]">
+          your voting power is {votingPower} {daoId.toUpperCase()}
+        </p>
 
         {address ? (
           <Button onClick={() => setIsVotingModalOpen(true)}>
@@ -66,7 +73,9 @@ export const ProposalHeader = ({
             <ArrowRight className="size-[14px]" />
           </Button>
         ) : (
-          <ConnectWalletCustom />
+          <div>
+            <ConnectWalletCustom />
+          </div>
         )}
       </div>
 
