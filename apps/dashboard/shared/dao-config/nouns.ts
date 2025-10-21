@@ -14,6 +14,7 @@ export const NOUNS: DaoConfiguration = {
   icon: EnsIcon,
   daoOverview: {
     token: "ERC721",
+    blockTime: 12,
     chain: mainnet,
     snapshot: "",
     contracts: {
