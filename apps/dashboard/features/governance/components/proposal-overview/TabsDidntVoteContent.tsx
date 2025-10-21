@@ -129,7 +129,7 @@ export const TabsDidntVoteContent = ({
       },
       {
         accessorKey: "lastVoteTimestamp",
-        size: 150,
+        size: 160,
         cell: ({ row }) => {
           const timestamp = row.getValue("lastVoteTimestamp") as string;
           const voterAddress = row.getValue("voter") as string;
@@ -175,7 +175,7 @@ export const TabsDidntVoteContent = ({
         },
         header: () => (
           <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p>Last Vote Date</p>
+            <p className="shrink-0 whitespace-nowrap">Last Vote Date</p>
           </div>
         ),
       },
@@ -254,7 +254,7 @@ export const TabsDidntVoteContent = ({
       },
       {
         accessorKey: "votingPowerVariation",
-        size: 150,
+        size: 160,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voter") as string;
           const votingPowerVariation = row.getValue(
@@ -314,7 +314,7 @@ export const TabsDidntVoteContent = ({
           };
 
           return (
-            <div className="flex h-10 items-center p-2">
+            <div className="flex h-10 shrink-0 items-center p-2">
               <div className="flex items-center gap-1">
                 {getArrowIcon()}
                 <span
@@ -333,7 +333,7 @@ export const TabsDidntVoteContent = ({
         },
         header: () => (
           <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p>VP Change (Last 30d)</p>
+            <p className="shrink-0 whitespace-nowrap">VP Change (Last 30d)</p>
           </div>
         ),
       },
