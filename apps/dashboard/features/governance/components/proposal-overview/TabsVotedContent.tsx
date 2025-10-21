@@ -301,7 +301,7 @@ export const TabsVotedContent = ({
       },
       {
         accessorKey: "votingPower",
-        size: 150,
+        size: 160,
         cell: ({ row }) => {
           const votingPower = row.getValue("votingPower") as string;
           const voterAddress = row.getValue("voterAccountId") as string;
@@ -384,7 +384,7 @@ export const TabsVotedContent = ({
       },
       {
         accessorKey: "historicalVotingPower",
-        size: 150,
+        size: 160,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voterAccountId") as string;
           const historicalVotingPower = row.getValue(
