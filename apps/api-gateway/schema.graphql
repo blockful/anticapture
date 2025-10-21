@@ -139,9 +139,8 @@ scalar BigInt
 
 type PageInfo {
   hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-  endCursor: String
+  startDate: String
+  endDate: String
 }
 
 type Meta {
@@ -1820,9 +1819,8 @@ type query_getDelegationPercentage_items_items {
 
 type query_getDelegationPercentage_pageInfo {
   hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  endCursor: String
-  startCursor: String
+  endDate: String
+  startDate: String
 }
 
 enum queryInput_getDelegationPercentage_orderDirection {

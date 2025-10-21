@@ -5,9 +5,8 @@ export type DelegationPercentageResponse = {
   totalCount: number;
   pageInfo: {
     hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    endCursor: string | null;
-    startCursor: string | null;
+    endDate: string | null;
+    startDate: string | null;
   };
 };
 
@@ -147,9 +146,8 @@ export async function fetchAndExtractDaoData(
               }
               pageInfo {
                 hasNextPage
-                hasPreviousPage
-                endCursor
-                startCursor
+                endDate
+                startDate
               }
             }
           `,
@@ -193,9 +191,8 @@ export function buildPaginatedResponse(
       totalCount: 0,
       pageInfo: {
         hasNextPage: false,
-        hasPreviousPage: false,
-        endCursor: null,
-        startCursor: null,
+        endDate: null,
+        startDate: null,
       },
     };
   }
@@ -213,10 +210,9 @@ export function buildPaginatedResponse(
     totalCount: finalItems.length,
     pageInfo: {
       hasNextPage: hasNextPageFromDaos,
-      hasPreviousPage: !!args.after || !!args.before,
-      endCursor:
+      endDate:
         finalItems.length > 0 ? finalItems[finalItems.length - 1].date : null,
-      startCursor: finalItems.length > 0 ? finalItems[0].date : null,
+      startDate: finalItems.length > 0 ? finalItems[0].date : null,
     },
   };
 }

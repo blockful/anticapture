@@ -65,9 +65,8 @@ export default processConfig(
 
       type PageInfo {
         hasNextPage: Boolean!
-        hasPreviousPage: Boolean!
-        endCursor: String
-        startCursor: String
+        endDate: String
+        startDate: String
       }
 
       type AggregatedDelegatedSupplyPage {

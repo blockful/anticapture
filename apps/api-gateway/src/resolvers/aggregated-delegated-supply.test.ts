@@ -17,9 +17,8 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 2,
           pageInfo: {
             hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
+            endDate: null,
+            startDate: null,
           },
         },
       ],
@@ -33,9 +32,8 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 2,
           pageInfo: {
             hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
+            endDate: null,
+            startDate: null,
           },
         },
       ],
@@ -73,9 +71,8 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 1,
           pageInfo: {
             hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
+            endDate: null,
+            startDate: null,
           },
         },
       ],
@@ -88,9 +85,8 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 1,
           pageInfo: {
             hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
+            endDate: null,
+            startDate: null,
           },
         },
       ],
@@ -115,9 +111,8 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 3,
           pageInfo: {
             hasNextPage: false,
-            hasPreviousPage: false,
-            endCursor: null,
-            startCursor: null,
+            endDate: null,
+            startDate: null,
           },
         },
       ],
@@ -139,9 +134,8 @@ describe('buildPaginatedResponse', () => {
     expect(result.items).toHaveLength(0);
     expect(result.totalCount).toBe(0);
     expect(result.pageInfo.hasNextPage).toBe(false);
-    expect(result.pageInfo.hasPreviousPage).toBe(false);
-    expect(result.pageInfo.endCursor).toBeNull();
-    expect(result.pageInfo.startCursor).toBeNull();
+    expect(result.pageInfo.endDate).toBeNull();
+    expect(result.pageInfo.startDate).toBeNull();
   });
 
   it('should apply desc ordering', () => {
@@ -173,7 +167,7 @@ describe('buildPaginatedResponse', () => {
     expect(result.pageInfo.hasNextPage).toBe(true);
   });
 
-  it('should set correct cursors in pageInfo', () => {
+  it('should set correct dates in pageInfo', () => {
     const items = [
       { date: '100', high: '10' },
       { date: '200', high: '20' },
@@ -182,21 +176,8 @@ describe('buildPaginatedResponse', () => {
 
     const result = buildPaginatedResponse(items, {}, false);
 
-    expect(result.pageInfo.startCursor).toBe('100');
-    expect(result.pageInfo.endCursor).toBe('300');
-  });
-
-  it('should set hasPreviousPage when after or before is provided', () => {
-    const items = [{ date: '1', high: '10' }];
-
-    const resultWithAfter = buildPaginatedResponse(items, { after: '0' }, false);
-    expect(resultWithAfter.pageInfo.hasPreviousPage).toBe(true);
-
-    const resultWithBefore = buildPaginatedResponse(items, { before: '2' }, false);
-    expect(resultWithBefore.pageInfo.hasPreviousPage).toBe(true);
-
-    const resultWithoutCursor = buildPaginatedResponse(items, {}, false);
-    expect(resultWithoutCursor.pageInfo.hasPreviousPage).toBe(false);
+    expect(result.pageInfo.startDate).toBe('100');
+    expect(result.pageInfo.endDate).toBe('300');
   });
 
   it('should combine ordering, limit and hasNextPage from DAOs', () => {
