@@ -2,11 +2,7 @@ import { ReactNode } from "react";
 import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
 
 export type DaoMetricsDayBucket = {
@@ -58,7 +54,6 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
-  supportStage: SupportStageEnum;
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
