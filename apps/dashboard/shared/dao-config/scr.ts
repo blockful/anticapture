@@ -14,6 +14,7 @@ export const SCR: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: ScrollIcon,
   daoOverview: {
+    token: "ERC20",
     chain: scroll,
     blockTime: 1.5,
     snapshot: "",
