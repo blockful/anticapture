@@ -1,6 +1,6 @@
 import { transfer, delegation, transaction } from "ponder:schema";
 import { isAddress } from "viem";
-import z from "zod";
+import { z } from "@hono/zod-openapi";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
