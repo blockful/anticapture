@@ -1,8 +1,6 @@
 import { DelegationPercentageService } from "./delegation-percentage.service";
-import {
-  DelegationPercentageRepository,
-  DaoMetricRow,
-} from "@/api/repositories/delegation-percentage.repository";
+import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
+import type { DaoMetricRow } from "@/api/mappers/delegation-percentage";
 import { MetricTypesEnum } from "@/lib/constants";
 
 describe("DelegationPercentageService", () => {
@@ -26,10 +24,9 @@ describe("DelegationPercentageService", () => {
 
       expect(result.items).toHaveLength(0);
       expect(result.totalCount).toBe(0);
-      expect(result.pageInfo.hasNextPage).toBe(false);
-      expect(result.pageInfo.hasPreviousPage).toBe(false);
-      expect(result.pageInfo.startCursor).toBeNull();
-      expect(result.pageInfo.endCursor).toBeNull();
+      expect(result.hasNextPage).toBe(false);
+      expect(result.startDate).toBeNull();
+      expect(result.endDate).toBeNull();
     });
 
     it("should calculate delegation percentage correctly", async () => {
@@ -182,9 +179,9 @@ describe("DelegationPercentageService", () => {
       });
 
       expect(result.items).toHaveLength(3);
-      expect(result.pageInfo.hasNextPage).toBe(true);
-      expect(result.pageInfo.startCursor).toBe("1600041600");
-      expect(result.pageInfo.endCursor).toBe("1600214400");
+      expect(result.hasNextPage).toBe(true);
+      expect(result.startDate).toBe("1600041600");
+      expect(result.endDate).toBe("1600214400");
     });
 
     it("should apply cursor-based pagination with after", async () => {
@@ -224,7 +221,6 @@ describe("DelegationPercentageService", () => {
       expect(result.items).toHaveLength(2);
       expect(result.items[0]?.date).toBe("1600214400"); // Day 3
       expect(result.items[1]?.date).toBe("1600300800"); // Day 4
-      expect(result.pageInfo.hasPreviousPage).toBe(true);
     });
 
     it("should apply cursor-based pagination with before", async () => {
@@ -264,7 +260,6 @@ describe("DelegationPercentageService", () => {
       expect(result.items).toHaveLength(2);
       expect(result.items[0]?.date).toBe("1600041600"); // Day 1
       expect(result.items[1]?.date).toBe("1600128000"); // Day 2
-      expect(result.pageInfo.hasPreviousPage).toBe(true);
     });
 
     it("should sort data in descending order when specified", async () => {
@@ -316,6 +311,7 @@ describe("DelegationPercentageService", () => {
         startDate: undefined,
         endDate: undefined,
         orderDirection: "asc",
+        limit: 366,
       });
       expect(result.items).toHaveLength(0);
     });
@@ -640,7 +636,7 @@ describe("DelegationPercentageService", () => {
       // Should return empty
       expect(result.items).toHaveLength(0);
       expect(result.totalCount).toBe(0);
-      expect(result.pageInfo.hasNextPage).toBe(false);
+      expect(result.hasNextPage).toBe(false);
     });
 
     it("should fetch previous values and optimize query when only after is provided", async () => {
@@ -693,6 +689,7 @@ describe("DelegationPercentageService", () => {
         startDate: day50.toString(),
         endDate: undefined,
         orderDirection: "asc",
+        limit: 366, // 365 + 1 for hasNextPage detection
       });
 
       // Verify previous values were fetched
@@ -732,6 +729,7 @@ describe("DelegationPercentageService", () => {
         startDate: undefined,
         endDate: day50.toString(),
         orderDirection: "asc",
+        limit: 366, // 365 + 1 for hasNextPage detection
       });
 
       // Should not fetch previous values (no startDate or after)

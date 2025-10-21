@@ -1,6 +1,10 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { DelegationPercentageService } from "@/api/services/delegation-percentage";
-import { DelegationPercentageResponseSchema } from "@/api/mappers/delegation-percentage";
+import {
+  DelegationPercentageQuerySchema,
+  DelegationPercentageResponseSchema,
+  mapServiceToHttpResponse,
+} from "@/api/mappers/delegation-percentage";
 
 export function delegationPercentage(
   app: Hono,
@@ -14,14 +18,7 @@ export function delegationPercentage(
       summary: "Get delegation percentage day buckets with forward-fill",
       tags: ["metrics"],
       request: {
-        query: z.object({
-          after: z.string().optional(),
-          before: z.string().optional(),
-          startDate: z.string().optional(),
-          endDate: z.string().optional(),
-          orderDirection: z.enum(["asc", "desc"]).default("asc"),
-          limit: z.coerce.number().int().positive().max(1000).default(100),
-        }),
+        query: DelegationPercentageQuerySchema,
       },
       responses: {
         200: {
@@ -33,19 +30,12 @@ export function delegationPercentage(
       },
     }),
     async (ctx) => {
-      const { after, before, startDate, endDate, orderDirection, limit } =
-        ctx.req.valid("query");
+      const serviceResult = await service.getDelegationPercentage(
+        ctx.req.valid("query"),
+      );
+      const httpResponse = mapServiceToHttpResponse(serviceResult);
 
-      const result = await service.getDelegationPercentage({
-        after,
-        before,
-        startDate,
-        endDate,
-        orderDirection,
-        limit,
-      });
-
-      return ctx.json(result);
+      return ctx.json(httpResponse);
     },
   );
 }
