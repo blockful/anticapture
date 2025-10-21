@@ -1,21 +1,49 @@
+/**
+ * # Delegation Percentage Service
+ *
+ * Handles logic for calculating delegation percentage over time with data consistency guarantees.
+ *
+ * ## Data Storage Strategy
+ * Database stores only value changes (sparse data), not daily records. Results in gaps between dates.
+ *
+ * ## Edge Cases Handled
+ *
+ * 1. **Forward-Fill for Missing Dates**
+ *    - Carries forward previous values when no new data exists for a date
+ *    - Ensures consecutive daily data despite database gaps
+ *
+ * 2. **Date Range Outside Available Data**
+ *    - Returns empty if requested range is completely before first available data
+ *    - Returns intersection only if partially overlapping (never extrapolates backwards)
+ *
+ * 3. **Consecutive Daily Results**
+ *    - Guarantees consecutive days in response, even with sparse database records
+ *    - Process: generate complete date range → apply forward-fill → return consecutive days
+ *
+ * 4. **Cursor-Based Date Filtering**
+ *    - `after`/`before` are date filters, not navigation cursors
+ *    - Repository receives effective range for efficient queries
+ *
+ */
+
 import { MetricTypesEnum } from "@/lib/constants";
-import {
-  DelegationPercentageRepository,
-  DaoMetricRow,
-} from "@/api/repositories/delegation-percentage.repository";
+import { SECONDS_IN_DAY } from "@/lib/enums";
+import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
 import type {
   DelegationPercentageItem,
-  PageInfo,
-  DelegationPercentageResponse,
+  DelegationPercentageQuery,
 } from "@/api/mappers/delegation-percentage";
 
-export interface DelegationPercentageFilters {
-  after?: string;
-  before?: string;
-  startDate?: string;
-  endDate?: string;
-  orderDirection?: "asc" | "desc";
-  limit?: number;
+/**
+ * Service result type
+ * Returns flat structure with pagination metadata
+ */
+export interface DelegationPercentageServiceResult {
+  items: DelegationPercentageItem[];
+  totalCount: number;
+  hasNextPage: boolean;
+  endDate: string | null;
+  startDate: string | null;
 }
 
 interface DateData {
@@ -32,19 +60,19 @@ export class DelegationPercentageService {
    * Main method to get delegation percentage data with forward-fill and pagination
    */
   async getDelegationPercentage(
-    filters: DelegationPercentageFilters,
-  ): Promise<DelegationPercentageResponse> {
+    filters: DelegationPercentageQuery,
+  ): Promise<DelegationPercentageServiceResult> {
     const {
       after,
       before,
       startDate,
       endDate,
       orderDirection = "asc",
-      limit = 100,
+      limit = 366,
     } = filters;
 
     // 1. Get initial values for proper forward-fill
-    const referenceDate = startDate || after;
+    const referenceDate = after || startDate;
     const initialValues = referenceDate
       ? await this.getInitialValuesBeforeDate(referenceDate)
       : { delegated: 0n, total: 0n };
@@ -52,8 +80,9 @@ export class DelegationPercentageService {
     // 2. Fetch data from repository
     const rows = await this.repository.getDaoMetricsByDateRange({
       startDate: referenceDate,
-      endDate: endDate || before,
+      endDate: before || endDate,
       orderDirection,
+      limit: limit + 1, // Necessary to check if there is a next page
     });
 
     // 3. Organize data by date
@@ -69,12 +98,9 @@ export class DelegationPercentageService {
       return {
         items: [],
         totalCount: 0,
-        pageInfo: {
-          hasNextPage: false,
-          hasPreviousPage: false,
-          endCursor: null,
-          startCursor: null,
-        },
+        hasNextPage: false,
+        endDate: null,
+        startDate: null,
       };
     }
 
@@ -105,14 +131,12 @@ export class DelegationPercentageService {
       before,
       limit,
     );
-
-    // 9. Build page info
-    const pageInfo = this.buildPageInfo(items, hasNextPage, after, before);
-
     return {
       items,
       totalCount: items.length,
-      pageInfo,
+      hasNextPage,
+      endDate: items[items.length - 1]?.date ?? null,
+      startDate: items[0]?.date ?? null,
     };
   }
 
@@ -124,7 +148,9 @@ export class DelegationPercentageService {
     beforeDate: string,
   ): Promise<{ delegated: bigint; total: bigint }> {
     try {
-      const beforeTimestamp = (BigInt(beforeDate) - 86400n).toString();
+      const beforeTimestamp = (
+        BigInt(beforeDate) - BigInt(SECONDS_IN_DAY)
+      ).toString();
 
       const [delegatedRow, totalRow] = await Promise.all([
         this.repository.getLastMetricValueBefore(
@@ -157,7 +183,7 @@ export class DelegationPercentageService {
     dateMap: Map<string, DateData>,
     initialValues: { delegated: bigint; total: bigint },
   ): string | undefined {
-    const referenceDate = startDate || after;
+    const referenceDate = after || startDate;
     if (!referenceDate) return undefined;
 
     if (
@@ -184,7 +210,11 @@ export class DelegationPercentageService {
    * Organizes database rows into a map by date
    * Separates DELEGATED_SUPPLY and TOTAL_SUPPLY metrics
    */
-  private organizeDateMap(rows: DaoMetricRow[]): Map<string, DateData> {
+  private organizeDateMap(
+    rows: Awaited<
+      ReturnType<DelegationPercentageRepository["getDaoMetricsByDateRange"]>
+    >,
+  ): Map<string, DateData> {
     const dateMap = new Map<string, DateData>();
 
     rows.forEach((row) => {
@@ -193,13 +223,12 @@ export class DelegationPercentageService {
 
       if (row.metricType === MetricTypesEnum.DELEGATED_SUPPLY) {
         existing.delegated = row.high;
-        existing.daoId = row.daoId;
-        existing.tokenId = row.tokenId;
       } else if (row.metricType === MetricTypesEnum.TOTAL_SUPPLY) {
         existing.total = row.high;
-        existing.daoId = row.daoId;
-        existing.tokenId = row.tokenId;
       }
+
+      existing.daoId = row.daoId;
+      existing.tokenId = row.tokenId;
 
       dateMap.set(dateStr, existing);
     });
@@ -236,9 +265,12 @@ export class DelegationPercentageService {
       return allDates;
     }
 
-    // Generate all days in range (86400 seconds = 1 day)
-    const ONE_DAY = 86400n;
-    for (let date = firstDate; date <= lastDate; date += ONE_DAY) {
+    // Generate all days in range
+    for (
+      let date = firstDate;
+      date <= lastDate;
+      date += BigInt(SECONDS_IN_DAY)
+    ) {
       allDates.push(date);
     }
 
@@ -310,30 +342,10 @@ export class DelegationPercentageService {
       );
     }
 
-    // Apply limit and detect hasNextPage
-    const pageSize = limit;
-    const itemsWithExtra = filteredItems.slice(0, pageSize + 1);
-    const hasNextPage = itemsWithExtra.length > pageSize;
-    const items = itemsWithExtra.slice(0, pageSize);
+    // Detect hasNextPage and apply limit
+    const hasNextPage = filteredItems.length > limit;
+    const items = filteredItems.slice(0, limit);
 
     return { items, hasNextPage };
-  }
-
-  /**
-   * Builds the PageInfo object for pagination metadata
-   */
-  private buildPageInfo(
-    items: DelegationPercentageItem[],
-    hasNextPage: boolean,
-    after?: string,
-    before?: string,
-  ): PageInfo {
-    return {
-      hasNextPage,
-      hasPreviousPage: !!after || !!before,
-      endCursor:
-        items.length > 0 ? (items[items.length - 1]?.date ?? null) : null,
-      startCursor: items.length > 0 ? (items[0]?.date ?? null) : null,
-    };
   }
 }
