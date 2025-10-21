@@ -65,7 +65,14 @@ export type DaoMetricRow = {
   daoId: string;
   tokenId: string;
   metricType: string;
+  open: bigint;
+  close: bigint;
+  low: bigint;
   high: bigint;
+  average: bigint;
+  volume: bigint;
+  count: number;
+  lastUpdate: bigint;
 };
 
 // === MAPPER FUNCTIONS ===

@@ -3,6 +3,29 @@ import { DelegationPercentageRepository } from "@/api/repositories/delegation-pe
 import type { DaoMetricRow } from "@/api/mappers/delegation-percentage";
 import { MetricTypesEnum } from "@/lib/constants";
 
+/**
+ * Mock Factory Pattern for type-safe test data
+ * Creates complete DaoMetricRow objects with sensible defaults
+ * Only requires specifying fields relevant to each test case
+ */
+const createMockRow = (
+  overwrites: Partial<DaoMetricRow> = {},
+): DaoMetricRow => ({
+  date: 0n,
+  daoId: "uniswap",
+  tokenId: "uni",
+  metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+  open: 0n,
+  close: 0n,
+  low: 0n,
+  high: 0n,
+  average: 0n,
+  volume: 0n,
+  count: 0,
+  lastUpdate: 0n,
+  ...overwrites,
+});
+
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
   let mockRepository: jest.Mocked<DelegationPercentageRepository>;
@@ -20,7 +43,10 @@ describe("DelegationPercentageService", () => {
     it("should return empty response when no data is available", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      const result = await service.getDelegationPercentage({});
+      const result = await service.getDelegationPercentage({
+        limit: 365,
+        orderDirection: "asc" as const,
+      });
 
       expect(result.items).toHaveLength(0);
       expect(result.totalCount).toBe(0);
@@ -30,21 +56,17 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should calculate delegation percentage correctly", async () => {
-      const mockRows: DaoMetricRow[] = [
-        {
+      const mockRows = [
+        createMockRow({
           date: 1600041600n,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n, // 50 tokens delegated
-        },
-        {
+        }),
+        createMockRow({
           date: 1600041600n,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n, // 100 tokens total
-        },
+        }),
       ];
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
@@ -52,6 +74,8 @@ describe("DelegationPercentageService", () => {
       const result = await service.getDelegationPercentage({
         startDate: "1600041600",
         endDate: "1600041600",
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(1);
@@ -66,37 +90,29 @@ describe("DelegationPercentageService", () => {
       const day2 = day1 + BigInt(ONE_DAY);
       const day3 = day2 + BigInt(ONE_DAY);
 
-      const mockRows: DaoMetricRow[] = [
+      const mockRows = [
         // Day 1: 40% delegation
-        {
+        createMockRow({
           date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 40000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
         // Day 3: 60% delegation (day 2 is missing)
-        {
+        createMockRow({
           date: day3,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 60000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day3,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ];
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
@@ -104,6 +120,8 @@ describe("DelegationPercentageService", () => {
       const result = await service.getDelegationPercentage({
         startDate: day1.toString(),
         endDate: day3.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(3);
@@ -117,21 +135,17 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should handle division by zero when total supply is zero", async () => {
-      const mockRows: DaoMetricRow[] = [
-        {
+      const mockRows = [
+        createMockRow({
           date: 1600041600n,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: 1600041600n,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 0n, // zero total supply
-        },
+        }),
       ];
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
@@ -139,6 +153,8 @@ describe("DelegationPercentageService", () => {
       const result = await service.getDelegationPercentage({
         startDate: "1600041600",
         endDate: "1600041600",
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(1);
@@ -147,26 +163,22 @@ describe("DelegationPercentageService", () => {
 
     it("should apply pagination with limit", async () => {
       const ONE_DAY = 86400;
-      const mockRows: DaoMetricRow[] = [];
+      const mockRows = [];
 
       // Create 5 days of data
       for (let i = 0; i < 5; i++) {
         const date = BigInt(1600041600 + i * ONE_DAY);
         mockRows.push(
-          {
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.DELEGATED_SUPPLY,
             high: 50000000000000000000n,
-          },
-          {
+          }),
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.TOTAL_SUPPLY,
             high: 100000000000000000000n,
-          },
+          }),
         );
       }
 
@@ -176,6 +188,7 @@ describe("DelegationPercentageService", () => {
         startDate: "1600041600",
         endDate: "1600387200", // 5 days
         limit: 3,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(3);
@@ -186,26 +199,22 @@ describe("DelegationPercentageService", () => {
 
     it("should apply cursor-based pagination with after", async () => {
       const ONE_DAY = 86400;
-      const mockRows: DaoMetricRow[] = [];
+      const mockRows = [];
 
       // Create 5 days of data
       for (let i = 0; i < 5; i++) {
         const date = BigInt(1600041600 + i * ONE_DAY);
         mockRows.push(
-          {
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.DELEGATED_SUPPLY,
             high: 50000000000000000000n,
-          },
-          {
+          }),
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.TOTAL_SUPPLY,
             high: 100000000000000000000n,
-          },
+          }),
         );
       }
 
@@ -216,6 +225,7 @@ describe("DelegationPercentageService", () => {
         endDate: "1600387200",
         after: "1600128000", // After day 2
         limit: 2,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(2);
@@ -225,26 +235,22 @@ describe("DelegationPercentageService", () => {
 
     it("should apply cursor-based pagination with before", async () => {
       const ONE_DAY = 86400;
-      const mockRows: DaoMetricRow[] = [];
+      const mockRows = [];
 
       // Create 5 days of data
       for (let i = 0; i < 5; i++) {
         const date = BigInt(1600041600 + i * ONE_DAY);
         mockRows.push(
-          {
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.DELEGATED_SUPPLY,
             high: 50000000000000000000n,
-          },
-          {
+          }),
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.TOTAL_SUPPLY,
             high: 100000000000000000000n,
-          },
+          }),
         );
       }
 
@@ -255,6 +261,7 @@ describe("DelegationPercentageService", () => {
         endDate: "1600387200",
         before: "1600214400", // Before day 3
         limit: 2,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(2);
@@ -264,26 +271,22 @@ describe("DelegationPercentageService", () => {
 
     it("should sort data in descending order when specified", async () => {
       const ONE_DAY = 86400;
-      const mockRows: DaoMetricRow[] = [];
+      const mockRows = [];
 
       // Create 3 days of data
       for (let i = 0; i < 3; i++) {
         const date = BigInt(1600041600 + i * ONE_DAY);
         mockRows.push(
-          {
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.DELEGATED_SUPPLY,
             high: BigInt(30 + i * 10) * BigInt(1e18),
-          },
-          {
+          }),
+          createMockRow({
             date,
-            daoId: "uniswap",
-            tokenId: "uni",
             metricType: MetricTypesEnum.TOTAL_SUPPLY,
             high: 100000000000000000000n,
-          },
+          }),
         );
       }
 
@@ -293,6 +296,7 @@ describe("DelegationPercentageService", () => {
         startDate: "1600041600",
         endDate: "1600214400",
         orderDirection: "desc",
+        limit: 365,
       });
 
       expect(result.items).toHaveLength(3);
@@ -305,7 +309,10 @@ describe("DelegationPercentageService", () => {
     it("should use default values when optional parameters are not provided", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      const result = await service.getDelegationPercentage({});
+      const result = await service.getDelegationPercentage({
+        limit: 365,
+        orderDirection: "asc" as const,
+      });
 
       expect(mockRepository.getDaoMetricsByDateRange).toHaveBeenCalledWith({
         startDate: undefined,
@@ -323,38 +330,30 @@ describe("DelegationPercentageService", () => {
       const day3 = day2 + BigInt(ONE_DAY);
       const day4 = day3 + BigInt(ONE_DAY);
 
-      const mockRows: DaoMetricRow[] = [
+      const mockRows = [
         // Day 1: 25% (25/100)
-        {
+        createMockRow({
           date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 25000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
         // Day 2: only total supply changes to 200 -> 25/200 = 12.5%
-        {
+        createMockRow({
           date: day2,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 200000000000000000000n,
-        },
+        }),
         // Day 3: delegated changes to 50 -> 50/200 = 25%
-        {
+        createMockRow({
           date: day3,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n,
-        },
+        }),
         // Day 4: no changes -> forward fill 50/200 = 25%
       ];
 
@@ -363,6 +362,8 @@ describe("DelegationPercentageService", () => {
       const result = await service.getDelegationPercentage({
         startDate: day1.toString(),
         endDate: day4.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(4);
@@ -383,41 +384,39 @@ describe("DelegationPercentageService", () => {
       const day105 = day100 + BigInt(ONE_DAY * 5);
 
       mockRepository.getLastMetricValueBefore
-        .mockResolvedValueOnce({
-          date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
-          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-          high: 40000000000000000000n,
-        })
-        .mockResolvedValueOnce({
-          date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
-          metricType: MetricTypesEnum.TOTAL_SUPPLY,
-          high: 100000000000000000000n,
-        });
+        .mockResolvedValueOnce(
+          createMockRow({
+            date: day1,
+            metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+            high: 40000000000000000000n,
+          }),
+        )
+        .mockResolvedValueOnce(
+          createMockRow({
+            date: day1,
+            metricType: MetricTypesEnum.TOTAL_SUPPLY,
+            high: 100000000000000000000n,
+          }),
+        );
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day105,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 60000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day105,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         startDate: day100.toString(),
         endDate: day105.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       expect(result.items).toHaveLength(6);
@@ -435,29 +434,29 @@ describe("DelegationPercentageService", () => {
 
       // Mock: only DELEGATED has previous value
       mockRepository.getLastMetricValueBefore
-        .mockResolvedValueOnce({
-          date: day50,
-          daoId: "uniswap",
-          tokenId: "uni",
-          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-          high: 30000000000000000000n,
-        })
+        .mockResolvedValueOnce(
+          createMockRow({
+            date: day50,
+            metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+            high: 30000000000000000000n,
+          }),
+        )
         .mockResolvedValueOnce(null); // TOTAL_SUPPLY has no previous value
 
       // Main data: TOTAL_SUPPLY appears on day 100
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         startDate: day100.toString(),
         endDate: day100.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // With total = 100 and delegated = 30 (from past) = 30%
@@ -474,25 +473,23 @@ describe("DelegationPercentageService", () => {
 
       // Main data: appears only on day 100
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         startDate: day100.toString(),
         endDate: day100.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // Should use values from day 100 directly (50/100 = 50%)
@@ -502,7 +499,10 @@ describe("DelegationPercentageService", () => {
     it("should not fetch previous values when neither startDate nor after is provided", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      await service.getDelegationPercentage({});
+      await service.getDelegationPercentage({
+        limit: 365,
+        orderDirection: "asc" as const,
+      });
 
       // Should not call getLastMetricValueBefore when no reference date
       expect(mockRepository.getLastMetricValueBefore).not.toHaveBeenCalled();
@@ -523,25 +523,23 @@ describe("DelegationPercentageService", () => {
 
       // Main data
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         startDate: day100.toString(),
         endDate: day100.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // Should work normally with fallback to 0 (50/100 = 50%)
@@ -570,39 +568,33 @@ describe("DelegationPercentageService", () => {
 
       // Real data starts on day 10
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day10,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 40000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day10,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day15,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day15,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         startDate: day5.toString(),
         endDate: day15.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // Should start from day 10 (first real data), not day 5
@@ -631,6 +623,8 @@ describe("DelegationPercentageService", () => {
 
       const result = await service.getDelegationPercentage({
         startDate: day100.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // Should return empty
@@ -647,41 +641,39 @@ describe("DelegationPercentageService", () => {
 
       // Mock: values before day50
       mockRepository.getLastMetricValueBefore
-        .mockResolvedValueOnce({
-          date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
-          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-          high: 30000000000000000000n, // 30%
-        })
-        .mockResolvedValueOnce({
-          date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
-          metricType: MetricTypesEnum.TOTAL_SUPPLY,
-          high: 100000000000000000000n,
-        });
+        .mockResolvedValueOnce(
+          createMockRow({
+            date: day1,
+            metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+            high: 30000000000000000000n, // 30%
+          }),
+        )
+        .mockResolvedValueOnce(
+          createMockRow({
+            date: day1,
+            metricType: MetricTypesEnum.TOTAL_SUPPLY,
+            high: 100000000000000000000n,
+          }),
+        );
 
       // Mock: data from day50 onwards (query should be optimized)
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 50000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day100,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         after: day50.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // Verify query was optimized (used after as startDate)
@@ -704,24 +696,22 @@ describe("DelegationPercentageService", () => {
       const day50 = day1 + BigInt(86400 * 50);
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
-        {
+        createMockRow({
           date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
           high: 30000000000000000000n,
-        },
-        {
+        }),
+        createMockRow({
           date: day1,
-          daoId: "uniswap",
-          tokenId: "uni",
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
           high: 100000000000000000000n,
-        },
+        }),
       ]);
 
       const result = await service.getDelegationPercentage({
         before: day50.toString(),
+        limit: 365,
+        orderDirection: "asc" as const,
       });
 
       // Verify query was optimized (used before as endDate)
