@@ -15,7 +15,6 @@ import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
 import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
-import { ETHEREUM_BLOCK_TIME_SECONDS } from "@/shared/types/blockchains";
 import {
   FilterDropdown,
   FilterOption,
@@ -99,12 +98,13 @@ export const ProposalsTable = ({
           item.userVote,
           item.proposal,
           finalResult.text,
-          Number(daoData?.votingPeriod) * ETHEREUM_BLOCK_TIME_SECONDS, //voting period comes in blocks, so we need to convert it to seconds
+          Number(daoData?.votingPeriod) *
+            daoConfigByDaoId[daoIdEnum]?.daoOverview.blockTime, //voting period comes in blocks, so we need to convert it to seconds
         ),
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod]);
+  }, [proposals, daoData?.votingPeriod, daoIdEnum]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
