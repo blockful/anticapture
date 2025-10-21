@@ -8,7 +8,7 @@ export enum DaoIdEnum {
   SCR = "SCR",
 }
 
-const SECONDS_IN_DAY = 24 * 60 * 60;
+export const SECONDS_IN_DAY = 24 * 60 * 60;
 
 /**
  * Enum representing different time periods in seconds
