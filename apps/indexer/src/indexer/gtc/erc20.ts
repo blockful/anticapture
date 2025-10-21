@@ -14,7 +14,6 @@ import {
   BurningAddresses,
   CEXAddresses,
   DEXAddresses,
-  LendingAddresses,
   TreasuryAddresses,
 } from "@/lib/constants";
 import {
@@ -49,7 +48,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
 
       const cexAddressList = Object.values(CEXAddresses[daoId]);
       const dexAddressList = Object.values(DEXAddresses[daoId]);
-      const lendingAddressList = Object.values(LendingAddresses[daoId]);
       const burningAddressList = Object.values(BurningAddresses[daoId]);
       const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
 
@@ -68,22 +66,8 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         {
           cex: cexAddressList,
           dex: dexAddressList,
-          lending: lendingAddressList,
           burning: burningAddressList,
         },
-      );
-
-      await updateSupplyMetric(
-        context,
-        "lendingSupply",
-        lendingAddressList,
-        MetricTypesEnum.LENDING_SUPPLY,
-        from,
-        to,
-        amount,
-        daoId,
-        address,
-        timestamp,
       );
 
       await updateSupplyMetric(
@@ -157,7 +141,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         {
           cex: cexAddressList,
           dex: dexAddressList,
-          lending: lendingAddressList,
           burning: burningAddressList,
         },
       );
