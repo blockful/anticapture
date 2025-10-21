@@ -2,6 +2,7 @@ import { ENS } from "@/shared/dao-config/ens";
 import { OP } from "@/shared/dao-config/op";
 import { UNI } from "@/shared/dao-config/uni";
 import { GTC } from "@/shared/dao-config/gtc";
+import { SCR } from "@/shared/dao-config/scr";
 import { NOUNS } from "@/shared/dao-config/nouns";
 
 export default {
@@ -9,5 +10,6 @@ export default {
   ENS,
   OP,
   GTC,
+  SCR,
   NOUNS,
 } as const;

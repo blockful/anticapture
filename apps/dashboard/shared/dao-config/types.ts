@@ -60,6 +60,7 @@ interface BaseInfo {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: Chain;
+  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;
@@ -125,6 +126,7 @@ export interface DaoAddresses {
     PayerContract: string;
     ClientIncentivesRewardsProxy: string;
   };
+  [DaoIdEnum.SCR]: Record<string, never>;
 }
 
 export interface AttackProfitabilityConfig {

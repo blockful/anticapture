@@ -21,7 +21,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const imageUrl = `${baseUrl}/opengraph-images/${daoId}.png`;
+  const imageUrl = `${baseUrl}/opengraph-images/${params.daoId}.png`;
 
   return {
     title: `Anticapture - ${daoId} DAO`,

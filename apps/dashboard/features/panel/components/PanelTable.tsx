@@ -11,10 +11,8 @@ import {
   Button,
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { useDelegatedSupply } from "@/shared/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize, useTokenData } from "@/shared/hooks";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import {
   ArrowUpDown,
@@ -36,7 +34,7 @@ type PanelDao = {
   inAnalysis?: boolean;
 };
 
-export const PanelTable = ({ days }: { days: TimeInterval }) => {
+export const PanelTable = () => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create a ref to store the actual delegated supply values
@@ -44,7 +42,8 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) =>
-      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION &&
+      daoId !== DaoIdEnum.SCR, // TODO remove this when Scroll is fully indexed on prod
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({
@@ -56,24 +55,22 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const DelegatedSupplyCell = ({
     daoId,
     rowIndex,
-    days,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
-    days: TimeInterval;
   }) => {
-    const { data: supplyData } = useDelegatedSupply(daoId, String(days));
+    const { data: tokenData } = useTokenData(daoId);
+    const delegatedSupply = tokenData?.delegatedSupply;
+
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (supplyData) {
-        const numericValue = Number(
-          BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18),
-        );
+      if (delegatedSupply) {
+        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
         delegatedSupplyValues.current[rowIndex] = numericValue;
       }
-    }, [supplyData, rowIndex]);
+    }, [delegatedSupply, rowIndex]);
 
-    if (!supplyData) {
+    if (!delegatedSupply) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -83,7 +80,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     }
 
     const formattedSupply = formatNumberUserReadable(
-      Number(BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18)),
+      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
     );
 
     return (
@@ -262,9 +259,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
             <div className="justify-endtext-end flex items-center">{"-"}</div>
           );
         }
-        return (
-          <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
-        );
+        return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
         <Button
