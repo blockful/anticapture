@@ -29,8 +29,6 @@ export const useVoterInfo = ({
   daoId,
   proposalId,
 }: UseAccountPowerParams): UseAccountPowerResult => {
-  console.log("useVoterInfo");
-
   // Main account power query
   const { data, loading, error, refetch } = useGetAccountPowerQuery({
     variables: {
