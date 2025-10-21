@@ -43,22 +43,24 @@ export const HeaderDAOSidebarDropdown = () => {
 
   const dropdownItems = useMemo(
     () => [
-      ...Object.values(DaoIdEnum).map((daoIdValue, index) => ({
-        id: index,
-        label: daoConfigByDaoId[daoIdValue].name,
-        icon: (
-          <DaoAvatarIcon
-            daoId={daoIdValue}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${daoIdValue.toLowerCase()}`,
-        name: daoIdValue,
-        isDisabled:
-          daoConfigByDaoId[daoIdValue].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      })),
+      ...Object.values(DaoIdEnum)
+        .filter((daoIdValue) => daoIdValue !== DaoIdEnum.SCR) // disable until Scroll is fully indexed on prod
+        .map((daoIdValue, index) => ({
+          id: index,
+          label: daoConfigByDaoId[daoIdValue].name,
+          icon: (
+            <DaoAvatarIcon
+              daoId={daoIdValue}
+              className="size-icon-md"
+              isRounded
+            />
+          ),
+          href: `/${daoIdValue.toLowerCase()}`,
+          name: daoIdValue,
+          isDisabled:
+            daoConfigByDaoId[daoIdValue].supportStage ===
+            SupportStageEnum.ANALYSIS,
+        })),
     ],
     [],
   );
