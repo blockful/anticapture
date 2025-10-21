@@ -12,15 +12,15 @@ interface Repository {
 }
 
 export class NFTPriceService {
-  private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
   private readonly client: AxiosInstance;
 
   constructor(
     private readonly repo: Repository,
+    coingeckoApiUrl: string,
     coingeckoApiKey: string,
   ) {
     this.client = axios.create({
-      baseURL: this.coingeckoApiUrl,
+      baseURL: coingeckoApiUrl,
       headers: {
         "x-cg-demo-api-key": coingeckoApiKey,
       },

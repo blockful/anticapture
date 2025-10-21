@@ -23,17 +23,17 @@ const createCoingeckoTokenPriceDataSchema = (
   });
 
 export class CoingeckoService {
-  private readonly coingeckoApiUrl = "https://api.coingecko.com/api/v3";
   private readonly client: AxiosInstance;
 
   constructor(
-    private readonly coingeckoApiKey: string,
+    coingeckoApiUrl: string,
+    coingeckoApiKey: string,
     private readonly daoId: DaoIdEnum,
   ) {
     this.client = axios.create({
-      baseURL: this.coingeckoApiUrl,
+      baseURL: coingeckoApiUrl,
       headers: {
-        "x-cg-demo-api-key": this.coingeckoApiKey,
+        "x-cg-demo-api-key": coingeckoApiKey,
       },
     });
   }
