@@ -52,8 +52,8 @@ export class AccountBalanceRepository {
       .from(aggregated)
       .orderBy(
         orderDirection == "desc"
-          ? desc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`)
-          : asc(sql`${aggregated.txsTo} - ${aggregated.txsFrom}`),
+          ? desc(sql`ABS(${aggregated.txsTo} - ${aggregated.txsFrom})`)
+          : asc(sql`ABS(${aggregated.txsTo} - ${aggregated.txsFrom})`),
       )
       .offset(skip)
       .limit(limit);
