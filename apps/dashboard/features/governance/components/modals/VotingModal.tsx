@@ -5,6 +5,8 @@ import { User2Icon, X, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import EnsGovernorAbi from "@/abis/ens-governor.json";
+import loadingAnimation from "@/public/loading-animation.json";
+import Lottie from "lottie-react";
 import {
   Account,
   Chain,
@@ -227,166 +229,178 @@ export const VotingModal = ({
         </div>
 
         {/* Content */}
-        <div className="text-primary overflow-hidden p-4">
-          <div className="bg-surface-contrast flex flex-col overflow-hidden rounded-lg">
-            <div className="border-border-contrast flex flex-col items-start gap-2 border-b p-3">
-              <ProposalInfoItem label="Proposal ID" value={proposal?.id} />
-              <ProposalInfoItem
-                label="Proposal name"
-                value={proposal?.title || "Untitled"}
-              />
-              <ProposalInfoItem
-                label="Your voting power"
-                value="0" // TODO: Get actual voting power
-              />
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <Lottie
+              animationData={loadingAnimation}
+              loop={true}
+              className="w-1/2"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="text-primary overflow-hidden p-4">
+              <div className="bg-surface-contrast flex flex-col overflow-hidden rounded-lg">
+                <div className="border-border-contrast flex flex-col items-start gap-2 border-b p-3">
+                  <ProposalInfoItem label="Proposal ID" value={proposal?.id} />
+                  <ProposalInfoItem
+                    label="Proposal name"
+                    value={proposal?.title || "Untitled"}
+                  />
+                  <ProposalInfoItem
+                    label="Your voting power"
+                    value="0" // TODO: Get actual voting power
+                  />
+                </div>
+
+                <div className="px-3 py-2">
+                  <p className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.045em]">
+                    You can also vote through:
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="px-3 py-2">
-              <p className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.045em]">
-                You can also vote through:
+            {/* your vote  */}
+            <div className="flex flex-col gap-[6px] p-4">
+              <p>Your vote</p>
+
+              {/* For vote  */}
+              <div className="flex flex-col">
+                <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+                  <div className="flex w-full items-center gap-2">
+                    <div className="flex w-[100px] items-center gap-2">
+                      <input
+                        className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+                        type="radio"
+                        name="vote"
+                        id="for"
+                        checked={vote === "for"}
+                        onChange={() => setVote("for")}
+                      />
+                      <p className="font-inter text-success text-[14px] font-normal not-italic leading-[20px]">
+                        For
+                      </p>
+                    </div>
+
+                    <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
+                      <div
+                        className="bg-success h-1"
+                        style={{ width: `${forPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
+                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                      {userReadableForVotes}
+                    </p>
+                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                      {forPercentage.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Against vote  */}
+              <div className="flex flex-col">
+                <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+                  <div className="flex w-full items-center gap-2">
+                    <div className="flex w-[100px] items-center gap-2">
+                      <input
+                        className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+                        type="radio"
+                        name="vote"
+                        id="for"
+                        checked={vote === "against"}
+                        onChange={() => setVote("against")}
+                      />
+                      <p className="font-inter text-error text-[14px] font-normal not-italic leading-[20px]">
+                        Against
+                      </p>
+                    </div>
+
+                    <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
+                      <div
+                        className="bg-error h-1"
+                        style={{ width: `${againstPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
+                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                      {userReadableAgainstVotes}
+                    </p>
+                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                      {againstPercentage.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Abstain vote  */}
+              <div className="flex flex-col">
+                <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+                  <div className="flex w-full items-center gap-2">
+                    <div className="flex w-[100px] items-center gap-2">
+                      <input
+                        className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+                        type="radio"
+                        name="vote"
+                        id="for"
+                        checked={vote === "abstain"}
+                        onChange={() => setVote("abstain")}
+                      />
+                      <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+                        Abstain
+                      </p>
+                    </div>
+
+                    <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
+                      <div
+                        className="bg-primary h-1"
+                        style={{ width: `${abstainPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
+                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                      {userReadableAbstainVotes}
+                    </p>
+                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                      {abstainPercentage.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
+                <User2Icon className="text-secondary size-3.5" />
+                <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+                  Quorum
+                </p>
+                <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
+                  {userReadableTotalVotes} / {userReadableQuorum}
+                </p>
+              </div>
+            </div>
+
+            {/* Comment  */}
+            <div className="flex flex-col gap-[6px] p-4">
+              <p className="font-inter text-[12px] font-medium not-italic leading-4">
+                Comment <span className="text-secondary">(optional)</span>
               </p>
+              <textarea
+                className="border-border-default flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
+                placeholder="Enter your comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
             </div>
-          </div>
-        </div>
-
-        {/* your vote  */}
-        <div className="flex flex-col gap-[6px] p-4">
-          <p>Your vote</p>
-
-          {/* For vote  */}
-          <div className="flex flex-col">
-            <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-              <div className="flex w-full items-center gap-2">
-                <div className="flex w-[100px] items-center gap-2">
-                  <input
-                    className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-                    type="radio"
-                    name="vote"
-                    id="for"
-                    checked={vote === "for"}
-                    onChange={() => setVote("for")}
-                  />
-                  <p className="font-inter text-success text-[14px] font-normal not-italic leading-[20px]">
-                    For
-                  </p>
-                </div>
-
-                <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-                  <div
-                    className="bg-success h-1"
-                    style={{ width: `${forPercentage}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {userReadableForVotes}
-                </p>
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {forPercentage.toFixed(1)}%
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Against vote  */}
-          <div className="flex flex-col">
-            <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-              <div className="flex w-full items-center gap-2">
-                <div className="flex w-[100px] items-center gap-2">
-                  <input
-                    className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-                    type="radio"
-                    name="vote"
-                    id="for"
-                    checked={vote === "against"}
-                    onChange={() => setVote("against")}
-                  />
-                  <p className="font-inter text-error text-[14px] font-normal not-italic leading-[20px]">
-                    Against
-                  </p>
-                </div>
-
-                <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-                  <div
-                    className="bg-error h-1"
-                    style={{ width: `${againstPercentage}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {userReadableAgainstVotes}
-                </p>
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {againstPercentage.toFixed(1)}%
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Abstain vote  */}
-          <div className="flex flex-col">
-            <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-              <div className="flex w-full items-center gap-2">
-                <div className="flex w-[100px] items-center gap-2">
-                  <input
-                    className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-                    type="radio"
-                    name="vote"
-                    id="for"
-                    checked={vote === "abstain"}
-                    onChange={() => setVote("abstain")}
-                  />
-                  <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-                    Abstain
-                  </p>
-                </div>
-
-                <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-                  <div
-                    className="bg-primary h-1"
-                    style={{ width: `${abstainPercentage}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {userReadableAbstainVotes}
-                </p>
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {abstainPercentage.toFixed(1)}%
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
-            <User2Icon className="text-secondary size-3.5" />
-            <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-              Quorum
-            </p>
-            <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-              {userReadableTotalVotes} / {userReadableQuorum}
-            </p>
-          </div>
-        </div>
-
-        {/* Comment  */}
-        <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-[12px] font-medium not-italic leading-4">
-            Comment <span className="text-secondary">(optional)</span>
-          </p>
-          <textarea
-            className="border-border-default flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
-            placeholder="Enter your comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
+          </>
+        )}
 
         <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
           <Button variant="outline" onClick={onClose}>
