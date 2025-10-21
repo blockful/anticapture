@@ -220,10 +220,6 @@ The codebase follows modern full-stack development practices with emphasis on:
 
 This architecture enables the team to build, maintain, and scale a complex DAO governance analysis platform while maintaining code quality and developer productivity.
 
-## General instructions for Claude Code
-
-- Always run `turbo lint` after making any code changes.
-
 ### MCP Tools
 
 - **Context7 MCP**: Use to fetch updated documentation for libraries and frameworks like Next.js, Tailwind CSS, Shadcn.
