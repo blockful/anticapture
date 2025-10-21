@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
-import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
+import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -24,23 +24,11 @@ export const ProposalHeader = ({
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { address } = useAccount();
 
-  // TODO: Use proposal data for voting logic
-  // check if the proposal is active or not
-
-  // check how much voting power the address has
-  // const votingPower = useVotingPower({
-  //   daoId: daoId.toUpperCase() as DaoIdEnum,
-  //   address: address || "",
-  // });
-
-  const { votingPower } = useAccountPower({
-    address: address || "0x81b287c0992B110ADEB5903Bf7E2d9350C80581a",
+  const { votingPower, votesOnchain } = useVoterInfo({
+    address: address || "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
     daoId: daoId.toUpperCase() as DaoIdEnum,
+    proposalId: proposal.id,
   });
-
-  console.log("votingPower ", votingPower);
-
-  // check if the address has already voted or not
 
   return (
     <div className="text-primary border-border-default flex h-[60px] w-full items-center justify-between gap-6 border-b px-5 py-2">
@@ -64,7 +52,8 @@ export const ProposalHeader = ({
 
       <div className="flex items-center gap-2">
         <p className="text-secondary flex items-center gap-2 text-[14px] font-normal leading-[20px]">
-          your voting power is {votingPower} {daoId.toUpperCase()}
+          your voting power is {votingPower} {daoId.toUpperCase()} voted{" "}
+          {votesOnchain?.support} on this proposal
         </p>
 
         {address ? (

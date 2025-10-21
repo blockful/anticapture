@@ -2593,10 +2593,19 @@ export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoter
 
 export type GetAccountPowerQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  proposalId: Scalars['String']['input'];
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
+
+export type GetUserVoteQueryVariables = Exact<{
+  proposalId: Scalars['String']['input'];
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetUserVoteQuery = { __typename?: 'Query', votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -4085,10 +4094,18 @@ export type GetProposalNonVotersLazyQueryHookResult = ReturnType<typeof useGetPr
 export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useGetProposalNonVotersSuspenseQuery>;
 export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
 export const GetAccountPowerDocument = gql`
-    query GetAccountPower($address: String!) {
+    query GetAccountPower($address: String!, $proposalId: String!) {
   accountPower(accountId: $address) {
     votingPower
     accountId
+  }
+  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
+    support
+    votingPower
+    reason
+    timestamp
+    txHash
+    daoId
   }
 }
     `;
@@ -4106,6 +4123,7 @@ export const GetAccountPowerDocument = gql`
  * const { data, loading, error } = useGetAccountPowerQuery({
  *   variables: {
  *      address: // value for 'address'
+ *      proposalId: // value for 'proposalId'
  *   },
  * });
  */
@@ -4125,6 +4143,52 @@ export type GetAccountPowerQueryHookResult = ReturnType<typeof useGetAccountPowe
 export type GetAccountPowerLazyQueryHookResult = ReturnType<typeof useGetAccountPowerLazyQuery>;
 export type GetAccountPowerSuspenseQueryHookResult = ReturnType<typeof useGetAccountPowerSuspenseQuery>;
 export type GetAccountPowerQueryResult = Apollo.QueryResult<GetAccountPowerQuery, GetAccountPowerQueryVariables>;
+export const GetUserVoteDocument = gql`
+    query GetUserVote($proposalId: String!, $address: String!) {
+  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
+    support
+    votingPower
+    reason
+    timestamp
+    txHash
+    daoId
+  }
+}
+    `;
+
+/**
+ * __useGetUserVoteQuery__
+ *
+ * To run a query within a React component, call `useGetUserVoteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserVoteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserVoteQuery({
+ *   variables: {
+ *      proposalId: // value for 'proposalId'
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetUserVoteQuery(baseOptions: Apollo.QueryHookOptions<GetUserVoteQuery, GetUserVoteQueryVariables> & ({ variables: GetUserVoteQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserVoteQuery, GetUserVoteQueryVariables>(GetUserVoteDocument, options);
+      }
+export function useGetUserVoteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserVoteQuery, GetUserVoteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserVoteQuery, GetUserVoteQueryVariables>(GetUserVoteDocument, options);
+        }
+export function useGetUserVoteSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUserVoteQuery, GetUserVoteQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetUserVoteQuery, GetUserVoteQueryVariables>(GetUserVoteDocument, options);
+        }
+export type GetUserVoteQueryHookResult = ReturnType<typeof useGetUserVoteQuery>;
+export type GetUserVoteLazyQueryHookResult = ReturnType<typeof useGetUserVoteLazyQuery>;
+export type GetUserVoteSuspenseQueryHookResult = ReturnType<typeof useGetUserVoteSuspenseQuery>;
+export type GetUserVoteQueryResult = Apollo.QueryResult<GetUserVoteQuery, GetUserVoteQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
   historicalBalances(addresses: $addresses, days: $days) {
