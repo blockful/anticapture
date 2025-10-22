@@ -37,12 +37,6 @@ type Query {
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
-  """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
-
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
 
@@ -126,8 +120,54 @@ type Query {
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 
   """Get delegation percentage day buckets with forward-fill"""
-  getDelegationPercentage(after: String, before: String, startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 100): getDelegationPercentage_200_response
-  aggregatedDelegatedSupply(after: String, before: String, startDate: String, endDate: String, orderDirection: String, limit: Int): AggregatedDelegatedSupplyPage!
+  getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
+
+  """Get historical market data for a specific token"""
+  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
+
+  """
+  Returns a mapping of the biggest changes to voting power associated by delegate address
+  """
+  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+
+  """
+  Returns a mapping of the biggest variations to account balances associated by account address
+  """
+  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+
+  """
+  Aggregated delegation supply across all supported DAOs.
+  Returns the mean delegation percentage for each day in the specified range.
+  Only includes dates where ALL DAOs have data available.
+  """
+  aggregatedDelegatedSupply(
+    """
+    Start date (Unix timestamp in seconds). Required.
+    All DAOs will return data starting from this date.
+    The aggregation will begin from the latest start date among all DAOs.
+    """
+    startDate: String!
+
+    """
+    End date (Unix timestamp in seconds). Optional.
+    If not provided, returns data up to the latest available date.
+    """
+    endDate: String
+
+    """Cursor for pagination. Returns items after this date."""
+    after: String
+
+    """Cursor for pagination. Returns items before this date."""
+    before: String
+
+    """
+    Sort direction: "asc" or "desc". Default: "asc"
+    """
+    orderDirection: String
+
+    """Maximum number of items to return. Default: 100"""
+    limit: Int
+  ): AggregatedDelegatedSupplyPage!
 }
 
 """
@@ -139,8 +179,11 @@ scalar BigInt
 
 type PageInfo {
   hasNextPage: Boolean!
-  startDate: String
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
   endDate: String
+  startDate: String
 }
 
 type Meta {
@@ -1313,52 +1356,6 @@ input transactionFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
-}
-
-enum queryInput_historicalTokenData_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
-type token_200_response {
-  id: String!
-  name: String
-  decimals: Float!
-  totalSupply: String!
-  delegatedSupply: String!
-  cexSupply: String!
-  dexSupply: String!
-  lendingSupply: String!
-  circulatingSupply: String!
-  treasury: String!
-  price: Float!
-}
-
-enum queryInput_token_currency {
-  eth
-  usd
-}
-
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
@@ -1782,6 +1779,28 @@ enum queryInput_votingPowers_orderDirection {
   desc
 }
 
+type getDelegationPercentage_200_response {
+  items: [query_getDelegationPercentage_items_items]!
+  totalCount: Float!
+  pageInfo: query_getDelegationPercentage_pageInfo!
+}
+
+type query_getDelegationPercentage_items_items {
+  date: String!
+  high: String!
+}
+
+type query_getDelegationPercentage_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_getDelegationPercentage_orderDirection {
+  asc
+  desc
+}
+
 scalar ObjMap
 
 enum HTTPMethod {
@@ -1796,34 +1815,99 @@ enum HTTPMethod {
   PATCH
 }
 
-type getDelegationPercentage_200_response {
-  items: [query_getDelegationPercentage_items_items]!
-  totalCount: Float!
-  pageInfo: query_getDelegationPercentage_pageInfo!
+type historicalTokenData_200_response {
+  prices: [[Float]]!
+  market_caps: [[Float]]!
+  total_volumes: [[Float]]!
 }
 
-type query_getDelegationPercentage_items_items {
-  date: String!
-  daoId: String!
-  tokenId: String!
-  metricType: String!
-  open: String!
-  close: String!
-  low: String!
-  high: String!
-  average: String!
-  volume: String!
-  count: Float!
-  lastUpdate: String!
+enum queryInput_historicalTokenData_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
 }
 
-type query_getDelegationPercentage_pageInfo {
-  hasNextPage: Boolean!
-  endDate: String
-  startDate: String
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: Float!
 }
 
-enum queryInput_getDelegationPercentage_orderDirection {
+enum queryInput_token_currency {
+  eth
+  usd
+}
+
+type votingPowerVariations_200_response {
+  period: query_votingPowerVariations_period!
+  items: [query_votingPowerVariations_items_items]!
+}
+
+type query_votingPowerVariations_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_votingPowerVariations_items_items {
+  accountId: String!
+  previousVotingPower: String
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_votingPowerVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_votingPowerVariations_orderDirection {
+  asc
+  desc
+}
+
+type accountBalanceVariations_200_response {
+  period: query_accountBalanceVariations_period!
+  items: [query_accountBalanceVariations_items_items]!
+}
+
+type query_accountBalanceVariations_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_accountBalanceVariations_items_items {
+  accountId: String!
+  previousBalance: String!
+  currentBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_accountBalanceVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_accountBalanceVariations_orderDirection {
   asc
   desc
 }
