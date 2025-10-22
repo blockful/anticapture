@@ -20,7 +20,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import toast from "react-hot-toast";
 import { formatNumberUserReadable } from "@/shared/utils";
-
+import Link from "next/link";
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,7 +67,7 @@ const handleVote = async (
   account: Account,
   chain: Chain,
   daoId: DaoIdEnum,
-
+  setTransactionhash: (hash: string) => void,
   comment?: string,
 ) => {
   console.log(vote);
@@ -118,7 +118,11 @@ const handleVote = async (
     }
 
     const hash = await client.writeContract(request);
-    return hash;
+    setTransactionhash(hash);
+    const transaction = await client.waitForTransactionReceipt({ hash: hash });
+    setTransactionhash("");
+
+    return transaction;
   } catch (error) {
     console.error(error);
     showCustomToast("Failed to vote");
@@ -134,6 +138,7 @@ export const VotingModal = ({
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [transactionhash, setTransactionhash] = useState<string>("");
 
   const totalVotes =
     Number(proposal?.forVotes) +
@@ -230,12 +235,23 @@ export const VotingModal = ({
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-4">
             <Lottie
               animationData={loadingAnimation}
               loop={true}
               className="w-1/2"
             />
+
+            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+              Transaction hash:{" "}
+              <Link
+                href={`https://etherscan.io/tx/${transactionhash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {transactionhash}
+              </Link>
+            </p>
           </div>
         ) : (
           <>
@@ -418,6 +434,7 @@ export const VotingModal = ({
                 address as unknown as Account,
                 chain,
                 DaoIdEnum.ENS as DaoIdEnum,
+                setTransactionhash,
                 comment,
               );
               setIsLoading(false);
