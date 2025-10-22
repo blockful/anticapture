@@ -21,6 +21,8 @@ import {
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
+import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -140,6 +142,17 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+          <div className="w-full">
+            <AccountBalanceChartCard daoId={daoId} />
+          </div>
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <div className="w-full">
+            <VotingPowerChartCard daoId={daoId} />
+          </div>
         </div>
       </div>
     </Suspense>

@@ -1,0 +1,19 @@
+query VotingPowerVariations(
+  $days: queryInput_votingPowerVariations_days!
+  $limit: PositiveInt = 10
+) {
+  votingPowerVariations(days: $days, limit: $limit) {
+    period {
+      days
+      startTimestamp
+      endTimestamp
+    }
+    items {
+      absoluteChange
+      accountId
+      currentVotingPower
+      percentageChange
+      previousVotingPower
+    }
+  }
+}

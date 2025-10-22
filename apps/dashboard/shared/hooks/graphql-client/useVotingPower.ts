@@ -49,6 +49,7 @@ interface UseVotingPowerResult {
   fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
   historicalDataLoading: boolean;
+  totalCount: number;
 }
 interface UseVotingPowerParams {
   daoId: DaoIdEnum;
@@ -111,6 +112,8 @@ export const useVotingPower = ({
       },
     },
   });
+
+  console.log("Counting data:", countingData);
 
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
@@ -375,5 +378,6 @@ export const useVotingPower = ({
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
     historicalDataLoading: tsLoading,
+    totalCount: countingData?.accountBalances.totalCount || 0,
   };
 };

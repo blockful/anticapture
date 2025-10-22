@@ -56,6 +56,8 @@ export type Query = {
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
+  /** Returns a mapping of the biggest variations to account balances associated by account address */
+  accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
@@ -106,7 +108,8 @@ export type Query = {
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
   proposalsOnchains: ProposalsOnchainPage;
-  token?: Maybe<Token>;
+  /** Get property data for a specific token */
+  token?: Maybe<Token_200_Response>;
   tokens: TokenPage;
   /** Get total assets */
   totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
@@ -119,6 +122,8 @@ export type Query = {
   votesOnchains: VotesOnchainPage;
   votingPowerHistory?: Maybe<VotingPowerHistory>;
   votingPowerHistorys: VotingPowerHistoryPage;
+  /** Returns a mapping of the biggest changes to voting power associated by delegate address */
+  votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
@@ -142,6 +147,14 @@ export type QueryAccountArgs = {
 export type QueryAccountBalanceArgs = {
   accountId: Scalars['String']['input'];
   tokenId: Scalars['String']['input'];
+};
+
+
+export type QueryAccountBalanceVariationsArgs = {
+  days?: InputMaybe<QueryInput_AccountBalanceVariations_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountBalanceVariations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -313,6 +326,7 @@ export type QueryProposalArgs = {
 
 
 export type QueryProposalNonVotersArgs = {
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
   id: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_ProposalNonVoters_OrderDirection>;
@@ -356,7 +370,7 @@ export type QueryProposalsOnchainsArgs = {
 
 
 export type QueryTokenArgs = {
-  id: Scalars['String']['input'];
+  currency?: InputMaybe<QueryInput_Token_Currency>;
 };
 
 
@@ -439,6 +453,14 @@ export type QueryVotingPowerHistorysArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<VotingPowerHistoryFilter>;
+};
+
+
+export type QueryVotingPowerVariationsArgs = {
+  days?: InputMaybe<QueryInput_VotingPowerVariations_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowerVariations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -617,6 +639,12 @@ export type AccountBalancePage = {
   items: Array<AccountBalance>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type AccountBalanceVariations_200_Response = {
+  __typename?: 'accountBalanceVariations_200_response';
+  items: Array<Maybe<Query_AccountBalanceVariations_Items_Items>>;
+  period: Query_AccountBalanceVariations_Period;
 };
 
 export type AccountFilter = {
@@ -1365,6 +1393,19 @@ export type Proposals_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export enum QueryInput_AccountBalanceVariations_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_AccountBalanceVariations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1512,6 +1553,11 @@ export enum QueryInput_Proposals_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_Token_Currency {
+  Eth = 'eth',
+  Usd = 'usd'
+}
+
 export enum QueryInput_TotalAssets_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1525,6 +1571,19 @@ export enum QueryInput_Transactions_SortOrder {
   Desc = 'desc'
 }
 
+export enum QueryInput_VotingPowerVariations_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_VotingPowerVariations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_VotingPowers_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
@@ -1534,6 +1593,22 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
+
+export type Query_AccountBalanceVariations_Items_Items = {
+  __typename?: 'query_accountBalanceVariations_items_items';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentBalance: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceVariations_Period = {
+  __typename?: 'query_accountBalanceVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
 
 export type Query_HistoricalBalances_Items = {
   __typename?: 'query_historicalBalances_items';
@@ -1662,6 +1737,22 @@ export type Query_Transactions_Transactions_Items_Transfers_Items = {
   toAccountId: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_VotingPowerVariations_Items_Items = {
+  __typename?: 'query_votingPowerVariations_items_items';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentVotingPower: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousVotingPower?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_VotingPowerVariations_Period = {
+  __typename?: 'query_votingPowerVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_VotingPowers_Items_Items = {
@@ -1803,6 +1894,21 @@ export type TokenPage = {
   items: Array<Token>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type Token_200_Response = {
+  __typename?: 'token_200_response';
+  cexSupply: Scalars['String']['output'];
+  circulatingSupply: Scalars['String']['output'];
+  decimals: Scalars['Float']['output'];
+  delegatedSupply: Scalars['String']['output'];
+  dexSupply: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  lendingSupply: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  price: Scalars['Float']['output'];
+  totalSupply: Scalars['String']['output'];
+  treasury: Scalars['String']['output'];
 };
 
 export type Transaction = {
@@ -2037,7 +2143,7 @@ export type VotesOnchain = {
   daoId: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
   proposalId: Scalars['String']['output'];
-  reason: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
   support: Scalars['String']['output'];
   timestamp: Scalars['BigInt']['output'];
   txHash: Scalars['String']['output'];
@@ -2231,6 +2337,12 @@ export type VotingPowerHistoryPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type VotingPowerVariations_200_Response = {
+  __typename?: 'votingPowerVariations_200_response';
+  items: Array<Maybe<Query_VotingPowerVariations_Items_Items>>;
+  period: Query_VotingPowerVariations_Period;
+};
+
 export type VotingPowers_200_Response = {
   __typename?: 'votingPowers_200_response';
   items: Array<Maybe<Query_VotingPowers_Items_Items>>;
@@ -2294,12 +2406,28 @@ export type BalanceHistorySellTotalCountQueryVariables = Exact<{
 
 export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
+export type AccountBalanceVariationsQueryVariables = Exact<{
+  days: QueryInput_AccountBalanceVariations_Days;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+}>;
+
+
+export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', period: { __typename?: 'query_accountBalanceVariations_period', days: string, startTimestamp: string, endTimestamp: string }, items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
+
 export type CompareTreasuryQueryVariables = Exact<{
   days: QueryInput_CompareTreasury_Days;
 }>;
 
 
 export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
+
+export type VotingPowerVariationsQueryVariables = Exact<{
+  days: QueryInput_VotingPowerVariations_Days;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+}>;
+
+
+export type VotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', period: { __typename?: 'query_votingPowerVariations_period', days: string, startTimestamp: string, endTimestamp: string }, items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower?: string | null } | null> } | null };
 
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
@@ -2826,6 +2954,58 @@ export type BalanceHistorySellTotalCountQueryHookResult = ReturnType<typeof useB
 export type BalanceHistorySellTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountLazyQuery>;
 export type BalanceHistorySellTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountSuspenseQuery>;
 export type BalanceHistorySellTotalCountQueryResult = Apollo.QueryResult<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>;
+export const AccountBalanceVariationsDocument = gql`
+    query AccountBalanceVariations($days: queryInput_accountBalanceVariations_days!, $limit: PositiveInt = 10) {
+  accountBalanceVariations(days: $days, limit: $limit) {
+    period {
+      days
+      startTimestamp
+      endTimestamp
+    }
+    items {
+      accountId
+      previousBalance
+      currentBalance
+      absoluteChange
+      percentageChange
+    }
+  }
+}
+    `;
+
+/**
+ * __useAccountBalanceVariationsQuery__
+ *
+ * To run a query within a React component, call `useAccountBalanceVariationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountBalanceVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountBalanceVariationsQuery({
+ *   variables: {
+ *      days: // value for 'days'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useAccountBalanceVariationsQuery(baseOptions: Apollo.QueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables> & ({ variables: AccountBalanceVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
+      }
+export function useAccountBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
+        }
+export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
+        }
+export type AccountBalanceVariationsQueryHookResult = ReturnType<typeof useAccountBalanceVariationsQuery>;
+export type AccountBalanceVariationsLazyQueryHookResult = ReturnType<typeof useAccountBalanceVariationsLazyQuery>;
+export type AccountBalanceVariationsSuspenseQueryHookResult = ReturnType<typeof useAccountBalanceVariationsSuspenseQuery>;
+export type AccountBalanceVariationsQueryResult = Apollo.QueryResult<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>;
 export const CompareTreasuryDocument = gql`
     query CompareTreasury($days: queryInput_compareTreasury_days!) {
   compareTreasury(days: $days) {
@@ -2868,6 +3048,58 @@ export type CompareTreasuryQueryHookResult = ReturnType<typeof useCompareTreasur
 export type CompareTreasuryLazyQueryHookResult = ReturnType<typeof useCompareTreasuryLazyQuery>;
 export type CompareTreasurySuspenseQueryHookResult = ReturnType<typeof useCompareTreasurySuspenseQuery>;
 export type CompareTreasuryQueryResult = Apollo.QueryResult<CompareTreasuryQuery, CompareTreasuryQueryVariables>;
+export const VotingPowerVariationsDocument = gql`
+    query VotingPowerVariations($days: queryInput_votingPowerVariations_days!, $limit: PositiveInt = 10) {
+  votingPowerVariations(days: $days, limit: $limit) {
+    period {
+      days
+      startTimestamp
+      endTimestamp
+    }
+    items {
+      absoluteChange
+      accountId
+      currentVotingPower
+      percentageChange
+      previousVotingPower
+    }
+  }
+}
+    `;
+
+/**
+ * __useVotingPowerVariationsQuery__
+ *
+ * To run a query within a React component, call `useVotingPowerVariationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVotingPowerVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVotingPowerVariationsQuery({
+ *   variables: {
+ *      days: // value for 'days'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useVotingPowerVariationsQuery(baseOptions: Apollo.QueryHookOptions<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables> & ({ variables: VotingPowerVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>(VotingPowerVariationsDocument, options);
+      }
+export function useVotingPowerVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>(VotingPowerVariationsDocument, options);
+        }
+export function useVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>(VotingPowerVariationsDocument, options);
+        }
+export type VotingPowerVariationsQueryHookResult = ReturnType<typeof useVotingPowerVariationsQuery>;
+export type VotingPowerVariationsLazyQueryHookResult = ReturnType<typeof useVotingPowerVariationsLazyQuery>;
+export type VotingPowerVariationsSuspenseQueryHookResult = ReturnType<typeof useVotingPowerVariationsSuspenseQuery>;
+export type VotingPowerVariationsQueryResult = Apollo.QueryResult<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>;
 export const GetDaoDataDocument = gql`
     query GetDaoData($daoId: String!) {
   dao(id: $daoId) {
