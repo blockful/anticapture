@@ -78,7 +78,10 @@ export const ProposalHeader = ({
               <ArrowRight className="size-[14px]" />
             </Button>
           ) : (
-            <VotedBadge vote={Number(votesOnchain?.support)} />
+            <div className="flex items-center gap-4">
+              <div className="bg-secondary ml-4 h-[28px] w-[1px] flex-shrink-0" />
+              <VotedBadge vote={Number(votesOnchain?.support)} />
+            </div>
           )
         ) : (
           <div className="hidden lg:flex">
