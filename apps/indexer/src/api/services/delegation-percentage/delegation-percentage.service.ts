@@ -57,6 +57,18 @@ export class DelegationPercentageService {
   constructor(private readonly repository: DelegationPercentageRepository) {}
 
   /**
+   * Normalizes a timestamp to midnight UTC (00:00:00)
+   * This ensures alignment with database timestamps which are always stored at midnight
+   * @param timestamp - Unix timestamp in seconds as string
+   * @returns Normalized timestamp at midnight UTC
+   */
+  private normalizeTimestamp(timestamp: string): string {
+    const ts = BigInt(timestamp);
+    const midnight = (ts / BigInt(SECONDS_IN_DAY)) * BigInt(SECONDS_IN_DAY);
+    return midnight.toString();
+  }
+
+  /**
    * Main method to get delegation percentage data with forward-fill and pagination
    */
   async getDelegationPercentage(
@@ -71,8 +83,20 @@ export class DelegationPercentageService {
       limit = 366,
     } = filters;
 
+    // Normalize all timestamps to midnight UTC to align with database storage
+    const normalizedStartDate = startDate
+      ? this.normalizeTimestamp(startDate)
+      : undefined;
+    const normalizedEndDate = endDate
+      ? this.normalizeTimestamp(endDate)
+      : undefined;
+    const normalizedAfter = after ? this.normalizeTimestamp(after) : undefined;
+    const normalizedBefore = before
+      ? this.normalizeTimestamp(before)
+      : undefined;
+
     // 1. Get initial values for proper forward-fill
-    const referenceDate = after || startDate;
+    const referenceDate = normalizedAfter || normalizedStartDate;
     const initialValues = referenceDate
       ? await this.getInitialValuesBeforeDate(referenceDate)
       : { delegated: 0n, total: 0n };
@@ -80,7 +104,7 @@ export class DelegationPercentageService {
     // 2. Fetch data from repository
     const rows = await this.repository.getDaoMetricsByDateRange({
       startDate: referenceDate,
-      endDate: before || endDate,
+      endDate: normalizedBefore || normalizedEndDate,
       orderDirection,
       limit: limit + 1, // Necessary to check if there is a next page
     });
@@ -107,8 +131,8 @@ export class DelegationPercentageService {
     // 5. Adjust startDate if no previous values and startDate is before first data
     // This prevents returning 0% for dates before first real data
     const effectiveStartDate = this.adjustStartDateToFirstRealData(
-      startDate,
-      after,
+      normalizedStartDate,
+      normalizedAfter,
       dateMap,
       initialValues,
     );
@@ -117,7 +141,7 @@ export class DelegationPercentageService {
     const allDates = this.generateDateRange(
       dateMap,
       effectiveStartDate,
-      endDate,
+      normalizedEndDate,
       orderDirection,
     );
 
@@ -127,10 +151,10 @@ export class DelegationPercentageService {
     // 8. Apply cursor-based pagination
     const { items, hasNextPage } = this.applyCursorPagination(
       allItems,
-      after,
-      before,
+      normalizedAfter,
+      normalizedBefore,
       limit,
-      endDate,
+      normalizedEndDate,
     );
     return {
       items,
@@ -142,25 +166,21 @@ export class DelegationPercentageService {
   }
 
   /**
-   * Gets the last known values before a given date for proper forward-fill
+   * Gets the last known values at or before a given date for proper forward-fill
    * Returns { delegated: 0n, total: 0n } if no previous values exist
    */
   private async getInitialValuesBeforeDate(
     beforeDate: string,
   ): Promise<{ delegated: bigint; total: bigint }> {
     try {
-      const beforeTimestamp = (
-        BigInt(beforeDate) - BigInt(SECONDS_IN_DAY)
-      ).toString();
-
       const [delegatedRow, totalRow] = await Promise.all([
         this.repository.getLastMetricValueBefore(
           MetricTypesEnum.DELEGATED_SUPPLY,
-          beforeTimestamp,
+          beforeDate,
         ),
         this.repository.getLastMetricValueBefore(
           MetricTypesEnum.TOTAL_SUPPLY,
-          beforeTimestamp,
+          beforeDate,
         ),
       ]);
 

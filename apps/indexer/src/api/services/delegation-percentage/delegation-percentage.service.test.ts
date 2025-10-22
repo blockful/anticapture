@@ -379,7 +379,7 @@ describe("DelegationPercentageService", () => {
 
     it("should use last known values before startDate for forward-fill", async () => {
       const ONE_DAY = 86400;
-      const day1 = 1600000000n;
+      const day1 = 1599955200n;
       const day100 = day1 + BigInt(ONE_DAY * 100);
       const day105 = day100 + BigInt(ONE_DAY * 5);
 
@@ -429,7 +429,7 @@ describe("DelegationPercentageService", () => {
 
     it("should handle when only one metric has previous value", async () => {
       const ONE_DAY = 86400;
-      const day50 = 1600000000n;
+      const day50 = 1599955200n;
       const day100 = day50 + BigInt(ONE_DAY * 50);
 
       // Mock: only DELEGATED has previous value
@@ -464,7 +464,7 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should start with 0% when no previous values exist", async () => {
-      const day100 = 1600000000n;
+      const day100 = 1599955200n;
 
       // Mock: no previous values
       mockRepository.getLastMetricValueBefore
@@ -509,7 +509,7 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should fallback to 0 when fetching previous values fails", async () => {
-      const day100 = 1600000000n;
+      const day100 = 1599955200n;
 
       // Mock console.error to suppress test output
       const consoleErrorSpy = jest
@@ -557,7 +557,7 @@ describe("DelegationPercentageService", () => {
 
     it("should adjust startDate when requested startDate is before first real data", async () => {
       const ONE_DAY = 86400;
-      const day5 = 1600000000n;
+      const day5 = 1599955200n;
       const day10 = day5 + BigInt(ONE_DAY * 5);
       const day15 = day10 + BigInt(ONE_DAY * 5);
 
@@ -610,7 +610,7 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should return empty when startDate is after all available data", async () => {
-      const day5 = 1600000000n;
+      const day5 = 1599955200n;
       const day100 = day5 + BigInt(86400 * 100);
 
       // Mock: no values before day 100
@@ -635,7 +635,7 @@ describe("DelegationPercentageService", () => {
 
     it("should fetch previous values and optimize query when only after is provided", async () => {
       const ONE_DAY = 86400;
-      const day1 = 1600000000n;
+      const day1 = 1599955200n;
       const day50 = day1 + BigInt(ONE_DAY * 50);
       const day100 = day50 + BigInt(ONE_DAY * 50);
 
@@ -692,7 +692,7 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should optimize query when only before is provided", async () => {
-      const day1 = 1600000000n;
+      const day1 = 1599955200n;
       const day50 = day1 + BigInt(86400 * 50);
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
