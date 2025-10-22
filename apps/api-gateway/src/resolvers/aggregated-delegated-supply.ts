@@ -35,7 +35,7 @@ export function alignDaoResponses(
 ): Map<string, DelegationPercentageResponse> {
   // Filter out DAOs with no data
   const daoResponsesWithData = Array.from(daoResponses.entries()).filter(
-    ([_, response]) => response.items.length > 0
+    ([_, response]) => response?.items?.length > 0
   );
 
   if (daoResponsesWithData.length === 0) {
@@ -159,7 +159,8 @@ export async function fetchAndExtractDaoData(
   );
 
   // Extract successful responses
-  const daoResponses = new Map<string, DelegationPercentageResponse>();
+  const daoResponses = new Map<string,
+  DelegationPercentageResponse>();
   results.forEach((result) => {
     if (result.status === 'fulfilled' && result.value.response) {
       daoResponses.set(result.value.daoId, result.value.response);
@@ -234,7 +235,7 @@ export const aggregatedDelegatedSupplyResolver = {
 
     // Check if any DAO has more data (hasNextPage)
     const hasNextPage = Array.from(daoResponses.values()).some(
-      (response) => response.pageInfo.hasNextPage
+      (response) => response?.pageInfo?.hasNextPage ?? false
     );
 
     // Align DAO responses to ensure all DAOs have data in the same range
