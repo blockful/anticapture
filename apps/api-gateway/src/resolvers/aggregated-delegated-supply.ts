@@ -170,7 +170,7 @@ export async function fetchAndExtractDaoData(
 }
 
 /**
- * Applies ordering, pagination, and builds complete response
+ * Applies pagination and builds complete response
  * Handles empty items case
  */
 export function buildPaginatedResponse(
@@ -196,13 +196,9 @@ export function buildPaginatedResponse(
     };
   }
 
-  // Apply ordering
-  const ordered =
-    args.orderDirection === 'desc' ? [...items].reverse() : items;
-
   // Apply limit if specified
   const userLimit = args.limit || 100;
-  const finalItems = ordered.slice(0, userLimit);
+  const finalItems = items.slice(0, userLimit);
 
   return {
     items: finalItems,

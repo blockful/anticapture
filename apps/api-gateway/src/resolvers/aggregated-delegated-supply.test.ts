@@ -138,15 +138,17 @@ describe('buildPaginatedResponse', () => {
     expect(result.pageInfo.startDate).toBeNull();
   });
 
-  it('should apply desc ordering', () => {
+  it('should preserve order from input (items already ordered by indexers)', () => {
+    // Items come pre-ordered from indexers (desc in this case)
     const items = [
-      { date: '1', high: '10' },
-      { date: '2', high: '20' },
       { date: '3', high: '30' },
+      { date: '2', high: '20' },
+      { date: '1', high: '10' },
     ];
 
     const result = buildPaginatedResponse(items, { orderDirection: 'desc' }, false);
 
+    // Should maintain the order received (no re-ordering)
     expect(result.items[0].date).toBe('3');
     expect(result.items[1].date).toBe('2');
     expect(result.items[2].date).toBe('1');
@@ -180,12 +182,13 @@ describe('buildPaginatedResponse', () => {
     expect(result.pageInfo.endDate).toBe('300');
   });
 
-  it('should combine ordering, limit and hasNextPage from DAOs', () => {
+  it('should combine limit and hasNextPage from DAOs', () => {
+    // Items come pre-ordered from indexers (desc in this example)
     const items = [
-      { date: '1', high: '10' },
-      { date: '2', high: '20' },
-      { date: '3', high: '30' },
       { date: '4', high: '40' },
+      { date: '3', high: '30' },
+      { date: '2', high: '20' },
+      { date: '1', high: '10' },
     ];
 
     const result = buildPaginatedResponse(items, {
@@ -194,7 +197,7 @@ describe('buildPaginatedResponse', () => {
     }, true);
 
     expect(result.items).toHaveLength(2);
-    expect(result.items[0].date).toBe('4'); // desc order
+    expect(result.items[0].date).toBe('4'); // maintains input order
     expect(result.items[1].date).toBe('3');
     expect(result.pageInfo.hasNextPage).toBe(true);
   });
