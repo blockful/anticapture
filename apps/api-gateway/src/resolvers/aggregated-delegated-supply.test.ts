@@ -11,8 +11,8 @@ describe('aggregateMeanPercentage', () => {
         'ENS',
         {
           items: [
-            { date: '1600041600', high: '50000000000000000000' }, // 50%
-            { date: '1600128000', high: '60000000000000000000' }, // 60%
+            { date: '1600041600', high: '50.00' }, // 50%
+            { date: '1600128000', high: '60.00' }, // 60%
           ],
           totalCount: 2,
           pageInfo: {
@@ -26,8 +26,8 @@ describe('aggregateMeanPercentage', () => {
         'UNI',
         {
           items: [
-            { date: '1600041600', high: '40000000000000000000' }, // 40%
-            { date: '1600128000', high: '50000000000000000000' }, // 50%
+            { date: '1600041600', high: '40.00' }, // 40%
+            { date: '1600128000', high: '50.00' }, // 50%
           ],
           totalCount: 2,
           pageInfo: {
@@ -44,11 +44,11 @@ describe('aggregateMeanPercentage', () => {
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
       date: '1600041600',
-      high: '45000000000000000000', // (50 + 40) / 2 = 45%
+      high: '45.00', // (50 + 40) / 2 = 45%
     });
     expect(result[1]).toEqual({
       date: '1600128000',
-      high: '55000000000000000000', // (60 + 50) / 2 = 55%
+      high: '55.00', // (60 + 50) / 2 = 55%
     });
   });
 
@@ -60,13 +60,13 @@ describe('aggregateMeanPercentage', () => {
     expect(result).toHaveLength(0);
   });
 
-  it('should correctly convert bigint with 18 decimals', () => {
+  it('should correctly calculate mean with decimal precision', () => {
     const daoResponses = new Map<string, DelegationPercentageResponse>([
       [
         'ENS',
         {
           items: [
-            { date: '1600041600', high: '12345678901234567890' }, // 12.345678901234567890%
+            { date: '1600041600', high: '12.35' }, // 12.35%
           ],
           totalCount: 1,
           pageInfo: {
@@ -80,7 +80,7 @@ describe('aggregateMeanPercentage', () => {
         'UNI',
         {
           items: [
-            { date: '1600041600', high: '23456789012345678901' }, // 23.456789012345678901%
+            { date: '1600041600', high: '23.46' }, // 23.46%
           ],
           totalCount: 1,
           pageInfo: {
@@ -95,7 +95,7 @@ describe('aggregateMeanPercentage', () => {
     const result = aggregateMeanPercentage(daoResponses);
 
     expect(result).toHaveLength(1);
-    expect(result[0].high).toBe('17901233956790122496');
+    expect(result[0].high).toBe('17.91'); // (12.35 + 23.46) / 2 = 17.905 → 17.91
   });
 
   it('should preserve order from input (no sorting)', () => {
@@ -104,9 +104,9 @@ describe('aggregateMeanPercentage', () => {
         'ENS',
         {
           items: [
-            { date: '1600041600', high: '10000000000000000000' },
-            { date: '1600128000', high: '20000000000000000000' },
-            { date: '1600214400', high: '30000000000000000000' },
+            { date: '1600041600', high: '10.00' },
+            { date: '1600128000', high: '20.00' },
+            { date: '1600214400', high: '30.00' },
           ],
           totalCount: 3,
           pageInfo: {
