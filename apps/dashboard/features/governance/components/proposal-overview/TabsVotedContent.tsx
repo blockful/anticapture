@@ -274,7 +274,9 @@ export const TabsVotedContent = ({
 
           return (
             <div className="flex h-10 items-center p-2">
-              <span className="text-secondary text-sm">{formattedDate}</span>
+              <span className="text-secondary whitespace-nowrap text-sm">
+                {formattedDate}
+              </span>
             </div>
           );
         },
@@ -475,7 +477,7 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex h-8 w-full shrink-0 items-center justify-start whitespace-nowrap px-2">
             <p>VP Change (Last 30d)</p>
           </div>
         ),
