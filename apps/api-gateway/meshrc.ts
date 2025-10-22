@@ -75,12 +75,12 @@ export default processConfig(
         pageInfo: PageInfo!
       }
 
-      """
-      Aggregated delegation supply across all supported DAOs.
-      Returns the mean delegation percentage for each day in the specified range.
-      Only includes dates where ALL DAOs have data available.
-      """
       extend type Query {
+        """
+        Aggregated delegation supply across all supported DAOs.
+        Returns the mean delegation percentage for each day in the specified range.
+        Only includes dates where ALL DAOs have data available.
+        """
         aggregatedDelegatedSupply(
           """
           Start date (Unix timestamp in seconds). Required.
