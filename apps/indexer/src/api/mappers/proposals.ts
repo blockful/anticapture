@@ -93,7 +93,8 @@ export const ProposalMapper = {
       endTimestamp: p.endTimestamp.toString(),
       startTimestamp: (
         p.endTimestamp -
-        (BigInt(p.endBlock - p.startBlock) + votingDelay) * BigInt(blockTime)
+        (BigInt(p.endBlock - p.startBlock) + votingDelay) *
+          BigInt(Math.ceil(blockTime))
       ).toString(),
       quorum: quorum.toString(),
       calldatas: p.calldatas,
