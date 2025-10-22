@@ -5,13 +5,13 @@ import {
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { /* NounsIcon*/ EnsIcon } from "@/shared/components/icons";
+import { NounsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 
 export const NOUNS: DaoConfiguration = {
   name: "Nouns",
   supportStage: SupportStageEnum.FULL,
-  icon: EnsIcon,
+  icon: NounsIcon,
   daoOverview: {
     token: "ERC721",
     blockTime: 12,
@@ -22,7 +22,6 @@ export const NOUNS: DaoConfiguration = {
       token: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
       timelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
     },
-    // cancelFunction: true,
     rules: {
       delay: true,
       changeVote: false,

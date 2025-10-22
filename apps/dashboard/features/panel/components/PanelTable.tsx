@@ -42,7 +42,8 @@ export const PanelTable = () => {
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) =>
-      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION &&
+      daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({
