@@ -8,9 +8,14 @@ import { TitleSection } from "@/features/governance/components/proposal-overview
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
 import { ProposalHeader } from "@/features/governance/components/proposal-overview/ProposalHeader";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import { Button } from "@/shared/components";
+import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
+import { ArrowRight } from "lucide-react";
+import { useAccount } from "wagmi";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams();
+  const { address } = useAccount();
 
   const { proposal, loading, error } = useProposal({
     proposalId: proposalId as string,
@@ -46,6 +51,17 @@ export const ProposalSection = () => {
           <TitleSection proposal={proposal} />
           <ProposalInfoSection proposal={proposal} />
           <ProposalStatusSection proposal={proposal} />
+
+          {address ? (
+            <Button className="flex w-full lg:hidden" onClick={() => {}}>
+              Cast your vote
+              <ArrowRight className="size-[14px]" />
+            </Button>
+          ) : (
+            <div className="flex w-full lg:hidden">
+              <ConnectWalletCustom className="w-full" />
+            </div>
+          )}
         </div>
 
         <TabsSection proposal={proposal} />

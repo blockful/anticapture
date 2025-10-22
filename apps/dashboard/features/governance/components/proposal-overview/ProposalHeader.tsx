@@ -25,7 +25,7 @@ export const ProposalHeader = ({
   const { address } = useAccount();
 
   const { votingPower, votesOnchain } = useVoterInfo({
-    address: address || "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
+    address: address ?? "",
     daoId: daoId.toUpperCase() as DaoIdEnum,
     proposalId: proposal.id,
   });
@@ -51,18 +51,37 @@ export const ProposalHeader = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <p className="text-secondary flex items-center gap-2 text-[14px] font-normal leading-[20px]">
-          your voting power is {votingPower} {daoId.toUpperCase()} voted{" "}
-          {votesOnchain?.support} on this proposal
+        {/* If wallet now connected: = don't show VP */}
+
+        <p className="text-secondary flex items-center gap-2 whitespace-nowrap text-[14px] font-normal leading-[20px] lg:hidden">
+          Your VP: <span className="text-primary">{votingPower}</span>{" "}
+          {/* {daoId.toUpperCase()} voted {votesOnchain?.support} on this proposal */}
         </p>
 
+        <div className="hidden flex-col items-end lg:flex">
+          <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+            Your voting power
+          </p>
+          <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+            {votingPower}
+          </p>
+        </div>
+
+        {/* If already voted: show voted badge */}
         {address ? (
-          <Button onClick={() => setIsVotingModalOpen(true)}>
-            Cast your vote
-            <ArrowRight className="size-[14px]" />
-          </Button>
+          !votesOnchain?.support ? (
+            <Button
+              className="hidden lg:flex"
+              onClick={() => setIsVotingModalOpen(true)}
+            >
+              Cast your vote
+              <ArrowRight className="size-[14px]" />
+            </Button>
+          ) : (
+            <VotedBadge vote={Number(votesOnchain?.support)} />
+          )
         ) : (
-          <div>
+          <div className="hidden lg:flex">
             <ConnectWalletCustom />
           </div>
         )}
@@ -75,4 +94,38 @@ export const ProposalHeader = ({
       />
     </div>
   );
+};
+
+const VotedBadge = ({ vote }: { vote: number }) => {
+  return (
+    <div className="flex flex-col items-end">
+      <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+        You voted
+      </p>
+      {getVoteText(vote)}
+    </div>
+  );
+};
+
+const getVoteText = (vote: number) => {
+  switch (vote) {
+    case 0:
+      return (
+        <p className="text-success bg-surface-opacity-success font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          For
+        </p>
+      );
+    case 1:
+      return (
+        <p className="text-error bg-surface-opacity-error font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          Against
+        </p>
+      );
+    case 2:
+      return (
+        <p className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          Abstain
+        </p>
+      );
+  }
 };
