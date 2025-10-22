@@ -41,8 +41,8 @@ export const ProposalSection = () => {
         proposal={proposal as Query_Proposals_Items_Items}
         daoId={daoId as string}
       />
-      <div className="flex gap-6 p-5">
-        <div className="sticky left-0 top-5 flex h-fit w-[420px] flex-col gap-6 self-start">
+      <div className="flex flex-col gap-6 p-5 lg:flex-row">
+        <div className="left-0 top-5 flex h-fit w-full flex-col gap-6 self-start lg:sticky lg:w-[420px]">
           <TitleSection proposal={proposal} />
           <ProposalInfoSection proposal={proposal} />
           <ProposalStatusSection proposal={proposal} />
