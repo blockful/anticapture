@@ -15,6 +15,7 @@ export const SCR: DaoConfiguration = {
     svgColor: "#ebc28e",
     svgBgColor: "#ffeeda",
   },
+  forumLink: "https://governance.scroll.io/",
   supportStage: SupportStageEnum.FULL,
   icon: ScrollIcon,
   daoOverview: {
