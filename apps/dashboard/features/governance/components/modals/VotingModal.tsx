@@ -235,23 +235,25 @@ export const VotingModal = ({
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-4">
+          <div className="flex flex-col items-center justify-center py-4">
             <Lottie
               animationData={loadingAnimation}
               loop={true}
               className="w-1/2"
             />
 
-            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-              Transaction hash:{" "}
-              <Link
-                href={`https://etherscan.io/tx/${transactionhash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {transactionhash}
-              </Link>
-            </p>
+            {transactionhash && (
+              <p className="text-secondary font-inter text-center text-[14px] font-normal not-italic leading-[20px]">
+                Transaction hash:{" "}
+                <Link
+                  href={`https://etherscan.io/tx/${transactionhash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {transactionhash}
+                </Link>
+              </p>
+            )}
           </div>
         ) : (
           <>
