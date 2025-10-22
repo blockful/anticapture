@@ -27,7 +27,7 @@
  */
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { SECONDS_IN_DAY } from "@/lib/enums";
+import { SECONDS_IN_DAY, getCurrentDayTimestamp } from "@/lib/enums";
 import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
 import type {
   DelegationPercentageItem,
@@ -130,6 +130,7 @@ export class DelegationPercentageService {
       after,
       before,
       limit,
+      endDate,
     );
     return {
       items,
@@ -239,6 +240,7 @@ export class DelegationPercentageService {
   /**
    * Generates a complete date range based on available data
    * Fills gaps between first and last date with all days
+   * If endDate is not provided, uses current day (today) for forward-fill
    */
   private generateDateRange(
     dateMap: Map<string, DateData>,
@@ -257,9 +259,7 @@ export class DelegationPercentageService {
       .sort((a, b) => Number(a - b));
 
     const firstDate = startDate ? BigInt(startDate) : datesFromDb[0];
-    const lastDate = endDate
-      ? BigInt(endDate)
-      : datesFromDb[datesFromDb.length - 1];
+    const lastDate = endDate ? BigInt(endDate) : getCurrentDayTimestamp();
 
     if (!firstDate || !lastDate) {
       return allDates;
@@ -305,25 +305,27 @@ export class DelegationPercentageService {
       if (data?.total !== undefined) lastTotal = data.total;
 
       // Calculate percentage (avoid division by zero)
-      // Returns as bigint with 18 decimal places for precision
+      // Returns as string with 2 decimal places (e.g., "11.74" for 11.74%)
       const percentage =
-        lastTotal > 0n ? (lastDelegated * 100n * BigInt(1e18)) / lastTotal : 0n;
+        lastTotal > 0n ? Number((lastDelegated * 10000n) / lastTotal) / 100 : 0;
 
       return {
         date: dateStr,
-        high: percentage.toString(),
+        high: percentage.toFixed(2),
       };
     });
   }
 
   /**
    * Applies cursor-based pagination (after/before) and limit
+   * When endDate is not provided, hasNextPage considers if data reaches today
    */
   private applyCursorPagination(
     allItems: DelegationPercentageItem[],
     after?: string,
     before?: string,
     limit: number = 100,
+    endDate?: string,
   ): { items: DelegationPercentageItem[]; hasNextPage: boolean } {
     let filteredItems = allItems;
 
@@ -342,9 +344,22 @@ export class DelegationPercentageService {
       );
     }
 
-    // Detect hasNextPage and apply limit
-    const hasNextPage = filteredItems.length > limit;
+    // Apply limit
     const items = filteredItems.slice(0, limit);
+
+    // Determine hasNextPage
+    let hasNextPage: boolean;
+    if (endDate) {
+      // If endDate is provided, use traditional pagination logic
+      hasNextPage = filteredItems.length > limit;
+    } else {
+      // If endDate is not provided, check if last item reached today
+      // hasNextPage = true only if we have more data AND haven't reached today yet
+      const today = getCurrentDayTimestamp();
+      const lastItem = items[items.length - 1];
+      const lastItemDate = lastItem ? BigInt(lastItem.date) : 0n;
+      hasNextPage = filteredItems.length > limit && lastItemDate < today;
+    }
 
     return { items, hasNextPage };
   }
