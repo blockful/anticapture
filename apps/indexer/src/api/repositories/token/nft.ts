@@ -5,6 +5,10 @@ import { desc, sql } from "ponder";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 
 export class NFTPriceRepository {
+  /**
+   * Repository for handling NFT price data and calculations.
+   * Provides methods to retrieve historical NFT auction prices with rolling averages.
+   */
   async getHistoricalNFTPrice(
     limit: number,
     offset: number,

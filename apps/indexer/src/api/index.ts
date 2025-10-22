@@ -103,20 +103,26 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   assets(app, duneClient);
 }
 
-if (env.COINGECKO_API_KEY) {
-  const tokenPriceClient =
-    env.DAO_ID === DaoIdEnum.NOUNS
-      ? new NFTPriceService(new NFTPriceRepository(), env.COINGECKO_API_KEY)
-      : new CoingeckoService(env.COINGECKO_API_KEY, env.DAO_ID);
+const tokenPriceClient =
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NFTPriceService(
+        new NFTPriceRepository(),
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+      )
+    : new CoingeckoService(
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+        env.DAO_ID,
+      );
 
-  tokenHistoricalData(app, tokenPriceClient);
-  token(
-    app,
-    tokenPriceClient,
-    new TokenService(new TokenRepository()),
-    env.DAO_ID,
-  );
-}
+tokenHistoricalData(app, tokenPriceClient);
+token(
+  app,
+  tokenPriceClient,
+  new TokenService(new TokenRepository()),
+  env.DAO_ID,
+);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);

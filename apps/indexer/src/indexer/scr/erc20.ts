@@ -10,7 +10,15 @@ import {
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
+  MetricTypesEnum,
+  TreasuryAddresses,
 } from "@/lib/constants";
+import {
+  updateSupplyMetric,
+  updateTotalSupply,
+  updateCirculatingSupply,
+  updateDelegatedSupply,
+} from "@/eventHandlers/metrics";
 
 export function SCRTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.SCR;
@@ -24,6 +32,15 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`SCRToken:Transfer`, async ({ event, context }) => {
+    const { from, to, value } = event.args;
+    const { timestamp } = event.block;
+
+    const cexAddressList = Object.values(CEXAddresses[daoId]);
+    const dexAddressList = Object.values(DEXAddresses[daoId]);
+    const lendingAddressList = Object.values(LendingAddresses[daoId]);
+    const burningAddressList = Object.values(BurningAddresses[daoId]);
+    const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+
     await tokenTransfer(
       context,
       daoId,
@@ -37,11 +54,83 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         logIndex: event.log.logIndex,
       },
       {
-        cex: Object.values(CEXAddresses[daoId] || {}),
-        dex: Object.values(DEXAddresses[daoId] || {}),
-        lending: Object.values(LendingAddresses[daoId] || {}),
-        burning: Object.values(BurningAddresses[daoId] || {}),
+        cex: cexAddressList,
+        dex: dexAddressList,
+        lending: lendingAddressList,
+        burning: burningAddressList,
       },
+    );
+
+    await updateSupplyMetric(
+      context,
+      "lendingSupply",
+      lendingAddressList,
+      MetricTypesEnum.LENDING_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "cexSupply",
+      cexAddressList,
+      MetricTypesEnum.CEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "dexSupply",
+      dexAddressList,
+      MetricTypesEnum.DEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "treasury",
+      treasuryAddressList,
+      MetricTypesEnum.TREASURY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateTotalSupply(
+      context,
+      burningAddressList,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateCirculatingSupply(
+      context,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      daoId,
+      address,
+      timestamp,
     );
 
     if (!event.transaction.to) return;
@@ -174,6 +263,14 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
+
+    await updateDelegatedSupply(
+      context,
+      daoId,
+      event.log.address,
+      event.args.newVotes - event.args.previousVotes,
+      event.block.timestamp,
+    );
 
     if (!event.transaction.to) return;
 

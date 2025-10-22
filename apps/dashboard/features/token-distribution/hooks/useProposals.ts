@@ -2,7 +2,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { useGetProposalsQuery } from "@anticapture/graphql-client/hooks";
 
 export const useProposals = (daoId: DaoIdEnum, fromDate: number) => {
-  const { data, loading, error } = useGetProposalsQuery({
+  return useGetProposalsQuery({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
@@ -14,6 +14,4 @@ export const useProposals = (daoId: DaoIdEnum, fromDate: number) => {
     fetchPolicy: "cache-and-network",
     notifyOnNetworkStatusChange: true,
   });
-
-  return { data, loading, error };
 };

@@ -5,7 +5,7 @@ import {
   delegation,
   votingPowerHistory,
 } from "ponder:schema";
-import { Address, Hex } from "viem";
+import { Address, Hex, zeroAddress } from "viem";
 
 import { ensureAccountExists, ensureAccountsExist } from "./shared";
 import { DaoIdEnum } from "@/lib/enums";
@@ -114,13 +114,24 @@ export const delegateChanged = async (
       delegate: toDelegate,
     });
 
+  // Update the old delegate's delegations count
+  if (fromDelegate !== zeroAddress) {
+    await context.db
+      .update(accountPower, {
+        accountId: fromDelegate,
+      })
+      .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
+  }
+
   await context.db
     .insert(accountPower)
     .values({
       accountId: toDelegate,
       daoId,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate((current) => ({
+      delegationsCount: current.delegationsCount + 1,
+    }));
 };
 
 /**
