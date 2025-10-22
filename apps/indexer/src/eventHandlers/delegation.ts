@@ -114,8 +114,8 @@ export const delegateChanged = async (
       delegate: toDelegate,
     });
 
-  // Update the old delegate's delegations count
-  if (fromDelegate !== zeroAddress) {
+  // handle airdrop and auto-delegate cases
+  if (fromDelegate !== zeroAddress && fromDelegate !== toDelegate) {
     await context.db
       .update(accountPower, {
         accountId: fromDelegate,
