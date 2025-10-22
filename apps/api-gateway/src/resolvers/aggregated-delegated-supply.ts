@@ -69,8 +69,9 @@ export function alignDaoResponses(
 
 /**
  * Aggregates delegation percentages across DAOs using mean calculation
- * Returns high as the mean percentage in bigint format (18 decimals)
+ * Returns high as the mean percentage string with 2 decimal places (e.g., "11.74")
  * Assumes all DAOs have the same dates after alignment (via alignDaoResponses)
+ * This is guaranteed because indexers return consecutive daily data via forward-fill
  * Complexity: O(m × n) where m is number of items and n is number of DAOs
  */
 export function aggregateMeanPercentage(
@@ -94,17 +95,15 @@ export function aggregateMeanPercentage(
   return referenceDao.items.map((_, index) => {
     const percentages = daoResponsesArray.map((response) => {
       const item = response.items[index];
-      // Convert from bigint with 18 decimals to percentage (0-100)
-      return Number(BigInt(item.high)) / Number(BigInt(1e18));
+      // Values are strings in percentage format (e.g., "11.74")
+      return parseFloat(item.high);
     });
 
-    const mean =
-      percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
-    const highAsBigInt = BigInt(Math.round(mean * Number(BigInt(1e18))));
+    const mean = percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
 
     return {
       date: referenceDao.items[index].date,
-      high: highAsBigInt.toString(),
+      high: mean.toFixed(2),
     };
   });
 }
