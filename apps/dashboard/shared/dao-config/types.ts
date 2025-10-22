@@ -58,7 +58,6 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
-  displayName: string;
   forumLink?: string;
   color: {
     svgColor: string;

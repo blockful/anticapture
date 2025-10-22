@@ -11,8 +11,7 @@ import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
-  name: "Ethereum Name Service",
-  displayName: "ENS",
+  name: "ENS",
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",

@@ -8,7 +8,6 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
-  displayName: "Uniswap",
   color: {
     svgColor: "#fc72ff",
     svgBgColor: "#FFF2FB",
