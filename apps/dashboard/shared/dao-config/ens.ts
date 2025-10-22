@@ -12,7 +12,6 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
-  displayName: "ENS",
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",
