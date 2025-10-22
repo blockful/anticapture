@@ -1396,25 +1396,6 @@ enum queryInput_token_currency {
   usd
 }
 
-type token_200_response {
-  id: String!
-  name: String
-  decimals: Float!
-  totalSupply: String!
-  delegatedSupply: String!
-  cexSupply: String!
-  dexSupply: String!
-  lendingSupply: String!
-  circulatingSupply: String!
-  treasury: String!
-  price: Float!
-}
-
-enum queryInput_token_currency {
-  eth
-  usd
-}
-
 type compareTotalSupply_200_response {
   oldTotalSupply: String!
   currentTotalSupply: String!
