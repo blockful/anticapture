@@ -1,141 +1,89 @@
-import { transaction, transfer, delegation } from "ponder:schema";
-import {
-  DBDelegation,
-  DBTransaction,
-  DBTransfer,
-  TransactionsRequest,
-} from "../mappers";
-import {
-  sql,
-  and,
-  or,
-  eq,
-  gte,
-  lte,
-  isNotNull,
-  desc,
-  asc,
-  SQL,
-  getTableColumns,
-} from "drizzle-orm";
-import { db } from "ponder:api";
+import { transfer, delegation } from "ponder:schema";
+import { DBTransaction, TransactionsRequest } from "../mappers";
+import { sql, eq, gte, lte, SQL } from "drizzle-orm";
 
 export class TransactionsRepository {
-  async getAggregateTransactions(
-    filter: TransactionsRequest,
+  async getFilteredAggregateTransactions(
+    _filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
-    const { transfer: transferConditions, delegation: delegationConditions } =
-      this.buildWhere(filter);
+    // WITH filtered_transactions AS (
+    //     SELECT DISTINCT transaction_hash
+    //     FROM transfers
+    //     WHERE ...
+    //     UNION
+    //     SELECT DISTINCT transaction_hash
+    //     FROM delegations
+    //     WHERE ...
+    // ),
+    // latest_filtered_transactions AS (
+    //     SELECT tx.transaction_hash, tx.timestamp
+    //     FROM transaction tx
+    //     WHERE tx.transaction_hash IN (SELECT transaction_hash FROM filtered_transactions)
+    //     ORDER BY tx.timestamp DESC
+    //     LIMIT 100
+    // ),
+    // transfer_aggregates AS (
+    //     SELECT
+    //         transaction_hash,
+    //         json_agg(json_build_object(
+    //          'transactionHash', transaction_hash, 'daoId', dao_id, 'tokenId', token_id, 'amount', amount, 'fromAccountId', from_account_id, 'toAccountId', to_account_id, 'timestamp', timestamp, 'logIndex', log_index, 'isCex', is_cex, 'isDex', is_dex, 'isLending', is_lending, 'isTotal', is_total
+    //         )) as transfers
+    //     FROM transfers
+    //     WHERE transaction_hash IN (SELECT transaction_hash FROM latest_filtered_transactions)
+    //     GROUP BY transaction_hash
+    // ),
+    // delegation_aggregates AS (
+    //     SELECT
+    //         transaction_hash,
+    //         json_agg(json_build_object(
+    //          'transactionHash', transaction_hash, 'daoId', dao_id, 'delegateAccountId', delegate_account_id, 'delegatorAccountId', delegator_account_id, 'delegatedValue', delegated_value, 'previousDelegate', previous_delegate, 'timestamp', timestamp, 'logIndex', log_index, 'isCex', is_cex, 'isDex', is_dex, 'isLending', is_lending, 'isTotal', is_total
+    //         )) as delegations
+    //     FROM delegations
+    //     WHERE transaction_hash IN (SELECT transaction_hash FROM latest_filtered_transactions)
+    //     GROUP BY transaction_hash
+    // )
+    // SELECT
+    //     lt.transaction_hash,
+    //     lt.timestamp,
+    //     COALESCE(ta.transfers, '[]'::json) as transfers,
+    //     COALESCE(da.delegations, '[]'::json) as delegations
+    // FROM latest_filtered_transactions lt
+    // LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash
+    // LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
+    // ORDER BY lt.timestamp DESC;
 
-    const filteredTransfers = db.$with("filtered_transfers").as(
-      db
-        .select()
-        .from(transfer)
-        .where(and(...transferConditions)),
-    );
+    return [];
+  }
 
-    const filteredDelegations = db.$with("filtered_delegations").as(
-      db
-        .select()
-        .from(delegation)
-        .where(and(...delegationConditions)),
-    );
+  async getRecentAggregateTransactions(): Promise<DBTransaction[]> {
+    // SELECT
+    //     tx.transaction_hash,
+    //     tx.timestamp,
+    //     COALESCE(transfers_agg.transfers, '[]'::json) as transfers,
+    //     COALESCE(delegations_agg.delegations, '[]'::json) as delegations
+    // FROM (
+    //     SELECT transaction_hash, timestamp
+    //     FROM transaction
+    //     ORDER BY timestamp DESC
+    //     LIMIT 100
+    // ) tx
+    // LEFT JOIN LATERAL (
+    //     SELECT json_agg(
+    //       json_build_object( 'transactionHash', tr.transaction_hash, 'daoId', tr.dao_id, 'tokenId', tr.token_id, 'amount', tr.amount, 'fromAccountId', tr.from_account_id, 'toAccountId', tr.to_account_id, 'timestamp', tr.timestamp, 'logIndex', tr.log_index, 'isCex', tr.is_cex, 'isDex', tr.is_dex, 'isLending', tr.is_lending, 'isTotal', tr.is_total)
+    //     ) as transfers
+    //     FROM transfers tr
+    //     WHERE tr.transaction_hash = tx.transaction_hash
+    // ) transfers_agg ON true
+    // LEFT JOIN LATERAL (
+    //     SELECT json_agg(
+    //       json_build_object( 'transactionHash', dg.transaction_hash, 'daoId', dg.dao_id, 'delegateAccountId', dg.delegate_account_id, 'delegatorAccountId', dg.delegator_account_id, 'delegatedValue', dg.delegated_value, 'previousDelegate', dg.previous_delegate, 'timestamp', dg.timestamp, 'logIndex', dg.log_index, 'isCex', dg.is_cex, 'isDex', dg.is_dex, 'isLending', dg.is_lending, 'isTotal', dg.is_total)
+    //     ) as delegations
+    //     FROM delegations dg
+    //     WHERE dg.transaction_hash = tx.transaction_hash
+    // ) delegations_agg ON true
+    // ORDER BY tx.timestamp DESC;
 
-    const transferAgg = db.$with("transfer_agg").as(
-      db
-        .select({
-          transactionHash: filteredTransfers.transactionHash,
-          transfers: sql`ARRAY_AGG(ROW(${filteredTransfers}.*))`.as(
-            "transfers",
-          ),
-        })
-        .from(filteredTransfers)
-        .groupBy(filteredTransfers.transactionHash),
-    );
-
-    const delegationAgg = db.$with("delegation_agg").as(
-      db
-        .select({
-          transactionHash: filteredDelegations.transactionHash,
-          delegations: sql`ARRAY_AGG(ROW(${filteredDelegations}.*))`.as(
-            "delegations",
-          ),
-        })
-        .from(filteredDelegations)
-        .groupBy(filteredDelegations.transactionHash),
-    );
-
-    const result = await db
-      .with(filteredTransfers, filteredDelegations, transferAgg, delegationAgg)
-      .select({
-        ...getTableColumns(transaction),
-        transfers: sql<DBTransfer[]>`COALESCE(
-      (SELECT ARRAY_AGG(
-        jsonb_build_object(
-          'transactionHash', ft.transaction_hash,
-          'daoId', ft.dao_id,
-          'tokenId', ft.token_id,
-          'amount', ft.amount,
-          'fromAccountId', ft.from_account_id,
-          'toAccountId', ft.to_account_id,
-          'timestamp', ft.timestamp,
-          'logIndex', ft.log_index,
-          'isCex', ft.is_cex,
-          'isDex', ft.is_dex,
-          'isLending', ft.is_lending,
-          'isTotal', ft.is_total
-        )
-      )
-      FROM filtered_transfers ft
-      WHERE ft.transaction_hash = ${transaction.transactionHash}),
-      ARRAY[]::jsonb[]
-    )`.as("transfers"),
-        delegations: sql<DBDelegation[]>`COALESCE(
-      (SELECT ARRAY_AGG(
-        jsonb_build_object(
-          'transactionHash', fd.transaction_hash,
-          'daoId', fd.dao_id,
-          'delegateAccountId', fd.delegate_account_id,
-          'delegatorAccountId', fd.delegator_account_id,
-          'delegatedValue', fd.delegated_value,
-          'previousDelegate', fd.previous_delegate,
-          'timestamp', fd.timestamp,
-          'logIndex', fd.log_index,
-          'isCex', fd.is_cex,
-          'isDex', fd.is_dex,
-          'isLending', fd.is_lending,
-          'isTotal', fd.is_total
-        )
-      )
-      FROM filtered_delegations fd
-      WHERE fd.transaction_hash = ${transaction.transactionHash}),
-      ARRAY[]::jsonb[]
-    )`.as("delegations"),
-      })
-      .from(transaction)
-      .leftJoin(
-        transferAgg,
-        eq(transferAgg.transactionHash, transaction.transactionHash),
-      )
-      .leftJoin(
-        delegationAgg,
-        eq(delegationAgg.transactionHash, transaction.transactionHash),
-      )
-      .where(
-        or(
-          isNotNull(transferAgg.transactionHash),
-          isNotNull(delegationAgg.transactionHash),
-        ),
-      )
-      .orderBy(
-        filter.sortOrder === "asc"
-          ? asc(transaction.timestamp)
-          : desc(transaction.timestamp),
-      )
-      .limit(filter.limit)
-      .offset(filter.offset);
-
-    return result;
+    return [];
   }
 
   private buildWhere = (

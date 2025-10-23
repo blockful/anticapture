@@ -4,6 +4,7 @@ import {
   TransactionsRequest,
   TransactionsResponse,
 } from "../../mappers/transactions";
+import { containsAnyValue } from "@/lib/utils";
 
 export class TransactionsService {
   constructor(private transactionsRepository: TransactionsRepository) {}
@@ -11,8 +12,20 @@ export class TransactionsService {
   async getTransactions(
     params: TransactionsRequest,
   ): Promise<TransactionsResponse> {
-    const result =
-      await this.transactionsRepository.getAggregateTransactions(params);
+    const isFiltered = containsAnyValue({
+      from: params.from,
+      to: params.to,
+      minAmount: params.minAmount,
+      maxAmount: params.maxAmount,
+      affectedSupply: params.affectedSupply,
+    });
+
+    const result = isFiltered
+      ? await this.transactionsRepository.getFilteredAggregateTransactions(
+          params,
+        )
+      : await this.transactionsRepository.getRecentAggregateTransactions();
+
     return {
       transactions: result.map(TransactionMapper.toApi),
     };

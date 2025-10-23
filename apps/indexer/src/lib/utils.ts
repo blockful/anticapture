@@ -30,3 +30,14 @@ export function max(...values: bigint[]): bigint {
 export function getChain(chainId: number): chains.Chain | undefined {
   return Object.values(chains).find((chain) => chain.id === chainId);
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function containsAnyValue(data: Record<string, any>): boolean {
+  return Object.keys(data).some((key) => {
+    const value = data[key];
+    if (value === null || value === undefined) return false;
+    if (typeof value === "object" && Object.keys(value).length === 0)
+      return false;
+    return true;
+  });
+}
