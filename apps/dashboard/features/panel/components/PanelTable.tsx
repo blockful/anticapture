@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  BadgeInAnalysis,
   SkeletonRow,
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
@@ -13,13 +12,12 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useScreenSize, useTokenData } from "@/shared/hooks";
-import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import {
   ArrowUpDown,
   ArrowState,
   DaoAvatarIcon,
 } from "@/shared/components/icons";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
 import {
@@ -41,9 +39,7 @@ export const PanelTable = () => {
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
-    (daoId) =>
-      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION &&
-      daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
+    (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({
@@ -143,16 +139,9 @@ export const PanelTable = () => {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
-        const isInAnalysis =
-          details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
-            <div
-              className={cn("flex w-full gap-3", {
-                "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
-              })}
-            >
+            <div className={"flex w-full gap-3"}>
               <div className="flex w-full items-center gap-1.5">
                 {!isMobile && (
                   <DaoAvatarIcon
@@ -168,16 +157,6 @@ export const PanelTable = () => {
                     : daoConfigByDaoId[dao as DaoIdEnum].name}
                 </p>
               </div>
-              {isInAnalysis && (
-                <>
-                  <div className="hidden w-full items-center lg:flex">
-                    <BadgeInAnalysis />
-                  </div>
-                  <div className="flex w-full items-center lg:hidden">
-                    <BadgeInAnalysis hasIcon={false} />
-                  </div>
-                </>
-              )}
             </div>
           </div>
         );
@@ -252,13 +231,6 @@ export const PanelTable = () => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        const isInAnalysis =
-          daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ANALYSIS;
-        if (isInAnalysis) {
-          return (
-            <div className="justify-endtext-end flex items-center">{"-"}</div>
-          );
-        }
         return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (

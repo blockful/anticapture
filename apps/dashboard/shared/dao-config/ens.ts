@@ -1,9 +1,5 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { EnsIcon } from "@/shared/components/icons";
@@ -12,7 +8,6 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
-  supportStage: SupportStageEnum.FULL,
   icon: EnsIcon,
   daoOverview: {
     token: "ERC20",

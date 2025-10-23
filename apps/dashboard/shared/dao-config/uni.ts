@@ -1,4 +1,4 @@
-import { RiskLevel, SupportStageEnum } from "@/shared/types/enums";
+import { RiskLevel } from "@/shared/types/enums";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
@@ -8,7 +8,6 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
-  supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
     token: "ERC20",

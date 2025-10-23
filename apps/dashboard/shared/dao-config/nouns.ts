@@ -1,16 +1,11 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { NounsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 
 export const NOUNS: DaoConfiguration = {
   name: "Nouns",
-  supportStage: SupportStageEnum.FULL,
   icon: NounsIcon,
   daoOverview: {
     token: "ERC721",

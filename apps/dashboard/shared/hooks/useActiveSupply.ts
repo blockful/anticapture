@@ -1,8 +1,6 @@
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
-import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
-import daoConfigByDaoId from "@/shared/dao-config";
 import axios from "axios";
 
 interface ActiveSupplyResponse {
@@ -23,9 +21,6 @@ export const fetchActiveSupply = async ({
     }
   }`;
 
-  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
-    return null;
-  }
   const response: {
     data: { data: { compareActiveSupply: ActiveSupplyResponse } };
   } = await axios.post(

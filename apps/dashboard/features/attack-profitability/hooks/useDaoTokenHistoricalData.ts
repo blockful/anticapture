@@ -1,8 +1,6 @@
 import useSWR, { SWRConfiguration } from "swr";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import axios from "axios";
 import { PriceEntry } from "@/shared/dao-config/types";
 
@@ -13,10 +11,6 @@ export const fetchDaoTokenHistoricalData = async ({
   daoId: DaoIdEnum;
   limit?: number;
 }): Promise<PriceEntry[] | null> => {
-  if (daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ELECTION) {
-    return null;
-  }
-
   const query = `query GetHistoricalTokenData($limit: Float) {
     historicalTokenData(limit: $limit) {
       price
