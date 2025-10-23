@@ -14,7 +14,7 @@ type Query {
   dao(id: String!): dao
   daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
+  """Get property data for a specific token"""
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
@@ -41,61 +41,72 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token/historical-data`\nGet historical market data for a specific token\n"
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/total-supply/compare`\nCompare total supply between periods\n"
+  """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegated-supply/compare`\nCompare delegated supply between periods\n"
+  """Compare delegated supply between periods"""
   compareDelegatedSupply(days: queryInput_compareDelegatedSupply_days = _90d): compareDelegatedSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/circulating-supply/compare`\nCompare circulating supply between periods\n"
+  """Compare circulating supply between periods"""
   compareCirculatingSupply(days: queryInput_compareCirculatingSupply_days = _90d): compareCirculatingSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/compare`\nCompare treasury between periods\n"
+  """Compare treasury between periods"""
   compareTreasury(days: queryInput_compareTreasury_days = _90d): compareTreasury_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/cex-supply/compare`\nCompare cex supply between periods\n"
+  """Compare cex supply between periods"""
   compareCexSupply(days: queryInput_compareCexSupply_days = _90d): compareCexSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/dex-supply/compare`\nCompare dex supply between periods\n"
+  """Compare dex supply between periods"""
   compareDexSupply(days: queryInput_compareDexSupply_days = _90d): compareDexSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/lending-supply/compare`\nCompare lending supply between periods\n"
+  """Compare lending supply between periods"""
   compareLendingSupply(days: queryInput_compareLendingSupply_days = _90d): compareLendingSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/active-supply/compare`\nGet active token supply for DAO\n"
+  """Get active token supply for DAO"""
   compareActiveSupply(days: queryInput_compareActiveSupply_days = _90d): compareActiveSupply_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/compare`\nCompare number of proposals between time periods\n"
+  """Compare number of proposals between time periods"""
   compareProposals(days: queryInput_compareProposals_days = _90d): compareProposals_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/votes/compare`\nCompare number of votes between time periods\n"
+  """Compare number of votes between time periods"""
   compareVotes(days: queryInput_compareVotes_days = _90d): compareVotes_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/average-turnout/compare`\nCompare average turnout between time periods\n"
+  """Compare average turnout between time periods"""
   compareAverageTurnout(days: queryInput_compareAverageTurnout_days = _90d): compareAverageTurnout_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals-activity`\nReturns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window\n"
+  """
+  Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
+  """
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals`\nReturns a list of proposal\n"
+  """Returns a list of proposal"""
   proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}`\nReturns a single proposal by its ID\n"
+  """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/non-voters`\nReturns the active delegates that did not vote on a given proposal\n"
+  """Returns the active delegates that did not vote on a given proposal"""
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/historical-balances`\nFetch historical token balances for multiple addresses at a specific time period using multicall\n"
+  """
+  Fetch historical token balances for multiple addresses at a specific time period using multicall
+  """
   historicalBalances(addresses: JSON!, days: queryInput_historicalBalances_days = _7d): [query_historicalBalances_items]
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/historical-voting-power`\nFetch historical voting power for multiple addresses at a specific time period using multicall\n"
+  """
+  Fetch historical voting power for multiple addresses at a specific time period using multicall
+  """
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/transactions`\nGet transactions with their associated transfers and delegations, with optional filtering and sorting\n"
+  """
+  Get transactions with their associated transfers and delegations, with optional filtering and sorting
+  """
   transactions(
     limit: PositiveInt = 50
     offset: NonNegativeInt
@@ -114,16 +125,20 @@ type Query {
     affectedSupply: JSON
   ): transactions_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/last-update`\nGet the last update time\n"
+  """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns a list of voting power changes\n"
+  """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-power/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
+  """
+  Returns a mapping of the biggest changes to voting power associated by delegate address
+  """
   votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
+  """
+  Returns a mapping of the biggest variations to account balances associated by account address
+  """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 }
 
@@ -1341,6 +1356,19 @@ input tokenPriceFilter {
   timestamp_lt: BigInt
   timestamp_gte: BigInt
   timestamp_lte: BigInt
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
 }
 
 type query_historicalTokenData_items {
