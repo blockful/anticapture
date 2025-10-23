@@ -8,25 +8,22 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { handleTransaction } from "@/eventHandlers/shared";
+import { handleTransaction, storeDailyBucket } from "@/eventHandlers/shared";
 import {
-  MetricTypesEnum,
   BurningAddresses,
-  CEXAddresses,
-  DEXAddresses,
+  MetricTypesEnum,
   TreasuryAddresses,
 } from "@/lib/constants";
 import {
   updateDelegatedSupply,
-  updateCirculatingSupply,
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
 
-export function GTCTokenIndexer(address: Address, decimals: number) {
-  const daoId = DaoIdEnum.GTC;
+export function NounsTokenIndexer(address: Address, decimals: number) {
+  const daoId = DaoIdEnum.NOUNS;
 
-  ponder.on("GTCToken:setup", async ({ context }) => {
+  ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
       id: address,
       name: daoId,
@@ -35,21 +32,18 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(
-    "GTCToken:Transfer",
+    "NounsToken:Transfer",
     async ({
       event,
       context,
     }: {
-      event: Event<"GTCToken:Transfer">;
+      event: Event<"NounsToken:Transfer">;
       context: Context;
     }) => {
-      const { from, to, amount } = event.args;
+      const { from, to } = event.args;
       const { timestamp } = event.block;
 
-      const cexAddressList = Object.values(CEXAddresses[daoId]);
-      const dexAddressList = Object.values(DEXAddresses[daoId]);
       const burningAddressList = Object.values(BurningAddresses[daoId]);
-      const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
 
       await tokenTransfer(
         context,
@@ -57,53 +51,25 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         {
           from,
           to,
-          value: amount,
+          value: 1n,
           token: address,
           transactionHash: event.transaction.hash,
           timestamp: event.block.timestamp,
           logIndex: event.log.logIndex,
         },
         {
-          cex: cexAddressList,
-          dex: dexAddressList,
           burning: burningAddressList,
         },
       );
 
       await updateSupplyMetric(
         context,
-        "cexSupply",
-        cexAddressList,
-        MetricTypesEnum.CEX_SUPPLY,
-        from,
-        to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateSupplyMetric(
-        context,
-        "dexSupply",
-        dexAddressList,
-        MetricTypesEnum.DEX_SUPPLY,
-        from,
-        to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateSupplyMetric(
-        context,
         "treasury",
-        treasuryAddressList,
+        Object.values(TreasuryAddresses[daoId]),
         MetricTypesEnum.TREASURY,
         from,
         to,
-        amount,
+        event.transaction.value,
         daoId,
         address,
         timestamp,
@@ -115,15 +81,7 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         MetricTypesEnum.TOTAL_SUPPLY,
         from,
         to,
-        amount,
-        daoId,
-        address,
-        timestamp,
-      );
-
-      await updateCirculatingSupply(
-        context,
-        MetricTypesEnum.CIRCULATING_SUPPLY,
+        1n,
         daoId,
         address,
         timestamp,
@@ -138,16 +96,43 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         event.transaction.to,
         event.block.timestamp,
         [event.args.from, event.args.to],
-        {
-          cex: cexAddressList,
-          dex: dexAddressList,
-          burning: burningAddressList,
-        },
       );
     },
   );
 
-  ponder.on(`GTCToken:DelegateChanged`, async ({ event, context }) => {
+  ponder.on(`NounsToken:NounCreated`, async ({ event, context }) => {
+    const tokenData = await context.db.find(token, {
+      id: address,
+    });
+
+    if (!tokenData) {
+      return;
+    }
+
+    await storeDailyBucket(
+      context,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      tokenData.totalSupply,
+      tokenData.totalSupply + 1n,
+      daoId,
+      event.block.timestamp,
+      address,
+    );
+
+    // every 10th token is automatically delegated to the treasury
+    // which doesn't count towards the delegated supply
+    if (event.args.tokenId % 10n !== 0n) {
+      await updateDelegatedSupply(
+        context,
+        daoId,
+        address,
+        1n,
+        event.block.timestamp,
+      );
+    }
+  });
+
+  ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       toDelegate: event.args.toDelegate,
@@ -170,7 +155,7 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
     );
   });
 
-  ponder.on(`GTCToken:DelegateVotesChanged`, async ({ event, context }) => {
+  ponder.on(`NounsToken:DelegateVotesChanged`, async ({ event, context }) => {
     await delegatedVotesChanged(context, daoId, {
       delegate: event.args.delegate,
       txHash: event.transaction.hash,
@@ -179,14 +164,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
-
-    await updateDelegatedSupply(
-      context,
-      daoId,
-      event.log.address,
-      event.args.newBalance - event.args.previousBalance,
-      event.block.timestamp,
-    );
 
     if (!event.transaction.to) return;
 

@@ -37,13 +37,15 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
+  tokenPrice(timestamp: BigInt!): tokenPrice
+  tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
   """Get total assets"""
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
+  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -1322,6 +1324,38 @@ input transactionFilter {
   timestamp_lte: BigInt
 }
 
+type tokenPrice {
+  price: BigInt!
+  timestamp: BigInt!
+}
+
+type tokenPricePage {
+  items: [tokenPrice!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input tokenPriceFilter {
+  AND: [tokenPriceFilter]
+  OR: [tokenPriceFilter]
+  price: BigInt
+  price_not: BigInt
+  price_in: [BigInt]
+  price_not_in: [BigInt]
+  price_gt: BigInt
+  price_lt: BigInt
+  price_gte: BigInt
+  price_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
 type query_totalAssets_items {
   totalAssets: String!
   date: String!
@@ -1335,18 +1369,31 @@ enum queryInput_totalAssets_days {
   _365d
 }
 
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
+type query_historicalTokenData_items {
+  price: String!
+  timestamp: String!
 }
 
-enum queryInput_historicalTokenData_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
+"""Integers that will have a value of 0 or more."""
+scalar NonNegativeInt
+
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: String!
+}
+
+enum queryInput_token_currency {
+  eth
+  usd
 }
 
 type token_200_response {
@@ -1559,9 +1606,6 @@ type query_proposalsActivity_proposals_items_userVote {
   reason: String
   timestamp: String!
 }
-
-"""Integers that will have a value of 0 or more."""
-scalar NonNegativeInt
 
 """Integers that will have a value greater than 0."""
 scalar PositiveInt
