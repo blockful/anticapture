@@ -1,7 +1,5 @@
-import {
-  DaoTokenHistoricalDataResponse,
-  TreasuryAssetNonDaoToken,
-} from "@/features/attack-profitability/hooks";
+import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
+import { TokenDataResponse } from "@/shared/hooks";
 import { CompareTreasury_200_Response } from "@anticapture/graphql-client";
 import { useMemo } from "react";
 import { formatEther } from "viem";
@@ -9,14 +7,14 @@ import { formatEther } from "viem";
 export const useDaoTreasuryStats = ({
   treasuryAll,
   treasuryNonDao,
-  tokenPrice,
+  tokenData,
 }: {
   treasuryAll: { data?: CompareTreasury_200_Response | null };
   treasuryNonDao: { data?: TreasuryAssetNonDaoToken[] | null };
-  tokenPrice: { data?: DaoTokenHistoricalDataResponse | { prices: never[] } };
+  tokenData: { data?: TokenDataResponse | null };
 }) => {
   return useMemo(() => {
-    const lastPrice = tokenPrice.data?.prices?.at(-1)?.[1] ?? 0;
+    const lastPrice = tokenData.data?.price || 0;
     const liquidTreasuryNonDaoValue = Number(
       treasuryNonDao.data?.[0]?.totalAssets || 0,
     );
@@ -38,5 +36,5 @@ export const useDaoTreasuryStats = ({
       liquidTreasuryAllValue,
       liquidTreasuryAllPercent,
     };
-  }, [tokenPrice.data, treasuryAll.data, treasuryNonDao.data]);
+  }, [tokenData, treasuryAll.data, treasuryNonDao.data]);
 };

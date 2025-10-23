@@ -72,6 +72,7 @@ export function useTopAccountsChartData({
 
       try {
         const [delegationResults, votingPowerResults] = await Promise.all([
+          // Fetch delegations
           Promise.all(
             addresses.map((address) =>
               client.query<GetDelegationHistoryItemsQuery>({
@@ -90,6 +91,7 @@ export function useTopAccountsChartData({
               }),
             ),
           ),
+          // Fetch voting power counts
           Promise.all(
             addresses.map((address) =>
               client.query<GetVotingPowerCountingQuery>({

@@ -19,12 +19,12 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const tokenPrice = useTokenData(daoId);
   const treasuryNonDao = useTreasuryAssetNonDaoToken(
     daoId,
     TimeInterval.NINETY_DAYS,
   );
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
+  const tokenData = useTokenData(daoId);
 
   const holders = useTokenHolders({
     daoId,
@@ -41,7 +41,7 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const treasuryStats = useDaoTreasuryStats({
     treasuryAll,
     treasuryNonDao,
-    tokenPrice,
+    tokenData,
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
@@ -54,7 +54,7 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     activeSupply.isLoading ||
     delegatedSupply.isLoading ||
     averageTurnout.isLoading ||
-    tokenPrice.isLoading ||
+    tokenData.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
     holders.loading;
