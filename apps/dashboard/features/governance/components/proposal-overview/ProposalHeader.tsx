@@ -58,14 +58,16 @@ export const ProposalHeader = ({
           {/* {daoId.toUpperCase()} voted {votesOnchain?.support} on this proposal */}
         </p>
 
-        <div className="hidden flex-col items-end lg:flex">
-          <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
-            Your voting power
-          </p>
-          <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-            {votingPower}
-          </p>
-        </div>
+        {address && (
+          <div className="hidden flex-col items-end lg:flex">
+            <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+              Your voting power
+            </p>
+            <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+              {votingPower}
+            </p>
+          </div>
+        )}
 
         {/* If already voted: show voted badge */}
         {address ? (
@@ -78,7 +80,7 @@ export const ProposalHeader = ({
               <ArrowRight className="size-[14px]" />
             </Button>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="hidden items-center gap-4 lg:flex">
               <div className="bg-secondary ml-4 h-[28px] w-[1px] flex-shrink-0" />
               <VotedBadge vote={Number(votesOnchain?.support)} />
             </div>
