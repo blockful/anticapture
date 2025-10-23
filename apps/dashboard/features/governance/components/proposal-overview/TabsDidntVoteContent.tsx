@@ -168,7 +168,7 @@ export const TabsDidntVoteContent = ({
             : "Never";
 
           return (
-            <div className="flex h-10 items-center p-2">
+            <div className="flex h-10 items-center whitespace-nowrap p-2">
               <span className="text-secondary text-sm">{formattedDate}</span>
             </div>
           );
