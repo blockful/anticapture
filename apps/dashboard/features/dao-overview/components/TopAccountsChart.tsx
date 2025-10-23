@@ -26,6 +26,8 @@ export interface TopAccountChartData {
   balance: number;
   variation: { absoluteChange: number; percentageChange: number };
   name?: string;
+  latestDelegate?: string;
+  totalDelegators?: number;
 }
 
 export const TopAccountsChart = ({
@@ -38,7 +40,7 @@ export const TopAccountsChart = ({
   entityType: EntityType;
 }) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const chartDataWithEns = useTopAccountsChartData(chartData);
+  const chartConfig = useTopAccountsChartData({ chartData, daoId });
 
   const handleOpenDrawer = useCallback(
     (item: { address: string }) => setSelectedAddress(item.address),
@@ -50,7 +52,7 @@ export const TopAccountsChart = ({
   return (
     <div className="border-light-dark text-primary sm:bg-surface-default relative flex h-40 w-full items-center justify-center sm:rounded-lg">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartDataWithEns} margin={{ top: 50, bottom: 20 }}>
+        <BarChart data={chartConfig.data} margin={{ top: 50, bottom: 20 }}>
           <Tooltip
             content={<CustomTooltip daoId={daoId} type={entityType} />}
             cursor={false}
