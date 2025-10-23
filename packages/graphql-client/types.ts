@@ -13,10 +13,26 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
+};
+
+export type AggregatedDelegatedSupplyItem = {
+  __typename?: 'AggregatedDelegatedSupplyItem';
+  date: Scalars['String']['output'];
+  high: Scalars['String']['output'];
+};
+
+export type AggregatedDelegatedSupplyPage = {
+  __typename?: 'AggregatedDelegatedSupplyPage';
+  items: Array<AggregatedDelegatedSupplyItem>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
 };
 
 export enum HttpMethod {
@@ -39,9 +55,11 @@ export type Meta = {
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['String']['output']>;
+  endDate?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
   startCursor?: Maybe<Scalars['String']['output']>;
+  startDate?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -56,6 +74,12 @@ export type Query = {
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
+  /**
+   * Aggregated delegation supply across all supported DAOs.
+   * Returns the mean delegation percentage for each day in the specified range.
+   * Only includes dates where ALL DAOs have data available.
+   */
+  aggregatedDelegatedSupply: AggregatedDelegatedSupplyPage;
   /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
   /** Compare average turnout between time periods */
@@ -87,7 +111,7 @@ export type Query = {
   /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
   /** Get historical market data for a specific token */
-  historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
+  historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Get the last update time */
@@ -104,9 +128,9 @@ export type Query = {
   proposalsOnchains: ProposalsOnchainPage;
   /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
+  tokenPrice?: Maybe<TokenPrice>;
+  tokenPrices: TokenPricePage;
   tokens: TokenPage;
-  /** Get total assets */
-  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
@@ -184,6 +208,16 @@ export type QueryAccountsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountFilter>;
+};
+
+
+export type QueryAggregatedDelegatedSupplyArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  startDate: Scalars['String']['input'];
 };
 
 
@@ -298,7 +332,8 @@ export type QueryHistoricalBalancesArgs = {
 
 
 export type QueryHistoricalTokenDataArgs = {
-  days?: InputMaybe<QueryInput_HistoricalTokenData_Days>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -368,6 +403,21 @@ export type QueryTokenArgs = {
 };
 
 
+export type QueryTokenPriceArgs = {
+  timestamp: Scalars['BigInt']['input'];
+};
+
+
+export type QueryTokenPricesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<TokenPriceFilter>;
+};
+
+
 export type QueryTokensArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -375,11 +425,6 @@ export type QueryTokensArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TokenFilter>;
-};
-
-
-export type QueryTotalAssetsArgs = {
-  days?: InputMaybe<QueryInput_TotalAssets_Days>;
 };
 
 
@@ -1157,13 +1202,6 @@ export type DelegationPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type HistoricalTokenData_200_Response = {
-  __typename?: 'historicalTokenData_200_response';
-  market_caps: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  prices: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  total_volumes: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-};
-
 export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
@@ -1496,14 +1534,6 @@ export enum QueryInput_HistoricalBalances_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_HistoricalTokenData_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
 export enum QueryInput_HistoricalVotingPower_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1550,14 +1580,6 @@ export enum QueryInput_Proposals_OrderDirection {
 export enum QueryInput_Token_Currency {
   Eth = 'eth',
   Usd = 'usd'
-}
-
-export enum QueryInput_TotalAssets_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
 }
 
 export enum QueryInput_Transactions_SortOrder {
@@ -1610,6 +1632,12 @@ export type Query_HistoricalBalances_Items = {
   balance: Scalars['String']['output'];
   blockNumber: Scalars['Float']['output'];
   tokenAddress: Scalars['String']['output'];
+};
+
+export type Query_HistoricalTokenData_Items = {
+  __typename?: 'query_historicalTokenData_items';
+  price: Scalars['String']['output'];
+  timestamp: Scalars['Float']['output'];
 };
 
 export type Query_HistoricalVotingPower_Items = {
@@ -1679,12 +1707,6 @@ export type Query_Proposals_Items_Items = {
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
-};
-
-export type Query_TotalAssets_Items = {
-  __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
 };
 
 export type Query_Transactions_Transactions_Items = {
@@ -1890,6 +1912,40 @@ export type TokenPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type TokenPrice = {
+  __typename?: 'tokenPrice';
+  price: Scalars['BigInt']['output'];
+  timestamp: Scalars['BigInt']['output'];
+};
+
+export type TokenPriceFilter = {
+  AND?: InputMaybe<Array<InputMaybe<TokenPriceFilter>>>;
+  OR?: InputMaybe<Array<InputMaybe<TokenPriceFilter>>>;
+  price?: InputMaybe<Scalars['BigInt']['input']>;
+  price_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  price_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  price_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  price_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  price_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  price_not?: InputMaybe<Scalars['BigInt']['input']>;
+  price_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+};
+
+export type TokenPricePage = {
+  __typename?: 'tokenPricePage';
+  items: Array<TokenPrice>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type Token_200_Response = {
   __typename?: 'token_200_response';
   cexSupply: Scalars['String']['output'];
@@ -1900,7 +1956,7 @@ export type Token_200_Response = {
   id: Scalars['String']['output'];
   lendingSupply: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
-  price: Scalars['Float']['output'];
+  price: Scalars['String']['output'];
   totalSupply: Scalars['String']['output'];
   treasury: Scalars['String']['output'];
 };
