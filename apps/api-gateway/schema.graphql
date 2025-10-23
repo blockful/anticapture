@@ -94,6 +94,8 @@ type Query {
     offset: NonNegativeInt
     sortBy: timestamp_const
     sortOrder: queryInput_transactions_sortOrder = desc
+    fromDate: Float
+    toDate: Float
     from: String
     to: String
     minAmount: String

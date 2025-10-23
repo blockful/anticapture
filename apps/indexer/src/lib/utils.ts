@@ -31,8 +31,7 @@ export function getChain(chainId: number): chains.Chain | undefined {
   return Object.values(chains).find((chain) => chain.id === chainId);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function containsAnyValue(data: Record<string, any>): boolean {
+export function containsAnyValue(data: Record<string, unknown>): boolean {
   return Object.keys(data).some((key) => {
     const value = data[key];
     if (value === null || value === undefined) return false;

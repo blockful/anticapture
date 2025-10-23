@@ -1,4 +1,4 @@
-import { DBTransaction, toSql, TransactionsRequest } from "../mappers";
+import { DBTransaction, TransactionsRequest } from "../mappers";
 import { sql } from "drizzle-orm";
 import { db } from "ponder:api";
 
@@ -7,7 +7,7 @@ export class TransactionsRepository {
     filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
     const { transfer: transferFilter, delegation: delegationFilter } =
-      toSql(filter);
+      this.filterToSql(filter);
 
     const query = sql`
     WITH filtered_transactions AS (
@@ -24,7 +24,7 @@ export class TransactionsRepository {
         FROM transaction tx
         WHERE tx.transaction_hash IN (SELECT transaction_hash FROM filtered_transactions)
         ORDER BY tx.timestamp DESC
-        LIMIT 100
+        LIMIT ${filter.limit}
     ),
     transfer_aggregates AS (
         SELECT transaction_hash, json_agg(json_build_object('transactionHash', transaction_hash, 'daoId', dao_id, 'tokenId', token_id, 'amount', amount, 'fromAccountId', from_account_id, 'toAccountId', to_account_id, 'timestamp', timestamp, 'logIndex', log_index, 'isCex', is_cex, 'isDex', is_dex, 'isLending', is_lending, 'isTotal', is_total)) as transfers
@@ -52,11 +52,16 @@ export class TransactionsRepository {
   async getRecentAggregateTransactions(
     params: TransactionsRequest,
   ): Promise<DBTransaction[]> {
+    const timePeriodConditions = this.coalesceConditionArray(
+      this.timePeriodToSql(params),
+    );
+
     const query = sql`
     SELECT tx.transaction_hash AS "transactionHash", tx.from_address AS "fromAddress", tx.to_address AS "toAddress", tx.is_cex AS "isCex", tx.is_dex AS "isDex", tx.is_lending AS "isLending", tx.is_total AS "isTotal", tx.timestamp, COALESCE(transfers_agg.transfers, '[]'::json) as transfers, COALESCE(delegations_agg.delegations, '[]'::json) as delegations
     FROM (
         SELECT transaction_hash, from_address, to_address, is_cex, is_dex, is_lending, is_total, timestamp
         FROM transaction
+        WHERE ${sql.raw(timePeriodConditions)}
         ORDER BY timestamp ${sql.raw(params.sortOrder)}
         LIMIT ${params.limit} OFFSET ${params.offset}
     ) tx
@@ -75,5 +80,67 @@ export class TransactionsRepository {
     const result = await db.execute<DBTransaction>(query);
 
     return result.rows;
+  }
+
+  private filterToSql(filter: TransactionsRequest): {
+    transfer: string;
+    delegation: string;
+  } {
+    const checkIsDex = filter.affectedSupply.isDex ?? false;
+    const checkIsCex = filter.affectedSupply.isCex ?? false;
+    const checkIsLending = filter.affectedSupply.isLending ?? false;
+    const checkIsTotal = filter.affectedSupply.isTotal ?? false;
+
+    const transferConditions: string[] = [];
+    const delegationConditions: string[] = [];
+    const timePeriodConditions: string[] = this.timePeriodToSql(filter);
+
+    transferConditions.push(...timePeriodConditions);
+    if (checkIsDex) transferConditions.push("is_dex = true");
+    if (checkIsCex) transferConditions.push("is_cex = true");
+    if (checkIsLending) transferConditions.push("is_lending = true");
+    if (checkIsTotal) transferConditions.push("is_total = true");
+    if (filter.minAmount != null)
+      transferConditions.push(`amount >= ${filter.minAmount}`);
+    if (filter.maxAmount != null)
+      transferConditions.push(`amount <= ${filter.maxAmount}`);
+    if (filter.from != null)
+      transferConditions.push(`from_account_id = '${filter.from}'`);
+    if (filter.to != null)
+      transferConditions.push(`to_account_id = '${filter.to}'`);
+
+    delegationConditions.push(...timePeriodConditions);
+    if (checkIsDex) delegationConditions.push("is_dex = true");
+    if (checkIsCex) delegationConditions.push("is_cex = true");
+    if (checkIsLending) delegationConditions.push("is_lending = true");
+    if (checkIsTotal) delegationConditions.push("is_total = true");
+    if (filter.minAmount != null)
+      delegationConditions.push(`delegated_value >= ${filter.minAmount}`);
+    if (filter.maxAmount != null)
+      delegationConditions.push(`delegated_value <= ${filter.maxAmount}`);
+    if (filter.from != null)
+      delegationConditions.push(`delegator_account_id = '${filter.from}'`);
+    if (filter.to != null)
+      delegationConditions.push(`delegate_account_id = '${filter.to}'`);
+
+    return {
+      transfer: this.coalesceConditionArray(transferConditions),
+      delegation: this.coalesceConditionArray(delegationConditions),
+    };
+  }
+
+  private timePeriodToSql(filter: TransactionsRequest): string[] {
+    const filterConditions: string[] = [];
+
+    if (filter.fromDate)
+      filterConditions.push(`timestamp >= ${BigInt(filter.fromDate)}`);
+    if (filter.toDate)
+      filterConditions.push(`timestamp <= ${BigInt(filter.toDate)}`);
+
+    return filterConditions;
+  }
+
+  private coalesceConditionArray(conditions: string[]): string {
+    return conditions.length > 0 ? conditions.join(" AND ") : "true";
   }
 }

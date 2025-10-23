@@ -20,6 +20,17 @@ export class TransactionsService {
       affectedSupply: params.affectedSupply,
     });
 
+    console.log({
+      isFiltered: isFiltered,
+      data: {
+        from: params.from,
+        to: params.to,
+        minAmount: params.minAmount,
+        maxAmount: params.maxAmount,
+        affectedSupply: params.affectedSupply,
+      },
+    });
+
     const result = isFiltered
       ? await this.transactionsRepository.getFilteredAggregateTransactions(
           params,
