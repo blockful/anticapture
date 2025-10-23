@@ -174,3 +174,51 @@ export const TransactionMapper = {
     };
   },
 };
+
+export function toSql(filter: TransactionsRequest): {
+  transfer: string;
+  delegation: string;
+} {
+  const checkIsDex = filter.affectedSupply.isDex ?? false;
+  const checkIsCex = filter.affectedSupply.isCex ?? false;
+  const checkIsLending = filter.affectedSupply.isLending ?? false;
+  const checkIsTotal = filter.affectedSupply.isTotal ?? false;
+
+  const transferConditions: string[] = [];
+  const delegationConditions: string[] = [];
+
+  if (checkIsDex) transferConditions.push("is_dex = true");
+  if (checkIsCex) transferConditions.push("is_cex = true");
+  if (checkIsLending) transferConditions.push("is_lending = true");
+  if (checkIsTotal) transferConditions.push("is_total = true");
+  if (filter.minAmount != null)
+    transferConditions.push(`amount >= ${filter.minAmount}`);
+  if (filter.maxAmount != null)
+    transferConditions.push(`amount <= ${filter.maxAmount}`);
+  if (filter.from != null)
+    transferConditions.push(`from_account_id = '${filter.from}'`);
+  if (filter.to != null)
+    transferConditions.push(`to_account_id = '${filter.to}'`);
+
+  if (checkIsDex) delegationConditions.push("is_dex = true");
+  if (checkIsCex) delegationConditions.push("is_cex = true");
+  if (checkIsLending) delegationConditions.push("is_lending = true");
+  if (checkIsTotal) delegationConditions.push("is_total = true");
+  if (filter.minAmount != null)
+    delegationConditions.push(`delegated_value >= ${filter.minAmount}`);
+  if (filter.maxAmount != null)
+    delegationConditions.push(`delegated_value <= ${filter.maxAmount}`);
+  if (filter.from != null)
+    delegationConditions.push(`delegator_account_id = '${filter.from}'`);
+  if (filter.to != null)
+    delegationConditions.push(`delegate_account_id = '${filter.to}'`);
+
+  return {
+    transfer:
+      transferConditions.length > 0 ? transferConditions.join(" AND ") : "true",
+    delegation:
+      delegationConditions.length > 0
+        ? delegationConditions.join(" AND ")
+        : "true",
+  };
+}
