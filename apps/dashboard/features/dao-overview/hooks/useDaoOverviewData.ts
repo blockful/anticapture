@@ -85,9 +85,7 @@ export const useDaoOverviewData = ({
   const quorumMinPercentageDelSupply =
     delegatedSupply.data?.currentDelegatedSupply &&
     formatEther(
-      (BigInt(delegatedSupply.data.currentDelegatedSupply) *
-        BigInt(30) *
-        BigInt(1e18)) /
+      (BigInt(delegatedSupply.data.currentDelegatedSupply) * BigInt(30)) /
         BigInt(100),
     );
 
