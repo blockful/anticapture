@@ -19,9 +19,9 @@ export const TabsSection = ({ proposal }: TabsSectionProps) => {
   const ActiveTabComponent = TabToContentMap[activeTab];
 
   return (
-    <div className="bg-surface-default flex flex-1 flex-col">
+    <div className="bg-surface-default flex min-w-0 flex-1 flex-col">
       {/* Tabs Section */}
-      <div className="bg-surface-default border-border-default sticky top-0 z-10 flex w-full shrink-0 gap-2 border-b px-4 lg:top-5">
+      <div className="bg-surface-default border-border-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b px-4 sm:top-[65x] lg:top-[85px]">
         <Tab
           isActive={activeTab === "description"}
           onClick={() => setActiveTab("description")}

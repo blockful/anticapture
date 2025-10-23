@@ -24,7 +24,7 @@ export const ProposalHeader = ({
   address,
 }: ProposalHeaderProps) => {
   return (
-    <div className="text-primary border-border-default flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2">
+    <div className="text-primary bg-surface-default border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 sm:top-0">
       <div className="flex items-center gap-2">
         <Link
           href={`/${daoId}/governance`}

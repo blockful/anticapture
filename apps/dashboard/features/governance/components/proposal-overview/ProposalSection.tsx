@@ -59,8 +59,10 @@ export const ProposalSection = () => {
         votesOnchain={votesOnchain}
         address={address}
       />
-      <div className="flex flex-col gap-6 p-5 lg:flex-row">
-        <div className="left-0 top-5 flex h-fit w-full flex-col gap-6 self-start lg:sticky lg:w-[420px]">
+      <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
+
+      <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
+        <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-6 lg:sticky lg:top-[85px] lg:w-[420px]">
           <TitleSection proposal={proposal} />
           <ProposalInfoSection proposal={proposal} />
           <ProposalStatusSection proposal={proposal} />
