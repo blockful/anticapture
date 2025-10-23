@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   useDaoData,
   useActiveSupply,
@@ -11,12 +10,15 @@ import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hoo
 import { useTokenHolders } from "@/features/holders-and-delegates";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { formatEther } from "viem";
 import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTreasury";
+import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
+import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
+import { useDaoQuorumStats } from "@/features/dao-overview/hooks/useDaoQuorumStats";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { calculateChangeRate } from "@/features/token-distribution/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoConfiguration } from "@/shared/dao-config/types";
+import { formatEther } from "viem";
 
 export const useDaoOverviewData = ({
   daoId,
@@ -25,16 +27,17 @@ export const useDaoOverviewData = ({
   daoId: DaoIdEnum;
   daoConfig: DaoConfiguration;
 }) => {
-  const { data: daoData } = useDaoData(daoId);
+  const daoData = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const tokenPrice = useTokenData(daoId);
   const treasuryNonDao = useTreasuryAssetNonDaoToken(
     daoId,
     TimeInterval.NINETY_DAYS,
   );
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
+  const tokenData = useTokenData(daoId);
+
   const holders = useTokenHolders({
     daoId,
     limit: 20,
@@ -56,133 +59,63 @@ export const useDaoOverviewData = ({
   };
 
   const proposalThresholdPercentage =
-    daoData?.proposalThreshold &&
+    daoData?.data?.proposalThreshold &&
     totalSupplyValue.value !== undefined &&
     formatEther(
-      (BigInt(daoData.proposalThreshold) * BigInt(1e20)) /
+      (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
         BigInt(totalSupplyValue.value ?? ("1" as string)),
     );
 
-  const proposalThresholdValue = daoData?.proposalThreshold
-    ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
+  const proposalThresholdValue = daoData?.data?.proposalThreshold
+    ? `${formatNumberUserReadable(Number(daoData.data.proposalThreshold) / 10 ** 18)}`
     : "No Threshold";
 
-  const lastPrice = tokenPrice.data?.price ?? 0;
+  const {
+    quorumValue,
+    averageTurnoutPercentAboveQuorum,
+    quorumPercentage,
+    quorumValueFormatted,
+  } = useDaoQuorumStats({
+    daoData: daoData.data,
+    averageTurnout,
+    totalSupplyValue,
+    delegatedSupply,
+    daoConfig,
+  });
 
-  const quorumMinPercentage =
-    daoData?.quorum &&
-    totalSupplyValue.value !== undefined &&
-    formatEther(
-      (BigInt(daoData.quorum) * BigInt(1e20)) /
-        BigInt(totalSupplyValue.value ?? ("1" as string)),
-    );
+  const treasuryStats = useDaoTreasuryStats({
+    treasuryAll,
+    treasuryNonDao,
+    tokenData,
+  });
 
-  const quorumMinPercentageDelSupply =
-    delegatedSupply.data?.currentDelegatedSupply &&
-    formatEther(
-      (BigInt(delegatedSupply.data.currentDelegatedSupply) * BigInt(30)) /
-        BigInt(100),
-    );
+  const topDelegatesToPass = useTopDelegatesToPass({
+    holders,
+    quorumValue,
+  });
 
-  const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 10 ** 18 : 0;
-
-  const quorumValueTotalSupply = quorumValue
-    ? `${formatNumberUserReadable(quorumValue)} `
-    : "No Quorum";
-
-  const quorumValueDelSupply = quorumMinPercentageDelSupply
-    ? `${formatNumberUserReadable(parseFloat(quorumMinPercentageDelSupply))} `
-    : "No Quorum";
-
-  const quorumPercentageDelSupply = quorumMinPercentageDelSupply
-    ? `(30% ${daoConfig.daoOverview.rules?.quorumCalculation})`
-    : "(N/A)";
-
-  const quorumPercentageTotalSupply = quorumMinPercentage
-    ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
-    : "(N/A)";
-
-  const quorumPercentage =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
-      ? quorumPercentageDelSupply
-      : quorumPercentageTotalSupply;
-
-  const quorumValueFormatted =
-    daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
-      ? quorumValueDelSupply
-      : quorumValueTotalSupply;
-
-  const liquidTreasuryNonDaoValue = Number(
-    treasuryNonDao.data?.[0]?.totalAssets || 0,
-  );
-
-  const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
-  const liquidTreasuryAllValue =
-    Number(formatEther(BigInt(daoTreasuryTokens))) * lastPrice;
-
-  const liquidTreasuryAllPercent = liquidTreasuryAllValue
-    ? Math.round(
-        ((liquidTreasuryAllValue - liquidTreasuryNonDaoValue) /
-          liquidTreasuryAllValue) *
-          100,
-      ).toString()
-    : "0";
-
-  const averageTurnoutPercentAboveQuorum = useMemo(() => {
-    if (!averageTurnout.data || !quorumValue) return 0;
-    const turnoutTokens =
-      Number(averageTurnout.data.currentAverageTurnout) / 10 ** 18;
-    return (turnoutTokens / quorumValue - 1) * 100;
-  }, [averageTurnout.data, quorumValue]);
-
-  const topDelegatesToPass = useMemo(() => {
-    if (!holders.data || !quorumValue) return null;
-    const topHolders = holders.data
-      .map((holder) => ({
-        balance: Number(holder.balance) / 10 ** 18,
-      }))
-      .sort((a, b) => b.balance - a.balance);
-
-    let topDelegatesBalance = 0;
-    let topDelegatesCount = 0;
-    for (const holder of topHolders) {
-      topDelegatesBalance += holder.balance;
-      topDelegatesCount++;
-      if (topDelegatesBalance >= quorumValue) break;
-    }
-
-    if (topDelegatesBalance < quorumValue) return "20+";
-
-    return topDelegatesCount;
-  }, [holders.data, quorumValue]);
-
-  const votingPeriod = daoData?.votingPeriod;
-  const votingDelay = daoData?.votingDelay;
-  const timelockDelay = daoData?.timelockDelay;
+  const votingPeriod = daoData?.data?.votingPeriod;
+  const votingDelay = daoData?.data?.votingDelay;
+  const timelockDelay = daoData?.data?.timelockDelay;
 
   const isLoading =
+    daoData.loading ||
     activeSupply.isLoading ||
     delegatedSupply.isLoading ||
     averageTurnout.isLoading ||
-    tokenPrice.isLoading ||
+    tokenData.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
-    tokenPrice.isLoading ||
     holders.loading ||
     totalSupply.isLoading;
 
   return {
-    daoData,
+    daoData: daoData.data,
     activeSupply,
     delegatedSupply,
     averageTurnout,
-    treasuryNonDao,
-    holders,
-    lastPrice,
+    treasuryStats,
     quorumValue,
-    liquidTreasuryAllValue,
-    liquidTreasuryNonDaoValue,
-    liquidTreasuryAllPercent,
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     isLoading,

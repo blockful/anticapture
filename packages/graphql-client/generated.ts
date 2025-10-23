@@ -2449,12 +2449,28 @@ export type BalanceHistorySellTotalCountQueryVariables = Exact<{
 
 export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
+export type AccountBalanceVariationsQueryVariables = Exact<{
+  days: QueryInput_AccountBalanceVariations_Days;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+}>;
+
+
+export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
+
 export type CompareTreasuryQueryVariables = Exact<{
   days: QueryInput_CompareTreasury_Days;
 }>;
 
 
 export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
+
+export type VotingPowerVariationsQueryVariables = Exact<{
+  days: QueryInput_VotingPowerVariations_Days;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+}>;
+
+
+export type VotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower?: string | null } | null> } | null };
 
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
@@ -2981,6 +2997,53 @@ export type BalanceHistorySellTotalCountQueryHookResult = ReturnType<typeof useB
 export type BalanceHistorySellTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountLazyQuery>;
 export type BalanceHistorySellTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountSuspenseQuery>;
 export type BalanceHistorySellTotalCountQueryResult = Apollo.QueryResult<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>;
+export const AccountBalanceVariationsDocument = gql`
+    query AccountBalanceVariations($days: queryInput_accountBalanceVariations_days!, $limit: PositiveInt = 10) {
+  accountBalanceVariations(days: $days, limit: $limit) {
+    items {
+      accountId
+      previousBalance
+      currentBalance
+      absoluteChange
+      percentageChange
+    }
+  }
+}
+    `;
+
+/**
+ * __useAccountBalanceVariationsQuery__
+ *
+ * To run a query within a React component, call `useAccountBalanceVariationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountBalanceVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountBalanceVariationsQuery({
+ *   variables: {
+ *      days: // value for 'days'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useAccountBalanceVariationsQuery(baseOptions: Apollo.QueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables> & ({ variables: AccountBalanceVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
+      }
+export function useAccountBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
+        }
+export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
+        }
+export type AccountBalanceVariationsQueryHookResult = ReturnType<typeof useAccountBalanceVariationsQuery>;
+export type AccountBalanceVariationsLazyQueryHookResult = ReturnType<typeof useAccountBalanceVariationsLazyQuery>;
+export type AccountBalanceVariationsSuspenseQueryHookResult = ReturnType<typeof useAccountBalanceVariationsSuspenseQuery>;
+export type AccountBalanceVariationsQueryResult = Apollo.QueryResult<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>;
 export const CompareTreasuryDocument = gql`
     query CompareTreasury($days: queryInput_compareTreasury_days!) {
   compareTreasury(days: $days) {
@@ -3023,6 +3086,53 @@ export type CompareTreasuryQueryHookResult = ReturnType<typeof useCompareTreasur
 export type CompareTreasuryLazyQueryHookResult = ReturnType<typeof useCompareTreasuryLazyQuery>;
 export type CompareTreasurySuspenseQueryHookResult = ReturnType<typeof useCompareTreasurySuspenseQuery>;
 export type CompareTreasuryQueryResult = Apollo.QueryResult<CompareTreasuryQuery, CompareTreasuryQueryVariables>;
+export const VotingPowerVariationsDocument = gql`
+    query VotingPowerVariations($days: queryInput_votingPowerVariations_days!, $limit: PositiveInt = 10) {
+  votingPowerVariations(days: $days, limit: $limit) {
+    items {
+      absoluteChange
+      accountId
+      currentVotingPower
+      percentageChange
+      previousVotingPower
+    }
+  }
+}
+    `;
+
+/**
+ * __useVotingPowerVariationsQuery__
+ *
+ * To run a query within a React component, call `useVotingPowerVariationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVotingPowerVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVotingPowerVariationsQuery({
+ *   variables: {
+ *      days: // value for 'days'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useVotingPowerVariationsQuery(baseOptions: Apollo.QueryHookOptions<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables> & ({ variables: VotingPowerVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>(VotingPowerVariationsDocument, options);
+      }
+export function useVotingPowerVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>(VotingPowerVariationsDocument, options);
+        }
+export function useVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>(VotingPowerVariationsDocument, options);
+        }
+export type VotingPowerVariationsQueryHookResult = ReturnType<typeof useVotingPowerVariationsQuery>;
+export type VotingPowerVariationsLazyQueryHookResult = ReturnType<typeof useVotingPowerVariationsLazyQuery>;
+export type VotingPowerVariationsSuspenseQueryHookResult = ReturnType<typeof useVotingPowerVariationsSuspenseQuery>;
+export type VotingPowerVariationsQueryResult = Apollo.QueryResult<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>;
 export const GetDaoDataDocument = gql`
     query GetDaoData($daoId: String!) {
   dao(id: $daoId) {

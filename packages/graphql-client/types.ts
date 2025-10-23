@@ -2446,12 +2446,28 @@ export type BalanceHistorySellTotalCountQueryVariables = Exact<{
 
 export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
+export type AccountBalanceVariationsQueryVariables = Exact<{
+  days: QueryInput_AccountBalanceVariations_Days;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+}>;
+
+
+export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
+
 export type CompareTreasuryQueryVariables = Exact<{
   days: QueryInput_CompareTreasury_Days;
 }>;
 
 
 export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
+
+export type VotingPowerVariationsQueryVariables = Exact<{
+  days: QueryInput_VotingPowerVariations_Days;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+}>;
+
+
+export type VotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower?: string | null } | null> } | null };
 
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];

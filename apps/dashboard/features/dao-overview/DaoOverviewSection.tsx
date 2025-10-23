@@ -21,6 +21,8 @@ import {
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
+import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 
@@ -30,13 +32,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const {
     isLoading,
-    lastPrice,
+    treasuryStats,
     delegatedSupply,
     activeSupply,
     averageTurnout,
-    liquidTreasuryAllValue,
-    liquidTreasuryNonDaoValue,
-    liquidTreasuryAllPercent,
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     proposalThresholdValue,
@@ -47,6 +46,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     votingDelay,
     timelockDelay,
   } = useDaoOverviewData({ daoId, daoConfig });
+
+  const {
+    liquidTreasuryAllValue,
+    liquidTreasuryAllPercent,
+    liquidTreasuryNonDaoValue,
+    lastPrice,
+  } = treasuryStats;
 
   if (isLoading) return <DaoOverviewSkeleton />;
 
@@ -152,6 +158,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             votingDelay={votingDelay}
             timelockDelay={timelockDelay}
           />
+        </div>
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
           <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
@@ -168,9 +176,14 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <DividerDefault isHorizontal />
         </div>
         <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
-          <TokenDistributionChartCard daoId={daoId} />
+          <div className="w-full">
+            <AccountBalanceChartCard daoId={daoId} />
+          </div>
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
+          </div>
+          <div className="w-full">
+            <VotingPowerChartCard daoId={daoId} />
           </div>
         </div>
       </div>
