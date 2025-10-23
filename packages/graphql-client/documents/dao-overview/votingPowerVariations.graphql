@@ -3,11 +3,6 @@ query VotingPowerVariations(
   $limit: PositiveInt = 10
 ) {
   votingPowerVariations(days: $days, limit: $limit) {
-    period {
-      days
-      startTimestamp
-      endTimestamp
-    }
     items {
       absoluteChange
       accountId

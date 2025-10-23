@@ -3,11 +3,6 @@ query AccountBalanceVariations(
   $limit: PositiveInt = 10
 ) {
   accountBalanceVariations(days: $days, limit: $limit) {
-    period {
-      days
-      startTimestamp
-      endTimestamp
-    }
     items {
       accountId
       previousBalance
