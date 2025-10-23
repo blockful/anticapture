@@ -41,10 +41,6 @@ import {
   DelegationPercentageService,
   HistoricalVotingPowerService,
   VotingPowerService,
-} from "./services";
-import { DuneService } from "./services/dune/dune.service";
-  HistoricalVotingPowerService,
-  VotingPowerService,
   TransactionsService,
   ProposalsService,
   DuneService,
@@ -104,6 +100,7 @@ const transactionsRepo = new TransactionsRepository();
 const delegationPercentageRepo = new DelegationPercentageRepository();
 const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
+);
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(votingPowerRepo);
