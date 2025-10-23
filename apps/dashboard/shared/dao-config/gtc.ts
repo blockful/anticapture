@@ -14,6 +14,7 @@ export const GTC: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: GitcoinIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",

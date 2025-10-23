@@ -43,22 +43,24 @@ export const HeaderDAOSidebarDropdown = () => {
 
   const dropdownItems = useMemo(
     () => [
-      ...Object.values(DaoIdEnum).map((daoIdValue, index) => ({
-        id: index,
-        label: daoConfigByDaoId[daoIdValue].name,
-        icon: (
-          <DaoAvatarIcon
-            daoId={daoIdValue}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${daoIdValue.toLowerCase()}`,
-        name: daoIdValue,
-        isDisabled:
-          daoConfigByDaoId[daoIdValue].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      })),
+      ...Object.values(DaoIdEnum)
+        .filter((daoId) => daoId !== DaoIdEnum.NOUNS) // TODO remove this when Nouns is fully supported
+        .map((daoIdValue, index) => ({
+          id: index,
+          label: daoConfigByDaoId[daoIdValue].name,
+          icon: (
+            <DaoAvatarIcon
+              daoId={daoIdValue}
+              className="size-icon-md"
+              isRounded
+            />
+          ),
+          href: `/${daoIdValue.toLowerCase()}`,
+          name: daoIdValue,
+          isDisabled:
+            daoConfigByDaoId[daoIdValue].supportStage ===
+            SupportStageEnum.ANALYSIS,
+        })),
     ],
     [],
   );

@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
 import {
   BadgeInAnalysis,
   SkeletonRow,
@@ -30,6 +29,11 @@ import {
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
 
+type PanelDao = {
+  dao: string;
+  inAnalysis?: boolean;
+};
+
 export const PanelTable = () => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
@@ -38,7 +42,8 @@ export const PanelTable = () => {
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) =>
-      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION &&
+      daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({

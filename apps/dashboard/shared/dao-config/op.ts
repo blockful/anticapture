@@ -15,6 +15,7 @@ export const OP: DaoConfiguration = {
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {
+    token: "ERC20",
     chain: optimism,
     blockTime: 2,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",

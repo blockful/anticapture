@@ -11,6 +11,7 @@ export const UNI: DaoConfiguration = {
   supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
     contracts: {

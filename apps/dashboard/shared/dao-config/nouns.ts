@@ -5,41 +5,46 @@ import {
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { ScrollIcon } from "@/shared/components/icons";
-import { scroll } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { NounsIcon } from "@/shared/components/icons";
+import { mainnet } from "viem/chains";
 
-export const SCR: DaoConfiguration = {
-  name: "Scroll",
+export const NOUNS: DaoConfiguration = {
+  name: "Nouns",
   supportStage: SupportStageEnum.FULL,
-  icon: ScrollIcon,
+  icon: NounsIcon,
   daoOverview: {
-    token: "ERC20",
-    chain: scroll,
-    blockTime: 1.5,
+    token: "ERC721",
+    blockTime: 12,
+    chain: mainnet,
     snapshot: "",
     contracts: {
-      governor: "0x2f3f2054776bd3c2fc30d750734a8f539bb214f0",
-      token: "0xd29687c813D741E2F938F4aC377128810E217b1b",
-      timelock: "0x79D83D1518e2eAA64cdc0631df01b06e2762CC14",
+      governor: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
+      token: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+      timelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
     },
     rules: {
       delay: true,
       changeVote: false,
       timelock: true,
-      cancelFunction: false,
-      logic: "For + Abstain + Against",
-      quorumCalculation: QUORUM_CALCULATION_TYPES.SCROLL,
-      proposalThreshold: "50M $SCR",
+      cancelFunction: true,
+      logic: "For",
+      quorumCalculation: "10-15% Dynamic Quorum",
+      proposalThreshold: "3 $NOUN (>0,25% Adjusted Supply)",
     },
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: false,
-    attackCostBarChart: {},
+    attackCostBarChart: {
+      NounsTimelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
+      PayerContract: "0xd97Bcd9f47cEe35c0a9ec1dc40C1269afc9E8E1D",
+      ClientIncentivesRewardsProxy:
+        "0x883860178F95d0C82413eDc1D6De530cB4771d55",
+      //PayerContract and ClientIncentivesRewardsProxy are controlled by Timelock.
+    },
   },
-  riskAnalysis: true,
   governanceImplementation: {
+    // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
         value: "Yes",
@@ -48,7 +53,7 @@ export const SCR: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
-        riskExplanation: "Governance contracts are audited.",
+        riskExplanation: "Nouns contracts are audited.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
@@ -59,20 +64,20 @@ export const SCR: DaoConfiguration = {
           ].description,
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
-          "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
         riskExplanation:
           "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
       },
+      // Quantify the profitability of an attack on Nouns.
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "No Treasury Control",
+        value: "",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
-        riskExplanation:
-          "The DAO has no treasury directly controllable by governance, so there is no risk of attack profitability.",
+        requirements: [""],
+        riskExplanation: "",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -85,27 +90,24 @@ export const SCR: DaoConfiguration = {
           "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "5% Total Supply",
+        value: "30% Market Supply",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         riskExplanation:
-          "The proposal threshold is greater than 1% of the active market supply of $SCR.",
+          "The supply available for purchase of governance tokens is extremely low—and the proposal threshold is high in relation to it.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        value: "No",
-        riskLevel: RiskLevel.HIGH,
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ].description,
-        requirements: [
-          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
-        ],
         riskExplanation:
-          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
+          "Nouns has a cancellation mechanism in place in case the balance of the person submitting a proposal falls below the proposal threshold.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         value: "No",
@@ -115,19 +117,17 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
         riskExplanation:
-          "Although it does not have a Security Council, the DAO has no control over Scroll's' capital. Therefore, there is no risk, because the DAO does not control anything.",
+          "Nouns does not have a Security Council, but it does have protection mechanisms—a Veto Strategy and the Proposal Threshold Cancel.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
-        riskLevel: RiskLevel.HIGH,
+        value: "YES",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
           ].description,
-        requirements: [
-          "Scroll has no limit on active proposals or proposals submitted per address. With a low proposal threshold, it is susceptible to spam in its governance.",
-        ],
-        riskExplanation: "Scroll governance is vulnerable to spam proposals.",
+        riskExplanation:
+          "Nouns prevents the same address from submitting multiple proposals in governance.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         value: "Yes",
@@ -136,17 +136,16 @@ export const SCR: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
           ].description,
-        riskExplanation:
-          "Governance powers fully enforced via Timelock, not upgradeable by EOA or central party",
+        riskExplanation: "The Timelock is controlled by the Governor.",
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "3 days",
+        value: "2 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        riskExplanation: "The timelock delay is higher than 1 day.",
+        riskExplanation: "Two days is a sufficient delay for Timelock.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
         value: "Yes",
@@ -156,10 +155,10 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
         requirements: [
-          "Veto strategy should be fully controlled by the DAO in order to have a low risk level.",
+          "To move up to Stage 2 (low risk), the veto strategy needs to be controlled by the DAO, not by a Foundation/DUNA. ",
         ],
         riskExplanation:
-          "There is a veto strategy controlled by the Timelock itself and Security Council multisig.",
+          "Nouns has a veto strategy in place, but only the Foundation can veto proposals. In the documentation, the veto is attributed to DUNA, but no one responsible for the veto has been named yet.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -169,20 +168,24 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
         requirements: [
-          "Without the ability to change votes after they are cast, voters cannot respond to new information or changes in sentiment.",
+          "Nouns must allow votes to be changed even after they have been cast in order to reach Stage 2. .",
         ],
         riskExplanation:
-          "The mutability of the vote is fundamental to allow voters to change their vote in response to new information or changes in sentiment.",
+          "The lack of vote mutability jeopardizes DAO decisions if its main voting interface is attacked.",
       },
+      // Review this
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "3 days",
-        riskLevel: RiskLevel.LOW,
+        value: "12 hours",
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
+        requirements: [
+          "Nouns must have a voting delay of at least 2 days to be classified as Stage 1 (medium risk).",
+        ],
         riskExplanation:
-          "With three days, Scroll has enough time to gather votes and delegates with the goal of blocking a malicious proposal in the DAO.",
+          "The 12-hour voting delay is too short for the DAO to protect itself from an attack before voting begins.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -192,34 +195,34 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         riskExplanation:
-          "Voting power is based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
+          "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "7 days",
-        riskLevel: RiskLevel.LOW,
+        value: "4 days",
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
+        requirements: [
+          "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
+        ],
         riskExplanation:
-          "Seven days is enough time for the DAO to organize itself against an attack during the voting period.",
+          "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "No",
-        riskLevel: RiskLevel.HIGH,
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
-        requirements: [
-          "Introduce a voting subsidy mechanism to encourage higher voter turnout and reduce voter attrition in times of need.",
-        ],
         riskExplanation:
-          "The voting subsidy is not applied, requiring voters to pay gas on the proposals they vote on.",
+          "Nouns subsidizes the cost of votes for participants in governance.",
       },
     },
   },
+  riskAnalysis: true,
   resilienceStages: true,
   tokenDistribution: true,
-  dataTables: true,
 };
