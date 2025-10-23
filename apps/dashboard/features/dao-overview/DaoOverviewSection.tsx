@@ -23,6 +23,7 @@ import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
 import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
+import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -129,6 +130,10 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
             className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
           />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
           </div>

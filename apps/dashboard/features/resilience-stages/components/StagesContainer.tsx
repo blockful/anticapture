@@ -147,7 +147,7 @@ export const StagesContainer = ({
         "sm:bg-surface-default gap-4 md:p-4": context === "overview",
       })}
     >
-      <div className="flex h-5 items-center gap-2 px-5 sm:px-0">
+      <div className="flex h-5 items-center gap-2">
         <DefaultLink
           href={`${daoId.toLowerCase()}/resilience-stages`}
           openInNewTab={false}

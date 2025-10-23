@@ -9,3 +9,5 @@ export * from "@/features/dao-overview/components/DaoInfoDropdown";
 export * from "@/features/dao-overview/components/ProgressBar";
 export * from "@/features/dao-overview/components/TokenDistributionChartCard";
 export * from "@/features/dao-overview/components/TopAccountsChart";
+export * from "@/features/dao-overview/components/AttackProfitabilityChartCard";
+export * from "@/features/dao-overview/components/OverviewMetric";
