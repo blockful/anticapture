@@ -1,5 +1,5 @@
 import { transfer, delegation, transaction } from "ponder:schema";
-import { isAddress } from "viem";
+import { formatEther, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
@@ -132,7 +132,7 @@ export const TransactionMapper = {
       transactionHash: t.transactionHash,
       daoId: t.daoId,
       tokenId: t.tokenId,
-      amount: t.amount.toString(),
+      amount: formatEther(t.amount),
       fromAccountId: t.fromAccountId,
       toAccountId: t.toAccountId,
       timestamp: t.timestamp.toString(),
@@ -150,7 +150,7 @@ export const TransactionMapper = {
       daoId: d.daoId,
       delegateAccountId: d.delegateAccountId,
       delegatorAccountId: d.delegatorAccountId,
-      delegatedValue: d.delegatedValue.toString(), // TODO: fix formatting ex.: 4.5e+25
+      delegatedValue: formatEther(d.delegatedValue),
       previousDelegate: d.previousDelegate,
       timestamp: d.timestamp.toString(),
       logIndex: d.logIndex,
