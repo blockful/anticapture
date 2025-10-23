@@ -407,11 +407,11 @@ export const VotingModal = ({
 
             {/* Comment  */}
             <div className="flex flex-col gap-[6px] p-4">
-              <p className="font-inter text-[12px] font-medium not-italic leading-4">
+              <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
                 Comment <span className="text-secondary">(optional)</span>
               </p>
               <textarea
-                className="border-border-default flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
+                className="border-border-default text-primary flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
                 placeholder="Enter your comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}

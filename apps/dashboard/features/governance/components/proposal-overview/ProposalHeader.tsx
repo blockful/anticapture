@@ -1,35 +1,28 @@
 "use client";
 
 import { Button } from "@/shared/components";
-import { VotingModal } from "@/features/governance";
-import { type Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { useAccount } from "wagmi";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
-import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
+import { GetAccountPowerQuery } from "@anticapture/graphql-client";
 
 interface ProposalHeaderProps {
   daoId: string;
-  proposal: Query_Proposals_Items_Items;
+  setIsVotingModalOpen: (isOpen: boolean) => void;
+  votingPower: string;
+  votesOnchain: GetAccountPowerQuery["votesOnchain"] | null;
+  address: string | undefined;
 }
 
 export const ProposalHeader = ({
-  proposal: proposal,
   daoId,
+  votingPower,
+  votesOnchain,
+  setIsVotingModalOpen,
+  address,
 }: ProposalHeaderProps) => {
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const { address } = useAccount();
-
-  const { votingPower, votesOnchain } = useVoterInfo({
-    address: address ?? "",
-    daoId: daoId.toUpperCase() as DaoIdEnum,
-    proposalId: proposal.id,
-  });
-
   return (
     <div className="text-primary border-border-default flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2">
       <div className="flex items-center gap-2">
@@ -91,17 +84,11 @@ export const ProposalHeader = ({
           </div>
         )}
       </div>
-
-      <VotingModal
-        isOpen={isVotingModalOpen}
-        onClose={() => setIsVotingModalOpen(false)}
-        proposal={proposal}
-      />
     </div>
   );
 };
 
-const VotedBadge = ({ vote }: { vote: number }) => {
+export const VotedBadge = ({ vote }: { vote: number }) => {
   return (
     <div className="flex flex-col items-end">
       <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
@@ -112,7 +99,7 @@ const VotedBadge = ({ vote }: { vote: number }) => {
   );
 };
 
-const getVoteText = (vote: number) => {
+export const getVoteText = (vote: number) => {
   switch (vote) {
     case 0:
       return (
