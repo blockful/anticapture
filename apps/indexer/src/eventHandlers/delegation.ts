@@ -4,16 +4,10 @@ import {
   accountPower,
   delegation,
   votingPowerHistory,
-  token,
 } from "ponder:schema";
 import { Address, Hex, zeroAddress } from "viem";
 
-import { MetricTypesEnum } from "@/lib/constants";
-import {
-  ensureAccountExists,
-  ensureAccountsExist,
-  storeDailyBucket,
-} from "./shared";
+import { ensureAccountExists, ensureAccountsExist } from "./shared";
 import { DaoIdEnum } from "@/lib/enums";
 import {
   BurningAddresses,
@@ -22,9 +16,23 @@ import {
   LendingAddresses,
 } from "@/lib/constants";
 
+/**
+ * ### Creates:
+ * - New `Account` records (for delegator and delegate if they don't exist)
+ * - New `Delegation` record with calculated delegated value and flags
+ * - New `AccountBalance` record (if delegator doesn't have one for this token)
+ * - New `AccountPower` record (if delegate doesn't have one for this DAO)
+ * - New `Transaction` record (if this transaction hasn't been processed)
+ *
+ * ### Updates:
+ * - `Delegation`: Adds to existing delegated value if record already exists
+ * - `AccountBalance`: Changes the delegate assignment for the delegator
+ * - `AccountPower`: Increments the delegate's delegation count
+ * - `Transaction`: Updates transaction flags if record already exists
+ */
 export const delegateChanged = async (
   context: Context,
-  daoId: string,
+  daoId: DaoIdEnum,
   args: {
     delegator: Address;
     toDelegate: Address;
@@ -55,14 +63,10 @@ export const delegateChanged = async (
   });
 
   // Pre-compute address lists for flag determination
-  const lendingAddressList = Object.values(
-    LendingAddresses[daoId as DaoIdEnum] || {},
-  );
-  const cexAddressList = Object.values(CEXAddresses[daoId as DaoIdEnum] || {});
-  const dexAddressList = Object.values(DEXAddresses[daoId as DaoIdEnum] || {});
-  const burningAddressList = Object.values(
-    BurningAddresses[daoId as DaoIdEnum] || {},
-  );
+  const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
+  const cexAddressList = Object.values(CEXAddresses[daoId] || {});
+  const dexAddressList = Object.values(DEXAddresses[daoId] || {});
+  const burningAddressList = Object.values(BurningAddresses[daoId] || {});
 
   // Determine flags for the delegation
   const isCex =
@@ -98,9 +102,6 @@ export const delegateChanged = async (
         current.delegatedValue + (delegatorBalance?.balance ?? 0n),
     }));
 
-  // Transaction flag updates moved to DAO-specific indexer
-
-  // Update the delegator's delegate
   await context.db
     .insert(accountBalance)
     .values({
@@ -114,7 +115,7 @@ export const delegateChanged = async (
     });
 
   // Update the old delegate's delegations count
-  if (fromDelegate != zeroAddress) {
+  if (fromDelegate !== zeroAddress) {
     await context.db
       .update(accountPower, {
         accountId: fromDelegate,
@@ -122,24 +123,33 @@ export const delegateChanged = async (
       .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
   }
 
-  // Update the delegate's delegations count
   await context.db
     .insert(accountPower)
     .values({
       accountId: toDelegate,
       daoId,
-      delegationsCount: 1,
     })
     .onConflictDoUpdate((current) => ({
-      delegationsCount: (current.delegationsCount ?? 0) + 1,
+      delegationsCount: current.delegationsCount + 1,
     }));
 };
 
+/**
+ * ### Creates:
+ * - New `Account` record (for delegate if it doesn't exist)
+ * - New `VotingPowerHistory` record with voting power change details
+ * - New `AccountPower` record (if delegate doesn't have one for this DAO)
+ * - New daily metric records (via `storeDailyBucket`)
+ *
+ * ### Updates:
+ * - `AccountPower`: Sets the delegate's current voting power to new balance
+ * - `Token`: Adjusts delegated supply by the balance delta
+ * - Daily bucket metrics for delegated supply tracking
+ */
 export const delegatedVotesChanged = async (
   context: Context,
-  daoId: string,
+  daoId: DaoIdEnum,
   args: {
-    tokenId: Address;
     delegate: Address;
     txHash: Hex;
     newBalance: bigint;
@@ -148,26 +158,13 @@ export const delegatedVotesChanged = async (
     logIndex: number;
   },
 ) => {
-  const {
-    delegate,
-    txHash,
-    newBalance,
-    oldBalance,
-    timestamp,
-    tokenId,
-    logIndex,
-  } = args;
+  const { delegate, txHash, newBalance, oldBalance, timestamp, logIndex } =
+    args;
 
   await ensureAccountExists(context, delegate);
 
-  // Validate daoId is a valid DaoIdEnum value
-  if (!Object.values(DaoIdEnum).includes(daoId as DaoIdEnum)) {
-    throw new Error(`Invalid daoId: ${daoId}`);
-  }
-
   const deltaMod = newBalance - oldBalance;
 
-  // Transaction handling moved to DAO-specific indexer
   await context.db
     .insert(votingPowerHistory)
     .values({
@@ -182,7 +179,6 @@ export const delegatedVotesChanged = async (
     })
     .onConflictDoNothing();
 
-  // Update the delegate's voting power
   await context.db
     .insert(accountPower)
     .values({
@@ -193,26 +189,4 @@ export const delegatedVotesChanged = async (
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
     }));
-
-  const currentDelegatedSupply = (await context.db.find(token, {
-    id: tokenId,
-  }))!.delegatedSupply;
-
-  // Update the delegated supply
-  const newDelegatedSupply = (
-    await context.db.update(token, { id: tokenId }).set((row) => ({
-      delegatedSupply: row.delegatedSupply + (newBalance - oldBalance),
-    }))
-  ).delegatedSupply;
-
-  // Store delegated supply on daily bucket
-  await storeDailyBucket(
-    context,
-    MetricTypesEnum.DELEGATED_SUPPLY,
-    currentDelegatedSupply,
-    newDelegatedSupply,
-    daoId,
-    timestamp,
-    tokenId,
-  );
 };
