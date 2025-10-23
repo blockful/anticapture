@@ -21,10 +21,12 @@ export const useChartMetrics = ({
   appliedMetrics,
   daoId,
   metricsSchema,
+  tokenType,
 }: {
   appliedMetrics: string[];
   daoId: DaoIdEnum;
   metricsSchema: Record<string, MetricSchema>;
+  tokenType: "ERC20" | "ERC721";
 }): UseChartMetricsResult => {
   // Get direct enum metrics
   const enumMetrics = appliedMetrics.filter((key) =>
@@ -157,7 +159,8 @@ export const useChartMetrics = ({
             result[normalizeTimestamp(item.date)] = {
               ...result[normalizeTimestamp(item.date)],
               date: normalizeTimestamp(item.date),
-              [metricKey]: Number(value) / 1e18, // Convert from wei to token units
+              [metricKey]:
+                tokenType === "ERC721" ? Number(value) : Number(value) / 1e18, // Convert from wei to token units
             };
           });
         }
@@ -165,7 +168,7 @@ export const useChartMetrics = ({
     }
 
     return result;
-  }, [timeSeriesData, stableAppliedMetrics, metricsSchema]);
+  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, tokenType]);
 
   // Process historical token data separately
   const tokenPriceDatasets = useMemo(() => {
