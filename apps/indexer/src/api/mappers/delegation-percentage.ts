@@ -12,11 +12,12 @@ const BaseFiltersSchema = z.object({
 
 // Repository filters schema
 export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
+  orderDirection: z.enum(["asc", "desc"]).default("asc"),
   limit: z.number(), // Required in repository layer
 });
 
 // HTTP query schema (extends base with pagination cursors and HTTP validations)
-export const DelegationPercentageQuerySchema = BaseFiltersSchema.extend({
+export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
   // Cursor for pagination - returns items after this date (exclusive)
   after: z.string().optional(),
   // Cursor for pagination - returns items before this date (exclusive)
@@ -46,7 +47,7 @@ export const DelegationPercentageResponseSchema = z.object({
 
 export type RepositoryFilters = z.infer<typeof RepositoryFiltersSchema>;
 export type DelegationPercentageQuery = z.infer<
-  typeof DelegationPercentageQuerySchema
+  typeof DelegationPercentageRequestSchema
 >;
 export type DelegationPercentageItem = z.infer<
   typeof DelegationPercentageItemSchema
@@ -56,31 +57,12 @@ export type DelegationPercentageResponse = z.infer<
   typeof DelegationPercentageResponseSchema
 >;
 
-/**
- * Type representing a DAO metric row from the database
- * Used for type-safe mocking in tests
- */
-export type DaoMetricRow = {
-  date: bigint;
-  daoId: string;
-  tokenId: string;
-  metricType: string;
-  open: bigint;
-  close: bigint;
-  low: bigint;
-  high: bigint;
-  average: bigint;
-  volume: bigint;
-  count: number;
-  lastUpdate: bigint;
-};
-
 // === MAPPER FUNCTIONS ===
 
 /**
  * Maps service result to HTTP response format
  */
-export function mapServiceToHttpResponse(serviceResult: {
+export function toApi(serviceResult: {
   items: DelegationPercentageItem[];
   totalCount: number;
   hasNextPage: boolean;

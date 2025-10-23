@@ -347,22 +347,10 @@ export class DelegationPercentageService {
     limit: number = 100,
     endDate?: string,
   ): { items: DelegationPercentageItem[]; hasNextPage: boolean } {
-    let filteredItems = allItems;
-
     // Apply cursor filters
-    if (after) {
-      const afterCursor = BigInt(after);
-      filteredItems = filteredItems.filter(
-        (item) => BigInt(item.date) > afterCursor,
-      );
-    }
-
-    if (before) {
-      const beforeCursor = BigInt(before);
-      filteredItems = filteredItems.filter(
-        (item) => BigInt(item.date) < beforeCursor,
-      );
-    }
+    const filteredItems = allItems
+      .filter((item) => !after || BigInt(item.date) > BigInt(after))
+      .filter((item) => !before || BigInt(item.date) < BigInt(before));
 
     // Apply limit
     const items = filteredItems.slice(0, limit);

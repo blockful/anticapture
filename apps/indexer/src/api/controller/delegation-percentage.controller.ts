@@ -1,9 +1,9 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { DelegationPercentageService } from "@/api/services/delegation-percentage";
 import {
-  DelegationPercentageQuerySchema,
+  DelegationPercentageRequestSchema,
   DelegationPercentageResponseSchema,
-  mapServiceToHttpResponse,
+  toApi,
 } from "@/api/mappers/delegation-percentage";
 
 export function delegationPercentage(
@@ -18,7 +18,7 @@ export function delegationPercentage(
       summary: "Get delegation percentage day buckets with forward-fill",
       tags: ["metrics"],
       request: {
-        query: DelegationPercentageQuerySchema,
+        query: DelegationPercentageRequestSchema,
       },
       responses: {
         200: {
@@ -33,7 +33,7 @@ export function delegationPercentage(
       const serviceResult = await service.getDelegationPercentage(
         ctx.req.valid("query"),
       );
-      const httpResponse = mapServiceToHttpResponse(serviceResult);
+      const httpResponse = toApi(serviceResult);
 
       return ctx.json(httpResponse);
     },

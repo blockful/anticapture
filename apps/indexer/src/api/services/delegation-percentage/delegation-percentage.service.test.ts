@@ -1,7 +1,25 @@
 import { DelegationPercentageService } from "./delegation-percentage.service";
 import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
-import type { DaoMetricRow } from "@/api/mappers/delegation-percentage";
 import { MetricTypesEnum } from "@/lib/constants";
+
+/**
+ * Type representing a DAO metric row from the database
+ * Used for type-safe mocking in tests
+ */
+export type DaoMetricRow = {
+  date: bigint;
+  daoId: string;
+  tokenId: string;
+  metricType: string;
+  open: bigint;
+  close: bigint;
+  low: bigint;
+  high: bigint;
+  average: bigint;
+  volume: bigint;
+  count: number;
+  lastUpdate: bigint;
+};
 
 /**
  * Mock Factory Pattern for type-safe test data

@@ -11,7 +11,7 @@ export class DelegationPercentageRepository {
    * @returns Array of metrics ordered by date
    */
   async getDaoMetricsByDateRange(filters: RepositoryFilters) {
-    const { startDate, endDate, orderDirection = "asc", limit } = filters;
+    const { startDate, endDate, orderDirection, limit } = filters;
 
     const conditions = [
       inArray(daoMetricsDayBucket.metricType, [
