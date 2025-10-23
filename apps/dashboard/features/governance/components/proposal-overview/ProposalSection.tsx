@@ -12,6 +12,7 @@ import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { ArrowRight } from "lucide-react";
 import { useAccount } from "wagmi";
+import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams();
@@ -21,13 +22,8 @@ export const ProposalSection = () => {
     proposalId: proposalId as string,
   });
 
-  // If loading, show loading skeleton - @todo: align with design
   if (loading) {
-    return (
-      <>
-        <div className="text-primary p-4">Loading...</div>
-      </>
-    );
+    return <ProposalSectionSkeleton />;
   }
 
   // If there is an error, show error message - @todo: align with design
