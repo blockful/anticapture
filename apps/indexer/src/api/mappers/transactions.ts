@@ -148,7 +148,7 @@ export const TransactionMapper = {
       daoId: d.daoId,
       delegateAccountId: d.delegateAccountId,
       delegatorAccountId: d.delegatorAccountId,
-      delegatedValue: d.delegatedValue.toString(),
+      delegatedValue: d.delegatedValue.toString(), // TODO: fix formatting ex.: 4.5e+25
       previousDelegate: d.previousDelegate,
       timestamp: d.timestamp.toString(),
       logIndex: d.logIndex,

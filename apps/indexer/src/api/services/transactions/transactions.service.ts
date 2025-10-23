@@ -24,7 +24,9 @@ export class TransactionsService {
       ? await this.transactionsRepository.getFilteredAggregateTransactions(
           params,
         )
-      : await this.transactionsRepository.getRecentAggregateTransactions();
+      : await this.transactionsRepository.getRecentAggregateTransactions(
+          params,
+        );
 
     return {
       transactions: result.map(TransactionMapper.toApi),
