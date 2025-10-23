@@ -1371,7 +1371,7 @@ enum queryInput_totalAssets_days {
 
 type query_historicalTokenData_items {
   price: String!
-  timestamp: String!
+  timestamp: Float!
 }
 
 """Integers that will have a value of 0 or more."""
@@ -1389,25 +1389,6 @@ type token_200_response {
   circulatingSupply: String!
   treasury: String!
   price: String!
-}
-
-enum queryInput_token_currency {
-  eth
-  usd
-}
-
-type token_200_response {
-  id: String!
-  name: String
-  decimals: Float!
-  totalSupply: String!
-  delegatedSupply: String!
-  cexSupply: String!
-  dexSupply: String!
-  lendingSupply: String!
-  circulatingSupply: String!
-  treasury: String!
-  price: Float!
 }
 
 enum queryInput_token_currency {

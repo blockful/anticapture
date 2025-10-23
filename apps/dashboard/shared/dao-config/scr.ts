@@ -1,9 +1,5 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { ScrollIcon } from "@/shared/components/icons";
 import { scroll } from "viem/chains";
@@ -16,9 +12,9 @@ export const SCR: DaoConfiguration = {
     svgBgColor: "#ffeeda",
   },
   forumLink: "https://governance.scroll.io/",
-  supportStage: SupportStageEnum.FULL,
   icon: ScrollIcon,
   daoOverview: {
+    token: "ERC20",
     chain: scroll,
     blockTime: 1.5,
     snapshot: "",

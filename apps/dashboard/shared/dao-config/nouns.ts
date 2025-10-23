@@ -1,39 +1,41 @@
-import { RiskLevel } from "@/shared/types/enums";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { UniswapIcon } from "@/shared/components/icons";
+import { NounsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
-export const UNI: DaoConfiguration = {
-  name: "Uniswap",
-  color: {
-    svgColor: "#fc72ff",
-    svgBgColor: "#FFF2FB",
-  },
-  forumLink: "https://gov.uniswap.org/",
-  icon: UniswapIcon,
+export const NOUNS: DaoConfiguration = {
+  name: "Nouns",
+  icon: NounsIcon,
   daoOverview: {
-    token: "ERC20",
-    chain: mainnet,
+    token: "ERC721",
     blockTime: 12,
+    chain: mainnet,
+    snapshot: "",
     contracts: {
-      governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
-      token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-      timelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+      governor: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
+      token: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+      timelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
     },
-    cancelFunction:
-      "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC#writeContract%23F2",
-    snapshot: "https://snapshot.box/#/s:uniswapgovernance.eth",
-    tally: "https://tally.xyz/gov/uniswap",
     rules: {
       delay: true,
-      changeVote: true,
+      changeVote: false,
       timelock: true,
       cancelFunction: true,
       logic: "For",
-      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
+      quorumCalculation: "10-15% Dynamic Quorum",
+      proposalThreshold: "3 $NOUN (>0,25% Adjusted Supply)",
+    },
+  },
+  attackProfitability: {
+    riskLevel: RiskLevel.LOW,
+    supportsLiquidTreasuryCall: false,
+    attackCostBarChart: {
+      NounsTimelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
+      PayerContract: "0xd97Bcd9f47cEe35c0a9ec1dc40C1269afc9E8E1D",
+      ClientIncentivesRewardsProxy:
+        "0x883860178F95d0C82413eDc1D6De530cB4771d55",
+      //PayerContract and ClientIncentivesRewardsProxy are controlled by Timelock.
     },
   },
   governanceImplementation: {
@@ -46,30 +48,31 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
+        riskExplanation: "Nouns contracts are audited.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
-          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable",
-          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity",
-          "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
-          "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
+          "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
         ],
-        riskExplanation: `Although protected from spoofing or hijacking, the service used for voting could still be internally compromised.\n
-          A change in the voting interface could be used to manipulate the results of the vote, hiding malicious txns, or even changing selection of votes.`,
+        riskExplanation:
+          "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
       },
+      // Quantify the profitability of an attack on Nouns.
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "<10k USD",
+        value: "",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
+        requirements: [""],
+        riskExplanation: "",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -78,14 +81,18 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ].description,
+        riskExplanation:
+          "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "1M UNI",
+        value: "30% Market Supply",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
+        riskExplanation:
+          "The supply available for purchase of governance tokens is extremely low—and the proposal threshold is high in relation to it.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
         value: "Yes",
@@ -94,34 +101,37 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ].description,
+        riskExplanation:
+          "Nouns has a cancellation mechanism in place in case the balance of the person submitting a proposal falls below the proposal threshold.",
       },
-      [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
-        value: "Yes",
+      [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
+        value: "No",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+            GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
+        riskExplanation:
+          "Nouns does not have a Security Council, but it does have protection mechanisms—a Veto Strategy and the Proposal Threshold Cancel.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "Yes",
+        value: "YES",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
           ].description,
+        riskExplanation:
+          "Nouns prevents the same address from submitting multiple proposals in governance.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "Only Governor",
+        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
           ].description,
-        requirements: [
-          "The timelock admin can control execution, canceling, upgrades or critical parameter changes; if this power sits outside audited, DAO-approved contracts, attackers or insiders can sidestep on-chain voting.",
-          "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
-        ],
+        riskExplanation: "The Timelock is controlled by the Governor.",
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
         value: "2 days",
@@ -130,6 +140,20 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
+        riskExplanation: "Two days is a sufficient delay for Timelock.",
+      },
+      [GovernanceImplementationEnum.VETO_STRATEGY]: {
+        value: "Yes",
+        riskLevel: RiskLevel.MEDIUM,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.VETO_STRATEGY
+          ].description,
+        requirements: [
+          "To move up to Stage 2 (low risk), the veto strategy needs to be controlled by the DAO, not by a Foundation/DUNA. ",
+        ],
+        riskExplanation:
+          "Nouns has a veto strategy in place, but only the Foundation can veto proposals. In the documentation, the veto is attributed to DUNA, but no one responsible for the veto has been named yet.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -139,23 +163,24 @@ export const UNI: DaoConfiguration = {
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
         requirements: [
-          "If ballots can’t be changed, a late‑discovered UI exploit or code bug can trap delegates in a now‑malicious vote, weakening defenses.",
-          "Currently, votes become immutable once cast (Medium Risk).",
-          "Upgrade governance so any voter can overwrite their vote until the voting window closes (e.g. via castVoteWithReasonAndParams).",
+          "Nouns must allow votes to be changed even after they have been cast in order to reach Stage 2. .",
         ],
+        riskExplanation:
+          "The lack of vote mutability jeopardizes DAO decisions if its main voting interface is attacked.",
       },
+      // Review this
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "44h",
-        riskLevel: RiskLevel.MEDIUM,
+        value: "12 hours",
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
         requirements: [
-          "A short window between proposal submission and the voting snapshot lets attackers rush malicious items through before delegates mobilize.",
-          "Currently, the delay is 44 h (Medium Risk).",
-          "Enforce a delay of ≥ 48 h and deploy an automatic delegate‑alert system when a proposal is queued.",
+          "Nouns must have a voting delay of at least 2 days to be classified as Stage 1 (medium risk).",
         ],
+        riskExplanation:
+          "The 12-hour voting delay is too short for the DAO to protect itself from an attack before voting begins.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -164,19 +189,21 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
+        riskExplanation:
+          "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "5d 6h",
+        value: "4 days",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
         requirements: [
-          "A voting window under seven days risks excluding weekend or time‑zoned delegates, lowering turnout and quorum.",
-          "Currently, voting lasts 5 d 6 h (Medium Risk).",
-          "Increase the period to ≥ 7 days so all delegates have time to participate.",
+          "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
         ],
+        riskExplanation:
+          "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         value: "Yes",
@@ -185,20 +212,12 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
+        riskExplanation:
+          "Nouns subsidizes the cost of votes for participants in governance.",
       },
     },
   },
-  attackProfitability: {
-    riskLevel: RiskLevel.LOW,
-    supportsLiquidTreasuryCall: false,
-    attackCostBarChart: {
-      UniTimelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
-      UniTokenDistributor: "0x090D4613473dEE047c3f2706764f49E0821D256e",
-      Univ3Uni: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
-    },
-  },
   riskAnalysis: true,
-  tokenDistribution: true,
   resilienceStages: true,
-  dataTables: true,
+  tokenDistribution: true,
 };
