@@ -265,7 +265,10 @@ export const TokenDistributionChart = ({
             <YAxis
               yAxisId="secondary"
               orientation="right"
-              domain={["auto", "auto"]}
+              domain={[
+                (dataMin: number) => Math.floor(dataMin * 0.25),
+                (dataMax: number) => Math.ceil(dataMax * 1.1),
+              ]}
               tickFormatter={(value) => `$${Number(value)}`}
               stroke="#8884d8"
               tick={{ fill: "#8884d8", fontSize: 10 }}
