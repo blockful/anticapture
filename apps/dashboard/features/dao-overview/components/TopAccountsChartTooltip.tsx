@@ -2,7 +2,7 @@
 
 import React from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { EntityType } from "@/features/holders-and-delegates";
 import { useDelegationHistory } from "@/features/holders-and-delegates";
@@ -27,12 +27,12 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
 
   const { data: delegationHistory } = useDelegationHistory({
     daoId,
-    delegatorAccountId: type === "tokenHolder" ? data?.address || "" : "",
+    delegatorAccountId:
+      type === "tokenHolder" && data?.address ? data.address : "",
   });
 
   const latestDelegation = delegationHistory?.find(
-    (entry) =>
-      entry.delegate?.id !== "0x0000000000000000000000000000000000000000",
+    (entry) => entry.delegate?.id !== zeroAddress,
   );
 
   const { data: latestDelegationData } = useEnsData(
@@ -41,7 +41,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
 
   const { totalCount } = useVotingPower({
     daoId,
-    address: type === "delegate" ? data?.address || "" : "",
+    address: type === "delegate" && data?.address ? data.address : "",
   });
 
   if (!active || !payload?.length || !data) return null;
@@ -66,7 +66,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
       <span>
         Variation:{" "}
         <span className={variationClassName}>
-          {formatNumberUserReadable(Math.abs(variation))}
+          {formatNumberUserReadable(Math.abs(variation), 0)}
         </span>
       </span>
       <span>{extraField}</span>

@@ -113,8 +113,6 @@ export const useVotingPower = ({
     },
   });
 
-  console.log("Counting data:", countingData);
-
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({

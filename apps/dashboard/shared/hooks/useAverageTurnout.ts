@@ -5,7 +5,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
 import axios from "axios";
 
-interface AverageTurnoutResponse {
+export interface AverageTurnoutResponse {
   currentAverageTurnout: string;
   oldAverageTurnout: string;
   changeRate: string;

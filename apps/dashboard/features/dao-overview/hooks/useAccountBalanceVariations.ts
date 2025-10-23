@@ -26,6 +26,7 @@ export const useAccountBalanceVariations = (
         "anticapture-dao-id": daoId,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   return {

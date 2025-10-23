@@ -31,16 +31,20 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const {
     isLoading,
-    lastPrice,
+    treasuryStats,
     delegatedSupply,
     activeSupply,
     averageTurnout,
-    liquidTreasuryAllValue,
-    liquidTreasuryNonDaoValue,
-    liquidTreasuryAllPercent,
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
   } = useDaoOverviewData(daoId);
+
+  const {
+    liquidTreasuryAllValue,
+    liquidTreasuryAllPercent,
+    liquidTreasuryNonDaoValue,
+    lastPrice,
+  } = treasuryStats;
 
   if (isLoading) return <DaoOverviewSkeleton />;
 

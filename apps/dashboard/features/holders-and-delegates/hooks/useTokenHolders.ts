@@ -10,7 +10,7 @@ import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoric
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
-interface TokenHolder {
+export interface TokenHolder {
   accountId: string;
   balance: string;
   delegate: string;

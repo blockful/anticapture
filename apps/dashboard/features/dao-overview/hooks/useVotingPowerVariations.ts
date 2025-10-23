@@ -26,6 +26,7 @@ export const useVotingPowerVariations = (
         "anticapture-dao-id": daoId,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   return {
