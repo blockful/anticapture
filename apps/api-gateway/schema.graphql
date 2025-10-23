@@ -41,9 +41,6 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
@@ -1356,22 +1353,9 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type query_historicalTokenData_items {
   price: String!
-  timestamp: String!
+  timestamp: Float!
 }
 
 """Integers that will have a value of 0 or more."""
@@ -1389,25 +1373,6 @@ type token_200_response {
   circulatingSupply: String!
   treasury: String!
   price: String!
-}
-
-enum queryInput_token_currency {
-  eth
-  usd
-}
-
-type token_200_response {
-  id: String!
-  name: String
-  decimals: Float!
-  totalSupply: String!
-  delegatedSupply: String!
-  cexSupply: String!
-  dexSupply: String!
-  lendingSupply: String!
-  circulatingSupply: String!
-  treasury: String!
-  price: Float!
 }
 
 enum queryInput_token_currency {
