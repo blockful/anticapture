@@ -3,6 +3,7 @@ import {
   useActiveSupply,
   useDelegatedSupply,
   useAverageTurnout,
+  useTimeSeriesData,
   useTokenData,
 } from "@/shared/hooks";
 import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
@@ -13,8 +14,19 @@ import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTrea
 import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
 import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { useDaoQuorumStats } from "@/features/dao-overview/hooks/useDaoQuorumStats";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { calculateChangeRate } from "@/features/token-distribution/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { formatEther } from "viem";
 
-export const useDaoOverviewData = (daoId: DaoIdEnum) => {
+export const useDaoOverviewData = ({
+  daoId,
+  daoConfig,
+}: {
+  daoId: DaoIdEnum;
+  daoConfig: DaoConfiguration;
+}) => {
   const daoData = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
@@ -32,10 +44,43 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     orderDirection: "desc",
     days: TimeInterval.NINETY_DAYS,
   });
+  const totalSupply = useTimeSeriesData(
+    daoId,
+    [MetricTypesEnum.TOTAL_SUPPLY],
+    TimeInterval.SEVEN_DAYS,
+  );
 
-  const { quorumValue, averageTurnoutPercentAboveQuorum } = useDaoQuorumStats({
+  const totalSupplyValue = {
+    value:
+      totalSupply.data?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
+    changeRate: calculateChangeRate(
+      totalSupply.data?.[MetricTypesEnum.TOTAL_SUPPLY],
+    ),
+  };
+
+  const proposalThresholdPercentage =
+    daoData?.data?.proposalThreshold &&
+    totalSupplyValue.value !== undefined &&
+    formatEther(
+      (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
+        BigInt(totalSupplyValue.value ?? ("1" as string)),
+    );
+
+  const proposalThresholdValue = daoData?.data?.proposalThreshold
+    ? `${formatNumberUserReadable(Number(daoData.data.proposalThreshold) / 10 ** 18)}`
+    : "No Threshold";
+
+  const {
+    quorumValue,
+    averageTurnoutPercentAboveQuorum,
+    quorumPercentage,
+    quorumValueFormatted,
+  } = useDaoQuorumStats({
     daoData: daoData.data,
     averageTurnout,
+    totalSupplyValue,
+    delegatedSupply,
+    daoConfig,
   });
 
   const treasuryStats = useDaoTreasuryStats({
@@ -49,6 +94,10 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     quorumValue,
   });
 
+  const votingPeriod = daoData?.data?.votingPeriod;
+  const votingDelay = daoData?.data?.votingDelay;
+  const timelockDelay = daoData?.data?.timelockDelay;
+
   const isLoading =
     daoData.loading ||
     activeSupply.isLoading ||
@@ -57,7 +106,8 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     tokenData.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
-    holders.loading;
+    holders.loading ||
+    totalSupply.isLoading;
 
   return {
     daoData: daoData.data,
@@ -69,5 +119,12 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     isLoading,
+    proposalThresholdValue,
+    proposalThresholdPercentage,
+    quorumValueFormatted,
+    quorumPercentage,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
   };
 };
