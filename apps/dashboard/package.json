@@ -37,6 +37,7 @@
     "graphql": "^16.11.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.511.0",
+    "markdown-to-jsx": "^7.7.13",
     "next": "15.3.2",
     "react": "19.1.0",
     "react-csv": "^2.2.2",

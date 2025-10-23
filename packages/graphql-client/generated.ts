@@ -1404,6 +1404,7 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
 }
 
 export enum QueryInput_CompareActiveSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1412,6 +1413,7 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1420,6 +1422,7 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1428,6 +1431,7 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1436,6 +1440,7 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1444,6 +1449,7 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1452,6 +1458,7 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1460,6 +1467,7 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1468,6 +1476,7 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1476,6 +1485,7 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1484,6 +1494,7 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1492,6 +1503,7 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1500,6 +1512,7 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalTokenData_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1508,6 +1521,7 @@ export enum QueryInput_HistoricalTokenData_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -2221,13 +2235,19 @@ export type VotesOnchainFilter = {
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
   votingPower?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
+  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
+  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
+  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type VotesOnchainPage = {
@@ -2535,6 +2555,61 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+
+export type GetProposalsFromDaoQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
+  status?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetProposalsFromDaoQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, description: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title?: string | null, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null> } | null };
+
+export type GetProposalQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title?: string | null, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
+
+export type GetVotesOnchainsQueryVariables = Exact<{
+  proposalId?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetVotesOnchainsQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, items: Array<{ __typename?: 'votesOnchain', voterAccountId: string, txHash: string, daoId: string, proposalId: string, support: string, votingPower: any, reason?: string | null, timestamp: any }> } };
+
+export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
+  proposalId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
+
+export type GetVotingPowerChangeQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+  days: QueryInput_HistoricalVotingPower_Days;
+}>;
+
+
+export type GetVotingPowerChangeQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null };
+
+export type GetProposalNonVotersQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_ProposalNonVoters_OrderDirection>;
+}>;
+
+
+export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoters?: { __typename?: 'proposalNonVoters_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposalNonVoters_items_items', lastVoteTimestamp: number, voter: string, votingPower: string, votingPowerVariation: string } | null> } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -3693,6 +3768,335 @@ export type GetDelegateProposalsActivityQueryHookResult = ReturnType<typeof useG
 export type GetDelegateProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivityLazyQuery>;
 export type GetDelegateProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivitySuspenseQuery>;
 export type GetDelegateProposalsActivityQueryResult = Apollo.QueryResult<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>;
+export const GetProposalsFromDaoDocument = gql`
+    query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
+  proposals(
+    skip: $skip
+    limit: $limit
+    orderDirection: $orderDirection
+    status: $status
+    fromDate: $fromDate
+  ) {
+    items {
+      id
+      daoId
+      txHash
+      description
+      quorum
+      forVotes
+      againstVotes
+      abstainVotes
+      timestamp
+      status
+      proposerAccountId
+      title
+      startTimestamp
+      endTimestamp
+      calldatas
+      targets
+      values
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetProposalsFromDaoQuery__
+ *
+ * To run a query within a React component, call `useGetProposalsFromDaoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalsFromDaoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProposalsFromDaoQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      status: // value for 'status'
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
+export function useGetProposalsFromDaoQuery(baseOptions?: Apollo.QueryHookOptions<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>(GetProposalsFromDaoDocument, options);
+      }
+export function useGetProposalsFromDaoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>(GetProposalsFromDaoDocument, options);
+        }
+export function useGetProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>(GetProposalsFromDaoDocument, options);
+        }
+export type GetProposalsFromDaoQueryHookResult = ReturnType<typeof useGetProposalsFromDaoQuery>;
+export type GetProposalsFromDaoLazyQueryHookResult = ReturnType<typeof useGetProposalsFromDaoLazyQuery>;
+export type GetProposalsFromDaoSuspenseQueryHookResult = ReturnType<typeof useGetProposalsFromDaoSuspenseQuery>;
+export type GetProposalsFromDaoQueryResult = Apollo.QueryResult<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>;
+export const GetProposalDocument = gql`
+    query GetProposal($id: String!) {
+  proposal(id: $id) {
+    id
+    daoId
+    txHash
+    proposerAccountId
+    title
+    description
+    quorum
+    timestamp
+    status
+    forVotes
+    againstVotes
+    abstainVotes
+    startTimestamp
+    endTimestamp
+    calldatas
+    targets
+    values
+  }
+}
+    `;
+
+/**
+ * __useGetProposalQuery__
+ *
+ * To run a query within a React component, call `useGetProposalQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProposalQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetProposalQuery(baseOptions: Apollo.QueryHookOptions<GetProposalQuery, GetProposalQueryVariables> & ({ variables: GetProposalQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProposalQuery, GetProposalQueryVariables>(GetProposalDocument, options);
+      }
+export function useGetProposalLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalQuery, GetProposalQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProposalQuery, GetProposalQueryVariables>(GetProposalDocument, options);
+        }
+export function useGetProposalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalQuery, GetProposalQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProposalQuery, GetProposalQueryVariables>(GetProposalDocument, options);
+        }
+export type GetProposalQueryHookResult = ReturnType<typeof useGetProposalQuery>;
+export type GetProposalLazyQueryHookResult = ReturnType<typeof useGetProposalLazyQuery>;
+export type GetProposalSuspenseQueryHookResult = ReturnType<typeof useGetProposalSuspenseQuery>;
+export type GetProposalQueryResult = Apollo.QueryResult<GetProposalQuery, GetProposalQueryVariables>;
+export const GetVotesOnchainsDocument = gql`
+    query GetVotesOnchains($proposalId: String, $limit: Int, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+  votesOnchains(
+    limit: $limit
+    after: $after
+    before: $before
+    where: {proposalId: $proposalId}
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    totalCount
+    items {
+      voterAccountId
+      txHash
+      daoId
+      proposalId
+      support
+      votingPower
+      reason
+      timestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVotesOnchainsQuery__
+ *
+ * To run a query within a React component, call `useGetVotesOnchainsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotesOnchainsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVotesOnchainsQuery({
+ *   variables: {
+ *      proposalId: // value for 'proposalId'
+ *      limit: // value for 'limit'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useGetVotesOnchainsQuery(baseOptions?: Apollo.QueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+      }
+export function useGetVotesOnchainsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+        }
+export function useGetVotesOnchainsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+        }
+export type GetVotesOnchainsQueryHookResult = ReturnType<typeof useGetVotesOnchainsQuery>;
+export type GetVotesOnchainsLazyQueryHookResult = ReturnType<typeof useGetVotesOnchainsLazyQuery>;
+export type GetVotesOnchainsSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsSuspenseQuery>;
+export type GetVotesOnchainsQueryResult = Apollo.QueryResult<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>;
+export const GetVotesOnchainsTotalCountDocument = gql`
+    query GetVotesOnchainsTotalCount($proposalId: String) {
+  votesOnchains(where: {proposalId: $proposalId}) {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetVotesOnchainsTotalCountQuery__
+ *
+ * To run a query within a React component, call `useGetVotesOnchainsTotalCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotesOnchainsTotalCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVotesOnchainsTotalCountQuery({
+ *   variables: {
+ *      proposalId: // value for 'proposalId'
+ *   },
+ * });
+ */
+export function useGetVotesOnchainsTotalCountQuery(baseOptions?: Apollo.QueryHookOptions<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>(GetVotesOnchainsTotalCountDocument, options);
+      }
+export function useGetVotesOnchainsTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>(GetVotesOnchainsTotalCountDocument, options);
+        }
+export function useGetVotesOnchainsTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>(GetVotesOnchainsTotalCountDocument, options);
+        }
+export type GetVotesOnchainsTotalCountQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountQuery>;
+export type GetVotesOnchainsTotalCountLazyQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountLazyQuery>;
+export type GetVotesOnchainsTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountSuspenseQuery>;
+export type GetVotesOnchainsTotalCountQueryResult = Apollo.QueryResult<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>;
+export const GetVotingPowerChangeDocument = gql`
+    query GetVotingPowerChange($addresses: JSON!, $days: queryInput_historicalVotingPower_days!) {
+  historicalVotingPower(addresses: $addresses, days: $days) {
+    address
+    votingPower
+  }
+}
+    `;
+
+/**
+ * __useGetVotingPowerChangeQuery__
+ *
+ * To run a query within a React component, call `useGetVotingPowerChangeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotingPowerChangeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVotingPowerChangeQuery({
+ *   variables: {
+ *      addresses: // value for 'addresses'
+ *      days: // value for 'days'
+ *   },
+ * });
+ */
+export function useGetVotingPowerChangeQuery(baseOptions: Apollo.QueryHookOptions<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables> & ({ variables: GetVotingPowerChangeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>(GetVotingPowerChangeDocument, options);
+      }
+export function useGetVotingPowerChangeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>(GetVotingPowerChangeDocument, options);
+        }
+export function useGetVotingPowerChangeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>(GetVotingPowerChangeDocument, options);
+        }
+export type GetVotingPowerChangeQueryHookResult = ReturnType<typeof useGetVotingPowerChangeQuery>;
+export type GetVotingPowerChangeLazyQueryHookResult = ReturnType<typeof useGetVotingPowerChangeLazyQuery>;
+export type GetVotingPowerChangeSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerChangeSuspenseQuery>;
+export type GetVotingPowerChangeQueryResult = Apollo.QueryResult<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>;
+export const GetProposalNonVotersDocument = gql`
+    query GetProposalNonVoters($id: String!, $limit: PositiveInt, $skip: NonNegativeInt, $orderDirection: queryInput_proposalNonVoters_orderDirection = desc) {
+  proposalNonVoters(
+    id: $id
+    limit: $limit
+    skip: $skip
+    orderDirection: $orderDirection
+  ) {
+    items {
+      lastVoteTimestamp
+      voter
+      votingPower
+      votingPowerVariation
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetProposalNonVotersQuery__
+ *
+ * To run a query within a React component, call `useGetProposalNonVotersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProposalNonVotersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProposalNonVotersQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      limit: // value for 'limit'
+ *      skip: // value for 'skip'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useGetProposalNonVotersQuery(baseOptions: Apollo.QueryHookOptions<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables> & ({ variables: GetProposalNonVotersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>(GetProposalNonVotersDocument, options);
+      }
+export function useGetProposalNonVotersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>(GetProposalNonVotersDocument, options);
+        }
+export function useGetProposalNonVotersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>(GetProposalNonVotersDocument, options);
+        }
+export type GetProposalNonVotersQueryHookResult = ReturnType<typeof useGetProposalNonVotersQuery>;
+export type GetProposalNonVotersLazyQueryHookResult = ReturnType<typeof useGetProposalNonVotersLazyQuery>;
+export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useGetProposalNonVotersSuspenseQuery>;
+export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
   historicalBalances(addresses: $addresses, days: $days) {

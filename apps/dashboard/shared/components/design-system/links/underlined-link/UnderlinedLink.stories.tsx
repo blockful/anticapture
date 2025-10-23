@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
 import { ExternalLinkIcon } from "lucide-react";
