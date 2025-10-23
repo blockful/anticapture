@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { ProposalsService } from "@/api/services/proposals/proposals";
+import { ProposalsService } from "@/api/services";
 import {
   ProposalsResponseSchema,
   ProposalsRequestSchema,

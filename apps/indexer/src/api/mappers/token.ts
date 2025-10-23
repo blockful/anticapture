@@ -1,6 +1,31 @@
 import { z } from "@hono/zod-openapi";
 import { token } from "ponder:schema";
 
+export const TokenHistoricalPriceRequest = z.object({
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
+  limit: z.coerce.number().max(365).optional().default(365),
+});
+
+export type TokenHistoricalPriceRequest = z.infer<
+  typeof TokenHistoricalPriceRequest
+>;
+
+export const TokenHistoricalPriceResponse = z.array(
+  z.object({
+    price: z.string(),
+    timestamp: z.number(),
+  }),
+);
+
+export type TokenHistoricalPriceResponse = z.infer<
+  typeof TokenHistoricalPriceResponse
+>;
+
 export const TokenPropertiesSchema = z.object({
   id: z.string(),
   name: z.string().nullable(),
@@ -15,7 +40,7 @@ export const TokenPropertiesSchema = z.object({
 });
 
 export const TokenPropertiesResponseSchema = TokenPropertiesSchema.extend({
-  price: z.number(),
+  price: z.string(),
 });
 
 export type TokenPropertiesResponse = z.infer<
@@ -25,7 +50,7 @@ export type TokenPropertiesResponse = z.infer<
 export type DBToken = typeof token.$inferSelect;
 
 export const TokenMapper = {
-  toApi: (dbToken: DBToken, tokenPrice: number): TokenPropertiesResponse => {
+  toApi: (dbToken: DBToken, tokenPrice: string): TokenPropertiesResponse => {
     return {
       ...dbToken,
       totalSupply: dbToken.totalSupply.toString(),

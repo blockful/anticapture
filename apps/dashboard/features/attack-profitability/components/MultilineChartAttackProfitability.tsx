@@ -19,7 +19,6 @@ import {
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
-import { filterPriceHistoryByTimeInterval } from "@/features/attack-profitability/utils";
 
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { useEffect, useMemo, useRef } from "react";
@@ -30,7 +29,11 @@ import {
   useDaoTokenHistoricalData,
   useTreasuryAssetNonDaoToken,
 } from "@/features/attack-profitability/hooks";
-import { timestampToReadableDate } from "@/shared/utils";
+import {
+  cn,
+  formatNumberUserReadable,
+  timestampToReadableDate,
+} from "@/shared/utils";
 import {
   normalizeDataset,
   normalizeDatasetTreasuryNonDaoToken,
@@ -43,27 +46,33 @@ import { Data } from "react-csv/lib/core";
 interface MultilineChartAttackProfitabilityProps {
   days: string;
   filterData?: string[];
-  setCsvData: (data: Data) => void;
+  setCsvData?: (data: Data) => void;
+  context?: "overview" | "section";
 }
 
 export const MultilineChartAttackProfitability = ({
   filterData,
   days,
   setCsvData,
+  context = "section",
 }: MultilineChartAttackProfitabilityProps) => {
-  const { daoId }: { daoId: string } = useParams();
-  const { data: daoData } = useDaoData(daoId.toUpperCase() as DaoIdEnum);
+  const { daoId } = useParams<{ daoId: string }>();
+  const daoEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { data: daoData } = useDaoData(daoEnum);
+  const daoConfig = daoConfigByDaoId[daoEnum];
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
-    daoId.toUpperCase() as DaoIdEnum,
+    daoEnum,
     TimeInterval.ONE_YEAR,
   );
 
-  const { data: daoTokenPriceHistoricalData = { prices: [] } } =
-    useDaoTokenHistoricalData({ daoId: daoId.toUpperCase() as DaoIdEnum });
+  const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
+    daoId: daoEnum,
+    limit: Number(days.split("d")[0]),
+  });
 
   const { data: timeSeriesData } = useTimeSeriesData(
-    daoId.toUpperCase() as DaoIdEnum,
+    daoEnum,
     [MetricTypesEnum.TREASURY, MetricTypesEnum.DELEGATED_SUPPLY],
     days as TimeInterval,
     {
@@ -86,26 +95,15 @@ export const MultilineChartAttackProfitability = ({
   const chartConfig = useMemo(
     () => ({
       treasuryNonDAO: {
-        label: `Non-${daoId.toUpperCase() as DaoIdEnum}`,
+        label: `Non-${daoEnum}`,
         color: "#4ade80",
       },
       all: { label: "All", color: "#4ade80" },
       quorum: { label: "Quorum", color: "#f87171" },
       delegated: { label: "Delegated", color: "#f87171" },
     }),
-    [daoId],
+    [daoEnum],
   ) satisfies ChartConfig;
-
-  const selectedPriceHistory = useMemo(() => {
-    const priceHistoryByTimeInterval = filterPriceHistoryByTimeInterval(
-      daoTokenPriceHistoricalData.prices,
-    );
-    return (
-      priceHistoryByTimeInterval[days as TimeInterval] ??
-      priceHistoryByTimeInterval.full ??
-      priceHistoryByTimeInterval
-    );
-  }, [daoTokenPriceHistoricalData.prices, days]);
 
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
@@ -124,43 +122,42 @@ export const MultilineChartAttackProfitability = ({
       treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
         treasuryAssetNonDAOToken,
         "treasuryNonDAO",
-      )
-        .reverse()
-        .slice(365 - Number(days.split("d")[0])),
+      ).reverse(),
       all: normalizeDatasetAllTreasury(
-        selectedPriceHistory,
+        daoTokenPriceHistoricalData,
         "all",
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
-      ).slice(365 - Number(days.split("d")[0])),
-      quorum: daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
-        ?.attackProfitability?.dynamicQuorum?.percentage
+      ),
+      quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
-            selectedPriceHistory,
+            daoTokenPriceHistoricalData,
             "quorum",
-            null,
+            1,
+            daoConfig?.daoOverview.token,
             delegatedSupplyChart,
-          )
-            .slice(365 - Number(days.split("d")[0]))
-            .map((datasetpoint) => ({
-              ...datasetpoint,
-              quorum:
-                datasetpoint.quorum *
-                (daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum]
-                  ?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
-            }))
+          ).map((datasetpoint) => ({
+            ...datasetpoint,
+            quorum:
+              datasetpoint.quorum *
+              (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
+          }))
         : quorumValue
-          ? normalizeDataset(selectedPriceHistory, "quorum", quorumValue).slice(
-              365 - Number(days.split("d")[0]),
+          ? normalizeDataset(
+              daoTokenPriceHistoricalData,
+              "quorum",
+              quorumValue,
+              daoConfig?.daoOverview.token,
             )
           : [],
       delegated: delegatedSupplyChart
         ? normalizeDataset(
-            selectedPriceHistory,
+            daoTokenPriceHistoricalData,
             "delegated",
-            null,
+            1,
+            daoConfig?.daoOverview.token,
             delegatedSupplyChart,
-          ).slice(365 - Number(days.split("d")[0]))
+          )
         : [],
     };
 
@@ -172,36 +169,32 @@ export const MultilineChartAttackProfitability = ({
       ),
     );
 
-    const data = Array.from(allDates)
-      .sort((a, b) => a - b)
-      .map((date) => {
-        const dataPoint: Record<string, number | null> = { date };
+    const data = Array.from(allDates).map((date) => {
+      const dataPoint: Record<string, number | null> = { date };
 
-        Object.entries(datasets).forEach(([key, dataset]) => {
-          const chartLabel =
-            chartConfig[key as keyof typeof chartConfig]?.label;
-          const isKeySelected = filterData?.includes(key);
-          const isLabelSelected = filterData?.includes(chartLabel);
+      Object.entries(datasets).forEach(([key, dataset]) => {
+        const chartLabel = chartConfig[key as keyof typeof chartConfig]?.label;
+        const isKeySelected = filterData?.includes(key);
+        const isLabelSelected = filterData?.includes(chartLabel);
 
-          if (isKeySelected || isLabelSelected) {
-            const value = dataset.find((d) => d.date === date)?.[key] ?? null;
-            if (value !== null) lastKnownValues[key] = value;
-            dataPoint[key] = lastKnownValues[key] ?? null;
-          }
-        });
-
-        return dataPoint;
+        if (isKeySelected || isLabelSelected) {
+          const value = dataset.find((d) => d.date === date)?.[key] ?? null;
+          if (value !== null) lastKnownValues[key] = value;
+          dataPoint[key] = lastKnownValues[key] ?? null;
+        }
       });
+
+      return dataPoint;
+    });
 
     return data;
   }, [
     filterData,
     chartConfig,
-    days,
     daoId,
     mocked,
     quorumValue,
-    selectedPriceHistory,
+    daoTokenPriceHistoricalData,
     treasuryAssetNonDAOToken,
     timeSeriesData,
   ]);
@@ -213,27 +206,46 @@ export const MultilineChartAttackProfitability = ({
     const serialized = JSON.stringify(chartData);
     if (serialized !== prevCsvRef.current) {
       prevCsvRef.current = serialized;
-      setCsvData(chartData as Data);
+      setCsvData?.(chartData as Data);
     }
   }, [chartData, mocked, setCsvData]);
 
   return (
-    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
+    <div
+      className={cn(
+        "sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
+        {
+          "-mb-1 h-32": context === "overview",
+        },
+      )}
+    >
       {mocked && <ResearchPendingChartBlur />}
-      <ChartContainer className="h-full w-full" config={chartConfig}>
-        <LineChart data={chartData}>
+      <ChartContainer
+        className="h-full w-full justify-start"
+        config={chartConfig}
+      >
+        <LineChart
+          data={chartData}
+          margin={{ top: 0, right: 16, left: -16, bottom: 0 }}
+        >
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
             dataKey="date"
             scale="time"
             type="number"
             domain={["auto", "auto"]}
-            tickLine={false}
-            axisLine={false}
             tickMargin={8}
-            tickFormatter={(date) => timestampToReadableDate(date)}
+            tickFormatter={(timestamp) =>
+              timestampToReadableDate(timestamp, "abbreviated")
+            }
+            allowDuplicatedCategory={false}
+            padding={{ left: 0, right: 20 }}
           />
-          <YAxis hide={true} />
+          <YAxis
+            tickFormatter={(value) => formatNumberUserReadable(value)}
+            yAxisId={0}
+            domain={["auto", "auto"]}
+          />
           <Tooltip
             content={
               <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />

@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { TransactionsService } from "../services/transactions";
+import { TransactionsService } from "../services";
 import {
   TransactionsRequestSchema,
   TransactionsResponseSchema,

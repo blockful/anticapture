@@ -5,11 +5,9 @@ import {
   useDelegatedSupply,
   useAverageTurnout,
   useTimeSeriesData,
+  useTokenData,
 } from "@/shared/hooks";
-import {
-  useDaoTokenHistoricalData,
-  useTreasuryAssetNonDaoToken,
-} from "@/features/attack-profitability/hooks";
+import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 import { useTokenHolders } from "@/features/holders-and-delegates";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -31,10 +29,7 @@ export const useDaoOverviewData = ({
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const tokenPrice = useDaoTokenHistoricalData({
-    daoId,
-    days: TimeInterval.SEVEN_DAYS,
-  });
+  const tokenPrice = useTokenData(daoId);
   const treasuryNonDao = useTreasuryAssetNonDaoToken(
     daoId,
     TimeInterval.NINETY_DAYS,
@@ -72,7 +67,7 @@ export const useDaoOverviewData = ({
     ? `${formatNumberUserReadable(Number(daoData.proposalThreshold) / 10 ** 18)}`
     : "No Threshold";
 
-  const lastPrice = tokenPrice.data?.prices?.at(-1)?.[1] ?? 0;
+  const lastPrice = tokenPrice.data?.price ?? 0;
 
   const quorumMinPercentage =
     daoData?.quorum &&
@@ -169,9 +164,10 @@ export const useDaoOverviewData = ({
     activeSupply.isLoading ||
     delegatedSupply.isLoading ||
     averageTurnout.isLoading ||
+    tokenPrice.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
-    tokenPrice.loading ||
+    tokenPrice.isLoading ||
     holders.loading ||
     totalSupply.isLoading;
 

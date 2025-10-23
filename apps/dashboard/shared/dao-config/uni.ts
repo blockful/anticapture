@@ -1,22 +1,23 @@
-import { RiskLevel, SupportStageEnum } from "@/shared/types/enums";
+import { RiskLevel } from "@/shared/types/enums";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
-  displayName: "Uniswap",
   color: {
     svgColor: "#fc72ff",
     svgBgColor: "#FFF2FB",
   },
   forumLink: "https://gov.uniswap.org/",
-  supportStage: SupportStageEnum.FULL,
   icon: UniswapIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
+    blockTime: 12,
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -32,7 +33,7 @@ export const UNI: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
   },
   governanceImplementation: {

@@ -6,16 +6,14 @@ import {
 
 export function formatBlocksToUserReadable(
   num: number,
+  blockTime: number,
   useAbbreviations: boolean = false,
 ): string {
-  // Constants
-  const SECONDS_PER_BLOCK = 12;
-
   // Handle zero or negative blocks
   if (num <= 0) return "0 sec";
 
   // Convert blocks to seconds
-  const totalSeconds = num * SECONDS_PER_BLOCK;
+  const totalSeconds = num * blockTime;
 
   // For small block counts, just show seconds
   if (num < 5) {

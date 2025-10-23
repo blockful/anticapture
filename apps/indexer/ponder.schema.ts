@@ -241,6 +241,11 @@ export const transaction = onchainTable("transaction", (drizzle) => ({
   timestamp: drizzle.bigint().notNull(),
 }));
 
+export const tokenPrice = onchainTable("token_price", (drizzle) => ({
+  price: drizzle.bigint().notNull(), // price in ETH
+  timestamp: drizzle.bigint().primaryKey(),
+}));
+
 // Account Power and Balance relations
 export const accountBalanceRelations = relations(accountBalance, ({ one }) => ({
   // Relation to the delegate's power

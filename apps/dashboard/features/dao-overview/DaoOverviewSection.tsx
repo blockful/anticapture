@@ -22,6 +22,7 @@ import {
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
+import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoConfig = daoConfigByDaoId[daoId];
@@ -151,6 +152,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             votingDelay={votingDelay}
             timelockDelay={timelockDelay}
           />
+          <AttackProfitabilityChartCard daoId={daoId} />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <TokenDistributionChartCard daoId={daoId} />
         </div>
         <div className="block md:hidden">
           <DividerDefault isHorizontal />

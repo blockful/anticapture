@@ -13,7 +13,9 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 type Query {
   dao(id: String!): dao
   daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
-  token(id: String!): token
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
@@ -35,13 +37,15 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
+  tokenPrice(timestamp: BigInt!): tokenPrice
+  tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
   """Get total assets"""
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
+  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -88,7 +92,7 @@ type Query {
   proposal(id: String!): proposal_200_response
 
   """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc): proposalNonVoters_200_response
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
@@ -124,6 +128,16 @@ type Query {
 
   """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+
+  """
+  Returns a mapping of the biggest changes to voting power associated by delegate address
+  """
+  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+
+  """
+  Returns a mapping of the biggest variations to account balances associated by account address
+  """
+  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 }
 
 """
@@ -789,7 +803,7 @@ type votesOnchain {
   proposalId: String!
   support: String!
   votingPower: BigInt!
-  reason: String!
+  reason: String
   timestamp: BigInt!
   proposal: proposalsOnchain
   voter: account
@@ -1310,6 +1324,38 @@ input transactionFilter {
   timestamp_lte: BigInt
 }
 
+type tokenPrice {
+  price: BigInt!
+  timestamp: BigInt!
+}
+
+type tokenPricePage {
+  items: [tokenPrice!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input tokenPriceFilter {
+  AND: [tokenPriceFilter]
+  OR: [tokenPriceFilter]
+  price: BigInt
+  price_not: BigInt
+  price_in: [BigInt]
+  price_not_in: [BigInt]
+  price_gt: BigInt
+  price_lt: BigInt
+  price_gte: BigInt
+  price_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
 type query_totalAssets_items {
   totalAssets: String!
   date: String!
@@ -1323,18 +1369,31 @@ enum queryInput_totalAssets_days {
   _365d
 }
 
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
+type query_historicalTokenData_items {
+  price: String!
+  timestamp: Float!
 }
 
-enum queryInput_historicalTokenData_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
+"""Integers that will have a value of 0 or more."""
+scalar NonNegativeInt
+
+type token_200_response {
+  id: String!
+  name: String
+  decimals: Float!
+  totalSupply: String!
+  delegatedSupply: String!
+  cexSupply: String!
+  dexSupply: String!
+  lendingSupply: String!
+  circulatingSupply: String!
+  treasury: String!
+  price: String!
+}
+
+enum queryInput_token_currency {
+  eth
+  usd
 }
 
 type compareTotalSupply_200_response {
@@ -1528,9 +1587,6 @@ type query_proposalsActivity_proposals_items_userVote {
   reason: String
   timestamp: String!
 }
-
-"""Integers that will have a value of 0 or more."""
-scalar NonNegativeInt
 
 """Integers that will have a value greater than 0."""
 scalar PositiveInt
@@ -1756,6 +1812,70 @@ enum queryInput_votingPowers_orderBy {
 }
 
 enum queryInput_votingPowers_orderDirection {
+  asc
+  desc
+}
+
+type votingPowerVariations_200_response {
+  period: query_votingPowerVariations_period!
+  items: [query_votingPowerVariations_items_items]!
+}
+
+type query_votingPowerVariations_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_votingPowerVariations_items_items {
+  accountId: String!
+  previousVotingPower: String
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_votingPowerVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_votingPowerVariations_orderDirection {
+  asc
+  desc
+}
+
+type accountBalanceVariations_200_response {
+  period: query_accountBalanceVariations_period!
+  items: [query_accountBalanceVariations_items_items]!
+}
+
+type query_accountBalanceVariations_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_accountBalanceVariations_items_items {
+  accountId: String!
+  previousBalance: String!
+  currentBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_accountBalanceVariations_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_accountBalanceVariations_orderDirection {
   asc
   desc
 }

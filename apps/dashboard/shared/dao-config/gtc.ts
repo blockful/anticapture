@@ -1,25 +1,22 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { GitcoinIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
-  displayName: "Gitcoin",
   color: {
     svgColor: "#1e443f",
     svgBgColor: "#D0E1DE",
   },
   forumLink: "https://gov.gitcoin.co/",
-  supportStage: SupportStageEnum.FULL,
   icon: GitcoinIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
+    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
       governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
@@ -35,7 +32,7 @@ export const GTC: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For + Abstain",
-      quorumCalculation: "Total Supply",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
       proposalThreshold: "150k GTC",
     },
   },
@@ -85,11 +82,11 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
         requirements: [
-          "Increase the deegation supply and active voter set to lower the profitability of an attacker.",
+          "Increase the delegation supply and active voter set to lower the profitability of an attacker.",
           "Get the delegated supply above the value directly available for proposal execution.",
         ],
         riskExplanation:
-          "The liquid treasury of the DAO is ~$500k bigger than its current delegated supply..",
+          "The liquid treasury of the DAO is ~$500k bigger than its current delegated supply.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
