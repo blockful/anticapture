@@ -68,8 +68,9 @@ export const AttackCostBarChart = ({
 }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const [mocked, setMocked] = useState<boolean>(false);
+  const [mocked, setMocked] = useState(false);
   const timeInterval = TimeInterval.NINETY_DAYS;
+
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -83,7 +84,7 @@ export const AttackCostBarChart = ({
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData({
     daoId: selectedDaoId,
-    days: TimeInterval.SEVEN_DAYS,
+    limit: 1,
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
@@ -134,18 +135,17 @@ export const AttackCostBarChart = ({
       return mockedAttackCostBarData as ChartDataItem[];
     }
 
-    const prices = daoTokenPriceHistoricalData.prices;
-    const lastPrice = prices.length > 0 ? prices[prices.length - 1][1] : 0;
+    const prices = daoTokenPriceHistoricalData;
+    const lastPrice =
+      prices.length > 0 ? Number(prices[prices.length - 1].price) : 0;
 
-    const formatValue = (value: number): number => {
-      if (value == null) return 0;
+    const formatValue = (value: number, token: "ERC20" | "ERC721"): number => {
+      const formattedValue =
+        token === "ERC20"
+          ? Number(formatEther(BigInt(Math.floor(value))))
+          : value;
 
-      const formattedValue = Number(formatEther(BigInt(value || 0)));
-
-      if (valueMode === "usd") {
-        return formattedValue * lastPrice;
-      }
-
+      if (valueMode === "usd") return formattedValue * lastPrice;
       return formattedValue;
     };
 
@@ -170,6 +170,7 @@ export const AttackCostBarChart = ({
         name: "Delegated Supply",
         value: formatValue(
           Number(delegatedSupply.data?.currentDelegatedSupply),
+          daoConfig.daoOverview.token,
         ),
         type: BarChartEnum.REGULAR,
         customColor: "#EC762ECC",
@@ -179,21 +180,30 @@ export const AttackCostBarChart = ({
         name: "Active Supply (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
-        value: formatValue(Number(activeSupply.data?.activeSupply)),
+        value: formatValue(
+          Number(activeSupply.data?.activeSupply),
+          daoConfig.daoOverview.token,
+        ),
       },
       {
         id: "averageTurnout",
         name: "Average Turnout (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
-        value: formatValue(Number(averageTurnout.data?.currentAverageTurnout)),
+        value: formatValue(
+          Number(averageTurnout.data?.currentAverageTurnout),
+          daoConfig.daoOverview.token,
+        ),
       },
       {
         id: "topTokenHolder",
         name: "Top Holder",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762E80",
-        value: formatValue(Number(daoTopTokenHolderExcludingTheDao?.balance)),
+        value: formatValue(
+          Number(daoTopTokenHolderExcludingTheDao?.balance),
+          daoConfig.daoOverview.token,
+        ),
       },
     ];
   }, [
@@ -205,7 +215,7 @@ export const AttackCostBarChart = ({
     activeSupply?.data?.activeSupply,
     averageTurnout?.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
-    daoTokenPriceHistoricalData.prices,
+    daoTokenPriceHistoricalData,
     valueMode,
   ]);
 

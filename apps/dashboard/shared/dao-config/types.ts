@@ -2,11 +2,7 @@ import { ReactNode } from "react";
 import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
 
 export type DaoMetricsDayBucket = {
@@ -23,13 +19,7 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-export type PriceEntry = [timestamp: number, value: number];
-
-export interface TokenHistoricalDataMetrics {
-  prices: PriceEntry[];
-  market_caps: PriceEntry[];
-  total_volumes: PriceEntry[];
-}
+export type PriceEntry = { timestamp: number; price: string };
 
 export interface MultilineChartDataSetPoint {
   date: number;
@@ -63,7 +53,6 @@ interface BaseInfo {
     svgColor: string;
     svgBgColor: string;
   };
-  supportStage: SupportStageEnum;
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
@@ -77,14 +66,15 @@ export interface DaoOverviewConfig {
     governor?: Address;
     timelock?: Address;
   };
+  token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
   tally?: string;
-  rules?: {
-    delay?: boolean;
-    changeVote?: boolean;
-    timelock?: boolean;
-    cancelFunction?: boolean;
+  rules: {
+    delay: boolean;
+    changeVote: boolean;
+    timelock: boolean;
+    cancelFunction: boolean;
     logic:
       | "For"
       | "For + Abstain"
@@ -130,6 +120,11 @@ export interface DaoAddresses {
     GTCWallet: string;
     GTCTimelock: string;
     GTCUniv3Uni: string;
+  };
+  [DaoIdEnum.NOUNS]: {
+    NounsTimelock: string;
+    PayerContract: string;
+    ClientIncentivesRewardsProxy: string;
   };
   [DaoIdEnum.SCR]: Record<string, never>;
 }

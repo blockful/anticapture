@@ -3,11 +3,9 @@ import {
   useActiveSupply,
   useDelegatedSupply,
   useAverageTurnout,
+  useTokenData,
 } from "@/shared/hooks";
-import {
-  useDaoTokenHistoricalData,
-  useTreasuryAssetNonDaoToken,
-} from "@/features/attack-profitability/hooks";
+import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 import { useTokenHolders } from "@/features/holders-and-delegates";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -21,10 +19,7 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const tokenPrice = useDaoTokenHistoricalData({
-    daoId,
-    days: TimeInterval.SEVEN_DAYS,
-  });
+  const tokenPrice = useTokenData(daoId);
   const treasuryNonDao = useTreasuryAssetNonDaoToken(
     daoId,
     TimeInterval.NINETY_DAYS,
@@ -59,9 +54,9 @@ export const useDaoOverviewData = (daoId: DaoIdEnum) => {
     activeSupply.isLoading ||
     delegatedSupply.isLoading ||
     averageTurnout.isLoading ||
+    tokenPrice.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
-    tokenPrice.loading ||
     holders.loading;
 
   return {

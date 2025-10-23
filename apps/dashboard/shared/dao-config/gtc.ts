@@ -1,9 +1,5 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { GitcoinIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
@@ -16,9 +12,9 @@ export const GTC: DaoConfiguration = {
     svgBgColor: "#D0E1DE",
   },
   forumLink: "https://gov.gitcoin.co/",
-  supportStage: SupportStageEnum.FULL,
   icon: GitcoinIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
