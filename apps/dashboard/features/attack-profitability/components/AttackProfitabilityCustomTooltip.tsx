@@ -10,14 +10,14 @@ export const AttackProfitabilityCustomTooltip: React.FC<
 > = ({ active, payload, label, chartConfig }) => {
   if (!active || !payload || payload.length === 0) return null;
 
-  const date = new Date(label).toLocaleDateString("en-US", {
+  const date = new Date(label * 1000).toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
   });
 
   return (
     <div className="flex flex-col rounded-lg border border-[#27272A] bg-[#09090b] p-3 text-black shadow-md">
-      <p className="flex pb-2 text-xs leading-[14px] font-medium text-neutral-50">
+      <p className="flex pb-2 text-xs font-medium leading-[14px] text-neutral-50">
         {date}
       </p>
       {payload.map((entry, index) => {

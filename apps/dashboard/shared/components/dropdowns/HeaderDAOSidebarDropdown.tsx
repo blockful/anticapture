@@ -43,7 +43,7 @@ export const HeaderDAOSidebarDropdown = () => {
   const dropdownItems = useMemo(
     () => [
       ...Object.values(DaoIdEnum)
-        .filter((daoIdValue) => daoIdValue !== DaoIdEnum.SCR) // disable until Scroll is fully indexed on prod
+        .filter((daoId) => daoId !== DaoIdEnum.NOUNS) // TODO remove this when Nouns is fully supported
         .map((daoIdValue, index) => ({
           id: index,
           label: daoConfigByDaoId[daoIdValue].name,

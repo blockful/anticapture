@@ -19,13 +19,7 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-export type PriceEntry = [timestamp: number, value: number];
-
-export interface TokenHistoricalDataMetrics {
-  prices: PriceEntry[];
-  market_caps: PriceEntry[];
-  total_volumes: PriceEntry[];
-}
+export type PriceEntry = { timestamp: number; price: string };
 
 export interface MultilineChartDataSetPoint {
   date: number;
@@ -67,14 +61,15 @@ export interface DaoOverviewConfig {
     governor?: Address;
     timelock?: Address;
   };
+  token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
   tally?: string;
-  rules?: {
-    delay?: boolean;
-    changeVote?: boolean;
-    timelock?: boolean;
-    cancelFunction?: boolean;
+  rules: {
+    delay: boolean;
+    changeVote: boolean;
+    timelock: boolean;
+    cancelFunction: boolean;
     logic:
       | "For"
       | "For + Abstain"
@@ -120,6 +115,11 @@ export interface DaoAddresses {
     GTCWallet: string;
     GTCTimelock: string;
     GTCUniv3Uni: string;
+  };
+  [DaoIdEnum.NOUNS]: {
+    NounsTimelock: string;
+    PayerContract: string;
+    ClientIncentivesRewardsProxy: string;
   };
   [DaoIdEnum.SCR]: Record<string, never>;
 }

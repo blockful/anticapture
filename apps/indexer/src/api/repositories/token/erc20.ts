@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "ponder:api";
 import { token } from "ponder:schema";
-import { DBToken } from "../mappers";
+import { DBToken } from "@/api/mappers";
 import { DaoIdEnum } from "@/lib/enums";
 
 export class TokenRepository {

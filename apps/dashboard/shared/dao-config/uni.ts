@@ -10,6 +10,7 @@ export const UNI: DaoConfiguration = {
   name: "Uniswap",
   icon: UniswapIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
     contracts: {

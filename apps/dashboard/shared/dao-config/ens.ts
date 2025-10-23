@@ -10,6 +10,7 @@ export const ENS: DaoConfiguration = {
   name: "ENS",
   icon: EnsIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
     snapshot: "https://snapshot.box/#/s:ens.eth",
