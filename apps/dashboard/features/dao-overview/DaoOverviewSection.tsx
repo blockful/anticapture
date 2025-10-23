@@ -7,7 +7,7 @@ import { DaoAvatarIcon } from "@/shared/components/icons";
 import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
-import { DaoOverviewMetrics } from "@/features/dao-overview/components/DaoOverviewMetrics";
+import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
@@ -21,6 +21,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -38,7 +39,14 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     liquidTreasuryAllPercent,
     averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
-  } = useDaoOverviewData(daoId);
+    proposalThresholdValue,
+    proposalThresholdPercentage,
+    quorumValueFormatted,
+    quorumPercentage,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
+  } = useDaoOverviewData({ daoId, daoConfig });
 
   if (isLoading) return <DaoOverviewSkeleton />;
 
@@ -90,7 +98,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 daoOverview={daoOverview}
                 lastPrice={lastPrice}
               />
-              <DaoOverviewMetrics
+              <DaoOverviewHeaderMetrics
                 daoId={daoId}
                 delegatedSupplyValue={delegatedSupplyValue}
                 activeSupplyValue={activeSupplyValue}
@@ -131,6 +139,19 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
           </div>
+        </div>
+        <div className="border-x-1 border-inverted mx-5">
+          <MetricsCard
+            proposalThresholdValue={proposalThresholdValue}
+            proposalThresholdPercentage={proposalThresholdPercentage}
+            quorumValueFormatted={quorumValueFormatted}
+            quorumPercentage={quorumPercentage}
+            daoId={daoId}
+            daoConfig={daoConfig}
+            votingPeriod={votingPeriod}
+            votingDelay={votingDelay}
+            timelockDelay={timelockDelay}
+          />
           <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
@@ -145,6 +166,12 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+          <TokenDistributionChartCard daoId={daoId} />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
         </div>
       </div>
     </Suspense>

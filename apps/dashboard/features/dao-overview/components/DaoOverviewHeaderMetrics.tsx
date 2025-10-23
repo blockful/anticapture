@@ -1,6 +1,7 @@
 import { formatNumberUserReadable } from "@/shared/utils";
+import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
 
-interface DaoOverviewMetricsProps {
+interface DaoOverviewHeaderMetricsProps {
   daoId: string;
   delegatedSupplyValue: string;
   activeSupplyValue: string;
@@ -12,25 +13,7 @@ interface DaoOverviewMetricsProps {
   topDelegatesToPass: number | string | null;
 }
 
-const DaoOverviewMetricCard = ({
-  title,
-  text,
-  subText,
-}: {
-  title: string;
-  text: string;
-  subText: string;
-}) => (
-  <div>
-    <p className="text-secondary mb-2 font-mono text-xs font-medium uppercase tracking-wider">
-      {title}
-    </p>
-    <p className="text-primary text-sm leading-5">{text}</p>
-    <p className="text-secondary text-xs">{subText}</p>
-  </div>
-);
-
-export const DaoOverviewMetrics = ({
+export const DaoOverviewHeaderMetrics = ({
   daoId,
   delegatedSupplyValue,
   activeSupplyValue,
@@ -40,8 +23,8 @@ export const DaoOverviewMetrics = ({
   liquidTreasuryAllPercent,
   liquidTreasuryNonDaoValue,
   topDelegatesToPass,
-}: DaoOverviewMetricsProps) => (
-  <div className="border-t-1 border-t-border-default md:bg-surface-default grid grid-cols-2 gap-4 border-dashed pt-4 md:flex md:grid-cols-4 md:justify-between md:border-none md:px-4 md:py-3">
+}: DaoOverviewHeaderMetricsProps) => (
+  <div className="border-t-1 border-t-border-default md:bg-surface-default grid grid-cols-2 gap-4 border-dashed pt-4 md:grid-cols-4 md:gap-0.5 md:border-none md:pt-0">
     <DaoOverviewMetricCard
       title="Votable Supply"
       text={`${delegatedSupplyValue} ${daoId} delegated`}

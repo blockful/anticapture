@@ -28,7 +28,10 @@ export function formatSecondsToReadable(
   totalSeconds: number,
   useAbbreviations: boolean = false,
 ): string {
-  const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+  const days = Math.floor(totalSeconds / (SECONDS_PER_HOUR * 24));
+  const hours = Math.floor(
+    (totalSeconds % (SECONDS_PER_HOUR * 24)) / SECONDS_PER_HOUR,
+  );
   const minutes = Math.floor(
     (totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
   );
@@ -36,19 +39,20 @@ export function formatSecondsToReadable(
 
   const parts = [];
 
-  // Add hours if we have any
+  if (days > 0) {
+    parts.push(useAbbreviations ? `${days}d` : formatPlural(days, "day"));
+  }
+
   if (hours > 0) {
     parts.push(useAbbreviations ? `${hours}h` : formatPlural(hours, "hour"));
   }
 
-  // Add minutes if we have any
   if (minutes > 0) {
     parts.push(
       useAbbreviations ? `${minutes}min` : formatPlural(minutes, "min"),
     );
   }
 
-  // Add seconds only if we have no hours and minutes
   if (parts.length === 0 && seconds > 0) {
     parts.push(useAbbreviations ? `${seconds}s` : formatPlural(seconds, "sec"));
   }
