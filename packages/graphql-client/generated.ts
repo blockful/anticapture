@@ -2455,7 +2455,7 @@ export type AccountBalanceVariationsQueryVariables = Exact<{
 }>;
 
 
-export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', period: { __typename?: 'query_accountBalanceVariations_period', days: string, startTimestamp: string, endTimestamp: string }, items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
+export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
 
 export type CompareTreasuryQueryVariables = Exact<{
   days: QueryInput_CompareTreasury_Days;
@@ -2470,7 +2470,7 @@ export type VotingPowerVariationsQueryVariables = Exact<{
 }>;
 
 
-export type VotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', period: { __typename?: 'query_votingPowerVariations_period', days: string, startTimestamp: string, endTimestamp: string }, items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower?: string | null } | null> } | null };
+export type VotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower?: string | null } | null> } | null };
 
 export type GetDaoDataQueryVariables = Exact<{
   daoId: Scalars['String']['input'];
@@ -3000,11 +3000,6 @@ export type BalanceHistorySellTotalCountQueryResult = Apollo.QueryResult<Balance
 export const AccountBalanceVariationsDocument = gql`
     query AccountBalanceVariations($days: queryInput_accountBalanceVariations_days!, $limit: PositiveInt = 10) {
   accountBalanceVariations(days: $days, limit: $limit) {
-    period {
-      days
-      startTimestamp
-      endTimestamp
-    }
     items {
       accountId
       previousBalance
@@ -3094,11 +3089,6 @@ export type CompareTreasuryQueryResult = Apollo.QueryResult<CompareTreasuryQuery
 export const VotingPowerVariationsDocument = gql`
     query VotingPowerVariations($days: queryInput_votingPowerVariations_days!, $limit: PositiveInt = 10) {
   votingPowerVariations(days: $days, limit: $limit) {
-    period {
-      days
-      startTimestamp
-      endTimestamp
-    }
     items {
       absoluteChange
       accountId
