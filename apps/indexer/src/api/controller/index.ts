@@ -10,3 +10,4 @@ export * from "./proposals";
 export * from "./last-update.controller";
 export * from "./voting-power";
 export * from "./top-account-balance-variations";
+export * from "./top-voting-power-variations";

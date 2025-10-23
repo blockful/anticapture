@@ -1,19 +1,15 @@
-import { DaoIdEnum } from "@/lib/enums";
-import {
-  CoingeckoTokenId,
-  CoingeckoTokenIdEnum,
-} from "../services/coingecko/types";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { TokenService } from "../services/token/token";
-import { TokenPropertiesResponseSchema, TokenMapper } from "../mappers";
+
+import { DaoIdEnum } from "@/lib/enums";
+import { TokenService } from "@/api/services";
+import { TokenPropertiesResponseSchema, TokenMapper } from "@/api/mappers";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 interface TokenPriceClient {
   getTokenPrice(
-    tokenId: CoingeckoTokenId,
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<number>;
+  ): Promise<string>;
 }
 
 export function token(
@@ -52,12 +48,10 @@ export function token(
     }),
     async (context) => {
       const { currency } = context.req.valid("query");
-      const tokenId =
-        CoingeckoTokenIdEnum[daoId as keyof typeof CoingeckoTokenIdEnum];
+
       const tokenContractAddress = CONTRACT_ADDRESSES[daoId].token.address;
       const tokenProps = await service.getTokenProperties(daoId);
       const priceData = await client.getTokenPrice(
-        tokenId,
         tokenContractAddress,
         currency,
       );
