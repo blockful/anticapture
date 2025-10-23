@@ -7,7 +7,7 @@ import {
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { ScrollIcon } from "@/shared/components/icons";
 import { scroll } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels"
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const SCR: DaoConfiguration = {
   name: "Scroll",
