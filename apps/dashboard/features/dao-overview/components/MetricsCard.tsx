@@ -37,6 +37,10 @@ export const MetricsCard = ({
       ? "Cancel Function"
       : "N/A";
 
+  const daoConfigBlockTime = daoConfig.daoOverview.chain.blockTime
+    ? daoConfig.daoOverview.chain.blockTime / 1000
+    : 0;
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:justify-between md:gap-2 md:border-none">
       <DaoOverviewMetricCard
@@ -48,12 +52,13 @@ export const MetricsCard = ({
 
       <DaoOverviewMetricCard
         title="Voting Period"
-        text={`${formatBlocksToUserReadable(votingPeriod, true)} to vote`}
+        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime)} to vote`}
         subText={
           <span>
             Starts after{" "}
             <span className="bg-surface-opacity rounded-full px-1.5 py-0.5">
-              {formatBlocksToUserReadable(votingDelay, true) || "N/A"}
+              {formatBlocksToUserReadable(votingDelay, daoConfigBlockTime) ||
+                "N/A"}
             </span>{" "}
             delay
           </span>
@@ -86,7 +91,10 @@ export const MetricsCard = ({
             <span>
               After{" "}
               <span className="bg-surface-opacity rounded-full px-1.5 py-0.5">
-                {formatBlocksToUserReadable(timelockDelay, true) || "N/A"}
+                {formatBlocksToUserReadable(
+                  timelockDelay,
+                  daoConfigBlockTime,
+                ) || "N/A"}
               </span>{" "}
               of delay
             </span>
