@@ -58,6 +58,7 @@ export const ProposalSection = () => {
         votingPower={votingPower}
         votesOnchain={votesOnchain}
         address={address}
+        proposalStatus={proposal.status}
       />
       <div className="mx-auto w-full max-w-7xl">
         <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />

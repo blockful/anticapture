@@ -14,6 +14,7 @@ interface ProposalHeaderProps {
   votingPower: string;
   votesOnchain: GetAccountPowerQuery["votesOnchain"] | null;
   address: string | undefined;
+  proposalStatus: string;
 }
 
 export const ProposalHeader = ({
@@ -22,6 +23,7 @@ export const ProposalHeader = ({
   votesOnchain,
   setIsVotingModalOpen,
   address,
+  proposalStatus,
 }: ProposalHeaderProps) => {
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 sm:top-0">
@@ -68,13 +70,15 @@ export const ProposalHeader = ({
           {/* If already voted: show voted badge */}
           {address ? (
             !votesOnchain?.support ? (
-              <Button
-                className="hidden lg:flex"
-                onClick={() => setIsVotingModalOpen(true)}
-              >
-                Cast your vote
-                <ArrowRight className="size-[14px]" />
-              </Button>
+              proposalStatus.toLowerCase() === "active" && (
+                <Button
+                  className="hidden lg:flex"
+                  onClick={() => setIsVotingModalOpen(true)}
+                >
+                  Cast your vote
+                  <ArrowRight className="size-[14px]" />
+                </Button>
+              )
             ) : (
               <div className="hidden items-center gap-4 lg:flex">
                 <div className="bg-secondary ml-4 h-[28px] w-[1px] flex-shrink-0" />
@@ -82,9 +86,11 @@ export const ProposalHeader = ({
               </div>
             )
           ) : (
-            <div className="hidden lg:flex">
-              <ConnectWalletCustom />
-            </div>
+            proposalStatus.toLowerCase() === "active" && (
+              <div className="hidden lg:flex">
+                <ConnectWalletCustom />
+              </div>
+            )
           )}
         </div>
       </div>
