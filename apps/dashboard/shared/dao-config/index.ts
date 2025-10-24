@@ -5,12 +5,13 @@ import { OP } from "@/shared/dao-config/op";
 import { UNI } from "@/shared/dao-config/uni";
 import { GTC } from "@/shared/dao-config/gtc";
 import { SCR } from "@/shared/dao-config/scr";
+import { COMP } from "@/shared/dao-config/comp";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 
 export type DaoConfigByDaoId = {
   [key in DaoIdEnum]: DaoConfiguration;
 };
 
-const daoConfigByDaoId: DaoConfigByDaoId = { UNI, ENS, OP, GTC, SCR };
+const daoConfigByDaoId: DaoConfigByDaoId = { UNI, ENS, OP, GTC, SCR, COMP };
 
 export default daoConfigByDaoId;

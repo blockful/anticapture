@@ -127,6 +127,7 @@ export interface DaoAddresses {
     GTCUniv3Uni: string;
   };
   [DaoIdEnum.SCR]: Record<string, never>;
+  [DaoIdEnum.COMP]: Record<string, never>; // TODO
 }
 
 export interface AttackProfitabilityConfig {

@@ -15,6 +15,7 @@ export const CoingeckoTokenIdEnum = {
   OP: "optimism",
   GTC: "gitcoin",
   SCR: "scroll",
+  COMP: "compound",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -24,6 +25,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
   [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
+  [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
 export type CoingeckoTokenId =
