@@ -1535,8 +1535,8 @@ enum queryInput_compareVotes_days {
 }
 
 type compareAverageTurnout_200_response {
-  currentAverageTurnout: Float!
-  oldAverageTurnout: Float!
+  currentAverageTurnout: String!
+  oldAverageTurnout: String!
   changeRate: Float!
 }
 

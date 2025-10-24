@@ -7,6 +7,7 @@ import {
   VotesCompareQueryResult,
   AverageTurnoutCompareQueryResult,
 } from "./types";
+import { formatEther } from "viem";
 
 interface GovernanceActivityRepository {
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
@@ -22,6 +23,7 @@ interface GovernanceActivityRepository {
 export function governanceActivity(
   app: Hono,
   repository: GovernanceActivityRepository,
+  tokenType: "ERC20" | "ERC721",
 ) {
   app.openapi(
     createRoute({
@@ -197,8 +199,8 @@ export function governanceActivity(
           content: {
             "application/json": {
               schema: z.object({
-                currentAverageTurnout: z.number(),
-                oldAverageTurnout: z.number(),
+                currentAverageTurnout: z.string(),
+                oldAverageTurnout: z.string(),
                 changeRate: z.number(),
               }),
             },
@@ -212,19 +214,34 @@ export function governanceActivity(
       const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
         return context.json({
-          currentAverageTurnout: 0,
-          oldAverageTurnout: 0,
+          currentAverageTurnout: "0",
+          oldAverageTurnout: "0",
           changeRate: 0,
         });
       }
-      const changeRate =
-        data.oldAverageTurnout &&
-        data.currentAverageTurnout / data.oldAverageTurnout - 1;
+
+      if (tokenType === "ERC721") {
+        return context.json(
+          {
+            ...data,
+            changeRate: data.oldAverageTurnout
+              ? 1 -
+                Number(data.currentAverageTurnout) /
+                  Number(data.oldAverageTurnout)
+              : 0,
+          },
+          200,
+        );
+      }
 
       return context.json(
         {
           ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
+          changeRate: data.oldAverageTurnout
+            ? 1 -
+              Number(formatEther(BigInt(data.currentAverageTurnout))) /
+                Number(formatEther(BigInt(data.oldAverageTurnout)))
+            : 0,
         },
         200,
       );
