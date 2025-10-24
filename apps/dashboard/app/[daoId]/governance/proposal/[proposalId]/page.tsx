@@ -66,7 +66,7 @@ export default function ProposalPage() {
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full flex-1">
+          <div className="w-full flex-1">
             <ProposalSection />
           </div>
           <Footer />

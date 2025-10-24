@@ -51,7 +51,7 @@ export const ProposalSection = () => {
   }
 
   return (
-    <div>
+    <div className="w-full">
       <ProposalHeader
         daoId={daoId as string}
         setIsVotingModalOpen={setIsVotingModalOpen}
@@ -59,41 +59,43 @@ export const ProposalSection = () => {
         votesOnchain={votesOnchain}
         address={address}
       />
-      <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
 
-      <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
-        <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-6 lg:sticky lg:top-[85px] lg:w-[420px]">
-          <TitleSection proposal={proposal} />
-          <ProposalInfoSection proposal={proposal} />
-          <ProposalStatusSection proposal={proposal} />
+        <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
+          <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-6 lg:sticky lg:top-[85px] lg:w-[420px]">
+            <TitleSection proposal={proposal} />
+            <ProposalInfoSection proposal={proposal} />
+            <ProposalStatusSection proposal={proposal} />
 
-          {address ? (
-            !votesOnchain?.support ? (
-              <Button
-                className="flex w-full lg:hidden"
-                onClick={() => setIsVotingModalOpen(true)}
-              >
-                Cast your vote
-                <ArrowRight className="size-[14px]" />
-              </Button>
+            {address ? (
+              !votesOnchain?.support ? (
+                <Button
+                  className="flex w-full lg:hidden"
+                  onClick={() => setIsVotingModalOpen(true)}
+                >
+                  Cast your vote
+                  <ArrowRight className="size-[14px]" />
+                </Button>
+              ) : (
+                <VotedBadge vote={Number(votesOnchain?.support)} />
+              )
             ) : (
-              <VotedBadge vote={Number(votesOnchain?.support)} />
-            )
-          ) : (
-            <div className="flex w-full lg:hidden">
-              <ConnectWalletCustom className="w-full" />
-            </div>
-          )}
+              <div className="flex w-full lg:hidden">
+                <ConnectWalletCustom className="w-full" />
+              </div>
+            )}
+          </div>
+
+          <TabsSection proposal={proposal} />
         </div>
 
-        <TabsSection proposal={proposal} />
+        <VotingModal
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+          proposal={proposal as Query_Proposals_Items_Items}
+        />
       </div>
-
-      <VotingModal
-        isOpen={isVotingModalOpen}
-        onClose={() => setIsVotingModalOpen(false)}
-        proposal={proposal as Query_Proposals_Items_Items}
-      />
     </div>
   );
 };

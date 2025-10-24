@@ -281,7 +281,9 @@ export const VotingModal = ({
 
             {/* your vote  */}
             <div className="flex flex-col gap-[6px] p-4">
-              <p>Your vote</p>
+              <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+                Your vote
+              </p>
 
               {/* For vote  */}
               <div className="flex flex-col">
