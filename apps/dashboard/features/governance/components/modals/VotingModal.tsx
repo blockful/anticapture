@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/components";
-import { User2Icon, X, CheckCircle2 } from "lucide-react";
+import { User2Icon, X, CheckCircle2, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import EnsGovernorAbi from "@/abis/ens-governor.json";
@@ -21,6 +21,8 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import toast from "react-hot-toast";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import Link from "next/link";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DotFilledIcon } from "@radix-ui/react-icons";
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -269,10 +271,29 @@ export const VotingModal = ({
                   />
                 </div>
 
-                <div className="px-3 py-2">
+                <div className="flex items-center justify-start gap-2 px-3 py-2">
                   <p className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.045em]">
                     You can also vote through:
                   </p>
+
+                  {/* TODO: Check links urls */}
+                  <DefaultLink href="https://tally.so/r/3pQ0p7" openInNewTab>
+                    Tally <ExternalLink className="size-3.5 shrink-0" />
+                  </DefaultLink>
+                  <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
+                  <DefaultLink
+                    href={`https://etherscan.io/address/`}
+                    openInNewTab
+                  >
+                    Etherscan <ExternalLink className="size-3.5 shrink-0" />
+                  </DefaultLink>
+                  <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
+                  <DefaultLink
+                    href={`https://agora.blockful.io/dao/${proposal?.daoId}`}
+                    openInNewTab
+                  >
+                    Agora <ExternalLink className="size-3.5 shrink-0" />
+                  </DefaultLink>
                 </div>
               </div>
             </div>
