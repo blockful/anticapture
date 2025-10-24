@@ -135,6 +135,9 @@ type Query {
   Returns a mapping of the biggest variations to account balances associated by account address
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 }
 
 """
@@ -1876,4 +1879,17 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
 }

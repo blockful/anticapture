@@ -113,6 +113,8 @@ export type Query = {
   tokenPrice?: Maybe<TokenPrice>;
   tokenPrices: TokenPricePage;
   tokens: TokenPage;
+  /** Get total assets */
+  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
@@ -397,6 +399,11 @@ export type QueryTokensArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TokenFilter>;
+};
+
+
+export type QueryTotalAssetsArgs = {
+  days?: InputMaybe<QueryInput_TotalAssets_Days>;
 };
 
 
@@ -1554,6 +1561,14 @@ export enum QueryInput_Token_Currency {
   Usd = 'usd'
 }
 
+export enum QueryInput_TotalAssets_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
 export enum QueryInput_Transactions_SortOrder {
   Asc = 'asc',
   Desc = 'desc'
@@ -1679,6 +1694,12 @@ export type Query_Proposals_Items_Items = {
   title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
+};
+
+export type Query_TotalAssets_Items = {
+  __typename?: 'query_totalAssets_items';
+  date: Scalars['String']['output'];
+  totalAssets: Scalars['String']['output'];
 };
 
 export type Query_Transactions_Transactions_Items = {
