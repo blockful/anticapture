@@ -37,13 +37,12 @@ type Query {
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
+  tokenPrice(timestamp: BigInt!): tokenPrice
+  tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
   """Get historical market data for a specific token"""
-  historicalTokenData(days: queryInput_historicalTokenData_days = _365d): historicalTokenData_200_response
+  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -136,6 +135,43 @@ type Query {
   Returns a mapping of the biggest variations to account balances associated by account address
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """
+  Aggregated delegation supply across all supported DAOs.
+  Returns the mean delegation percentage for each day in the specified range.
+  Only includes dates where ALL DAOs have data available.
+  """
+  aggregatedDelegatedSupply(
+    """
+    Start date (Unix timestamp in seconds). Required.
+    All DAOs will return data starting from this date.
+    The aggregation will begin from the latest start date among all DAOs.
+    """
+    startDate: String!
+
+    """
+    End date (Unix timestamp in seconds). Optional.
+    If not provided, returns data up to the latest available date.
+    """
+    endDate: String
+
+    """Cursor for pagination. Returns items after this date."""
+    after: String
+
+    """Cursor for pagination. Returns items before this date."""
+    before: String
+
+    """
+    Sort direction: "asc" or "desc". Default: "asc"
+    """
+    orderDirection: String
+
+    """Maximum number of items to return. Default: 100"""
+    limit: Int
+  ): AggregatedDelegatedSupplyPage!
 }
 
 """
@@ -150,6 +186,8 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+  endDate: String
+  startDate: String
 }
 
 type Meta {
@@ -1322,32 +1360,45 @@ input transactionFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
+type tokenPrice {
+  price: BigInt!
+  timestamp: BigInt!
 }
 
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
+type tokenPricePage {
+  items: [tokenPrice!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
-type historicalTokenData_200_response {
-  prices: [[Float]]!
-  market_caps: [[Float]]!
-  total_volumes: [[Float]]!
+input tokenPriceFilter {
+  AND: [tokenPriceFilter]
+  OR: [tokenPriceFilter]
+  price: BigInt
+  price_not: BigInt
+  price_in: [BigInt]
+  price_not_in: [BigInt]
+  price_gt: BigInt
+  price_lt: BigInt
+  price_gte: BigInt
+  price_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
 }
 
-enum queryInput_historicalTokenData_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
+type query_historicalTokenData_items {
+  price: String!
+  timestamp: Float!
 }
+
+"""Integers that will have a value of 0 or more."""
+scalar NonNegativeInt
 
 type token_200_response {
   id: String!
@@ -1360,7 +1411,7 @@ type token_200_response {
   lendingSupply: String!
   circulatingSupply: String!
   treasury: String!
-  price: Float!
+  price: String!
 }
 
 enum queryInput_token_currency {
@@ -1559,9 +1610,6 @@ type query_proposalsActivity_proposals_items_userVote {
   reason: String
   timestamp: String!
 }
-
-"""Integers that will have a value of 0 or more."""
-scalar NonNegativeInt
 
 """Integers that will have a value greater than 0."""
 scalar PositiveInt
@@ -1867,4 +1915,28 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+type AggregatedDelegatedSupplyItem {
+  date: String!
+  high: String!
+}
+
+type AggregatedDelegatedSupplyPage {
+  items: [AggregatedDelegatedSupplyItem!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
 }

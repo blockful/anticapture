@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { DaoIdEnum } from "@/lib/enums";
+
 enum AssetPlatformEnum {
   // From https://docs.coingecko.com/v3.0.1/reference/token-lists
   ETHEREUM = "ethereum",
@@ -8,12 +10,14 @@ enum AssetPlatformEnum {
   SCROLL = "scroll",
 }
 
-export const CoingeckoTokenIdEnum = {
+export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
+  TEST: "ethereum-name-service",
+  NOUNS: "nouns",
   SCR: "scroll",
   COMP: "compound",
 } as const;
@@ -28,17 +32,10 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
-export type CoingeckoTokenId =
-  (typeof CoingeckoTokenIdEnum)[keyof typeof CoingeckoTokenIdEnum];
-
 export interface CoingeckoHistoricalMarketData {
   prices: [number, number][];
-  market_caps: [number, number][];
-  total_volumes: [number, number][];
 }
 
 export const CoingeckoHistoricalMarketDataSchema = z.object({
   prices: z.array(z.tuple([z.number(), z.number()])),
-  market_caps: z.array(z.tuple([z.number(), z.number()])),
-  total_volumes: z.array(z.tuple([z.number(), z.number()])),
 });

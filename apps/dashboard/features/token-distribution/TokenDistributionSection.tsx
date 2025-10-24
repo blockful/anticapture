@@ -16,17 +16,20 @@ import { useTokenDistributionStore } from "@/features/token-distribution/store/u
 import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import daoConfig from "@/shared/dao-config";
 
 type CsvRow = Record<string, number | string | null>;
 
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
   const { metrics, setMetrics } = useTokenDistributionStore();
+  const daoCfg = daoConfig[daoId];
 
   const { chartData, chartConfig, isLoading } = useChartMetrics({
     appliedMetrics: metrics,
     daoId,
     metricsSchema,
+    tokenType: daoCfg.daoOverview.token,
   });
 
   const buildCsvData = (

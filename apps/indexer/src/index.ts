@@ -26,6 +26,11 @@ import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
 import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "./indexer/scr";
 import { COMPGovernorIndexer, COMPTokenIndexer } from "./indexer/comp";
 import { COMPClient } from "./indexer/comp/client";
+import {
+  NounsTokenIndexer,
+  GovernorIndexer as NounsGovernorIndexer,
+  Client as NounsClient,
+} from "@/indexer/nouns";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -82,6 +87,16 @@ switch (daoId) {
     GTCGovernorIndexer(new GTCClient(client, governor.address), blockTime);
     break;
   }
+  case DaoIdEnum.NOUNS: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    NounsTokenIndexer(token.address, token.decimals);
+    NounsGovernorIndexer(
+      new NounsClient(client, governor.address),
+      blockTime,
+      token.address,
+    );
+    break;
+  }
   case DaoIdEnum.SCR: {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     SCRTokenIndexer(token.address, token.decimals);
@@ -100,6 +115,6 @@ switch (daoId) {
 
 //@ts-expect-error ignore linting error
 //This line is to avoid the error "Do not know how to serialize a BigInt"
-BigInt.prototype.toJSON = function() {
+BigInt.prototype.toJSON = function () {
   return this.toString();
 };

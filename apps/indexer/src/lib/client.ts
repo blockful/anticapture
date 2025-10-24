@@ -7,6 +7,7 @@ import { ENSClient } from "@/indexer/ens/client";
 import { OPClient } from "@/indexer/op";
 import { DAOClient } from "@/interfaces/client";
 import { GTCClient } from "@/indexer/gtc/client";
+import { Client as NounsClient } from "@/indexer/nouns/client";
 import { SCRClient } from "@/indexer/scr";
 import { COMPClient } from "@/indexer/comp";
 
@@ -38,6 +39,10 @@ export function getClient<
     case DaoIdEnum.GTC: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new GTCClient(client, governor.address);
+    }
+    case DaoIdEnum.NOUNS: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new NounsClient(client, governor.address);
     }
     case DaoIdEnum.SCR: {
       const { governor } = CONTRACT_ADDRESSES[daoId];

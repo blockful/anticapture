@@ -18,30 +18,39 @@ import {
   lastUpdate,
   assets,
   votingPower,
+  delegationPercentage,
+  votingPowerVariations,
+  accountBalanceVariations,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
-import { CoingeckoService } from "./services/coingecko/coingecko.service";
 import {
+  DelegationPercentageRepository,
   AccountBalanceRepository,
   DrizzleRepository,
+  NFTPriceRepository,
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
 } from "./repositories";
-import { TransactionsService } from "./services/transactions";
 import { errorHandler } from "./middlewares";
-import { ProposalsService } from "./services/proposals";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
-import { HistoricalVotingPowerService, VotingPowerService } from "./services";
-import { DuneService } from "./services/dune/dune.service";
+import {
+  DelegationPercentageService,
+  HistoricalVotingPowerService,
+  VotingPowerService,
+  TransactionsService,
+  ProposalsService,
+  DuneService,
+  CoingeckoService,
+  NFTPriceService,
+  TokenService,
+  TopBalanceVariationsService,
+} from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { votingPowerVariations } from "./controller/top-voting-power-variations";
-import { TokenService } from "./services/token";
-import { accountBalanceVariations } from "./controller";
-import { TopBalanceVariationsService } from "./services";
+import { DaoIdEnum } from "@/lib/enums";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -76,22 +85,6 @@ const client = createPublicClient({
   transport: http(env.RPC_URL),
 });
 
-if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  assets(app, duneClient);
-}
-
-if (env.COINGECKO_API_KEY) {
-  const coingeckoClient = new CoingeckoService(env.COINGECKO_API_KEY);
-  tokenHistoricalData(app, coingeckoClient, env.DAO_ID);
-  token(
-    app,
-    coingeckoClient,
-    new TokenService(new TokenRepository()),
-    env.DAO_ID,
-  );
-}
-
 const daoClient = getClient(env.DAO_ID, client);
 
 if (!daoClient) {
@@ -104,9 +97,39 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
+const delegationPercentageRepo = new DelegationPercentageRepository();
+const delegationPercentageService = new DelegationPercentageService(
+  delegationPercentageRepo,
+);
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(votingPowerRepo);
+
+if (env.DUNE_API_URL && env.DUNE_API_KEY) {
+  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
+  assets(app, duneClient);
+}
+
+const tokenPriceClient =
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NFTPriceService(
+        new NFTPriceRepository(),
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+      )
+    : new CoingeckoService(
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+        env.DAO_ID,
+      );
+
+tokenHistoricalData(app, tokenPriceClient);
+token(
+  app,
+  tokenPriceClient,
+  new TokenService(new TokenRepository()),
+  env.DAO_ID,
+);
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo);
@@ -119,6 +142,7 @@ historicalOnchain(
 );
 transactions(app, transactionsService);
 lastUpdate(app);
+delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 accountBalanceVariations(
