@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SECONDS_IN_DAY } from "@/lib/enums";
 
 // === ZOD SCHEMAS ===
 
@@ -58,6 +59,18 @@ export type DelegationPercentageResponse = z.infer<
 >;
 
 // === MAPPER FUNCTIONS ===
+
+/**
+ * Normalizes a timestamp to midnight UTC (00:00:00)
+ * This ensures alignment with database timestamps which are always stored at midnight
+ * @param timestamp - Unix timestamp in seconds as string
+ * @returns Normalized timestamp at midnight UTC
+ */
+export function normalizeTimestamp(timestamp: string): string {
+  const ts = BigInt(timestamp);
+  const midnight = (ts / BigInt(SECONDS_IN_DAY)) * BigInt(SECONDS_IN_DAY);
+  return midnight.toString();
+}
 
 /**
  * Maps service result to HTTP response format

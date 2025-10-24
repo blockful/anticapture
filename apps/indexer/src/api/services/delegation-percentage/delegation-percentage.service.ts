@@ -29,9 +29,10 @@
 import { MetricTypesEnum } from "@/lib/constants";
 import { SECONDS_IN_DAY, getCurrentDayTimestamp } from "@/lib/enums";
 import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
-import type {
+import {
   DelegationPercentageItem,
   DelegationPercentageQuery,
+  normalizeTimestamp,
 } from "@/api/mappers/delegation-percentage";
 
 /**
@@ -57,43 +58,21 @@ export class DelegationPercentageService {
   constructor(private readonly repository: DelegationPercentageRepository) {}
 
   /**
-   * Normalizes a timestamp to midnight UTC (00:00:00)
-   * This ensures alignment with database timestamps which are always stored at midnight
-   * @param timestamp - Unix timestamp in seconds as string
-   * @returns Normalized timestamp at midnight UTC
-   */
-  private normalizeTimestamp(timestamp: string): string {
-    const ts = BigInt(timestamp);
-    const midnight = (ts / BigInt(SECONDS_IN_DAY)) * BigInt(SECONDS_IN_DAY);
-    return midnight.toString();
-  }
-
-  /**
    * Main method to get delegation percentage data with forward-fill and pagination
    */
   async getDelegationPercentage(
     filters: DelegationPercentageQuery,
   ): Promise<DelegationPercentageServiceResult> {
-    const {
-      after,
-      before,
-      startDate,
-      endDate,
-      orderDirection = "asc",
-      limit = 366,
-    } = filters;
+    const { after, before, startDate, endDate, orderDirection, limit } =
+      filters;
 
     // Normalize all timestamps to midnight UTC to align with database storage
     const normalizedStartDate = startDate
-      ? this.normalizeTimestamp(startDate)
+      ? normalizeTimestamp(startDate)
       : undefined;
-    const normalizedEndDate = endDate
-      ? this.normalizeTimestamp(endDate)
-      : undefined;
-    const normalizedAfter = after ? this.normalizeTimestamp(after) : undefined;
-    const normalizedBefore = before
-      ? this.normalizeTimestamp(before)
-      : undefined;
+    const normalizedEndDate = endDate ? normalizeTimestamp(endDate) : undefined;
+    const normalizedAfter = after ? normalizeTimestamp(after) : undefined;
+    const normalizedBefore = before ? normalizeTimestamp(before) : undefined;
 
     // 1. Get initial values for proper forward-fill
     const referenceDate = normalizedAfter || normalizedStartDate;
@@ -266,7 +245,7 @@ export class DelegationPercentageService {
     dateMap: Map<string, DateData>,
     startDate?: string,
     endDate?: string,
-    orderDirection: "asc" | "desc" = "asc",
+    orderDirection?: "asc" | "desc",
   ): bigint[] {
     const allDates: bigint[] = [];
 
