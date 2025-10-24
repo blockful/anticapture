@@ -19,7 +19,7 @@ import { useAccount } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import toast from "react-hot-toast";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import Link from "next/link";
 interface VotingModalProps {
   isOpen: boolean;
@@ -31,13 +31,15 @@ const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
   return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;
 };
 
-const showCustomToast = (message: string) => {
+const showCustomToast = (message: string, type: "success" | "error") => {
   toast.custom(
     (t) => (
       <div
-        className={`bg-error flex max-w-[500px] items-center justify-between gap-4 px-6 py-4 text-black shadow-lg transition-all ${
-          t.visible ? "animate-enter" : "animate-leave"
-        }`}
+        className={cn(
+          "flex max-w-[500px] items-center justify-between gap-4 px-6 py-4 text-black shadow-lg transition-all",
+          type === "success" ? "bg-success" : "bg-error",
+          t.visible ? "animate-enter" : "animate-leave",
+        )}
       >
         <div className="flex items-center gap-3">
           <CheckCircle2 className="size-6 flex-shrink-0" />
@@ -125,7 +127,7 @@ const handleVote = async (
     return transaction;
   } catch (error) {
     console.error(error);
-    showCustomToast("Failed to vote");
+    showCustomToast("Failed to vote", "error");
     return null;
   }
 };
@@ -443,7 +445,7 @@ export const VotingModal = ({
               );
               setIsLoading(false);
               if (hash) {
-                showCustomToast("Vote submitted successfully!");
+                showCustomToast("Vote submitted successfully!", "success");
                 onClose();
               }
             }}
