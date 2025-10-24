@@ -443,6 +443,8 @@ export const VotingModal = ({
               if (hash) {
                 showCustomToast("Vote submitted successfully!", "success");
                 onClose();
+                // Reload the page to fetch fresh data
+                window.location.reload();
               }
             }}
           >
