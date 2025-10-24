@@ -1,5 +1,4 @@
 import { ponder } from "ponder:registry";
-import { Address, zeroAddress } from "viem";
 import { dao, tokenPrice } from "ponder:schema";
 
 import {
@@ -9,23 +8,11 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { DAOClient } from "@/interfaces/client";
-import {
-  MetricTypesEnum,
-  ProposalStatus,
-  TreasuryAddresses,
-} from "@/lib/constants";
+import { ProposalStatus } from "@/lib/constants";
 import { env } from "@/env";
-import {
-  // updateDelegatedSupply,
-  updateSupplyMetric,
-} from "@/eventHandlers/metrics";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
 
-export function GovernorIndexer(
-  client: DAOClient,
-  blockTime: number,
-  tokenAddress: Address,
-) {
+export function GovernorIndexer(client: DAOClient, blockTime: number) {
   const daoId = DaoIdEnum.NOUNS;
 
   ponder.on(`NounsGovernor:setup`, async ({ context }) => {
@@ -111,19 +98,5 @@ export function GovernorIndexer(
       price: event.args.amount,
       timestamp: truncateTimestampTime(event.block.timestamp),
     });
-
-    if (!event.transaction.to) return;
-    await updateSupplyMetric(
-      context,
-      "treasury",
-      Object.values(TreasuryAddresses[daoId]),
-      MetricTypesEnum.TREASURY,
-      zeroAddress,
-      event.transaction.to,
-      event.args.amount,
-      daoId,
-      tokenAddress,
-      event.block.timestamp,
-    );
   });
 }
