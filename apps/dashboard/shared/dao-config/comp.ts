@@ -1,49 +1,60 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { CompoundIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { calculateMonthsBefore } from "@/shared/utils";
 
 export const COMP: DaoConfiguration = {
-  name: "Compound",
-  supportStage: SupportStageEnum.FULL,
+  // TODO: Use COMP (Currently ENS)
+  name: "COMP",
   icon: CompoundIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
-    snapshot: "https://snapshot.box/#/s:compounddao.eth",
+    snapshot: "https://snapshot.box/#/s:compound.eth",
     contracts: {
-      governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
-      token: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
-      timelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
+      governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+      timelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
     },
-    tally: "https://tally.xyz/gov/compound",
-    cancelFunction:
-      "https://etherscan.io/address/0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518#writeContract#F2",
+    cancelFunction: undefined,
     rules: {
       delay: true,
       changeVote: false,
       timelock: true,
-      cancelFunction: true,
+      cancelFunction: false,
       logic: "For + Abstain",
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
-      proposalThreshold: "150k COMP",
+    },
+    tally: "https://tally.xyz/gov/compound",
+    securityCouncil: {
+      isActive: true,
+      vetoCouncilAddress: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
+      multisig: {
+        threshold: 4,
+        signers: 8,
+        externalLink:
+          "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
+      },
+      expiration: {
+        startDate: "July 1, 2024",
+        date: "July 26 2026",
+        timestamp: 1784919179,
+        alertExpiration: calculateMonthsBefore({
+          monthsBeforeTimestamp: 3,
+          timestamp: 1784919179,
+        }),
+      },
     },
   },
-  // attackProfitability: {
-  //   riskLevel: RiskLevel.HIGH,
-  //   supportsLiquidTreasuryCall: false,
-  //   attackCostBarChart: {
-  //     OptimismTimelock: "",
-  //     OptimismTokenDistributor: "",
-  //     OptimismUniv3Uni: "",
-  //   },
-  // },
+  attackProfitability: {
+    riskLevel: RiskLevel.HIGH,
+    supportsLiquidTreasuryCall: true,
+    attackCostBarChart: {},
+  },
   riskAnalysis: true,
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
@@ -55,8 +66,6 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
-        riskExplanation:
-          "The contracts have been audited for smart contract security.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         value: "No",
@@ -66,26 +75,27 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
         requirements: [
-          "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
-          "Currently, the DAO’s domains have no publicly verifiable DNS-level protections (High Risk).",
-          "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
+          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable",
+          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity",
+          "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
+          "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
         ],
-        riskExplanation:
-          "The DAO's domains have no publicly verifiable DNS-level protections we are aware of.",
+        riskExplanation: `Although protected from spoofing or hijacking, the service used for voting could still be internally compromised.\n
+          A change in the voting interface could be used to manipulate the results of the vote, hiding malicious txns, or even changing selection of votes.`,
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "~$500k",
-        riskLevel: RiskLevel.HIGH,
+        value: "~100M USD",
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
         requirements: [
-          "Increase the delegation supply and active voter set to lower the profitability of an attacker.",
-          "Get the delegated supply above the value directly available for proposal execution.",
+          "Once a proposal snapshot block has passed, if any single address or group has over 50% of the delegated supply, they can approve the proposal without the need of of any other support.",
+          "Currently, the active supply in COMP DAO - meaning the voting power of delegates who have voted in recent proposals - is a little below 20% of the delegated supply.",
+          "Even without 50% of the delegated supply, an address with over 50% of the active supply could present a big risk to the DAO if not for the Security Council, active until July 2026.",
+          "The DAO should dedicate effort to the increase of governance participation, aiming at an active supply worth at least double the amount of liquid assets under governance management.",
         ],
-        riskExplanation:
-          "The liquid treasury of the DAO is ~$500k bigger than its current delegated supply.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -94,18 +104,18 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ].description,
-        riskExplanation:
-          "The DAO is not vulnerable to proposal flashloan attacks.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "150k COMP",
-        riskLevel: RiskLevel.HIGH,
+        value: "100k COMP",
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
-        riskExplanation:
-          "The proposal threshold is 150k COMP, which is the minimum amount of GTC required to propose a new proposal. The level of risk of this depends on the liquidity on markets.",
+        requirements: [
+          "A low proposal threshold lets attackers or small coalitions submit governance actions too easily, forcing the DAO to vote on spam or malicious items.",
+          "The DAO should set the proposal threshold at ≥ 1 % of circulating market supply (CEX + DEX + lending pools) so that only wallets with meaningful economic stake can create proposals.",
+        ],
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
         value: "No",
@@ -115,19 +125,29 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ].description,
         requirements: [
-          "Stablish a defense system that allows the DAO to cancel proposals if the original proposer doesn't have the required amount of COMP to meet threshold any longer.",
+          "Once a proposal is submitted, the proposer can immediately dump their tokcompound, reducing their financial risk in case of an attack.",
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
         ],
-        riskExplanation:
-          "Currently an attacker can propose by holding enough tokens, dump them on the market and the proposal would stay valid.",
+      },
+      [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
+        value: "No",
+        riskLevel: RiskLevel.HIGH,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ].description,
+        requirements: [
+          "Once a proposal is submitted, the proposer can immediately dump their tokcompound, reducing their financial risk in case of an attack.",
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
+        ],
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        value: "No",
-        riskLevel: RiskLevel.NONE,
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
-        riskExplanation: "The DAO has no security council.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
         value: "No",
@@ -137,20 +157,21 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.SPAM_RESISTANCE
           ].description,
         requirements: [
-          "The DAO should establish a system to stop proposers from having multiple proposals at the same time.",
+          "An attacker can swamp the system with simultaneous proposals, overwhelming voters to approve an attack through a war of attrition",
+          "The DAO should impose—and automatically enforce—a hard cap on the number of active proposals any single address can have at once.",
         ],
-        riskExplanation:
-          "Currently, an attacker can submit multiple proposals and cause a war of attrition against defending delegates.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         value: "No",
-        riskLevel: RiskLevel.LOW,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
           ].description,
-        riskExplanation:
-          "There's no external entity with control to the timelock roles.",
+        requirements: [
+          "The timelock admin can control execution, canceling, upgrades or critical parameter changes; if this power sits outside audited, DAO-approved contracts, attackers or insiders can sidestep on-chain voting.",
+          "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
+        ],
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
         value: "2 days",
@@ -159,17 +180,14 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        riskExplanation:
-          "The timelock delay of two days gives time for the DAO to respond before execution.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "No",
+        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
-        riskExplanation: "The DAO has no veto strategy.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -179,64 +197,45 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
         requirements: [
-          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
-          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through an adapted castVoteWithReasonAndParams call or equivalent.",
+          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defcompounde.",
+          "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through a single castVoteWithReasonAndParams call or equivalent.",
         ],
-        riskExplanation:
-          "In case of an exploit that affects the voting platforms, immutable votes can leave delegates stuck with a incorrect vote made in a compromised interface.",
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "44 hours",
-        riskLevel: RiskLevel.MEDIUM,
+        value: "12 seconds",
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
         requirements: [
-          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 44 hours delay is the time to redelegate and activate delegates before voting starts.",
-          "Our standard for low risk is of at least 2 days, to give time for a coordinated response with holders that need to redelegate in case of an attacker",
+          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current one-block delay lets attackers rush proposals before token-holders or delegates can react.",
+          "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
         ],
-        riskExplanation:
-          "With less than 2 days of voting delay, token holders might miss the chance to delegate in support of the DAOs defense",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
+        value: "Yes(default)",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
-        riskExplanation:
-          "Delegates voting power are based on its delegation on block previous to when they could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "5 days and 14 hours",
-        riskLevel: RiskLevel.MEDIUM,
+        value: "7 days",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        requirements: [
-          "The voting period is 5 days and 14 hours, with the recommended safety being of 7 or more for a low level of risk.",
-          "Increase the voting period to allow for more delegates to participate in the voting process. and increase attack costs.",
-        ],
-        riskExplanation:
-          "The voting period is 5 days and 14 hours, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "No",
-        riskLevel: RiskLevel.HIGH,
+        value: "Yes",
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
-        requirements: [
-          "The voting subsidy is not applied, requiring delegates to pay gas on the proposals they vote on.",
-          "With no voting subsidy, the structure is more vulnerable to spam attacks, as it's more costly for the defense than the attacker",
-          "The Foundation is the only allowed proposer, so the risk of spam attacks are low. Still, the DAO should consider applying a voting subsidy to make its structure more resilient.",
-        ],
-        riskExplanation:
-          "The voting subsidy is not applied, requiring delegates to pay gas on the proposals they vote on.",
       },
     },
   },
