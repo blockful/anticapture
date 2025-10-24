@@ -257,47 +257,6 @@ export const VotingModal = ({
           </div>
         ) : (
           <>
-            <div className="text-primary overflow-hidden p-4">
-              <div className="bg-surface-contrast flex flex-col overflow-hidden rounded-lg">
-                <div className="border-border-contrast flex flex-col items-start gap-2 border-b p-3">
-                  <ProposalInfoItem label="Proposal ID" value={proposal?.id} />
-                  <ProposalInfoItem
-                    label="Proposal name"
-                    value={proposal?.title || "Untitled"}
-                  />
-                  <ProposalInfoItem
-                    label="Your voting power"
-                    value="0" // TODO: Get actual voting power
-                  />
-                </div>
-
-                <div className="flex items-center justify-start gap-2 px-3 py-2">
-                  <p className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.045em]">
-                    You can also vote through:
-                  </p>
-
-                  {/* TODO: Check links urls */}
-                  <DefaultLink href="https://tally.so/r/3pQ0p7" openInNewTab>
-                    Tally <ExternalLink className="size-3.5 shrink-0" />
-                  </DefaultLink>
-                  <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
-                  <DefaultLink
-                    href={`https://etherscan.io/address/`}
-                    openInNewTab
-                  >
-                    Etherscan <ExternalLink className="size-3.5 shrink-0" />
-                  </DefaultLink>
-                  <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
-                  <DefaultLink
-                    href={`https://agora.blockful.io/dao/${proposal?.daoId}`}
-                    openInNewTab
-                  >
-                    Agora <ExternalLink className="size-3.5 shrink-0" />
-                  </DefaultLink>
-                </div>
-              </div>
-            </div>
-
             {/* your vote  */}
             <div className="flex flex-col gap-[6px] p-4">
               <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
@@ -438,6 +397,34 @@ export const VotingModal = ({
                 onChange={(e) => setComment(e.target.value)}
               />
             </div>
+
+            {/* You can also vote through  */}
+            <div className="text-primary overflow-hidden px-4 pb-4">
+              <div className="flex items-center justify-start gap-2 py-2">
+                <p className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.045em]">
+                  You can also vote through:
+                </p>
+
+                {/* TODO: Check links urls */}
+                <DefaultLink href="https://tally.so/r/3pQ0p7" openInNewTab>
+                  Tally <ExternalLink className="size-3.5 shrink-0" />
+                </DefaultLink>
+                <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
+                <DefaultLink
+                  href={`https://etherscan.io/address/`}
+                  openInNewTab
+                >
+                  Etherscan <ExternalLink className="size-3.5 shrink-0" />
+                </DefaultLink>
+                <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
+                <DefaultLink
+                  href={`https://agora.blockful.io/dao/${proposal?.daoId}`}
+                  openInNewTab
+                >
+                  Agora <ExternalLink className="size-3.5 shrink-0" />
+                </DefaultLink>
+              </div>
+            </div>
           </>
         )}
 
@@ -472,29 +459,6 @@ export const VotingModal = ({
             Submit
           </Button>
         </div>
-      </div>
-    </div>
-  );
-};
-
-const ProposalInfoItem = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => {
-  return (
-    <div className="flex w-full items-start gap-3">
-      <div className="w-[116px] flex-shrink-0">
-        <p className="font-inter text-secondary text-[12px] font-medium not-italic leading-4">
-          {label}
-        </p>
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="font-inter break-all text-[14px] font-normal not-italic leading-[20px]">
-          {value}
-        </p>
       </div>
     </div>
   );
