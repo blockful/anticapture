@@ -369,7 +369,7 @@ export const TabsVotedContent = ({
             onClick={() => handleSort("votingPower")}
           >
             <h4 className="text-table-header whitespace-nowrap">
-              Voting Power (CAT)
+              Voting Power ({daoId?.toString().toUpperCase()})
             </h4>
             <ArrowUpDown
               props={{ className: "size-4 ml-1" }}
