@@ -136,6 +136,9 @@ type Query {
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
   """
   Aggregated delegation supply across all supported DAOs.
   Returns the mean delegation percentage for each day in the specified range.
@@ -1912,6 +1915,19 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
 }
 
 type AggregatedDelegatedSupplyItem {
