@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";

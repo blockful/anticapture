@@ -4,7 +4,7 @@ import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
 import { Address } from "viem";
 
-interface TokenDataResponse {
+export interface TokenDataResponse {
   id: Address;
   name: DaoIdEnum;
   decimals: 18;

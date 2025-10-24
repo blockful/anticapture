@@ -8,6 +8,11 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
+  color: {
+    svgColor: "#fc72ff",
+    svgBgColor: "#FFF2FB",
+  },
+  forumLink: "https://gov.uniswap.org/",
   icon: UniswapIcon,
   daoOverview: {
     token: "ERC20",

@@ -3,7 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
 
-interface AverageTurnoutResponse {
+export interface AverageTurnoutResponse {
   currentAverageTurnout: string;
   oldAverageTurnout: string;
   changeRate: string;

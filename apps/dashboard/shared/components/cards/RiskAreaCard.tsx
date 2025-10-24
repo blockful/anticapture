@@ -5,10 +5,12 @@ import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { cn } from "@/shared/utils/";
-import { RiskTooltipCard } from "@/shared/components";
+import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { useScreenSize } from "@/shared/hooks";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { useParams } from "next/navigation";
 
 export type RiskArea = {
   name: string;
@@ -104,7 +106,7 @@ const RiskAreaCardInternal = ({
     >
       <div
         className={cn(
-          "flex h-full items-center px-1 py-2 sm:px-2",
+          "flex h-full items-center px-2 py-4",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
             "bg-surface-contrast": risk.level === RiskLevel.NONE,
@@ -124,7 +126,7 @@ const RiskAreaCardInternal = ({
       >
         <div
           className={cn(
-            "flex items-center",
+            "flex items-center text-left",
             isPanelTable && "w-full justify-center",
           )}
         >
@@ -263,7 +265,7 @@ export const RiskAreaCard = ({
         description={riskInfo.description}
         riskLevel={riskArea.level}
       >
-        <div className="relative h-[42px]">
+        <div className="px- relative h-[48px]">
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
@@ -291,7 +293,7 @@ export const RiskAreaCard = ({
         </div>
         <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
           {isActive && (
-            <div className="border-l-middle-dark size-0 border-y-13 border-l-13 border-y-transparent" />
+            <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
         </div>
       </div>
@@ -339,14 +341,32 @@ export const RiskAreaCardWrapper = ({
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
 }: RiskAreaCardWrapperProps) => {
+  const { daoId }: { daoId: string } = useParams();
   return (
-    <div className="flex w-full flex-col gap-1">
+    <div
+      className={cn("flex w-full flex-col gap-1", {
+        "sm:bg-surface-default gap-4 md:p-4":
+          variant === RiskAreaCardEnum.DAO_OVERVIEW,
+      })}
+    >
       {/* Desktop title */}
-      {withTitle && (
-        <h3 className="text-primary mb-3 hidden font-mono text-xs font-medium tracking-wider sm:block">
-          {title}
-        </h3>
-      )}
+      {withTitle &&
+        (variant !== RiskAreaCardEnum.DAO_OVERVIEW ? (
+          <h3 className="text-primary mb-3 hidden font-mono text-xs font-medium tracking-wider sm:block">
+            {title}
+          </h3>
+        ) : (
+          <div className="flex h-5 items-center gap-2 px-5 sm:px-0">
+            <DefaultLink
+              href={`${daoId.toLowerCase()}/risk-analysis`}
+              openInNewTab={false}
+              className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+            >
+              RISK AREAS
+            </DefaultLink>
+            <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats." />
+          </div>
+        ))}
       <div className={cn("", className)}>
         {riskAreas.map((risk: RiskArea, index: number) => (
           <RiskAreaCard

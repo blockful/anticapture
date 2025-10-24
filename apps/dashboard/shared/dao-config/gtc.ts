@@ -7,6 +7,11 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
+  color: {
+    svgColor: "#1e443f",
+    svgBgColor: "#D0E1DE",
+  },
+  forumLink: "https://gov.gitcoin.co/",
   icon: GitcoinIcon,
   daoOverview: {
     token: "ERC20",
