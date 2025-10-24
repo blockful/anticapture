@@ -41,9 +41,6 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
@@ -138,6 +135,43 @@ type Query {
   Returns a mapping of the biggest variations to account balances associated by account address
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """
+  Aggregated delegation supply across all supported DAOs.
+  Returns the mean delegation percentage for each day in the specified range.
+  Only includes dates where ALL DAOs have data available.
+  """
+  aggregatedDelegatedSupply(
+    """
+    Start date (Unix timestamp in seconds). Required.
+    All DAOs will return data starting from this date.
+    The aggregation will begin from the latest start date among all DAOs.
+    """
+    startDate: String!
+
+    """
+    End date (Unix timestamp in seconds). Optional.
+    If not provided, returns data up to the latest available date.
+    """
+    endDate: String
+
+    """Cursor for pagination. Returns items after this date."""
+    after: String
+
+    """Cursor for pagination. Returns items before this date."""
+    before: String
+
+    """
+    Sort direction: "asc" or "desc". Default: "asc"
+    """
+    orderDirection: String
+
+    """Maximum number of items to return. Default: 100"""
+    limit: Int
+  ): AggregatedDelegatedSupplyPage!
 }
 
 """
@@ -152,6 +186,8 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+  endDate: String
+  startDate: String
 }
 
 type Meta {
@@ -1356,19 +1392,6 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type query_historicalTokenData_items {
   price: String!
   timestamp: Float!
@@ -1892,4 +1915,28 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+type AggregatedDelegatedSupplyItem {
+  date: String!
+  high: String!
+}
+
+type AggregatedDelegatedSupplyPage {
+  items: [AggregatedDelegatedSupplyItem!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
 }
