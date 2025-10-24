@@ -46,7 +46,7 @@ export const ProposalHeader = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {/* If wallet now connected: = don't show VP */}
 
           <p className="text-secondary flex items-center gap-2 whitespace-nowrap text-[14px] font-normal leading-[20px] lg:hidden">
