@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/shared/components";
+import { Button, IconButton } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -27,11 +27,13 @@ export const ProposalHeader = ({
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 sm:top-0">
       <div className="mx-auto flex w-full max-w-7xl flex-1 items-center justify-between px-5">
         <div className="flex items-center gap-2">
-          <Link
-            href={`/${daoId}/governance`}
-            className="hover:bg-surface-default p-2 transition-colors duration-300"
-          >
-            <ArrowLeft className="size-[14px]" />
+          <Link href={`/${daoId}/governance`}>
+            <IconButton
+              icon={ArrowLeft}
+              size="lg"
+              variant="ghost"
+              className="size-[14px]"
+            />
           </Link>
 
           <DaoAvatarIcon
