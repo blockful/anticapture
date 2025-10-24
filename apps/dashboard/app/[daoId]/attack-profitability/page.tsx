@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -67,9 +71,20 @@ export default async function AttackProfitabilityPage({
   }
 
   return (
-    <AttackProfitabilitySection
-      daoId={daoIdEnum}
-      attackProfitability={daoConstants.attackProfitability}
-    />
+    <TheSectionLayout
+      title={PAGES_CONSTANTS.attackProfitability.title}
+      icon={<Crosshair2Icon className="section-layout-icon" />}
+      description={PAGES_CONSTANTS.attackProfitability.description}
+      riskLevel={
+        <RiskLevelCard status={daoConstants.attackProfitability?.riskLevel} />
+      }
+    >
+      <SubSectionsContainer>
+        <AttackProfitabilitySection
+          daoId={daoIdEnum}
+          attackProfitability={daoConstants.attackProfitability}
+        />
+      </SubSectionsContainer>
+    </TheSectionLayout>
   );
 }

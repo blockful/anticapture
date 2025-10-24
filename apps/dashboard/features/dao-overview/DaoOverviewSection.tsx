@@ -159,18 +159,16 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             timelockDelay={timelockDelay}
           />
         </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <SecurityCouncilCard daoOverview={daoOverview} />
         <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
           <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
           </div>
           <TokenDistributionChartCard daoId={daoId} />
-        </div>
-        <div className="block md:hidden">
-          <DividerDefault isHorizontal />
-        </div>
-        <div className="border-x-1 border-inverted mx-5">
-          <SecurityCouncilCard daoOverview={daoOverview} />
         </div>
         <div className="block md:hidden">
           <DividerDefault isHorizontal />

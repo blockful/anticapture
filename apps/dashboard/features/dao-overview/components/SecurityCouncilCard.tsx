@@ -51,43 +51,47 @@ export const SecurityCouncilCard = ({
   if (!securityCouncil) return null;
 
   return (
-    <div className={"sm:bg-surface-default flex w-full flex-col gap-4 md:p-4"}>
-      <div className="flex w-full flex-col text-[13px] sm:flex-row sm:items-center sm:gap-2">
-        <p className="text-primary flex items-center gap-2 font-mono font-medium tracking-wider sm:px-0">
-          SECURITY COUNCIL
-        </p>
-        <div className="hidden size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
-        <div className="flex items-center gap-1.5">
-          <UnderlinedLink
-            href={securityCouncil.multisig.externalLink}
-            openInNewTab
-          >
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Key className="text-link size-3.5" /> Multisig:
+    <div className="border-x-1 border-inverted mx-5">
+      <div
+        className={"sm:bg-surface-default flex w-full flex-col gap-4 md:p-4"}
+      >
+        <div className="flex w-full flex-col text-[13px] sm:flex-row sm:items-center sm:gap-2">
+          <p className="text-primary flex items-center gap-2 font-mono font-medium tracking-wider sm:px-0">
+            SECURITY COUNCIL
+          </p>
+          <div className="hidden size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
+          <div className="flex items-center gap-1.5">
+            <UnderlinedLink
+              href={securityCouncil.multisig.externalLink}
+              openInNewTab
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Key className="text-link size-3.5" /> Multisig:
+                </div>
+                <span>
+                  {securityCouncil.multisig.threshold}/
+                  {securityCouncil.multisig.signers}
+                </span>
+                <span className="hidden sm:inline">
+                  required for transactions
+                </span>
+                <span className="inline sm:hidden">required</span>
               </div>
-              <span>
-                {securityCouncil.multisig.threshold}/
-                {securityCouncil.multisig.signers}
-              </span>
-              <span className="hidden sm:inline">
-                required for transactions
-              </span>
-              <span className="inline sm:hidden">required</span>
+            </UnderlinedLink>
+            <div className="hidden sm:flex">
+              <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
             </div>
-          </UnderlinedLink>
-          <div className="hidden sm:flex">
-            <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
           </div>
         </div>
-      </div>
-      <div className="flex">
-        <ProgressBar
-          startDate={securityCouncil.expiration.startDate}
-          progress={progress}
-          warning={warning}
-          daoOverview={daoOverview}
-        />
+        <div className="flex">
+          <ProgressBar
+            startDate={securityCouncil.expiration.startDate}
+            progress={progress}
+            warning={warning}
+            daoOverview={daoOverview}
+          />
+        </div>
       </div>
     </div>
   );

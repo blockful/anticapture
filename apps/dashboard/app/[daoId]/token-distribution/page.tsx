@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { TokenDistributionSection } from "@/features/token-distribution";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { TheSectionLayout } from "@/shared/components";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { ArrowRightLeft } from "lucide-react";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -66,5 +70,15 @@ export default async function TokenDistributionPage({
     return null;
   }
 
-  return <TokenDistributionSection daoId={daoIdEnum} />;
+  return (
+    <TheSectionLayout
+      title={PAGES_CONSTANTS.tokenDistribution.title}
+      icon={<ArrowRightLeft className="section-layout-icon" />}
+      description={PAGES_CONSTANTS.tokenDistribution.description}
+    >
+      <SubSectionsContainer>
+        <TokenDistributionSection daoId={daoIdEnum} />
+      </SubSectionsContainer>
+    </TheSectionLayout>
+  );
 }

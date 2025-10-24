@@ -105,7 +105,7 @@ export default async function RiskAnalysisPage({
     >
       <SubSectionsContainer>
         <SubSection
-          subsectionTitle={PAGES_CONSTANTS.riskAnalysis.subTitlte}
+          subsectionTitle={PAGES_CONSTANTS.riskAnalysis.subTitle}
           subsectionDescription={PAGES_CONSTANTS.riskAnalysis.subDescription}
           dateRange=""
         >
@@ -113,7 +113,7 @@ export default async function RiskAnalysisPage({
         </SubSection>
         <DividerDefault isHorizontal />
         <SubSection
-          subsectionTitle={PAGES_CONSTANTS.governanceImplementation.subTitlte}
+          subsectionTitle={PAGES_CONSTANTS.governanceImplementation.subTitle}
           subsectionDescription={
             PAGES_CONSTANTS.governanceImplementation.subDescription
           }

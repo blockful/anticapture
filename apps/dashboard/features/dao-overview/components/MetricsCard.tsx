@@ -52,13 +52,16 @@ export const MetricsCard = ({
 
       <DaoOverviewMetricCard
         title="Voting Period"
-        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime)} to vote`}
+        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime, true)} to vote`}
         subText={
           <span>
             Starts after{" "}
             <span className="bg-surface-opacity rounded-full px-1.5 py-0.5">
-              {formatBlocksToUserReadable(votingDelay, daoConfigBlockTime) ||
-                "N/A"}
+              {formatBlocksToUserReadable(
+                votingDelay,
+                daoConfigBlockTime,
+                true,
+              ) || "N/A"}
             </span>{" "}
             delay
           </span>
@@ -94,6 +97,7 @@ export const MetricsCard = ({
                 {formatBlocksToUserReadable(
                   timelockDelay,
                   daoConfigBlockTime,
+                  true,
                 ) || "N/A"}
               </span>{" "}
               of delay

@@ -1,15 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  TheSectionLayout,
-  RiskLevelCard,
-  TheCardChartLayout,
-  SwitcherDate,
-} from "@/shared/components";
+import { TheCardChartLayout, SwitcherDate } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import {
   AttackProfitabilityAccordion,
@@ -17,7 +11,6 @@ import {
   AttackCostBarChart,
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
-import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { Data } from "react-csv/lib/core";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
@@ -53,12 +46,7 @@ export const AttackProfitabilitySection = ({
   }
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.attackProfitability.title}
-      icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.attackProfitability.description}
-      riskLevel={<RiskLevelCard status={attackProfitability?.riskLevel} />}
-    >
+    <div className="flex flex-col gap-[13px]">
       <TheCardChartLayout
         title="Cost of Attack vs Profit"
         subtitle={getDateRange(days ?? "")}
@@ -136,6 +124,6 @@ export const AttackProfitabilitySection = ({
           <AttackProfitabilityAccordion />
         </div>
       </div>
-    </TheSectionLayout>
+    </div>
   );
 };
