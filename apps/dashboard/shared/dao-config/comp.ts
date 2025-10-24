@@ -4,11 +4,10 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { CompoundIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
-import { calculateMonthsBefore } from "@/shared/utils";
 
 export const COMP: DaoConfiguration = {
   // TODO: Use COMP (Currently ENS)
-  name: "COMP",
+  name: "Compound",
   icon: CompoundIcon,
   daoOverview: {
     token: "ERC20",
@@ -16,9 +15,9 @@ export const COMP: DaoConfiguration = {
     blockTime: 12,
     snapshot: "https://snapshot.box/#/s:compound.eth",
     contracts: {
-      governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-      token: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-      timelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
+      governor: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",
+      token: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+      timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
     },
     cancelFunction: undefined,
     rules: {
@@ -26,34 +25,10 @@ export const COMP: DaoConfiguration = {
       changeVote: false,
       timelock: true,
       cancelFunction: false,
-      logic: "For + Abstain",
+      logic: "For + Abstain + Against",
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
     tally: "https://tally.xyz/gov/compound",
-    securityCouncil: {
-      isActive: true,
-      vetoCouncilAddress: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
-      multisig: {
-        threshold: 4,
-        signers: 8,
-        externalLink:
-          "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
-      },
-      expiration: {
-        startDate: "July 1, 2024",
-        date: "July 26 2026",
-        timestamp: 1784919179,
-        alertExpiration: calculateMonthsBefore({
-          monthsBeforeTimestamp: 3,
-          timestamp: 1784919179,
-        }),
-      },
-    },
-  },
-  attackProfitability: {
-    riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: true,
-    attackCostBarChart: {},
   },
   riskAnalysis: true,
   governanceImplementation: {
