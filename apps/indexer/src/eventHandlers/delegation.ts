@@ -114,13 +114,17 @@ export const delegateChanged = async (
       delegate: toDelegate,
     });
 
-  // Update the old delegate's delegations count
   if (fromDelegate !== zeroAddress) {
     await context.db
-      .update(accountPower, {
+      .insert(accountPower)
+      .values({
         accountId: fromDelegate,
+        daoId,
+        delegationsCount: 0,
       })
-      .set((row) => ({ delegationsCount: row.delegationsCount - 1 }));
+      .onConflictDoUpdate((current) => ({
+        delegationsCount: Math.max(0, current.delegationsCount - 1),
+      }));
   }
 
   await context.db

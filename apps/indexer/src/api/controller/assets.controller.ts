@@ -18,6 +18,7 @@ export function assets(app: Hono, service: AssetsClient) {
       tags: ["assets"],
       request: {
         query: z.object({
+          // TODO add sort by date and remove sorting from apps/dashboard/features/attack-profitability/utils/normalizeDataset.ts:19
           days: z
             .enum(DaysOpts)
             .default("7d")
