@@ -4,7 +4,7 @@ export const ProposalSectionSkeleton = () => {
   return (
     <div>
       {/* Header Skeleton */}
-      <div className="border-border-default flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2">
+      <div className="border-border-default mx-auto flex h-[65px] w-full max-w-7xl shrink-0 items-center justify-between gap-6 border-b px-5 py-2">
         <div className="flex items-center gap-2">
           <SkeletonRow
             parentClassName="flex animate-pulse"
@@ -39,7 +39,7 @@ export const ProposalSectionSkeleton = () => {
       </div>
 
       {/* Main Content Skeleton */}
-      <div className="flex flex-col gap-6 p-5 lg:flex-row">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-5 lg:flex-row">
         {/* Left Side - Title, Info, Status */}
         <div className="left-0 top-5 flex h-fit w-full shrink-0 flex-col gap-6 self-start lg:sticky lg:w-[420px]">
           {/* Title Section Skeleton */}
