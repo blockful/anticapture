@@ -43,16 +43,13 @@ export class DelegationPercentageRepository {
    * @param beforeDate - The date to search before
    * @returns The most recent metric row or null if not found
    */
-  async getLastMetricValueBefore(metricType: string, beforeDate: string) {
-    const rows = await db.query.daoMetricsDayBucket.findMany({
+  async getLastMetricBeforeDate(metricType: string, beforeDate: string) {
+    return await db.query.daoMetricsDayBucket.findFirst({
       where: and(
         lte(daoMetricsDayBucket.date, BigInt(beforeDate)),
         inArray(daoMetricsDayBucket.metricType, [metricType]),
       ),
       orderBy: desc(daoMetricsDayBucket.date),
-      limit: 1,
     });
-
-    return rows[0] ?? null;
   }
 }

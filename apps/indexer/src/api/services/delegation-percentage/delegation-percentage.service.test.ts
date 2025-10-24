@@ -51,7 +51,7 @@ describe("DelegationPercentageService", () => {
   beforeEach(() => {
     mockRepository = {
       getDaoMetricsByDateRange: jest.fn(),
-      getLastMetricValueBefore: jest.fn(),
+      getLastMetricBeforeDate: jest.fn(),
     } as jest.Mocked<DelegationPercentageRepository>;
 
     service = new DelegationPercentageService(mockRepository);
@@ -401,7 +401,7 @@ describe("DelegationPercentageService", () => {
       const day100 = day1 + BigInt(ONE_DAY * 100);
       const day105 = day100 + BigInt(ONE_DAY * 5);
 
-      mockRepository.getLastMetricValueBefore
+      mockRepository.getLastMetricBeforeDate
         .mockResolvedValueOnce(
           createMockRow({
             date: day1,
@@ -451,7 +451,7 @@ describe("DelegationPercentageService", () => {
       const day100 = day50 + BigInt(ONE_DAY * 50);
 
       // Mock: only DELEGATED has previous value
-      mockRepository.getLastMetricValueBefore
+      mockRepository.getLastMetricBeforeDate
         .mockResolvedValueOnce(
           createMockRow({
             date: day50,
@@ -485,7 +485,7 @@ describe("DelegationPercentageService", () => {
       const day100 = 1599955200n;
 
       // Mock: no previous values
-      mockRepository.getLastMetricValueBefore
+      mockRepository.getLastMetricBeforeDate
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
 
@@ -522,8 +522,8 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      // Should not call getLastMetricValueBefore when no reference date
-      expect(mockRepository.getLastMetricValueBefore).not.toHaveBeenCalled();
+      // Should not call getLastMetricBeforeDate when no reference date
+      expect(mockRepository.getLastMetricBeforeDate).not.toHaveBeenCalled();
     });
 
     it("should fallback to 0 when fetching previous values fails", async () => {
@@ -535,7 +535,7 @@ describe("DelegationPercentageService", () => {
         .mockImplementation(() => {});
 
       // Mock: error fetching previous values
-      mockRepository.getLastMetricValueBefore.mockRejectedValue(
+      mockRepository.getLastMetricBeforeDate.mockRejectedValue(
         new Error("Database error"),
       );
 
@@ -580,7 +580,7 @@ describe("DelegationPercentageService", () => {
       const day15 = day10 + BigInt(ONE_DAY * 5);
 
       // Mock: no values before day 5
-      mockRepository.getLastMetricValueBefore
+      mockRepository.getLastMetricBeforeDate
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
 
@@ -632,7 +632,7 @@ describe("DelegationPercentageService", () => {
       const day100 = day5 + BigInt(86400 * 100);
 
       // Mock: no values before day 100
-      mockRepository.getLastMetricValueBefore
+      mockRepository.getLastMetricBeforeDate
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
 
@@ -658,7 +658,7 @@ describe("DelegationPercentageService", () => {
       const day100 = day50 + BigInt(ONE_DAY * 50);
 
       // Mock: values before day50
-      mockRepository.getLastMetricValueBefore
+      mockRepository.getLastMetricBeforeDate
         .mockResolvedValueOnce(
           createMockRow({
             date: day1,
@@ -703,7 +703,7 @@ describe("DelegationPercentageService", () => {
       });
 
       // Verify previous values were fetched
-      expect(mockRepository.getLastMetricValueBefore).toHaveBeenCalledTimes(2);
+      expect(mockRepository.getLastMetricBeforeDate).toHaveBeenCalledTimes(2);
 
       // Results should have correct forward-fill from previous values
       expect(result.items.length).toBeGreaterThan(0);
@@ -742,7 +742,7 @@ describe("DelegationPercentageService", () => {
       });
 
       // Should not fetch previous values (no startDate or after)
-      expect(mockRepository.getLastMetricValueBefore).not.toHaveBeenCalled();
+      expect(mockRepository.getLastMetricBeforeDate).not.toHaveBeenCalled();
 
       // With forward-fill, should generate from day1 to day50 (50 days)
       expect(result.items.length).toBeGreaterThan(1);

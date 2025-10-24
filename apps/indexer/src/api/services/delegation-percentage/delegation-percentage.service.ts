@@ -174,11 +174,11 @@ export class DelegationPercentageService {
   ): Promise<{ delegated: bigint; total: bigint }> {
     try {
       const [delegatedRow, totalRow] = await Promise.all([
-        this.repository.getLastMetricValueBefore(
+        this.repository.getLastMetricBeforeDate(
           MetricTypesEnum.DELEGATED_SUPPLY,
           beforeDate,
         ),
-        this.repository.getLastMetricValueBefore(
+        this.repository.getLastMetricBeforeDate(
           MetricTypesEnum.TOTAL_SUPPLY,
           beforeDate,
         ),
