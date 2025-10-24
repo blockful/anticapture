@@ -72,10 +72,6 @@ const handleVote = async (
   setTransactionhash: (hash: string) => void,
   comment?: string,
 ) => {
-  console.log(vote);
-  console.log(comment);
-  console.log(proposalId);
-
   const daoGovernanceAddress = getDaoGovernanceAddress(daoId);
 
   if (!daoGovernanceAddress) {
