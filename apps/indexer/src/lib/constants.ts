@@ -120,6 +120,22 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 8963441,
     },
   },
+  [DaoIdEnum.OBOL]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7
+    // Token created: Sep-19-2022 11:12:47 PM UTC
+    token: {
+      address: "0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7",
+      decimals: 18,
+      startBlock: 15570746,
+    },
+    // https://etherscan.io/address/0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c
+    // Governor created: Feb-19-2025 10:34:47 PM UTC
+    governor: {
+      address: "0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c",
+      startBlock: 21883431,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -194,6 +210,16 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "DAO Treasury": "0x4cb06982dD097633426cf32038D9f1182a9aDA0c",
     "Foundation Treasury": "0xfF120e015777E9AA9F1417a4009a65d2EdA78C13",
     "Ecosystem Treasury": "0xeE198F4a91E5b05022dc90535729B2545D3b03DF",
+  },
+  [DaoIdEnum.OBOL]: {
+    timelock: "0xCdBf527842Ab04Da548d33EB09d03DB831381Fb0",
+    "Ecosystem Treasury 1": "0x42D201CC4d9C1e31c032397F54caCE2f48C1FA72",
+    "Ecosystem Treasury 2": "0x54076088bE86943e27B99120c5905AAD8A1bD166",
+    "Staking Rewards Reserve": "0x33f3D61415784A5899b733976b0c1F9176051569",
+    "OBOL Incentives Reserve": "0xdc8A309111aB0574CA51cA9C7Dd0152738e4c374",
+    "Protocol Revenue": "0xDe5aE4De36c966747Ea7DF13BD9589642e2B1D0d",
+    "Grant Program": "0xa59f60A7684A69E63c07bEC087cEC3D0607cd5cE",
+    "DV Labs Treasury 2": "0x6BeFB6484AA10187947Dda81fC01e495f7168dB4",
   },
 };
 
@@ -360,6 +386,14 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Kucoin: "0x2933782B5A8d72f2754103D1489614F29bfA4625",
     OKX: "0x611f7bF868a6212f871e89F7e44684045DdFB09d",
   },
+  [DaoIdEnum.OBOL]: {
+    "Bybit Hot Wallet": "0xA31231E727Ca53Ff95f0D00a06C645110c4aB647",
+    "Binance Wallet": "0x93dEb693b170d56BdDe1B0a5222B14c0F885d976",
+    "Gate Cold Wallet": "0xC882b111A75C0c657fC507C04FbFcD2cC984F071",
+    "Gate Hot Wallet": "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    "MEXC Hot Wallet": "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    "Binance Wallet Proxy": "0x73D8bD54F7Cf5FAb43fE4Ef40A62D390644946Db",
+  },
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -412,6 +446,10 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     SyncSwap: "0x7160570BB153Edd0Ea1775EC2b2Ac9b65F1aB61B",
     Nuri: "0x76c662b1e25CB67D7365191B55813D8CD3Fdac02",
   },
+  [DaoIdEnum.OBOL]: {
+    "Uniswap V3 Pool": "0x57F52C9faa6D40c5163D76b8D7dD81ddB7c95434",
+    "Uniswap PoolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -449,6 +487,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.SCR]: {
     Aave: "0x25718130C2a8eb94e2e1FAFB5f1cDd4b459aCf64",
   },
+  [DaoIdEnum.OBOL]: {},
 };
 
 export const BurningAddresses: Record<
@@ -500,6 +539,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
     TokenContract: "0xd29687c813D741E2F938F4aC377128810E217b1b",
+  },
+  [DaoIdEnum.OBOL]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7",
   },
 };
 
