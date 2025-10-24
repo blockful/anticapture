@@ -264,115 +264,31 @@ export const VotingModal = ({
               </p>
 
               {/* For vote  */}
-              <div className="flex flex-col">
-                <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-                  <div className="flex w-full items-center gap-2">
-                    <div className="flex w-[100px] items-center gap-2">
-                      <input
-                        className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-                        type="radio"
-                        name="vote"
-                        id="for"
-                        checked={vote === "for"}
-                        onChange={() => setVote("for")}
-                      />
-                      <p className="font-inter text-success text-[14px] font-normal not-italic leading-[20px]">
-                        For
-                      </p>
-                    </div>
-
-                    <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-                      <div
-                        className="bg-success h-1"
-                        style={{ width: `${forPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                      {userReadableForVotes}
-                    </p>
-                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                      {forPercentage.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <VoteOption
+                vote="for"
+                percentage={forPercentage}
+                userReadableVotes={userReadableForVotes}
+                onChange={setVote}
+                checked={vote === "for"}
+              />
 
               {/* Against vote  */}
-              <div className="flex flex-col">
-                <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-                  <div className="flex w-full items-center gap-2">
-                    <div className="flex w-[100px] items-center gap-2">
-                      <input
-                        className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-                        type="radio"
-                        name="vote"
-                        id="for"
-                        checked={vote === "against"}
-                        onChange={() => setVote("against")}
-                      />
-                      <p className="font-inter text-error text-[14px] font-normal not-italic leading-[20px]">
-                        Against
-                      </p>
-                    </div>
-
-                    <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-                      <div
-                        className="bg-error h-1"
-                        style={{ width: `${againstPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                      {userReadableAgainstVotes}
-                    </p>
-                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                      {againstPercentage.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <VoteOption
+                vote="against"
+                percentage={againstPercentage}
+                userReadableVotes={userReadableAgainstVotes}
+                onChange={setVote}
+                checked={vote === "against"}
+              />
 
               {/* Abstain vote  */}
-              <div className="flex flex-col">
-                <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-                  <div className="flex w-full items-center gap-2">
-                    <div className="flex w-[100px] items-center gap-2">
-                      <input
-                        className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-                        type="radio"
-                        name="vote"
-                        id="for"
-                        checked={vote === "abstain"}
-                        onChange={() => setVote("abstain")}
-                      />
-                      <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-                        Abstain
-                      </p>
-                    </div>
-
-                    <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-                      <div
-                        className="bg-primary h-1"
-                        style={{ width: `${abstainPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                      {userReadableAbstainVotes}
-                    </p>
-                    <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                      {abstainPercentage.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <VoteOption
+                vote="abstain"
+                percentage={abstainPercentage}
+                userReadableVotes={userReadableAbstainVotes}
+                onChange={setVote}
+                checked={vote === "abstain"}
+              />
 
               <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
                 <User2Icon className="text-secondary size-3.5" />
@@ -458,6 +374,80 @@ export const VotingModal = ({
           >
             Submit
           </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface VoteOptionProps {
+  vote: "for" | "against" | "abstain";
+  percentage: number;
+  userReadableVotes: string;
+  onChange: (vote: "for" | "against" | "abstain") => void;
+  checked: boolean;
+}
+
+const VoteOption = ({
+  vote,
+  percentage,
+  userReadableVotes,
+  onChange,
+  checked,
+}: VoteOptionProps) => {
+  return (
+    <div className="flex flex-col">
+      <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
+        <div className="flex w-full items-center gap-2">
+          <div className="flex w-[100px] items-center gap-2">
+            <input
+              className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+              type="radio"
+              name="vote"
+              id="for"
+              checked={checked}
+              onChange={() => onChange(vote)}
+            />
+            <p
+              className={cn(
+                "font-inter text-[14px] font-normal not-italic leading-[20px]",
+                vote === "for"
+                  ? "text-success"
+                  : vote === "against"
+                    ? "text-error"
+                    : "text-primary",
+              )}
+            >
+              {vote === "for"
+                ? "For"
+                : vote === "against"
+                  ? "Against"
+                  : "Abstain"}
+            </p>
+          </div>
+
+          <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
+            <div
+              className={cn(
+                "h-1",
+                vote === "for"
+                  ? "bg-success"
+                  : vote === "against"
+                    ? "bg-error"
+                    : "bg-primary",
+              )}
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
+          <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+            {userReadableVotes}
+          </p>
+          <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+            {percentage.toFixed(1)}%
+          </p>
         </div>
       </div>
     </div>
