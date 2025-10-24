@@ -4,12 +4,25 @@ export enum DaoIdEnum {
   ARB = "ARB",
   OP = "OP",
   GTC = "GTC",
+  NOUNS = "NOUNS",
   TEST = "TEST",
   SCR = "SCR",
   COMP = "COMP",
 }
 
-const SECONDS_IN_DAY = 24 * 60 * 60;
+export const SECONDS_IN_DAY = 24 * 60 * 60;
+
+/**
+ * Gets the current day timestamp (midnight UTC)
+ * Used for forward-fill to ensure data goes up to "today"
+ * @returns BigInt timestamp representing the start of the current day
+ */
+export function getCurrentDayTimestamp(): bigint {
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  const todayMidnight =
+    Math.floor(nowInSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;
+  return BigInt(todayMidnight);
+}
 
 /**
  * Enum representing different time periods in seconds
