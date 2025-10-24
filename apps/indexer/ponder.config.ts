@@ -5,6 +5,7 @@ import optimismConfig from "./config/optimism.config";
 import gitcoinConfig from "./config/gitcoin.config";
 import nounsConfig from "./config/nouns.config";
 import scrollConfig from "./config/scroll.config";
+import compoundConfig from "./config/compound.config";
 
 export default {
   chains: {
@@ -15,6 +16,7 @@ export default {
     ...gitcoinConfig.chains,
     ...nounsConfig.chains,
     ...scrollConfig.chains,
+    ...compoundConfig.chains,
   },
   contracts: {
     ...arbitrumConfig.contracts,
@@ -24,5 +26,6 @@ export default {
     ...gitcoinConfig.contracts,
     ...nounsConfig.contracts,
     ...scrollConfig.contracts,
+    ...compoundConfig.contracts,
   },
 };

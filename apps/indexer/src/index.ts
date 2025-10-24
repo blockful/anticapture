@@ -20,12 +20,12 @@ import {
   OPTokenIndexer,
 } from "@/indexer/op";
 import { ARBTokenIndexer } from "@/indexer/arb";
-import {
-  GTCClient,
-  GovernorIndexer as GTCGovernorIndexer,
-  GTCTokenIndexer,
-} from "@/indexer/gtc";
-import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "@/indexer/scr";
+import { GTCClient } from "@/indexer/gtc/client";
+import { GTCTokenIndexer } from "@/indexer/gtc/erc20";
+import { GovernorIndexer as GTCGovernorIndexer } from "@/indexer/gtc/governor";
+import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "./indexer/scr";
+import { COMPGovernorIndexer, COMPTokenIndexer } from "./indexer/comp";
+import { COMPClient } from "./indexer/comp/client";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,
@@ -101,6 +101,12 @@ switch (daoId) {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     SCRTokenIndexer(token.address, token.decimals);
     SCRGovernorIndexer(new SCRClient(client, governor.address), blockTime);
+    break;
+  }
+  case DaoIdEnum.COMP: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    COMPTokenIndexer(token.address, token.decimals);
+    COMPGovernorIndexer(new COMPClient(client, governor.address), blockTime);
     break;
   }
   default:
