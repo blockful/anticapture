@@ -1,3 +1,4 @@
+export * from "./delegation-percentage.repository";
 export * from "./drizzle";
 export * from "./proposals-activity.repository";
 export * from "./transactions.repository";
