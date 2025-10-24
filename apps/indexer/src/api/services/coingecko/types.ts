@@ -19,6 +19,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   TEST: "ethereum-name-service",
   NOUNS: "nouns",
   SCR: "scroll",
+  COMP: "compound",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -28,6 +29,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
   [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
+  [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {
