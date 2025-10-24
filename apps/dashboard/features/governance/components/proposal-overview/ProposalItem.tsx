@@ -34,7 +34,7 @@ const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "text-error";
     case ProposalStatus.NO_QUORUM:
-      return "text-error";
+      return "text-secondary";
     default:
       return "text-secondary";
   }
@@ -59,7 +59,7 @@ const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "bg-error";
     case ProposalStatus.NO_QUORUM:
-      return "bg-error";
+      return "bg-secondary";
     default:
       return "bg-secondary";
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Landmark, Loader2 } from "lucide-react";
+import { Building2, Landmark } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 
 import { useProposals } from "@/features/governance/hooks/useProposals";
@@ -11,6 +11,7 @@ import { Button } from "@/shared/components/ui/button";
 import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -85,11 +86,10 @@ export const GovernanceSection = () => {
       >
         <div className="flex-1">
           {loading && proposals.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="text-primary h-8 w-8 animate-spin" />
-              <span className="text-muted-foreground ml-2">
-                Loading proposals...
-              </span>
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 10 }).map((_, index) => (
+                <ProposalItemSkeleton key={index} />
+              ))}
             </div>
           ) : proposals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
@@ -106,27 +106,71 @@ export const GovernanceSection = () => {
               {/* Infinite scroll trigger */}
               <div ref={loadMoreRef} className="py-4">
                 {isPaginationLoading && (
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="text-primary h-6 w-6 animate-spin" />
-                    <span className="text-muted-foreground ml-2">
-                      Loading more proposals...
-                    </span>
+                  <div className="flex flex-col gap-2">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <ProposalItemSkeleton
+                        key={`pagination-skeleton-${index}`}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
-
-              {/* Load more button as fallback */}
-              {pagination.hasNextPage && !isPaginationLoading && (
-                <div className="flex justify-center pt-6">
-                  <Button onClick={handleLoadMore} variant="outline">
-                    Load More Proposals
-                  </Button>
-                </div>
-              )}
             </>
           )}
         </div>
       </TheSectionLayout>
+    </div>
+  );
+};
+
+const ProposalItemSkeleton = () => {
+  return (
+    <div className="bg-surface-default relative flex w-full flex-col items-center justify-between gap-3 px-3 py-3 md:flex-row md:gap-6">
+      <div className="bg-surface-hover absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2 animate-pulse" />
+
+      <div className="flex w-full flex-col items-start justify-between gap-2 md:w-auto">
+        <SkeletonRow
+          parentClassName="flex animate-pulse"
+          className="h-5 w-64"
+        />
+        <div className="flex items-center gap-2">
+          <SkeletonRow
+            parentClassName="flex animate-pulse"
+            className="h-4 w-16"
+          />
+          <SkeletonRow
+            parentClassName="flex animate-pulse"
+            className="h-4 w-24"
+          />
+          <SkeletonRow
+            parentClassName="flex animate-pulse"
+            className="h-4 w-32"
+          />
+        </div>
+      </div>
+
+      <div className="flex w-full shrink-0 flex-col items-center gap-1 md:w-[220px]">
+        <div className="flex w-full items-center justify-between gap-2">
+          <SkeletonRow
+            parentClassName="flex animate-pulse"
+            className="h-4 w-20"
+          />
+          <div className="flex items-center gap-2">
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-12"
+            />
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-12"
+            />
+          </div>
+        </div>
+        <SkeletonRow
+          parentClassName="flex animate-pulse w-full"
+          className="h-1 w-full"
+        />
+      </div>
     </div>
   );
 };

@@ -34,17 +34,17 @@ export const ProposalInfoSection = ({
     (Number(proposal.abstainVotes) / totalVotes) * 100;
 
   return (
-    <div className="border-surface-default flex w-[420px] flex-col border">
-      <div className="flex w-[420px] flex-col p-3">
+    <div className="border-surface-default flex w-full flex-col border lg:w-[420px]">
+      <div className="flex w-full flex-col p-3 lg:w-[420px]">
         <ProposalInfoText className="pb-4">
           <BarChart4 className="text-secondary size-4" /> Current Results
         </ProposalInfoText>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:w-full">
           {/* For Votes */}
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-between gap-2 lg:justify-start">
             {/* Votes  */}
-            <div className="flex w-[100px] items-center gap-2">
+            <div className="flex w-[100px] shrink-0 items-center gap-2">
               <CheckCircle2 className="text-success size-3.5" />
               <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                 For
@@ -52,7 +52,7 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Progress bar */}
-            <div className="relative h-1 w-[184px] bg-[#3F3F46]">
+            <div className="relative h-1 w-full bg-[#3F3F46] lg:w-[184px] lg:flex-1">
               <div
                 className="bg-success absolute h-full"
                 style={{ width: `${forVotesPercentage}%` }}
@@ -60,30 +60,32 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Votes */}
-            <div className="flex w-12 items-center">
-              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                {formatNumberUserReadable(
-                  Number(
+            <div className="flex w-[100px] items-center gap-2">
+              <div className="flex w-12 items-center">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {formatNumberUserReadable(
                     Number(
-                      formatEther(BigInt(proposal.forVotes || "0")),
-                    ).toFixed(1),
-                  ),
-                )}
-              </p>
-            </div>
+                      Number(
+                        formatEther(BigInt(proposal.forVotes || "0")),
+                      ).toFixed(1),
+                    ),
+                  )}
+                </p>
+              </div>
 
-            {/* Votes Percentage */}
-            <div className="flex w-12 items-center">
-              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                {forVotesPercentage.toFixed(1)}%
-              </p>
+              {/* Votes Percentage */}
+              <div className="flex w-12 items-center">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {forVotesPercentage.toFixed(1)}%
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Against Votes */}
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-between gap-2 lg:justify-start">
             {/* Votes  */}
-            <div className="flex w-[100px] items-center gap-2">
+            <div className="flex w-[100px] shrink-0 items-center gap-2">
               <XCircle className="text-error size-3.5" />
               <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                 Against
@@ -91,7 +93,7 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Progress bar */}
-            <div className="relative h-1 w-[184px] bg-[#3F3F46]">
+            <div className="relative h-1 w-full bg-[#3F3F46] lg:w-[184px] lg:flex-1">
               <div
                 className="bg-error absolute h-full"
                 style={{ width: `${againstVotesPercentage}%` }}
@@ -99,30 +101,32 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Votes */}
-            <div className="flex w-12 items-center">
-              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                {formatNumberUserReadable(
-                  Number(
+            <div className="flex w-[100px] items-center gap-2">
+              <div className="flex w-12 items-center">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {formatNumberUserReadable(
                     Number(
-                      formatEther(BigInt(proposal.againstVotes || "0")),
-                    ).toFixed(1),
-                  ),
-                )}
-              </p>
-            </div>
+                      Number(
+                        formatEther(BigInt(proposal.againstVotes || "0")),
+                      ).toFixed(1),
+                    ),
+                  )}
+                </p>
+              </div>
 
-            {/* Votes Percentage */}
-            <div className="flex w-12 items-center">
-              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                {againstVotesPercentage.toFixed(1)}%
-              </p>
+              {/* Votes Percentage */}
+              <div className="flex w-12 items-center">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {againstVotesPercentage.toFixed(1)}%
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Abstain Votes */}
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-between gap-2 lg:justify-start">
             {/* Votes  */}
-            <div className="flex w-[100px] items-center gap-2">
+            <div className="flex w-[100px] shrink-0 items-center gap-2">
               <DivideCircle className="text-secondary size-3.5" />
               <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                 Abstain
@@ -130,7 +134,7 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Progress bar */}
-            <div className="relative h-1 w-[184px] bg-[#3F3F46]">
+            <div className="relative h-1 w-full bg-[#3F3F46] lg:w-[184px] lg:flex-1">
               <div
                 className="bg-secondary absolute h-full"
                 style={{ width: `${abstainVotesPercentage}%` }}
@@ -138,23 +142,25 @@ export const ProposalInfoSection = ({
             </div>
 
             {/* Votes */}
-            <div className="flex w-12 items-center">
-              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                {formatNumberUserReadable(
-                  Number(
+            <div className="flex w-[100px] items-center gap-2">
+              <div className="flex w-12 items-center">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {formatNumberUserReadable(
                     Number(
-                      formatEther(BigInt(proposal.abstainVotes || "0")),
-                    ).toFixed(1),
-                  ),
-                )}
-              </p>
-            </div>
+                      Number(
+                        formatEther(BigInt(proposal.abstainVotes || "0")),
+                      ).toFixed(1),
+                    ),
+                  )}
+                </p>
+              </div>
 
-            {/* Votes Percentage */}
-            <div className="flex w-12 items-center">
-              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                {abstainVotesPercentage.toFixed(1)}%
-              </p>
+              {/* Votes Percentage */}
+              <div className="flex w-12 items-center">
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {abstainVotesPercentage.toFixed(1)}%
+                </p>
+              </div>
             </div>
           </div>
         </div>

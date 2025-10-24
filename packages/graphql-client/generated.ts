@@ -1404,7 +1404,6 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
 }
 
 export enum QueryInput_CompareActiveSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1413,7 +1412,6 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1422,7 +1420,6 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1431,7 +1428,6 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1440,7 +1436,6 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1449,7 +1444,6 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1458,7 +1452,6 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1467,7 +1460,6 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1476,7 +1468,6 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1485,7 +1476,6 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1494,7 +1484,6 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1503,7 +1492,6 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1512,7 +1500,6 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalTokenData_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1521,7 +1508,6 @@ export enum QueryInput_HistoricalTokenData_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -2235,19 +2221,13 @@ export type VotesOnchainFilter = {
   voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
   votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
   votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_contains?: InputMaybe<Scalars['String']['input']>;
-  votingPower_not_ends_with?: InputMaybe<Scalars['String']['input']>;
   votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type VotesOnchainPage = {
@@ -2610,6 +2590,22 @@ export type GetProposalNonVotersQueryVariables = Exact<{
 
 
 export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoters?: { __typename?: 'proposalNonVoters_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposalNonVoters_items_items', lastVoteTimestamp: number, voter: string, votingPower: string, votingPowerVariation: string } | null> } | null };
+
+export type GetAccountPowerQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  proposalId: Scalars['String']['input'];
+}>;
+
+
+export type GetAccountPowerQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
+
+export type GetUserVoteQueryVariables = Exact<{
+  proposalId: Scalars['String']['input'];
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetUserVoteQuery = { __typename?: 'Query', votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -4097,6 +4093,102 @@ export type GetProposalNonVotersQueryHookResult = ReturnType<typeof useGetPropos
 export type GetProposalNonVotersLazyQueryHookResult = ReturnType<typeof useGetProposalNonVotersLazyQuery>;
 export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useGetProposalNonVotersSuspenseQuery>;
 export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
+export const GetAccountPowerDocument = gql`
+    query GetAccountPower($address: String!, $proposalId: String!) {
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
+  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
+    support
+    votingPower
+    reason
+    timestamp
+    txHash
+    daoId
+  }
+}
+    `;
+
+/**
+ * __useGetAccountPowerQuery__
+ *
+ * To run a query within a React component, call `useGetAccountPowerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAccountPowerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAccountPowerQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *      proposalId: // value for 'proposalId'
+ *   },
+ * });
+ */
+export function useGetAccountPowerQuery(baseOptions: Apollo.QueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables> & ({ variables: GetAccountPowerQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
+      }
+export function useGetAccountPowerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
+        }
+export function useGetAccountPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
+        }
+export type GetAccountPowerQueryHookResult = ReturnType<typeof useGetAccountPowerQuery>;
+export type GetAccountPowerLazyQueryHookResult = ReturnType<typeof useGetAccountPowerLazyQuery>;
+export type GetAccountPowerSuspenseQueryHookResult = ReturnType<typeof useGetAccountPowerSuspenseQuery>;
+export type GetAccountPowerQueryResult = Apollo.QueryResult<GetAccountPowerQuery, GetAccountPowerQueryVariables>;
+export const GetUserVoteDocument = gql`
+    query GetUserVote($proposalId: String!, $address: String!) {
+  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
+    support
+    votingPower
+    reason
+    timestamp
+    txHash
+    daoId
+  }
+}
+    `;
+
+/**
+ * __useGetUserVoteQuery__
+ *
+ * To run a query within a React component, call `useGetUserVoteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserVoteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserVoteQuery({
+ *   variables: {
+ *      proposalId: // value for 'proposalId'
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetUserVoteQuery(baseOptions: Apollo.QueryHookOptions<GetUserVoteQuery, GetUserVoteQueryVariables> & ({ variables: GetUserVoteQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserVoteQuery, GetUserVoteQueryVariables>(GetUserVoteDocument, options);
+      }
+export function useGetUserVoteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserVoteQuery, GetUserVoteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserVoteQuery, GetUserVoteQueryVariables>(GetUserVoteDocument, options);
+        }
+export function useGetUserVoteSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUserVoteQuery, GetUserVoteQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetUserVoteQuery, GetUserVoteQueryVariables>(GetUserVoteDocument, options);
+        }
+export type GetUserVoteQueryHookResult = ReturnType<typeof useGetUserVoteQuery>;
+export type GetUserVoteLazyQueryHookResult = ReturnType<typeof useGetUserVoteLazyQuery>;
+export type GetUserVoteSuspenseQueryHookResult = ReturnType<typeof useGetUserVoteSuspenseQuery>;
+export type GetUserVoteQueryResult = Apollo.QueryResult<GetUserVoteQuery, GetUserVoteQueryVariables>;
 export const GetHistoricalBalancesDocument = gql`
     query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
   historicalBalances(addresses: $addresses, days: $days) {
