@@ -459,7 +459,7 @@ describe("DelegationPercentageService", () => {
             high: 30000000000000000000n,
           }),
         )
-        .mockResolvedValueOnce(null); // TOTAL_SUPPLY has no previous value
+        .mockResolvedValueOnce(undefined);
 
       // Main data: TOTAL_SUPPLY appears on day 100
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
@@ -486,8 +486,8 @@ describe("DelegationPercentageService", () => {
 
       // Mock: no previous values
       mockRepository.getLastMetricBeforeDate
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined);
 
       // Main data: appears only on day 100
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
@@ -581,8 +581,8 @@ describe("DelegationPercentageService", () => {
 
       // Mock: no values before day 5
       mockRepository.getLastMetricBeforeDate
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined);
 
       // Real data starts on day 10
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
@@ -633,8 +633,8 @@ describe("DelegationPercentageService", () => {
 
       // Mock: no values before day 100
       mockRepository.getLastMetricBeforeDate
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined);
 
       // Mock: no data >= day 100
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
