@@ -57,11 +57,11 @@ describe("DelegationPercentageService", () => {
     service = new DelegationPercentageService(mockRepository);
   });
 
-  describe("getDelegationPercentage", () => {
+  describe("delegationPercentageByDay", () => {
     it("should return empty response when no data is available", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -89,7 +89,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
         endDate: "1600041600",
         limit: 365,
@@ -135,7 +135,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day1.toString(),
         endDate: day3.toString(),
         limit: 365,
@@ -168,7 +168,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
         endDate: "1600041600",
         limit: 365,
@@ -202,7 +202,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
         endDate: "1600387200", // 5 days
         limit: 3,
@@ -238,7 +238,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
         endDate: "1600387200",
         after: "1600128000", // After day 2
@@ -274,7 +274,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
         endDate: "1600387200",
         before: "1600214400", // Before day 3
@@ -310,7 +310,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
         endDate: "1600214400",
         orderDirection: "desc",
@@ -327,7 +327,7 @@ describe("DelegationPercentageService", () => {
     it("should use default values when optional parameters are not provided", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -377,7 +377,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day1.toString(),
         endDate: day4.toString(),
         limit: 365,
@@ -430,7 +430,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day100.toString(),
         endDate: day105.toString(),
         limit: 365,
@@ -470,7 +470,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day100.toString(),
         endDate: day100.toString(),
         limit: 365,
@@ -503,7 +503,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day100.toString(),
         endDate: day100.toString(),
         limit: 365,
@@ -517,7 +517,7 @@ describe("DelegationPercentageService", () => {
     it("should not fetch previous values when neither startDate nor after is provided", async () => {
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      await service.getDelegationPercentage({
+      await service.delegationPercentageByDay({
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -553,7 +553,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day100.toString(),
         endDate: day100.toString(),
         limit: 365,
@@ -608,7 +608,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day5.toString(),
         endDate: day15.toString(),
         limit: 365,
@@ -639,7 +639,7 @@ describe("DelegationPercentageService", () => {
       // Mock: no data >= day 100
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: day100.toString(),
         limit: 365,
         orderDirection: "asc" as const,
@@ -688,7 +688,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         after: day50.toString(),
         limit: 365,
         orderDirection: "asc" as const,
@@ -726,7 +726,7 @@ describe("DelegationPercentageService", () => {
         }),
       ]);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         before: day50.toString(),
         endDate: day50.toString(), // Add explicit endDate to prevent forward-fill to today
         limit: 365,
@@ -775,7 +775,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: threeDaysAgoMidnight.toString(),
         // No endDate - should forward-fill to today
         limit: 10,
@@ -818,7 +818,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: twoDaysAgoMidnight.toString(),
         // No endDate, limit covers all days to today
         limit: 10,
@@ -849,7 +849,7 @@ describe("DelegationPercentageService", () => {
 
       mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
 
-      const result = await service.getDelegationPercentage({
+      const result = await service.delegationPercentageByDay({
         startDate: tenDaysAgoMidnight.toString(),
         // No endDate, but limit only returns 3 items (not reaching today)
         limit: 3,

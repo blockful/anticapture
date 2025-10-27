@@ -142,6 +142,9 @@ type Query {
   """Get delegation percentage day buckets with forward-fill"""
   getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
 
+  """Get delegation percentage day buckets with forward-fill"""
+  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
+
   """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
@@ -1951,6 +1954,28 @@ type query_getDelegationPercentage_pageInfo {
 }
 
 enum queryInput_getDelegationPercentage_orderDirection {
+  asc
+  desc
+}
+
+type delegationPercentageByDay_200_response {
+  items: [query_delegationPercentageByDay_items_items]!
+  totalCount: Float!
+  pageInfo: query_delegationPercentageByDay_pageInfo!
+}
+
+type query_delegationPercentageByDay_items_items {
+  date: String!
+  high: String!
+}
+
+type query_delegationPercentageByDay_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_delegationPercentageByDay_orderDirection {
   asc
   desc
 }

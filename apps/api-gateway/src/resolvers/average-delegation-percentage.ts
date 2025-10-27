@@ -127,14 +127,14 @@ export async function fetchAndExtractDaoData(
     }))
     .filter(
       ({ client }) =>
-        client && typeof client.getDelegationPercentage === 'function'
+        client && typeof client.delegationPercentageByDay === 'function'
     );
 
   // Fetch from all DAOs in parallel
   const results = await Promise.allSettled(
     restClients.map(({ daoId, client }) =>
       client
-        .getDelegationPercentage({
+        .delegationPercentageByDay({
           root,
           args: queryArgs,
           context,

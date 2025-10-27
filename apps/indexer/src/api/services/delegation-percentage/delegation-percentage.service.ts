@@ -60,7 +60,7 @@ export class DelegationPercentageService {
   /**
    * Main method to get delegation percentage data with forward-fill and pagination
    */
-  async getDelegationPercentage(
+  async delegationPercentageByDay(
     filters: DelegationPercentageQuery,
   ): Promise<DelegationPercentageServiceResult> {
     const { after, before, startDate, endDate, orderDirection, limit } =
