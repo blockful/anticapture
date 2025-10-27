@@ -4,7 +4,7 @@ import {
   TransactionsResponse,
   TransactionMapper,
 } from "../../mappers/transactions";
-import { containsAnyValue } from "@/lib/utils";
+import { containsAnyValue } from "../utils";
 
 export class TransactionsService {
   constructor(private transactionsRepository: TransactionsRepository) {}
