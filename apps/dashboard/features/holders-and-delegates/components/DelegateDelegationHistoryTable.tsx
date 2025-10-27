@@ -243,6 +243,9 @@ export const DelegateDelegationHistoryTable = ({
               ? Number(formatUnits(BigInt(item.transfer.value), 18))
               : Number(item.transfer.value),
           );
+        } else {
+          // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta
+          amount = item.delta;
         }
 
         return (
