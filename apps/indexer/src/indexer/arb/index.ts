@@ -1,4 +1,4 @@
 export * from "./abi";
-export * from "./erc20";
+export * from "./token";
 export * from "./governor";
 export * from "./client";
