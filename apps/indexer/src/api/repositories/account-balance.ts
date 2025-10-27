@@ -95,7 +95,7 @@ export class AccountBalanceRepository {
 
   async getHistoricalBalances(
     addresses: Address[],
-    startTimestamp: number,
+    timestamp: number,
   ): Promise<DBHistoricalBalance[]> {
     const transfersFrom = db
       .select({
@@ -105,7 +105,7 @@ export class AccountBalanceRepository {
       .from(transfer)
       .where(
         and(
-          gte(transfer.timestamp, BigInt(startTimestamp)),
+          gte(transfer.timestamp, BigInt(timestamp)),
           inArray(transfer.fromAccountId, addresses),
         ),
       )
@@ -121,7 +121,7 @@ export class AccountBalanceRepository {
       .from(transfer)
       .where(
         and(
-          gte(transfer.timestamp, BigInt(startTimestamp)),
+          gte(transfer.timestamp, BigInt(timestamp)),
           inArray(transfer.toAccountId, addresses),
         ),
       )

@@ -7,7 +7,7 @@ import { DBHistoricalBalance } from "@/api/mappers";
 interface AccountBalanceRepository {
   getHistoricalBalances(
     addresses: Address[],
-    startTimestamp: number,
+    timestamp: number,
   ): Promise<DBHistoricalBalance[]>;
 }
 
@@ -33,12 +33,9 @@ export class HistoricalBalancesService {
    */
   async getHistoricalBalances(
     addresses: Address[],
-    startTimestamp: number,
+    timestamp: number,
   ): Promise<DBHistoricalBalance[]> {
-    return await this.repository.getHistoricalBalances(
-      addresses,
-      startTimestamp,
-    );
+    return await this.repository.getHistoricalBalances(addresses, timestamp);
   }
 
   /**
