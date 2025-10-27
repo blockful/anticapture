@@ -5,6 +5,7 @@ export type DelegationPercentageResponse = {
   totalCount: number;
   pageInfo: {
     hasNextPage: boolean;
+    hasPreviousPage: boolean;
     endDate: string | null;
     startDate: string | null;
   };
@@ -171,6 +172,19 @@ export async function fetchAndExtractDaoData(
 }
 
 /**
+ * Calculates hasPreviousPage based on whether user has paginated forward
+ * Logic: hasPreviousPage = true when 'after' is used AND after !== startDate
+ */
+function calculateHasPreviousPage(
+  args: {
+    startDate?: string;
+    after?: string;
+  }
+): boolean {
+  return !!(args.after && args.startDate && args.after !== args.startDate);
+}
+
+/**
  * Applies pagination and builds complete response
  * Handles empty items case
  */
@@ -181,6 +195,7 @@ export function buildPaginatedResponse(
     after?: string;
     before?: string;
     orderDirection?: string;
+    startDate?: string;
   },
   hasNextPageFromDaos: boolean
 ): DelegationPercentageResponse {
@@ -191,6 +206,7 @@ export function buildPaginatedResponse(
       totalCount: 0,
       pageInfo: {
         hasNextPage: false,
+        hasPreviousPage: false,
         endDate: null,
         startDate: null,
       },
@@ -206,6 +222,10 @@ export function buildPaginatedResponse(
     totalCount: finalItems.length,
     pageInfo: {
       hasNextPage: hasNextPageFromDaos,
+      hasPreviousPage: calculateHasPreviousPage({
+        startDate: args.startDate,
+        after: args.after,
+      }),
       endDate:
         finalItems.length > 0 ? finalItems[finalItems.length - 1].date : null,
       startDate: finalItems.length > 0 ? finalItems[0].date : null,
@@ -216,11 +236,11 @@ export function buildPaginatedResponse(
 // === RESOLVER ===
 
 /**
- * GraphQL resolver for aggregated delegated supply across all DAOs
+ * GraphQL resolver for average delegation percentage across all DAOs
  * Uses GraphQL Mesh context to fetch delegation percentage from each DAO's REST API
- * and aggregates them into a mean delegation percentage time series
+ * and aggregates them into a mean delegation percentage time series by day
  */
-export const aggregatedDelegatedSupplyResolver = {
+export const averageDelegationPercentageByDayResolver = {
   resolve: async (root: any, args: any, context: any, info: any) => {
     if (
       args.startDate &&
@@ -253,3 +273,4 @@ export const aggregatedDelegatedSupplyResolver = {
     return buildPaginatedResponse(aggregated, args, hasNextPage);
   },
 };
+

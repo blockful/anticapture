@@ -139,12 +139,15 @@ type Query {
   """Get total assets"""
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
+  """Get delegation percentage day buckets with forward-fill"""
+  getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
+
   """
-  Aggregated delegation supply across all supported DAOs.
+  Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
   Only includes dates where ALL DAOs have data available.
   """
-  aggregatedDelegatedSupply(
+  averageDelegationPercentageByDay(
     """
     Start date (Unix timestamp in seconds). Required.
     All DAOs will return data starting from this date.
@@ -171,7 +174,7 @@ type Query {
 
     """Maximum number of items to return. Default: 100"""
     limit: Int
-  ): AggregatedDelegatedSupplyPage!
+  ): AverageDelegationPercentagePage!
 }
 
 """
@@ -1930,13 +1933,40 @@ enum queryInput_totalAssets_days {
   _365d
 }
 
-type AggregatedDelegatedSupplyItem {
+type getDelegationPercentage_200_response {
+  items: [query_getDelegationPercentage_items_items]!
+  totalCount: Float!
+  pageInfo: query_getDelegationPercentage_pageInfo!
+}
+
+type query_getDelegationPercentage_items_items {
   date: String!
   high: String!
 }
 
-type AggregatedDelegatedSupplyPage {
-  items: [AggregatedDelegatedSupplyItem!]!
+type query_getDelegationPercentage_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_getDelegationPercentage_orderDirection {
+  asc
+  desc
+}
+
+type AverageDelegationPercentageItem {
+  date: String!
+  high: String!
+}
+
+type AverageDelegationPercentagePage {
+  items: [AverageDelegationPercentageItem!]!
+
+  """
+  The actual number of items returned in this response.
+  May be less than requested if DAOs don't have overlapping data for the full date range.
+  """
   totalCount: Int!
   pageInfo: PageInfo!
 }
